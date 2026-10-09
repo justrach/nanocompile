@@ -861,3 +861,60 @@ not a new project benchmark. Producers currently run native tool-selection
 queries before every cache lookup. This makes verified selection reuse a
 candidate to investigate next; no such reuse or selection guard relaxation has
 been implemented here. The earlier parallel-query experiment remains rejected.
+
+## Live Apple driver plan: adopted
+
+A [live driver plan](../docs/apple-driver-plan.md) replaces three separate
+Clang selection queries with one `cc -v -###` diagnostic. Independent xcrun
+compiler/linker/SDK queries and the same native file fingerprints remain.
+The recognized path needs four queries instead of six. Unknown rendering or
+failed plans use the existing queries; configurations still refuse producer
+storage. Selection remains live on every lookup, with no cross-invocation
+selection memo. Ordinary library keys and producer eligibility are unchanged.
+
+The [25-sample rotating selection comparison](driver-plan-query-comparison.json)
+requires every selection field and fingerprint to match between both binaries.
+Median complete process time falls from **41.54 ms to 27.04 ms**, about 34.9%.
+The [real selector comparison](driver-plan-selection-comparison.json) also
+matches cc/clang, Command Line Tools/Xcode developer roots, explicit and private
+SDKs, preserved-mtime SDK metadata changes, invalid selectors and legacy
+fallback from an invalid deployment-target plan. Installation files and global
+Xcode selection are not changed by the fixtures.
+
+The [controlled nine-pair Harness comparison](harness-driver-plan-paired.json)
+uses one stable wrapper path, the same environment/target/cache, and rotating
+order after both binaries are primed. Baseline SHA-256 is
+`33100a369757582d2d880f85f2de0f823ab408cf4f2b1e25c75f4928608a33ad`;
+candidate SHA-256 is
+`531207e9947654f5b989608d4227ca8ec0d63ca5287f2cb43c55ea519c86e003`.
+Median warm time falls from **2.848 s to 2.714 s**, about **4.7%**. All nine
+pairs favor the candidate. Mean paired savings are 152.04 ms, sample standard
+deviation 103.88 ms, and standard error 34.63 ms. Every warm build records
+167 hits, eight bypasses and three failed probes. All 167 collected library,
+macro and build-script artifacts match the first prime; tracked Rust files
+and manifests remain unchanged. The second prime reuses ordinary entries,
+so its 4.558 s timing is not a cold-cache comparison.
+
+The [separate twelve-build three-way run](harness-hill-driver-plan.json) gives:
+
+| Implementation | Warm median | Cold sample |
+| --- | ---: | ---: |
+| Direct Cargo | 22.704 s | 23.311 s prime |
+| nanocompile | 2.914 s | 37.463 s |
+| kache daemon | 1.981 s | 27.216 s |
+
+All three Nano samples are retained: **3.098, 2.914 and 2.667 s**. This session's
+median is higher than the preceding native-metadata row. The separate sessions
+do not establish a before/after result; the controlled paired comparison above
+supplies that evidence. This change is adopted for that modest measured gain,
+without claiming a lower three-way median or a demonstrated cold-build gain.
+Kache still leads. All 135 rlibs, 10 macro dylibs and 21 build-script executables
+match direct output and their own cold builds; tracked sources remain unchanged.
+R2 transport is excluded.
+
+Unit tests and the real Rust/Zig integration suite pass. Final-binary records
+also cover [native selection and SDK/corruption/fallback](driver-plan-native-identity.json),
+[macro producer restore/loading and Cargo flags](driver-plan-producer-regression.json),
+and [executable restore/invalidation/failure behavior](driver-plan-executable-regression.json).
+Mac CI's existing native selection fixture now verifies the invalid-plan legacy
+fallback. Linux retains its existing producer policy and runs parser unit tests.

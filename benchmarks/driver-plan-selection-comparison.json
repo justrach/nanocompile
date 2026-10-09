@@ -1,0 +1,259 @@
+{
+  "method": "Identical private environment, cwd and cache. Each real selector case calls both binaries; successful selection structures and fingerprints must be identical. Default Apple driver plans do not execute compiler/linker jobs.",
+  "binary_sha256": {
+    "baseline": "33100a369757582d2d880f85f2de0f823ab408cf4f2b1e25c75f4928608a33ad",
+    "candidate": "531207e9947654f5b989608d4227ca8ec0d63ca5287f2cb43c55ea519c86e003"
+  },
+  "probe_sha256": "a49f4c12274b3dfa128b0f51fef1ca5cd8e406835b94901a36062552e6fe86b1",
+  "cases": [
+    {
+      "case": "default",
+      "driver": "/usr/bin/cc",
+      "accepted": true,
+      "full_selection_and_fingerprint_equal": true,
+      "driver_plan_exit_code": 0,
+      "driver_plan_has_error_diagnostic": false,
+      "identity": {
+        "driver": "/usr/bin/cc",
+        "clang": "/Library/Developer/CommandLineTools/usr/bin/clang",
+        "linker": "/Library/Developer/CommandLineTools/usr/bin/ld",
+        "sdk": "/Library/Developer/CommandLineTools/SDKs/MacOSX27.0.sdk",
+        "resource_dir": "/Library/Developer/CommandLineTools/usr/lib/clang/21",
+        "files": [
+          "/usr/bin/cc",
+          "/usr/bin/xcrun",
+          "/Library/Developer/CommandLineTools/usr/bin/clang",
+          "/Library/Developer/CommandLineTools/usr/bin/ld",
+          "/Library/Developer/CommandLineTools/usr/lib/libLTO.dylib",
+          "/Library/Developer/CommandLineTools/SDKs/MacOSX27.0.sdk/SDKSettings.json"
+        ],
+        "hash": "c105346a7f5747b604f7a9fb2e9c80687111c6b2aa7f9ed824c1bc4f66e3c907"
+      }
+    },
+    {
+      "case": "default_clang",
+      "driver": "/usr/bin/clang",
+      "accepted": true,
+      "full_selection_and_fingerprint_equal": true,
+      "driver_plan_exit_code": 0,
+      "driver_plan_has_error_diagnostic": false,
+      "identity": {
+        "driver": "/usr/bin/clang",
+        "clang": "/Library/Developer/CommandLineTools/usr/bin/clang",
+        "linker": "/Library/Developer/CommandLineTools/usr/bin/ld",
+        "sdk": "/Library/Developer/CommandLineTools/SDKs/MacOSX27.0.sdk",
+        "resource_dir": "/Library/Developer/CommandLineTools/usr/lib/clang/21",
+        "files": [
+          "/usr/bin/clang",
+          "/usr/bin/xcrun",
+          "/Library/Developer/CommandLineTools/usr/bin/clang",
+          "/Library/Developer/CommandLineTools/usr/bin/ld",
+          "/Library/Developer/CommandLineTools/usr/lib/libLTO.dylib",
+          "/Library/Developer/CommandLineTools/SDKs/MacOSX27.0.sdk/SDKSettings.json"
+        ],
+        "hash": "31b3755b496ebfd8a9cb2edfb4baffca1d05e410db3fb178616d11abd0ac7764"
+      }
+    },
+    {
+      "case": "explicit_selected_sdk",
+      "driver": "/usr/bin/cc",
+      "accepted": true,
+      "full_selection_and_fingerprint_equal": true,
+      "driver_plan_exit_code": 0,
+      "driver_plan_has_error_diagnostic": false,
+      "identity": {
+        "driver": "/usr/bin/cc",
+        "clang": "/Library/Developer/CommandLineTools/usr/bin/clang",
+        "linker": "/Library/Developer/CommandLineTools/usr/bin/ld",
+        "sdk": "/Library/Developer/CommandLineTools/SDKs/MacOSX27.0.sdk",
+        "resource_dir": "/Library/Developer/CommandLineTools/usr/lib/clang/21",
+        "files": [
+          "/usr/bin/cc",
+          "/usr/bin/xcrun",
+          "/Library/Developer/CommandLineTools/usr/bin/clang",
+          "/Library/Developer/CommandLineTools/usr/bin/ld",
+          "/Library/Developer/CommandLineTools/usr/lib/libLTO.dylib",
+          "/Library/Developer/CommandLineTools/SDKs/MacOSX27.0.sdk/SDKSettings.json"
+        ],
+        "hash": "c293e92b994473f3e0fb53fdd2ef605d7f9d4bfbadde3e3e6e043ae01dfc7fa1"
+      }
+    },
+    {
+      "case": "developer_Developer",
+      "driver": "/usr/bin/cc",
+      "accepted": true,
+      "full_selection_and_fingerprint_equal": true,
+      "driver_plan_exit_code": 0,
+      "driver_plan_has_error_diagnostic": false,
+      "identity": {
+        "driver": "/usr/bin/cc",
+        "clang": "/Library/Developer/CommandLineTools/usr/bin/clang",
+        "linker": "/Library/Developer/CommandLineTools/usr/bin/ld",
+        "sdk": "/Library/Developer/CommandLineTools/SDKs/MacOSX27.0.sdk",
+        "resource_dir": "/Library/Developer/CommandLineTools/usr/lib/clang/21",
+        "files": [
+          "/usr/bin/cc",
+          "/usr/bin/xcrun",
+          "/Library/Developer/CommandLineTools/usr/bin/clang",
+          "/Library/Developer/CommandLineTools/usr/bin/ld",
+          "/Library/Developer/CommandLineTools/usr/lib/libLTO.dylib",
+          "/Library/Developer/CommandLineTools/SDKs/MacOSX27.0.sdk/SDKSettings.json"
+        ],
+        "hash": "c105346a7f5747b604f7a9fb2e9c80687111c6b2aa7f9ed824c1bc4f66e3c907"
+      }
+    },
+    {
+      "case": "developer_Contents",
+      "driver": "/usr/bin/cc",
+      "accepted": true,
+      "full_selection_and_fingerprint_equal": true,
+      "driver_plan_exit_code": 0,
+      "driver_plan_has_error_diagnostic": false,
+      "identity": {
+        "driver": "/usr/bin/cc",
+        "clang": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang",
+        "linker": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld",
+        "sdk": "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk",
+        "resource_dir": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/21",
+        "files": [
+          "/usr/bin/cc",
+          "/usr/bin/xcrun",
+          "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang",
+          "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld",
+          "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/libLTO.dylib",
+          "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/SDKSettings.json"
+        ],
+        "hash": "4854e2f87b18c48013f6ed303fb8c5bbd900694ea202a4756085b8ad4f2dd100"
+      }
+    },
+    {
+      "case": "private_sdk_selection",
+      "driver": "/usr/bin/cc",
+      "accepted": true,
+      "full_selection_and_fingerprint_equal": true,
+      "driver_plan_exit_code": 0,
+      "driver_plan_has_error_diagnostic": false,
+      "identity": {
+        "driver": "/usr/bin/cc",
+        "clang": "/Library/Developer/CommandLineTools/usr/bin/clang",
+        "linker": "/Library/Developer/CommandLineTools/usr/bin/ld",
+        "sdk": "/private/var/folders/t3/zjm3hgy56l551q_ygry8mbjm0000gn/T/nano driver plan selectors, 8xmw3rtx/private SDK",
+        "resource_dir": "/Library/Developer/CommandLineTools/usr/lib/clang/21",
+        "files": [
+          "/usr/bin/cc",
+          "/usr/bin/xcrun",
+          "/Library/Developer/CommandLineTools/usr/bin/clang",
+          "/Library/Developer/CommandLineTools/usr/bin/ld",
+          "/Library/Developer/CommandLineTools/usr/lib/libLTO.dylib",
+          "/private/var/folders/t3/zjm3hgy56l551q_ygry8mbjm0000gn/T/nano driver plan selectors, 8xmw3rtx/private SDK/SDKSettings.json"
+        ],
+        "hash": "8e9e6b56b8e3a0afb07c7a3feff08ecba2c08562c749fd872c6f7583cbb8cf62"
+      }
+    },
+    {
+      "case": "private_sdk_preserved_mtime_change",
+      "driver": "/usr/bin/cc",
+      "accepted": true,
+      "full_selection_and_fingerprint_equal": true,
+      "driver_plan_exit_code": 0,
+      "driver_plan_has_error_diagnostic": false,
+      "identity": {
+        "driver": "/usr/bin/cc",
+        "clang": "/Library/Developer/CommandLineTools/usr/bin/clang",
+        "linker": "/Library/Developer/CommandLineTools/usr/bin/ld",
+        "sdk": "/private/var/folders/t3/zjm3hgy56l551q_ygry8mbjm0000gn/T/nano driver plan selectors, 8xmw3rtx/private SDK",
+        "resource_dir": "/Library/Developer/CommandLineTools/usr/lib/clang/21",
+        "files": [
+          "/usr/bin/cc",
+          "/usr/bin/xcrun",
+          "/Library/Developer/CommandLineTools/usr/bin/clang",
+          "/Library/Developer/CommandLineTools/usr/bin/ld",
+          "/Library/Developer/CommandLineTools/usr/lib/libLTO.dylib",
+          "/private/var/folders/t3/zjm3hgy56l551q_ygry8mbjm0000gn/T/nano driver plan selectors, 8xmw3rtx/private SDK/SDKSettings.json"
+        ],
+        "hash": "2b94bb13630f5566e5f08b9c1d4e42e49d89ced0bc5e2d476c775ee9c647ae22"
+      }
+    },
+    {
+      "case": "invalid_deployment_legacy_fallback",
+      "driver": "/usr/bin/cc",
+      "accepted": true,
+      "full_selection_and_fingerprint_equal": true,
+      "driver_plan_exit_code": 1,
+      "driver_plan_has_error_diagnostic": true,
+      "identity": {
+        "driver": "/usr/bin/cc",
+        "clang": "/Library/Developer/CommandLineTools/usr/bin/clang",
+        "linker": "/Library/Developer/CommandLineTools/usr/bin/ld",
+        "sdk": "/Library/Developer/CommandLineTools/SDKs/MacOSX27.0.sdk",
+        "resource_dir": "/Library/Developer/CommandLineTools/usr/lib/clang/21",
+        "files": [
+          "/usr/bin/cc",
+          "/usr/bin/xcrun",
+          "/Library/Developer/CommandLineTools/usr/bin/clang",
+          "/Library/Developer/CommandLineTools/usr/bin/ld",
+          "/Library/Developer/CommandLineTools/usr/lib/libLTO.dylib",
+          "/Library/Developer/CommandLineTools/SDKs/MacOSX27.0.sdk/SDKSettings.json"
+        ],
+        "hash": "c105346a7f5747b604f7a9fb2e9c80687111c6b2aa7f9ed824c1bc4f66e3c907"
+      }
+    },
+    {
+      "case": "missing_sdk",
+      "driver": "/usr/bin/cc",
+      "accepted": false,
+      "full_selection_and_fingerprint_equal": true,
+      "driver_plan_exit_code": 0,
+      "driver_plan_has_error_diagnostic": false,
+      "identity": null
+    },
+    {
+      "case": "missing_developer",
+      "driver": "/usr/bin/cc",
+      "accepted": false,
+      "full_selection_and_fingerprint_equal": true,
+      "driver_plan_exit_code": 1,
+      "driver_plan_has_error_diagnostic": true,
+      "identity": null
+    },
+    {
+      "case": "unsupported_CCC_OVERRIDE_OPTIONS",
+      "driver": "/usr/bin/cc",
+      "accepted": false,
+      "full_selection_and_fingerprint_equal": true,
+      "driver_plan_exit_code": 0,
+      "driver_plan_has_error_diagnostic": false,
+      "identity": null
+    },
+    {
+      "case": "unsupported_CCC_ADD_ARGS",
+      "driver": "/usr/bin/cc",
+      "accepted": false,
+      "full_selection_and_fingerprint_equal": true,
+      "driver_plan_exit_code": 0,
+      "driver_plan_has_error_diagnostic": false,
+      "identity": null
+    },
+    {
+      "case": "unsupported_DYLD_INSERT_LIBRARIES",
+      "driver": "/usr/bin/cc",
+      "accepted": false,
+      "full_selection_and_fingerprint_equal": true,
+      "driver_plan_exit_code": 0,
+      "driver_plan_has_error_diagnostic": false,
+      "identity": null
+    },
+    {
+      "case": "unsupported_LD_PRELOAD",
+      "driver": "/usr/bin/cc",
+      "accepted": false,
+      "full_selection_and_fingerprint_equal": true,
+      "driver_plan_exit_code": 0,
+      "driver_plan_has_error_diagnostic": false,
+      "identity": null
+    }
+  ],
+  "preserved_mtime_sdk_change_detected": true,
+  "unparseable_driver_plan_legacy_fallback_verified": true,
+  "no_compilation_outputs_created_in_cwd": true
+}

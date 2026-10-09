@@ -31,6 +31,9 @@ def main():
             return json.loads(result.stdout) if success else None
         first = invoke()
         assert invoke() == first
+        # The full driver plan rejects an invalid deployment target, while
+        # legacy selection-only queries still identify the same tools.
+        assert invoke({'MACOSX_DEPLOYMENT_TARGET': 'not-a-version'}) == first
         assert Path(first['clang']).is_file() and Path(first['linker']).is_file()
         assert Path(first['sdk']).is_dir() and Path(first['resource_dir']).is_dir()
         assert all(Path(p).is_file() for p in first['files'])
@@ -60,7 +63,7 @@ def main():
         evidence = {'platform': sys.platform, 'selected': first,
                     'observer_sha256': hashlib.sha256(binary.read_bytes()).hexdigest(),
                     'probe_sha256': hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
-                    'stable_warm_identity': True, 'private_sdk_selection_changes_identity': True,
+                    'stable_warm_identity': True, 'invalid_driver_plan_legacy_fallback': True, 'private_sdk_selection_changes_identity': True,
                     'preserved_mtime_sdk_metadata_change_detected': True,
                     'corrupt_memos_recomputed': True, 'invalid_selections_rejected': True,
                     'limits': 'Apple dispatch shim only; experimental producer keys; '
