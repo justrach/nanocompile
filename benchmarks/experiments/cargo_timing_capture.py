@@ -25,6 +25,7 @@ def main():
     p.add_argument('--state', type=Path, required=True)
     p.add_argument('--output', type=Path, required=True)
     p.add_argument('--warm-runs', type=int, default=3)
+    p.add_argument('--native-clang', action='store_true', help='Profile the accepted Apple Clang CAS configuration too')
     args = p.parse_args()
     assert args.warm_runs > 0
     binary, project, root = args.binary.resolve(), args.project.resolve(), args.state.resolve()
@@ -36,6 +37,9 @@ def main():
                CARGO_INCREMENTAL='0', NANOCOMPILE_DIR=str(root / 'cache'),
                NANOCOMPILE_PROC_MACROS='reported', NANOCOMPILE_PROC_MACRO_PRODUCERS='1',
                NANOCOMPILE_EXECUTABLE_PRODUCERS='1')
+    if args.native_clang:
+        env.update(CC=str(binary)+' clang', CC_KNOWN_WRAPPER_CUSTOM='nanocompile',
+                   NANOCOMPILE_CLANG_REMARKS='1')
     command = ['cargo', 'build', '--release', '--lib', '--locked', '--offline',
                '-p', 'harness-adapters', '-j', '4', '--timings']
     names = subprocess.check_output(['git', 'ls-files', '-z'], cwd=project).decode().split('\0')
@@ -44,6 +48,7 @@ def main():
     report = {'method': 'Accepted executable used directly as RUSTC_WRAPPER; stable Cargo --timings, one prime and clean warm builds, four jobs, fixed environment/target/cache. Timing instrumentation is diagnostic, not an A/B performance comparison. No extra Python compiler shim.',
               'core_revision': subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip(),
               'binary_sha256': sha(binary), 'script_sha256': sha(Path(__file__)),
+              'native_clang': args.native_clang,
               'project_commit': subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=project, text=True).strip(),
               'project_dirty': bool(subprocess.check_output(['git', 'status', '--porcelain'], cwd=project)),
               'tracked_source_sha256': sources, 'command': command, 'jobs': 4,
@@ -71,7 +76,7 @@ def main():
             seconds = time.perf_counter()-start
         assert child.returncode == 0, (root/(phase+'.log')).read_text()[-4000:]
         artifacts = {str(p.relative_to(target)): sha(p) for p in sorted(target.rglob('*')) if p.is_file()
-                     and (p.suffix in ('.rlib', '.dylib', '.so') or p.name == 'build-script-build')}
+                     and (p.suffix in (('.rlib', '.dylib', '.so', '.o', '.a') if args.native_clang else ('.rlib', '.dylib', '.so')) or p.name == 'build-script-build')}
         assert artifacts
         if reference is None: reference = artifacts
         assert artifacts == reference
@@ -84,6 +89,7 @@ def main():
                'peak_sampled_process_tree_rss_bytes': peak, 'artifact_count': len(artifacts),
                'artifacts_match_prime': True, 'timing_html_sha256': sha(captured), 'timing_file': captured.name}
         if i: assert row['events'].get('hit') == 167 and row['events'].get('failed') == 3, row
+        if i and args.native_clang: assert row['events'].get('clang_native_hit') == 24, row
         report['builds'].append(row)
         args.output.write_text(json.dumps(report, indent=2)+'\n')
         print(json.dumps(row), flush=True)

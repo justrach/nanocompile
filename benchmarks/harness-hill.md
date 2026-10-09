@@ -1339,3 +1339,14 @@ only **13/27 pairs**. Mean paired saving is **−22.41 ms** (standard error
 The two-query production limit is retained.
 [Protocol and decision](../docs/rust-native-three-experiment.md);
 [raw paired samples](harness-rust-native-three-paired.json).
+
+## Accepted native-CAS timing profile
+
+Three instrumented warm builds take 2.095245, 2.045258, and 2.025664 s.
+Ring's native build-script run takes 1.24, 1.22, and 1.23 s and precedes
+the finishing rustls/reqwest chain. All 193 artifacts match the prime; each
+warm build has 167 Rust and 24 native hits. Production stays unchanged.
+The next diagnostic target is native invocation overhead inside ring.
+[Method and limits](../docs/native-cargo-timing-profile.md);
+[build evidence](harness-native-cargo-timing.json);
+[complete unit timings](harness-native-cargo-timing-units.json).
