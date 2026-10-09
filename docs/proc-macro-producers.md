@@ -162,8 +162,35 @@ rules; LLD escapes prerequisite names. The reader now binds GNU's exact layout
 to the expected output and requires every matching raw phony rule, preserving
 spaces, dollars, colons and backslashes without guessing token combinations.
 Truncated or mismatched layouts are rejected. Missing actual inputs still
-invalidate discovery. Local parser tests pass; hosted verification of this
-fix remains pending.
+invalidate discovery. Local parser tests verified the strict layout before
+hosted verification.
+
+The GNU decoder and complete existing suite subsequently passed on Linux and
+Mac in [run 37941809114](https://github.com/justrach/nanocompile/actions/runs/37941809114)
+at `d046d71f72d81f790d5b3f2f1562e429294ace16`. The native observer entry also
+passed both platforms in [run 37942262790](https://github.com/justrach/nanocompile/actions/runs/37942262790)
+at `3f38c8e6e2526857aa54ee87b406605ecb03b6b9`.
+
+`src/producer_dependencies.zig` now converts a bound, sealed linker capture into
+content-hashed dependencies, excluding only captured owned scratch inputs.
+Persistent files must predate compilation, retain their recorded resolution,
+and pass content plus inode/size/mtime/ctime checks around hashing. Both lexical
+and resolved file paths are retained. Symbolic links along lexical paths carry
+explicit target guards; these also must predate compilation and remain stable.
+Darwin's missing lookups become the existing negative dependency records.
+
+The optional `symlink_target` CAS extension is omitted for ordinary entries.
+Its path/target marker is domain-separated and validated at storage and before
+restoration writes. Retargeting an alias, even to identical bytes, refuses an
+old restore without touching the destination. Malformed marker combinations
+and checksums are rejected. The real C-link test converts a capture after its
+owned object has been deleted and refuses a subsequent foreign-alias change;
+all twelve local macro builds also exercise conversion after rustc returns.
+
+This converter is not a complete producer plan: source/extern before-and-after
+snapshots, lookup-directory guards, macro-consumer input policy, tool/SDK
+selection and output/diagnostic handling still require compiler integration.
+Producer eligibility remains disabled.
 
 Output placement is now probed by `tests/producer_placement.py` with absolute
 and relative directories, default and optimized codegen, and full debug info.

@@ -13,6 +13,7 @@ from pathlib import Path
 import subprocess
 import sys
 import tempfile
+import time
 
 
 def main():
@@ -81,6 +82,7 @@ def main():
                         install_name = original_output + '/libproducer' + suffix
                         for value in ('-Xlinker', '-install_name', '-Xlinker', install_name):
                             command.extend(['-C', 'link-arg=' + value])
+                    started = time.time_ns()
                     compiled = run(command)
                     ownership_counts = None
                     if observer:
@@ -90,6 +92,13 @@ def main():
                         ownership_counts = {'owned': sum(p['owned'] for p in inputs),
                                             'persistent': sum(not p['owned'] for p in inputs)}
                         assert ownership_counts['owned'] > 0 and ownership_counts['persistent'] > 0
+                        dependencies = json.loads(run([str(observer), 'internal-producer-dependencies',
+                            str(config), str(invocation), str(started)]).stdout)
+                        ownership_counts['cache_dependencies'] = len(dependencies)
+                        ownership_counts['symlink_guards'] = sum('symlink_target' in p for p in dependencies)
+                        ownership_counts['negative_guards'] = sum(p.get('missing', False) for p in dependencies)
+                        assert all(any(p['path'] == item['path'] for p in dependencies)
+                                   for item in inputs if not item['owned'])
                     dylib = path / ('libproducer' + suffix)
                     consumer = root / ('consumer-' + case + '-' + str(index))
                     run(['rustc', '--edition=2021', 'consumer.rs', '--extern',

@@ -215,7 +215,33 @@ pub fn unseal(ctx: *Context, bytes: []const u8) ![]const u8 {
     return bytes[65..];
 }
 
-pub const Dependency = struct { path: []const u8, hash: []const u8, directory: bool = false, libraries: bool = false, library_prefix: ?[]const u8 = null, all_members: bool = false, missing: ?bool = null };
+pub const Dependency = struct { path: []const u8, hash: []const u8, directory: bool = false, libraries: bool = false, library_prefix: ?[]const u8 = null, all_members: bool = false, missing: ?bool = null, symlink_target: ?[]const u8 = null };
+
+pub fn symlinkDependency(ctx: *Context, path_: []const u8) !Dependency {
+    const path = try std.fs.path.resolve(ctx.a, &.{ ctx.cwd, path_ });
+    if ((try Dir.cwd().statFile(ctx.io, path, .{ .follow_symlinks = false })).kind != .sym_link) return error.NotSymbolicLink;
+    var buffer: [std.fs.max_path_bytes]u8 = undefined;
+    const target = try ctx.a.dupe(u8, buffer[0..try Dir.cwd().readLink(ctx.io, path, &buffer)]);
+    return .{ .path = path, .hash = try symlinkHash(ctx, path, target), .symlink_target = target };
+}
+
+fn symlinkHash(ctx: *Context, path: []const u8, target: []const u8) ![]const u8 {
+    var h = Hash.init(.{});
+    field(&h, "nanocompile-link-target-v1");
+    field(&h, path);
+    field(&h, target);
+    return finish(ctx.a, &h);
+}
+
+fn symlinkValid(ctx: *Context, dep: Dependency) !bool {
+    const target = dep.symlink_target orelse return false;
+    if (target.len == 0 or dep.missing != null or dep.directory or dep.libraries or dep.all_members or
+        dep.library_prefix != null or !std.fs.path.isAbsolute(dep.path)) return false;
+    if (!std.mem.eql(u8, dep.hash, try symlinkHash(ctx, dep.path, target))) return false;
+    if ((try Dir.cwd().statFile(ctx.io, dep.path, .{ .follow_symlinks = false })).kind != .sym_link) return false;
+    var buffer: [std.fs.max_path_bytes]u8 = undefined;
+    return std.mem.eql(u8, target, buffer[0..try Dir.cwd().readLink(ctx.io, dep.path, &buffer)]);
+}
 
 /// Negative linker lookups are inputs too. A later successful lookup must
 /// invalidate restoration. Never treat access errors as evidence of absence.
@@ -241,7 +267,7 @@ fn absent(ctx: *Context, path_: []const u8) !bool {
 }
 
 fn missingValid(ctx: *Context, dep: Dependency) !bool {
-    if (dep.missing != true or dep.directory or dep.libraries or dep.all_members or dep.library_prefix != null or !std.fs.path.isAbsolute(dep.path)) return false;
+    if (dep.missing != true or dep.symlink_target != null or dep.directory or dep.libraries or dep.all_members or dep.library_prefix != null or !std.fs.path.isAbsolute(dep.path)) return false;
     if (!std.mem.eql(u8, dep.hash, try absentHash(ctx, dep.path))) return false;
     return absent(ctx, dep.path);
 }
@@ -314,6 +340,7 @@ fn putBytes(ctx: *Context, bytes: []const u8) ![]const u8 {
 
 pub fn store(ctx: *Context, key: []const u8, dependencies: []const Dependency, output_paths: []const []const u8, stdout: []const u8, stderr: []const u8) !void {
     for (dependencies) |dep| if (dep.missing != null and !try missingValid(ctx, dep)) return error.InvalidMissingDependency;
+    for (dependencies) |dep| if (dep.symlink_target != null and !try symlinkValid(ctx, dep)) return error.InvalidSymlinkDependency;
     var outputs: std.ArrayList(Output) = .empty;
     for (output_paths) |path_| {
         const st = try Dir.cwd().statFile(ctx.io, path_, .{});
@@ -386,6 +413,10 @@ pub fn restore(ctx: *Context, key: []const u8, allowed_outputs: []const []const 
     var file_hashes: std.StringHashMapUnmanaged([]const u8) = .empty;
     defer file_hashes.deinit(ctx.a);
     for (entry.dependencies) |dep| {
+        if (dep.symlink_target != null) {
+            if (!(symlinkValid(ctx, dep) catch false)) return false;
+            continue;
+        }
         if (dep.missing != null) {
             if (!(missingValid(ctx, dep) catch false)) {
                 ctx.trace("miss: negative lookup changed or unavailable");
@@ -583,6 +614,46 @@ test "hash fields cannot collide through concatenation" {
 test "blob hashes reject traversal" {
     try std.testing.expect(!validHash("../entry"));
     try std.testing.expect(validHash("0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"));
+}
+
+test "symlink guards reject retargeting before restoration writes" {
+    var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer arena.deinit();
+    const a = arena.allocator();
+    const io = std.testing.io;
+    var tmp = std.testing.tmpDir(.{});
+    defer tmp.cleanup();
+    const cwd = try Dir.cwd().realPathFileAlloc(io, try std.fs.path.join(a, &.{ ".zig-cache", "tmp", &tmp.sub_path }), a);
+    var env = std.process.Environ.Map.init(a);
+    var ctx: Context = .{ .a = a, .io = io, .env = &env, .root = try std.fs.path.join(a, &.{ cwd, "cache" }), .cwd = cwd };
+    try ctx.prepare();
+    try tmp.dir.writeFile(io, .{ .sub_path = "first", .data = "same bytes" });
+    try tmp.dir.writeFile(io, .{ .sub_path = "second", .data = "same bytes" });
+    try tmp.dir.symLink(io, "first", "alias", .{});
+    const dep = try symlinkDependency(&ctx, "alias");
+    const output = try std.fs.path.join(a, &.{ cwd, "output" });
+    try tmp.dir.writeFile(io, .{ .sub_path = "output", .data = "compiled" });
+    const key = "123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0";
+    try store(&ctx, key, &.{dep}, &.{output}, "", "");
+    try tmp.dir.deleteFile(io, "output");
+    try std.testing.expect(try restore(&ctx, key, &.{output}));
+    try tmp.dir.deleteFile(io, "alias");
+    try tmp.dir.symLink(io, "second", "alias", .{});
+    try tmp.dir.writeFile(io, .{ .sub_path = "output", .data = "leave untouched" });
+    try std.testing.expect(!try restore(&ctx, key, &.{output}));
+    try std.testing.expectEqualStrings("leave untouched", try ctx.read(output));
+    try std.testing.expectError(error.InvalidSymlinkDependency, store(&ctx, key, &.{dep}, &.{output}, "", ""));
+    const changed = try symlinkDependency(&ctx, "alias");
+    try std.testing.expect(!std.mem.eql(u8, changed.hash, dep.hash));
+    var malformed = changed;
+    malformed.directory = true;
+    try std.testing.expectError(error.InvalidSymlinkDependency, store(&ctx, key, &.{malformed}, &.{output}, "", ""));
+    malformed = changed;
+    malformed.hash = key;
+    try std.testing.expectError(error.InvalidSymlinkDependency, store(&ctx, key, &.{malformed}, &.{output}, "", ""));
+    const ordinary = try std.json.Stringify.valueAlloc(a, Dependency{ .path = output, .hash = key }, .{ .emit_null_optional_fields = false });
+    try std.testing.expect(std.mem.indexOf(u8, ordinary, "symlink_target") == null);
+    try std.testing.expectError(error.NotSymbolicLink, symlinkDependency(&ctx, "first"));
 }
 
 test "negative linker lookups gate storage and restoration before writes" {

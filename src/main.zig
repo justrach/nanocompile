@@ -58,6 +58,14 @@ fn dispatch(ctx: *cache.Context, args: []const [:0]const u8) !u8 {
         return 0;
     }
     const command = args[1];
+    if (std.mem.eql(u8, command, "internal-producer-dependencies")) {
+        if (args.len != 5) return error.InvalidProducerCapture;
+        const parsed = try std.json.parseFromSlice(@import("link_observer.zig").Config, ctx.a, try ctx.read(args[2]), .{ .allocate = .alloc_always });
+        const records = try @import("producer_dependencies.zig").collect(ctx, parsed.value, try ctx.read(args[3]), try std.fmt.parseInt(i96, args[4], 10));
+        try ctx.out(try std.json.Stringify.valueAlloc(ctx.a, records, .{ .emit_null_optional_fields = false }));
+        try ctx.out("\n");
+        return 0;
+    }
     if (std.mem.eql(u8, command, "internal-native-identity")) {
         if (args.len != 3) return error.InvalidNativeIdentity;
         try ctx.prepare();
@@ -139,4 +147,5 @@ test {
     _ = @import("link_observer.zig");
     _ = @import("producer_job.zig");
     _ = @import("native_identity.zig");
+    _ = @import("producer_dependencies.zig");
 }

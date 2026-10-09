@@ -8,6 +8,7 @@ import subprocess
 import shutil
 import sys
 import tempfile
+import time
 
 
 def main():
@@ -127,6 +128,7 @@ def main():
         owned_command = [str(binary), 'internal-linker', str(config),
                          '-dynamiclib' if sys.platform == 'darwin' else '-shared',
                          str(owned_object), str(alias), '-o', str(owned_library)]
+        started = time.time_ns()
         result = subprocess.run(owned_command, cwd=root, env=env, capture_output=True, timeout=30)
         assert result.returncode == 0, result
         assert ctypes.CDLL(str(owned_library)).answer() == 42
@@ -138,6 +140,22 @@ def main():
         assert payload['link']['ownership'] == ownership
         owned_object.unlink()
         assert any(p['owned'] for p in inputs)  # durable capture outlives scratch
+        converted = subprocess.run([str(binary), 'internal-producer-dependencies', str(config),
+            str(record), str(started)], cwd=root, env=env, capture_output=True, timeout=30)
+        assert converted.returncode == 0, converted.stderr.decode()
+        dependencies = json.loads(converted.stdout)
+        assert any(p['path'] == str(foreign.resolve()) for p in dependencies)
+        assert any(p.get('symlink_target') == str(foreign) for p in dependencies)
+        assert all(p['path'] != str(owned_object) for p in dependencies)
+        # Retargeting an alias after the compile cannot become a new input for
+        # this captured result, even when the replacement bytes are identical.
+        replacement = root / 'replacement.o'
+        replacement.write_bytes(foreign.read_bytes())
+        alias.unlink()
+        alias.symlink_to(replacement)
+        converted = subprocess.run([str(binary), 'internal-producer-dependencies', str(config),
+            str(record), str(started)], cwd=root, env=env, capture_output=True, timeout=30)
+        assert converted.returncode != 0 and b'LinkInputChanged' in converted.stderr
         # A successful driver that writes no new report cannot adopt the prior
         # link's report. Discovery failure must still retain native exit zero.
         driver.write_text('#!/usr/bin/env python3\nimport sys\nsys.exit(0)\n')
