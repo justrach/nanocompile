@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/images/readme-cache-rat.png" alt="A workshop rat in a coral coat shelving reusable build artifacts" width="280" height="280">
+  <img src="docs/images/readme-cache-rat-v2.png" alt="A workshop rat in a coral coat shelving reusable build artifacts" width="280" height="280">
 </p>
 
 <h1 align="center">nanocompile</h1>
@@ -7,6 +7,12 @@
 <p align="center">Reuse the build work you've already done.</p>
 
 <p align="center">Rust and Zig compiler caching · Xcode native cache · Turborepo task artifacts</p>
+
+<p align="center">
+  <a href="https://github.com/justrach/nanocompile/actions/workflows/ci.yml"><img src="https://github.com/justrach/nanocompile/actions/workflows/ci.yml/badge.svg" alt="Linux and macOS CI"></a>
+  <a href="build.zig.zon"><img src="https://img.shields.io/badge/Zig-0.17.0-f7a41d" alt="Stable Zig 0.17.0"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-blue" alt="Apache 2.0 license"></a>
+</p>
 
 <p align="center">
   <a href="#build-and-use">Build and use</a> ·
@@ -29,6 +35,8 @@ This implementation targets repeated compilation of unchanged inputs. It is an e
 | Turborepo | Run the [two-package example](examples/turborepo/README.md) with the loopback remote-cache adapter. |
 
 Measured performance and its limits are published with raw samples: [Rust versus kache](benchmarks/harness-hill.md), [Xcode](benchmarks/xcode.md), and [Turborepo with R2 restores](benchmarks/turborepo.md).
+
+**Try it today:** Cargo library builds, supported direct Zig invocations, and the runnable Turbo example. Rust proc-macro producers still run directly. Xcode uses Apple's native cache, and R2 currently transports explicit snapshots. See [supported builds](#current-eligibility) before choosing a workload.
 
 ## Build and use
 
