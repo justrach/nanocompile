@@ -1,5 +1,7 @@
 # Measured optimization trail
 
+The [Xcode comparison](xcode.md) covers Apple Clang compatibility and Xcode's native compilation cache separately from the Rust/Harness comparison.
+
 For a real Cargo workload, start with the [Harness comparison against kache](kache-harness.md): direct 22.77 s, nanocompile 22.95 s, kache with its daemon 2.01 s. The individual compiler fixtures below measure warm-hit latency and do not predict project-level performance.
 
 The [Harness hill climb](harness-hill.md) improves default warm builds to 19.31 s against a 25.16 s direct baseline; kache still takes 2.16 s. It records unsuccessful iterations and the larger cold-cache cost too.

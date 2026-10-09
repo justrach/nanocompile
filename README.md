@@ -96,6 +96,8 @@ Working directories and output paths remain in keys, preserving embedded paths a
 
 The [Harness hill climb](benchmarks/harness-hill.md) now measures **19.31 s for the default mode versus 25.16 s direct**, with 90–91 cache hits. Kache still takes 2.16 s on that comparison. The cold-cache regression and the optional reported-input macro experiment are recorded alongside the results.
 
+The [Xcode comparison](benchmarks/xcode.md) adds real `xcodebuild` workloads and an Xcode-native compilation-cache baseline. Current nanocompile and kache 1.0.0 both record zero hits on the default Xcode Clang fixture; Swift caching is not implemented by either external tool.
+
 ## Experimental R2 testing
 
 `tools/r2_cache.py` transports snapshots of entries and content-addressed blobs to a private R2 bucket. The compiler/cache core remains Zig; this optional benchmark transport uses Python and boto3. It is explicit prefetch/upload, rather than an HTTP request on each compiler invocation. Archives have SHA-256 checks, extraction accepts only regular cache files with valid names, and the Zig cache validates dependencies and BLAKE3 artifact hashes before use. Only share a bucket with trusted writers.

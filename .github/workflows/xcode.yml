@@ -1,0 +1,50 @@
+name: Xcode build comparison
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  benchmark:
+    runs-on: macos-26
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - name: Install verified Zig 0.17.0
+        run: python3 tools/install_zig.py "$RUNNER_TEMP/zig"
+      - name: Build nanocompile
+        run: zig build -Doptimize=ReleaseFast
+      - name: Install pinned, verified kache 1.0.0
+        run: |
+          python3 - <<'PY'
+          import hashlib, io, os, pathlib, platform, tarfile, urllib.request
+          arch = 'aarch64' if platform.machine() == 'arm64' else 'x86_64'
+          expected = {'aarch64': '6d1be0079d0689a85fa04b7fed7eaa94f7e08259cafb8bd361a5c25c4c98c4a3',
+                      'x86_64': 'ae0792b17e1c5f2438b39be888896c20aaf006bef5959c44fa3bc5bc66d93b5b'}[arch]
+          url = f'https://github.com/kunobi-ninja/kache/releases/download/v1.0.0/kache-{arch}-apple-darwin.tar.gz'
+          with urllib.request.urlopen(url, timeout=60) as response:
+              data = response.read()
+          assert hashlib.sha256(data).hexdigest() == expected, 'release checksum mismatch'
+          root = pathlib.Path(os.environ['RUNNER_TEMP']) / 'kache'
+          root.mkdir()
+          with tarfile.open(fileobj=io.BytesIO(data)) as archive:
+              member = next(m for m in archive.getmembers() if pathlib.PurePosixPath(m.name).name == 'kache' and m.isfile())
+              (root / 'kache').write_bytes(archive.extractfile(member).read())
+          (root / 'kache').chmod(0o755)
+          with open(os.environ['GITHUB_PATH'], 'a') as output:
+              output.write(str(root) + '\n')
+          PY
+      - name: Compare clean Xcode builds
+        run: |
+          python3 tests/xcode_fixture.py "$RUNNER_TEMP/xcode-fixture"
+          python3 tests/xcode_comparison.py "$RUNNER_TEMP/xcode-fixture/ClangFixture.xcodeproj" \
+            --scheme ClangFixture --destination platform=macOS \
+            --nanocompile zig-out/bin/nanocompile --kache "$RUNNER_TEMP/kache/kache" \
+            --state "$RUNNER_TEMP/xcode-comparison" --runs 3 --native-cache \
+            --verify-executable Release/ClangFixture --output bench-results/xcode-runner.json
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: xcode-benchmark
+          path: |
+            bench-results/
+            ${{ runner.temp }}/xcode-comparison/*.log
