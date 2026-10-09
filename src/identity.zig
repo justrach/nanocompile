@@ -79,6 +79,38 @@ fn readMemo(ctx: *cache.Context, path: []const u8, minimum_stamps: usize) ?[]con
     return memo.hash;
 }
 
+// Selection memos intentionally differ across cwd/override chains. Share only
+// installed Rust file digests between them, using the same trusted toolchain
+// inode/size/mtime/ctime contract. Never use this for project dependencies.
+const FileMemo = struct { schema: u32 = 1, stamp: Stamp, hash: []const u8 };
+
+fn readFileMemo(ctx: *cache.Context, path: []const u8, expected: Stamp) ?[]const u8 {
+    const payload = cache.unseal(ctx, ctx.read(path) catch return null) catch return null;
+    const parsed = std.json.parseFromSlice(FileMemo, ctx.a, payload, .{ .allocate = .alloc_always }) catch return null;
+    const memo = parsed.value;
+    if (memo.schema != 1 or !cache.validHash(memo.hash) or !std.mem.eql(u8, expected.path, memo.stamp.path) or !equal(expected, memo.stamp)) return null;
+    return memo.hash;
+}
+
+fn rustFileDigest(ctx: *cache.Context, expected: Stamp) ![]const u8 {
+    var h = cache.Hash.init(.{});
+    cache.field(&h, "rust-toolchain-file-v1");
+    cache.field(&h, expected.path);
+    const key = try cache.finish(ctx.a, &h);
+    const path = try ctx.path(&.{ "toolchain-files", key });
+    // Atomic sealed records permit an optimistic read. A per-file lock makes
+    // concurrent first-use fingerprints share the expensive content hash.
+    if (readFileMemo(ctx, path, expected)) |hash| return hash;
+    const lock = try cache.Lock.acquire(ctx, try std.fmt.allocPrint(ctx.a, "toolchain-file-{s}", .{key}), true);
+    defer lock.release();
+    if (readFileMemo(ctx, path, expected)) |hash| return hash;
+    const hash = try ctx.digest(expected.path);
+    if (!equal(expected, try stamp(ctx, expected.path))) return error.ToolchainChanged;
+    const bytes = try std.json.Stringify.valueAlloc(ctx.a, FileMemo{ .stamp = expected, .hash = hash }, .{});
+    try ctx.atomic(path, try cache.seal(ctx, bytes));
+    return hash;
+}
+
 fn rustResources(ctx: *cache.Context, stamps: *std.ArrayList(Stamp), root: []const u8) !void {
     try add(ctx, stamps, root);
     var dir = try Dir.cwd().openDir(ctx.io, root, .{ .iterate = true });
@@ -207,7 +239,7 @@ pub fn fingerprint(ctx: *cache.Context, is_zig: bool, executable: []const u8) ![
     for (stamps.items) |s| {
         cache.field(&h, s.path);
         if (s.exists and s.kind == .file) {
-            const digest = ctx.digest(s.path) catch |err| {
+            const digest = (if (is_zig) ctx.digest(s.path) else rustFileDigest(ctx, s)) catch |err| {
                 ctx.trace(try std.fmt.allocPrint(ctx.a, "toolchain file unavailable: {s} ({s})", .{ s.path, @errorName(err) }));
                 return err;
             };
@@ -220,4 +252,40 @@ pub fn fingerprint(ctx: *cache.Context, is_zig: bool, executable: []const u8) ![
     const bytes = try std.json.Stringify.valueAlloc(ctx.a, Memo{ .hash = hash, .stamps = stamps.items }, .{});
     try ctx.atomic(path, try cache.seal(ctx, bytes));
     return hash;
+}
+
+test "shared Rust toolchain digests reject corruption and preserved-mtime edits" {
+    var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer arena.deinit();
+    const a = arena.allocator();
+    const io = std.testing.io;
+    var tmp = std.testing.tmpDir(.{});
+    defer tmp.cleanup();
+    const relative = try std.fs.path.join(a, &.{ ".zig-cache", "tmp", &tmp.sub_path });
+    const cwd = try Dir.cwd().realPathFileAlloc(io, relative, a);
+    var env = std.process.Environ.Map.init(a);
+    var ctx: cache.Context = .{ .a = a, .io = io, .env = &env, .root = try std.fs.path.join(a, &.{ cwd, "cache" }), .cwd = cwd };
+    try ctx.prepare();
+    try tmp.dir.writeFile(io, .{ .sub_path = "resource", .data = "first_" });
+    const input = try std.fs.path.join(a, &.{ cwd, "resource" });
+    const before = try stamp(&ctx, input);
+    const first = try rustFileDigest(&ctx, before);
+    try std.testing.expectEqualStrings(try ctx.digest(input), first);
+    try std.testing.expectEqualStrings(first, try rustFileDigest(&ctx, before));
+    try tmp.dir.writeFile(io, .{ .sub_path = "resource", .data = "second" });
+    const file = try tmp.dir.openFile(io, "resource", .{});
+    defer file.close(io);
+    try file.setTimestamps(io, .{ .modify_timestamp = .{ .new = .{ .nanoseconds = before.mtime } } });
+    const after = try stamp(&ctx, input);
+    try std.testing.expectEqual(before.mtime, after.mtime);
+    try std.testing.expect(!equal(before, after));
+    const second = try rustFileDigest(&ctx, after);
+    try std.testing.expect(!std.mem.eql(u8, first, second));
+    try std.testing.expectEqualStrings(try ctx.digest(input), second);
+    var memos = try Dir.cwd().openDir(io, try ctx.path(&.{"toolchain-files"}), .{ .iterate = true });
+    defer memos.close(io);
+    var iterator = memos.iterate();
+    const entry = (try iterator.next(io)).?;
+    try memos.writeFile(io, .{ .sub_path = entry.name, .data = "corrupt" });
+    try std.testing.expectEqualStrings(second, try rustFileDigest(&ctx, after));
 }

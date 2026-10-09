@@ -50,7 +50,7 @@ Set `NANOCOMPILE_DIR` to choose a shared cache location. Its default is `$XDG_CA
 ./zig-out/bin/nanocompile clear
 ```
 
-GC is explicit, so the normal compilation path does not scan the entire store. It removes orphan blobs and evicts entries by recorded access time until the unique artifact bytes fit the requested budget. Filesystem access-time policies make this an approximate eviction order. The quota covers blobs; metadata and toolchain identities are additional space. `clear` removes artifacts, Rust classification memos, private diagnostic files and counters while retaining validated toolchain identities to avoid paying their initial fingerprinting cost again.
+GC is explicit, so the normal compilation path does not scan the entire store. It removes orphan blobs and evicts entries by recorded access time until the unique artifact bytes fit the requested budget. Filesystem access-time policies make this an approximate eviction order. The quota covers blobs; metadata and toolchain identities are additional space. `clear` removes artifacts, Rust classification memos, private diagnostic files and counters while retaining validated toolchain identities and shared Rust toolchain-file digests to avoid paying their initial fingerprinting cost again.
 
 ## Cache correctness and storage
 
@@ -64,7 +64,7 @@ Per-key locks collapse identical concurrent requests into one compilation. Sorte
 
 Blobs are shared by content, even between unrelated compilation entries. Restores try APFS `clonefile` on macOS and `FICLONE` on Linux, then fall back to an independent copy. Outputs are staged beside their destinations and atomically renamed into place. No hardlinks are used: changing a restored file cannot change a stored artifact. Permissions and compiler stdout/stderr are restored too. A multi-file restore is not one filesystem transaction; if interrupted, the next build or restore repairs the outputs.
 
-Toolchain contents are hashed once and memoized. Warm validation checks file identity, size, mtime, ctime, and directory metadata. It observes rustup settings and ancestor override files, and detects changes to installed compiler/runtime resources. Source inputs and artifact blobs do not use this metadata shortcut. Official native compiler executables and rustup proxies are supported; arbitrary compiler scripts pass through. The cache is for a trusted local installation, not a remote cache or a defense against a hostile filesystem that can forge metadata and checksums.
+Toolchain contents are hashed once and memoized. Rust selection memos retain caller-directory and override checks, while installed-file digests are shared across those memos behind the same inode/size/mtime/ctime checks. Atomic sealed records and per-file locks prevent redundant concurrent first-use hashing. Warm validation checks file identity, size, mtime, ctime, and directory metadata. It observes rustup settings and ancestor override files, and detects changes to installed compiler/runtime resources. Source inputs and artifact blobs do not use this metadata shortcut. Official native compiler executables and rustup proxies are supported; arbitrary compiler scripts pass through. The cache is for a trusted local installation, not a remote cache or a defense against a hostile filesystem that can forge metadata and checksums.
 
 ## Current eligibility
 
