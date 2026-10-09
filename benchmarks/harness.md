@@ -37,3 +37,28 @@ an optional Python/boto3 snapshot utility, separate from the Zig compiler core.
 GitHub's manual Harness workflow tests a pinned publicly available revision.
 That revision may differ from this local checkout; compare results only with
 their recorded commit, platform and toolchain. Artifacts contain timing JSON.
+
+## GitHub Linux runner
+
+The [Linux benchmark job](https://github.com/justrach/nanocompile/actions/runs/37902722700/job/113728798023)
+completed successfully on Ubuntu 24.04 x86_64, using four jobs, Rust 1.97.1 and
+a clean checkout at `20c4019201e4b1eee5e04cfbb8dc7bda941b11b9`.
+Raw measurements and artifact hashes: [harness-linux.json](harness-linux.json).
+
+| Mode | Seconds | Recorded hits |
+| --- | ---: | ---: |
+| Direct, median of two builds | 53.17 | — |
+| Empty wrapper cache | 54.54 | 0 |
+| Warm wrapper cache, median of two builds | 53.39 | 2–3 |
+| After R2 restore, build only | 52.54 | 2 |
+| R2 download + unpack + rebuild | 53.03 | 2 |
+
+All 131 resulting Rust libraries matched by SHA-256 across every build mode.
+The cold snapshot contained only seven files (9,831 unpacked bytes; 4,559
+compressed bytes): most successful invocations were bypassed or could not be
+stored safely. There were 162 bypass calls per warm build. Upload took 1.97
+seconds and download/unpack took 0.49 seconds. Small differences between these
+whole-build timings are not convincing evidence of a speedup; this sample has
+only two direct and two warm builds. The Linux and local macOS workloads use
+different revisions and machines and must not be treated as a controlled
+cross-platform comparison.
