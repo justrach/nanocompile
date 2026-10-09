@@ -120,4 +120,5 @@ test {
     _ = cache;
     _ = compiler;
     _ = @import("link_dependencies.zig");
+    _ = @import("response_files.zig");
 }

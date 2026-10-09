@@ -31,8 +31,32 @@ report format and private report/invocation paths. It records the original
 driver arguments in a sealed manifest, inherits the existing environment, adds
 the native dependency-report option using separate driver arguments, and
 delegates stdout/stderr and exit status. The producer fixture exercises it with
-spaces and a comma in its private paths. Driver/SDK identity, response-file
-capture, scratch ownership and producer eligibility still need integration.
+spaces and a comma in its private paths. Driver/SDK identity, scratch ownership
+and producer eligibility still need integration.
+
+Response-file capture is now implemented in `src/response_files.zig`. It expands
+GNU compiler-driver quotes and escapes recursively from the original working
+directory, preserves the raw driver arguments, and snapshots response contents
+and inode/size/mtime/ctime before delegation. Content and stamps are checked
+again afterward. Cycles, malformed quoting, unsupported encodings, oversized
+expansions and changed responses invalidate discovery while retaining the
+driver's exit status. Captured environments are not recorded. The observer test
+loads a real C library linked through nested response files and exercises both
+content changes and a write that restores the original contents and mtime.
+
+Completed invocation manifests have an explicit schema and optional capture
+identity. Parent discovery requires a matching fresh identity, expected driver
+and working directory, a valid BLAKE3 seal, and successful response validation.
+It rejects incomplete or stale captures; ordinary user compiler eligibility
+remains unchanged.
+
+LLD writes its output path verbatim in a Make report even when it contains
+spaces. The strict reader binds that raw header to the caller's known output
+destination instead of guessing how multiple target tokens should be combined.
+Unbound parsing stays strict. The Linux path-with-spaces fixture failed before
+this change, then the full Linux/macOS workflow passed in
+[run 37933977961](https://github.com/justrach/nanocompile/actions/runs/37933977961)
+at `f8eebf0ec0c2dd9b08f9bef4ecc1227bbd333949`.
 
 The [new local fixture](../benchmarks/producer-link-observer-macos.json) covers
 three loaded macro results: 12, 13 after a preserved-mtime archive edit, and 14

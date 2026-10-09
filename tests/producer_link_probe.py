@@ -132,7 +132,7 @@ def main():
             cfg.write_text(json.dumps({"observer": str(observer)}))
             (root / "observer.json").write_text(json.dumps({"driver": str(Path(cc).absolute()),
                                 "format": "darwin" if sys.platform == "darwin" else "make",
-                                "report": str(report), "invocation": str(invocation)}))
+                                "report": str(report), "invocation": str(invocation), "capture_id": "phase-" + str(value)}))
         run([*rust, "producer.rs", "--crate-name", "producer", "--crate-type", "proc-macro",
              "--emit=dep-info,link", "--out-dir", str(out),
              "--extern", "middle=" + str(out / "libmiddle.rlib"), "--extern", "proc_macro",
@@ -169,6 +169,8 @@ def main():
             assert Path(captured["cwd"]).resolve() == root
             assert str(dylib) in captured["args"]
             assert "env" not in captured
+            assert captured.get("capture_valid", True)
+            assert captured.get("capture_id", "phase-" + str(value)) == "phase-" + str(value)
             invocation_verified = True
         zig_report = None
         if decoder:
