@@ -1,0 +1,154 @@
+{
+  "investigation_only": true,
+  "production_cache_behavior_changed": false,
+  "compiler_version": "rustc 1.97.1 (8bab26f4f 2026-07-14)",
+  "probe_sha256": "312e2f652abae19ca51fa5b91f6ecf6560ea91ab77fc2ebc522807b4d5520cff",
+  "cases": {
+    "none": {
+      "triple": "aarch64-apple-darwin",
+      "hash": "c1332b0179b70209e42b190d4ea8f99a",
+      "name": {
+        "predefined": 1309
+      },
+      "extra_filename": "",
+      "native_libraries": [],
+      "dynamic_only_candidate": true
+    },
+    "default": {
+      "triple": "aarch64-apple-darwin",
+      "hash": "f5830711e1dbe48b0993144a68ab7ec7",
+      "name": {
+        "predefined": 62
+      },
+      "extra_filename": "",
+      "native_libraries": [
+        {
+          "kind": "unspecified",
+          "name": "probe",
+          "filename": null,
+          "modifiers": [],
+          "verbatim": null
+        }
+      ],
+      "dynamic_only_candidate": true
+    },
+    "dylib": {
+      "triple": "aarch64-apple-darwin",
+      "hash": "94a3a3440b8ef449fe6c20b58b1c56d7",
+      "name": {
+        "predefined": 757
+      },
+      "extra_filename": "",
+      "native_libraries": [
+        {
+          "kind": "dylib",
+          "name": "probe",
+          "filename": null,
+          "modifiers": [
+            null
+          ],
+          "verbatim": null
+        }
+      ],
+      "dynamic_only_candidate": true
+    },
+    "static": {
+      "triple": "aarch64-apple-darwin",
+      "hash": "cee94cbd43cc9c8d28a645d1e76fe1dc",
+      "name": {
+        "predefined": 28
+      },
+      "extra_filename": "",
+      "native_libraries": [
+        {
+          "kind": "static",
+          "name": "probe",
+          "filename": null,
+          "modifiers": [
+            null,
+            null,
+            null
+          ],
+          "verbatim": null
+        }
+      ],
+      "dynamic_only_candidate": false
+    },
+    "two_dylibs": {
+      "triple": "aarch64-apple-darwin",
+      "hash": "085ce9f57d4de30844453f6d00652cca",
+      "name": "two_dylibs",
+      "extra_filename": "",
+      "native_libraries": [
+        {
+          "kind": "dylib",
+          "name": "probe",
+          "filename": null,
+          "modifiers": [
+            null
+          ],
+          "verbatim": null
+        },
+        {
+          "kind": "dylib",
+          "name": "second",
+          "filename": null,
+          "modifiers": [
+            null
+          ],
+          "verbatim": null
+        }
+      ],
+      "dynamic_only_candidate": true
+    },
+    "inactive_static": {
+      "triple": "aarch64-apple-darwin",
+      "hash": "a747a1b834c51239a3a3a4011d8845c5",
+      "name": "inactive_static",
+      "extra_filename": "",
+      "native_libraries": [],
+      "dynamic_only_candidate": true
+    },
+    "macro_static": {
+      "triple": "aarch64-apple-darwin",
+      "hash": "f68528b5c4da3812d93c90f58ec85b72",
+      "name": "macro_static",
+      "extra_filename": "",
+      "native_libraries": [
+        {
+          "kind": "static",
+          "name": "probe",
+          "filename": null,
+          "modifiers": [
+            null,
+            null,
+            null
+          ],
+          "verbatim": null
+        }
+      ],
+      "dynamic_only_candidate": false
+    },
+    "real_libc": {
+      "triple": "aarch64-apple-darwin",
+      "hash": "1953bce17754d365974da251971c4f1e",
+      "name": {
+        "predefined": 1060
+      },
+      "extra_filename": "-ed4b6486ad6ca64c",
+      "native_libraries": [
+        {
+          "kind": "unspecified",
+          "name": "iconv",
+          "filename": null,
+          "modifiers": [],
+          "verbatim": null
+        }
+      ],
+      "dynamic_only_candidate": true
+    }
+  },
+  "malformed_header_version_and_truncation_rejected": true,
+  "dynamic_rlib_bytes_equal_with_native_archive_removed": true,
+  "static_and_macro_static_rlib_bytes_change_with_native_archive": true
+}
