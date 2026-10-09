@@ -232,3 +232,39 @@ The existing source, transitive, proc-macro, native C-link/run, output corruptio
 concurrency and Zig tests also pass. `tests/rust_diagnostic.py` can collect private
 per-crate traces; its capture wrapper adds instrumentation overhead and its timing
 must not be used as a performance comparison.
+
+
+The candidate's local comparison uses implementation `636a9e6`, the same M3
+Ultra, dirty local Harness revision `32b41cb`, Rust 1.97.1 and four Cargo jobs.
+The two policy comparisons record the same measured executable checksum. Each
+has three rotated warm samples per pipeline and removes the Cargo target before
+every build. These sessions are independent of the earlier v7 measurements.
+
+| Macro policy | Direct warm median | nanocompile | kache | nanocompile warm hits |
+| --- | ---: | ---: | ---: | ---: |
+| Default | 22.964 s | 17.363 s | 2.183 s | 97 each build |
+| Reported inputs | 23.249 s | 4.775 s | 2.053 s | 132 each build |
+
+Reported-input warm samples were 4.775/4.884/4.728 seconds, with no warm cache
+fill ramp in this run. Default samples were 17.336/17.363/17.670 seconds. Kache
+still leads in both modes. Default kache samples were 2.183/2.101/4.720 seconds,
+so one outlier also limits precision. These observations do not establish a
+controlled A/B speedup against prior sessions, although eligible-library
+coverage is more consistent.
+
+Cold nanocompile builds took 53.904 seconds in default mode and 64.194 seconds
+in reported mode, versus kache's 25.206 and 26.866 seconds. Each cold timing is
+one sample. Classification readers add cold work; reducing this cost remains
+necessary. No extra macro file declaration was used, and reported mode retains
+its compiler-reported-input limitation for arbitrary macros.
+
+All 24 builds succeeded and produced 135 rlibs. Every warm artifact matches its
+own cold reference; nanocompile also matches direct. All 881 tracked Rust and
+manifest hashes stayed unchanged. Peak sampled process-tree RSS was 1.20 GiB.
+R2 is excluded. [Default raw measurements](harness-hill-full-prefix-default.json)
+and [reported-input raw measurements](harness-hill-full-prefix-reported.json)
+record every sample, source/artifact hash and executable checksum.
+[Linux/Mac CI](https://github.com/justrach/nanocompile/actions/runs/37922949650)
+passed for this implementation. Its separate
+[hosted Harness comparison](https://github.com/justrach/nanocompile/actions/runs/37923282236)
+is pending; it must not be treated as a completed result yet.
