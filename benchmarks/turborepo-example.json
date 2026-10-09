@@ -1,0 +1,313 @@
+{
+  "turbo_version": "2.11.7",
+  "node_version": "v24.10.0",
+  "nanocompile_sha256": "4fc6b5141874079eff59aa828271bdcbc2346631d4f73a11c671249c63dbd15d",
+  "snapshot_transport": "in-memory S3 test double",
+  "method": "remote-only task cache; remove declared outputs and client local cache before restores; signed artifacts; assert execution log and output hashes",
+  "runs": [
+    {
+      "phase": "cold",
+      "seconds": 0.30177470901980996,
+      "executed": [
+        "message",
+        "site"
+      ],
+      "artifacts": {
+        "apps/site/dist/index.html": "322ac3d0713d957d89de228eae1705133f7b7d452c39e53fe9b79e664f055122",
+        "packages/message/dist/message.json": "199bad7de96eb1cd175e3769a2844ee64ffe444d7b4770d55f58bba2a7d3aa14"
+      },
+      "tasks": [
+        {
+          "taskId": "@nano/message#build",
+          "hash": "d5a91ae64eb5d5ec",
+          "cache": {
+            "local": false,
+            "remote": false,
+            "status": "MISS",
+            "timeSaved": 0
+          }
+        },
+        {
+          "taskId": "@nano/site#build",
+          "hash": "a8aa55b2bc552344",
+          "cache": {
+            "local": false,
+            "remote": false,
+            "status": "MISS",
+            "timeSaved": 0
+          }
+        }
+      ]
+    },
+    {
+      "phase": "remote-restore",
+      "seconds": 0.05864158400800079,
+      "executed": [],
+      "artifacts": {
+        "apps/site/dist/index.html": "322ac3d0713d957d89de228eae1705133f7b7d452c39e53fe9b79e664f055122",
+        "packages/message/dist/message.json": "199bad7de96eb1cd175e3769a2844ee64ffe444d7b4770d55f58bba2a7d3aa14"
+      },
+      "tasks": [
+        {
+          "taskId": "@nano/message#build",
+          "hash": "d5a91ae64eb5d5ec",
+          "cache": {
+            "local": false,
+            "remote": true,
+            "status": "HIT",
+            "source": "REMOTE",
+            "timeSaved": 125
+          }
+        },
+        {
+          "taskId": "@nano/site#build",
+          "hash": "a8aa55b2bc552344",
+          "cache": {
+            "local": false,
+            "remote": true,
+            "status": "HIT",
+            "source": "REMOTE",
+            "timeSaved": 121
+          }
+        }
+      ]
+    },
+    {
+      "phase": "snapshot-restore",
+      "seconds": 0.06004787504207343,
+      "executed": [],
+      "artifacts": {
+        "apps/site/dist/index.html": "322ac3d0713d957d89de228eae1705133f7b7d452c39e53fe9b79e664f055122",
+        "packages/message/dist/message.json": "199bad7de96eb1cd175e3769a2844ee64ffe444d7b4770d55f58bba2a7d3aa14"
+      },
+      "tasks": [
+        {
+          "taskId": "@nano/message#build",
+          "hash": "d5a91ae64eb5d5ec",
+          "cache": {
+            "local": false,
+            "remote": true,
+            "status": "HIT",
+            "source": "REMOTE",
+            "timeSaved": 125
+          }
+        },
+        {
+          "taskId": "@nano/site#build",
+          "hash": "a8aa55b2bc552344",
+          "cache": {
+            "local": false,
+            "remote": true,
+            "status": "HIT",
+            "source": "REMOTE",
+            "timeSaved": 121
+          }
+        }
+      ]
+    },
+    {
+      "phase": "changed-dependency",
+      "seconds": 0.30324316601036116,
+      "executed": [
+        "message",
+        "site"
+      ],
+      "artifacts": {
+        "apps/site/dist/index.html": "308496eb19de3228964745cce1f51c2137ca89d97edbf9169b6aed1e24892e52",
+        "packages/message/dist/message.json": "f57f40d329bab1f16b466a18670c3203c96fa6d853e7cc781fa58c1ed87365c2"
+      },
+      "tasks": [
+        {
+          "taskId": "@nano/message#build",
+          "hash": "4a4a9734ac3b7062",
+          "cache": {
+            "local": false,
+            "remote": false,
+            "status": "MISS",
+            "timeSaved": 0
+          }
+        },
+        {
+          "taskId": "@nano/site#build",
+          "hash": "7f060145bce8e35b",
+          "cache": {
+            "local": false,
+            "remote": false,
+            "status": "MISS",
+            "timeSaved": 0
+          }
+        }
+      ]
+    },
+    {
+      "phase": "changed-dependency-restore",
+      "seconds": 0.06056654202984646,
+      "executed": [],
+      "artifacts": {
+        "apps/site/dist/index.html": "308496eb19de3228964745cce1f51c2137ca89d97edbf9169b6aed1e24892e52",
+        "packages/message/dist/message.json": "f57f40d329bab1f16b466a18670c3203c96fa6d853e7cc781fa58c1ed87365c2"
+      },
+      "tasks": [
+        {
+          "taskId": "@nano/message#build",
+          "hash": "4a4a9734ac3b7062",
+          "cache": {
+            "local": false,
+            "remote": true,
+            "status": "HIT",
+            "source": "REMOTE",
+            "timeSaved": 122
+          }
+        },
+        {
+          "taskId": "@nano/site#build",
+          "hash": "7f060145bce8e35b",
+          "cache": {
+            "local": false,
+            "remote": true,
+            "status": "HIT",
+            "source": "REMOTE",
+            "timeSaved": 125
+          }
+        }
+      ]
+    },
+    {
+      "phase": "changed-site",
+      "seconds": 0.18221887497929856,
+      "executed": [
+        "site"
+      ],
+      "artifacts": {
+        "apps/site/dist/index.html": "53db4739a534cd1b3be731981ffa68b076ae49954750758e9fa8b6d2a67d1ef4",
+        "packages/message/dist/message.json": "f57f40d329bab1f16b466a18670c3203c96fa6d853e7cc781fa58c1ed87365c2"
+      },
+      "tasks": [
+        {
+          "taskId": "@nano/message#build",
+          "hash": "4a4a9734ac3b7062",
+          "cache": {
+            "local": false,
+            "remote": true,
+            "status": "HIT",
+            "source": "REMOTE",
+            "timeSaved": 122
+          }
+        },
+        {
+          "taskId": "@nano/site#build",
+          "hash": "283e830f47f23964",
+          "cache": {
+            "local": false,
+            "remote": false,
+            "status": "MISS",
+            "timeSaved": 0
+          }
+        }
+      ]
+    },
+    {
+      "phase": "changed-env",
+      "seconds": 0.2931262499769218,
+      "executed": [
+        "message",
+        "site"
+      ],
+      "artifacts": {
+        "apps/site/dist/index.html": "d9af6cd118eba789d60612275bbe8f2236cd519ff9a90c9c9f6d6d9eb02c563a",
+        "packages/message/dist/message.json": "f57f40d329bab1f16b466a18670c3203c96fa6d853e7cc781fa58c1ed87365c2"
+      },
+      "tasks": [
+        {
+          "taskId": "@nano/message#build",
+          "hash": "a4125f5daecbe1f2",
+          "cache": {
+            "local": false,
+            "remote": false,
+            "status": "MISS",
+            "timeSaved": 0
+          }
+        },
+        {
+          "taskId": "@nano/site#build",
+          "hash": "4e519126768872bd",
+          "cache": {
+            "local": false,
+            "remote": false,
+            "status": "MISS",
+            "timeSaved": 0
+          }
+        }
+      ]
+    },
+    {
+      "phase": "corruption-rebuild",
+      "seconds": 0.1745221660239622,
+      "executed": [
+        "message"
+      ],
+      "artifacts": {
+        "apps/site/dist/index.html": "d9af6cd118eba789d60612275bbe8f2236cd519ff9a90c9c9f6d6d9eb02c563a",
+        "packages/message/dist/message.json": "f57f40d329bab1f16b466a18670c3203c96fa6d853e7cc781fa58c1ed87365c2"
+      },
+      "tasks": [
+        {
+          "taskId": "@nano/message#build",
+          "hash": "a4125f5daecbe1f2",
+          "cache": {
+            "local": false,
+            "remote": false,
+            "status": "MISS",
+            "timeSaved": 0
+          }
+        },
+        {
+          "taskId": "@nano/site#build",
+          "hash": "4e519126768872bd",
+          "cache": {
+            "local": false,
+            "remote": true,
+            "status": "HIT",
+            "source": "REMOTE",
+            "timeSaved": 117
+          }
+        }
+      ]
+    },
+    {
+      "phase": "after-gc",
+      "seconds": 0.29079720797017217,
+      "executed": [
+        "message",
+        "site"
+      ],
+      "artifacts": {
+        "apps/site/dist/index.html": "53db4739a534cd1b3be731981ffa68b076ae49954750758e9fa8b6d2a67d1ef4",
+        "packages/message/dist/message.json": "f57f40d329bab1f16b466a18670c3203c96fa6d853e7cc781fa58c1ed87365c2"
+      },
+      "tasks": [
+        {
+          "taskId": "@nano/message#build",
+          "hash": "4a4a9734ac3b7062",
+          "cache": {
+            "local": false,
+            "remote": false,
+            "status": "MISS",
+            "timeSaved": 0
+          }
+        },
+        {
+          "taskId": "@nano/site#build",
+          "hash": "283e830f47f23964",
+          "cache": {
+            "local": false,
+            "remote": false,
+            "status": "MISS",
+            "timeSaved": 0
+          }
+        }
+      ]
+    }
+  ],
+  "nanocompile_source_revision": "531885767b02a5e8ce6f8b76a70d3c805ab74e6c"
+}

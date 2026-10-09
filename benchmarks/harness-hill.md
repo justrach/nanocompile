@@ -353,4 +353,26 @@ passed on [Linux/Mac CI](https://github.com/justrach/nanocompile/actions/runs/37
 `clear` retains validated toolchain-file memos alongside selection memos; they
 are not shipped in R2 snapshots and are outside the artifact GC quota.
 [Hosted project run 37925078346](https://github.com/justrach/nanocompile/actions/runs/37925078346)
-is running for this implementation; results are not yet available.
+completed successfully; the results are recorded below.
+
+
+The shared-digest implementation's hosted run passed all artifact and unchanged
+source checks on both runners (public Harness `20c4019`, Rust 1.97.1, reported
+macros, four jobs, three warm samples, removed targets each build).
+
+| Runner | Direct warm median | nanocompile | kache | Cold nanocompile / kache |
+| --- | ---: | ---: | ---: | ---: |
+| Ubuntu 24.04, x86_64 | 58.609 s | 11.721 s | 1.509 s | 82.686 / 65.697 s |
+| macOS 26, arm64 | 85.085 s | 18.730 s | 5.103 s | 74.441 / 73.781 s |
+
+Warm hit counts stayed at 130 on Linux and 132 on Mac. All 24 builds succeeded;
+Linux produced 131 rlibs and Mac 135. Nanocompile artifacts match direct and own
+cold references. These are separate hosted workloads: Linux's direct median
+changed substantially from the preceding run, and Mac kache warm samples ranged
+from 3.143 to 6.949 seconds. Do not claim a controlled project A/B from these
+sessions. Kache remains faster warm; the cold gap is small on this Mac run and
+still substantial on Linux. The controlled initialization experiment above is
+the stronger evidence for the intended shared-digest mechanism.
+[Linux raw results](harness-hosted-shared-toolchain-ubuntu-24.04.json) and
+[Mac raw results](harness-hosted-shared-toolchain-macos-26.json) preserve every
+sample, artifact/source hash and executable checksum.
