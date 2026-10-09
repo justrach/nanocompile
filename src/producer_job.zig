@@ -36,7 +36,11 @@ pub const Job = struct {
         try Dir.cwd().deleteTree(ctx.io, self.root);
     }
 
-    pub const Input = struct { path: []const u8, owned: bool };
+    pub const Input = struct { lexical: []const u8, path: []const u8, owned: bool };
+
+    pub fn ownsPaths(self: Job, lexical: []const u8, canonical: []const u8) bool {
+        return within(self.out, lexical) and within(self.canonical_out, canonical);
+    }
 
     pub fn classify(self: Job, ctx: *cache.Context, input: []const u8) !Input {
         const lexical = try std.fs.path.resolve(ctx.a, &.{ ctx.cwd, input });
@@ -45,7 +49,7 @@ pub const Job = struct {
             return error.NotRegularFile;
         // A symlink into or out of the private output directory never gains
         // ownership merely through one of its spellings. No suffix heuristic.
-        return .{ .path = canonical, .owned = within(self.out, lexical) and within(self.canonical_out, canonical) };
+        return .{ .lexical = lexical, .path = canonical, .owned = self.ownsPaths(lexical, canonical) };
     }
 };
 

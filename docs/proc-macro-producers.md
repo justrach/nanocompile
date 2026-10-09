@@ -105,8 +105,22 @@ objects, sibling-prefix paths, symlinks into or out of the directory, missing
 files and directories cannot be treated as owned compiler inputs. Tests verify
 independent job identities, an initially empty output, and these boundaries.
 Future callers must hold the maintenance lock and reserve this directory for
-the compiler job. This helper is not yet wired into producer compilation or
-linker capture, so producer eligibility remains unchanged.
+the compiler job. The production compiler wrapper does not yet use this helper;
+producer eligibility remains unchanged.
+
+The observer now accepts an explicit private output boundary and captures the
+complete raw linker report plus each input's lexical path, resolved path and
+ownership while scratch files still live. Parent parsing binds the captured
+output boundary and output spelling, report input order and ownership flags to
+the fresh sealed invocation. It does not require temporary files to survive
+rustc returning. Persistent inputs retain both path spellings for subsequent
+content and symlink-resolution checks. The observer removes old reports before
+delegation; missing or invalid discovery retains the native exit code and
+invalidates capture. Real C linking exercises generated objects and foreign
+symlinks; the placement fixture now captures real proc-macro scratch inputs
+for all twelve builds and loads every macro. Driver/SDK identity, complete
+persistent dependency validation and producer compilation integration remain
+unfinished.
 
 Output placement is now probed by `tests/producer_placement.py` with absolute
 and relative directories, default and optimized codegen, and full debug info.
@@ -117,8 +131,11 @@ full debug-info dylibs differ. The original install name must retain its
 relative or absolute spelling. Dep-info targets need output-path mapping;
 rustc writes literal spaces in these target names. CI records each mode on
 Linux and macOS. These results support further private-output investigation,
-not producer eligibility or a performance claim. Debug output equivalence,
-scratch ownership, diagnostic mapping and driver/SDK identity remain unresolved.
+not producer eligibility or a performance claim. The preceding placement probe
+passed on both platforms in [run 37938338649](https://github.com/justrach/nanocompile/actions/runs/37938338649)
+at `2c5be6a78b9a2e9d8fb1dca16a1110fd35d22e14`; that revision predates live
+ownership capture. Debug output equivalence, production scratch integration,
+diagnostic mapping and driver/SDK identity remain unresolved.
 
 1. Keep the user's compiler selection, compilation environment and original
    arguments as key inputs. A producer-specific implementation/version domain

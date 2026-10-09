@@ -95,6 +95,52 @@ def main():
         assert payload["capture_valid"] and all(r["unchanged"] for r in payload["responses"])
         assert library.name in payload["expanded_args"]
         assert (root / "report").exists()
+        # Ownership is captured before control returns to rustc, which may
+        # immediately delete its scratch files. A symlink to a foreign object
+        # remains persistent even when the link spelling is inside the job.
+        owned_out = root / 'private output'
+        owned_out.mkdir(mode=0o700)
+        owned_object = owned_out / 'generated, object'
+        subprocess.run([cc, '-fPIC', '-c', 'source.c', '-o', str(owned_object)],
+                       cwd=root, env=env, capture_output=True, check=True, timeout=20)
+        (root / 'foreign.c').write_text('int persistent(void) { return 7; }\n')
+        foreign = root / 'persistent.o'
+        subprocess.run([cc, '-fPIC', '-c', 'foreign.c', '-o', str(foreign)],
+                       cwd=root, env=env, capture_output=True, check=True, timeout=20)
+        alias = owned_out / 'foreign alias.o'
+        alias.symlink_to(foreign)
+        owned_library = owned_out / library.name
+        ownership = {'out': str(owned_out), 'canonical_out': str(owned_out.resolve()),
+                     'output': str(owned_library)}
+        config.write_text(json.dumps({'driver': str(Path(cc).absolute()),
+            'format': 'darwin' if sys.platform == 'darwin' else 'make',
+            'report': str(root / 'report'), 'invocation': str(record),
+            'capture_id': 'owned-job', 'ownership': ownership}))
+        owned_command = [str(binary), 'internal-linker', str(config),
+                         '-dynamiclib' if sys.platform == 'darwin' else '-shared',
+                         str(owned_object), str(alias), '-o', str(owned_library)]
+        result = subprocess.run(owned_command, cwd=root, env=env, capture_output=True, timeout=30)
+        assert result.returncode == 0, result
+        assert ctypes.CDLL(str(owned_library)).answer() == 42
+        payload = json.loads(record.read_bytes().split(b'\n', 1)[1])
+        assert payload['capture_valid'], payload
+        inputs = payload['link']['inputs']
+        assert any(p['owned'] and p['path'] == str(owned_object.resolve()) for p in inputs), payload
+        assert any(not p['owned'] and p['path'] == str(foreign.resolve()) for p in inputs), payload
+        assert payload['link']['ownership'] == ownership
+        owned_object.unlink()
+        assert any(p['owned'] for p in inputs)  # durable capture outlives scratch
+        # A successful driver that writes no new report cannot adopt the prior
+        # link's report. Discovery failure must still retain native exit zero.
+        driver.write_text('#!/usr/bin/env python3\nimport sys\nsys.exit(0)\n')
+        cfg = json.loads(config.read_text())
+        cfg['driver'] = str(driver)
+        config.write_text(json.dumps(cfg))
+        result = subprocess.run(owned_command, cwd=root, env=env, capture_output=True, timeout=20)
+        assert result.returncode == 0, result
+        payload = json.loads(record.read_bytes().split(b'\n', 1)[1])
+        assert not payload['capture_valid'] and payload['link'] is None, payload
+        assert not (root / 'report').exists()
         config.write_text(json.dumps({"driver": str(driver), "format": "darwin",
                                     "report": str(root / "report"), "invocation": str(record)}))
         driver.write_text("#!/usr/bin/env python3\n"
