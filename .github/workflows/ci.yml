@@ -32,6 +32,8 @@ jobs:
           python3 tests/turbo_integration.py zig-out/bin/nanocompile --output bench-results/turborepo.json
       - name: Benchmark complete compiler invocations
         run: python3 tests/benchmark.py zig-out/bin/nanocompile --runs 9 --output bench-results/runner.json
+      - name: Verify proc-macro final linker inputs
+        run: python3 tests/producer_link_probe.py --state "$RUNNER_TEMP/producer-link-probe" --output bench-results/producer-link-probe.json
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
         with:

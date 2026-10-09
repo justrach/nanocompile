@@ -84,6 +84,33 @@ sysroot lookup, linker/SDK inputs and complete dynamic-library outputs before
 expanding eligibility. This is separate from the existing opt-in contract for
 macro **consumers**. That coverage work is the next target.
 
+The [producer linker fixture](producer-link-probe-macos.json) now demonstrates
+why the existing library metadata resolver cannot simply be reused for
+producers. A macro links `middle -> leaf -> unbundled native archive` and returns
+the native function's value. Changing that archive from 12 to 13 changes the
+compiled macro and its executed expansion while the macro's sources, explicit
+Rust externs and dep-info remain identical. The archive remains 712 bytes and
+its mtime is preserved. `rustc -Zls=root` reports an empty external dependency
+list for both macro binaries; the native linker's dependency report includes
+the transitive Rust archives, native archive and SDK stubs. On this Mac it also
+records failed lookup candidates. Those negative lookups matter: adding a
+previously absent library can change resolution.
+
+The fixture is a discovery prototype, not newly enabled caching. It invokes
+the compiler through a private linker observer only within the fixture; normal
+user compilation is unchanged. Run it on macOS or Linux with:
+
+```sh
+python3 tests/producer_link_probe.py --state /tmp/nano-producer-probe-new \
+  --output /tmp/nano-producer-probe.json
+```
+
+Apple's [dependency report format](https://github.com/apple-oss-distributions/ld64/blob/main/src/ld/Options.h)
+includes inputs, missing candidates and outputs. The Linux probe uses the
+linker's Make-format dependency report. The
+[Rust linkage documentation](https://doc.rust-lang.org/rustc/command-line-arguments.html#linking-modifiers-bundle)
+explains why an unbundled native archive is only searched during final linking.
+
 A [buffer-size probe](harness-digest-buffer-probe.json) checked identical
 BLAKE3 digests over the twelve largest rlibs in the preceding local target
 (114 MB total). Five rotated samples measured about 0.103 s with the current
