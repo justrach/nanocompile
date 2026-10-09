@@ -1,0 +1,151 @@
+{
+  "timestamp": "2026-10-09T11:34:59.779700+00:00",
+  "rustc": "rustc 1.97.1 (8bab26f4f 2026-07-14)\nbinary: rustc\ncommit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452\ncommit-date: 2026-07-14\nhost: aarch64-apple-darwin\nrelease: 1.97.1\nLLVM version: 22.1.6\n",
+  "binary_sha256": {
+    "baseline": "3f83e35884f8bdbf133d3fe147b7e4a2741df46d8b92522d0ebcd578556b0305",
+    "candidate": "49338d1d8442a0554f9ba4c7cc35766d30ac7feadd9499701418babfae116bc1"
+  },
+  "runs": 3,
+  "directories": 6,
+  "samples": [
+    {
+      "implementation": "baseline",
+      "iteration": 0,
+      "seconds": 5.474871248065028,
+      "invocation_seconds": [
+        1.1431254590279423,
+        0.8647260410361923,
+        0.8659402080229484,
+        0.8702242909930646,
+        0.8678262910107151,
+        0.8630289579741657
+      ],
+      "artifacts_match": true,
+      "selection_memos": 6,
+      "shared_file_memos": 0
+    },
+    {
+      "implementation": "candidate",
+      "iteration": 0,
+      "seconds": 1.3701692919712514,
+      "invocation_seconds": [
+        0.9254344590008259,
+        0.09035133296856657,
+        0.0894765830016695,
+        0.08887204201892018,
+        0.08785487501882017,
+        0.08817999996244907
+      ],
+      "artifacts_match": true,
+      "selection_memos": 6,
+      "shared_file_memos": 362
+    },
+    {
+      "implementation": "candidate",
+      "iteration": 1,
+      "seconds": 1.36101020895876,
+      "invocation_seconds": [
+        0.9248709589592181,
+        0.08740883297286928,
+        0.08618591603590176,
+        0.0881095840013586,
+        0.08732220798265189,
+        0.08711270900676027
+      ],
+      "artifacts_match": true,
+      "selection_memos": 6,
+      "shared_file_memos": 362
+    },
+    {
+      "implementation": "baseline",
+      "iteration": 1,
+      "seconds": 5.205006666015834,
+      "invocation_seconds": [
+        0.8651255420409143,
+        0.8648163750185631,
+        0.8655110420077108,
+        0.8641097079962492,
+        0.8640020829625428,
+        0.8814419159898534
+      ],
+      "artifacts_match": true,
+      "selection_memos": 6,
+      "shared_file_memos": 0
+    },
+    {
+      "implementation": "baseline",
+      "iteration": 2,
+      "seconds": 5.1972762100049295,
+      "invocation_seconds": [
+        0.8785314590204507,
+        0.8672347079846077,
+        0.8635175840463489,
+        0.8635684589971788,
+        0.8572594169527292,
+        0.8671645830036141
+      ],
+      "artifacts_match": true,
+      "selection_memos": 6,
+      "shared_file_memos": 0
+    },
+    {
+      "implementation": "candidate",
+      "iteration": 2,
+      "seconds": 1.3839731260668486,
+      "invocation_seconds": [
+        0.9434620420215651,
+        0.08823941700393334,
+        0.08813737501623109,
+        0.08656379202147946,
+        0.08957637497223914,
+        0.08799412503140047
+      ],
+      "artifacts_match": true,
+      "selection_memos": 6,
+      "shared_file_memos": 362
+    }
+  ],
+  "method": "alternate implementations; fresh private cache each sample; same fixed caller directories, sources, output paths, compiler and environment; time only wrapper invocations; verify artifact hashes across implementations",
+  "summary": {
+    "baseline": {
+      "median_seconds": 5.205006666015834
+    },
+    "candidate": {
+      "median_seconds": 1.3701692919712514
+    }
+  },
+  "artifacts": {
+    "0": {
+      "libcold_fixture.rmeta": "bbcd6ea123e59eb9d648d5ff5d758f4551f926ac4f7ded4dc0eb6d5099358f82",
+      "libcold_fixture.rlib": "8ffe54af4cf9741459b649be0e426df6e09e9621982fe2a958fc86e1594e8ab0",
+      "cold_fixture.d": "c6871bdeee2ce16c1aae2d754903c8971ea406656ca372eb84c3b365a38c9679"
+    },
+    "1": {
+      "libcold_fixture.rmeta": "5a1da0110ff0a8d5008afddf023bb8b6dc5317cc43ab78802dfbbbc2c2eec28a",
+      "libcold_fixture.rlib": "36d0b6381d3b68bb0a65b2e1939bb871503110d83ccfcad44b1d3c63f17d5a6c",
+      "cold_fixture.d": "c6871bdeee2ce16c1aae2d754903c8971ea406656ca372eb84c3b365a38c9679"
+    },
+    "2": {
+      "libcold_fixture.rmeta": "575e63a73237149cd447b55a89ff6ff6e0f32b6cc5c8dcb7a0794a61ebe8338c",
+      "libcold_fixture.rlib": "f5ada185f76c171b70a1376d7dda1a1a0ef0468ee5b9b178d71797789db0dbe7",
+      "cold_fixture.d": "c6871bdeee2ce16c1aae2d754903c8971ea406656ca372eb84c3b365a38c9679"
+    },
+    "3": {
+      "libcold_fixture.rmeta": "32ed85e82f46e28a7625b399c30c384be122ac44ec72f70b1222496e16e868a2",
+      "libcold_fixture.rlib": "9b25d676c78ae0f266a613fbdd419c4419b1ebfd7d8bd57d1fef631d179e6f31",
+      "cold_fixture.d": "c6871bdeee2ce16c1aae2d754903c8971ea406656ca372eb84c3b365a38c9679"
+    },
+    "4": {
+      "libcold_fixture.rmeta": "37ea5c42f822eefa4adc7f53b32694bf886b0ea1fe8dd6eff658e48c29f0a981",
+      "libcold_fixture.rlib": "a1c3218722786090e67198a9e5c8fafa3a72670aa00e61cc4248b14063108c99",
+      "cold_fixture.d": "c6871bdeee2ce16c1aae2d754903c8971ea406656ca372eb84c3b365a38c9679"
+    },
+    "5": {
+      "libcold_fixture.rmeta": "85a8d8f9810bffffaf942736a0855337832dab7230980f9aa5f9d6115dd0611c",
+      "libcold_fixture.rlib": "29df02cde5e0fa4b3f021a3648203697aa40d2dca9d7cbc0c8e6f8548c681af5",
+      "cold_fixture.d": "c6871bdeee2ce16c1aae2d754903c8971ea406656ca372eb84c3b365a38c9679"
+    }
+  },
+  "baseline_source_revision": "636a9e66bf248c1c6fd39069fb6c6eb5b5d23a74",
+  "candidate_source_revision": "fa4554424f01168dc36a080a0fb13d9634fbf4ae"
+}

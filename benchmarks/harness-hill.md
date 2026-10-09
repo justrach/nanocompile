@@ -267,4 +267,90 @@ record every sample, source/artifact hash and executable checksum.
 [Linux/Mac CI](https://github.com/justrach/nanocompile/actions/runs/37922949650)
 passed for this implementation. Its separate
 [hosted Harness comparison](https://github.com/justrach/nanocompile/actions/runs/37923282236)
-is pending; it must not be treated as a completed result yet.
+completed successfully; the results are recorded below.
+
+
+## Hosted full-prefix results
+
+[Run 37923282236](https://github.com/justrach/nanocompile/actions/runs/37923282236)
+passed on both runners for `636a9e6`, public Harness `20c4019`, reported-input
+macro policy, Rust 1.97.1 and four jobs. Each pipeline has three warm samples,
+with target directories removed before every build. This is the full-prefix
+implementation before the shared toolchain-digest optimization below.
+
+| Runner | Direct warm median | nanocompile | kache | nanocompile warm hits |
+| --- | ---: | ---: | ---: | ---: |
+| Ubuntu 24.04, x86_64 | 36.312 s | 6.957 s | 1.089 s | 130 each build |
+| macOS 26, arm64 | 87.052 s | 14.254 s | 3.880 s | 132 each build |
+
+All 24 builds succeeded. Restored library hashes match each wrapper's cold
+reference, nanocompile matches direct, and tracked sources/manifests stayed
+unchanged. Linux produced 131 rlibs and Mac 135. These are library artifact
+checks, not GUI execution. Kache remains faster. Runner variation prevents a
+controlled A/B claim against the preceding hosted run: even Linux's direct
+median changed from 52.965 to 36.312 seconds. Full-prefix hit counts stayed
+constant across the warm builds, without a cache-fill ramp.
+
+Cold nanocompile took 49.151 seconds on Linux and 142.870 on Mac, versus kache's
+39.230 and 93.420 seconds. Cold timings are single samples. The raw data is in
+[Linux](harness-hosted-full-prefix-ubuntu-24.04.json) and
+[Mac](harness-hosted-full-prefix-macos-26.json).
+
+## Shared Rust toolchain file digests
+
+Cargo callers in different directories have distinct toolchain-selection
+memos so adding or changing an ancestor override invalidates them. Previously,
+each fresh selection memo hashed the same installed Rust resources again.
+Implementation `fa45544` shares those file digests under the existing trusted
+local-toolchain inode/size/mtime/ctime contract. Sealed atomic records and
+per-file locks let concurrent first-use selection memos reuse a validated
+content hash. Complete toolchain directory checks and selection checks remain;
+source dependencies and project artifacts are still content-hashed on every
+invocation. Zig fingerprinting is unchanged. This preserves the existing key
+and fingerprint bytes; no cache namespace change is needed.
+
+A controlled comparison compiled the same tiny Rust crate in six fixed caller
+directories, with a fresh private cache for each sample, three samples per
+implementation, alternating order. It compared the frozen `636a9e6` executable
+against `fa45544` on Rust 1.97.1. All 36 compilations produced identical artifacts
+across the implementations. Six selection memos remained in each sample;
+the candidate shared 362 file digests between them. Total wrapper time medians
+were **5.205 seconds baseline versus 1.370 candidate**. The candidate's first
+caller still took 0.925–0.943 seconds, while subsequent first-use callers took
+0.086–0.090. This measures repeated toolchain initialization, not a large
+project speed prediction. [Controlled raw data](toolchain-shared-digests.json)
+records every invocation and both executable checksums.
+
+```sh
+python3 tests/toolchain_comparison.py /path/to/frozen-baseline /path/to/candidate \
+  --state /tmp/toolchain-comparison-new --runs 3 --directories 6 \
+  --output bench-results/toolchain.json
+```
+
+The full local Harness comparison with `fa45544` then measured a **39.760-second
+cold build**, versus kache's 26.985 seconds. The preceding full-prefix session
+observed 64.194 seconds; these project cold timings are single samples from
+separate sessions, not the controlled test above. Warm medians were **4.808
+seconds nanocompile**, 22.952 direct and 2.007 kache. Nanocompile warm samples
+were 4.808/4.830/4.783 seconds with 132 hits each. Warm time is effectively
+unchanged from the preceding session; this iteration reduces cold work rather
+than claiming a warm improvement.
+
+All 12 project builds succeeded and produced 135 rlibs. Warm artifacts match
+own cold references, nanocompile matches direct, and all 881 tracked source and
+manifest hashes stayed unchanged. Peak sampled process-tree RSS was 1.31 GiB.
+Reported-input macro policy was explicit, with no extra file declaration; its
+hidden-input limitations remain. R2 transport is excluded. The default-policy
+project measurements above are from `636a9e6`, not a new default-policy run of
+this binary. [Project raw results](harness-hill-shared-toolchain-reported.json)
+record the exact measured executable and all samples.
+
+A new filesystem test changes toolchain resource bytes while preserving size
+and mtime, verifies the shared digest changes, then corrupts a memo and verifies
+it is repaired. The existing real Rust/Zig restore, source and transitive
+invalidation, macro/native C-link/run, concurrency, corruption and R2 tests also
+passed on [Linux/Mac CI](https://github.com/justrach/nanocompile/actions/runs/37924515217).
+`clear` retains validated toolchain-file memos alongside selection memos; they
+are not shipped in R2 snapshots and are outside the artifact GC quota.
+[Hosted project run 37925078346](https://github.com/justrach/nanocompile/actions/runs/37925078346)
+is running for this implementation; results are not yet available.
