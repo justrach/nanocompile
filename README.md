@@ -54,7 +54,7 @@ GC is explicit, so the normal compilation path does not scan the entire store. I
 
 ## Cache correctness and storage
 
-Compilation keys include compiler arguments, the full environment, working directory, runtime host CPU/OS identity, and a toolchain content fingerprint. Rust dependencies come from rustc's dep-info, explicit externs, and library search paths. Source directory membership tracks file-versus-directory module resolution; library directory membership tracks newly appearing transitive dependencies. Zig dependencies come from tokenized literal imports, module definitions, and embedded files.
+Compilation keys include compiler arguments, the full environment, working directory, runtime host CPU/OS identity, and a toolchain content fingerprint. Rust dependencies come from rustc's dep-info, explicit externs, and the compiled crate's dependency metadata. Source directory membership tracks file-versus-directory module resolution; library lookup guards track only prefixes of crates in the dependency graph. Unrelated Cargo outputs can appear without invalidating an entry. Zig dependencies come from tokenized literal imports, module definitions, and embedded files.
 
 On a hit, source and library inputs are hashed again with BLAKE3. Every artifact and diagnostic blob is verified against its content hash before any output is replaced. Entry manifests and toolchain memos carry integrity checksums. A missing or corrupted entry causes recompilation. Failed compilations preserve their status and diagnostics and are never stored as successful entries.
 
@@ -70,14 +70,31 @@ Toolchain contents are hashed once and memoized. Warm validation checks file ide
 
 | Compiler | Cached | Runs directly |
 | --- | --- | --- |
-| Rust | `lib`/`rlib`, dep-info plus metadata and/or link output, ordinary supported codegen flags, extern libraries, Cargo release libraries and non-incremental checks | Binaries, tests, build scripts, proc macros, dependency directories containing proc-macro libraries, incremental compilations, native search/link flags, custom targets, unstable/unknown flags, split-debug link sidecars |
+| Rust | `lib`/`rlib`, dep-info plus metadata and/or link output, ordinary supported codegen flags, extern libraries, Cargo release libraries and non-incremental checks | Binaries, tests, build scripts, proc macros, proc-macro consumers in the default mode, incremental compilations, native search/link flags, custom targets, unstable/unknown flags, split-debug link sidecars |
 | Zig | Pure Zig `build-exe`, `build-obj`, static `build-lib`, explicit `-femit-bin=…`, literal imports/embed files, positional roots and named `-M` modules | `zig build`, `zig test`, C/C++ inputs, C imports, computed imports, module aliases, dynamic libraries, Windows/UEFI targets, custom SDK/linker options and unrecognized flags |
 
-Rust source containing a possible `link(…)` declaration is conservatively left uncached, including declarations hidden inside `cfg_attr`. This heuristic can also decline a normal function named `link`. Rust library search paths are conservatively fingerprinted in full, except the current unit's outputs; large dependency directories therefore cost more than the small benchmark fixture.
+Rust source containing a possible `link(…)` declaration is conservatively left uncached, including declarations hidden inside `cfg_attr`. This heuristic can also decline a normal function named `link`. Rust library search paths are scoped to the completed crate's metadata graph. Every candidate matching a relevant crate prefix is content-hashed, and additions/removals invalidate the entry; unrelated libraries are ignored. On misses, a separate `rustc -Zls=root` subprocess reads the completed artifact with `RUSTC_BOOTSTRAP=1`. Actual compilations retain the user's original environment and arguments. Unsupported diagnostic formats decline storage.
+
+### Optional compiler-reported proc-macro inputs
+
+The default mode leaves actual proc-macro consumers uncached. To use the same reported-input contract as kache, explicitly set `NANOCOMPILE_PROC_MACROS=reported`. Macro libraries and their resolved crate graph are content-tracked, along with rustc's dep-info and the full compilation environment.
+
+A proc macro can read files that rustc never reports, including SQL query metadata or migration files. Declare each such file in a JSON array and set `NANOCOMPILE_EXTRA_INPUTS_FILE` to its absolute path. Paths in the array are relative to the declaration file's directory. The declaration and all listed files are tracked for **every Rust consumer**, so changing a macro's data invalidates consumers even if the macro library stays unchanged. This initial declaration format accepts explicit files, not directories or globs; add new files to the array too. Missing or invalid inputs cause compilation to run without caching.
+
+```sh
+# .nanocompile-inputs.json: [".sqlx/query-example.json", "migrations/001.sql"]
+export NANOCOMPILE_PROC_MACROS=reported
+export NANOCOMPILE_EXTRA_INPUTS_FILE="$PWD/.nanocompile-inputs.json"
+RUSTC_WRAPPER="$nano_wrapper" CARGO_INCREMENTAL=0 cargo build --release
+```
+
+Reported mode cannot detect undeclared reads, network access, clocks, or randomness inside macros. Use it for builds whose macro inputs are reported or declared; retain the default for unknown macro behavior. Neither this mode nor kache makes an arbitrary proc macro hermetic.
 
 Zig already has a native cache. This wrapper skips the compiler process on a matching hit and shares deduplicated outputs in the same store as Rust. It currently does not intercept compilation steps inside `zig build`; those continue to use Zig's native cache.
 
 Working directories and output paths remain in keys, preserving embedded paths and diagnostics. Cross-worktree path normalization, automatic remote lookup, a daemon/scheduler, and broader Rust/linker coverage are future work. This is not full kache feature parity.
+
+The [Harness hill climb](benchmarks/harness-hill.md) now measures **19.31 s for the default mode versus 25.16 s direct**, with 90–91 cache hits. Kache still takes 2.16 s on that comparison. The cold-cache regression and the optional reported-input macro experiment are recorded alongside the results.
 
 ## Experimental R2 testing
 
@@ -124,7 +141,7 @@ Benchmarks time complete process invocations. They remove the primary output bef
 
 Measured results and the optimization trail are in `benchmarks/`. These synthetic workloads demonstrate warm-hit latency, not whole-project speed or an advantage across all workloads. A first-seen toolchain requires a full content fingerprint and makes the initial miss slower than direct compilation or kache. Later compilation units share that validated identity.
 
-The [direct Harness comparison with kache](benchmarks/kache-harness.md) measures clean release builds of a real Cargo dependency graph: direct 22.77 s, nanocompile 22.95 s, kache with its daemon 2.01 s (three warm samples per implementation). Kache currently performs substantially better on this workload because nanocompile bypasses most units. Small-fixture hit latency does not predict this project result. The separate [R2 snapshot benchmark](benchmarks/harness.md) verifies cache preservation and restoration.
+The [initial Harness comparison with kache](benchmarks/kache-harness.md) measured clean release builds of a real Cargo dependency graph: direct 22.77 s, nanocompile 22.95 s, kache with its daemon 2.01 s. The [subsequent hill climb](benchmarks/harness-hill.md) improves default nanocompile builds to 19.31 s against 25.16 s direct and 2.16 s kache, with three warm samples per implementation. Kache remains substantially faster. Small-fixture hit latency does not predict this project result. The separate [R2 snapshot benchmark](benchmarks/harness.md) verifies cache preservation and restoration.
 
 GitHub Actions runs real compiler tests and the synthetic benchmark on Linux and macOS. Each run uploads its measured JSON as an artifact. No R2 credentials are needed by pull-request jobs.
 

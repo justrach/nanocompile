@@ -1,7 +1,7 @@
 # Direct comparison with kache on Harness
 
-The real workload comparison shows **kache helps substantially; nanocompile
-currently does not**. This replaces any inference from the tiny fixture about
+This initial workload comparison showed **kache helped substantially; nanocompile
+did not**. The [subsequent hill climb](harness-hill.md) records coverage improvements and the remaining performance gap. This replaces any inference from the tiny fixture about
 which tool performs better on a Cargo project.
 
 Measured on Apple M3 Ultra, macOS 27 arm64, Rust 1.97.1, four Cargo jobs.

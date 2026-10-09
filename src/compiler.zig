@@ -1,6 +1,7 @@
 const std = @import("std");
 const cache = @import("cache.zig");
 const identity = @import("identity.zig");
+const rust_dependencies = @import("rust_dependencies.zig");
 const Dir = std.Io.Dir;
 pub const Kind = enum { rust, zig };
 const Plan = struct {
@@ -9,6 +10,7 @@ const Plan = struct {
     dependencies: []const []const u8,
     dep_info: ?[]const u8 = null,
     library_dirs: []const []const u8 = &.{},
+    configuration: ?cache.Dependency = null,
 };
 const Module = struct { name: []const u8, source: []const u8 };
 
@@ -48,6 +50,7 @@ fn rustPlan(ctx: *cache.Context, argv: []const []const u8) !Plan {
     var split_debug: []const u8 = "off";
     var inputs: std.ArrayList([]const u8) = .empty;
     var search_dirs: std.ArrayList([]const u8) = .empty;
+    var configuration: ?cache.Dependency = null;
     var i: usize = 1;
     while (i < argv.len) : (i += 1) {
         const arg = argv[i];
@@ -70,7 +73,9 @@ fn rustPlan(ctx: *cache.Context, argv: []const []const u8) !Plan {
         if (try option(argv, &i, "--extern")) |v| {
             const split = std.mem.indexOfScalar(u8, v, '=') orelse return error.UntrackedExtern;
             const path = v[split + 1 ..];
-            if (!std.mem.endsWith(u8, path, ".rlib") and !std.mem.endsWith(u8, path, ".rmeta")) return error.ProceduralMacro;
+            if (!std.mem.endsWith(u8, path, ".rlib") and !std.mem.endsWith(u8, path, ".rmeta")) {
+                if (!rust_dependencies.reportedMacros(ctx) or (!std.mem.endsWith(u8, path, ".dylib") and !std.mem.endsWith(u8, path, ".so"))) return error.ProceduralMacro;
+            }
             try addUnique(ctx, &inputs, path);
             continue;
         }
@@ -100,16 +105,19 @@ fn rustPlan(ctx: *cache.Context, argv: []const []const u8) !Plan {
                 split_debug = v[@min(split + 1, v.len)..];
                 continue;
             }
-            const safe = [_][]const u8{ "opt-level", "debuginfo", "debug-assertions", "overflow-checks", "panic", "codegen-units", "metadata", "embed-bitcode", "lto", "target-cpu", "target-feature", "strip", "relocation-model", "force-frame-pointers", "symbol-mangling-version" };
+            const safe = [_][]const u8{ "opt-level", "debuginfo", "debug-assertions", "overflow-checks", "panic", "codegen-units", "metadata", "embed-bitcode", "lto", "linker-plugin-lto", "prefer-dynamic", "target-cpu", "target-feature", "strip", "relocation-model", "force-frame-pointers", "symbol-mangling-version" };
             var accepted = false;
             for (safe) |s| if (eq(s, key)) {
                 accepted = true;
                 break;
             };
-            if (!accepted) return error.UntrackedCodegenOption;
+            if (!accepted) {
+                ctx.trace(try std.fmt.allocPrint(ctx.a, "unsupported Rust codegen option: {s}", .{key}));
+                return error.UntrackedCodegenOption;
+            }
             continue;
         }
-        const safe = [_][]const u8{ "--edition", "--cap-lints", "--error-format", "--json", "--diagnostic-width", "--color", "--cfg", "--check-cfg", "--remap-path-prefix", "--target" };
+        const safe = [_][]const u8{ "--edition", "--cap-lints", "--error-format", "--json", "--diagnostic-width", "--color", "--cfg", "--check-cfg", "--remap-path-prefix", "--target", "--allow", "--warn", "--deny", "--forbid", "--force-warn", "-A", "-W", "-D", "-F" };
         var accepted = false;
         for (safe) |s| if (try option(argv, &i, s)) |v| {
             if (eq(s, "--target") and (std.mem.endsWith(u8, v, ".json") or std.mem.indexOfScalar(u8, v, '/') != null)) return error.CustomTarget;
@@ -117,7 +125,10 @@ fn rustPlan(ctx: *cache.Context, argv: []const []const u8) !Plan {
             break;
         };
         if (accepted) continue;
-        if (std.mem.startsWith(u8, arg, "-")) return error.UnsupportedRustOption;
+        if (std.mem.startsWith(u8, arg, "-")) {
+            ctx.trace(try std.fmt.allocPrint(ctx.a, "unsupported Rust option: {s}", .{arg}));
+            return error.UnsupportedRustOption;
+        }
         if (source != null or !std.mem.endsWith(u8, arg, ".rs")) return error.UnsupportedSource;
         source = arg;
     }
@@ -127,6 +138,18 @@ fn rustPlan(ctx: *cache.Context, argv: []const []const u8) !Plan {
     if (crate.len == 0 or std.mem.indexOfAny(u8, crate, "/\\\n") != null or std.mem.indexOfAny(u8, suffix, "/\\\n") != null) return error.InvalidOutputName;
     const src = try absolute(ctx, source orelse return error.NoSource);
     try addUnique(ctx, &inputs, src);
+    // An explicit global declaration applies to every consumer too, including
+    // files a proc macro reads only while expanding another package.
+    if (ctx.env.get("NANOCOMPILE_EXTRA_INPUTS_FILE")) |declaration| {
+        const config = try absolute(ctx, declaration);
+        try addUnique(ctx, &inputs, config);
+        const bytes = try ctx.read(config);
+        var config_hash = cache.Hash.init(.{});
+        config_hash.update(bytes);
+        configuration = .{ .path = config, .hash = try cache.finish(ctx.a, &config_hash) };
+        const parsed = try std.json.parseFromSlice([]const []const u8, ctx.a, bytes, .{ .allocate = .alloc_always });
+        for (parsed.value) |input| try addUnique(ctx, &inputs, try std.fs.path.resolve(ctx.a, &.{ std.fs.path.dirname(config).?, input }));
+    }
     const dir = out_dir orelse return error.NoOutputDirectory;
     if (!eq(split_debug, "off") and std.mem.indexOf(u8, emit orelse "", "link") != null) return error.SplitDebugSidecars;
     var outputs: std.ArrayList([]const u8) = .empty;
@@ -147,24 +170,7 @@ fn rustPlan(ctx: *cache.Context, argv: []const []const u8) !Plan {
         if (eq(e, "dep-info")) dep_info = path;
     }
     if (dep_info == null) return error.NoDependencyInfo;
-    for (search_dirs.items) |path| {
-        var dir_ = try Dir.cwd().openDir(ctx.io, path, .{ .iterate = true });
-        defer dir_.close(ctx.io);
-        var iterator = dir_.iterate();
-        while (try iterator.next(ctx.io)) |entry| {
-            // Reexported proc macros can be loaded transitively from an rlib.
-            if (std.mem.endsWith(u8, entry.name, ".so") or std.mem.endsWith(u8, entry.name, ".dylib")) return error.ProceduralMacroSearchPath;
-            if (!std.mem.endsWith(u8, entry.name, ".rlib") and !std.mem.endsWith(u8, entry.name, ".rmeta")) continue;
-            const full = try absolute(ctx, try std.fs.path.join(ctx.a, &.{ path, entry.name }));
-            var own_output = false;
-            for (outputs.items) |out| if (eq(out, full)) {
-                own_output = true;
-                break;
-            };
-            if (!own_output) try addUnique(ctx, &inputs, full);
-        }
-    }
-    return .{ .source = src, .outputs = outputs.items, .dependencies = inputs.items, .dep_info = dep_info, .library_dirs = search_dirs.items };
+    return .{ .source = src, .outputs = outputs.items, .dependencies = inputs.items, .dep_info = dep_info, .library_dirs = search_dirs.items, .configuration = configuration };
 }
 
 fn zigPlan(ctx: *cache.Context, argv: []const []const u8) !Plan {
@@ -349,7 +355,7 @@ fn hiddenNativeLink(bytes: []const u8) bool {
 
 fn keyFor(ctx: *cache.Context, kind: Kind, argv: []const []const u8) ![]const u8 {
     var hash = cache.Hash.init(.{});
-    cache.field(&hash, "nanocompile-v5");
+    cache.field(&hash, "nanocompile-v6");
     cache.field(&hash, @tagName(kind));
     cache.field(&hash, ctx.cwd);
     const host = std.zig.system.resolveTargetQuery(ctx.io, .{}) catch |err| {
@@ -413,14 +419,17 @@ pub fn execute(ctx: *cache.Context, kind: Kind, argv: []const []const u8) !u8 {
         const lock_ = cache.Lock.acquire(ctx, name, true) catch return bypass(ctx, argv, "bypass: output lock unavailable");
         try output_locks.append(ctx.a, lock_);
     }
+    if (plan.configuration) |config| {
+        const current = ctx.digest(config.path) catch return bypass(ctx, argv, "bypass: cannot read extra input declaration");
+        if (!eq(config.hash, current)) return bypass(ctx, argv, "bypass: extra input declaration changed");
+    }
     if (cache.restore(ctx, key, plan.outputs) catch false) {
         ctx.trace("hit");
         ctx.event("hit");
         return 0;
     }
     const before = dependencyRecords(ctx, plan.dependencies) catch return bypass(ctx, argv, "bypass: cannot fingerprint inputs");
-    var directories: std.ArrayList(cache.Dependency) = .empty;
-    for (plan.library_dirs) |dir| try directories.append(ctx.a, .{ .path = dir, .hash = try ctx.directoryDigest(dir, true, plan.outputs), .directory = true, .libraries = true });
+    const directories = rust_dependencies.snapshot(ctx, plan.library_dirs, plan.outputs) catch return bypass(ctx, argv, "bypass: cannot enumerate dependency directories");
     const started = std.Io.Clock.real.now(ctx.io).nanoseconds;
     ctx.trace("miss: compiling");
     const result = try std.process.run(ctx.a, ctx.io, .{ .argv = argv, .environ_map = ctx.env });
@@ -432,11 +441,11 @@ pub fn execute(ctx: *cache.Context, kind: Kind, argv: []const []const u8) !u8 {
         return code;
     }
     ctx.event("miss");
-    save(ctx, key, plan, before, directories.items, started, result) catch |err| ctx.trace(try std.fmt.allocPrint(ctx.a, "uncached: {s}", .{@errorName(err)}));
+    save(ctx, key, plan, argv, before, directories, started, result) catch |err| ctx.trace(try std.fmt.allocPrint(ctx.a, "uncached: {s}", .{@errorName(err)}));
     return 0;
 }
 
-fn save(ctx: *cache.Context, key: []const u8, plan: Plan, before: []const cache.Dependency, directories: []const cache.Dependency, started: i96, result: std.process.RunResult) !void {
+fn save(ctx: *cache.Context, key: []const u8, plan: Plan, argv: []const []const u8, before: []const cache.Dependency, directories: []const rust_dependencies.Directory, started: i96, result: std.process.RunResult) !void {
     for (before) |dep| if (!eq(try ctx.digest(dep.path), dep.hash)) return error.InputChangedDuringCompilation;
     var paths: std.ArrayList([]const u8) = .empty;
     for (plan.dependencies) |path| try addUnique(ctx, &paths, path);
@@ -463,10 +472,8 @@ fn save(ctx: *cache.Context, key: []const u8, plan: Plan, before: []const cache.
         if (st.mtime.nanoseconds >= started or st.ctime.nanoseconds >= started) return error.DirectoryChangedDuringCompilation;
         try records.append(ctx.a, .{ .path = dir, .hash = try ctx.directoryDigest(dir, false, plan.outputs), .directory = true });
     }
-    for (directories) |dep| {
-        if (!eq(dep.hash, try ctx.directoryDigest(dep.path, true, plan.outputs))) return error.LibraryDirectoryChangedDuringCompilation;
-        try records.append(ctx.a, dep);
-    }
+    if (plan.dep_info != null and directories.len != 0)
+        try rust_dependencies.collect(ctx, argv, plan.outputs, directories, started, &records);
     try cache.store(ctx, key, records.items, plan.outputs, result.stdout, result.stderr);
 }
 

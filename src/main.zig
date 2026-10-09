@@ -22,6 +22,8 @@ const help =
     \\  NANOCOMPILE_DIR       cache directory (default: $XDG_CACHE_HOME/nanocompile)
     \\  NANOCOMPILE_TRACE=1   print cache decisions to stderr
     \\  NANOCOMPILE_DISABLE=1 run the compiler without caching
+    \\  NANOCOMPILE_PROC_MACROS=reported  opt into compiler-reported macro inputs
+    \\  NANOCOMPILE_EXTRA_INPUTS_FILE    JSON array declaring additional files
     \\  NANOCOMPILE_ZIG       Zig executable (default: zig)
     \\  NANOCOMPILE_RUSTC     rustc executable (default: rustc)
     \\Unsupported invocations transparently run the original compiler.

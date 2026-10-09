@@ -211,17 +211,103 @@ def main():
         run(consumer)
         run(consumer)
         assert events()[-1] == "hit"
+        # Unrelated Cargo outputs in the same -L directory must not evict this
+        # graph. In particular, mere presence of a proc-macro library is safe.
+        run(library("trans.rs", "unrelated", "deps"))
+        (root / "deps/libunrelated_macro.dylib").write_bytes(b"not loaded by this crate")
+        run(consumer)
+        assert events()[-1] == "hit"
+        # A new candidate for a relevant transitive crate must invalidate even
+        # if the original path and every tracked source stayed unchanged.
+        shutil.copyfile(root / "deps/libtrans.rlib", root / "deps/libtrans-alternate.rlib")
+        run(consumer, success=False)
+        assert events()[-1] != "hit"
+        (root / "deps/libtrans-alternate.rlib").unlink()
+        run(consumer)
         (root / "trans.rs").write_text('pub const VALUE: u32 = 42;\n')
         run(trans)
         p = run(consumer, success=False)
         assert events()[-1] != "hit"
         direct = subprocess.run(consumer, cwd=root, env=env, capture_output=True)
         assert p.returncode == direct.returncode
+        # Reported-input macro mode is explicit. Test a real proc macro whose
+        # hidden file read is absent from rustc dep-info, then declare that file
+        # globally so every macro consumer tracks it by content.
+        (root / "macro_read.rs").write_text("""extern crate proc_macro;
+#[proc_macro] pub fn read(_: proc_macro::TokenStream) -> proc_macro::TokenStream {
+    let path = std::env::var("MACRO_INPUT").unwrap();
+    format!("{:?}", std::fs::read_to_string(path).unwrap()).parse().unwrap()
+}
+""")
+        extension = ".dylib" if sys.platform == "darwin" else ".so"
+        macro_path = "deps/libmacro_read" + extension
+        def compile_macro():
+            p = subprocess.run(["rustc", "macro_read.rs", "--crate-name", "macro_read", "--crate-type", "proc-macro", "-o", macro_path], cwd=root, env=env, capture_output=True)
+            assert p.returncode == 0, p.stderr
+        compile_macro()
+        (root / "macro_consumer.rs").write_text('pub const DATA: &str = macro_read::read!();\n')
+        (root / "macro_check.rs").write_text('fn main() { print!("{}", macro_consumer::DATA); }\n')
+        def check_macro_value(expected_value):
+            p = subprocess.run(["rustc", "macro_check.rs", "--edition=2021", "--extern", "macro_consumer=out/libmacro_consumer.rlib", "-L", "dependency=deps", "-o", "out/macro_check"], cwd=root, env=env, capture_output=True)
+            assert p.returncode == 0, p.stderr
+            assert subprocess.check_output([str(root / "out/macro_check")]) == expected_value
+
+        (root / "macro-data.txt").write_text("one")
+        (root / "macro-inputs.json").write_text(json.dumps(["macro-data.txt"]))
+        macro_env = dict(env, MACRO_INPUT=str(root / "macro-data.txt"))
+        macro_consumer = library("macro_consumer.rs", "macro_consumer", "out", ["--extern", "macro_read=" + macro_path, "-L", "dependency=deps"])
+        run(macro_consumer, custom_env=macro_env)
+        assert events()[-1] == "bypass"
+        macro_env.update(NANOCOMPILE_PROC_MACROS="reported", NANOCOMPILE_EXTRA_INPUTS_FILE=str(root / "macro-inputs.json"))
+        run(macro_consumer, custom_env=macro_env)
+        original = digest(root / "out/libmacro_consumer.rlib")
+        (root / "out/libmacro_consumer.rlib").unlink()
+        p = run(macro_consumer, custom_env=macro_env)
+        assert events()[-1] == "hit", p.stderr
+        assert digest(root / "out/libmacro_consumer.rlib") == original
+        check_macro_value(b"one")
+        data = root / "macro-data.txt"
+        old_time = data.stat().st_mtime_ns
+        data.write_text("two")
+        os.utime(data, ns=(old_time, old_time))
+        run(macro_consumer, custom_env=macro_env)
+        assert events()[-1] == "miss"
+        assert digest(root / "out/libmacro_consumer.rlib") != original
+        check_macro_value(b"two")
+        run(macro_consumer, custom_env=macro_env)
+        assert events()[-1] == "hit"
+        # Changing the loaded macro itself invalidates an unchanged consumer.
+        source = root / "macro_read.rs"
+        source.write_text(source.read_text().replace('format!("{:?}", std::fs::read_to_string(path).unwrap())', 'format!("{:?}", std::fs::read_to_string(path).unwrap() + "!")'))
+        compile_macro()
+        run(macro_consumer, custom_env=macro_env)
+        assert events()[-1] == "miss"
+        # Reexporting a macro hides the DSO behind an ordinary --extern rlib.
+        # The metadata graph must still find it and preserve the selected policy.
+        (root / "macro_bridge.rs").write_text('pub use macro_read::read;\n')
+        macro_bridge = library("macro_bridge.rs", "macro_bridge", "deps", ["--extern", "macro_read=" + macro_path, "-L", "dependency=deps"])
+        run(macro_bridge, custom_env=macro_env)
+        (root / "macro_reexport.rs").write_text('pub const DATA: &str = macro_bridge::read!();\n')
+        macro_reexport = library("macro_reexport.rs", "macro_reexport", "out", ["--extern", "macro_bridge=deps/libmacro_bridge.rlib", "-L", "dependency=deps"])
+        strict_env = dict(macro_env, NANOCOMPILE_PROC_MACROS="tracked")
+        run(macro_reexport, custom_env=strict_env)
+        p = run(macro_reexport, custom_env=strict_env)
+        assert b"uncached: ProceduralMacroDependency" in p.stderr, p.stderr
+        assert events()[-1] != "hit"
+        run(macro_reexport, custom_env=macro_env)
+        p = run(macro_reexport, custom_env=macro_env)
+        assert events()[-1] == "hit", p.stderr
+        data.write_text("new")
+        run(macro_reexport, custom_env=macro_env)
+        assert events()[-1] == "miss"
+        missing_declaration = dict(macro_env, NANOCOMPILE_EXTRA_INPUTS_FILE=str(root / "missing-inputs.json"))
+        run(macro_reexport, custom_env=missing_declaration)
+        assert events()[-1] == "bypass"
         # Cargo exercises the wrapper protocol and real extern dependency paths.
         project = root / "cargo-project"
         (project / "src").mkdir(parents=True)
         (project / "dep/src").mkdir(parents=True)
-        (project / "Cargo.toml").write_text('[package]\nname="consumer"\nversion="0.1.0"\nedition="2021"\n[dependencies]\nlocaldep={path="dep"}\n')
+        (project / "Cargo.toml").write_text('[package]\nname="consumer"\nversion="0.1.0"\nedition="2021"\n[dependencies]\nlocaldep={path="dep"}\n[profile.release]\nlto="thin"\n')
         (project / "dep/Cargo.toml").write_text('[package]\nname="localdep"\nversion="0.1.0"\nedition="2021"\n')
         (project / "src/lib.rs").write_text('pub fn answer() -> u32 { localdep::answer() }\n')
         (project / "dep/src/lib.rs").write_text('pub fn answer() -> u32 { 42 }\n')

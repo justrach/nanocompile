@@ -2,6 +2,8 @@
 
 For a real Cargo workload, start with the [Harness comparison against kache](kache-harness.md): direct 22.77 s, nanocompile 22.95 s, kache with its daemon 2.01 s. The individual compiler fixtures below measure warm-hit latency and do not predict project-level performance.
 
+The [Harness hill climb](harness-hill.md) improves default warm builds to 19.31 s against a 25.16 s direct baseline; kache still takes 2.16 s. It records unsuccessful iterations and the larger cold-cache cost too.
+
 The final run used the actual `nanocompile 0.1.0` release binary built with stable Zig 0.17.0 on macOS/arm64. Its SHA-256, timestamp, every sample, compiler versions, and kache counters are recorded in [results.json](results.json). The measured binary's checksum was checked against `zig-out/bin/nanocompile` after the run.
 
 ## Final comparison

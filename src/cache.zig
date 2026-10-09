@@ -81,6 +81,33 @@ pub const Context = struct {
         return finish(self.a, &h);
     }
 
+    pub fn libraryNames(self: *Context, path_: []const u8, outputs: []const []const u8) ![]const []const u8 {
+        var dir = try Dir.cwd().openDir(self.io, path_, .{ .iterate = true });
+        defer dir.close(self.io);
+        var iterator = dir.iterate();
+        var names: std.ArrayList([]const u8) = .empty;
+        while (try iterator.next(self.io)) |entry| {
+            if (!std.mem.endsWith(u8, entry.name, ".rlib") and !std.mem.endsWith(u8, entry.name, ".rmeta") and !std.mem.endsWith(u8, entry.name, ".dylib") and !std.mem.endsWith(u8, entry.name, ".so")) continue;
+            const full = try std.fs.path.join(self.a, &.{ path_, entry.name });
+            var ignored = false;
+            for (outputs) |out_| if (std.mem.eql(u8, full, out_)) {
+                ignored = true;
+                break;
+            };
+            if (!ignored) try names.append(self.a, try std.fmt.allocPrint(self.a, "{s}:{s}", .{ entry.name, @tagName(entry.kind) }));
+        }
+        std.mem.sort([]const u8, names.items, {}, struct {
+            fn less(_: void, a: []const u8, b: []const u8) bool {
+                return std.mem.order(u8, a, b) == .lt;
+            }
+        }.less);
+        return names.items;
+    }
+
+    pub fn libraryDigest(self: *Context, path_: []const u8, prefix: []const u8, outputs: []const []const u8) ![]const u8 {
+        return prefixDigest(self.a, try self.libraryNames(path_, outputs), prefix);
+    }
+
     pub fn directoryDigest(self: *Context, path_: []const u8, libraries: bool, outputs: []const []const u8) ![]const u8 {
         var dir = try Dir.cwd().openDir(self.io, path_, .{ .iterate = true });
         defer dir.close(self.io);
@@ -179,10 +206,10 @@ pub fn unseal(ctx: *Context, bytes: []const u8) ![]const u8 {
     return bytes[65..];
 }
 
-pub const Dependency = struct { path: []const u8, hash: []const u8, directory: bool = false, libraries: bool = false };
+pub const Dependency = struct { path: []const u8, hash: []const u8, directory: bool = false, libraries: bool = false, library_prefix: ?[]const u8 = null };
 pub const Output = struct { path: []const u8, hash: []const u8, mode: u32 };
 pub const Entry = struct {
-    schema: u32 = 3,
+    schema: u32 = 4,
     dependencies: []const Dependency,
     outputs: []const Output,
     stdout: []const u8,
@@ -264,9 +291,9 @@ pub fn store(ctx: *Context, key: []const u8, dependencies: []const Dependency, o
 pub fn restore(ctx: *Context, key: []const u8, allowed_outputs: []const []const u8) !bool {
     const bytes = ctx.read(try ctx.path(&.{ "entries", key })) catch return false;
     const entry = parseEntry(ctx, bytes) catch return false;
-    if (entry.schema != 3 or entry.outputs.len != allowed_outputs.len) return false;
+    if (entry.schema != 4 or entry.outputs.len != allowed_outputs.len) return false;
     for (entry.dependencies) |dep| {
-        const hash = (if (dep.directory) ctx.directoryDigest(dep.path, dep.libraries, allowed_outputs) else ctx.digest(dep.path)) catch return false;
+        const hash = (if (dep.library_prefix) |prefix| ctx.libraryDigest(dep.path, prefix, allowed_outputs) else if (dep.directory) ctx.directoryDigest(dep.path, dep.libraries, allowed_outputs) else ctx.digest(dep.path)) catch return false;
         if (!std.mem.eql(u8, hash, dep.hash)) {
             ctx.trace("miss: dependency content changed");
             return false;
@@ -359,7 +386,7 @@ pub fn gc(ctx: *Context, limit: u64) !void {
         var hashes: std.ArrayList([]const u8) = .empty;
         try hashes.appendSlice(ctx.a, &.{ entry.stdout, entry.stderr });
         for (entry.outputs) |output| try hashes.append(ctx.a, output.hash);
-        var valid = entry.schema == 3;
+        var valid = entry.schema == 4;
         for (hashes.items) |hash| if (!validHash(hash)) {
             valid = false;
             break;
@@ -439,4 +466,12 @@ test "hash fields cannot collide through concatenation" {
 test "blob hashes reject traversal" {
     try std.testing.expect(!validHash("../entry"));
     try std.testing.expect(validHash("0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"));
+}
+
+// Names are sorted by libraryNames. Prefix matching deliberately follows rustc's
+// over-inclusive library lookup, including alternate filenames and duplicates.
+pub fn prefixDigest(a: std.mem.Allocator, names: []const []const u8, prefix: []const u8) ![]const u8 {
+    var hash = Hash.init(.{});
+    for (names) |name| if (std.mem.startsWith(u8, name, prefix)) field(&hash, name);
+    return finish(a, &hash);
 }
