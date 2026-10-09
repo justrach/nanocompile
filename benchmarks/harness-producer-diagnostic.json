@@ -1,0 +1,346 @@
+{
+  "purpose": "diagnose configuration gates; tracing and Python shim timings are not project benchmark times",
+  "binary_sha256": "8449f3f8738abff8d35d8f19ebbdf1e37f7428ef7b82390f9cc5d5c00a270c56",
+  "macro_invocations": [
+    {
+      "crate": "displaydoc",
+      "type": "proc-macro",
+      "phase": "cold",
+      "seconds": 0.2228094579768367,
+      "decisions": [
+        "nanocompile: bypass: UnsupportedProducerConfiguration"
+      ],
+      "codegen": [
+        "prefer-dynamic",
+        "embed-bitcode=no",
+        "debug-assertions=off",
+        "metadata=38504fa235f9a940",
+        "extra-filename=-922a32df521d2719",
+        "strip=symbols"
+      ]
+    },
+    {
+      "crate": "zerovec_derive",
+      "type": "proc-macro",
+      "phase": "cold",
+      "seconds": 0.33575887500774115,
+      "decisions": [
+        "nanocompile: bypass: UnsupportedProducerConfiguration"
+      ],
+      "codegen": [
+        "prefer-dynamic",
+        "embed-bitcode=no",
+        "debug-assertions=off",
+        "metadata=4bc798fb88f8dca9",
+        "extra-filename=-1b466c3b2a96e3a5",
+        "strip=symbols"
+      ]
+    },
+    {
+      "crate": "tokio_macros",
+      "type": "proc-macro",
+      "phase": "cold",
+      "seconds": 0.2062558329780586,
+      "decisions": [
+        "nanocompile: bypass: UnsupportedProducerConfiguration"
+      ],
+      "codegen": [
+        "prefer-dynamic",
+        "embed-bitcode=no",
+        "debug-assertions=off",
+        "metadata=24f6219713c1ef26",
+        "extra-filename=-637864ac99bd4af5",
+        "strip=symbols"
+      ]
+    },
+    {
+      "crate": "zerofrom_derive",
+      "type": "proc-macro",
+      "phase": "cold",
+      "seconds": 0.2817414580495097,
+      "decisions": [
+        "nanocompile: bypass: UnsupportedProducerConfiguration"
+      ],
+      "codegen": [
+        "prefer-dynamic",
+        "embed-bitcode=no",
+        "debug-assertions=off",
+        "metadata=9b7bf202925b8caf",
+        "extra-filename=-76a4c3a7e96191a2",
+        "strip=symbols"
+      ]
+    },
+    {
+      "crate": "yoke_derive",
+      "type": "proc-macro",
+      "phase": "cold",
+      "seconds": 0.2649099170230329,
+      "decisions": [
+        "nanocompile: bypass: UnsupportedProducerConfiguration"
+      ],
+      "codegen": [
+        "prefer-dynamic",
+        "embed-bitcode=no",
+        "debug-assertions=off",
+        "metadata=3b5b2361cb83743f",
+        "extra-filename=-c7a6f2e88e99426f",
+        "strip=symbols"
+      ]
+    },
+    {
+      "crate": "futures_macro",
+      "type": "proc-macro",
+      "phase": "cold",
+      "seconds": 0.24381462502060458,
+      "decisions": [
+        "nanocompile: bypass: UnsupportedProducerConfiguration"
+      ],
+      "codegen": [
+        "prefer-dynamic",
+        "embed-bitcode=no",
+        "debug-assertions=off",
+        "metadata=190de59b70258521",
+        "extra-filename=-dddb32d6084cf002",
+        "strip=symbols"
+      ]
+    },
+    {
+      "crate": "serde_derive",
+      "type": "proc-macro",
+      "phase": "cold",
+      "seconds": 0.81471679196693,
+      "decisions": [
+        "nanocompile: bypass: UnsupportedProducerConfiguration"
+      ],
+      "codegen": [
+        "prefer-dynamic",
+        "embed-bitcode=no",
+        "debug-assertions=off",
+        "metadata=b5ea5d50cbfe639f",
+        "extra-filename=-4ba90fce08de847e",
+        "strip=symbols"
+      ]
+    },
+    {
+      "crate": "tracing_attributes",
+      "type": "proc-macro",
+      "phase": "cold",
+      "seconds": 0.3215270829969086,
+      "decisions": [
+        "nanocompile: bypass: UnsupportedProducerConfiguration"
+      ],
+      "codegen": [
+        "prefer-dynamic",
+        "embed-bitcode=no",
+        "debug-assertions=off",
+        "metadata=950208bff4d37c4a",
+        "extra-filename=-cb70a717d3a80b79",
+        "strip=symbols"
+      ]
+    },
+    {
+      "crate": "thiserror_impl",
+      "type": "proc-macro",
+      "phase": "cold",
+      "seconds": 0.3410234999610111,
+      "decisions": [
+        "nanocompile: bypass: UnsupportedProducerConfiguration"
+      ],
+      "codegen": [
+        "prefer-dynamic",
+        "embed-bitcode=no",
+        "debug-assertions=off",
+        "metadata=668b17fc2e859ede",
+        "extra-filename=-c47134122044d386",
+        "strip=symbols"
+      ]
+    },
+    {
+      "crate": "async_trait",
+      "type": "proc-macro",
+      "phase": "cold",
+      "seconds": 0.2793547089677304,
+      "decisions": [
+        "nanocompile: bypass: UnsupportedProducerConfiguration"
+      ],
+      "codegen": [
+        "prefer-dynamic",
+        "embed-bitcode=no",
+        "debug-assertions=off",
+        "metadata=90c5678131a532c2",
+        "extra-filename=-e488d3c43421d8e1",
+        "strip=symbols"
+      ]
+    },
+    {
+      "crate": "displaydoc",
+      "type": "proc-macro",
+      "phase": "warm-1",
+      "seconds": 0.22959029203047976,
+      "decisions": [
+        "nanocompile: bypass: UnsupportedProducerConfiguration"
+      ],
+      "codegen": [
+        "prefer-dynamic",
+        "embed-bitcode=no",
+        "debug-assertions=off",
+        "metadata=38504fa235f9a940",
+        "extra-filename=-922a32df521d2719",
+        "strip=symbols"
+      ]
+    },
+    {
+      "crate": "zerofrom_derive",
+      "type": "proc-macro",
+      "phase": "warm-1",
+      "seconds": 0.2905754580278881,
+      "decisions": [
+        "nanocompile: bypass: UnsupportedProducerConfiguration"
+      ],
+      "codegen": [
+        "prefer-dynamic",
+        "embed-bitcode=no",
+        "debug-assertions=off",
+        "metadata=9b7bf202925b8caf",
+        "extra-filename=-76a4c3a7e96191a2",
+        "strip=symbols"
+      ]
+    },
+    {
+      "crate": "yoke_derive",
+      "type": "proc-macro",
+      "phase": "warm-1",
+      "seconds": 0.2725702080060728,
+      "decisions": [
+        "nanocompile: bypass: UnsupportedProducerConfiguration"
+      ],
+      "codegen": [
+        "prefer-dynamic",
+        "embed-bitcode=no",
+        "debug-assertions=off",
+        "metadata=3b5b2361cb83743f",
+        "extra-filename=-c7a6f2e88e99426f",
+        "strip=symbols"
+      ]
+    },
+    {
+      "crate": "zerovec_derive",
+      "type": "proc-macro",
+      "phase": "warm-1",
+      "seconds": 0.34329954197164625,
+      "decisions": [
+        "nanocompile: bypass: UnsupportedProducerConfiguration"
+      ],
+      "codegen": [
+        "prefer-dynamic",
+        "embed-bitcode=no",
+        "debug-assertions=off",
+        "metadata=4bc798fb88f8dca9",
+        "extra-filename=-1b466c3b2a96e3a5",
+        "strip=symbols"
+      ]
+    },
+    {
+      "crate": "tokio_macros",
+      "type": "proc-macro",
+      "phase": "warm-1",
+      "seconds": 0.20562050002627075,
+      "decisions": [
+        "nanocompile: bypass: UnsupportedProducerConfiguration"
+      ],
+      "codegen": [
+        "prefer-dynamic",
+        "embed-bitcode=no",
+        "debug-assertions=off",
+        "metadata=24f6219713c1ef26",
+        "extra-filename=-637864ac99bd4af5",
+        "strip=symbols"
+      ]
+    },
+    {
+      "crate": "futures_macro",
+      "type": "proc-macro",
+      "phase": "warm-1",
+      "seconds": 0.2532587500172667,
+      "decisions": [
+        "nanocompile: bypass: UnsupportedProducerConfiguration"
+      ],
+      "codegen": [
+        "prefer-dynamic",
+        "embed-bitcode=no",
+        "debug-assertions=off",
+        "metadata=190de59b70258521",
+        "extra-filename=-dddb32d6084cf002",
+        "strip=symbols"
+      ]
+    },
+    {
+      "crate": "serde_derive",
+      "type": "proc-macro",
+      "phase": "warm-1",
+      "seconds": 0.8177774579962716,
+      "decisions": [
+        "nanocompile: bypass: UnsupportedProducerConfiguration"
+      ],
+      "codegen": [
+        "prefer-dynamic",
+        "embed-bitcode=no",
+        "debug-assertions=off",
+        "metadata=b5ea5d50cbfe639f",
+        "extra-filename=-4ba90fce08de847e",
+        "strip=symbols"
+      ]
+    },
+    {
+      "crate": "tracing_attributes",
+      "type": "proc-macro",
+      "phase": "warm-1",
+      "seconds": 0.3149884580052458,
+      "decisions": [
+        "nanocompile: bypass: UnsupportedProducerConfiguration"
+      ],
+      "codegen": [
+        "prefer-dynamic",
+        "embed-bitcode=no",
+        "debug-assertions=off",
+        "metadata=950208bff4d37c4a",
+        "extra-filename=-cb70a717d3a80b79",
+        "strip=symbols"
+      ]
+    },
+    {
+      "crate": "thiserror_impl",
+      "type": "proc-macro",
+      "phase": "warm-1",
+      "seconds": 0.3519389579887502,
+      "decisions": [
+        "nanocompile: bypass: UnsupportedProducerConfiguration"
+      ],
+      "codegen": [
+        "prefer-dynamic",
+        "embed-bitcode=no",
+        "debug-assertions=off",
+        "metadata=668b17fc2e859ede",
+        "extra-filename=-c47134122044d386",
+        "strip=symbols"
+      ]
+    },
+    {
+      "crate": "async_trait",
+      "type": "proc-macro",
+      "phase": "warm-1",
+      "seconds": 0.271510666992981,
+      "decisions": [
+        "nanocompile: bypass: UnsupportedProducerConfiguration"
+      ],
+      "codegen": [
+        "prefer-dynamic",
+        "embed-bitcode=no",
+        "debug-assertions=off",
+        "metadata=90c5678131a532c2",
+        "extra-filename=-e488d3c43421d8e1",
+        "strip=symbols"
+      ]
+    }
+  ]
+}

@@ -297,3 +297,12 @@ builds and kache with a fresh dedicated state, rotated warm samples, artifact
 verification and the same reported/default policy disclosure. Diagnostic sums
 are not a performance comparison. Keep the existing Rust, Zig, Xcode and Turbo
 checks passing while adding producer coverage.
+
+The experimental implementation and existing suite passed on Linux and macOS in
+[run 37949239666](https://github.com/justrach/nanocompile/actions/runs/37949239666)
+at `69b52a0ffb381c993872671f00bb224e2d5ec0d0`. The Apple producer round trip runs
+on macOS; unsupported Linux producer compilation retains direct fallback.
+The first [Harness comparison](../benchmarks/harness-hill.md#experimental-apple-proc-macro-producers)
+passes all library and macro dylib artifact checks but adds no producer hits: all
+ten Cargo macro invocations use unsupported `prefer-dynamic` and `strip=symbols`
+flags and therefore run directly. It verifies fallback, not producer restore on Harness.

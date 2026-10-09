@@ -47,6 +47,7 @@ def main():
     p.add_argument('--package', default='harness-adapters')
     p.add_argument('--proc-macros', choices=('tracked', 'reported'), default='reported')
     p.add_argument('--warm-runs', type=int, default=2)
+    p.add_argument('--proc-macro-producers', action='store_true')
     args = p.parse_args()
     if args.warm_runs < 1:
         p.error('warm-runs must be positive')
@@ -61,6 +62,8 @@ def main():
     env.update(NANOCOMPILE_DIR=str(root / 'cache'), NANOCOMPILE_TRACE='1',
                NANOCOMPILE_PROC_MACROS=args.proc_macros, CARGO_INCREMENTAL='0',
                CARGO_TARGET_DIR=str(target), RUSTC_WRAPPER=str(shim))
+    if args.proc_macro_producers:
+        env['NANOCOMPILE_PROC_MACRO_PRODUCERS'] = '1'
     cfg = {'binary': str(Path(args.binary).resolve()), 'phase': 'cold'}
     for iteration in range(args.warm_runs + 1):
         shutil.rmtree(target, ignore_errors=True)

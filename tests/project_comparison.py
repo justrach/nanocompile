@@ -39,6 +39,7 @@ def main():
     p.add_argument("--jobs", type=int, default=4)
     p.add_argument("--standalone", action="store_true", help="disable kache's daemon for this comparison")
     p.add_argument("--proc-macros", choices=("tracked", "reported"), default="tracked", help="nanocompile proc-macro input policy; reported requires declaring unreported file reads")
+    p.add_argument("--proc-macro-producers", action="store_true", help="enable the experimental macOS producer cache; verify macro dylib artifacts too")
     args = p.parse_args()
     if args.runs < 1 or args.jobs < 1:
         p.error("runs and jobs must be positive")
@@ -55,6 +56,8 @@ def main():
     env.update(CARGO_TARGET_DIR=str(target), CARGO_INCREMENTAL="0", NANOCOMPILE_DIR=str(cache),
                KACHE_CACHE_DIR=str(kcache), KACHE_CONFIG=str(config), KACHE_HOST_CONFIG="",
                NANOCOMPILE_PROC_MACROS=args.proc_macros, KACHE_SOCKET_PATH=str(state / "daemon.sock"), KACHE_DAEMON_IDLE_TIMEOUT="600")
+    if args.proc_macro_producers:
+        env["NANOCOMPILE_PROC_MACRO_PRODUCERS"] = "1"
     command = ["cargo", "build", "--release", "--locked", "--offline", "--lib",
                "-p", args.package, "-j", str(args.jobs), "--message-format=json-render-diagnostics"]
     result = {"project": str(project), "commit": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=project, text=True).strip(),
@@ -63,7 +66,7 @@ def main():
               "rustc": subprocess.check_output(["rustc", "--version", "--verbose"], cwd=project, text=True),
               "nanocompile_sha256": sha(Path(binary)), "kache_sha256": sha(Path(kache)),
               "kache_version": subprocess.check_output([kache, "--version"], text=True).strip(),
-              "kache_daemon": not args.standalone, "nanocompile_proc_macros": args.proc_macros, "command": command,
+              "kache_daemon": not args.standalone, "nanocompile_proc_macros": args.proc_macros, "nanocompile_proc_macro_producers": args.proc_macro_producers, "command": command,
               "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat(), "builds": [],
               "method": "offline clean release package builds; same target path; prime direct build then empty caches; rotate three-way warm measurement order; validate each wrapper against its own cold artifact hashes (kache remaps paths)"}
     tracked = subprocess.check_output(['git', 'ls-files', '-z'], cwd=project).decode().split('\0')
@@ -90,6 +93,7 @@ def main():
         return counts
 
     references = {}
+    macro_references = {}
 
     def build(implementation, phase):
         shutil.rmtree(target, ignore_errors=True)
@@ -120,21 +124,25 @@ def main():
         seconds = time.monotonic() - start
         after = nano_events() if implementation == "nanocompile" else kache_events() if implementation == "kache" else collections.Counter()
         artifacts = {str(path.relative_to(target)): sha(path) for path in sorted((target / "release/deps").glob("*.rlib"))}
+        macros = {str(path.relative_to(target)): sha(path) for path in sorted((target / "release/deps").glob("*.dylib"))}
         row = {"implementation": implementation, "phase": phase, "seconds": seconds,
                "exit_code": proc.returncode, "events": dict(after - before), "rlibs": len(artifacts), "artifacts": artifacts,
-               "peak_sampled_process_tree_rss_bytes": peak}
+               "peak_sampled_process_tree_rss_bytes": peak, "macro_dylibs": macros}
         if implementation not in references:
             references[implementation] = artifacts
+            macro_references[implementation] = macros
         else:
             row["matches_own_cold_artifacts"] = references[implementation] == artifacts
+            row["matches_own_cold_macro_dylibs"] = macro_references[implementation] == macros
         if implementation == "nanocompile":
             row["matches_direct_artifacts"] = artifacts == references.get("direct")
+            row["matches_direct_macro_dylibs"] = macros == macro_references.get("direct")
         result["builds"].append(row)
         save()
-        print(json.dumps({k: v for k, v in row.items() if k != "artifacts"}), flush=True)
+        print(json.dumps({k: v for k, v in row.items() if k not in ("artifacts", "macro_dylibs")}), flush=True)
         if proc.returncode or not artifacts:
             raise RuntimeError(f"Build failed or produced no libraries; see {log_path}")
-        if row.get("matches_own_cold_artifacts") is False or row.get("matches_direct_artifacts") is False:
+        if any(row.get(check) is False for check in ("matches_own_cold_artifacts", "matches_direct_artifacts", "matches_own_cold_macro_dylibs", "matches_direct_macro_dylibs")):
             raise RuntimeError(f"Artifact validation failed; see {log_path}")
         if phase == "warm" and implementation == "kache" and not row["events"].get("local_hit", 0):
             raise RuntimeError("kache recorded no local hits; comparison is invalid")

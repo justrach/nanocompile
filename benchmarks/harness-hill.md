@@ -443,3 +443,33 @@ the stronger evidence for the intended shared-digest mechanism.
 [Linux raw results](harness-hosted-shared-toolchain-ubuntu-24.04.json) and
 [Mac raw results](harness-hosted-shared-toolchain-macos-26.json) preserve every
 sample, artifact/source hash and executable checksum.
+
+## Experimental Apple proc-macro producers
+
+The first full comparison of producer caching used binary `8449f3f8738abff8d35d8f19ebbdf1e37f7428ef7b82390f9cc5d5c00a270c56`
+(the exact checksum is recorded in the raw JSON), stable Zig 0.17.0 and Rust
+1.97.1. [Raw results](harness-hill-producer-reported.json) retain twelve clean
+builds, rotating three warm measurement orders with four Cargo jobs. The
+existing reported-input macro policy and experimental producer flag were enabled;
+R2 was excluded. Harness was the same local dirty checkout at `32b41cb`; all
+tracked Rust and manifest hashes remained unchanged during the run.
+
+| Implementation | Warm median | Cold build |
+| --- | ---: | ---: |
+| Direct Cargo | 22.796 s | 24.556 s prime |
+| nanocompile | 4.752 s | 40.621 s |
+| kache daemon | 2.018 s | 26.561 s |
+
+All 135 library and ten macro dylib hashes matched direct Cargo for nanocompile
+and remained stable across warm builds. Kache matched its own cold outputs.
+Nanocompile still recorded 132 hits and three misses per warm build; producer
+storage contributed no new entries. The trace confirms all ten Harness macros pass `-C prefer-dynamic` and
+`-C strip=symbols`, so all ten take the unsupported-configuration fallback.
+The three misses are not producer compilations. This run verifies the
+fallback and unchanged library cache, but **does not exercise producer restore
+on Harness or establish a producer performance improvement**. Supporting these
+actual Cargo flags is the next coverage step.
+
+Reproduce with `tests/project_comparison.py --proc-macros reported
+--proc-macro-producers`, retaining the same isolated-state and runs/jobs options
+shown above.
