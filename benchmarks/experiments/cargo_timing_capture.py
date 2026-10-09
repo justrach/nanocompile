@@ -26,9 +26,12 @@ def main():
     p.add_argument('--output', type=Path, required=True)
     p.add_argument('--warm-runs', type=int, default=3)
     p.add_argument('--native-clang', action='store_true', help='Profile the accepted Apple Clang CAS configuration too')
+    p.add_argument('--clang-wrapper', type=Path, help='Separate diagnostic Clang adapter; Rust wrapper stays fixed')
     args = p.parse_args()
     assert args.warm_runs > 0
     binary, project, root = args.binary.resolve(), args.project.resolve(), args.state.resolve()
+    assert args.clang_wrapper is None or args.native_clang
+    clang_wrapper = args.clang_wrapper.resolve() if args.clang_wrapper else binary
     root.mkdir(mode=0o700, parents=True, exist_ok=False)
     target = root / 'target'
     env = {k: v for k, v in os.environ.items() if not k.startswith(('R2_', 'KACHE_', 'NANOCOMPILE_'))
@@ -38,7 +41,7 @@ def main():
                NANOCOMPILE_PROC_MACROS='reported', NANOCOMPILE_PROC_MACRO_PRODUCERS='1',
                NANOCOMPILE_EXECUTABLE_PRODUCERS='1')
     if args.native_clang:
-        env.update(CC=str(binary)+' clang', CC_KNOWN_WRAPPER_CUSTOM='nanocompile',
+        env.update(CC=str(clang_wrapper)+' clang', CC_KNOWN_WRAPPER_CUSTOM='nanocompile',
                    NANOCOMPILE_CLANG_REMARKS='1')
     command = ['cargo', 'build', '--release', '--lib', '--locked', '--offline',
                '-p', 'harness-adapters', '-j', '4', '--timings']
@@ -49,6 +52,7 @@ def main():
               'core_revision': subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip(),
               'binary_sha256': sha(binary), 'script_sha256': sha(Path(__file__)),
               'native_clang': args.native_clang,
+              'clang_wrapper_sha256': sha(clang_wrapper) if args.native_clang else None,
               'project_commit': subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=project, text=True).strip(),
               'project_dirty': bool(subprocess.check_output(['git', 'status', '--porcelain'], cwd=project)),
               'tracked_source_sha256': sources, 'command': command, 'jobs': 4,

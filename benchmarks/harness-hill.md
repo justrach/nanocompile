@@ -1350,3 +1350,18 @@ The next diagnostic target is native invocation overhead inside ring.
 [Method and limits](../docs/native-cargo-timing-profile.md);
 [build evidence](harness-native-cargo-timing.json);
 [complete unit timings](harness-native-cargo-timing-units.json).
+
+## Native invocation phase profile and integrated cc1 candidate
+
+The final diagnostic warm sample records 24 native hits: aggregate Clang
+process time is 742.895 ms, live selection 199.610 ms, and identity/capability/
+setup under 5 ms. These phase sums are attribution rather than critical-path
+savings. A driver probe shows explicit `-fintegrated-cc1` changes cc1 to
+in-process execution. [Diagnostic protocol](../docs/clang-phase-profile.md).
+
+The uninstrumented candidate wins 25/27 paired warm builds, reducing median
+1.988609 to 1.886351 s (5.14%). Mean paired saving is 87.862 ms with descriptive
+standard error 10.276 ms. All 193 artifacts match and tracked sources stay
+unchanged. Production stays unchanged pending a separate confirmation batch.
+[Candidate protocol and limits](../docs/clang-integrated-cc1-experiment.md);
+[all paired builds](harness-clang-integrated-paired.json).

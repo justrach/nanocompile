@@ -1,0 +1,20 @@
+{
+  "binary_sha256": "45116c708c497081faf41039b852c9e5be5e39455404a60141652ea64e00228a",
+  "script_sha256": "1aae27cb9abc732f4a06a82dd31b7543a2a4bb74e0b2981fda9e73585cdc8c64",
+  "checks": [
+    "C debug objects match replay-disabled compiler and exact warm replay",
+    "preprocessed assembly exact replay",
+    "same-size preserved-mtime header invalidation",
+    "already-dirty unflushed mmap header invalidation",
+    "compiler and SDK selection queried on both eligible lookups",
+    "normal streaming mode caches without reporting unobserved hits",
+    "private CAS permissions and clear forces native miss",
+    "version, stdin and disabled commands bypass cache",
+    "opaque compiler override passes through with original arguments",
+    "compiler failure preserved without an output"
+  ],
+  "compiler_version": "Apple clang version 21.0.0 (clang-2100.3.34.2)\nTarget: arm64-apple-darwin27.0.0\nThread model: posix\nInstalledDir: /Library/Developer/CommandLineTools/usr/bin\n",
+  "local_cas_capable": true,
+  "capability_probe_stderr": "remark: compile job cache hit for 'llvmcas://13a1739f0cf144f7c916720ec91bb1f7e2452007ee3afca77f91bd510d292998' => 'llvmcas://c909062301ca11e75e8246fab61ed96ec54a225fad2db065c27acd044566ae6f' [-Rcompile-job-cache-hit]\n",
+  "dirty_mmap_metadata_unchanged": true
+}

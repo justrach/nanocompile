@@ -1,0 +1,54 @@
+diff --git a/src/clang.zig b/src/clang.zig
+index f4b2ae0..e2cb534 100644
+--- a/src/clang.zig
++++ b/src/clang.zig
+@@ -133,6 +133,7 @@ fn supports(ctx: *cache.Context, tool: []const u8, hash: []const u8) !bool {
+ }
+ 
+ pub fn execute(ctx: *cache.Context, args: []const []const u8) !u8 {
++    const profile_start = std.Io.Clock.awake.now(ctx.io).nanoseconds;
+     const eligible = builtin.os.tag == .macos and compileOnly(args) and !enabled(ctx, "NANOCOMPILE_DISABLE");
+     var sdk_query: SdkQuery = .{};
+     defer sdk_query.deinit();
+@@ -162,6 +163,7 @@ pub fn execute(ctx: *cache.Context, args: []const []const u8) !u8 {
+     } else sdk(ctx) catch {
+         return run(ctx, original.items);
+     };
++    const profile_selection = std.Io.Clock.awake.now(ctx.io).nanoseconds;
+     if (!nativeExecutable(ctx, tool) or (!hasSysroot(args) and !std.fs.path.isAbsolute(selected_sdk))) return run(ctx, original.items);
+     ctx.prepare() catch {
+         return run(ctx, original.items);
+@@ -173,10 +175,12 @@ pub fn execute(ctx: *cache.Context, args: []const []const u8) !u8 {
+     const hash = identity.installedFileDigest(ctx, tool) catch {
+         return run(ctx, original.items);
+     };
++    const profile_identity = std.Io.Clock.awake.now(ctx.io).nanoseconds;
+     if (!(supports(ctx, tool, hash) catch false)) {
+         ctx.trace("Clang CAS unavailable; compiler passthrough");
+         return run(ctx, original.items);
+     }
++    const profile_capability = std.Io.Clock.awake.now(ctx.io).nanoseconds;
+     if (!hasSysroot(args)) try argv.appendSlice(ctx.a, &.{ "-isysroot", selected_sdk });
+     var h = cache.Hash.init(.{});
+     cache.field(&h, "nanocompile-native-clang-v1");
+@@ -199,7 +203,20 @@ pub fn execute(ctx: *cache.Context, args: []const []const u8) !u8 {
+         if (result != 0) ctx.event("clang_native_failed");
+         return result;
+     }
++    const profile_compile = std.Io.Clock.awake.now(ctx.io).nanoseconds;
+     const result = try std.process.run(ctx.a, ctx.io, .{ .argv = argv.items, .environ_map = ctx.env, .stdout_limit = .limited(64 * 1024 * 1024), .stderr_limit = .limited(64 * 1024 * 1024) });
++    const profile_finished = std.Io.Clock.awake.now(ctx.io).nanoseconds;
++    const profile = try std.json.Stringify.valueAlloc(ctx.a, .{
++        .args = args,
++        .selection_ns = profile_selection - profile_start,
++        .identity_ns = profile_identity - profile_selection,
++        .capability_ns = profile_capability - profile_identity,
++        .setup_ns = profile_compile - profile_capability,
++        .compiler_ns = profile_finished - profile_compile,
++        .total_ns = profile_finished - profile_start,
++        .hit = std.mem.indexOf(u8, result.stderr, "remark: compile job cache hit") != null,
++    }, .{});
++    try std.Io.File.stderr().writeStreamingAll(ctx.io, try std.fmt.allocPrint(ctx.a, "NANOCOMPILE_CLANG_PHASE {s}\n", .{profile}));
+     try ctx.out(result.stdout);
+     try std.Io.File.stderr().writeStreamingAll(ctx.io, result.stderr);
+     if (std.mem.indexOf(u8, result.stderr, "remark: compile job cache hit") != null) ctx.event("clang_native_hit");
