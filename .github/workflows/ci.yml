@@ -21,8 +21,10 @@ jobs:
         run: rustup toolchain install 1.97.1 --profile minimal && rustup default 1.97.1
       - name: Verify proc-macro final linker inputs
         run: |
+          zig build -Doptimize=ReleaseFast
+          python3 tests/link_observer.py zig-out/bin/nanocompile
           zig build-exe -O ReleaseFast -lc --dep link_dependencies -Mroot=tools/link_report.zig -Mlink_dependencies=src/link_dependencies.zig -femit-bin="$RUNNER_TEMP/link-report"
-          python3 tests/producer_link_probe.py --state "$RUNNER_TEMP/producer-link-probe" --output bench-results/producer-link-probe.json --decoder "$RUNNER_TEMP/link-report"
+          python3 tests/producer_link_probe.py --state "$RUNNER_TEMP/producer, link probe" --output bench-results/producer-link-probe.json --decoder "$RUNNER_TEMP/link-report" --observer zig-out/bin/nanocompile
       - name: Build and real compiler tests
         run: |
           python3 tests/r2_transport.py

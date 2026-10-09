@@ -53,6 +53,10 @@ fn dispatch(ctx: *cache.Context, args: []const [:0]const u8) !u8 {
         return 0;
     }
     const command = args[1];
+    if (std.mem.eql(u8, command, "internal-linker")) {
+        if (args.len < 4) return error.InvalidLinkObserver;
+        return @import("link_observer.zig").execute(ctx, args[2], args[3..]);
+    }
     if (std.mem.eql(u8, command, "xcodebuild")) return xcode.execute(ctx, args[2..]);
     if (std.mem.eql(u8, command, "artifact")) {
         if (args.len < 5) return error.MissingArtifactArguments;

@@ -215,7 +215,36 @@ pub fn unseal(ctx: *Context, bytes: []const u8) ![]const u8 {
     return bytes[65..];
 }
 
-pub const Dependency = struct { path: []const u8, hash: []const u8, directory: bool = false, libraries: bool = false, library_prefix: ?[]const u8 = null, all_members: bool = false };
+pub const Dependency = struct { path: []const u8, hash: []const u8, directory: bool = false, libraries: bool = false, library_prefix: ?[]const u8 = null, all_members: bool = false, missing: ?bool = null };
+
+/// Negative linker lookups are inputs too. A later successful lookup must
+/// invalidate restoration. Never treat access errors as evidence of absence.
+pub fn missingDependency(ctx: *Context, path_: []const u8) !Dependency {
+    const path = try std.fs.path.resolve(ctx.a, &.{ ctx.cwd, path_ });
+    if (!try absent(ctx, path)) return error.InputAlreadyExists;
+    return .{ .path = path, .hash = try absentHash(ctx, path), .missing = true };
+}
+
+fn absentHash(ctx: *Context, path_: []const u8) ![]const u8 {
+    var hash = Hash.init(.{});
+    field(&hash, "nanocompile-absent-link-input-v1");
+    field(&hash, path_);
+    return finish(ctx.a, &hash);
+}
+
+fn absent(ctx: *Context, path_: []const u8) !bool {
+    _ = Dir.cwd().statFile(ctx.io, path_, .{}) catch |err| switch (err) {
+        error.FileNotFound, error.NotDir => return true,
+        else => return err,
+    };
+    return false;
+}
+
+fn missingValid(ctx: *Context, dep: Dependency) !bool {
+    if (dep.missing != true or dep.directory or dep.libraries or dep.all_members or dep.library_prefix != null or !std.fs.path.isAbsolute(dep.path)) return false;
+    if (!std.mem.eql(u8, dep.hash, try absentHash(ctx, dep.path))) return false;
+    return absent(ctx, dep.path);
+}
 pub const Output = struct { path: []const u8, hash: []const u8, mode: u32 };
 const entry_schema = 5;
 pub const ArtifactInfo = struct { namespace: []const u8, key: []const u8, metadata: []const u8 };
@@ -284,6 +313,7 @@ fn putBytes(ctx: *Context, bytes: []const u8) ![]const u8 {
 }
 
 pub fn store(ctx: *Context, key: []const u8, dependencies: []const Dependency, output_paths: []const []const u8, stdout: []const u8, stderr: []const u8) !void {
+    for (dependencies) |dep| if (dep.missing != null and !try missingValid(ctx, dep)) return error.InvalidMissingDependency;
     var outputs: std.ArrayList(Output) = .empty;
     for (output_paths) |path_| {
         const st = try Dir.cwd().statFile(ctx.io, path_, .{});
@@ -356,6 +386,13 @@ pub fn restore(ctx: *Context, key: []const u8, allowed_outputs: []const []const 
     var file_hashes: std.StringHashMapUnmanaged([]const u8) = .empty;
     defer file_hashes.deinit(ctx.a);
     for (entry.dependencies) |dep| {
+        if (dep.missing != null) {
+            if (!(missingValid(ctx, dep) catch false)) {
+                ctx.trace("miss: negative lookup changed or unavailable");
+                return false;
+            }
+            continue;
+        }
         const hash = if (dep.library_prefix) |prefix| blk: {
             const slot = try library_names.getOrPut(ctx.a, dep.path);
             if (!slot.found_existing) slot.value_ptr.* = ctx.libraryNames(dep.path, allowed_outputs) catch return false;
@@ -546,6 +583,51 @@ test "hash fields cannot collide through concatenation" {
 test "blob hashes reject traversal" {
     try std.testing.expect(!validHash("../entry"));
     try std.testing.expect(validHash("0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"));
+}
+
+test "negative linker lookups gate storage and restoration before writes" {
+    var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer arena.deinit();
+    const a = arena.allocator();
+    const io = std.testing.io;
+    var tmp = std.testing.tmpDir(.{});
+    defer tmp.cleanup();
+    const relative = try std.fs.path.join(a, &.{ ".zig-cache", "tmp", &tmp.sub_path });
+    const cwd = try Dir.cwd().realPathFileAlloc(io, relative, a);
+    var env = std.process.Environ.Map.init(a);
+    var ctx: Context = .{ .a = a, .io = io, .env = &env, .root = try std.fs.path.join(a, &.{ cwd, "cache" }), .cwd = cwd };
+    try ctx.prepare();
+    const output = try std.fs.path.join(a, &.{ cwd, "output" });
+    const dep = try missingDependency(&ctx, "candidate.a");
+    try tmp.dir.writeFile(io, .{ .sub_path = "output", .data = "compiled artifact" });
+    const key = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
+    try store(&ctx, key, &.{dep}, &.{output}, "", "");
+    try tmp.dir.deleteFile(io, "output");
+    try std.testing.expect(try restore(&ctx, key, &.{output}));
+    try std.testing.expectEqualStrings("compiled artifact", try ctx.read(output));
+    // Appearance of a previously absent candidate cannot overwrite destinations.
+    try tmp.dir.writeFile(io, .{ .sub_path = "candidate.a", .data = "new library" });
+    try tmp.dir.writeFile(io, .{ .sub_path = "output", .data = "leave untouched" });
+    try std.testing.expect(!try restore(&ctx, key, &.{output}));
+    try std.testing.expectEqualStrings("leave untouched", try ctx.read(output));
+    try std.testing.expectError(error.InputAlreadyExists, missingDependency(&ctx, dep.path));
+    try std.testing.expectError(error.InvalidMissingDependency, store(&ctx, key, &.{dep}, &.{output}, "", ""));
+    try tmp.dir.deleteFile(io, "candidate.a");
+    try std.testing.expect(try restore(&ctx, key, &.{output}));
+    // Malformed combinations cannot sneak past file-content validation.
+    var malformed = dep;
+    malformed.directory = true;
+    try std.testing.expectError(error.InvalidMissingDependency, store(&ctx, key, &.{malformed}, &.{output}, "", ""));
+    malformed = dep;
+    malformed.hash = key;
+    try std.testing.expectError(error.InvalidMissingDependency, store(&ctx, key, &.{malformed}, &.{output}, "", ""));
+    malformed = dep;
+    malformed.missing = false;
+    try std.testing.expectError(error.InvalidMissingDependency, store(&ctx, key, &.{malformed}, &.{output}, "", ""));
+    // Ordinary entries still omit the optional extension for older v5 readers.
+    const ordinary: Dependency = .{ .path = "source.rs", .hash = key };
+    const json = try std.json.Stringify.valueAlloc(a, ordinary, .{ .emit_null_optional_fields = false });
+    try std.testing.expect(std.mem.indexOf(u8, json, "missing") == null);
 }
 
 // Names are sorted by libraryNames. Prefix matching deliberately follows rustc's

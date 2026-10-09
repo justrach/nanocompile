@@ -17,6 +17,31 @@ and phony dependency rules. Unknown opcodes, truncated reports, unsupported Make
 expansions and ambiguous multiple link rules are rejected. It does not yet
 classify scratch files or enable producer storage.
 
+The CAS now supports optional missing-file dependency records. They contain a
+domain-separated path hash and an absence marker. Storage rechecks absence;
+restoration checks every marker before replacing any output. Existing paths,
+unavailable lookups and malformed marker combinations prevent restoration.
+Ordinary entries omit the optional extension, retaining their existing v5
+serialization. The filesystem test verifies restoration, new-candidate refusal,
+destination preservation, removal/revalidation and malformed-record rejection.
+
+`src/link_observer.zig` implements the private final-link observer through
+`nanocompile internal-linker`. Its configuration explicitly selects the driver,
+report format and private report/invocation paths. It records the original
+driver arguments in a sealed manifest, inherits the existing environment, adds
+the native dependency-report option using separate driver arguments, and
+delegates stdout/stderr and exit status. The producer fixture exercises it with
+spaces and a comma in its private paths. Driver/SDK identity, response-file
+capture, scratch ownership and producer eligibility still need integration.
+
+The [new local fixture](../benchmarks/producer-link-observer-macos.json) covers
+three loaded macro results: 12, 13 after a preserved-mtime archive edit, and 14
+after a higher-priority archive appears while the fallback archive stays
+unchanged. Sources, explicit Rust externs and producer dep-info stay identical.
+Darwin reports the preferred candidate as missing before it appears; the cache
+must also guard native search-directory membership on platforms whose reports
+omit negative lookups.
+
 Inspect a report with the standalone diagnostic tool:
 
 ```sh

@@ -45,14 +45,18 @@ def main():
     p.add_argument("--output", required=True, type=Path)
     p.add_argument("--toolchain", default="1.97.1")
     p.add_argument("--decoder", type=Path, help="optional Zig link-report inspector")
+    p.add_argument("--observer", type=Path, help="nanocompile binary to observe the actual final linker")
     args = p.parse_args()
     decoder = args.decoder.resolve() if args.decoder else None
+    observer = args.observer.resolve() if args.observer else None
     if sys.platform not in ("darwin", "linux"):
         p.error("this probe requires macOS or Linux")
     root = args.state.resolve()
     root.mkdir(mode=0o700, parents=True, exist_ok=False)
     out = root / "out"
     out.mkdir()
+    preferred = root / "preferred-native"
+    preferred.mkdir()
     env = {k: v for k, v in os.environ.items()
            if not k.startswith(("R2_", "KACHE_", "NANOCOMPILE_"))
            and k not in ("RUSTC_WRAPPER", "RUSTC_WORKSPACE_WRAPPER", "RUSTC_BOOTSTRAP")}
@@ -66,6 +70,12 @@ def main():
                       "import json,pathlib,subprocess,sys\n"
                       "cfg=json.loads((pathlib.Path(__file__).parent/'linker.json').read_text())\n"
                       "sys.exit(subprocess.call([cfg['cc'],*sys.argv[1:],cfg['report_flag']]))\n")
+    if observer:
+        linker.write_text("#!/usr/bin/env python3\n"
+                          "import json,pathlib,subprocess,sys\n"
+                          "root=pathlib.Path(__file__).parent\n"
+                          "cfg=json.loads((root/'linker.json').read_text())\n"
+                          "sys.exit(subprocess.call([cfg['observer'],'internal-linker',str(root/'observer.json'),*sys.argv[1:]]))\n")
     linker.chmod(0o700)
 
     def run(command, name):
@@ -100,7 +110,11 @@ def main():
     phases = []
     metadata_texts = []
     original_stamp = None
-    for value in (12, 13):
+    for value in (12, 13, 14):
+        if value == 14:
+            # A newly appearing higher-priority archive changes resolution
+            # without changing the previously selected archive at all.
+            native = preferred / "libprobe_native.a"
         (root / "native.c").write_text("unsigned probe_value(void) { return " + str(value) + "; }\n")
         run([cc, "-fPIC", "-c", "native.c", "-o", str(root / "native.o")], "native-" + str(value))
         native.unlink(missing_ok=True)
@@ -113,10 +127,17 @@ def main():
         flag = ("-Wl,-dependency_info," + str(report) if sys.platform == "darwin"
                 else "-Wl,--dependency-file=" + str(report))
         cfg.write_text(json.dumps({"cc": cc, "report_flag": flag}))
+        invocation = root / ("invocation-" + str(value) + ".json")
+        if observer:
+            cfg.write_text(json.dumps({"observer": str(observer)}))
+            (root / "observer.json").write_text(json.dumps({"driver": str(Path(cc).absolute()),
+                                "format": "darwin" if sys.platform == "darwin" else "make",
+                                "report": str(report), "invocation": str(invocation)}))
         run([*rust, "producer.rs", "--crate-name", "producer", "--crate-type", "proc-macro",
              "--emit=dep-info,link", "--out-dir", str(out),
              "--extern", "middle=" + str(out / "libmiddle.rlib"), "--extern", "proc_macro",
-             "-L", "dependency=" + str(out), "-L", "native=" + str(out),
+             "-L", "dependency=" + str(out), "-L", "native=" + str(preferred),
+             "-L", "native=" + str(out),
              "-C", "linker=" + str(linker)], "producer-" + str(value))
         diagnostic = subprocess.run(["rustc", "-Zls=root", str(dylib)], cwd=root,
                                     env=dict(env, RUSTC_BOOTSTRAP="1"), capture_output=True, timeout=120)
@@ -136,6 +157,19 @@ def main():
         assert str(native) in deps["inputs"], deps
         assert any("libleaf" in path for path in deps["inputs"]), deps
         assert any("libmiddle" in path for path in deps["inputs"]), deps
+        invocation_verified = False
+        if observer:
+            record = invocation.read_bytes()
+            seal, payload = record.split(b"\n", 1)
+            # Check envelope structure and captured fields here. The producer
+            # parent must also validate the BLAKE3 seal before using the record.
+            assert len(seal) == 64 and all(chr(c) in "0123456789abcdef" for c in seal)
+            captured = json.loads(payload)
+            assert captured["driver"] == str(Path(cc).absolute())
+            assert Path(captured["cwd"]).resolve() == root
+            assert str(dylib) in captured["args"]
+            assert "env" not in captured
+            invocation_verified = True
         zig_report = None
         if decoder:
             zig_report = json.loads(run([str(decoder), "darwin" if sys.platform == "darwin" else "make",
@@ -155,9 +189,13 @@ def main():
         phases.append({"native_value": value, "consumer_output": actual,
                        "native_sha256": sha(native), "native_bytes": native.stat().st_size,
                        "native_mtime_ns": native.stat().st_mtime_ns,
+                       "selected_native_path": str(native),
+                       "fallback_native_sha256": sha(out / "libprobe_native.a"),
+                       "preferred_candidate_reported_missing": str(preferred / "libprobe_native.a") in deps["missing"],
                        "producer_sha256": sha(dylib),
                        "producer_dep_info_sha256": sha(out / "producer.d"),
                        "zig_report_verified": zig_report is not None,
+                       "zig_observer_invocation_verified": invocation_verified,
                        "linker_inputs": deps["inputs"], "linker_missing": deps["missing"],
                        "source_and_explicit_externs_unchanged": True,
                        "producer_external_metadata_dependencies": []})
@@ -165,19 +203,24 @@ def main():
     assert phases[0]["producer_sha256"] != phases[1]["producer_sha256"]
     assert phases[0]["native_sha256"] != phases[1]["native_sha256"]
     assert phases[0]["native_mtime_ns"] == phases[1]["native_mtime_ns"]
+    assert phases[1]["fallback_native_sha256"] == phases[2]["fallback_native_sha256"]
+    assert phases[1]["producer_dep_info_sha256"] == phases[2]["producer_dep_info_sha256"]
+    assert phases[1]["producer_sha256"] != phases[2]["producer_sha256"]
     result = {"platform": platform.platform(),
               "rustc": run(["rustc", "-vV"], "version").decode(),
-              "method": "real compiler and final native linker; two macro producer builds; native archive changed with preserved mtime; unchanged source files and explicit Rust externs; unchanged producer dep-info; load macro in rustc and run expanded consumer",
+              "method": "real compiler and final native linker; three macro producer builds; native archive changed with preserved mtime, then a higher-priority archive appears while fallback archive remains unchanged; unchanged source files and explicit Rust externs; unchanged producer dep-info; load macro in rustc and run expanded consumer",
               "fixture_hashes": reference, "phases": phases,
               "producer_metadata": metadata_texts,
               "zig_decoder_sha256": sha(decoder) if decoder else None,
-              "conclusion": "Producer metadata and source dep-info alone do not describe final linker inputs. Linker dependency reports include transitive Rust archives and unbundled native archives."}
+              "zig_observer_sha256": sha(observer) if observer else None,
+              "conclusion": "Producer metadata and source dep-info alone do not describe final linker inputs. Linker reports include transitive Rust archives and selected native archives. Higher-priority candidates can be resolved by rustc before the final linker; explicit native search membership still needs guards."}
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(result, indent=2) + "\n")
     print(json.dumps({"native_values": [p["consumer_output"] for p in phases],
                       "metadata_dependencies_empty": True,
                       "source_externs_and_dep_info_unchanged": True,
                       "native_mtime_preserved": True,
+                      "new_candidate_changes_resolution": True,
                       "linker_tracks_native_archive": True}))
 
 
