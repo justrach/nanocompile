@@ -37,6 +37,7 @@ def main():
     p.add_argument("--output", required=True)
     p.add_argument("--runs", type=int, default=3)
     p.add_argument("--jobs", type=int, default=4)
+    p.add_argument("--native-clang", action="store_true", help="opt Nano into Apple Clang native CAS; validate each mode against its own cold artifacts")
     p.add_argument("--standalone", action="store_true", help="disable kache's daemon for this comparison")
     p.add_argument("--proc-macros", choices=("tracked", "reported"), default="tracked", help="nanocompile proc-macro input policy; reported requires declaring unreported file reads")
     p.add_argument("--proc-macro-producers", action="store_true", help="enable the experimental macOS producer cache; verify macro dylib artifacts too")
@@ -63,13 +64,13 @@ def main():
         env["NANOCOMPILE_EXECUTABLE_PRODUCERS"] = "1"
     command = ["cargo", "build", "--release", "--locked", "--offline", "--lib",
                "-p", args.package, "-j", str(args.jobs), "--message-format=json-render-diagnostics"]
-    result = {"project": str(project), "commit": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=project, text=True).strip(),
+    result = {"script_sha256": sha(Path(__file__)), "project": str(project), "commit": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=project, text=True).strip(),
               "dirty": bool(subprocess.check_output(["git", "status", "--porcelain"], cwd=project)),
               "platform": platform.platform(), "jobs": args.jobs, "runs": args.runs,
               "rustc": subprocess.check_output(["rustc", "--version", "--verbose"], cwd=project, text=True),
               "nanocompile_sha256": sha(Path(binary)), "kache_sha256": sha(Path(kache)),
               "kache_version": subprocess.check_output([kache, "--version"], text=True).strip(),
-              "kache_daemon": not args.standalone, "nanocompile_proc_macros": args.proc_macros, "nanocompile_proc_macro_producers": args.proc_macro_producers, "nanocompile_executable_producers": args.executable_producers, "command": command,
+              "kache_daemon": not args.standalone, "native_clang": args.native_clang, "nanocompile_proc_macros": args.proc_macros, "nanocompile_proc_macro_producers": args.proc_macro_producers, "nanocompile_executable_producers": args.executable_producers, "command": command,
               "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat(), "builds": [],
               "method": "offline clean release package builds; same target path; prime direct build then empty caches; rotate three-way warm measurement order; validate each wrapper against its own cold artifact hashes (kache remaps paths)"}
     tracked = subprocess.check_output(['git', 'ls-files', '-z'], cwd=project).decode().split('\0')
@@ -98,6 +99,7 @@ def main():
     references = {}
     macro_references = {}
     executable_references = {}
+    native_references = {}
 
     def build(implementation, phase):
         shutil.rmtree(target, ignore_errors=True)
@@ -105,6 +107,10 @@ def main():
         build_env = dict(env)
         if implementation != "direct":
             build_env["RUSTC_WRAPPER"] = binary if implementation == "nanocompile" else kache
+        if implementation == "nanocompile" and args.native_clang:
+            build_env['CC'] = binary + ' clang'
+            build_env['CC_KNOWN_WRAPPER_CUSTOM'] = Path(binary).name
+            build_env['NANOCOMPILE_CLANG_REMARKS'] = '1'
         number = len(result["builds"])
         print(f"Starting {implementation} {phase} clean release build {number + 1}", flush=True)
         log_path = state / f"{number}-{implementation}-{phase}.log"
@@ -115,7 +121,7 @@ def main():
             proc = subprocess.Popen(command, cwd=project, env=build_env, stdout=log, stderr=log, start_new_session=True)
             while proc.poll() is None:
                 if time.monotonic() - last_sample > .5:
-                    peak = max(peak, tree_rss(proc.pid))
+                    peak = max(peak, tree_rss(os.getpid()))
                     last_sample = time.monotonic()
                 if peak > 40 * 1024**3 or time.monotonic() - start > 3600:
                     os.killpg(proc.pid, signal.SIGTERM)
@@ -130,31 +136,40 @@ def main():
         artifacts = {str(path.relative_to(target)): sha(path) for path in sorted((target / "release/deps").glob("*.rlib"))}
         macros = {str(path.relative_to(target)): sha(path) for path in sorted((target / "release/deps").glob("*.dylib"))}
         executables = {str(path.relative_to(target)): sha(path) for path in sorted((target / "release/build").glob("*/build-script-build")) if path.is_file()}
-        row = {"implementation": implementation, "phase": phase, "seconds": seconds,
+        native = {str(path.relative_to(target)): sha(path) for path in sorted(target.rglob('*'))
+                  if path.is_file() and path.suffix in ('.o', '.a')} if args.native_clang else {}
+        row = {"native_objects_and_archives": native, "implementation": implementation, "phase": phase, "seconds": seconds,
                "exit_code": proc.returncode, "events": dict(after - before), "rlibs": len(artifacts), "artifacts": artifacts,
                "peak_sampled_process_tree_rss_bytes": peak, "macro_dylibs": macros, "build_script_executables": executables}
         if implementation not in references:
             references[implementation] = artifacts
             macro_references[implementation] = macros
             executable_references[implementation] = executables
+            native_references[implementation] = native
         else:
+            row["matches_own_cold_native_artifacts"] = native_references[implementation] == native
             row["matches_own_cold_artifacts"] = references[implementation] == artifacts
             row["matches_own_cold_macro_dylibs"] = macro_references[implementation] == macros
             row["matches_own_cold_build_script_executables"] = executable_references[implementation] == executables
-        if implementation == "nanocompile":
+        if implementation == "nanocompile" and not args.native_clang:
             row["matches_direct_artifacts"] = artifacts == references.get("direct")
             row["matches_direct_macro_dylibs"] = macros == macro_references.get("direct")
             row["matches_direct_build_script_executables"] = executables == executable_references.get("direct")
         result["builds"].append(row)
         save()
-        print(json.dumps({k: v for k, v in row.items() if k not in ("artifacts", "macro_dylibs", "build_script_executables")}), flush=True)
+        print(json.dumps({k: v for k, v in row.items() if k not in ("artifacts", "macro_dylibs", "build_script_executables", "native_objects_and_archives")}), flush=True)
         if proc.returncode or not artifacts:
             raise RuntimeError(f"Build failed or produced no libraries; see {log_path}")
-        if any(row.get(check) is False for check in ("matches_own_cold_artifacts", "matches_direct_artifacts", "matches_own_cold_macro_dylibs", "matches_direct_macro_dylibs", "matches_own_cold_build_script_executables", "matches_direct_build_script_executables")):
+        if any(row.get(check) is False for check in ("matches_own_cold_native_artifacts", "matches_own_cold_artifacts", "matches_direct_artifacts", "matches_own_cold_macro_dylibs", "matches_direct_macro_dylibs", "matches_own_cold_build_script_executables", "matches_direct_build_script_executables")):
             raise RuntimeError(f"Artifact validation failed; see {log_path}")
+        if phase == "warm" and implementation == "nanocompile" and args.native_clang:
+            if row['events'].get('clang_native_hit', 0) < 20 or row['events'].get('hit', 0) < 165:
+                raise RuntimeError('Nano native or Rust cache did not serve expected warm hits')
         if phase == "warm" and implementation == "kache" and not row["events"].get("local_hit", 0):
             raise RuntimeError("kache recorded no local hits; comparison is invalid")
 
+    if args.native_clang:
+        result['method'] += '; Nano explicitly uses CC=nanocompile clang and native remarks; direct and kache retain their usual native compiler selection. Inline scanner changes debug representation, so every mode must match its own cold Rust, macro, executable and native artifact bytes. RSS includes benchmark parent, private kache daemon and Cargo descendants.'
     daemon = None
     daemon_log = None
     try:

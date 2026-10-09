@@ -104,6 +104,12 @@ fn readFileMemo(ctx: *cache.Context, path: []const u8, expected: Stamp) ?[]const
     return memo.hash;
 }
 
+/// Installed compiler binaries share the existing content/stamp identity policy.
+/// This is never used for source files or native output blobs.
+pub fn installedFileDigest(ctx: *cache.Context, path: []const u8) ![]const u8 {
+    return installedDigest(ctx, try stamp(ctx, path), "native-toolchain-file-v1");
+}
+
 fn rustFileDigest(ctx: *cache.Context, expected: Stamp) ![]const u8 {
     return installedDigest(ctx, expected, "rust-toolchain-file-v1");
 }

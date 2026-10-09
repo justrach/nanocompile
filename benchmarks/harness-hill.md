@@ -1248,3 +1248,33 @@ Rust/native artifacts match the first prime, and tracked sources remain unchange
 Fixtures detect preserved-mtime and already-dirty mmap header changes. This
 remains experimental: production and the accepted kache comparison are unchanged.
 The candidate prime reuses the shared cache and is not a cold-build measurement.
+
+## Installed Cargo native Clang command
+
+`nanocompile clang` is now an explicit Apple compiler-owned CAS command, with
+live Clang/SDK selection and compiler-content namespacing. The
+[installed-command correctness report](clang-command-regression.json) covers
+C debug objects, assembly, preserved-mtime and already-dirty mmap header changes,
+live selection on successive lookups, streaming mode, private permissions,
+clear, probes, stdin, disabling, opaque overrides and compiler failure.
+Unit and existing Rust/Zig integration checks pass; the CI matrix includes the
+new command's capable-compiler or passthrough checks.
+
+The [fresh three-way Harness run](harness-clang-command-three-way.json) uses
+three rotating warm samples per mode: direct **22.543275 s**, Nano with native
+caching **2.095014 s**, and kache with its daemon **2.054298 s**. Kache remains
+about 40.7 ms ahead in this run. Every Nano warm build has 167 Rust hits and
+24 actual native hits, with eight bypasses and three failed compiler probes.
+Each mode's Rust libraries, macro dylibs, build-script executables, native
+objects and archives match its own cold output. Native scanning changes debug
+representation and kache remaps paths, so this run validates each mode against
+its own cold output rather than normalizing away differences. All tracked
+sources remain unchanged. The benchmark parent, private daemon and compiler
+processes are included in the 40 GiB RSS cap.
+
+Direct prime is 24.356 s; Nano cold is 37.544 s with 167 Rust misses and 24
+native misses; kache cold is 26.570 s. There is no demonstrated cold-build gain.
+R2 transfer is excluded. Nano's native command is opt-in and its own Clang CAS
+is local; ordinary Rust/Zig caching behavior retains its existing policies.
+The preceding 27-pair scanner/replay comparison supplies the controlled
+performance evidence; this three-way run supplies the current kache comparison.

@@ -131,3 +131,11 @@ for arbitrary Clang versions, compilers, SDKs, languages or hosts. The native
 CAS remains local; Nano GC and R2 transport do not manage it. The first failed
 SDK-selection attempt remains in its private state directory and is not a
 performance sample. No incomplete or failed builds enter the final replay comparison report.
+
+The production CLI now provides the explicit `nanocompile clang` command.
+Its [installed-command run](../benchmarks/harness-clang-command-three-way.json)
+queries toolchain selection live, uses the existing installed-file identity
+policy and validates each configuration against its own cold artifacts.
+It measures 2.095 s Nano with native caching versus 22.54 s direct and 2.054 s
+kache. This is a fresh three-way comparison with different configurations;
+the earlier 27 pairs remain the controlled native replay evidence.

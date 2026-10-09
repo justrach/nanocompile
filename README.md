@@ -21,7 +21,7 @@
   <a href="#experimental-r2-testing">R2 snapshots</a>
 </p>
 
-A local, content-addressed compiler cache written in **stable Zig 0.17.0**, for Rust and Zig, with an opt-in Xcode native-cache command. It adapts kache's shared-blob storage, copy-on-write restoration, and single-flight compilation ideas into a small standalone program.
+A local, content-addressed compiler cache written in **stable Zig 0.17.0**, for Rust and Zig, with opt-in Apple Clang and Xcode native-cache commands. It adapts kache's shared-blob storage, copy-on-write restoration, and single-flight compilation ideas into a small standalone program.
 
 This implementation targets repeated compilation of unchanged inputs. It is an early implementation with explicit eligibility gates; unsupported invocations run the original compiler.
 
@@ -147,7 +147,7 @@ Zig already has a native cache. This wrapper skips the compiler process on a mat
 
 Working directories and output paths remain in keys, preserving embedded paths and diagnostics. Cross-worktree path normalization, automatic remote lookup, a daemon/scheduler, and broader Rust/linker coverage are future work. This is not full kache feature parity.
 
-The latest [Harness hill climb](benchmarks/harness-hill.md#two-active-native-queries-adopted) measures **2.89 s versus 22.81 s direct**, with 167 warm hits under explicit reported-input macros, experimental Apple macro/executable producers and pinned-compiler native classification. Kache still leads at 2.04 s. Capping the four live Apple selection queries at two active commands improved controlled Harness medians by 2.0% and 1.3% in two 27-pair batches, winning 42 of 54 pairs. The separate three-way Nano samples are 3.06, 2.89 and 2.64 s; the paired batches supply the before/after evidence. Cold Nano was 37.55 s versus kache's 26.72 s, with no demonstrated cold-build improvement. Earlier accepted live-driver-plan and native-classification changes gained 4.7% and 2.0% in their controlled comparisons. The last default-policy project run, on an earlier revision, took 17.36 s versus 22.96 s direct and 2.18 s kache, with 97 hits. Earlier full-prefix hosted comparisons passed on both Linux and Mac; those workloads are separate from this local run. Raw samples, executable checksums and policy limits are published alongside the results.
+The accepted Rust-only [Harness hill climb](benchmarks/harness-hill.md#two-active-native-queries-adopted) measures **2.89 s versus 22.81 s direct**, with 167 warm hits under explicit reported-input macros, experimental Apple macro/executable producers and pinned-compiler native classification. Kache still leads at 2.04 s. Capping the four live Apple selection queries at two active commands improved controlled Harness medians by 2.0% and 1.3% in two 27-pair batches, winning 42 of 54 pairs. The separate three-way Nano samples are 3.06, 2.89 and 2.64 s; the paired batches supply the before/after evidence. Cold Nano was 37.55 s versus kache's 26.72 s, with no demonstrated cold-build improvement. Earlier accepted live-driver-plan and native-classification changes gained 4.7% and 2.0% in their controlled comparisons. The last default-policy project run, on an earlier revision, took 17.36 s versus 22.96 s direct and 2.18 s kache, with 97 hits. Earlier full-prefix hosted comparisons passed on both Linux and Mac; those workloads are separate from this local run. Raw samples, executable checksums and policy limits are published alongside the results.
 
 The [Xcode comparison](benchmarks/xcode.md) measures real `xcodebuild` workloads against kache and Xcode's native compilation cache. On the latest Harness iOS app comparison, direct builds take **45.60 s**, the external nanocompile Clang launcher 47.09 s, kache 46.96 s, and **`nanocompile xcodebuild` 4.16 s**. The new command uses Apple's native Swift/Clang cache; the two external compiler launchers record zero cache hits for this Xcode command profile. Correctness checks and the five-pipeline comparison also passed on a hosted Mac.
 
@@ -178,6 +178,48 @@ fallback. See [executable requirements](docs/executable-producers.md).
 ```sh
 NANOCOMPILE_EXECUTABLE_PRODUCERS=1 RUSTC_WRAPPER="$nano_wrapper" cargo build --release
 ```
+
+## Cargo native Clang cache
+
+On macOS, `nanocompile clang` opts into Apple's compiler-owned CAS for eligible
+compile jobs. Use it for native C/assembly built by Cargo's `cc` crate:
+
+```sh
+PATH="$(dirname "$nano_wrapper"):$PATH" \
+CC="nanocompile clang" CC_KNOWN_WRAPPER_CUSTOM=nanocompile \
+RUSTC_WRAPPER="$nano_wrapper" cargo build --release
+
+# Show native cache remarks and record observed hits/misses
+NANOCOMPILE_CLANG_REMARKS=1 "$nano_wrapper" clang -c example.c -o example.o
+```
+
+Build scripts continue to execute. The command queries the selected Clang and
+SDK live, namespaces the managed `NANOCOMPILE_DIR/native-clang` CAS by installed
+compiler content, SDK selection and host architecture, and lets Clang discover
+inputs and replay compilations. Caller sysroots and SDKROOT take precedence;
+`NANOCOMPILE_CLANG` selects an explicit compiler. Unsupported compiler capability,
+opaque helpers, probes, stdin jobs, response files, caller-owned CAS flags and
+non-macOS targets pass through. Native caching is available when the selected
+Apple Clang supports the required flags. Other hosts use compiler passthrough.
+
+Inline scanning changes Clang's debug representation: the tested compiler omits
+`DW_AT_comp_dir`. Native cache output is validated against the same scanner
+with replay disabled and against its own cold output. This is an explicit
+compiler mode. `clear` removes the managed CAS under the maintenance lock;
+`gc` and R2 snapshots cover the existing Rust/Zig blobs, while this native CAS
+remains local. `stats` reports native invocations/failures; hit/miss observations
+require `NANOCOMPILE_CLANG_REMARKS=1`, which adds remarks and uses bounded capture.
+Default mode streams the compiler's inherited descriptors normally.
+
+The [installed-command comparison](benchmarks/harness-clang-command-three-way.json)
+measures **2.095 s Nano versus 22.54 s direct and 2.054 s kache** on Harness,
+with 167 Rust and 24 native warm hits. It uses the explicit reported-macro,
+macro/executable-producer policies from the Rust hill climb. These are three
+warm samples per mode; the preceding [27-pair replay experiment](docs/cargo-clang-cas-experiment.md)
+establishes the native replay gain. Nano cold is 37.54 s versus kache's 26.57 s.
+The native cache does not establish a cold-build improvement. All warm modes
+match their own cold Rust/native artifacts; scanner debug changes and kache
+remapping prevent treating every mode as byte-identical to default direct builds.
 
 ## Xcode native cache
 

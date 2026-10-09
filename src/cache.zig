@@ -540,6 +540,10 @@ pub fn stats(ctx: *Context) !void {
     var failed: usize = 0;
     var xcode_runs: usize = 0;
     var xcode_failed: usize = 0;
+    var clang_run: usize = 0;
+    var clang_failed: usize = 0;
+    var clang_hit: usize = 0;
+    var clang_miss: usize = 0;
     var it = std.mem.tokenizeScalar(u8, events, '\n');
     while (it.next()) |event| {
         if (std.mem.eql(u8, event, "hit")) hit += 1;
@@ -548,6 +552,10 @@ pub fn stats(ctx: *Context) !void {
         if (std.mem.eql(u8, event, "failed")) failed += 1;
         if (std.mem.eql(u8, event, "xcode_native_run")) xcode_runs += 1;
         if (std.mem.eql(u8, event, "xcode_native_failed")) xcode_failed += 1;
+        if (std.mem.eql(u8, event, "clang_native_run")) clang_run += 1;
+        if (std.mem.eql(u8, event, "clang_native_failed")) clang_failed += 1;
+        if (std.mem.eql(u8, event, "clang_native_hit")) clang_hit += 1;
+        if (std.mem.eql(u8, event, "clang_native_miss")) clang_miss += 1;
     }
     var blobs: usize = 0;
     var size: u64 = 0;
@@ -561,13 +569,14 @@ pub fn stats(ctx: *Context) !void {
     };
     try ctx.out(try std.fmt.allocPrint(ctx.a, "hits: {d}\nmisses: {d}\nbypasses: {d}\nfailed compilations: {d}\nblobs: {d}\nlogical bytes: {d}\n", .{ hit, miss, bypass, failed, blobs, size }));
     try ctx.out(try std.fmt.allocPrint(ctx.a, "native Xcode invocations: {d}\nnative Xcode failures: {d}\n", .{ xcode_runs, xcode_failed }));
+    try ctx.out(try std.fmt.allocPrint(ctx.a, "native Clang invocations: {d}\nnative Clang failures: {d}\nobserved Clang hits: {d}\nobserved Clang misses: {d}\nClang hit/miss observations require NANOCOMPILE_CLANG_REMARKS=1\n", .{ clang_run, clang_failed, clang_hit, clang_miss }));
 }
 
 pub fn clear(ctx: *Context) !void {
     try ctx.prepare();
     const lock = try Lock.acquire(ctx, "maintenance", true);
     defer lock.release();
-    for ([_][]const u8{ "entries", "blobs", "xcode", "metadata", "metadata-queries", "producer-jobs" }) |sub| {
+    for ([_][]const u8{ "entries", "blobs", "xcode", "native-clang", "metadata", "metadata-queries", "producer-jobs" }) |sub| {
         try Dir.cwd().deleteTree(ctx.io, try ctx.path(&.{sub}));
         try Dir.cwd().createDirPath(ctx.io, try ctx.path(&.{sub}));
     }
