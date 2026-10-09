@@ -1182,3 +1182,16 @@ with 20.36 ms standard error. Every candidate warm build serves 136 worker
 hits, all 167 artifacts match, and source contents remain unchanged. The
 prototype remains experimental; production is not changed. Raw samples and
 source/build instructions are published for further transport work.
+
+## In-memory diagnostics and earlier fallback dispatch
+
+The [second worker iteration](../docs/restore-worker-memory-experiment.md)
+removes temporary-file diagnostic capture and skips IPC for obvious producers
+and compiler probes. Fifteen real compiler/failure checks pass. Two actual
+27-pair Harness sessions retain full content hashing and exact artifacts:
+2.685267 → 2.649694 s and 2.697642 → 2.677427 s build medians, with 19 and
+18 candidate wins. Across 54 pairs, median paired savings are 13.19 ms and
+mean savings 26.83 ms (13.73 ms standard error). IPC declines fall from 42 to
+six per candidate build; 136 hits are actually served by workers. The gain is
+modest and variable. The prototype remains experimental and production is
+unchanged; raw samples, source patches and reproduction instructions are public.

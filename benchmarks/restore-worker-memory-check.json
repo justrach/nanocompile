@@ -1,0 +1,37 @@
+{
+  "scope": "private macOS cache-hit worker and lightweight C client; not production adoption",
+  "checks": [
+    "miss falls back; worker hit preserves every artifact and diagnostic byte",
+    "trace-enabled worker hit preserves exact diagnostics and trace bytes",
+    "obvious rustc version probe skips worker IPC",
+    "source mutation causes normal compiler miss",
+    "per-request environment changes invalidate and previous environment restores correctly",
+    "per-request cwd isolation and original cwd reuse",
+    "artifact blob corruption recompiled and repaired",
+    "already-dirty live mmap source mutation is detected by full hashing",
+    "unsupported invocation preserves compiler failure status and diagnostics",
+    "fallback compiler receives original stdin and produces identical executable",
+    "obvious Rust binary producer skips worker IPC",
+    "stable Zig 0.17.0 executable restored by worker with identical bytes",
+    "concurrent same-key restores preserve outputs and locks",
+    "oversized/malformed requests leave workers usable",
+    "terminated workers and leftover sockets fall back to accepted wrapper"
+  ],
+  "passed": 15,
+  "binary_sha256": {
+    "worker": "925bd3a9c71b1ae25d6351d5e47900de4885501f12fd0c09b65aac2fdf606b9b",
+    "front": "ac0f6416a5f848395ee92ecd44ec17e52e64d5742cbac12e2bf072db074860a4",
+    "baseline": "1f8f2a76a8bd66450fb24065a64556d74b254a946fb207cfbe7e4a83d96f0658"
+  },
+  "core_source_revision": "d7c3c02345f63961509767cc559609f45dcfbe7b",
+  "experimental_sources_sha256": {
+    "restore_worker_memory.zig": "7c4556c12b007c1a28898870e7ec8bfafd5da9a68d88cb3275598398c5ce8e4f",
+    "restore_worker_front_memory.c": "3c5dc681431dc47eb28a0f0af60caa2e4ae2ad7e843bb2daa83edd6f3781b8f8",
+    "restore_worker_transport_memory.c": "76c13e94d13f06326686b8a1af8116c968e355f95f4f1c35ead3919a8b0a0b56",
+    "restore-worker-memory.patch": "dfcf764ea0ad1ec580aa417fc64818c587ea78c82b4ed285fb5717750ea83039",
+    "restore_worker_check.py": "b0b1a39cf26b6cf6eed798822b5f00c34c168acc53f19a039fc997856d1e95d9",
+    "restore_worker_pool.py": "3e2c2037ec3a364fbc72a306caca14779d035a09e6194fc77f4d9d25c1dafa4b",
+    "restore_worker_pair.py": "a5d2330bd895ff9b1b8386a7a04d5805f2034ba156da7b0a941ea94e424ab40f"
+  },
+  "production_adoption": false
+}

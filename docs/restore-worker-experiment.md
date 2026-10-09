@@ -129,3 +129,8 @@ installed executable SHA-256 remains
 The next iteration can remove temporary-file diagnostic capture and decline
 known producer/probe requests before IPC. Those are hypotheses to implement
 and measure against this first prototype, not established savings.
+
+The subsequent [in-memory diagnostic/dispatch experiment](restore-worker-memory-experiment.md)
+implements those changes and records two 27-pair Harness sessions. It preserves
+full hashing and remains experimental; its small median improvements are not
+a production adoption or a cold-build gain.

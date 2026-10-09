@@ -26,6 +26,7 @@ def main():
     parser.add_argument("front", type=Path)
     parser.add_argument("baseline", type=Path)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--expect-pruning", action="store_true")
     args = parser.parse_args()
     args.worker, args.front, args.baseline = (p.resolve() for p in [args.worker, args.front, args.baseline])
     checks = []
@@ -74,6 +75,20 @@ def main():
             assert (baseline.stdout, baseline.stderr) == (warm.stdout, warm.stderr)
             assert artifacts(out) == expected
             checks.append("miss falls back; worker hit preserves every artifact and diagnostic byte")
+
+            trace_env = dict(env, NANOCOMPILE_TRACE="1")
+            remove(); run(e=trace_env)
+            remove(); trace_front = run(e=trace_env)
+            remove(); trace_base = run(binary=args.baseline, e=trace_env)
+            assert (trace_front.stdout, trace_front.stderr) == (trace_base.stdout, trace_base.stderr)
+            assert b"nanocompile: hit\n" in trace_front.stderr
+            checks.append("trace-enabled worker hit preserves exact diagnostics and trace bytes")
+
+            if args.expect_pruning:
+                before_probe = pool.counts()
+                probe = run(["rustc", "-vV"])
+                assert b"rustc 1.97.1" in probe.stdout and pool.counts() == before_probe
+                checks.append("obvious rustc version probe skips worker IPC")
 
             src.write_text(src.read_text().replace("let dead = 1", "let dead = 2"))
             remove(); run()
@@ -135,6 +150,7 @@ def main():
 
             stdin_command = ["rustc", "-", "--crate-name", "stdin_fixture", "--crate-type", "bin", "-o", str(root / "stdin-bin")]
             stdin_code = b"fn main() { println!(\"stdin preserved\"); }\n"
+            before_stdin = pool.counts()
             front_stdin = subprocess.run([str(args.front), *stdin_command], input=stdin_code, env=env, cwd=root, capture_output=True, timeout=60)
             stdin_artifact = (root / "stdin-bin").read_bytes()
             base_stdin = subprocess.run([str(args.baseline), *stdin_command], input=stdin_code, env=env, cwd=root, capture_output=True, timeout=60)
@@ -143,6 +159,9 @@ def main():
             assert (root / "stdin-bin").read_bytes() == stdin_artifact
             assert subprocess.check_output([str(root / "stdin-bin")]) == b"stdin preserved\n"
             checks.append("fallback compiler receives original stdin and produces identical executable")
+            if args.expect_pruning:
+                assert pool.counts() == before_stdin
+                checks.append("obvious Rust binary producer skips worker IPC")
 
             zig_output = root / "zig-bin"
             zig_command = ["zig", "build-exe", str(zig_src), "-O", "ReleaseFast", "-femit-bin=" + str(zig_output)]
