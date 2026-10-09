@@ -96,7 +96,7 @@ Zig already has a native cache. This wrapper skips the compiler process on a mat
 
 Working directories and output paths remain in keys, preserving embedded paths and diagnostics. Cross-worktree path normalization, automatic remote lookup, a daemon/scheduler, and broader Rust/linker coverage are future work. This is not full kache feature parity.
 
-The [Harness hill climb](benchmarks/harness-hill.md) now measures **19.31 s for the default mode versus 25.16 s direct**, with 90–91 cache hits. Kache still takes 2.16 s on that comparison. The cold-cache regression and the optional reported-input macro experiment are recorded alongside the results.
+The [Harness hill climb](benchmarks/harness-hill.md) now measures **5.30 s versus 22.96 s direct** with explicit reported-input macros and native-path tracking, with 115–123 hits. Kache still leads at 2.80 s in that run. The default macro policy takes 19.18 s versus 22.86 s direct; it does not receive the reported mode's improvement. Cold-cache cost remains a regression. Raw samples and policy limits are recorded alongside the results.
 
 The [Xcode comparison](benchmarks/xcode.md) measures real `xcodebuild` workloads against kache and Xcode's native compilation cache. On the latest Harness iOS app comparison, direct builds take **45.60 s**, the external nanocompile Clang launcher 47.09 s, kache 46.96 s, and **`nanocompile xcodebuild` 4.16 s**. The new command uses Apple's native Swift/Clang cache; the two external compiler launchers record zero cache hits for this Xcode command profile. Correctness checks and the five-pipeline comparison also passed on a hosted Mac.
 
