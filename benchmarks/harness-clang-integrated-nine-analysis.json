@@ -1,0 +1,81 @@
+{
+  "measured_revision": "8f6dace1054341dcd215f6502f7adb2e157437c4",
+  "raw_file": "harness-clang-integrated-nine-samples.json",
+  "raw_sha256": "df23fad1badc0c62696fdf520cad0c86200689b7c015367df6510c8c0f91e64b",
+  "binary_sha256": "f03c9570446371873565886f4e6ba980629547f99284437240c13a2003200be1",
+  "script_sha256": "cccb356df988baecca4132464674026f4da2beb4c589a24ffc03bc0c9b90a50e",
+  "summary": {
+    "direct": {
+      "samples_seconds": [
+        25.52110749995336,
+        25.112602874985896,
+        24.499831957975402,
+        24.298767999978736,
+        24.3214707080042,
+        23.83031366596697,
+        23.511668416962493,
+        25.01385962497443,
+        24.66090662503848
+      ],
+      "median_seconds": 24.499831957975402,
+      "mean_seconds": 24.530058819315553,
+      "min_seconds": 23.511668416962493,
+      "max_seconds": 25.52110749995336,
+      "stdev_seconds": 0.6321985279251232
+    },
+    "nanocompile": {
+      "samples_seconds": [
+        1.999240540957544,
+        2.0080894170096144,
+        2.0699378340505064,
+        2.141607416968327,
+        2.0156864160089754,
+        1.9922295000287704,
+        2.2388511250028387,
+        2.3688200000324287,
+        2.037681541987695
+      ],
+      "median_seconds": 2.037681541987695,
+      "mean_seconds": 2.0969048657829665,
+      "min_seconds": 1.9922295000287704,
+      "max_seconds": 2.3688200000324287,
+      "stdev_seconds": 0.1300477771669895
+    },
+    "kache": {
+      "samples_seconds": [
+        2.4216773750376888,
+        2.1367774169775657,
+        2.31525933399098,
+        2.5062971249572,
+        2.536541417008266,
+        2.614201208052691,
+        3.565004708012566,
+        3.7816725409938954,
+        2.1617426250013523
+      ],
+      "median_seconds": 2.5062971249572,
+      "mean_seconds": 2.671019305559134,
+      "min_seconds": 2.1367774169775657,
+      "max_seconds": 3.7816725409938954,
+      "stdev_seconds": 0.5931610440300576
+    }
+  },
+  "same_round_nano_minus_kache": {
+    "method": "Descriptive differences within each rotating round. Samples share one host/session and are not independent machine trials; standard error is descriptive, not a general winner test.",
+    "samples_seconds": [
+      -0.42243683408014476,
+      -0.12868799996795133,
+      -0.2453214999404736,
+      -0.3646897079888731,
+      -0.5208550009992905,
+      -0.6219717080239207,
+      -1.3261535830097273,
+      -1.4128525409614667,
+      -0.12406108301365748
+    ],
+    "nano_faster_rounds": 9,
+    "median_seconds": -0.42243683408014476,
+    "mean_seconds": -0.5741144397761673,
+    "descriptive_standard_error_seconds": 0.16029892692731199
+  }
+}

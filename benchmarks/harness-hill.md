@@ -1382,3 +1382,17 @@ and live selector barrier/failure checks pass.
 [protocol and adoption](../docs/clang-integrated-cc1-experiment.md).
 The earlier nine-sample kache comparison predates this change and is retained
 as historical evidence pending a new complete comparison.
+
+## Adopted integrated cc1: fresh nine-sample comparison
+
+Warm medians are 2.037682 s Nano, 2.506297 s kache and 24.499832 s direct.
+Nano is faster in 9/9 corresponding rounds in this local session. Mean
+same-round saving is 574.114 ms with descriptive standard error 160.299 ms;
+kache ranges 2.136777–3.781673 s, so variability and all outliers remain explicit.
+The paired 5.14%/5.62% source-change proof is separate from this full comparison.
+Cold remains 38.066364 s Nano versus 27.462381 s kache. All 27 warm builds
+match their own cold Rust/producer/native artifacts and tracked sources remain
+unchanged. Linux/macOS CI passes on core 8f6dace.
+[Protocol and limits](../docs/clang-integrated-nine-samples.md);
+[all builds](harness-clang-integrated-nine-samples.json);
+[complete statistical summary](harness-clang-integrated-nine-analysis.json).

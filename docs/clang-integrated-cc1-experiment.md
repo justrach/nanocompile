@@ -69,8 +69,10 @@ python3 benchmarks/experiments/clang_integrated_pair.py \
 [source/binary provenance and native checks](../benchmarks/clang-integrated-check.json),
 and [raw paired builds](../benchmarks/harness-clang-integrated-paired.json)
 retain the evidence. [Full confirmation data](../benchmarks/harness-clang-integrated-confirm.json)
-records the separate batch. This is a local paired evaluation. It does not update the
-last three-way kache comparison or establish a cross-machine advantage.
+records the separate batch. This is a local paired evaluation. A subsequent
+[nine-sample complete comparison](clang-integrated-nine-samples.md) measures
+the adopted version against direct Cargo and kache separately; these local
+results do not establish a cross-machine advantage.
 
 Installed source matches the tested candidate exactly.
 [Installed build/check provenance](../benchmarks/clang-integrated-installed-check.json),

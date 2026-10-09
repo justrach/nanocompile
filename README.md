@@ -217,23 +217,23 @@ Default mode streams the compiler's inherited descriptors normally.
 Eligible native-CAS jobs run Clang's cc1 frontend in-process to reduce replay
 overhead; caller execution flags can override this default.
 
-The [latest nine-sample comparison before integrated cc1](benchmarks/harness-clang-selection-nine-samples.json)
-measures warm medians of **2.005 s Nano versus 22.64 s direct and 1.962 s kache**
+The [latest nine-sample comparison](docs/clang-integrated-nine-samples.md)
+measures warm medians of **2.038 s Nano versus 24.50 s direct and 2.506 s kache**
 on Harness, with 167 Rust and 24 native warm hits. It uses explicit reported-macro
-and Apple macro/executable-producer policies. Kache's median leads by 43 ms in
-this session, reversing the previous three-sample ordering; Nano is faster in
-3/9 corresponding rounds. The mean same-round difference is 20 ms, with
-descriptive standard error 45 ms. A broad Nano latency advantage is not
-established. The earlier 2.854 s Nano outlier did not recur; both datasets
-remain public.
+and Apple macro/executable-producer policies. Nano is faster in all nine
+corresponding rounds in this session. Kache ranges from 2.137 to 3.782 s;
+Nano ranges from 1.992 to 2.369 s. The mean same-round saving is 574 ms,
+with descriptive standard error 160 ms. This local session does not establish
+a general cross-machine advantage. The previous nine-sample run favored kache
+by 43 ms in median; both datasets remain public.
 Two independent [27-pair lookup comparisons](docs/clang-selection-overlap-experiment.md)
 confirm the adopted live-query overlap gains **5.6% and 5.1%**, winning 51/54
 pairs with 193 exact artifacts. Compiler and SDK selection remain live.
 Two further [27-pair integrated-cc1 comparisons](docs/clang-integrated-cc1-experiment.md)
 confirm **5.1% and 5.6%** median improvements, winning 51/54 pairs with
 193 exact artifacts. These measure the native adapter change against its
-predecessor; a fresh three-way comparison is needed to update the kache ranking.
-Nano cold is 37.29 s versus kache's 26.51 s. The native cache does not establish
+predecessor; the complete comparison above separately measures the installed version.
+Nano cold is 38.07 s versus kache's 27.46 s in the latest session. The native cache does not establish
 a cold-build improvement. All warm modes match their own cold Rust/native
 artifacts; scanner debug changes and kache remapping prevent treating every
 mode as byte-identical to default direct builds.
@@ -299,7 +299,7 @@ Benchmarks time complete process invocations. They remove the primary output bef
 
 Measured results and the optimization trail are in `benchmarks/`. These synthetic workloads demonstrate warm-hit latency, not whole-project speed or an advantage across all workloads. A first-seen toolchain requires a full content fingerprint and makes the initial miss slower than direct compilation or kache. Later compilation units share that validated identity.
 
-The [initial Harness comparison with kache](benchmarks/kache-harness.md) measured clean release builds of a real Cargo dependency graph: direct 22.77 s, nanocompile 22.95 s, kache with its daemon 2.01 s. The [subsequent hill climb](benchmarks/harness-hill.md) improves default nanocompile builds to 19.31 s against 25.16 s direct and 2.16 s kache, with three warm samples per implementation. Kache remains substantially faster. Small-fixture hit latency does not predict this project result. The separate [R2 snapshot benchmark](benchmarks/harness.md) verifies cache preservation and restoration.
+The [initial Harness comparison with kache](benchmarks/kache-harness.md) measured clean release builds of a real Cargo dependency graph: direct 22.77 s, nanocompile 22.95 s, kache with its daemon 2.01 s. The [subsequent hill climb](benchmarks/harness-hill.md) improves default nanocompile builds to 19.31 s against 25.16 s direct and 2.16 s kache, with three warm samples per implementation. Kache is substantially faster under that default policy. The separate opt-in native/producers profile above reports the newer complete comparison. Small-fixture hit latency does not predict this project result. The separate [R2 snapshot benchmark](benchmarks/harness.md) verifies cache preservation and restoration.
 
 GitHub Actions runs real compiler tests and the synthetic benchmark on Linux and macOS. Each run uploads its measured JSON as an artifact. No R2 credentials are needed by pull-request jobs.
 
