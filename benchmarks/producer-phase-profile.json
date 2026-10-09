@@ -1,0 +1,2642 @@
+{
+  "method": "Private instrumented executable and Python capture wrapper. One clean cold plus two warm Cargo builds. Stage times include concurrent contention and profiler output overhead; sums overlap and are not project wall times. No compiler environments or arguments are recorded.",
+  "accepted_binary_sha256": "531207e9947654f5b989608d4227ca8ec0d63ca5287f2cb43c55ea519c86e003",
+  "profile_binary_sha256": "2283e26b51498cac2e4d1b4fdb6a9a1e6bab5b2d8ae2bde22e37c026ada7a589",
+  "instrumentation_patch_sha256": "5d3aefd4a59ba7dbab75de2deabd9e6661369f09b13ab47f2e137c3ffa7ae3f8",
+  "capture_patch_sha256": "8d6756701240575e931cbcf485a88320a6d3b0686696a5c39150299491a301e0",
+  "capture_script_sha256": "e682d33b8e01d999d0973494af44b6421a9efa069074d53644e40b664c83f2c2",
+  "rustc": "rustc 1.97.1 (8bab26f4f 2026-07-14)\nbinary: rustc\ncommit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452\ncommit-date: 2026-07-14\nhost: aarch64-apple-darwin\nrelease: 1.97.1\nLLVM version: 22.1.6\n",
+  "jobs": 4,
+  "successful_warm_producer_hits": 62,
+  "tracked_sources_match_accepted_run": true,
+  "stage_median_ms": {
+    "prepare": 0.036146,
+    "native-selection": 29.2240625,
+    "rust-key": 1.222854,
+    "observer-hash": 1.112708,
+    "producer-locks": 0.093521,
+    "restore": 10.769708
+  },
+  "stage_samples": {
+    "prepare": [
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 57291
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 36375
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 41542
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 35500
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 47125
+      },
+      {
+        "phase": "warm-1",
+        "crate": "zerovec_derive",
+        "type": "proc-macro",
+        "nanoseconds": 35167
+      },
+      {
+        "phase": "warm-1",
+        "crate": "displaydoc",
+        "type": "proc-macro",
+        "nanoseconds": 34042
+      },
+      {
+        "phase": "warm-1",
+        "crate": "zerofrom_derive",
+        "type": "proc-macro",
+        "nanoseconds": 43042
+      },
+      {
+        "phase": "warm-1",
+        "crate": "yoke_derive",
+        "type": "proc-macro",
+        "nanoseconds": 34291
+      },
+      {
+        "phase": "warm-1",
+        "crate": "tokio_macros",
+        "type": "proc-macro",
+        "nanoseconds": 33750
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 35333
+      },
+      {
+        "phase": "warm-1",
+        "crate": "futures_macro",
+        "type": "proc-macro",
+        "nanoseconds": 36750
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 36833
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 38958
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 34750
+      },
+      {
+        "phase": "warm-1",
+        "crate": "serde_derive",
+        "type": "proc-macro",
+        "nanoseconds": 30917
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 35125
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 32000
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 37042
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 48542
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 35458
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 38500
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 34875
+      },
+      {
+        "phase": "warm-1",
+        "crate": "tracing_attributes",
+        "type": "proc-macro",
+        "nanoseconds": 34708
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 35000
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 39875
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 43875
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 34500
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 34042
+      },
+      {
+        "phase": "warm-1",
+        "crate": "thiserror_impl",
+        "type": "proc-macro",
+        "nanoseconds": 39125
+      },
+      {
+        "phase": "warm-1",
+        "crate": "async_trait",
+        "type": "proc-macro",
+        "nanoseconds": 38458
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 56750
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 37500
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 36167
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 37541
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 44875
+      },
+      {
+        "phase": "warm-2",
+        "crate": "zerovec_derive",
+        "type": "proc-macro",
+        "nanoseconds": 34875
+      },
+      {
+        "phase": "warm-2",
+        "crate": "displaydoc",
+        "type": "proc-macro",
+        "nanoseconds": 35750
+      },
+      {
+        "phase": "warm-2",
+        "crate": "zerofrom_derive",
+        "type": "proc-macro",
+        "nanoseconds": 36125
+      },
+      {
+        "phase": "warm-2",
+        "crate": "yoke_derive",
+        "type": "proc-macro",
+        "nanoseconds": 35916
+      },
+      {
+        "phase": "warm-2",
+        "crate": "tokio_macros",
+        "type": "proc-macro",
+        "nanoseconds": 34500
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 36875
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 44250
+      },
+      {
+        "phase": "warm-2",
+        "crate": "futures_macro",
+        "type": "proc-macro",
+        "nanoseconds": 41208
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 52917
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 37584
+      },
+      {
+        "phase": "warm-2",
+        "crate": "serde_derive",
+        "type": "proc-macro",
+        "nanoseconds": 33500
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 34333
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 35584
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 42458
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 48208
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 39250
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 33958
+      },
+      {
+        "phase": "warm-2",
+        "crate": "tracing_attributes",
+        "type": "proc-macro",
+        "nanoseconds": 33667
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 36917
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 42333
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 34291
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 57708
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 35416
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 34708
+      },
+      {
+        "phase": "warm-2",
+        "crate": "thiserror_impl",
+        "type": "proc-macro",
+        "nanoseconds": 36125
+      },
+      {
+        "phase": "warm-2",
+        "crate": "async_trait",
+        "type": "proc-macro",
+        "nanoseconds": 31625
+      }
+    ],
+    "native-selection": [
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 32059875
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 31326333
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 29696125
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 31145709
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 28965375
+      },
+      {
+        "phase": "warm-1",
+        "crate": "zerovec_derive",
+        "type": "proc-macro",
+        "nanoseconds": 30019208
+      },
+      {
+        "phase": "warm-1",
+        "crate": "displaydoc",
+        "type": "proc-macro",
+        "nanoseconds": 30542708
+      },
+      {
+        "phase": "warm-1",
+        "crate": "zerofrom_derive",
+        "type": "proc-macro",
+        "nanoseconds": 29186500
+      },
+      {
+        "phase": "warm-1",
+        "crate": "yoke_derive",
+        "type": "proc-macro",
+        "nanoseconds": 28631250
+      },
+      {
+        "phase": "warm-1",
+        "crate": "tokio_macros",
+        "type": "proc-macro",
+        "nanoseconds": 29261625
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 30754250
+      },
+      {
+        "phase": "warm-1",
+        "crate": "futures_macro",
+        "type": "proc-macro",
+        "nanoseconds": 27856917
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 29689459
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 29669334
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 28675458
+      },
+      {
+        "phase": "warm-1",
+        "crate": "serde_derive",
+        "type": "proc-macro",
+        "nanoseconds": 29833000
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 28794000
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 28510709
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 27781708
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 28824542
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 28306208
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 27875417
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 27805917
+      },
+      {
+        "phase": "warm-1",
+        "crate": "tracing_attributes",
+        "type": "proc-macro",
+        "nanoseconds": 29482875
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 28282000
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 29145500
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 28090250
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 29962167
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 28136416
+      },
+      {
+        "phase": "warm-1",
+        "crate": "thiserror_impl",
+        "type": "proc-macro",
+        "nanoseconds": 30041042
+      },
+      {
+        "phase": "warm-1",
+        "crate": "async_trait",
+        "type": "proc-macro",
+        "nanoseconds": 28422459
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 31806625
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 31034917
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 28502750
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 29637917
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 29265500
+      },
+      {
+        "phase": "warm-2",
+        "crate": "zerovec_derive",
+        "type": "proc-macro",
+        "nanoseconds": 30465833
+      },
+      {
+        "phase": "warm-2",
+        "crate": "displaydoc",
+        "type": "proc-macro",
+        "nanoseconds": 29077459
+      },
+      {
+        "phase": "warm-2",
+        "crate": "zerofrom_derive",
+        "type": "proc-macro",
+        "nanoseconds": 28843917
+      },
+      {
+        "phase": "warm-2",
+        "crate": "yoke_derive",
+        "type": "proc-macro",
+        "nanoseconds": 29530334
+      },
+      {
+        "phase": "warm-2",
+        "crate": "tokio_macros",
+        "type": "proc-macro",
+        "nanoseconds": 33728125
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 31452208
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 33016208
+      },
+      {
+        "phase": "warm-2",
+        "crate": "futures_macro",
+        "type": "proc-macro",
+        "nanoseconds": 34913292
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 31351667
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 31133875
+      },
+      {
+        "phase": "warm-2",
+        "crate": "serde_derive",
+        "type": "proc-macro",
+        "nanoseconds": 32356708
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 29074417
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 30250458
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 30146000
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 28131875
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 27445208
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 28431958
+      },
+      {
+        "phase": "warm-2",
+        "crate": "tracing_attributes",
+        "type": "proc-macro",
+        "nanoseconds": 29132791
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 29654958
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 28395125
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 27987709
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 29322250
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 28324167
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 28084500
+      },
+      {
+        "phase": "warm-2",
+        "crate": "thiserror_impl",
+        "type": "proc-macro",
+        "nanoseconds": 28866584
+      },
+      {
+        "phase": "warm-2",
+        "crate": "async_trait",
+        "type": "proc-macro",
+        "nanoseconds": 27673917
+      }
+    ],
+    "rust-key": [
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 1931917
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 1879417
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 1893583
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 1249958
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 1294916
+      },
+      {
+        "phase": "warm-1",
+        "crate": "zerovec_derive",
+        "type": "proc-macro",
+        "nanoseconds": 1291292
+      },
+      {
+        "phase": "warm-1",
+        "crate": "displaydoc",
+        "type": "proc-macro",
+        "nanoseconds": 1566583
+      },
+      {
+        "phase": "warm-1",
+        "crate": "zerofrom_derive",
+        "type": "proc-macro",
+        "nanoseconds": 1335667
+      },
+      {
+        "phase": "warm-1",
+        "crate": "yoke_derive",
+        "type": "proc-macro",
+        "nanoseconds": 1180167
+      },
+      {
+        "phase": "warm-1",
+        "crate": "tokio_macros",
+        "type": "proc-macro",
+        "nanoseconds": 1157750
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 1200625
+      },
+      {
+        "phase": "warm-1",
+        "crate": "futures_macro",
+        "type": "proc-macro",
+        "nanoseconds": 1105500
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 1507750
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 1121041
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 1136208
+      },
+      {
+        "phase": "warm-1",
+        "crate": "serde_derive",
+        "type": "proc-macro",
+        "nanoseconds": 1233833
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 1223875
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 1292625
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 952625
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 1217583
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 1188042
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 1207083
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 1290375
+      },
+      {
+        "phase": "warm-1",
+        "crate": "tracing_attributes",
+        "type": "proc-macro",
+        "nanoseconds": 1283000
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 1175416
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 1394167
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 1171958
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 1190791
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 1169167
+      },
+      {
+        "phase": "warm-1",
+        "crate": "thiserror_impl",
+        "type": "proc-macro",
+        "nanoseconds": 1158333
+      },
+      {
+        "phase": "warm-1",
+        "crate": "async_trait",
+        "type": "proc-macro",
+        "nanoseconds": 1140583
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 1993709
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 1995042
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 1990708
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 1308792
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 1072625
+      },
+      {
+        "phase": "warm-2",
+        "crate": "zerovec_derive",
+        "type": "proc-macro",
+        "nanoseconds": 1294292
+      },
+      {
+        "phase": "warm-2",
+        "crate": "displaydoc",
+        "type": "proc-macro",
+        "nanoseconds": 1221833
+      },
+      {
+        "phase": "warm-2",
+        "crate": "zerofrom_derive",
+        "type": "proc-macro",
+        "nanoseconds": 1300667
+      },
+      {
+        "phase": "warm-2",
+        "crate": "yoke_derive",
+        "type": "proc-macro",
+        "nanoseconds": 1194375
+      },
+      {
+        "phase": "warm-2",
+        "crate": "tokio_macros",
+        "type": "proc-macro",
+        "nanoseconds": 1242625
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 1532208
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 1712042
+      },
+      {
+        "phase": "warm-2",
+        "crate": "futures_macro",
+        "type": "proc-macro",
+        "nanoseconds": 1711916
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 1637666
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 1020875
+      },
+      {
+        "phase": "warm-2",
+        "crate": "serde_derive",
+        "type": "proc-macro",
+        "nanoseconds": 1285000
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 1195458
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 1340083
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 1215875
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 975958
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 1083667
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 1306625
+      },
+      {
+        "phase": "warm-2",
+        "crate": "tracing_attributes",
+        "type": "proc-macro",
+        "nanoseconds": 1366417
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 1113250
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 1147209
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 1239333
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 1202833
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 1177917
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 1130042
+      },
+      {
+        "phase": "warm-2",
+        "crate": "thiserror_impl",
+        "type": "proc-macro",
+        "nanoseconds": 1161708
+      },
+      {
+        "phase": "warm-2",
+        "crate": "async_trait",
+        "type": "proc-macro",
+        "nanoseconds": 1149917
+      }
+    ],
+    "observer-hash": [
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 1119875
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 1117583
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 1111917
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 1116083
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 1145250
+      },
+      {
+        "phase": "warm-1",
+        "crate": "zerovec_derive",
+        "type": "proc-macro",
+        "nanoseconds": 1028750
+      },
+      {
+        "phase": "warm-1",
+        "crate": "displaydoc",
+        "type": "proc-macro",
+        "nanoseconds": 1108500
+      },
+      {
+        "phase": "warm-1",
+        "crate": "zerofrom_derive",
+        "type": "proc-macro",
+        "nanoseconds": 1115583
+      },
+      {
+        "phase": "warm-1",
+        "crate": "yoke_derive",
+        "type": "proc-macro",
+        "nanoseconds": 1111500
+      },
+      {
+        "phase": "warm-1",
+        "crate": "tokio_macros",
+        "type": "proc-macro",
+        "nanoseconds": 1119875
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 1091958
+      },
+      {
+        "phase": "warm-1",
+        "crate": "futures_macro",
+        "type": "proc-macro",
+        "nanoseconds": 1008750
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 1121625
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 1101209
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 1092334
+      },
+      {
+        "phase": "warm-1",
+        "crate": "serde_derive",
+        "type": "proc-macro",
+        "nanoseconds": 993792
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 1143667
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 1112666
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 1073708
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 1122750
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 1106875
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 1099833
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 1103833
+      },
+      {
+        "phase": "warm-1",
+        "crate": "tracing_attributes",
+        "type": "proc-macro",
+        "nanoseconds": 1125583
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 985917
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 1125833
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 1104875
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 1116292
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 1101417
+      },
+      {
+        "phase": "warm-1",
+        "crate": "thiserror_impl",
+        "type": "proc-macro",
+        "nanoseconds": 1119125
+      },
+      {
+        "phase": "warm-1",
+        "crate": "async_trait",
+        "type": "proc-macro",
+        "nanoseconds": 1116000
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 1124041
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 1120000
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 1115833
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 1104125
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 994792
+      },
+      {
+        "phase": "warm-2",
+        "crate": "zerovec_derive",
+        "type": "proc-macro",
+        "nanoseconds": 1000708
+      },
+      {
+        "phase": "warm-2",
+        "crate": "displaydoc",
+        "type": "proc-macro",
+        "nanoseconds": 1088792
+      },
+      {
+        "phase": "warm-2",
+        "crate": "zerofrom_derive",
+        "type": "proc-macro",
+        "nanoseconds": 1107708
+      },
+      {
+        "phase": "warm-2",
+        "crate": "yoke_derive",
+        "type": "proc-macro",
+        "nanoseconds": 1100333
+      },
+      {
+        "phase": "warm-2",
+        "crate": "tokio_macros",
+        "type": "proc-macro",
+        "nanoseconds": 1137666
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 1133792
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 1143417
+      },
+      {
+        "phase": "warm-2",
+        "crate": "futures_macro",
+        "type": "proc-macro",
+        "nanoseconds": 1140625
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 1172459
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 1122333
+      },
+      {
+        "phase": "warm-2",
+        "crate": "serde_derive",
+        "type": "proc-macro",
+        "nanoseconds": 1121334
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 1055084
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 1113667
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 1103042
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 1006542
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 1086333
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 1108584
+      },
+      {
+        "phase": "warm-2",
+        "crate": "tracing_attributes",
+        "type": "proc-macro",
+        "nanoseconds": 1121292
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 1112750
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 1102166
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 1116208
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 1113584
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 1115833
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 1105333
+      },
+      {
+        "phase": "warm-2",
+        "crate": "thiserror_impl",
+        "type": "proc-macro",
+        "nanoseconds": 1011542
+      },
+      {
+        "phase": "warm-2",
+        "crate": "async_trait",
+        "type": "proc-macro",
+        "nanoseconds": 1119333
+      }
+    ],
+    "producer-locks": [
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 100000
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 99792
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 94333
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 97500
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 93834
+      },
+      {
+        "phase": "warm-1",
+        "crate": "zerovec_derive",
+        "type": "proc-macro",
+        "nanoseconds": 93208
+      },
+      {
+        "phase": "warm-1",
+        "crate": "displaydoc",
+        "type": "proc-macro",
+        "nanoseconds": 104334
+      },
+      {
+        "phase": "warm-1",
+        "crate": "zerofrom_derive",
+        "type": "proc-macro",
+        "nanoseconds": 90708
+      },
+      {
+        "phase": "warm-1",
+        "crate": "yoke_derive",
+        "type": "proc-macro",
+        "nanoseconds": 102208
+      },
+      {
+        "phase": "warm-1",
+        "crate": "tokio_macros",
+        "type": "proc-macro",
+        "nanoseconds": 97334
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 104625
+      },
+      {
+        "phase": "warm-1",
+        "crate": "futures_macro",
+        "type": "proc-macro",
+        "nanoseconds": 112667
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 120833
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 88541
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 84083
+      },
+      {
+        "phase": "warm-1",
+        "crate": "serde_derive",
+        "type": "proc-macro",
+        "nanoseconds": 79917
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 87708
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 103834
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 88042
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 85750
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 102625
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 88917
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 105250
+      },
+      {
+        "phase": "warm-1",
+        "crate": "tracing_attributes",
+        "type": "proc-macro",
+        "nanoseconds": 89292
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 85250
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 96167
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 96250
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 87125
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 83791
+      },
+      {
+        "phase": "warm-1",
+        "crate": "thiserror_impl",
+        "type": "proc-macro",
+        "nanoseconds": 93875
+      },
+      {
+        "phase": "warm-1",
+        "crate": "async_trait",
+        "type": "proc-macro",
+        "nanoseconds": 91458
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 105000
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 104333
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 94709
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 86500
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 95291
+      },
+      {
+        "phase": "warm-2",
+        "crate": "zerovec_derive",
+        "type": "proc-macro",
+        "nanoseconds": 104750
+      },
+      {
+        "phase": "warm-2",
+        "crate": "displaydoc",
+        "type": "proc-macro",
+        "nanoseconds": 93000
+      },
+      {
+        "phase": "warm-2",
+        "crate": "zerofrom_derive",
+        "type": "proc-macro",
+        "nanoseconds": 93917
+      },
+      {
+        "phase": "warm-2",
+        "crate": "yoke_derive",
+        "type": "proc-macro",
+        "nanoseconds": 89417
+      },
+      {
+        "phase": "warm-2",
+        "crate": "tokio_macros",
+        "type": "proc-macro",
+        "nanoseconds": 168667
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 123458
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 129583
+      },
+      {
+        "phase": "warm-2",
+        "crate": "futures_macro",
+        "type": "proc-macro",
+        "nanoseconds": 132750
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 109083
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 83167
+      },
+      {
+        "phase": "warm-2",
+        "crate": "serde_derive",
+        "type": "proc-macro",
+        "nanoseconds": 90875
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 129541
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 90792
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 83583
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 101333
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 81459
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 92000
+      },
+      {
+        "phase": "warm-2",
+        "crate": "tracing_attributes",
+        "type": "proc-macro",
+        "nanoseconds": 87208
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 86292
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 80625
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 87209
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 86666
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 88875
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 85417
+      },
+      {
+        "phase": "warm-2",
+        "crate": "thiserror_impl",
+        "type": "proc-macro",
+        "nanoseconds": 95958
+      },
+      {
+        "phase": "warm-2",
+        "crate": "async_trait",
+        "type": "proc-macro",
+        "nanoseconds": 90292
+      }
+    ],
+    "restore": [
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 15466667
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 15653375
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 15711125
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 10347417
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 10713458
+      },
+      {
+        "phase": "warm-1",
+        "crate": "zerovec_derive",
+        "type": "proc-macro",
+        "nanoseconds": 14848792
+      },
+      {
+        "phase": "warm-1",
+        "crate": "displaydoc",
+        "type": "proc-macro",
+        "nanoseconds": 13615916
+      },
+      {
+        "phase": "warm-1",
+        "crate": "zerofrom_derive",
+        "type": "proc-macro",
+        "nanoseconds": 15889834
+      },
+      {
+        "phase": "warm-1",
+        "crate": "yoke_derive",
+        "type": "proc-macro",
+        "nanoseconds": 15285000
+      },
+      {
+        "phase": "warm-1",
+        "crate": "tokio_macros",
+        "type": "proc-macro",
+        "nanoseconds": 13338166
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 12199959
+      },
+      {
+        "phase": "warm-1",
+        "crate": "futures_macro",
+        "type": "proc-macro",
+        "nanoseconds": 13563958
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 10601458
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 10146167
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 9867292
+      },
+      {
+        "phase": "warm-1",
+        "crate": "serde_derive",
+        "type": "proc-macro",
+        "nanoseconds": 15362666
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 10987583
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 10595125
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 9810958
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 10280792
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 10229958
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 10662792
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 10212583
+      },
+      {
+        "phase": "warm-1",
+        "crate": "tracing_attributes",
+        "type": "proc-macro",
+        "nanoseconds": 14656708
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 9894333
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 10621500
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 9863083
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 11079417
+      },
+      {
+        "phase": "warm-1",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 9676625
+      },
+      {
+        "phase": "warm-1",
+        "crate": "thiserror_impl",
+        "type": "proc-macro",
+        "nanoseconds": 14302542
+      },
+      {
+        "phase": "warm-1",
+        "crate": "async_trait",
+        "type": "proc-macro",
+        "nanoseconds": 14219334
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 21016959
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 21010000
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 21048833
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 9542958
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 9317209
+      },
+      {
+        "phase": "warm-2",
+        "crate": "zerovec_derive",
+        "type": "proc-macro",
+        "nanoseconds": 13536000
+      },
+      {
+        "phase": "warm-2",
+        "crate": "displaydoc",
+        "type": "proc-macro",
+        "nanoseconds": 12591166
+      },
+      {
+        "phase": "warm-2",
+        "crate": "zerofrom_derive",
+        "type": "proc-macro",
+        "nanoseconds": 15045166
+      },
+      {
+        "phase": "warm-2",
+        "crate": "yoke_derive",
+        "type": "proc-macro",
+        "nanoseconds": 14286500
+      },
+      {
+        "phase": "warm-2",
+        "crate": "tokio_macros",
+        "type": "proc-macro",
+        "nanoseconds": 13833792
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 12180959
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 10825958
+      },
+      {
+        "phase": "warm-2",
+        "crate": "futures_macro",
+        "type": "proc-macro",
+        "nanoseconds": 13333500
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 9324917
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 10104708
+      },
+      {
+        "phase": "warm-2",
+        "crate": "serde_derive",
+        "type": "proc-macro",
+        "nanoseconds": 14229000
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 10501792
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 9708291
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 9743125
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 9260667
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 9222125
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 10508583
+      },
+      {
+        "phase": "warm-2",
+        "crate": "tracing_attributes",
+        "type": "proc-macro",
+        "nanoseconds": 13616333
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 9651708
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 9096917
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 9463416
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 9988667
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 9741250
+      },
+      {
+        "phase": "warm-2",
+        "crate": "build_script_build",
+        "type": "bin",
+        "nanoseconds": 9202958
+      },
+      {
+        "phase": "warm-2",
+        "crate": "thiserror_impl",
+        "type": "proc-macro",
+        "nanoseconds": 13696042
+      },
+      {
+        "phase": "warm-2",
+        "crate": "async_trait",
+        "type": "proc-macro",
+        "nanoseconds": 13077750
+      }
+    ]
+  },
+  "producer_entry_inputs": [
+    {
+      "outputs": [
+        "displaydoc-922a32df521d2719.d",
+        "libdisplaydoc-922a32df521d2719.dylib"
+      ],
+      "unique_regular_files": 114,
+      "bytes": 34561381,
+      "largest_file": "libsyn-804e1da7bee6720d.rlib",
+      "largest_bytes": 9562952,
+      "largest_original_queue_index": 2,
+      "existing_parallel_threshold_met": true
+    },
+    {
+      "outputs": [
+        "build_script_build-fe3d5f4e67d1a56d.d",
+        "build_script_build-fe3d5f4e67d1a56d"
+      ],
+      "unique_regular_files": 102,
+      "bytes": 19772023,
+      "largest_file": "libstd-4f24f0876fd27385.rlib",
+      "largest_bytes": 9525632,
+      "largest_original_queue_index": 99,
+      "existing_parallel_threshold_met": true
+    },
+    {
+      "outputs": [
+        "build_script_build-a0bf544264bb1c97.d",
+        "build_script_build-a0bf544264bb1c97"
+      ],
+      "unique_regular_files": 102,
+      "bytes": 19768148,
+      "largest_file": "libstd-4f24f0876fd27385.rlib",
+      "largest_bytes": 9525632,
+      "largest_original_queue_index": 99,
+      "existing_parallel_threshold_met": true
+    },
+    {
+      "outputs": [
+        "build_script_build-b72c457fd2ecc7d2.d",
+        "build_script_build-b72c457fd2ecc7d2"
+      ],
+      "unique_regular_files": 102,
+      "bytes": 19774824,
+      "largest_file": "libstd-4f24f0876fd27385.rlib",
+      "largest_bytes": 9525632,
+      "largest_original_queue_index": 99,
+      "existing_parallel_threshold_met": true
+    },
+    {
+      "outputs": [
+        "build_script_build-c5fccb227c3cf478.d",
+        "build_script_build-c5fccb227c3cf478"
+      ],
+      "unique_regular_files": 102,
+      "bytes": 19768584,
+      "largest_file": "libstd-4f24f0876fd27385.rlib",
+      "largest_bytes": 9525632,
+      "largest_original_queue_index": 99,
+      "existing_parallel_threshold_met": true
+    },
+    {
+      "outputs": [
+        "build_script_build-b96cfa8ec7f01e8e.d",
+        "build_script_build-b96cfa8ec7f01e8e"
+      ],
+      "unique_regular_files": 102,
+      "bytes": 19769064,
+      "largest_file": "libstd-4f24f0876fd27385.rlib",
+      "largest_bytes": 9525632,
+      "largest_original_queue_index": 99,
+      "existing_parallel_threshold_met": true
+    },
+    {
+      "outputs": [
+        "build_script_build-74d3a2d878ffcc42.d",
+        "build_script_build-74d3a2d878ffcc42"
+      ],
+      "unique_regular_files": 102,
+      "bytes": 19768154,
+      "largest_file": "libstd-4f24f0876fd27385.rlib",
+      "largest_bytes": 9525632,
+      "largest_original_queue_index": 99,
+      "existing_parallel_threshold_met": true
+    },
+    {
+      "outputs": [
+        "build_script_build-a714839a6a934221.d",
+        "build_script_build-a714839a6a934221"
+      ],
+      "unique_regular_files": 102,
+      "bytes": 19770173,
+      "largest_file": "libstd-4f24f0876fd27385.rlib",
+      "largest_bytes": 9525632,
+      "largest_original_queue_index": 99,
+      "existing_parallel_threshold_met": true
+    },
+    {
+      "outputs": [
+        "build_script_build-fe758527990ace75.d",
+        "build_script_build-fe758527990ace75"
+      ],
+      "unique_regular_files": 102,
+      "bytes": 19768154,
+      "largest_file": "libstd-4f24f0876fd27385.rlib",
+      "largest_bytes": 9525632,
+      "largest_original_queue_index": 99,
+      "existing_parallel_threshold_met": true
+    },
+    {
+      "outputs": [
+        "build_script_build-c197f64ee8bc0f5f.d",
+        "build_script_build-c197f64ee8bc0f5f"
+      ],
+      "unique_regular_files": 102,
+      "bytes": 19768054,
+      "largest_file": "libstd-4f24f0876fd27385.rlib",
+      "largest_bytes": 9525632,
+      "largest_original_queue_index": 99,
+      "existing_parallel_threshold_met": true
+    },
+    {
+      "outputs": [
+        "build_script_build-e92fc34376df9b9e.d",
+        "build_script_build-e92fc34376df9b9e"
+      ],
+      "unique_regular_files": 102,
+      "bytes": 19777979,
+      "largest_file": "libstd-4f24f0876fd27385.rlib",
+      "largest_bytes": 9525632,
+      "largest_original_queue_index": 99,
+      "existing_parallel_threshold_met": true
+    },
+    {
+      "outputs": [
+        "yoke_derive-c7a6f2e88e99426f.d",
+        "libyoke_derive-c7a6f2e88e99426f.dylib"
+      ],
+      "unique_regular_files": 115,
+      "bytes": 41405220,
+      "largest_file": "libsyn-bd9e1d5bf0bba7fc.rlib",
+      "largest_bytes": 10280952,
+      "largest_original_queue_index": 2,
+      "existing_parallel_threshold_met": true
+    },
+    {
+      "outputs": [
+        "build_script_build-22c342eef51cd492.d",
+        "build_script_build-22c342eef51cd492"
+      ],
+      "unique_regular_files": 102,
+      "bytes": 19768217,
+      "largest_file": "libstd-4f24f0876fd27385.rlib",
+      "largest_bytes": 9525632,
+      "largest_original_queue_index": 99,
+      "existing_parallel_threshold_met": true
+    },
+    {
+      "outputs": [
+        "zerovec_derive-1b466c3b2a96e3a5.d",
+        "libzerovec_derive-1b466c3b2a96e3a5.dylib"
+      ],
+      "unique_regular_files": 116,
+      "bytes": 34596974,
+      "largest_file": "libsyn-804e1da7bee6720d.rlib",
+      "largest_bytes": 9562952,
+      "largest_original_queue_index": 2,
+      "existing_parallel_threshold_met": true
+    },
+    {
+      "outputs": [
+        "build_script_build-c40775d5ffadd11b.d",
+        "build_script_build-c40775d5ffadd11b"
+      ],
+      "unique_regular_files": 102,
+      "bytes": 19768190,
+      "largest_file": "libstd-4f24f0876fd27385.rlib",
+      "largest_bytes": 9525632,
+      "largest_original_queue_index": 99,
+      "existing_parallel_threshold_met": true
+    },
+    {
+      "outputs": [
+        "build_script_build-e56e2005e468bd5a.d",
+        "build_script_build-e56e2005e468bd5a"
+      ],
+      "unique_regular_files": 102,
+      "bytes": 19774638,
+      "largest_file": "libstd-4f24f0876fd27385.rlib",
+      "largest_bytes": 9525632,
+      "largest_original_queue_index": 99,
+      "existing_parallel_threshold_met": true
+    },
+    {
+      "outputs": [
+        "build_script_build-7ae68504f77fcf7d.d",
+        "build_script_build-7ae68504f77fcf7d"
+      ],
+      "unique_regular_files": 102,
+      "bytes": 19771954,
+      "largest_file": "libstd-4f24f0876fd27385.rlib",
+      "largest_bytes": 9525632,
+      "largest_original_queue_index": 99,
+      "existing_parallel_threshold_met": true
+    },
+    {
+      "outputs": [
+        "build_script_build-c1fbc98543384746.d",
+        "build_script_build-c1fbc98543384746"
+      ],
+      "unique_regular_files": 102,
+      "bytes": 19768569,
+      "largest_file": "libstd-4f24f0876fd27385.rlib",
+      "largest_bytes": 9525632,
+      "largest_original_queue_index": 99,
+      "existing_parallel_threshold_met": true
+    },
+    {
+      "outputs": [
+        "build_script_build-5d798e62f2640c23.d",
+        "build_script_build-5d798e62f2640c23"
+      ],
+      "unique_regular_files": 103,
+      "bytes": 20281926,
+      "largest_file": "libstd-4f24f0876fd27385.rlib",
+      "largest_bytes": 9525632,
+      "largest_original_queue_index": 100,
+      "existing_parallel_threshold_met": true
+    },
+    {
+      "outputs": [
+        "build_script_build-7ddf83487ba9d245.d",
+        "build_script_build-7ddf83487ba9d245"
+      ],
+      "unique_regular_files": 103,
+      "bytes": 20107296,
+      "largest_file": "libstd-4f24f0876fd27385.rlib",
+      "largest_bytes": 9525632,
+      "largest_original_queue_index": 100,
+      "existing_parallel_threshold_met": true
+    },
+    {
+      "outputs": [
+        "tokio_macros-637864ac99bd4af5.d",
+        "libtokio_macros-637864ac99bd4af5.dylib"
+      ],
+      "unique_regular_files": 113,
+      "bytes": 34577993,
+      "largest_file": "libsyn-804e1da7bee6720d.rlib",
+      "largest_bytes": 9562952,
+      "largest_original_queue_index": 2,
+      "existing_parallel_threshold_met": true
+    },
+    {
+      "outputs": [
+        "futures_macro-dddb32d6084cf002.d",
+        "libfutures_macro-dddb32d6084cf002.dylib"
+      ],
+      "unique_regular_files": 115,
+      "bytes": 34553706,
+      "largest_file": "libsyn-804e1da7bee6720d.rlib",
+      "largest_bytes": 9562952,
+      "largest_original_queue_index": 2,
+      "existing_parallel_threshold_met": true
+    },
+    {
+      "outputs": [
+        "tracing_attributes-cb70a717d3a80b79.d",
+        "libtracing_attributes-cb70a717d3a80b79.dylib"
+      ],
+      "unique_regular_files": 113,
+      "bytes": 35317753,
+      "largest_file": "libsyn-bd9e1d5bf0bba7fc.rlib",
+      "largest_bytes": 10280952,
+      "largest_original_queue_index": 2,
+      "existing_parallel_threshold_met": true
+    },
+    {
+      "outputs": [
+        "build_script_build-95bec2d36b01c9b6.d",
+        "build_script_build-95bec2d36b01c9b6"
+      ],
+      "unique_regular_files": 102,
+      "bytes": 19768908,
+      "largest_file": "libstd-4f24f0876fd27385.rlib",
+      "largest_bytes": 9525632,
+      "largest_original_queue_index": 99,
+      "existing_parallel_threshold_met": true
+    },
+    {
+      "outputs": [
+        "zerofrom_derive-76a4c3a7e96191a2.d",
+        "libzerofrom_derive-76a4c3a7e96191a2.dylib"
+      ],
+      "unique_regular_files": 114,
+      "bytes": 41378487,
+      "largest_file": "libsyn-bd9e1d5bf0bba7fc.rlib",
+      "largest_bytes": 10280952,
+      "largest_original_queue_index": 2,
+      "existing_parallel_threshold_met": true
+    },
+    {
+      "outputs": [
+        "serde_derive-4ba90fce08de847e.d",
+        "libserde_derive-4ba90fce08de847e.dylib"
+      ],
+      "unique_regular_files": 138,
+      "bytes": 34839497,
+      "largest_file": "libsyn-804e1da7bee6720d.rlib",
+      "largest_bytes": 9562952,
+      "largest_original_queue_index": 2,
+      "existing_parallel_threshold_met": true
+    },
+    {
+      "outputs": [
+        "build_script_build-307e9ae4992f7aa9.d",
+        "build_script_build-307e9ae4992f7aa9"
+      ],
+      "unique_regular_files": 107,
+      "bytes": 22467525,
+      "largest_file": "libstd-4f24f0876fd27385.rlib",
+      "largest_bytes": 9525632,
+      "largest_original_queue_index": 104,
+      "existing_parallel_threshold_met": true
+    },
+    {
+      "outputs": [
+        "build_script_build-fd083ed6e0f316fa.d",
+        "build_script_build-fd083ed6e0f316fa"
+      ],
+      "unique_regular_files": 102,
+      "bytes": 19774625,
+      "largest_file": "libstd-4f24f0876fd27385.rlib",
+      "largest_bytes": 9525632,
+      "largest_original_queue_index": 99,
+      "existing_parallel_threshold_met": true
+    },
+    {
+      "outputs": [
+        "async_trait-e488d3c43421d8e1.d",
+        "libasync_trait-e488d3c43421d8e1.dylib"
+      ],
+      "unique_regular_files": 118,
+      "bytes": 34568479,
+      "largest_file": "libsyn-804e1da7bee6720d.rlib",
+      "largest_bytes": 9562952,
+      "largest_original_queue_index": 2,
+      "existing_parallel_threshold_met": true
+    },
+    {
+      "outputs": [
+        "thiserror_impl-c47134122044d386.d",
+        "libthiserror_impl-c47134122044d386.dylib"
+      ],
+      "unique_regular_files": 121,
+      "bytes": 34610929,
+      "largest_file": "libsyn-804e1da7bee6720d.rlib",
+      "largest_bytes": 9562952,
+      "largest_original_queue_index": 2,
+      "existing_parallel_threshold_met": true
+    },
+    {
+      "outputs": [
+        "build_script_build-252ff014a95892a6.d",
+        "build_script_build-252ff014a95892a6"
+      ],
+      "unique_regular_files": 102,
+      "bytes": 19780494,
+      "largest_file": "libstd-4f24f0876fd27385.rlib",
+      "largest_bytes": 9525632,
+      "largest_original_queue_index": 99,
+      "existing_parallel_threshold_met": true
+    }
+  ],
+  "all_producer_entries_already_parallel": true,
+  "median_largest_file_queue_fraction": 0.9705882352941176
+}

@@ -1,0 +1,45 @@
+diff --git a/src/compiler.zig b/src/compiler.zig
+index aab3d65..5fe7ef5 100644
+--- a/src/compiler.zig
++++ b/src/compiler.zig
+@@ -529,18 +529,30 @@ fn replacePath(ctx: *cache.Context, bytes: []const u8, old: []const u8, new: []c
+     return out.items;
+ }
+ 
++fn producerPhase(ctx: *cache.Context, previous: *i96, phase: []const u8) void {
++    if (!eq(ctx.env.get("NANOCOMPILE_PROFILE_PRODUCER") orelse "", "1")) return;
++    const now = std.Io.Clock.awake.now(ctx.io).nanoseconds;
++    std.debug.print("nanocompile: profile producer {s} {d} ns\n", .{ phase, now - previous.* });
++    previous.* = now;
++}
++
+ fn executeProducer(ctx: *cache.Context, plan: Plan, argv: []const []const u8) !u8 {
++    var checkpoint = std.Io.Clock.awake.now(ctx.io).nanoseconds;
+     const native_identity = @import("native_identity.zig");
+     const observer = @import("link_observer.zig");
+     ctx.prepare() catch return bypass(ctx, argv, "bypass: cache unavailable");
+     const maintenance = cache.Lock.acquire(ctx, "maintenance", false) catch return bypass(ctx, argv, "bypass: producer cache lock unavailable");
+     defer maintenance.release();
++    producerPhase(ctx, &checkpoint, "prepare");
+     const driver = identity.selectedExecutable(ctx, "cc") catch return bypass(ctx, argv, "bypass: producer driver unavailable");
+     const selected = native_identity.apple(ctx, driver) catch return bypass(ctx, argv, "bypass: producer driver selection unsupported");
++    producerPhase(ctx, &checkpoint, "native-selection");
+     const binary = std.process.executablePathAlloc(ctx.io, ctx.a) catch return bypass(ctx, argv, "bypass: producer observer unavailable");
+     const base_key = keyFor(ctx, .rust, argv) catch return bypass(ctx, argv, "bypass: producer compiler identity unavailable");
+     const compiler_epoch = ctx.compiler_epoch orelse return bypass(ctx, argv, "bypass: producer compiler state unavailable");
++    producerPhase(ctx, &checkpoint, "rust-key");
+     const binary_hash = ctx.digest(binary) catch return bypass(ctx, argv, "bypass: producer observer cannot be fingerprinted");
++    producerPhase(ctx, &checkpoint, "observer-hash");
+     var h = cache.Hash.init(.{});
+     cache.field(&h, "nanocompile-experimental-producer-v1");
+     cache.field(&h, base_key);
+@@ -564,7 +576,9 @@ fn executeProducer(ctx: *cache.Context, plan: Plan, argv: []const []const u8) !u
+         if (!eq(config.hash, ctx.digest(config.path) catch return bypass(ctx, argv, "bypass: cannot read producer declaration")))
+             return bypass(ctx, argv, "bypass: producer input declaration changed");
+     }
++    producerPhase(ctx, &checkpoint, "producer-locks");
+     if (cache.restore(ctx, key, plan.outputs) catch false) {
++        producerPhase(ctx, &checkpoint, "restore");
+         ctx.trace(if (plan.producer_dylib) "hit: proc-macro producer" else "hit: executable producer");
+         ctx.event("hit");
+         return 0;

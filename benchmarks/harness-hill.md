@@ -918,3 +918,44 @@ also cover [native selection and SDK/corruption/fallback](driver-plan-native-ide
 and [executable restore/invalidation/failure behavior](driver-plan-executable-regression.json).
 Mac CI's existing native selection fixture now verifies the invalid-plan legacy
 fallback. Linux retains its existing producer policy and runs parser unit tests.
+
+## Largest-file-first restore queue: rejected
+
+The [producer phase profile](../docs/producer-phase-profile.md) records 62 warm
+producer hits: live native selection takes 29.224 ms median, restore validation
+and materialization 10.770 ms, and the full observer executable digest 1.113 ms.
+These overlapping diagnostic timings include instrumentation overhead. The
+observer digest remains complete; no metadata shortcut was introduced.
+
+Every measured producer already qualifies for four-worker input hashing. Its
+largest input usually appears late in the queue (median position 97.1%). The
+[candidate patch](experiments/restore-largest-first.patch) sorts those existing
+jobs by decreasing size without changing worker count, content verification,
+locks, keys, or storage schema.
+
+The [first nine rotating pairs](harness-largest-first-paired.json) suggest a
+possible gain: 2.809 s baseline versus 2.717 s candidate medians, seven wins,
+37.93 ms mean paired savings, and 23.95 ms standard error. A longer
+[27-pair comparison](harness-largest-first-paired-long.json) does not support
+adoption: medians are 2.740 s and 2.713 s, but only 14 pairs favor the candidate.
+Mean paired savings are **−2.14 ms**, with 105.39 ms sample standard deviation
+and **20.28 ms standard error**. The median difference alone is insufficient
+evidence of a reliable improvement.
+
+Both comparisons use one stable wrapper path, identical environment and target,
+and a shared cache after priming both binaries. Baseline SHA-256 is
+`531207e9947654f5b989608d4227ca8ec0d63ca5287f2cb43c55ea519c86e003`;
+candidate SHA-256 is
+`09ecfec9e0e2e6234baec30454f8c4031cbffa819111950bef1e6db237e12683`.
+Each warm build records 167 hits, eight bypasses and three failed probes. All
+167 collected artifacts match the first prime, and tracked sources remain
+unchanged. The second prime reuses ordinary entries; prime times are not a
+cold-cache A/B comparison. R2 transport is excluded.
+
+Candidate unit tests and Rust/Zig integration pass, along with real
+[metadata priority](largest-first-rmeta-regression.json),
+[macro producer/Cargo flag](largest-first-producer-regression.json), and
+[executable restore/invalidation](largest-first-executable-regression.json)
+checks. The candidate and profiler were removed from production. The accepted
+live-driver-plan implementation remains in place; this experiment supplies no
+new project speedup claim.
