@@ -1412,3 +1412,23 @@ passes with diagnostic profiling disabled/enabled.
 [Method and limits](../docs/cold-phase-profile.md);
 [all 167 phase records](harness-cold-phase-profile.json);
 [build evidence](harness-cold-phase-builds.json).
+
+## Graph detail: repeated metadata reader launches
+
+A detailed diagnostic attributes 83.821477 aggregate seconds to 2,885
+resolver metadata subprocesses, including 1,989 installed-toolchain reads.
+Fresh resolver hashing takes 0.842309 s and enumeration 0.068624 s.
+There are 169 collector records over 147 parent jobs and complete miss/save
+coverage for all 167 cold misses. Times overlap and are not build-time savings.
+
+Collectors observe 143 compiler identities. Captured memo inspection finds
+139 different identity hashes with identical existing stamp lists; absent
+caller-specific toolchain selector paths provide a plausible scope barrier.
+The next candidate will retain compilation selection guards while testing
+a separately validated decoder identity for classification memo reuse.
+Production remains unchanged. Three warm restores match 193 artifacts, with
+167 Rust/24 native hits and unchanged tracked sources; unit and profiling-enabled
+real Rust/Zig integration pass.
+[Method and limits](../docs/graph-detail-profile.md);
+[all graph records](harness-graph-detail-profile.json);
+[identity memo observations](harness-graph-detail-identities.json).
