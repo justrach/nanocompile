@@ -70,7 +70,8 @@ fn supports(ctx: *cache.Context, tool: []const u8, hash: []const u8) !bool {
     const memo = try ctx.path(&.{ "metadata", try std.fmt.allocPrint(ctx.a, "clang-cas-capability-{s}", .{hash}) });
     if (ctx.read(memo)) |bytes| {
         const payload = cache.unseal(ctx, bytes) catch "";
-        if (std.mem.eql(u8, payload, "apple-clang-cas-v1")) return true;
+        if (std.mem.eql(u8, payload, "apple-clang-cas-v2")) return true;
+        if (std.mem.eql(u8, payload, "apple-clang-cas-unsupported-v2")) return false;
     } else |_| {}
     const version = try std.process.run(ctx.a, ctx.io, .{ .argv = &.{ tool, "--version" }, .environ_map = ctx.env });
     if (code(version.term) != 0 or std.mem.indexOf(u8, version.stdout, "Apple clang version") == null) return false;
@@ -80,8 +81,28 @@ fn supports(ctx: *cache.Context, tool: []const u8, hash: []const u8) !bool {
         std.mem.indexOf(u8, driver.stdout, "-fdepscan=") == null or
         std.mem.indexOf(u8, frontend.stdout, "-fcache-compile-job") == null or
         std.mem.indexOf(u8, frontend.stdout, "-fcas-path") == null) return false;
-    try ctx.atomic(memo, try cache.seal(ctx, "apple-clang-cas-v1"));
-    return true;
+    // Some Apple releases advertise these flags without exposing usable driver
+    // replay. Qualify the exact binary with a real compiler-owned hit once.
+    const probe_lock = try cache.Lock.acquire(ctx, try std.fmt.allocPrint(ctx.a, "clang-capability-{s}", .{hash}), true);
+    defer probe_lock.release();
+    if (ctx.read(memo)) |bytes| {
+        const payload = cache.unseal(ctx, bytes) catch "";
+        if (std.mem.eql(u8, payload, "apple-clang-cas-v2")) return true;
+        if (std.mem.eql(u8, payload, "apple-clang-cas-unsupported-v2")) return false;
+    } else |_| {}
+    const probe_root = try ctx.path(&.{ "metadata", try std.fmt.allocPrint(ctx.a, "clang-cas-probe-{s}", .{hash}) });
+    try std.Io.Dir.cwd().createDirPath(ctx.io, probe_root);
+    defer std.Io.Dir.cwd().deleteTree(ctx.io, probe_root) catch {};
+    const source = try std.fs.path.join(ctx.a, &.{ probe_root, "probe.c" });
+    const output = try std.fs.path.join(ctx.a, &.{ probe_root, "probe.o" });
+    const cas_root = try std.fs.path.join(ctx.a, &.{ probe_root, "cas" });
+    try ctx.atomic(source, "int nanocompile_capability_probe(void) { return 42; }\n");
+    const command = &.{ tool, "-c", source, "-o", output, "-fdepscan=inline", "-Xclang", "-fcas-path", "-Xclang", cas_root, "-Xclang", "-fcache-compile-job", "-Rcompile-job-cache" };
+    const cold = try std.process.run(ctx.a, ctx.io, .{ .argv = command, .environ_map = ctx.env });
+    const warm = try std.process.run(ctx.a, ctx.io, .{ .argv = command, .environ_map = ctx.env });
+    const usable = code(cold.term) == 0 and code(warm.term) == 0 and std.mem.indexOf(u8, warm.stderr, "remark: compile job cache hit") != null;
+    try ctx.atomic(memo, try cache.seal(ctx, if (usable) "apple-clang-cas-v2" else "apple-clang-cas-unsupported-v2"));
+    return usable;
 }
 
 pub fn execute(ctx: *cache.Context, args: []const []const u8) !u8 {

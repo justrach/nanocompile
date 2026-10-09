@@ -200,7 +200,10 @@ inputs and replay compilations. Caller sysroots and SDKROOT take precedence;
 `NANOCOMPILE_CLANG` selects an explicit compiler. Unsupported compiler capability,
 opaque helpers, probes, stdin jobs, response files, caller-owned CAS flags and
 non-macOS targets pass through. Native caching is available when the selected
-Apple Clang supports the required flags. Other hosts use compiler passthrough.
+Apple Clang supports the required flags and passes a first-use replay probe.
+Apple Clang 17 on the hosted Mac advertises the flags but fails that qualification
+and passes through. The probe result is memoized by compiler content. Other
+hosts use compiler passthrough.
 
 Inline scanning changes Clang's debug representation: the tested compiler omits
 `DW_AT_comp_dir`. Native cache output is validated against the same scanner

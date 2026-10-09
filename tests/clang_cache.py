@@ -32,6 +32,17 @@ else:
     report['local_cas_capable'] = capable
     with tempfile.TemporaryDirectory(prefix='nano Clang command ') as tmp:
         root = Path(tmp)
+        if capable:
+            probe = root/'capability.c'
+            probe.write_text('int nanocompile_capability_probe(void) { return 42; }\n')
+            command = [clang, '-c', str(probe), '-o', str(root/'capability.o'), '-fdepscan=inline',
+                       '-Xclang', '-fcas-path', '-Xclang', str(root/'capability-cas'),
+                       '-Xclang', '-fcache-compile-job', '-Rcompile-job-cache']
+            cold_probe = subprocess.run(command, capture_output=True)
+            warm_probe = subprocess.run(command, capture_output=True)
+            capable = cold_probe.returncode == warm_probe.returncode == 0 and b'remark: compile job cache hit' in warm_probe.stderr
+            report['local_cas_capable'] = capable
+            report['capability_probe_stderr'] = warm_probe.stderr.decode(errors='replace')
         env = {k:v for k,v in os.environ.items() if not k.startswith(('NANOCOMPILE_', 'R2_', 'KACHE_')) and k != 'SDKROOT'}
         env.update(NANOCOMPILE_DIR=str(root/'cache'), NANOCOMPILE_CLANG_REMARKS='1')
         source, header, out = root/'x.c', root/'x.h', root/'x.o'
@@ -109,6 +120,9 @@ else:
             q,_=run()
             assert b'compile job cache miss' in q.stderr
             report['checks'].append('private CAS permissions and clear forces native miss')
+        if not capable:
+            assert not events(), events()
+            report['checks'].append('advertised but unqualified native cache uses original compiler passthrough')
         before=events()
         version=subprocess.run([str(binary),'clang','--version'],env=env,capture_output=True,check=True)
         assert version.stdout==subprocess.check_output([clang,'--version'],env=env)

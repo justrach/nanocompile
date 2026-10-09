@@ -139,3 +139,12 @@ policy and validates each configuration against its own cold artifacts.
 It measures 2.095 s Nano with native caching versus 22.54 s direct and 2.054 s
 kache. This is a fresh three-way comparison with different configurations;
 the earlier 27 pairs remain the controlled native replay evidence.
+
+The hosted Xcode 16.4 compiler (Apple Clang 17.0.0) accepts the flags but emits
+no replay remarks. The installed command now requires a real two-compile hit
+probe before enabling managed CAS and memoizes qualification by compiler
+content. That hosted compiler passes through. Local Apple Clang 21 passes
+the probe and the full regression suite; see
+[`qualified-clang-command-regression.json`](../benchmarks/qualified-clang-command-regression.json).
+The three-way performance report measures the preceding candidate, identified
+by its recorded SHA; it has not been rerun for the qualification change.
