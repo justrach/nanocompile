@@ -14,6 +14,8 @@ const Plan = struct {
     native_dirs: []const []const u8 = &.{},
     configuration: ?cache.Dependency = null,
     producer: bool = false,
+    producer_dylib: bool = false,
+    linked_output: ?[]const u8 = null,
     out_dir: ?[]const u8 = null,
 };
 const Module = struct { name: []const u8, source: []const u8 };
@@ -163,9 +165,11 @@ fn rustPlan(ctx: *cache.Context, argv: []const []const u8) !Plan {
         source = arg;
     }
     const ct = crate_type orelse return error.NoCrateType;
-    const producer = eq(ct, "proc-macro") and eq(ctx.env.get("NANOCOMPILE_PROC_MACRO_PRODUCERS") orelse "", "1");
+    const producer_dylib = eq(ct, "proc-macro") and eq(ctx.env.get("NANOCOMPILE_PROC_MACRO_PRODUCERS") orelse "", "1");
+    const executable = eq(ct, "bin") and eq(ctx.env.get("NANOCOMPILE_EXECUTABLE_PRODUCERS") orelse "", "1");
+    const producer = producer_dylib or executable;
     if (!producer and !eq(ct, "rlib") and !eq(ct, "lib")) return error.UnsupportedCrateType;
-    if (!producer and builtin_macro) return error.UntrackedExtern;
+    if (!producer_dylib and builtin_macro) return error.UntrackedExtern;
     if (producer and (builtin.os.tag != .macos or !eq(debug_info, "0") or producer_unsafe_codegen or target != null)) return error.UnsupportedProducerConfiguration;
     if (static_libraries.items.len != 0 and target != null) return error.UnsupportedNativeTarget;
     // Plain static libraries bundle archive members into the rlib. Require a
@@ -206,24 +210,27 @@ fn rustPlan(ctx: *cache.Context, argv: []const []const u8) !Plan {
     if (!eq(split_debug, "off") and std.mem.indexOf(u8, emit orelse "", "link") != null) return error.SplitDebugSidecars;
     var outputs: std.ArrayList([]const u8) = .empty;
     var dep_info: ?[]const u8 = null;
+    var linked_output: ?[]const u8 = null;
     var emissions = std.mem.splitScalar(u8, emit orelse return error.NoEmit, ',');
     while (emissions.next()) |e| {
+        if (executable and eq(e, "metadata")) return error.UnsupportedEmission;
         const filename = if (eq(e, "dep-info"))
             try std.fmt.allocPrint(ctx.a, "{s}{s}.d", .{ crate, suffix })
         else if (eq(e, "metadata"))
             try std.fmt.allocPrint(ctx.a, "lib{s}{s}.rmeta", .{ crate, suffix })
         else if (eq(e, "link"))
-            try std.fmt.allocPrint(ctx.a, "lib{s}{s}{s}", .{ crate, suffix, if (producer) ".dylib" else ".rlib" })
+            if (executable) try std.fmt.allocPrint(ctx.a, "{s}{s}", .{ crate, suffix }) else try std.fmt.allocPrint(ctx.a, "lib{s}{s}{s}", .{ crate, suffix, if (producer_dylib) ".dylib" else ".rlib" })
         else
             return error.UnsupportedEmission;
         const path = try absolute(ctx, try std.fs.path.join(ctx.a, &.{ dir, filename }));
         for (outputs.items) |existing| if (eq(existing, path)) return error.DuplicateEmission;
         try outputs.append(ctx.a, path);
         if (eq(e, "dep-info")) dep_info = path;
+        if (eq(e, "link")) linked_output = path;
     }
     if (dep_info == null) return error.NoDependencyInfo;
     if (producer and (std.mem.indexOfAny(u8, dir, "\r\n\t\"\\") != null or std.mem.indexOfAny(u8, ctx.root, "\r\n\t\"\\") != null or std.mem.indexOf(u8, dir, "//") != null)) return error.UnsupportedProducerPath;
-    return .{ .source = src, .outputs = outputs.items, .dependencies = inputs.items, .dep_info = dep_info, .library_dirs = search_dirs.items, .native_dirs = native_dirs.items, .configuration = configuration, .producer = producer, .out_dir = dir };
+    return .{ .source = src, .outputs = outputs.items, .dependencies = inputs.items, .dep_info = dep_info, .library_dirs = search_dirs.items, .native_dirs = native_dirs.items, .configuration = configuration, .producer = producer, .producer_dylib = producer_dylib, .linked_output = linked_output, .out_dir = dir };
 }
 
 fn zigPlan(ctx: *cache.Context, argv: []const []const u8) !Plan {
@@ -557,7 +564,7 @@ fn executeProducer(ctx: *cache.Context, plan: Plan, argv: []const []const u8) !u
             return bypass(ctx, argv, "bypass: producer input declaration changed");
     }
     if (cache.restore(ctx, key, plan.outputs) catch false) {
-        ctx.trace("hit: proc-macro producer");
+        ctx.trace(if (plan.producer_dylib) "hit: proc-macro producer" else "hit: executable producer");
         ctx.event("hit");
         return 0;
     }
@@ -567,11 +574,7 @@ fn executeProducer(ctx: *cache.Context, plan: Plan, argv: []const []const u8) !u
     const directories = rust_dependencies.snapshot(ctx, plan.library_dirs, plan.outputs) catch return bypass(ctx, argv, "bypass: producer dependency lookup unavailable");
     const job = @import("producer_job.zig").Job.create(ctx) catch return bypass(ctx, argv, "bypass: producer staging unavailable");
     defer job.cleanup(ctx) catch {};
-    var dylib: ?[]const u8 = null;
-    for (plan.outputs) |path| if (std.mem.endsWith(u8, path, ".dylib")) {
-        dylib = path;
-    };
-    const original = dylib orelse return bypass(ctx, argv, "bypass: producer needs link output");
+    const original = plan.linked_output orelse return bypass(ctx, argv, "bypass: producer needs link output");
     const output = try std.fs.path.join(ctx.a, &.{ job.out, std.fs.path.basename(original) });
     const config: observer.Config = .{ .driver = driver, .format = .darwin, .report = try std.fs.path.join(ctx.a, &.{ job.root, "link.deps" }), .invocation = try std.fs.path.join(ctx.a, &.{ job.root, "invocation" }), .capture_id = job.capture_id, .ownership = .{ .out = job.out, .canonical_out = job.canonical_out, .output = output } };
     const linker = job.installObserver(ctx, binary, try std.json.Stringify.valueAlloc(ctx.a, config, .{})) catch return bypass(ctx, argv, "bypass: producer observer installation unavailable");
@@ -586,11 +589,13 @@ fn executeProducer(ctx: *cache.Context, plan: Plan, argv: []const []const u8) !u
         } else try command.append(ctx.a, argv[i]);
     }
     try command.appendSlice(ctx.a, &.{ "-C", try std.fmt.allocPrint(ctx.a, "linker={s}", .{linker}) });
-    const install_name = try std.fs.path.join(ctx.a, &.{ plan.out_dir.?, std.fs.path.basename(original) });
-    for ([_][]const u8{ "-Xlinker", "-install_name", "-Xlinker", install_name }) |arg|
-        try command.appendSlice(ctx.a, &.{ "-C", try std.fmt.allocPrint(ctx.a, "link-arg={s}", .{arg}) });
+    if (plan.producer_dylib) {
+        const install_name = try std.fs.path.join(ctx.a, &.{ plan.out_dir.?, std.fs.path.basename(original) });
+        for ([_][]const u8{ "-Xlinker", "-install_name", "-Xlinker", install_name }) |arg|
+            try command.appendSlice(ctx.a, &.{ "-C", try std.fmt.allocPrint(ctx.a, "link-arg={s}", .{arg}) });
+    }
     const started = std.Io.Clock.real.now(ctx.io).nanoseconds;
-    ctx.trace("miss: compiling proc-macro producer");
+    ctx.trace(if (plan.producer_dylib) "miss: compiling proc-macro producer" else "miss: compiling executable producer");
     var result = try std.process.run(ctx.a, ctx.io, .{ .argv = command.items, .environ_map = ctx.env });
     result.stdout = try replacePath(ctx, result.stdout, job.out, plan.out_dir.?);
     result.stderr = try replacePath(ctx, result.stderr, job.out, plan.out_dir.?);

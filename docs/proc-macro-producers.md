@@ -318,3 +318,7 @@ Cargo macro flag coverage and the full suite passed on both platforms in
 [run 37950601653](https://github.com/justrach/nanocompile/actions/runs/37950601653)
 at `3bc48d7ebf6b77c9e7040235cbcb27d9eb60ef4b`. Linux continues to bypass
 producer compilation; the Apple producer fixture executes on the hosted Mac.
+
+The explicit bundled static-library implementation and real fixture passed
+on both platforms in [run 37951786539](https://github.com/justrach/nanocompile/actions/runs/37951786539)
+at `3391aad639e5506caa332b4cabc3fbd8a5b48b76`.

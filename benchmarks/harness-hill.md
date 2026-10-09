@@ -535,3 +535,38 @@ run. These are separate comparisons rather than a randomized static-library
 on/off experiment. Kache still leads. Native compilation by build scripts,
 source link declarations, executable producers and Linux proc-macro producers
 remain coverage gaps; the cold-cache cost remains larger too.
+
+## Build-script executable compilation
+
+The experimental `NANOCOMPILE_EXECUTABLE_PRODUCERS=1` flag enables native
+Apple executable compilation using the same private capture and verified CAS
+path. The plan names executable link outputs explicitly; dylib install-name
+arguments apply only to macro producers. Cargo still executes restored build
+scripts, including their current runtime inputs. The
+[executable fixture](../tests/executable_cache.py) verifies direct/cold/restored
+bytes, executable permissions, diagnostic replay and live runtime reads, plus
+source/native-input invalidation, corruption, failure and default/debug fallback.
+[Fixture evidence](executable-cache-macos.json) records binary and test checksums.
+
+The expanded [Harness comparison](harness-hill-executable.json) records twelve
+clean builds with the same four jobs and consumer/macro policies. It additionally
+checks all 21 build-script executable hashes. Every nanocompile library, macro
+and build-script executable matches direct Cargo and its own cold artifact.
+Kache matches its own cold artifact set. All 21 build-script executables are
+stored and warm builds record 165 hits, with two misses and eight bypasses.
+Tracked sources are unchanged.
+
+| Implementation | Warm median | Cold build |
+| --- | ---: | ---: |
+| Direct Cargo | 22.817 s | 24.837 s prime |
+| nanocompile | 3.264 s | 41.458 s |
+| kache daemon | 2.077 s | 27.013 s |
+
+The observed median is 4.9% below the preceding 3.433 s static-library run;
+these are separate measurements rather than an isolated producer-on/off test.
+Kache still leads, and cold-cache cost increased. Tool selection/validation
+latency, remaining source-native declarations and native compilation performed
+by running scripts remain costs to investigate. Linux producer integration
+and broader debug/link coverage remain unfinished.
+
+Reproduce with the previous comparison arguments plus `--executable-producers`.

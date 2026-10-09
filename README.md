@@ -147,7 +147,7 @@ Zig already has a native cache. This wrapper skips the compiler process on a mat
 
 Working directories and output paths remain in keys, preserving embedded paths and diagnostics. Cross-worktree path normalization, automatic remote lookup, a daemon/scheduler, and broader Rust/linker coverage are future work. This is not full kache feature parity.
 
-The latest [Harness hill climb](benchmarks/harness-hill.md#explicit-bundled-static-libraries) measures **3.43 s versus 23.13 s direct**, with explicit reported-input macros, experimental Apple macro producers and bundled static archives: 144 hits per warm build. Kache still leads at 2.17 s. Sharing validated Rust toolchain file digests reduced repeated initialization in a controlled test from 5.21 s to 1.37 s; the latest project cold sample was 40.64 s versus kache's 27.75 s. The last default-policy project run, on the preceding revision, took 17.36 s versus 22.96 s direct and 2.18 s kache, with 97 hits. Full-prefix hosted comparisons also passed: Linux warm medians were 36.31 s direct, 6.96 s nanocompile and 1.09 s kache; Mac medians were 87.05 s, 14.25 s and 3.88 s. Hosted and local workloads are separate. Raw samples, executable checksums and policy limits are recorded alongside the results.
+The latest [Harness hill climb](benchmarks/harness-hill.md#build-script-executable-compilation) measures **3.26 s versus 22.82 s direct**, with explicit reported-input macros, experimental Apple macro/executable producers and bundled static archives: 165 hits per warm build. Kache still leads at 2.08 s. Sharing validated Rust toolchain file digests reduced repeated initialization in a controlled test from 5.21 s to 1.37 s; the latest project cold sample was 41.46 s versus kache's 27.01 s. The last default-policy project run, on the preceding revision, took 17.36 s versus 22.96 s direct and 2.18 s kache, with 97 hits. Full-prefix hosted comparisons also passed: Linux warm medians were 36.31 s direct, 6.96 s nanocompile and 1.09 s kache; Mac medians were 87.05 s, 14.25 s and 3.88 s. Hosted and local workloads are separate. Raw samples, executable checksums and policy limits are recorded alongside the results.
 
 The [Xcode comparison](benchmarks/xcode.md) measures real `xcodebuild` workloads against kache and Xcode's native compilation cache. On the latest Harness iOS app comparison, direct builds take **45.60 s**, the external nanocompile Clang launcher 47.09 s, kache 46.96 s, and **`nanocompile xcodebuild` 4.16 s**. The new command uses Apple's native Swift/Clang cache; the two external compiler launchers record zero cache hits for this Xcode command profile. Correctness checks and the five-pipeline comparison also passed on a hosted Mac.
 
@@ -163,6 +163,20 @@ versus **22.86 s** direct and **2.01 s** kache. This flag does not opt macro con
 
 ```sh
 NANOCOMPILE_PROC_MACRO_PRODUCERS=1 RUSTC_WRAPPER="$nano_wrapper" cargo build --release
+```
+
+## Experimental executable compilation cache
+
+`NANOCOMPILE_EXECUTABLE_PRODUCERS=1` enables caching native Apple Rust `bin`
+compilations, including Cargo build-script executables, with zero debug
+information and supported codegen flags. It uses the same private linker capture
+and dependency validation as macro producers. Cargo still runs each restored
+build script; execution and its runtime file reads are not cached. Default,
+Linux, test, custom-linker, cross-target, LTO and debug configurations retain
+fallback. See [executable requirements](docs/executable-producers.md).
+
+```sh
+NANOCOMPILE_EXECUTABLE_PRODUCERS=1 RUSTC_WRAPPER="$nano_wrapper" cargo build --release
 ```
 
 ## Xcode native cache
