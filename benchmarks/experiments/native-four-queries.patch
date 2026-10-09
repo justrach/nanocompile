@@ -1,0 +1,19 @@
+diff --git a/src/native_identity.zig b/src/native_identity.zig
+index f80c84c..a609ae1 100644
+--- a/src/native_identity.zig
++++ b/src/native_identity.zig
+@@ -180,9 +180,11 @@ pub fn apple(ctx: *cache.Context, driver: []const u8) !Selection {
+     var next: std.atomic.Value(usize) = .init(0);
+     var group: std.Io.Group = .init;
+     defer group.cancel(ctx.io);
+-    // At most two active queries per invocation, including this calling worker.
+-    if ((std.Thread.getCpuCount() catch 1) > 1)
+-        group.concurrent(ctx.io, queryWorker, .{ &queries, &next, ctx.io, ctx.env }) catch {};
++    // At most four active queries, bounded by CPU count and including the caller.
++    const workers = @min(queries.len, @max(@as(usize, 1), std.Thread.getCpuCount() catch 1));
++    for (1..workers) |_| {
++        group.concurrent(ctx.io, queryWorker, .{ &queries, &next, ctx.io, ctx.env }) catch break;
++    }
+     queryWorker(&queries, &next, ctx.io, ctx.env);
+     try group.await(ctx.io);
+     const plan = queries[0].plan(ctx) catch |err| switch (err) {

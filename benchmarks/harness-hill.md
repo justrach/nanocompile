@@ -1077,3 +1077,43 @@ paired batches above supply that evidence. Kache remains faster, and no
 cold-build gain is claimed. All 135 rlibs, 10 macro dylibs and 21 build-script
 executables match direct output and their own cold builds. Tracked Rust sources
 and manifests remain unchanged. R2 transfer time is excluded.
+
+## Four active native queries: rejected
+
+The [candidate patch](experiments/native-four-queries.patch) increases the native
+selection queue from two active queries to at most four, capped by CPU count.
+The caller remains a worker and unavailable concurrency keeps existing workers
+plus the caller. Commands, parsing, configuration rejection, live selection,
+fallback, fingerprints and producer eligibility remain unchanged.
+
+The [25-pair isolated selection comparison](native-four-query-comparison.json)
+lowers complete process latency from **17.140 ms to 14.201 ms**, about 17.1%.
+All selected fields and fingerprints match. The
+[real selector comparison](native-four-selection-comparison.json) also matches
+developer roots, private/explicit SDKs, preserved-mtime metadata changes,
+invalid deployment-plan fallback and invalid/unsupported selectors.
+
+The [27-pair Harness comparison](harness-native-four-paired.json) is tied:
+**2.6897 s baseline versus 2.6900 s candidate** medians, with 12 candidate wins.
+Median paired savings are −3.19 ms, mean savings **−4.03 ms**, sample standard
+deviation 28.60 ms and standard error **5.50 ms**. The isolated reduction does
+not demonstrate a project gain. The candidate is rejected and production
+retains the two-query limit.
+
+Baseline SHA-256 is
+`1f8f2a76a8bd66450fb24065a64556d74b254a946fb207cfbe7e4a83d96f0658`;
+candidate SHA-256 is
+`a258b38b0335eebd882ae55896c504d8cb115367a644255ce704408b36b4f30b`.
+Both binaries are primed using one stable wrapper path, identical environment
+and target, and a shared cache before rotating measurements. All 54 warm builds
+have 167 hits, eight bypasses and three failed probes. All 167 collected
+artifacts match the first prime and tracked sources remain unchanged. The
+second prime reuses ordinary entries, so prime times are not a cold-cache A/B
+comparison. No samples are discarded and R2 transport is excluded.
+
+Candidate unit tests pass, together with
+[Apple selection/SDK metadata/corruption/fallback](native-four-identity-regression.json),
+[macro restore/loading and Cargo flags](native-four-producer-regression.json),
+and [executable restore/invalidation/failure](native-four-executable-regression.json)
+checks. The accepted production source and measured executable were restored;
+this experiment adds no new project speedup or cold-build claim.

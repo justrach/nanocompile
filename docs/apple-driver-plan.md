@@ -52,3 +52,8 @@ binary. Every accepted selection and fingerprint matches. The
 [isolated 25-pair comparison](../benchmarks/native-two-query-comparison.json)
 and [controlled Harness batches](../benchmarks/harness-hill.md#two-active-native-queries-adopted)
 record latency and project behavior separately.
+
+A [four-query-limit experiment](../benchmarks/harness-hill.md#four-active-native-queries-rejected)
+reduced isolated selection latency but showed no project gain across 27
+controlled Harness pairs. It was rejected; production retains two active
+queries.
