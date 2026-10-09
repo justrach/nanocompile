@@ -44,7 +44,9 @@ def main():
     p.add_argument("--state", required=True, type=Path)
     p.add_argument("--output", required=True, type=Path)
     p.add_argument("--toolchain", default="1.97.1")
+    p.add_argument("--decoder", type=Path, help="optional Zig link-report inspector")
     args = p.parse_args()
+    decoder = args.decoder.resolve() if args.decoder else None
     if sys.platform not in ("darwin", "linux"):
         p.error("this probe requires macOS or Linux")
     root = args.state.resolve()
@@ -134,6 +136,17 @@ def main():
         assert str(native) in deps["inputs"], deps
         assert any("libleaf" in path for path in deps["inputs"]), deps
         assert any("libmiddle" in path for path in deps["inputs"]), deps
+        zig_report = None
+        if decoder:
+            zig_report = json.loads(run([str(decoder), "darwin" if sys.platform == "darwin" else "make",
+                                         str(report)], "zig-report-" + str(value)))
+            assert str(native) in zig_report["inputs"], zig_report
+            assert any("libleaf" in path for path in zig_report["inputs"]), zig_report
+            assert any("libmiddle" in path for path in zig_report["inputs"]), zig_report
+            assert zig_report["outputs"] == [str(dylib)], zig_report
+            if sys.platform == "darwin":
+                assert zig_report["inputs"] == deps["inputs"]
+                assert zig_report["missing"] == deps["missing"]
         run([*rust, "consumer.rs", "--extern", "producer=" + str(dylib),
              "-o", str(root / "consumer")], "consumer-" + str(value))
         actual = run([str(root / "consumer")], "execute-" + str(value)).decode().strip()
@@ -144,6 +157,7 @@ def main():
                        "native_mtime_ns": native.stat().st_mtime_ns,
                        "producer_sha256": sha(dylib),
                        "producer_dep_info_sha256": sha(out / "producer.d"),
+                       "zig_report_verified": zig_report is not None,
                        "linker_inputs": deps["inputs"], "linker_missing": deps["missing"],
                        "source_and_explicit_externs_unchanged": True,
                        "producer_external_metadata_dependencies": []})
@@ -156,6 +170,7 @@ def main():
               "method": "real compiler and final native linker; two macro producer builds; native archive changed with preserved mtime; unchanged source files and explicit Rust externs; unchanged producer dep-info; load macro in rustc and run expanded consumer",
               "fixture_hashes": reference, "phases": phases,
               "producer_metadata": metadata_texts,
+              "zig_decoder_sha256": sha(decoder) if decoder else None,
               "conclusion": "Producer metadata and source dep-info alone do not describe final linker inputs. Linker dependency reports include transitive Rust archives and unbundled native archives."}
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(result, indent=2) + "\n")
@@ -168,4 +183,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

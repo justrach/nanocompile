@@ -11,6 +11,36 @@ expands to a different value. The final linker report includes the native
 archive and transitive Rust archives. On Darwin it also records SDK inputs and
 unsuccessful lookup candidates. These are necessary inputs to producer caching.
 
+The Zig reader is now implemented in `src/link_dependencies.zig`. It preserves
+Darwin input/missing/output records and decodes escaped Make paths, continuations
+and phony dependency rules. Unknown opcodes, truncated reports, unsupported Make
+expansions and ambiguous multiple link rules are rejected. It does not yet
+classify scratch files or enable producer storage.
+
+Inspect a report with the standalone diagnostic tool:
+
+```sh
+zig build-exe -O ReleaseFast -lc --dep link_dependencies \
+  -Mroot=tools/link_report.zig -Mlink_dependencies=src/link_dependencies.zig \
+  -femit-bin=/tmp/nano-link-report
+/tmp/nano-link-report darwin /path/to/linker.deps
+# ELF linker reports use `make` instead of `darwin`.
+```
+
+Pass `--decoder /tmp/nano-link-report` to the producer fixture to validate the
+reader against actual linker output. That check compares Darwin's complete
+input/missing record lists with an independent Python decoder, checks the
+output destination, and requires the transitive Rust and native archives on
+both platforms. Parser unit tests run with `zig build test`.
+
+The preceding observer fixture passed on hosted
+[Linux](../benchmarks/producer-link-probe-ubuntu-24.04.json) and
+[macOS](../benchmarks/producer-link-probe-macos-15.json) in
+[run 37931112697](https://github.com/justrach/nanocompile/actions/runs/37931112697).
+Those files predate the Zig reader. The
+[local Zig reader check](../benchmarks/producer-link-probe-zig-macos.json) also
+passed; hosted decoder verification runs in the regular CI workflow.
+
 ## Miss and discovery
 
 1. Keep the user's compiler selection, compilation environment and original

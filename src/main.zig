@@ -115,4 +115,5 @@ fn dispatch(ctx: *cache.Context, args: []const [:0]const u8) !u8 {
 test {
     _ = cache;
     _ = compiler;
+    _ = @import("link_dependencies.zig");
 }
