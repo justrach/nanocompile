@@ -1,0 +1,2354 @@
+{
+  "method": "Same Zig executable and BLAKE3; accepted buffered reader versus positional reads with 4KiB, 64KiB, 256KiB or 1MiB blocks. Prime all and rotate order across complete process runs. Internal timer includes open/stat/read/hash/close/result allocation. Full reads to EOF; no mapping, memo shortcut or extra threads. File digest microbenchmark, not a project build comparison.",
+  "zig_version": "0.17.0",
+  "upstream_tag": "1.8.7",
+  "upstream_commit": "f3149ec5bb5449af877ba20377a11008ff499fa2",
+  "binary_sha256": "e262597624b4d52fbc6dedc38b0aa484be97a344b22072f957998f0a179f09fc",
+  "script_sha256": "7e40560109560fe1865822222f889149a4dc6286d8603f09b72bcf5d6f0479fc",
+  "zig_probe_sha256": "17b28438c9b19fe4041b3ca1c96032e4b237e6a19b0cd35b3d5e03d261b9fb7d",
+  "cache_source_sha256": "b002556b2074333b52885b7771f6ee43abffd96e7d9597d0e47f663b0ca0b340",
+  "vectors_sha256": "dcb91ea8accc77e6d6e632af7cdc1a99a9f3ae78cf648da595c7d064db32f624",
+  "official_unkeyed_vectors_verified": 35,
+  "runs_per_implementation_per_file": 25,
+  "files": [
+    {
+      "path": "/private/tmp/nanocompile-library-phase-profile-state/cache/blobs/09/09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+      "bytes": 32551120,
+      "input_sha256": "7f12e283c88ee0e8176701e72bad2159b2cfcaf9c165b57e14dc0f778bfb2883",
+      "blake3": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+      "input_content_and_state_unchanged": true,
+      "samples": [
+        {
+          "implementation": "accepted",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 18074333,
+          "process_seconds": 0.021548959019128233
+        },
+        {
+          "implementation": "positional-4k",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 20998750,
+          "process_seconds": 0.02449166600126773
+        },
+        {
+          "implementation": "positional-64k",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17594583,
+          "process_seconds": 0.020936291955877095
+        },
+        {
+          "implementation": "positional-256k",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17364417,
+          "process_seconds": 0.020778833015356213
+        },
+        {
+          "implementation": "positional-1m",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17343125,
+          "process_seconds": 0.02070262498455122
+        },
+        {
+          "implementation": "positional-4k",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 23313875,
+          "process_seconds": 0.027907875017262995
+        },
+        {
+          "implementation": "positional-64k",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 18283333,
+          "process_seconds": 0.02195612498326227
+        },
+        {
+          "implementation": "positional-256k",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17596292,
+          "process_seconds": 0.021279459004290402
+        },
+        {
+          "implementation": "positional-1m",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17655750,
+          "process_seconds": 0.021263625007122755
+        },
+        {
+          "implementation": "accepted",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 18659250,
+          "process_seconds": 0.022322417004033923
+        },
+        {
+          "implementation": "positional-64k",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 18173667,
+          "process_seconds": 0.021731208020355552
+        },
+        {
+          "implementation": "positional-256k",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 18078709,
+          "process_seconds": 0.021644041989929974
+        },
+        {
+          "implementation": "positional-1m",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17657167,
+          "process_seconds": 0.02111858403077349
+        },
+        {
+          "implementation": "accepted",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 18339959,
+          "process_seconds": 0.02174658398143947
+        },
+        {
+          "implementation": "positional-4k",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 21472125,
+          "process_seconds": 0.0251445000176318
+        },
+        {
+          "implementation": "positional-256k",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17687833,
+          "process_seconds": 0.021216750028543174
+        },
+        {
+          "implementation": "positional-1m",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17643334,
+          "process_seconds": 0.021153500012587756
+        },
+        {
+          "implementation": "accepted",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17940667,
+          "process_seconds": 0.021335083001758903
+        },
+        {
+          "implementation": "positional-4k",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 20932708,
+          "process_seconds": 0.024327208986505866
+        },
+        {
+          "implementation": "positional-64k",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17583208,
+          "process_seconds": 0.021166999998968095
+        },
+        {
+          "implementation": "positional-1m",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17309292,
+          "process_seconds": 0.02068754198262468
+        },
+        {
+          "implementation": "accepted",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17983541,
+          "process_seconds": 0.02134604100137949
+        },
+        {
+          "implementation": "positional-4k",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 20980792,
+          "process_seconds": 0.024553374969400465
+        },
+        {
+          "implementation": "positional-64k",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17552167,
+          "process_seconds": 0.021031250013038516
+        },
+        {
+          "implementation": "positional-256k",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17346875,
+          "process_seconds": 0.02074779203394428
+        },
+        {
+          "implementation": "accepted",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17937292,
+          "process_seconds": 0.021431875007692724
+        },
+        {
+          "implementation": "positional-4k",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 20900417,
+          "process_seconds": 0.024221958010457456
+        },
+        {
+          "implementation": "positional-64k",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17645625,
+          "process_seconds": 0.021077291981782764
+        },
+        {
+          "implementation": "positional-256k",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17303459,
+          "process_seconds": 0.020680291985627264
+        },
+        {
+          "implementation": "positional-1m",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17252959,
+          "process_seconds": 0.020747208036482334
+        },
+        {
+          "implementation": "positional-4k",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 20937667,
+          "process_seconds": 0.02427733299555257
+        },
+        {
+          "implementation": "positional-64k",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17536250,
+          "process_seconds": 0.02080808294704184
+        },
+        {
+          "implementation": "positional-256k",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17297792,
+          "process_seconds": 0.020931041974108666
+        },
+        {
+          "implementation": "positional-1m",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17286000,
+          "process_seconds": 0.02070695796282962
+        },
+        {
+          "implementation": "accepted",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 18132333,
+          "process_seconds": 0.021472333988640457
+        },
+        {
+          "implementation": "positional-64k",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17641500,
+          "process_seconds": 0.02099058299791068
+        },
+        {
+          "implementation": "positional-256k",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17438833,
+          "process_seconds": 0.02108820795547217
+        },
+        {
+          "implementation": "positional-1m",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17343458,
+          "process_seconds": 0.020845500053837895
+        },
+        {
+          "implementation": "accepted",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 18065459,
+          "process_seconds": 0.0216066250577569
+        },
+        {
+          "implementation": "positional-4k",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 21310541,
+          "process_seconds": 0.02489699999568984
+        },
+        {
+          "implementation": "positional-256k",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17412792,
+          "process_seconds": 0.020875291025731713
+        },
+        {
+          "implementation": "positional-1m",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17348042,
+          "process_seconds": 0.021040166029706597
+        },
+        {
+          "implementation": "accepted",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 18063042,
+          "process_seconds": 0.02166775002842769
+        },
+        {
+          "implementation": "positional-4k",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 21698083,
+          "process_seconds": 0.02520133403595537
+        },
+        {
+          "implementation": "positional-64k",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17748875,
+          "process_seconds": 0.02122479199897498
+        },
+        {
+          "implementation": "positional-1m",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17321833,
+          "process_seconds": 0.020895958004985005
+        },
+        {
+          "implementation": "accepted",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 18037417,
+          "process_seconds": 0.021602207969408482
+        },
+        {
+          "implementation": "positional-4k",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 21717291,
+          "process_seconds": 0.025395417003892362
+        },
+        {
+          "implementation": "positional-64k",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17725541,
+          "process_seconds": 0.021250833000522107
+        },
+        {
+          "implementation": "positional-256k",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17351292,
+          "process_seconds": 0.020896875008475035
+        },
+        {
+          "implementation": "accepted",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 18027833,
+          "process_seconds": 0.02152149996254593
+        },
+        {
+          "implementation": "positional-4k",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 21256041,
+          "process_seconds": 0.02479604195104912
+        },
+        {
+          "implementation": "positional-64k",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 18535666,
+          "process_seconds": 0.022296624956652522
+        },
+        {
+          "implementation": "positional-256k",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17321792,
+          "process_seconds": 0.020932207989972085
+        },
+        {
+          "implementation": "positional-1m",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17272334,
+          "process_seconds": 0.020782208011951298
+        },
+        {
+          "implementation": "positional-4k",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 21143458,
+          "process_seconds": 0.02464804198825732
+        },
+        {
+          "implementation": "positional-64k",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17659584,
+          "process_seconds": 0.021158707968425006
+        },
+        {
+          "implementation": "positional-256k",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17341792,
+          "process_seconds": 0.020858083968050778
+        },
+        {
+          "implementation": "positional-1m",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17264500,
+          "process_seconds": 0.020704624999780208
+        },
+        {
+          "implementation": "accepted",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17945416,
+          "process_seconds": 0.02150174998678267
+        },
+        {
+          "implementation": "positional-64k",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17676750,
+          "process_seconds": 0.021098708966746926
+        },
+        {
+          "implementation": "positional-256k",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17359500,
+          "process_seconds": 0.02076812495943159
+        },
+        {
+          "implementation": "positional-1m",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17271042,
+          "process_seconds": 0.02070308302063495
+        },
+        {
+          "implementation": "accepted",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17947500,
+          "process_seconds": 0.021536207990720868
+        },
+        {
+          "implementation": "positional-4k",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 21130209,
+          "process_seconds": 0.02451129100518301
+        },
+        {
+          "implementation": "positional-256k",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17344875,
+          "process_seconds": 0.020812624949030578
+        },
+        {
+          "implementation": "positional-1m",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17944959,
+          "process_seconds": 0.021540958958212286
+        },
+        {
+          "implementation": "accepted",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 19792000,
+          "process_seconds": 0.02340204204665497
+        },
+        {
+          "implementation": "positional-4k",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 23332834,
+          "process_seconds": 0.026998833985999227
+        },
+        {
+          "implementation": "positional-64k",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 19781917,
+          "process_seconds": 0.023865583003498614
+        },
+        {
+          "implementation": "positional-1m",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 19524458,
+          "process_seconds": 0.023412750044371933
+        },
+        {
+          "implementation": "accepted",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 19198834,
+          "process_seconds": 0.023288458003662527
+        },
+        {
+          "implementation": "positional-4k",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 22629708,
+          "process_seconds": 0.026543125044554472
+        },
+        {
+          "implementation": "positional-64k",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 19030042,
+          "process_seconds": 0.022986333002336323
+        },
+        {
+          "implementation": "positional-256k",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 18697666,
+          "process_seconds": 0.02261816698592156
+        },
+        {
+          "implementation": "accepted",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 20265167,
+          "process_seconds": 0.02395583299221471
+        },
+        {
+          "implementation": "positional-4k",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 22812667,
+          "process_seconds": 0.026704749965574592
+        },
+        {
+          "implementation": "positional-64k",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 19089166,
+          "process_seconds": 0.022879833995830268
+        },
+        {
+          "implementation": "positional-256k",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17551000,
+          "process_seconds": 0.021018291998188943
+        },
+        {
+          "implementation": "positional-1m",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17451334,
+          "process_seconds": 0.021250249992590398
+        },
+        {
+          "implementation": "positional-4k",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 21073708,
+          "process_seconds": 0.02466687501873821
+        },
+        {
+          "implementation": "positional-64k",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17685208,
+          "process_seconds": 0.021134749986231327
+        },
+        {
+          "implementation": "positional-256k",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17468042,
+          "process_seconds": 0.020920124952681363
+        },
+        {
+          "implementation": "positional-1m",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17491167,
+          "process_seconds": 0.02095462498255074
+        },
+        {
+          "implementation": "accepted",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 18070500,
+          "process_seconds": 0.02178995800204575
+        },
+        {
+          "implementation": "positional-64k",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17755916,
+          "process_seconds": 0.021438041992951185
+        },
+        {
+          "implementation": "positional-256k",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17917625,
+          "process_seconds": 0.021748332947026938
+        },
+        {
+          "implementation": "positional-1m",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 18234709,
+          "process_seconds": 0.02235137502430007
+        },
+        {
+          "implementation": "accepted",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 18167333,
+          "process_seconds": 0.02192500000819564
+        },
+        {
+          "implementation": "positional-4k",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 20972666,
+          "process_seconds": 0.024540459038689733
+        },
+        {
+          "implementation": "positional-256k",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17404875,
+          "process_seconds": 0.02088212501257658
+        },
+        {
+          "implementation": "positional-1m",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17335833,
+          "process_seconds": 0.020900916017126292
+        },
+        {
+          "implementation": "accepted",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17953375,
+          "process_seconds": 0.02144816698273644
+        },
+        {
+          "implementation": "positional-4k",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 20871208,
+          "process_seconds": 0.02428404102101922
+        },
+        {
+          "implementation": "positional-64k",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17556792,
+          "process_seconds": 0.021075042022857815
+        },
+        {
+          "implementation": "positional-1m",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17267041,
+          "process_seconds": 0.02083329198649153
+        },
+        {
+          "implementation": "accepted",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 18011750,
+          "process_seconds": 0.02156749996356666
+        },
+        {
+          "implementation": "positional-4k",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 20952500,
+          "process_seconds": 0.024456457991618663
+        },
+        {
+          "implementation": "positional-64k",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17543625,
+          "process_seconds": 0.021095249976497144
+        },
+        {
+          "implementation": "positional-256k",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17299750,
+          "process_seconds": 0.02067391702439636
+        },
+        {
+          "implementation": "accepted",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17897416,
+          "process_seconds": 0.021403165999799967
+        },
+        {
+          "implementation": "positional-4k",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 21037667,
+          "process_seconds": 0.024439957982394844
+        },
+        {
+          "implementation": "positional-64k",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17668416,
+          "process_seconds": 0.021214834006968886
+        },
+        {
+          "implementation": "positional-256k",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17437084,
+          "process_seconds": 0.020973792008589953
+        },
+        {
+          "implementation": "positional-1m",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17267875,
+          "process_seconds": 0.02071150002302602
+        },
+        {
+          "implementation": "positional-4k",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 20936000,
+          "process_seconds": 0.024527625006157905
+        },
+        {
+          "implementation": "positional-64k",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17555709,
+          "process_seconds": 0.021071291994303465
+        },
+        {
+          "implementation": "positional-256k",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17373500,
+          "process_seconds": 0.020902750024106354
+        },
+        {
+          "implementation": "positional-1m",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17258333,
+          "process_seconds": 0.020720708009321243
+        },
+        {
+          "implementation": "accepted",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17916583,
+          "process_seconds": 0.021328708040528
+        },
+        {
+          "implementation": "positional-64k",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17572167,
+          "process_seconds": 0.020982875023037195
+        },
+        {
+          "implementation": "positional-256k",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17291833,
+          "process_seconds": 0.020653125015087426
+        },
+        {
+          "implementation": "positional-1m",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17229625,
+          "process_seconds": 0.02061104105086997
+        },
+        {
+          "implementation": "accepted",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17961584,
+          "process_seconds": 0.021497750014532357
+        },
+        {
+          "implementation": "positional-4k",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 20908167,
+          "process_seconds": 0.024225582950748503
+        },
+        {
+          "implementation": "positional-256k",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17278000,
+          "process_seconds": 0.02074912504758686
+        },
+        {
+          "implementation": "positional-1m",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17279958,
+          "process_seconds": 0.020552875008434057
+        },
+        {
+          "implementation": "accepted",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17899500,
+          "process_seconds": 0.02130849997047335
+        },
+        {
+          "implementation": "positional-4k",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 20952209,
+          "process_seconds": 0.024396875000093132
+        },
+        {
+          "implementation": "positional-64k",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17673958,
+          "process_seconds": 0.021249875018838793
+        },
+        {
+          "implementation": "positional-1m",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17246000,
+          "process_seconds": 0.020760207960847765
+        },
+        {
+          "implementation": "accepted",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17971250,
+          "process_seconds": 0.021470249979756773
+        },
+        {
+          "implementation": "positional-4k",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 20988209,
+          "process_seconds": 0.024445999995805323
+        },
+        {
+          "implementation": "positional-64k",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17552083,
+          "process_seconds": 0.021031207987107337
+        },
+        {
+          "implementation": "positional-256k",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17316541,
+          "process_seconds": 0.02066904096864164
+        }
+      ],
+      "median_hash_ms": {
+        "accepted": 18.027833,
+        "positional-4k": 21.037667,
+        "positional-64k": 17.668416,
+        "positional-256k": 17.364417,
+        "positional-1m": 17.321833
+      },
+      "median_process_seconds": {
+        "accepted": 0.021536207990720868,
+        "positional-4k": 0.024540459038689733,
+        "positional-64k": 0.021158707968425006,
+        "positional-256k": 0.020896875008475035,
+        "positional-1m": 0.02083329198649153
+      }
+    },
+    {
+      "path": "/private/tmp/nanocompile-library-phase-profile-state/cache/blobs/2b/2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+      "bytes": 13162816,
+      "input_sha256": "e6ee9cf088d11a33e430e7d7a1b4ad51728444d254c1a48a180b86f0891bd065",
+      "blake3": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+      "input_content_and_state_unchanged": true,
+      "samples": [
+        {
+          "implementation": "accepted",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7289834,
+          "process_seconds": 0.010453582974150777
+        },
+        {
+          "implementation": "positional-4k",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 8476292,
+          "process_seconds": 0.011590791982598603
+        },
+        {
+          "implementation": "positional-64k",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7126167,
+          "process_seconds": 0.010397415957413614
+        },
+        {
+          "implementation": "positional-256k",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7043000,
+          "process_seconds": 0.010332957957871258
+        },
+        {
+          "implementation": "positional-1m",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7044541,
+          "process_seconds": 0.010241625015623868
+        },
+        {
+          "implementation": "positional-4k",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 8483083,
+          "process_seconds": 0.011876708013005555
+        },
+        {
+          "implementation": "positional-64k",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7122041,
+          "process_seconds": 0.010299124987795949
+        },
+        {
+          "implementation": "positional-256k",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7021625,
+          "process_seconds": 0.010262791998684406
+        },
+        {
+          "implementation": "positional-1m",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7010000,
+          "process_seconds": 0.01013999996939674
+        },
+        {
+          "implementation": "accepted",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7292667,
+          "process_seconds": 0.010482166020665318
+        },
+        {
+          "implementation": "positional-64k",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7119083,
+          "process_seconds": 0.01034958299715072
+        },
+        {
+          "implementation": "positional-256k",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7046042,
+          "process_seconds": 0.010337667015846819
+        },
+        {
+          "implementation": "positional-1m",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7024916,
+          "process_seconds": 0.01034604199230671
+        },
+        {
+          "implementation": "accepted",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7306166,
+          "process_seconds": 0.01066212501609698
+        },
+        {
+          "implementation": "positional-4k",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 8571416,
+          "process_seconds": 0.011937416973523796
+        },
+        {
+          "implementation": "positional-256k",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7040375,
+          "process_seconds": 0.01037183398148045
+        },
+        {
+          "implementation": "positional-1m",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7027417,
+          "process_seconds": 0.010394708020612597
+        },
+        {
+          "implementation": "accepted",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7307583,
+          "process_seconds": 0.01066058297874406
+        },
+        {
+          "implementation": "positional-4k",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 8714125,
+          "process_seconds": 0.012050458986777812
+        },
+        {
+          "implementation": "positional-64k",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7132334,
+          "process_seconds": 0.010430792055558413
+        },
+        {
+          "implementation": "positional-1m",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7015625,
+          "process_seconds": 0.010290290985722095
+        },
+        {
+          "implementation": "accepted",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7269250,
+          "process_seconds": 0.010526208963710815
+        },
+        {
+          "implementation": "positional-4k",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 8412208,
+          "process_seconds": 0.011690249957609922
+        },
+        {
+          "implementation": "positional-64k",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7146583,
+          "process_seconds": 0.010467665968462825
+        },
+        {
+          "implementation": "positional-256k",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7017125,
+          "process_seconds": 0.010251708037685603
+        },
+        {
+          "implementation": "accepted",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7252042,
+          "process_seconds": 0.010622583038639277
+        },
+        {
+          "implementation": "positional-4k",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 8872125,
+          "process_seconds": 0.012283584044780582
+        },
+        {
+          "implementation": "positional-64k",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7120500,
+          "process_seconds": 0.010375667014159262
+        },
+        {
+          "implementation": "positional-256k",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7266041,
+          "process_seconds": 0.010810583014972508
+        },
+        {
+          "implementation": "positional-1m",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7038791,
+          "process_seconds": 0.010484625003300607
+        },
+        {
+          "implementation": "positional-4k",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 8502250,
+          "process_seconds": 0.012028584023937583
+        },
+        {
+          "implementation": "positional-64k",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7135083,
+          "process_seconds": 0.010377416969276965
+        },
+        {
+          "implementation": "positional-256k",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7013667,
+          "process_seconds": 0.010116832971107215
+        },
+        {
+          "implementation": "positional-1m",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7083584,
+          "process_seconds": 0.010542000003624707
+        },
+        {
+          "implementation": "accepted",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7293208,
+          "process_seconds": 0.01059349998831749
+        },
+        {
+          "implementation": "positional-64k",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7131375,
+          "process_seconds": 0.010413624986540526
+        },
+        {
+          "implementation": "positional-256k",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7013375,
+          "process_seconds": 0.010379250044934452
+        },
+        {
+          "implementation": "positional-1m",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7018500,
+          "process_seconds": 0.01026808301685378
+        },
+        {
+          "implementation": "accepted",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7255875,
+          "process_seconds": 0.010526750003919005
+        },
+        {
+          "implementation": "positional-4k",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 8516625,
+          "process_seconds": 0.011736625048797578
+        },
+        {
+          "implementation": "positional-256k",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7020709,
+          "process_seconds": 0.010422958992421627
+        },
+        {
+          "implementation": "positional-1m",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7015750,
+          "process_seconds": 0.010257249989081174
+        },
+        {
+          "implementation": "accepted",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7249375,
+          "process_seconds": 0.01056583400350064
+        },
+        {
+          "implementation": "positional-4k",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 8445792,
+          "process_seconds": 0.011779249995015562
+        },
+        {
+          "implementation": "positional-64k",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7118000,
+          "process_seconds": 0.010733374976553023
+        },
+        {
+          "implementation": "positional-1m",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7033417,
+          "process_seconds": 0.010344000009354204
+        },
+        {
+          "implementation": "accepted",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7301833,
+          "process_seconds": 0.010608125012367964
+        },
+        {
+          "implementation": "positional-4k",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 8484959,
+          "process_seconds": 0.011750040983315557
+        },
+        {
+          "implementation": "positional-64k",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7122000,
+          "process_seconds": 0.010497915965970606
+        },
+        {
+          "implementation": "positional-256k",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7012583,
+          "process_seconds": 0.010344084003008902
+        },
+        {
+          "implementation": "accepted",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7268792,
+          "process_seconds": 0.010641083004884422
+        },
+        {
+          "implementation": "positional-4k",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 8478750,
+          "process_seconds": 0.011833750002551824
+        },
+        {
+          "implementation": "positional-64k",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7163625,
+          "process_seconds": 0.010503125027753413
+        },
+        {
+          "implementation": "positional-256k",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7011750,
+          "process_seconds": 0.010407499969005585
+        },
+        {
+          "implementation": "positional-1m",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7022250,
+          "process_seconds": 0.010266249999403954
+        },
+        {
+          "implementation": "positional-4k",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 8473750,
+          "process_seconds": 0.011824499990325421
+        },
+        {
+          "implementation": "positional-64k",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7142292,
+          "process_seconds": 0.010463375016115606
+        },
+        {
+          "implementation": "positional-256k",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7031167,
+          "process_seconds": 0.010173000046052039
+        },
+        {
+          "implementation": "positional-1m",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7019375,
+          "process_seconds": 0.010319583991076797
+        },
+        {
+          "implementation": "accepted",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7250875,
+          "process_seconds": 0.010514916968531907
+        },
+        {
+          "implementation": "positional-64k",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7124000,
+          "process_seconds": 0.010465416999068111
+        },
+        {
+          "implementation": "positional-256k",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7014875,
+          "process_seconds": 0.010248958016745746
+        },
+        {
+          "implementation": "positional-1m",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7010083,
+          "process_seconds": 0.010591000027488917
+        },
+        {
+          "implementation": "accepted",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7267041,
+          "process_seconds": 0.010664166999049485
+        },
+        {
+          "implementation": "positional-4k",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 8481584,
+          "process_seconds": 0.011899749981239438
+        },
+        {
+          "implementation": "positional-256k",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7023459,
+          "process_seconds": 0.010451874986756593
+        },
+        {
+          "implementation": "positional-1m",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7026000,
+          "process_seconds": 0.010328417003620416
+        },
+        {
+          "implementation": "accepted",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7248625,
+          "process_seconds": 0.010601625021081418
+        },
+        {
+          "implementation": "positional-4k",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 8507375,
+          "process_seconds": 0.011928166961297393
+        },
+        {
+          "implementation": "positional-64k",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7119167,
+          "process_seconds": 0.01041329198051244
+        },
+        {
+          "implementation": "positional-1m",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7008500,
+          "process_seconds": 0.010233250039163977
+        },
+        {
+          "implementation": "accepted",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7303292,
+          "process_seconds": 0.01065383298555389
+        },
+        {
+          "implementation": "positional-4k",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 8584667,
+          "process_seconds": 0.01200620800955221
+        },
+        {
+          "implementation": "positional-64k",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7347792,
+          "process_seconds": 0.010909791977610439
+        },
+        {
+          "implementation": "positional-256k",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7112833,
+          "process_seconds": 0.010767958010546863
+        },
+        {
+          "implementation": "accepted",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7258583,
+          "process_seconds": 0.010789874999318272
+        },
+        {
+          "implementation": "positional-4k",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 8482542,
+          "process_seconds": 0.011785499984398484
+        },
+        {
+          "implementation": "positional-64k",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7112875,
+          "process_seconds": 0.010488124971743673
+        },
+        {
+          "implementation": "positional-256k",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7016792,
+          "process_seconds": 0.010421875049360096
+        },
+        {
+          "implementation": "positional-1m",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7012125,
+          "process_seconds": 0.01023670902941376
+        },
+        {
+          "implementation": "positional-4k",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 8494458,
+          "process_seconds": 0.012024833995383233
+        },
+        {
+          "implementation": "positional-64k",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7106250,
+          "process_seconds": 0.010610249999444932
+        },
+        {
+          "implementation": "positional-256k",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7001167,
+          "process_seconds": 0.010316792002413422
+        },
+        {
+          "implementation": "positional-1m",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7012458,
+          "process_seconds": 0.010320916946511716
+        },
+        {
+          "implementation": "accepted",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7240416,
+          "process_seconds": 0.010550541977863759
+        },
+        {
+          "implementation": "positional-64k",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7120250,
+          "process_seconds": 0.010616042010951787
+        },
+        {
+          "implementation": "positional-256k",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7212458,
+          "process_seconds": 0.010555333981756121
+        },
+        {
+          "implementation": "positional-1m",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7030708,
+          "process_seconds": 0.010406916961073875
+        },
+        {
+          "implementation": "accepted",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7268500,
+          "process_seconds": 0.010687041969504207
+        },
+        {
+          "implementation": "positional-4k",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 8466834,
+          "process_seconds": 0.011724667041562498
+        },
+        {
+          "implementation": "positional-256k",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7039875,
+          "process_seconds": 0.010419250000268221
+        },
+        {
+          "implementation": "positional-1m",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7008750,
+          "process_seconds": 0.010365208028815687
+        },
+        {
+          "implementation": "accepted",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7482750,
+          "process_seconds": 0.01093233295250684
+        },
+        {
+          "implementation": "positional-4k",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 8663250,
+          "process_seconds": 0.012315707979723811
+        },
+        {
+          "implementation": "positional-64k",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7143292,
+          "process_seconds": 0.010733041970524937
+        },
+        {
+          "implementation": "positional-1m",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7002333,
+          "process_seconds": 0.010352207988034934
+        },
+        {
+          "implementation": "accepted",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7276625,
+          "process_seconds": 0.010670624964404851
+        },
+        {
+          "implementation": "positional-4k",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 8487292,
+          "process_seconds": 0.011730375001206994
+        },
+        {
+          "implementation": "positional-64k",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7117583,
+          "process_seconds": 0.010517709015402943
+        },
+        {
+          "implementation": "positional-256k",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7043375,
+          "process_seconds": 0.010514708992559463
+        },
+        {
+          "implementation": "accepted",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7276625,
+          "process_seconds": 0.010715666983742267
+        },
+        {
+          "implementation": "positional-4k",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 8437750,
+          "process_seconds": 0.01189820800209418
+        },
+        {
+          "implementation": "positional-64k",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7115209,
+          "process_seconds": 0.010544250020757318
+        },
+        {
+          "implementation": "positional-256k",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7065875,
+          "process_seconds": 0.010390666022431105
+        },
+        {
+          "implementation": "positional-1m",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7003792,
+          "process_seconds": 0.010351625038310885
+        },
+        {
+          "implementation": "positional-4k",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 8456417,
+          "process_seconds": 0.01202962500974536
+        },
+        {
+          "implementation": "positional-64k",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7129250,
+          "process_seconds": 0.010479332995600998
+        },
+        {
+          "implementation": "positional-256k",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7008291,
+          "process_seconds": 0.01042604201938957
+        },
+        {
+          "implementation": "positional-1m",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7160125,
+          "process_seconds": 0.010511542030144483
+        },
+        {
+          "implementation": "accepted",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7436417,
+          "process_seconds": 0.011361625045537949
+        },
+        {
+          "implementation": "positional-64k",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7299500,
+          "process_seconds": 0.0110727499704808
+        },
+        {
+          "implementation": "positional-256k",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7729542,
+          "process_seconds": 0.011396792018786073
+        },
+        {
+          "implementation": "positional-1m",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7230209,
+          "process_seconds": 0.010886832955293357
+        },
+        {
+          "implementation": "accepted",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7449417,
+          "process_seconds": 0.010964541987050325
+        },
+        {
+          "implementation": "positional-4k",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 8468958,
+          "process_seconds": 0.011826333007775247
+        },
+        {
+          "implementation": "positional-256k",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7035042,
+          "process_seconds": 0.010280875023454428
+        },
+        {
+          "implementation": "positional-1m",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7022708,
+          "process_seconds": 0.010397083999123424
+        },
+        {
+          "implementation": "accepted",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7276292,
+          "process_seconds": 0.010659708001185209
+        },
+        {
+          "implementation": "positional-4k",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 8509708,
+          "process_seconds": 0.011910083994735032
+        },
+        {
+          "implementation": "positional-64k",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7155667,
+          "process_seconds": 0.010696333018131554
+        },
+        {
+          "implementation": "positional-1m",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7005792,
+          "process_seconds": 0.010344791982788593
+        },
+        {
+          "implementation": "accepted",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7288959,
+          "process_seconds": 0.010636000020895153
+        },
+        {
+          "implementation": "positional-4k",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 8469416,
+          "process_seconds": 0.012084333051461726
+        },
+        {
+          "implementation": "positional-64k",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7115667,
+          "process_seconds": 0.010745917039457709
+        },
+        {
+          "implementation": "positional-256k",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7027375,
+          "process_seconds": 0.01049012498697266
+        }
+      ],
+      "median_hash_ms": {
+        "accepted": 7.276625,
+        "positional-4k": 8.483083,
+        "positional-64k": 7.124,
+        "positional-256k": 7.027375,
+        "positional-1m": 7.019375
+      },
+      "median_process_seconds": {
+        "accepted": 0.010641083004884422,
+        "positional-4k": 0.01189820800209418,
+        "positional-64k": 0.010488124971743673,
+        "positional-256k": 0.010390666022431105,
+        "positional-1m": 0.010344791982788593
+      }
+    },
+    {
+      "path": "/private/tmp/nanocompile-library-phase-profile-state/cache/blobs/3c/3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+      "bytes": 10280952,
+      "input_sha256": "2982a61fffc4b1ecd427fa75d7401c534390fe5f6eee93a6b3191d457dc0eee4",
+      "blake3": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+      "input_content_and_state_unchanged": true,
+      "samples": [
+        {
+          "implementation": "accepted",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5718792,
+          "process_seconds": 0.009045292041264474
+        },
+        {
+          "implementation": "positional-4k",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 6623375,
+          "process_seconds": 0.009946666017640382
+        },
+        {
+          "implementation": "positional-64k",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5576959,
+          "process_seconds": 0.008864084025844932
+        },
+        {
+          "implementation": "positional-256k",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5525708,
+          "process_seconds": 0.008777583949267864
+        },
+        {
+          "implementation": "positional-1m",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5499000,
+          "process_seconds": 0.008829583006445318
+        },
+        {
+          "implementation": "positional-4k",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 6634083,
+          "process_seconds": 0.009939540992490947
+        },
+        {
+          "implementation": "positional-64k",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5578708,
+          "process_seconds": 0.009003792016301304
+        },
+        {
+          "implementation": "positional-256k",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5494708,
+          "process_seconds": 0.009010042005684227
+        },
+        {
+          "implementation": "positional-1m",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5498542,
+          "process_seconds": 0.00889029202517122
+        },
+        {
+          "implementation": "accepted",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5757209,
+          "process_seconds": 0.009031665977090597
+        },
+        {
+          "implementation": "positional-64k",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5690583,
+          "process_seconds": 0.009092124993912876
+        },
+        {
+          "implementation": "positional-256k",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5484042,
+          "process_seconds": 0.008852416998706758
+        },
+        {
+          "implementation": "positional-1m",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5500000,
+          "process_seconds": 0.008862000016961247
+        },
+        {
+          "implementation": "accepted",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5677208,
+          "process_seconds": 0.009037457988597453
+        },
+        {
+          "implementation": "positional-4k",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 6615500,
+          "process_seconds": 0.00992716703331098
+        },
+        {
+          "implementation": "positional-256k",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5483000,
+          "process_seconds": 0.008916375052649528
+        },
+        {
+          "implementation": "positional-1m",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5491500,
+          "process_seconds": 0.008724834013264626
+        },
+        {
+          "implementation": "accepted",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5685917,
+          "process_seconds": 0.009216042002663016
+        },
+        {
+          "implementation": "positional-4k",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 6620667,
+          "process_seconds": 0.009888791013509035
+        },
+        {
+          "implementation": "positional-64k",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5568333,
+          "process_seconds": 0.009025042003486305
+        },
+        {
+          "implementation": "positional-1m",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5505167,
+          "process_seconds": 0.008722583996132016
+        },
+        {
+          "implementation": "accepted",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5690291,
+          "process_seconds": 0.00905175000661984
+        },
+        {
+          "implementation": "positional-4k",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 6615167,
+          "process_seconds": 0.009916834009345621
+        },
+        {
+          "implementation": "positional-64k",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5556166,
+          "process_seconds": 0.008935084042605013
+        },
+        {
+          "implementation": "positional-256k",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5481625,
+          "process_seconds": 0.008699458034243435
+        },
+        {
+          "implementation": "accepted",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5692708,
+          "process_seconds": 0.009002832986880094
+        },
+        {
+          "implementation": "positional-4k",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 6610334,
+          "process_seconds": 0.010061540990136564
+        },
+        {
+          "implementation": "positional-64k",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5557625,
+          "process_seconds": 0.00919362501008436
+        },
+        {
+          "implementation": "positional-256k",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5481834,
+          "process_seconds": 0.008813166990876198
+        },
+        {
+          "implementation": "positional-1m",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5498500,
+          "process_seconds": 0.008757709001656622
+        },
+        {
+          "implementation": "positional-4k",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 6644084,
+          "process_seconds": 0.010014667001087219
+        },
+        {
+          "implementation": "positional-64k",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5564875,
+          "process_seconds": 0.008920957974623889
+        },
+        {
+          "implementation": "positional-256k",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5484542,
+          "process_seconds": 0.008772249973844737
+        },
+        {
+          "implementation": "positional-1m",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5494542,
+          "process_seconds": 0.008770457992795855
+        },
+        {
+          "implementation": "accepted",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5674958,
+          "process_seconds": 0.00904108298709616
+        },
+        {
+          "implementation": "positional-64k",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5560459,
+          "process_seconds": 0.008933499979320914
+        },
+        {
+          "implementation": "positional-256k",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5492000,
+          "process_seconds": 0.008951708034146577
+        },
+        {
+          "implementation": "positional-1m",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5492083,
+          "process_seconds": 0.008778291987255216
+        },
+        {
+          "implementation": "accepted",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5678208,
+          "process_seconds": 0.00899441697401926
+        },
+        {
+          "implementation": "positional-4k",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 6603792,
+          "process_seconds": 0.010059667052701116
+        },
+        {
+          "implementation": "positional-256k",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5479666,
+          "process_seconds": 0.008780958014540374
+        },
+        {
+          "implementation": "positional-1m",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5527791,
+          "process_seconds": 0.00890841701766476
+        },
+        {
+          "implementation": "accepted",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5685541,
+          "process_seconds": 0.009118375019170344
+        },
+        {
+          "implementation": "positional-4k",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 6619250,
+          "process_seconds": 0.009982042014598846
+        },
+        {
+          "implementation": "positional-64k",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5564625,
+          "process_seconds": 0.008960250008385628
+        },
+        {
+          "implementation": "positional-1m",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5484417,
+          "process_seconds": 0.008904791960958391
+        },
+        {
+          "implementation": "accepted",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5688417,
+          "process_seconds": 0.00909624999621883
+        },
+        {
+          "implementation": "positional-4k",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 6619083,
+          "process_seconds": 0.010013374965637922
+        },
+        {
+          "implementation": "positional-64k",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5554667,
+          "process_seconds": 0.008935999998357147
+        },
+        {
+          "implementation": "positional-256k",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5474084,
+          "process_seconds": 0.00885420897975564
+        },
+        {
+          "implementation": "accepted",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5677875,
+          "process_seconds": 0.009089124971069396
+        },
+        {
+          "implementation": "positional-4k",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 6611959,
+          "process_seconds": 0.009932165965437889
+        },
+        {
+          "implementation": "positional-64k",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5586416,
+          "process_seconds": 0.008904040965717286
+        },
+        {
+          "implementation": "positional-256k",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5517417,
+          "process_seconds": 0.00897833303315565
+        },
+        {
+          "implementation": "positional-1m",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5488458,
+          "process_seconds": 0.008986041997559369
+        },
+        {
+          "implementation": "positional-4k",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 6643209,
+          "process_seconds": 0.010178875003475696
+        },
+        {
+          "implementation": "positional-64k",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5754416,
+          "process_seconds": 0.009234249999281019
+        },
+        {
+          "implementation": "positional-256k",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5484458,
+          "process_seconds": 0.008960833016317338
+        },
+        {
+          "implementation": "positional-1m",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5482959,
+          "process_seconds": 0.008787665981799364
+        },
+        {
+          "implementation": "accepted",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5673042,
+          "process_seconds": 0.009147375007160008
+        },
+        {
+          "implementation": "positional-64k",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5554916,
+          "process_seconds": 0.00892037496669218
+        },
+        {
+          "implementation": "positional-256k",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5476417,
+          "process_seconds": 0.008850666985381395
+        },
+        {
+          "implementation": "positional-1m",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5517125,
+          "process_seconds": 0.00924858299549669
+        },
+        {
+          "implementation": "accepted",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5701000,
+          "process_seconds": 0.009338125004433095
+        },
+        {
+          "implementation": "positional-4k",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 6581708,
+          "process_seconds": 0.009989958023652434
+        },
+        {
+          "implementation": "positional-256k",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5896125,
+          "process_seconds": 0.009511540993116796
+        },
+        {
+          "implementation": "positional-1m",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 6090875,
+          "process_seconds": 0.010063124995213002
+        },
+        {
+          "implementation": "accepted",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 6225750,
+          "process_seconds": 0.01012191700283438
+        },
+        {
+          "implementation": "positional-4k",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 7057916,
+          "process_seconds": 0.011082707962486893
+        },
+        {
+          "implementation": "positional-64k",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5815750,
+          "process_seconds": 0.009722875023726374
+        },
+        {
+          "implementation": "positional-1m",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 6326166,
+          "process_seconds": 0.010385167028289288
+        },
+        {
+          "implementation": "accepted",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5800333,
+          "process_seconds": 0.009779208980035037
+        },
+        {
+          "implementation": "positional-4k",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 6800791,
+          "process_seconds": 0.01061316701816395
+        },
+        {
+          "implementation": "positional-64k",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5697792,
+          "process_seconds": 0.009334875037893653
+        },
+        {
+          "implementation": "positional-256k",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5661834,
+          "process_seconds": 0.009430708014406264
+        },
+        {
+          "implementation": "accepted",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5705125,
+          "process_seconds": 0.009409833000972867
+        },
+        {
+          "implementation": "positional-4k",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 6638917,
+          "process_seconds": 0.010150707967113703
+        },
+        {
+          "implementation": "positional-64k",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5578042,
+          "process_seconds": 0.009102124953642488
+        },
+        {
+          "implementation": "positional-256k",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5482208,
+          "process_seconds": 0.009096709021832794
+        },
+        {
+          "implementation": "positional-1m",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5494167,
+          "process_seconds": 0.008994666044600308
+        },
+        {
+          "implementation": "positional-4k",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 6625000,
+          "process_seconds": 0.010050166980363429
+        },
+        {
+          "implementation": "positional-64k",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5575125,
+          "process_seconds": 0.009269292000681162
+        },
+        {
+          "implementation": "positional-256k",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5477000,
+          "process_seconds": 0.00884408300044015
+        },
+        {
+          "implementation": "positional-1m",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5491458,
+          "process_seconds": 0.008982083003502339
+        },
+        {
+          "implementation": "accepted",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5676916,
+          "process_seconds": 0.009126292017754167
+        },
+        {
+          "implementation": "positional-64k",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5549167,
+          "process_seconds": 0.009119541966356337
+        },
+        {
+          "implementation": "positional-256k",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5472625,
+          "process_seconds": 0.008908999967388809
+        },
+        {
+          "implementation": "positional-1m",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5477667,
+          "process_seconds": 0.009135416999924928
+        },
+        {
+          "implementation": "accepted",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5681500,
+          "process_seconds": 0.009137707995250821
+        },
+        {
+          "implementation": "positional-4k",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 6603250,
+          "process_seconds": 0.010025875002611428
+        },
+        {
+          "implementation": "positional-256k",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5475417,
+          "process_seconds": 0.00882300001103431
+        },
+        {
+          "implementation": "positional-1m",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5516375,
+          "process_seconds": 0.008875833998899907
+        },
+        {
+          "implementation": "accepted",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5689709,
+          "process_seconds": 0.009093667031265795
+        },
+        {
+          "implementation": "positional-4k",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 6627000,
+          "process_seconds": 0.010003959003370255
+        },
+        {
+          "implementation": "positional-64k",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5562833,
+          "process_seconds": 0.009131708007771522
+        },
+        {
+          "implementation": "positional-1m",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5495291,
+          "process_seconds": 0.009371666004881263
+        },
+        {
+          "implementation": "accepted",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5659583,
+          "process_seconds": 0.009188583004288375
+        },
+        {
+          "implementation": "positional-4k",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 6620625,
+          "process_seconds": 0.010253541986458004
+        },
+        {
+          "implementation": "positional-64k",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5565667,
+          "process_seconds": 0.009151290985755622
+        },
+        {
+          "implementation": "positional-256k",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5483708,
+          "process_seconds": 0.009058958035893738
+        },
+        {
+          "implementation": "accepted",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5681000,
+          "process_seconds": 0.009217207960318774
+        },
+        {
+          "implementation": "positional-4k",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 6601042,
+          "process_seconds": 0.010060958040412515
+        },
+        {
+          "implementation": "positional-64k",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5556959,
+          "process_seconds": 0.008985583030153066
+        },
+        {
+          "implementation": "positional-256k",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5478417,
+          "process_seconds": 0.008895249979104847
+        },
+        {
+          "implementation": "positional-1m",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5481542,
+          "process_seconds": 0.00904799997806549
+        },
+        {
+          "implementation": "positional-4k",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 6588375,
+          "process_seconds": 0.010195083974394947
+        },
+        {
+          "implementation": "positional-64k",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5582167,
+          "process_seconds": 0.009122583025600761
+        },
+        {
+          "implementation": "positional-256k",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5476667,
+          "process_seconds": 0.009132374951150268
+        },
+        {
+          "implementation": "positional-1m",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5532584,
+          "process_seconds": 0.009098624985199422
+        },
+        {
+          "implementation": "accepted",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5665916,
+          "process_seconds": 0.009092083026189357
+        },
+        {
+          "implementation": "positional-64k",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5560625,
+          "process_seconds": 0.009138875000644475
+        },
+        {
+          "implementation": "positional-256k",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5472459,
+          "process_seconds": 0.00886374997207895
+        },
+        {
+          "implementation": "positional-1m",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5486375,
+          "process_seconds": 0.008985499967820942
+        },
+        {
+          "implementation": "accepted",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5663542,
+          "process_seconds": 0.009149958961643279
+        },
+        {
+          "implementation": "positional-4k",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 6573042,
+          "process_seconds": 0.010102041997015476
+        },
+        {
+          "implementation": "positional-256k",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5478375,
+          "process_seconds": 0.009074083005543798
+        },
+        {
+          "implementation": "positional-1m",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5494791,
+          "process_seconds": 0.00896766601363197
+        },
+        {
+          "implementation": "accepted",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5670375,
+          "process_seconds": 0.009255625016521662
+        },
+        {
+          "implementation": "positional-4k",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 6595625,
+          "process_seconds": 0.009988875011913478
+        },
+        {
+          "implementation": "positional-64k",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5579458,
+          "process_seconds": 0.00896333297714591
+        },
+        {
+          "implementation": "positional-1m",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5483292,
+          "process_seconds": 0.0090125419665128
+        },
+        {
+          "implementation": "accepted",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5676125,
+          "process_seconds": 0.009123416035436094
+        },
+        {
+          "implementation": "positional-4k",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 6621625,
+          "process_seconds": 0.010709292022511363
+        },
+        {
+          "implementation": "positional-64k",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5592709,
+          "process_seconds": 0.009045040991622955
+        },
+        {
+          "implementation": "positional-256k",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5483167,
+          "process_seconds": 0.009090625040698797
+        }
+      ],
+      "median_hash_ms": {
+        "accepted": 5.6815,
+        "positional-4k": 6.61925,
+        "positional-64k": 5.568333,
+        "positional-256k": 5.482208,
+        "positional-1m": 5.494791
+      },
+      "median_process_seconds": {
+        "accepted": 0.009123416035436094,
+        "positional-4k": 0.010025875002611428,
+        "positional-64k": 0.009045040991622955,
+        "positional-256k": 0.008908999967388809,
+        "positional-1m": 0.00896766601363197
+      }
+    }
+  ],
+  "core_revision": "6191692",
+  "interpretation": "Large-file positional reads have modest gains; two 27-pair Harness comparisons do not establish a dependable project speedup. Candidate not adopted.",
+  "provenance": {
+    "core_revision": "6191692",
+    "source_sha256": {
+      "benchmarks/experiments/digest_read.zig": "17b28438c9b19fe4041b3ca1c96032e4b237e6a19b0cd35b3d5e03d261b9fb7d",
+      "benchmarks/experiments/digest_read.py": "7e40560109560fe1865822222f889149a4dc6286d8603f09b72bcf5d6f0479fc",
+      "benchmarks/experiments/digest-read-positional.patch": "5f478863a4d020b9f1c35b62d900cf21776812fb0b1feb33a8c4dad740d13923",
+      "src/cache.zig": "b002556b2074333b52885b7771f6ee43abffd96e7d9597d0e47f663b0ca0b340",
+      "tests/integration.py": "428e9dda76546db7019c6bd82d957c3adf8724d6d602301d9c2b78aa99201d6c",
+      "tests/project_pair_comparison.py": "af9f109373f036a1bd3436258333d737acb168bfae1b9abccb5dde209c5374cc"
+    },
+    "binary_sha256": {
+      "zig-out/bin/nanocompile": "1f8f2a76a8bd66450fb24065a64556d74b254a946fb207cfbe7e4a83d96f0658",
+      "/tmp/nanocompile-digest-read": "e262597624b4d52fbc6dedc38b0aa484be97a344b22072f957998f0a179f09fc",
+      "/tmp/nanocompile-digest-read-candidate": "4ca4b5d9a2f265ef702d3a400f57e1494894ad602355bcd1b75e2cbc0984a6a5"
+    },
+    "integration": "PASS: real Rust/Zig restore, invalidation, corruption, isolation, failures, environment, escaped paths, single-flight and bypass",
+    "production_source_unchanged": true
+  }
+}

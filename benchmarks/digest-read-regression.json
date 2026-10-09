@@ -1,0 +1,18 @@
+{
+  "core_revision": "6191692",
+  "source_sha256": {
+    "benchmarks/experiments/digest_read.zig": "17b28438c9b19fe4041b3ca1c96032e4b237e6a19b0cd35b3d5e03d261b9fb7d",
+    "benchmarks/experiments/digest_read.py": "7e40560109560fe1865822222f889149a4dc6286d8603f09b72bcf5d6f0479fc",
+    "benchmarks/experiments/digest-read-positional.patch": "5f478863a4d020b9f1c35b62d900cf21776812fb0b1feb33a8c4dad740d13923",
+    "src/cache.zig": "b002556b2074333b52885b7771f6ee43abffd96e7d9597d0e47f663b0ca0b340",
+    "tests/integration.py": "428e9dda76546db7019c6bd82d957c3adf8724d6d602301d9c2b78aa99201d6c",
+    "tests/project_pair_comparison.py": "af9f109373f036a1bd3436258333d737acb168bfae1b9abccb5dde209c5374cc"
+  },
+  "binary_sha256": {
+    "zig-out/bin/nanocompile": "1f8f2a76a8bd66450fb24065a64556d74b254a946fb207cfbe7e4a83d96f0658",
+    "/tmp/nanocompile-digest-read": "e262597624b4d52fbc6dedc38b0aa484be97a344b22072f957998f0a179f09fc",
+    "/tmp/nanocompile-digest-read-candidate": "4ca4b5d9a2f265ef702d3a400f57e1494894ad602355bcd1b75e2cbc0984a6a5"
+  },
+  "integration": "PASS: real Rust/Zig restore, invalidation, corruption, isolation, failures, environment, escaped paths, single-flight and bypass",
+  "production_source_unchanged": true
+}

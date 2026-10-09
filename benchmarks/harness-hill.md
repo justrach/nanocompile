@@ -1209,3 +1209,16 @@ savings are 11.84 ms with 17.52 ms standard error. Serving 167 versus 136 worker
 hits is proven, but a dependable incremental speed gain is not. All artifacts
 match and tracked source contents remain unchanged. This remains experimental;
 production and the accepted kache comparison are unchanged.
+
+## Full-content file-read strategy
+
+The [positional-read experiment](../docs/digest-read-experiment.md) retains the
+same Zig BLAKE3 and full content validation. All 35 official vectors and real
+Rust/Zig integration pass. A 256 KiB buffer improves large-file hash medians by
+roughly 3–4%, but two controlled 27-pair Harness sessions measure only
+2.699154 → 2.691375 s and 2.710470 → 2.702229 s build medians. Candidate wins
+36 of 54 pairs; combined mean paired savings are 18.49 ms with 11.07 ms standard
+error. The confirmation mean is smaller than its standard error. Every warm
+build has 167 hits and matching artifacts; tracked sources remain unchanged.
+The evidence does not justify adoption or a dependable project speedup claim.
+Production keeps the accepted buffered reader.

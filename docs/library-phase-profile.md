@@ -63,3 +63,9 @@ The [first persistent cache-hit worker](restore-worker-experiment.md) keeps
 complete content verification and tests actual Harness builds. Its 27-pair
 comparison does not establish a dependable gain, so it remains a private
 prototype for transport and dispatch experiments.
+
+The subsequent [file-read strategy experiment](digest-read-experiment.md)
+tests full-content positional reads with the existing Zig BLAKE3. Large-file
+hashing medians improve modestly, but two 27-pair Harness sessions show only
+about 0.3% differences in build medians with uncertain paired savings. The
+candidate is not adopted; production keeps its accepted reader.
