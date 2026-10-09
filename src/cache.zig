@@ -109,6 +109,14 @@ pub const Context = struct {
     }
 
     pub fn directoryDigest(self: *Context, path_: []const u8, libraries: bool, outputs: []const []const u8) ![]const u8 {
+        return self.membersDigest(path_, libraries, false, outputs);
+    }
+
+    pub fn nativeDirectoryDigest(self: *Context, path_: []const u8) ![]const u8 {
+        return self.membersDigest(path_, false, true, &.{});
+    }
+
+    fn membersDigest(self: *Context, path_: []const u8, libraries: bool, all_members: bool, outputs: []const []const u8) ![]const u8 {
         var dir = try Dir.cwd().openDir(self.io, path_, .{ .iterate = true });
         defer dir.close(self.io);
         var iterator = dir.iterate();
@@ -126,7 +134,7 @@ pub const Context = struct {
                 if (ignored) continue;
             }
             // Rust's file-vs-directory module resolution observes these names.
-            if (libraries or entry.kind == .directory or std.mem.endsWith(u8, entry.name, ".rs"))
+            if (all_members or libraries or entry.kind == .directory or std.mem.endsWith(u8, entry.name, ".rs"))
                 try names.append(self.a, try std.fmt.allocPrint(self.a, "{s}:{s}", .{ entry.name, @tagName(entry.kind) }));
         }
         std.mem.sort([]const u8, names.items, {}, struct {
@@ -206,10 +214,11 @@ pub fn unseal(ctx: *Context, bytes: []const u8) ![]const u8 {
     return bytes[65..];
 }
 
-pub const Dependency = struct { path: []const u8, hash: []const u8, directory: bool = false, libraries: bool = false, library_prefix: ?[]const u8 = null };
+pub const Dependency = struct { path: []const u8, hash: []const u8, directory: bool = false, libraries: bool = false, library_prefix: ?[]const u8 = null, all_members: bool = false };
 pub const Output = struct { path: []const u8, hash: []const u8, mode: u32 };
+const entry_schema = 5;
 pub const Entry = struct {
-    schema: u32 = 4,
+    schema: u32 = entry_schema,
     dependencies: []const Dependency,
     outputs: []const Output,
     stdout: []const u8,
@@ -291,9 +300,29 @@ pub fn store(ctx: *Context, key: []const u8, dependencies: []const Dependency, o
 pub fn restore(ctx: *Context, key: []const u8, allowed_outputs: []const []const u8) !bool {
     const bytes = ctx.read(try ctx.path(&.{ "entries", key })) catch return false;
     const entry = parseEntry(ctx, bytes) catch return false;
-    if (entry.schema != 4 or entry.outputs.len != allowed_outputs.len) return false;
+    if (entry.schema != entry_schema or entry.outputs.len != allowed_outputs.len) return false;
+    // One crate graph can record many prefixes in the same Cargo directory,
+    // and explicit externs can also appear in the transitive graph. Reuse the
+    // enumeration and content hashes only within this restore. No metadata
+    // shortcut survives a compiler invocation or a before/after input check.
+    var library_names: std.StringHashMapUnmanaged([]const []const u8) = .empty;
+    defer library_names.deinit(ctx.a);
+    var file_hashes: std.StringHashMapUnmanaged([]const u8) = .empty;
+    defer file_hashes.deinit(ctx.a);
     for (entry.dependencies) |dep| {
-        const hash = (if (dep.library_prefix) |prefix| ctx.libraryDigest(dep.path, prefix, allowed_outputs) else if (dep.directory) ctx.directoryDigest(dep.path, dep.libraries, allowed_outputs) else ctx.digest(dep.path)) catch return false;
+        const hash = if (dep.library_prefix) |prefix| blk: {
+            const slot = try library_names.getOrPut(ctx.a, dep.path);
+            if (!slot.found_existing) slot.value_ptr.* = ctx.libraryNames(dep.path, allowed_outputs) catch return false;
+            break :blk try prefixDigest(ctx.a, slot.value_ptr.*, prefix);
+        } else if (dep.all_members)
+            ctx.nativeDirectoryDigest(dep.path) catch return false
+        else if (dep.directory)
+            ctx.directoryDigest(dep.path, dep.libraries, allowed_outputs) catch return false
+        else blk: {
+            const slot = try file_hashes.getOrPut(ctx.a, dep.path);
+            if (!slot.found_existing) slot.value_ptr.* = ctx.digest(dep.path) catch return false;
+            break :blk slot.value_ptr.*;
+        };
         if (!std.mem.eql(u8, hash, dep.hash)) {
             ctx.trace("miss: dependency content changed");
             return false;
@@ -391,7 +420,7 @@ pub fn gc(ctx: *Context, limit: u64) !void {
         var hashes: std.ArrayList([]const u8) = .empty;
         try hashes.appendSlice(ctx.a, &.{ entry.stdout, entry.stderr });
         for (entry.outputs) |output| try hashes.append(ctx.a, output.hash);
-        var valid = entry.schema == 4;
+        var valid = entry.schema == entry_schema;
         for (hashes.items) |hash| if (!validHash(hash)) {
             valid = false;
             break;

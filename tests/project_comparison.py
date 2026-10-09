@@ -15,6 +15,18 @@ import time
 from project_benchmark import sha
 
 
+def tree_rss(pid):
+    rows = subprocess.check_output(['ps', '-axo', 'pid=,ppid=,rss='], text=True)
+    entries = [tuple(map(int, row.split())) for row in rows.splitlines() if row.strip()]
+    descendants = {pid}
+    for _ in range(30):
+        new = descendants | {p for p, parent, _ in entries if parent in descendants}
+        if new == descendants:
+            break
+        descendants = new
+    return sum(rss for p, _, rss in entries if p in descendants) * 1024
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("binary")
@@ -54,6 +66,11 @@ def main():
               "kache_daemon": not args.standalone, "nanocompile_proc_macros": args.proc_macros, "command": command,
               "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat(), "builds": [],
               "method": "offline clean release package builds; same target path; prime direct build then empty caches; rotate three-way warm measurement order; validate each wrapper against its own cold artifact hashes (kache remaps paths)"}
+    tracked = subprocess.check_output(['git', 'ls-files', '-z'], cwd=project).decode().split('\0')
+    result['tracked_rust_and_manifest_hashes'] = {
+        name: sha(project / name) for name in tracked
+        if name and (name.endswith(('.rs', '.toml')) or Path(name).name == 'Cargo.lock') and (project / name).is_file()
+    }
     output = Path(args.output)
     output.parent.mkdir(parents=True, exist_ok=True)
 
@@ -84,13 +101,28 @@ def main():
         print(f"Starting {implementation} {phase} clean release build {number + 1}", flush=True)
         log_path = state / f"{number}-{implementation}-{phase}.log"
         start = time.monotonic()
+        peak = 0
+        last_sample = 0
         with log_path.open("w") as log:
-            proc = subprocess.run(command, cwd=project, env=build_env, stdout=log, stderr=log)
+            proc = subprocess.Popen(command, cwd=project, env=build_env, stdout=log, stderr=log, start_new_session=True)
+            while proc.poll() is None:
+                if time.monotonic() - last_sample > .5:
+                    peak = max(peak, tree_rss(proc.pid))
+                    last_sample = time.monotonic()
+                if peak > 40 * 1024**3 or time.monotonic() - start > 3600:
+                    os.killpg(proc.pid, signal.SIGTERM)
+                    proc.wait(timeout=15)
+                    raise RuntimeError('Build exceeded memory/time limit; see ' + str(log_path))
+                try:
+                    proc.wait(timeout=.1)
+                except subprocess.TimeoutExpired:
+                    pass
         seconds = time.monotonic() - start
         after = nano_events() if implementation == "nanocompile" else kache_events() if implementation == "kache" else collections.Counter()
         artifacts = {str(path.relative_to(target)): sha(path) for path in sorted((target / "release/deps").glob("*.rlib"))}
         row = {"implementation": implementation, "phase": phase, "seconds": seconds,
-               "exit_code": proc.returncode, "events": dict(after - before), "rlibs": len(artifacts), "artifacts": artifacts}
+               "exit_code": proc.returncode, "events": dict(after - before), "rlibs": len(artifacts), "artifacts": artifacts,
+               "peak_sampled_process_tree_rss_bytes": peak}
         if implementation not in references:
             references[implementation] = artifacts
         else:
@@ -136,7 +168,11 @@ def main():
             result.setdefault("summary", {})[implementation] = {"samples_seconds": samples, "median_seconds": statistics.median(samples)}
         stats = subprocess.run([kache, "--json", "stats"], cwd=project, env=env, capture_output=True, text=True, check=True)
         result["kache_stats"] = json.loads(stats.stdout)
+        result['tracked_sources_unchanged'] = all((project / name).is_file() and sha(project / name) == digest
+                                                  for name, digest in result['tracked_rust_and_manifest_hashes'].items())
         save()
+        if not result['tracked_sources_unchanged']:
+            raise RuntimeError('Tracked Rust sources changed during the comparison; results are not comparable')
         print(json.dumps(result["summary"], indent=2), flush=True)
     finally:
         if daemon is not None:

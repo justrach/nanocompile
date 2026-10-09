@@ -230,6 +230,90 @@ def main():
         assert events()[-1] != "hit"
         direct = subprocess.run(consumer, cwd=root, env=env, capture_output=True)
         assert p.returncode == direct.returncode
+        # Native -L paths on consumers must track full directory membership,
+        # regular files, and symlink targets, including preserved-mtime edits.
+        (root / "native").mkdir()
+        archive = root / "native/libcandidate.a"
+        archive.write_bytes(b"!<arch>\nfirst___")
+        # The scanner intentionally still declines ambiguous bare link calls.
+        (root / "plain.rs").write_text('''/// A symbolic link (parent) is ordinary documentation.
+pub struct Queue;
+impl Queue { pub fn link(&self, x: u32) -> u32 { x + 1 } }
+pub fn value() -> u32 { Queue.link(41) }
+''')
+        native_consumer = library("plain.rs", "plain", "out", ["-L", "native=native"])
+        run(native_consumer)
+        p = run(native_consumer)
+        assert events()[-1] == "hit", p.stderr
+        stamp = archive.stat()
+        archive.write_bytes(b"!<arch>\nsecond__")
+        os.utime(archive, ns=(stamp.st_atime_ns, stamp.st_mtime_ns))
+        run(native_consumer)
+        assert events()[-1] == "miss"
+        run(native_consumer)
+        assert events()[-1] == "hit"
+        competing = root / "native/libcompeting.a"
+        competing.write_bytes(b"!<arch>\n")
+        run(native_consumer)
+        assert events()[-1] == "miss"
+        competing.unlink()
+        run(native_consumer)
+        assert events()[-1] == "miss"
+        (root / "external-native.a").write_bytes(b"!<arch>\ntarget_1")
+        alias = root / "native/libalias.a"
+        alias.symlink_to(root / "external-native.a")
+        run(native_consumer)
+        run(native_consumer)
+        assert events()[-1] == "hit"
+        (root / "external-native.a").write_bytes(b"!<arch>\ntarget_2")
+        run(native_consumer)
+        assert events()[-1] == "miss"
+        thin = root / "native/libthin.a"
+        thin.write_bytes(b"!<thin>\n")
+        run(native_consumer)
+        p = run(native_consumer)
+        assert events()[-1] == "bypass" and b"ThinNativeArchive" in p.stderr, p.stderr
+        thin.unlink()
+        # Genuine native declarations remain ineligible. Strings containing
+        # comment markers must not hide an attribute that follows the string.
+        (root / "native_attr.rs").write_text('''const MARKER: &str = "/*";
+#[link(name="c")] extern "C" { fn puts(s: *const u8) -> i32; }
+pub fn value() -> u32 { 42 }
+''')
+        native_attribute = library("native_attr.rs", "native_attr", "out")
+        run(native_attribute)
+        p = run(native_attribute)
+        assert events()[-1] == "miss" and b"HiddenNativeLinkInput" in p.stderr, p.stderr
+        # Exercise a real bundled C archive through a Rust provider and cached
+        # consumer, then relink/run after changing the native implementation.
+        (root / "native_provider.rs").write_text('''#[link(name="answer", kind="static")]
+extern "C" { fn native_answer() -> u32; }
+pub fn value() -> u32 { unsafe { native_answer() } }
+''')
+        provider = library("native_provider.rs", "native_provider", "deps", ["-L", "native=native"])
+        (root / "native_consumer.rs").write_text('pub fn value() -> u32 { native_provider::value() }\n')
+        native_chain = library("native_consumer.rs", "native_consumer", "out", ["--extern", "native_provider=deps/libnative_provider.rlib", "-L", "dependency=deps", "-L", "native=native"])
+        def native_archive(value):
+            (root / "native/answer.c").write_text(f'unsigned native_answer(void) {{ return {value}; }}\n')
+            subprocess.run(['cc', '-c', 'native/answer.c', '-o', 'native/answer.o'], cwd=root, check=True, capture_output=True)
+            subprocess.run(['ar', 'rcs', 'native/libanswer.a', 'native/answer.o'], cwd=root, check=True, capture_output=True)
+            run(provider)
+        def check_native(value):
+            (root / "native_driver.rs").write_text(f'fn main() {{ assert_eq!(native_consumer::value(), {value}); }}\n')
+            linked = subprocess.run(['rustc', 'native_driver.rs', '--extern', 'native_consumer=out/libnative_consumer.rlib', '-L', 'dependency=deps', '-L', 'native=native', '-o', 'native_driver'], cwd=root, env=env, capture_output=True)
+            assert linked.returncode == 0, linked.stderr
+            subprocess.run([str(root / 'native_driver')], check=True, capture_output=True)
+        native_archive(41)
+        run(native_chain)
+        run(native_chain)
+        assert events()[-1] == "hit"
+        check_native(41)
+        native_archive(42)
+        run(native_chain)
+        assert events()[-1] == "miss"
+        run(native_chain)
+        assert events()[-1] == "hit"
+        check_native(42)
         # Reported-input macro mode is explicit. Test a real proc macro whose
         # hidden file read is absent from rustc dep-info, then declare that file
         # globally so every macro consumer tracks it by content.

@@ -7,6 +7,32 @@ const Dir = std.Io.Dir;
 
 pub const Directory = struct { path: []const u8, names: []const []const u8 };
 
+/// Native search is not recursive. Track every immediate file and every name,
+/// including symlink targets and competing archive names. Thin archives can
+/// reference objects outside this directory, so leave them uncached.
+pub fn nativeSnapshot(ctx: *cache.Context, dirs: []const []const u8) ![]const cache.Dependency {
+    var records: std.ArrayList(cache.Dependency) = .empty;
+    for (dirs) |path| {
+        try records.append(ctx.a, .{ .path = path, .hash = try ctx.nativeDirectoryDigest(path), .directory = true, .all_members = true });
+        var dir = try Dir.cwd().openDir(ctx.io, path, .{ .iterate = true });
+        defer dir.close(ctx.io);
+        var iterator = dir.iterate();
+        while (try iterator.next(ctx.io)) |entry| {
+            if (entry.kind == .directory) continue;
+            const input = try std.fs.path.join(ctx.a, &.{ path, entry.name });
+            const file = try Dir.cwd().openFile(ctx.io, input, .{});
+            defer file.close(ctx.io);
+            if ((try file.stat(ctx.io)).kind != .file) return error.UnsupportedNativeInput;
+            var magic: [8]u8 = undefined;
+            var reader = file.reader(ctx.io, &.{});
+            const n = try reader.interface.readSliceShort(&magic);
+            if (std.mem.eql(u8, magic[0..n], "!<thin>\n")) return error.ThinNativeArchive;
+            try records.append(ctx.a, .{ .path = input, .hash = try ctx.digest(input) });
+        }
+    }
+    return records.items;
+}
+
 pub fn snapshot(ctx: *cache.Context, dirs: []const []const u8, outputs: []const []const u8) ![]const Directory {
     var result: std.ArrayList(Directory) = .empty;
     for (dirs) |dir| try result.append(ctx.a, .{ .path = dir, .names = try ctx.libraryNames(dir, outputs) });

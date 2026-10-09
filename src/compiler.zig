@@ -10,6 +10,7 @@ const Plan = struct {
     dependencies: []const []const u8,
     dep_info: ?[]const u8 = null,
     library_dirs: []const []const u8 = &.{},
+    native_dirs: []const []const u8 = &.{},
     configuration: ?cache.Dependency = null,
 };
 const Module = struct { name: []const u8, source: []const u8 };
@@ -50,6 +51,7 @@ fn rustPlan(ctx: *cache.Context, argv: []const []const u8) !Plan {
     var split_debug: []const u8 = "off";
     var inputs: std.ArrayList([]const u8) = .empty;
     var search_dirs: std.ArrayList([]const u8) = .empty;
+    var native_dirs: std.ArrayList([]const u8) = .empty;
     var configuration: ?cache.Dependency = null;
     var i: usize = 1;
     while (i < argv.len) : (i += 1) {
@@ -85,8 +87,11 @@ fn rustPlan(ctx: *cache.Context, argv: []const []const u8) !Plan {
                 if (i == argv.len) return error.MissingValue;
                 break :blk argv[i];
             } else arg[2..];
-            if (!std.mem.startsWith(u8, v, "dependency=")) return error.NativeSearchPath;
-            try addUnique(ctx, &search_dirs, v[11..]);
+            if (std.mem.startsWith(u8, v, "dependency=")) {
+                try addUnique(ctx, &search_dirs, v[11..]);
+            } else if (std.mem.startsWith(u8, v, "native=")) {
+                try addUnique(ctx, &native_dirs, v[7..]);
+            } else return error.NativeSearchPath;
             continue;
         }
         if (eq(arg, "-C") or std.mem.startsWith(u8, arg, "-C")) {
@@ -170,7 +175,7 @@ fn rustPlan(ctx: *cache.Context, argv: []const []const u8) !Plan {
         if (eq(e, "dep-info")) dep_info = path;
     }
     if (dep_info == null) return error.NoDependencyInfo;
-    return .{ .source = src, .outputs = outputs.items, .dependencies = inputs.items, .dep_info = dep_info, .library_dirs = search_dirs.items, .configuration = configuration };
+    return .{ .source = src, .outputs = outputs.items, .dependencies = inputs.items, .dep_info = dep_info, .library_dirs = search_dirs.items, .native_dirs = native_dirs.items, .configuration = configuration };
 }
 
 fn zigPlan(ctx: *cache.Context, argv: []const []const u8) !Plan {
@@ -316,46 +321,104 @@ fn dependencyRecords(ctx: *cache.Context, paths: []const []const u8) ![]const ca
     return deps.items;
 }
 
-fn hiddenNativeLink(bytes: []const u8) bool {
-    var offset: usize = 0;
-    while (std.mem.indexOfPos(u8, bytes, offset, "link")) |pos| {
-        offset = pos + 4;
-        if (pos > 0 and (std.ascii.isAlphanumeric(bytes[pos - 1]) or bytes[pos - 1] == '_')) continue;
-        var i = offset;
-        while (i < bytes.len) {
-            if (std.ascii.isWhitespace(bytes[i])) {
-                i += 1;
-                continue;
+// Skip Rust whitespace and nested comments. Token text in comments cannot be
+// a link attribute; retain conservative handling of other ambiguous tokens.
+fn skipRustTrivia(bytes: []const u8, start: usize) usize {
+    var i = start;
+    while (i < bytes.len) {
+        if (std.ascii.isWhitespace(bytes[i])) {
+            i += 1;
+        } else if (std.mem.startsWith(u8, bytes[i..], "//")) {
+            i = std.mem.indexOfScalarPos(u8, bytes, i, '\n') orelse bytes.len;
+        } else if (std.mem.startsWith(u8, bytes[i..], "/*")) {
+            i += 2;
+            var depth: usize = 1;
+            while (i < bytes.len and depth > 0) {
+                if (std.mem.startsWith(u8, bytes[i..], "/*")) {
+                    depth += 1;
+                    i += 2;
+                } else if (std.mem.startsWith(u8, bytes[i..], "*/")) {
+                    depth -= 1;
+                    i += 2;
+                } else i += 1;
             }
-            if (i + 1 < bytes.len and bytes[i] == '/' and bytes[i + 1] == '/') {
-                i = std.mem.indexOfScalarPos(u8, bytes, i, '\n') orelse bytes.len;
-                continue;
-            }
-            if (i + 1 < bytes.len and bytes[i] == '/' and bytes[i + 1] == '*') {
-                i += 2;
-                var depth: usize = 1;
-                while (i + 1 < bytes.len and depth > 0) {
-                    if (bytes[i] == '/' and bytes[i + 1] == '*') {
-                        depth += 1;
-                        i += 2;
-                    } else if (bytes[i] == '*' and bytes[i + 1] == '/') {
-                        depth -= 1;
-                        i += 2;
-                    } else i += 1;
-                }
-                continue;
-            }
-            break;
+        } else break;
+    }
+    return i;
+}
+
+fn rustLiteralEnd(bytes: []const u8, start: usize) ?usize {
+    var i = start;
+    if (bytes[i] == 'b' or bytes[i] == 'c') i += 1;
+    if (i == bytes.len) return null;
+    if (bytes[i] == 'r') {
+        i += 1;
+        const hashes_start = i;
+        while (i < bytes.len and bytes[i] == '#') : (i += 1) {}
+        const hashes = i - hashes_start;
+        if (i == bytes.len or bytes[i] != '"') return null;
+        i += 1;
+        while (i < bytes.len) : (i += 1) {
+            if (bytes[i] != '"') continue;
+            var end = i + 1;
+            while (end < bytes.len and end - i - 1 < hashes and bytes[end] == '#') : (end += 1) {}
+            if (end - i - 1 == hashes) return end;
         }
-        // Conservative: this may also decline a user function named link.
-        if (i < bytes.len and bytes[i] == '(') return true;
+        return bytes.len;
+    }
+    if (bytes[i] == '"') {
+        i += 1;
+        while (i < bytes.len) {
+            if (bytes[i] == '"') return i + 1;
+            i += if (bytes[i] == '\\' and i + 1 < bytes.len) @as(usize, 2) else 1;
+        }
+        return bytes.len;
+    }
+    if (bytes[i] != '\'' or i + 1 == bytes.len) return null;
+    // A lifetime is not a character literal. Only consume a complete single
+    // character (including escapes), avoiding quotes inside character tokens.
+    i += 1;
+    if (bytes[i] == '\\') {
+        i += 1;
+        if (i == bytes.len) return null;
+        if (bytes[i] == 'u' and i + 1 < bytes.len and bytes[i + 1] == '{') {
+            i = (std.mem.indexOfScalarPos(u8, bytes, i + 2, '}') orelse return null) + 1;
+        } else if (bytes[i] == 'x') {
+            i += 3;
+        } else i += 1;
+    } else i += std.unicode.utf8ByteSequenceLength(bytes[i]) catch return null;
+    return if (i < bytes.len and bytes[i] == '\'') i + 1 else null;
+}
+
+fn hiddenNativeLink(bytes: []const u8) bool {
+    var i: usize = 0;
+    var previous: []const u8 = "";
+    while (true) {
+        i = skipRustTrivia(bytes, i);
+        if (i == bytes.len) break;
+        if (rustLiteralEnd(bytes, i)) |end| {
+            i = end;
+            previous = "literal";
+            continue;
+        }
+        const start = i;
+        if (std.ascii.isAlphanumeric(bytes[i]) or bytes[i] == '_') {
+            i += 1;
+            while (i < bytes.len and (std.ascii.isAlphanumeric(bytes[i]) or bytes[i] == '_')) : (i += 1) {}
+        } else i += 1;
+        const token = bytes[start..i];
+        if (eq(token, "link") and !eq(previous, "fn") and !eq(previous, ".") and !eq(previous, ":")) {
+            const next = skipRustTrivia(bytes, i);
+            if (next < bytes.len and bytes[next] == '(') return true;
+        }
+        previous = token;
     }
     return false;
 }
 
 fn keyFor(ctx: *cache.Context, kind: Kind, argv: []const []const u8) ![]const u8 {
     var hash = cache.Hash.init(.{});
-    cache.field(&hash, "nanocompile-v6");
+    cache.field(&hash, "nanocompile-v7");
     cache.field(&hash, @tagName(kind));
     cache.field(&hash, ctx.cwd);
     const host = std.zig.system.resolveTargetQuery(ctx.io, .{}) catch |err| {
@@ -428,7 +491,11 @@ pub fn execute(ctx: *cache.Context, kind: Kind, argv: []const []const u8) !u8 {
         ctx.event("hit");
         return 0;
     }
-    const before = dependencyRecords(ctx, plan.dependencies) catch return bypass(ctx, argv, "bypass: cannot fingerprint inputs");
+    var before: std.ArrayList(cache.Dependency) = .empty;
+    try before.appendSlice(ctx.a, dependencyRecords(ctx, plan.dependencies) catch return bypass(ctx, argv, "bypass: cannot fingerprint inputs"));
+    const native = rust_dependencies.nativeSnapshot(ctx, plan.native_dirs) catch |err|
+        return bypass(ctx, argv, try std.fmt.allocPrint(ctx.a, "bypass: native inputs unavailable ({s})", .{@errorName(err)}));
+    try before.appendSlice(ctx.a, native);
     const directories = rust_dependencies.snapshot(ctx, plan.library_dirs, plan.outputs) catch return bypass(ctx, argv, "bypass: cannot enumerate dependency directories");
     const started = std.Io.Clock.real.now(ctx.io).nanoseconds;
     ctx.trace("miss: compiling");
@@ -441,12 +508,15 @@ pub fn execute(ctx: *cache.Context, kind: Kind, argv: []const []const u8) !u8 {
         return code;
     }
     ctx.event("miss");
-    save(ctx, key, plan, argv, before, directories, started, result) catch |err| ctx.trace(try std.fmt.allocPrint(ctx.a, "uncached: {s}", .{@errorName(err)}));
+    save(ctx, key, plan, argv, before.items, directories, started, result) catch |err| ctx.trace(try std.fmt.allocPrint(ctx.a, "uncached: {s}", .{@errorName(err)}));
     return 0;
 }
 
 fn save(ctx: *cache.Context, key: []const u8, plan: Plan, argv: []const []const u8, before: []const cache.Dependency, directories: []const rust_dependencies.Directory, started: i96, result: std.process.RunResult) !void {
-    for (before) |dep| if (!eq(try ctx.digest(dep.path), dep.hash)) return error.InputChangedDuringCompilation;
+    for (before) |dep| if (!dep.directory) {
+        for (plan.outputs) |out| if (eq(dep.path, out)) return error.OverlappingOutput;
+    };
+    for (before) |dep| if (!eq(if (dep.all_members) try ctx.nativeDirectoryDigest(dep.path) else try ctx.digest(dep.path), dep.hash)) return error.InputChangedDuringCompilation;
     var paths: std.ArrayList([]const u8) = .empty;
     for (plan.dependencies) |path| try addUnique(ctx, &paths, path);
     if (plan.dep_info) |path| {
@@ -456,6 +526,21 @@ fn save(ctx: *cache.Context, key: []const u8, plan: Plan, argv: []const []const 
     // Outputs cannot be inputs, otherwise the next run could self-invalidate.
     for (paths.items) |dep| for (plan.outputs) |out| if (eq(dep, out)) return error.OverlappingOutput;
     var records: std.ArrayList(cache.Dependency) = .empty;
+    // Retain all native files and full top-level directory membership; source
+    // and Rust graph records below continue using their more specific guards.
+    for (before) |dep| {
+        var native_input = dep.all_members;
+        if (!native_input) for (plan.native_dirs) |dir| {
+            if (eq(std.fs.path.dirname(dep.path) orelse "", dir)) {
+                native_input = true;
+                break;
+            }
+        };
+        if (!native_input) continue;
+        const st = try Dir.cwd().statFile(ctx.io, dep.path, .{});
+        if (st.mtime.nanoseconds >= started or st.ctime.nanoseconds >= started) return error.InputChangedDuringCompilation;
+        try records.append(ctx.a, dep);
+    }
     var dirs: std.ArrayList([]const u8) = .empty;
     for (paths.items) |dep| {
         const st = try Dir.cwd().statFile(ctx.io, dep, .{});
@@ -491,4 +576,10 @@ test "native link attributes include comments and cfg_attr forms" {
     try std.testing.expect(hiddenNativeLink("#[link /* comment */ (name=\"native\")] extern {}"));
     try std.testing.expect(hiddenNativeLink("#[cfg_attr(unix, link(name=\"native\"))] extern {}"));
     try std.testing.expect(!hiddenNativeLink("pub fn linking_notes() {} #[link_name=\"symbol\"] extern {}"));
+    try std.testing.expect(!hiddenNativeLink("/// symbolic link (parent)\nfn /* nested /* comment */ */ link(x: u32) {} self.link(1); queue::link(2);"));
+    try std.testing.expect(hiddenNativeLink("macro_use!(link(name=\"native\"));"));
+    try std.testing.expect(hiddenNativeLink("/* outer /* inner */ */ #[cfg_attr(unix, link /*nested*/ (name=\"native\"))] extern {}"));
+    try std.testing.expect(hiddenNativeLink("const S: &str = r##\"\"/*\"##; #[link(name=\"native\")] extern {}"));
+    try std.testing.expect(hiddenNativeLink("const C: char = '\"'; const S: &str=\"/*\"; #[link(name=\"native\")] extern {}"));
+    try std.testing.expect(!hiddenNativeLink("const S: &str = \"link(name=foo)\"; pub fn link<'a>(x: &'a str) {}"));
 }

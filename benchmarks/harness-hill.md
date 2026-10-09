@@ -87,3 +87,43 @@ Raw data retains every sample, artifact hash, cache counter, compiler version an
 measured executable checksum:
 [LTO gate](harness-hill-lto.json), [scoped graph](harness-hill-scoped.json),
 [reported macro inputs](harness-hill-reported.json).
+
+## Native-path iteration
+
+The scan-reuse-only comparison measured 18.902 s nanocompile versus 22.787 s
+direct and 2.050 s kache, with 84–87 warm hits. It is a separate session, not
+a controlled A/B against the scoped-graph run; it does not establish a useful
+performance gain from scan reuse alone.
+[Raw scan-reuse results](harness-hill-scan-reuse.json) retain all samples.
+
+The next candidate accepts explicit `-L native=…` on Rust consumers. It records
+every immediate file's content, symlink targets and all directory names before
+and after compilation and on hits. Additions and preserved-mtime edits
+invalidate it. Thin archives remain uncached because their member objects may
+live elsewhere. Direct `-l` options and possible native link declarations
+remain unsupported until their resolution inputs can be fully tracked.
+Rust can pack a static native library into an rlib; tracking the Rust provider's
+content and native inputs matters for downstream consumers.
+[Rust's native bundle semantics](https://doc.rust-lang.org/rustc/command-line-arguments.html#linking-modifiers-bundle)
+describe this behavior. A new integration case compiles a real C archive,
+builds a Rust provider/consumer, restores the consumer, links/runs it, then
+changes the C implementation and verifies the new executable result.
+
+The source scanner now ignores comments and literals and recognizes function
+declarations and member/qualified calls. It still refuses actual link
+attributes, `cfg_attr` forms, macro arguments and ambiguous bare `link(…)`
+calls. Raw strings and character literals containing comment markers cannot
+hide a subsequent native declaration.
+
+The reported-input native-path prototype measured 6.615 s nanocompile versus
+22.797 s direct and 2.007 s kache. Its warm samples were 9.385, 6.615 and 5.972
+seconds with 114–123 hits; cache coverage was still filling after the first
+build. Every artifact matched direct and its own cold reference. These are
+prototype measurements before the additional overlapping-output guard, not
+the final binary's performance result.
+[Raw prototype measurements](harness-hill-native-prototype.json) record the
+measured executable checksum and all samples. Cold cache still took 52.727 s.
+
+The final implementation uses entry schema 5 and key namespace v7. The project
+benchmark now enforces a sampled 40 GiB process-tree RSS guard, records tracked
+Rust/manifests' hashes, and checks they stayed unchanged during a comparison.
