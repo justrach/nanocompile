@@ -61,8 +61,8 @@ through `nanocompile artifact put|get|head`. The two-package JSON/HTML example
 proves remote hits after outputs and client-local cache are removed, dependency
 and environment invalidation, corruption repair, GC, clear and snapshot restore.
 Task artifacts also travel through the existing R2 snapshot transport. This is
-a development adapter, with the hosted actual-R2 check available as a manual
-workflow; it is not a deployed public cache service.
+a development adapter. The [actual R2 restore check](benchmarks/turborepo.md)
+passed on Linux and Mac; it is not a deployed public cache service.
 
 ```sh
 npm ci --prefix examples/turborepo --ignore-scripts --no-audit --no-fund

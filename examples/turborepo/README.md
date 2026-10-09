@@ -64,8 +64,9 @@ python3 tests/turbo_integration.py zig-out/bin/nanocompile \
 
 That uploads the populated store, deletes the isolated local server cache,
 downloads the snapshot and proves Turbo restores outputs without executing tasks.
-The manual `Turborepo task cache and R2` workflow does this on Linux and Mac with
-GitHub's encrypted R2 secrets. The live server serves local CAS data; R2 is a
+The [manual R2 workflow](https://github.com/justrach/nanocompile/actions/runs/37928602023)
+passed this check on Linux and Mac with GitHub's encrypted R2 secrets.
+[Recorded evidence](../../benchmarks/turborepo.md) includes all task/output hashes. The live server serves local CAS data; R2 is a
 snapshot backend, not an S3 request for every task fetch.
 
 ## Other task runners and native builds

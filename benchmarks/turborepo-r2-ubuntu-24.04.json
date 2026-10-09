@@ -1,13 +1,13 @@
 {
   "turbo_version": "2.11.7",
-  "node_version": "v24.10.0",
-  "nanocompile_sha256": "4fc6b5141874079eff59aa828271bdcbc2346631d4f73a11c671249c63dbd15d",
-  "snapshot_transport": "in-memory S3 test double",
+  "node_version": "v22.23.3",
+  "nanocompile_sha256": "c6a9c62f55a389dbfa2048f848ddcec88e09c7b7a57d6044881678ae5797da83",
+  "snapshot_transport": "actual R2",
   "method": "remote-only task cache; remove declared outputs and client local cache before restores; signed artifacts; assert execution log and output hashes",
   "runs": [
     {
       "phase": "cold",
-      "seconds": 0.6301652920083143,
+      "seconds": 0.4007005260000085,
       "executed": [
         "message",
         "site"
@@ -41,7 +41,7 @@
     },
     {
       "phase": "remote-restore",
-      "seconds": 0.05822987499414012,
+      "seconds": 0.1249732779999988,
       "executed": [],
       "artifacts": {
         "apps/site/dist/index.html": "322ac3d0713d957d89de228eae1705133f7b7d452c39e53fe9b79e664f055122",
@@ -56,7 +56,7 @@
             "remote": true,
             "status": "HIT",
             "source": "REMOTE",
-            "timeSaved": 126
+            "timeSaved": 237
           }
         },
         {
@@ -67,14 +67,14 @@
             "remote": true,
             "status": "HIT",
             "source": "REMOTE",
-            "timeSaved": 118
+            "timeSaved": 123
           }
         }
       ]
     },
     {
       "phase": "snapshot-restore",
-      "seconds": 0.05852737498935312,
+      "seconds": 0.12362698800001226,
       "executed": [],
       "artifacts": {
         "apps/site/dist/index.html": "322ac3d0713d957d89de228eae1705133f7b7d452c39e53fe9b79e664f055122",
@@ -89,7 +89,7 @@
             "remote": true,
             "status": "HIT",
             "source": "REMOTE",
-            "timeSaved": 126
+            "timeSaved": 237
           }
         },
         {
@@ -100,14 +100,14 @@
             "remote": true,
             "status": "HIT",
             "source": "REMOTE",
-            "timeSaved": 118
+            "timeSaved": 123
           }
         }
       ]
     },
     {
       "phase": "changed-dependency",
-      "seconds": 0.29912766703637317,
+      "seconds": 0.28254058499999246,
       "executed": [
         "message",
         "site"
@@ -141,7 +141,7 @@
     },
     {
       "phase": "changed-dependency-restore",
-      "seconds": 0.057287874980829656,
+      "seconds": 0.12223774600002457,
       "executed": [],
       "artifacts": {
         "apps/site/dist/index.html": "308496eb19de3228964745cce1f51c2137ca89d97edbf9169b6aed1e24892e52",
@@ -156,7 +156,7 @@
             "remote": true,
             "status": "HIT",
             "source": "REMOTE",
-            "timeSaved": 125
+            "timeSaved": 120
           }
         },
         {
@@ -167,14 +167,14 @@
             "remote": true,
             "status": "HIT",
             "source": "REMOTE",
-            "timeSaved": 121
+            "timeSaved": 122
           }
         }
       ]
     },
     {
       "phase": "changed-site",
-      "seconds": 0.18186179199256003,
+      "seconds": 0.2020577070000229,
       "executed": [
         "site"
       ],
@@ -191,7 +191,7 @@
             "remote": true,
             "status": "HIT",
             "source": "REMOTE",
-            "timeSaved": 125
+            "timeSaved": 120
           }
         },
         {
@@ -208,7 +208,7 @@
     },
     {
       "phase": "changed-env",
-      "seconds": 0.2911897919839248,
+      "seconds": 0.28358467499998596,
       "executed": [
         "message",
         "site"
@@ -242,7 +242,7 @@
     },
     {
       "phase": "corruption-rebuild",
-      "seconds": 0.17280512501019984,
+      "seconds": 0.15834897700000283,
       "executed": [
         "message"
       ],
@@ -269,14 +269,14 @@
             "remote": true,
             "status": "HIT",
             "source": "REMOTE",
-            "timeSaved": 116
+            "timeSaved": 121
           }
         }
       ]
     },
     {
       "phase": "after-gc",
-      "seconds": 0.2881835420266725,
+      "seconds": 0.2822594010000046,
       "executed": [
         "message",
         "site"
@@ -309,6 +309,6 @@
       ]
     }
   ],
-  "nanocompile_source_revision": "531885767b02a5e8ce6f8b76a70d3c805ab74e6c",
-  "adapter_source_revision": "12f12ecbc30db64318cd31190f4fbfe2939a5d32"
+  "source_revision": "12f12ecbc30db64318cd31190f4fbfe2939a5d32",
+  "workflow_run": "https://github.com/justrach/nanocompile/actions/runs/37928602023"
 }
