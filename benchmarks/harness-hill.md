@@ -63,6 +63,46 @@ and arguments. A failed query or unrecognized format leaves the result uncached.
 
 ## Next bottlenecks
 
+A fresh [invocation diagnostic](harness-current-diagnostic.json) on 2026-10-09
+used the current compiler core, the dirty local Harness checkout and explicit
+reported-input mode. Both clean warm builds recorded 133 hits and 40 bypasses.
+Hit invocation durations summed to 2.48 s and 2.30 s, versus 6.53 s and 6.49 s
+for bypasses. These sums overlap under four Cargo jobs and include Python
+capture/trace overhead; they are **not build wall times** or a forecast of
+speedup. The run is diagnostic evidence, not another kache comparison.
+All three Cargo builds completed successfully. Each phase also contains three
+nonzero rustc exits from build-script feature probes (`proc_macro2`, `anyhow`
+and `thiserror`); these are recorded as failed invocations, not failed Cargo
+builds. Failed probe results remain uncached.
+
+`serde_derive` took about 0.81 s per warm invocation and `ring` about 0.63 s.
+The other slow bypasses are largely proc-macro producers. Ten calls reject
+extern arguments without paths, including `--extern proc_macro`; allowing
+that spelling alone would still leave proc-macro crate types unsupported.
+Producer caching requires validation of its source/dependency graph, implicit
+sysroot lookup, linker/SDK inputs and complete dynamic-library outputs before
+expanding eligibility. This is separate from the existing opt-in contract for
+macro **consumers**. That coverage work is the next target.
+
+A [buffer-size probe](harness-digest-buffer-probe.json) checked identical
+BLAKE3 digests over the twelve largest rlibs in the preceding local target
+(114 MB total). Five rotated samples measured about 0.103 s with the current
+64 KiB reader/block setup and 0.098–0.102 s with other buffer configurations.
+The result does not justify changing the production hash loop. Reproduce the
+individual-file probe with `zig build-exe tests/digest_probe.zig -O ReleaseFast
+-lc -femit-bin=/tmp/nano-digest-probe`, then run it with a file path and block
+size; an optional third argument allocates a matching reader buffer.
+
+The diagnostic can be captured and summarized without publishing compiler
+arguments or environments:
+
+```sh
+python3 tests/rust_diagnostic.py zig-out/bin/nanocompile /path/to/harness \
+  --state /tmp/nano-diagnostic-new --warm-runs 2
+python3 tests/summarize_rust_diagnostic.py /tmp/nano-diagnostic-new \
+  --output /tmp/nano-diagnostic-summary.json
+```
+
 The earlier reported-mode diagnostic found 21 unsupported crate types, 10 extern
 arguments without explicit file paths, 7 native search paths, 5 possible native
 link declarations, one native `-l` argument and one directory change during

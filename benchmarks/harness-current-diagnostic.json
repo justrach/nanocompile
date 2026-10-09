@@ -1,0 +1,1808 @@
+{
+  "method": "real clean offline Cargo release builds; four jobs; Python capture wrapper and trace enabled; diagnostic only, not a performance comparison; summed invocation durations overlap and include capture overhead; no compiler environments or argv published",
+  "phases": {
+    "cold": {
+      "calls": 178,
+      "failed_calls": 3,
+      "outcomes": {
+        "bypass": {
+          "calls": 40,
+          "summed_invocation_seconds": 6.3747864158358425
+        },
+        "uncached-or-miss": {
+          "calls": 138,
+          "summed_invocation_seconds": 96.81594696344109
+        }
+      },
+      "refusals": {
+        "nanocompile: bypass: UnsupportedRustOption": 9,
+        "nanocompile: bypass: UnsupportedCrateType": 21,
+        "nanocompile: uncached: HiddenNativeLinkInput": 2,
+        "nanocompile: bypass: UntrackedExtern": 10
+      },
+      "slowest": [
+        {
+          "crate": "harness_adapters",
+          "type": "lib",
+          "seconds": 8.597418582998216,
+          "decisions": [
+            "nanocompile: miss: compiling"
+          ]
+        },
+        {
+          "crate": "reqwest",
+          "type": "lib",
+          "seconds": 3.7540840830188245,
+          "decisions": [
+            "nanocompile: miss: compiling"
+          ]
+        },
+        {
+          "crate": "tokio",
+          "type": "lib",
+          "seconds": 3.112486957979854,
+          "decisions": [
+            "nanocompile: miss: compiling"
+          ]
+        },
+        {
+          "crate": "harness_proto",
+          "type": "lib",
+          "seconds": 2.598022833990399,
+          "decisions": [
+            "nanocompile: miss: compiling"
+          ]
+        },
+        {
+          "crate": "rustls",
+          "type": "lib",
+          "seconds": 2.4229610839975066,
+          "decisions": [
+            "nanocompile: miss: compiling"
+          ]
+        },
+        {
+          "crate": "hyper_util",
+          "type": "lib",
+          "seconds": 2.229447167017497,
+          "decisions": [
+            "nanocompile: miss: compiling"
+          ]
+        },
+        {
+          "crate": "tower_http",
+          "type": "lib",
+          "seconds": 2.044600541004911,
+          "decisions": [
+            "nanocompile: miss: compiling"
+          ]
+        },
+        {
+          "crate": "hyper_rustls",
+          "type": "lib",
+          "seconds": 2.0279507089871913,
+          "decisions": [
+            "nanocompile: miss: compiling"
+          ]
+        },
+        {
+          "crate": "futures_util",
+          "type": "lib",
+          "seconds": 1.9354972500004806,
+          "decisions": [
+            "nanocompile: miss: compiling"
+          ]
+        },
+        {
+          "crate": "syn",
+          "type": "lib",
+          "seconds": 1.824835625011474,
+          "decisions": [
+            "nanocompile: miss: compiling"
+          ]
+        },
+        {
+          "crate": "zlib_rs",
+          "type": "lib",
+          "seconds": 1.741084499983117,
+          "decisions": [
+            "nanocompile: miss: compiling"
+          ]
+        },
+        {
+          "crate": "syn",
+          "type": "lib",
+          "seconds": 1.6878480409504846,
+          "decisions": [
+            "nanocompile: miss: compiling"
+          ]
+        },
+        {
+          "crate": "hyper",
+          "type": "lib",
+          "seconds": 1.5023636660189368,
+          "decisions": [
+            "nanocompile: miss: compiling"
+          ]
+        },
+        {
+          "crate": "url",
+          "type": "lib",
+          "seconds": 1.4536283750203438,
+          "decisions": [
+            "nanocompile: miss: compiling"
+          ]
+        },
+        {
+          "crate": "tower",
+          "type": "lib",
+          "seconds": 1.3453400840517133,
+          "decisions": [
+            "nanocompile: miss: compiling"
+          ]
+        }
+      ]
+    },
+    "warm-1": {
+      "calls": 178,
+      "failed_calls": 3,
+      "outcomes": {
+        "bypass": {
+          "calls": 40,
+          "summed_invocation_seconds": 6.533438919053879
+        },
+        "hit": {
+          "calls": 133,
+          "summed_invocation_seconds": 2.484359580092132
+        },
+        "uncached-or-miss": {
+          "calls": 5,
+          "summed_invocation_seconds": 0.37856774899410084
+        }
+      },
+      "refusals": {
+        "nanocompile: bypass: UnsupportedRustOption": 9,
+        "nanocompile: bypass: UnsupportedCrateType": 21,
+        "nanocompile: uncached: HiddenNativeLinkInput": 2,
+        "nanocompile: bypass: UntrackedExtern": 10
+      },
+      "slowest": [
+        {
+          "crate": "serde_derive",
+          "type": "proc-macro",
+          "seconds": 0.8091955839772709,
+          "decisions": [
+            "nanocompile: bypass: UntrackedExtern"
+          ]
+        },
+        {
+          "crate": "ring",
+          "type": "lib",
+          "seconds": 0.6352864580112509,
+          "decisions": [
+            "nanocompile: unsupported Rust option: -l",
+            "nanocompile: bypass: UnsupportedRustOption"
+          ]
+        },
+        {
+          "crate": "thiserror_impl",
+          "type": "proc-macro",
+          "seconds": 0.3491514169727452,
+          "decisions": [
+            "nanocompile: bypass: UntrackedExtern"
+          ]
+        },
+        {
+          "crate": "zerovec_derive",
+          "type": "proc-macro",
+          "seconds": 0.3396941249957308,
+          "decisions": [
+            "nanocompile: bypass: UntrackedExtern"
+          ]
+        },
+        {
+          "crate": "tracing_attributes",
+          "type": "proc-macro",
+          "seconds": 0.31633516697911546,
+          "decisions": [
+            "nanocompile: bypass: UntrackedExtern"
+          ]
+        },
+        {
+          "crate": "zerofrom_derive",
+          "type": "proc-macro",
+          "seconds": 0.2863246250199154,
+          "decisions": [
+            "nanocompile: bypass: UntrackedExtern"
+          ]
+        },
+        {
+          "crate": "yoke_derive",
+          "type": "proc-macro",
+          "seconds": 0.26950879202922806,
+          "decisions": [
+            "nanocompile: bypass: UntrackedExtern"
+          ]
+        },
+        {
+          "crate": "async_trait",
+          "type": "proc-macro",
+          "seconds": 0.2654982919921167,
+          "decisions": [
+            "nanocompile: bypass: UntrackedExtern"
+          ]
+        },
+        {
+          "crate": "futures_macro",
+          "type": "proc-macro",
+          "seconds": 0.2585857920348644,
+          "decisions": [
+            "nanocompile: bypass: UntrackedExtern"
+          ]
+        },
+        {
+          "crate": "displaydoc",
+          "type": "proc-macro",
+          "seconds": 0.224282665993087,
+          "decisions": [
+            "nanocompile: bypass: UntrackedExtern"
+          ]
+        },
+        {
+          "crate": "libc",
+          "type": "lib",
+          "seconds": 0.22063416702440009,
+          "decisions": [
+            "nanocompile: miss: compiling",
+            "nanocompile: uncached: HiddenNativeLinkInput"
+          ]
+        },
+        {
+          "crate": "tokio_macros",
+          "type": "proc-macro",
+          "seconds": 0.2045138330431655,
+          "decisions": [
+            "nanocompile: bypass: UntrackedExtern"
+          ]
+        },
+        {
+          "crate": "harness_adapters",
+          "type": "lib",
+          "seconds": 0.19378537504235283,
+          "decisions": [
+            "nanocompile: hit"
+          ]
+        },
+        {
+          "crate": "build_script_build",
+          "type": "bin",
+          "seconds": 0.174536291975528,
+          "decisions": [
+            "nanocompile: bypass: UnsupportedCrateType"
+          ]
+        },
+        {
+          "crate": "build_script_build",
+          "type": "bin",
+          "seconds": 0.1430723749799654,
+          "decisions": [
+            "nanocompile: bypass: UnsupportedCrateType"
+          ]
+        }
+      ]
+    },
+    "warm-2": {
+      "calls": 178,
+      "failed_calls": 3,
+      "outcomes": {
+        "bypass": {
+          "calls": 40,
+          "summed_invocation_seconds": 6.488415956904646
+        },
+        "hit": {
+          "calls": 133,
+          "summed_invocation_seconds": 2.296345925948117
+        },
+        "uncached-or-miss": {
+          "calls": 5,
+          "summed_invocation_seconds": 0.38297291699564084
+        }
+      },
+      "refusals": {
+        "nanocompile: bypass: UnsupportedRustOption": 9,
+        "nanocompile: bypass: UnsupportedCrateType": 21,
+        "nanocompile: uncached: HiddenNativeLinkInput": 2,
+        "nanocompile: bypass: UntrackedExtern": 10
+      },
+      "slowest": [
+        {
+          "crate": "serde_derive",
+          "type": "proc-macro",
+          "seconds": 0.8076329999603331,
+          "decisions": [
+            "nanocompile: bypass: UntrackedExtern"
+          ]
+        },
+        {
+          "crate": "ring",
+          "type": "lib",
+          "seconds": 0.633415290969424,
+          "decisions": [
+            "nanocompile: unsupported Rust option: -l",
+            "nanocompile: bypass: UnsupportedRustOption"
+          ]
+        },
+        {
+          "crate": "thiserror_impl",
+          "type": "proc-macro",
+          "seconds": 0.34940524998819456,
+          "decisions": [
+            "nanocompile: bypass: UntrackedExtern"
+          ]
+        },
+        {
+          "crate": "zerovec_derive",
+          "type": "proc-macro",
+          "seconds": 0.3424464169656858,
+          "decisions": [
+            "nanocompile: bypass: UntrackedExtern"
+          ]
+        },
+        {
+          "crate": "tracing_attributes",
+          "type": "proc-macro",
+          "seconds": 0.31912616599584,
+          "decisions": [
+            "nanocompile: bypass: UntrackedExtern"
+          ]
+        },
+        {
+          "crate": "zerofrom_derive",
+          "type": "proc-macro",
+          "seconds": 0.28345591702964157,
+          "decisions": [
+            "nanocompile: bypass: UntrackedExtern"
+          ]
+        },
+        {
+          "crate": "yoke_derive",
+          "type": "proc-macro",
+          "seconds": 0.26438570802565664,
+          "decisions": [
+            "nanocompile: bypass: UntrackedExtern"
+          ]
+        },
+        {
+          "crate": "async_trait",
+          "type": "proc-macro",
+          "seconds": 0.2612373750307597,
+          "decisions": [
+            "nanocompile: bypass: UntrackedExtern"
+          ]
+        },
+        {
+          "crate": "futures_macro",
+          "type": "proc-macro",
+          "seconds": 0.2516970420256257,
+          "decisions": [
+            "nanocompile: bypass: UntrackedExtern"
+          ]
+        },
+        {
+          "crate": "displaydoc",
+          "type": "proc-macro",
+          "seconds": 0.23081724997609854,
+          "decisions": [
+            "nanocompile: bypass: UntrackedExtern"
+          ]
+        },
+        {
+          "crate": "libc",
+          "type": "lib",
+          "seconds": 0.2212772080092691,
+          "decisions": [
+            "nanocompile: miss: compiling",
+            "nanocompile: uncached: HiddenNativeLinkInput"
+          ]
+        },
+        {
+          "crate": "tokio_macros",
+          "type": "proc-macro",
+          "seconds": 0.2035923749790527,
+          "decisions": [
+            "nanocompile: bypass: UntrackedExtern"
+          ]
+        },
+        {
+          "crate": "harness_adapters",
+          "type": "lib",
+          "seconds": 0.1916132919723168,
+          "decisions": [
+            "nanocompile: hit"
+          ]
+        },
+        {
+          "crate": "build_script_build",
+          "type": "bin",
+          "seconds": 0.17165129201021045,
+          "decisions": [
+            "nanocompile: bypass: UnsupportedCrateType"
+          ]
+        },
+        {
+          "crate": "build_script_build",
+          "type": "bin",
+          "seconds": 0.14356200001202524,
+          "decisions": [
+            "nanocompile: bypass: UnsupportedCrateType"
+          ]
+        }
+      ]
+    }
+  },
+  "warm_crates": [
+    {
+      "crate": "serde_derive",
+      "type": "proc-macro",
+      "samples": 2,
+      "median_invocation_seconds": 0.808414291968802,
+      "decisions": [
+        "nanocompile: bypass: UntrackedExtern"
+      ]
+    },
+    {
+      "crate": "ring",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.6343508744903374,
+      "decisions": [
+        "nanocompile: bypass: UnsupportedRustOption",
+        "nanocompile: unsupported Rust option: -l"
+      ]
+    },
+    {
+      "crate": "thiserror_impl",
+      "type": "proc-macro",
+      "samples": 2,
+      "median_invocation_seconds": 0.3492783334804699,
+      "decisions": [
+        "nanocompile: bypass: UntrackedExtern"
+      ]
+    },
+    {
+      "crate": "zerovec_derive",
+      "type": "proc-macro",
+      "samples": 2,
+      "median_invocation_seconds": 0.3410702709807083,
+      "decisions": [
+        "nanocompile: bypass: UntrackedExtern"
+      ]
+    },
+    {
+      "crate": "tracing_attributes",
+      "type": "proc-macro",
+      "samples": 2,
+      "median_invocation_seconds": 0.3177306664874777,
+      "decisions": [
+        "nanocompile: bypass: UntrackedExtern"
+      ]
+    },
+    {
+      "crate": "zerofrom_derive",
+      "type": "proc-macro",
+      "samples": 2,
+      "median_invocation_seconds": 0.2848902710247785,
+      "decisions": [
+        "nanocompile: bypass: UntrackedExtern"
+      ]
+    },
+    {
+      "crate": "yoke_derive",
+      "type": "proc-macro",
+      "samples": 2,
+      "median_invocation_seconds": 0.26694725002744235,
+      "decisions": [
+        "nanocompile: bypass: UntrackedExtern"
+      ]
+    },
+    {
+      "crate": "async_trait",
+      "type": "proc-macro",
+      "samples": 2,
+      "median_invocation_seconds": 0.2633678335114382,
+      "decisions": [
+        "nanocompile: bypass: UntrackedExtern"
+      ]
+    },
+    {
+      "crate": "futures_macro",
+      "type": "proc-macro",
+      "samples": 2,
+      "median_invocation_seconds": 0.25514141703024507,
+      "decisions": [
+        "nanocompile: bypass: UntrackedExtern"
+      ]
+    },
+    {
+      "crate": "displaydoc",
+      "type": "proc-macro",
+      "samples": 2,
+      "median_invocation_seconds": 0.22754995798459277,
+      "decisions": [
+        "nanocompile: bypass: UntrackedExtern"
+      ]
+    },
+    {
+      "crate": "libc",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.2209556875168346,
+      "decisions": [
+        "nanocompile: miss: compiling",
+        "nanocompile: uncached: HiddenNativeLinkInput"
+      ]
+    },
+    {
+      "crate": "tokio_macros",
+      "type": "proc-macro",
+      "samples": 2,
+      "median_invocation_seconds": 0.2040531040111091,
+      "decisions": [
+        "nanocompile: bypass: UntrackedExtern"
+      ]
+    },
+    {
+      "crate": "harness_adapters",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.1926993335073348,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "reqwest",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.12338081299094483,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "build_script_build",
+      "type": "bin",
+      "samples": 42,
+      "median_invocation_seconds": 0.11370935398736037,
+      "decisions": [
+        "nanocompile: bypass: UnsupportedCrateType"
+      ]
+    },
+    {
+      "crate": "hyper_rustls",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.08000508300028741,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "core_foundation_sys",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.07728445797692984,
+      "decisions": [
+        "nanocompile: miss: compiling",
+        "nanocompile: uncached: HiddenNativeLinkInput"
+      ]
+    },
+    {
+      "crate": "tower_http",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.07636035452014767,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "hyper_util",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.06825302049401216,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "harness_proto",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.053136270988034084,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "tokio_rustls",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.049235937505727634,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "tokio",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.04903810450923629,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "tower",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.04808270852663554,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "hyper",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.0444341040274594,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "idna_adapter",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.035808125510811806,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "idna",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.035079063003649935,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "url",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.03458722899085842,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "rustls",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.03308239550096914,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "tokio_util",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.03304612549254671,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "icu_properties",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.03214525000657886,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "futures_util",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.031957583501935005,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "serde_yaml_ng",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.03030202048830688,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "system_configuration_sys",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.030099541501840577,
+      "decisions": [
+        "nanocompile: bypass: UnsupportedRustOption",
+        "nanocompile: unsupported Rust option: -l"
+      ]
+    },
+    {
+      "crate": "chrono",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.0299443960248027,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "icu_normalizer",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.02694997951039113,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "zip",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.025489166495390236,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "icu_provider",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.025279520981712267,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "autocfg_2cf667ff6e38f707_1",
+      "type": "lib",
+      "samples": 1,
+      "median_invocation_seconds": 0.02499208302469924,
+      "decisions": [
+        "nanocompile: bypass: UnsupportedRustOption",
+        "nanocompile: unsupported Rust option: -"
+      ]
+    },
+    {
+      "crate": "icu_locale_core",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.024600895994808525,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "autocfg_3d760b46299f0c9f_1",
+      "type": "lib",
+      "samples": 1,
+      "median_invocation_seconds": 0.024547541979700327,
+      "decisions": [
+        "nanocompile: bypass: UnsupportedRustOption",
+        "nanocompile: unsupported Rust option: -"
+      ]
+    },
+    {
+      "crate": "synstructure",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.023305166512727737,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "autocfg_2cf667ff6e38f707_0",
+      "type": "lib",
+      "samples": 1,
+      "median_invocation_seconds": 0.022800749982707202,
+      "decisions": [
+        "nanocompile: bypass: UnsupportedRustOption",
+        "nanocompile: unsupported Rust option: -"
+      ]
+    },
+    {
+      "crate": "webpki",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.02278537501115352,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "autocfg_3d760b46299f0c9f_0",
+      "type": "lib",
+      "samples": 1,
+      "median_invocation_seconds": 0.022594875015784055,
+      "decisions": [
+        "nanocompile: bypass: UnsupportedRustOption",
+        "nanocompile: unsupported Rust option: -"
+      ]
+    },
+    {
+      "crate": "syn",
+      "type": "lib",
+      "samples": 4,
+      "median_invocation_seconds": 0.0214865414891392,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "serde_json",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.021075750002637506,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "futures",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.020607812504749745,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "serde",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.019693103997269645,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "uuid",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.019536000007065013,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "icu_collections",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.019410395994782448,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "futures_executor",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.01936916701379232,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "anyhow",
+      "type": "lib",
+      "samples": 4,
+      "median_invocation_seconds": 0.019218145520426333,
+      "decisions": [
+        "nanocompile: hit",
+        "nanocompile: miss: compiling"
+      ]
+    },
+    {
+      "crate": "deser_hjson",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.018403500493150204,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "serde_urlencoded",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.018275250011356547,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "thiserror",
+      "type": "lib",
+      "samples": 4,
+      "median_invocation_seconds": 0.01724922948051244,
+      "decisions": [
+        "nanocompile: hit",
+        "nanocompile: miss: compiling"
+      ]
+    },
+    {
+      "crate": "tinystr",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.016876187961315736,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "system_configuration",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.01615722948918119,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "zerovec",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.016012291511287913,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "icu_properties_data",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.01568385449354537,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "serde_core",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.015347146021667868,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "___",
+      "type": "bin",
+      "samples": 2,
+      "median_invocation_seconds": 0.015234875027090311,
+      "decisions": [
+        "nanocompile: bypass: UnsupportedRustOption",
+        "nanocompile: unsupported Rust option: -"
+      ]
+    },
+    {
+      "crate": "pulldown_cmark",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.014980895502958447,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "generic_array",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.014625145500758663,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "block_buffer",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.01454281248152256,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "parking_lot_core",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.014494916511466727,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "parking_lot",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.014403562498046085,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "zerotrie",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.014184187486534938,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "indexmap",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.014170353970257565,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "sha2",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.014147062494885176,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "potential_utf",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.013539354491513222,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "digest",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.013279187493026257,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "typed_path",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.013201833004131913,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "http_body",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.01290358352707699,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "tracing",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.01287262499681674,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "http_body_util",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.012817041482776403,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "core_foundation",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.012650332995690405,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "crypto_common",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.012645207985769957,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "http",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.012596415996085852,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "flate2",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.012182333011878654,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "mio",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.011934937530895695,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "typenum",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.011762167006963864,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "yoke",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.011755790968891233,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "zlib_rs",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.011616458476055413,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "socket2",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.011260437517194077,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "errno",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.011125166493002325,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "cc",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.010898916487349197,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "getrandom",
+      "type": "lib",
+      "samples": 4,
+      "median_invocation_seconds": 0.01061381251201965,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "rustls_pki_types",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.010542687494307756,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "unicode_width",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.010384166002040729,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "autocfg",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.010329478973289952,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "hashbrown",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.010299813002347946,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "webpki_roots",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.010256791487336159,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "signal_hook_registry",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.010227520484477282,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "getopts",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.010148271481739357,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "cpufeatures",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.010069290961837396,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "quote",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.010012250015279278,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "httparse",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.009934625501045957,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "num_traits",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.009831458475673571,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "tracing_core",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.00966227101162076,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "tower_layer",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.00950220852973871,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "memchr",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.009379416529554874,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "bytes",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.009257125027943403,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "futures_channel",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.009080083516892046,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "unsafe_libyaml",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.008861958485795185,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "lock_api",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.008703853993210942,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "futures_io",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.00867208349518478,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "zerofrom",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.00840997850173153,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "iana_time_zone",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.008262458490207791,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "semver",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.008229291473980993,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "icu_normalizer_data",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.008185437502106652,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "smallvec",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.008094937511486933,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "try_lock",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.007922895514639094,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "proc_macro2",
+      "type": "lib",
+      "samples": 8,
+      "median_invocation_seconds": 0.007910999993328005,
+      "decisions": [
+        "nanocompile: hit",
+        "nanocompile: miss: compiling"
+      ]
+    },
+    {
+      "crate": "base64",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.007827333494788036,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "ipnet",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.00773250000202097,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "zeroize",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.007707208482315764,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "futures_task",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.007703542010858655,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "bitflags",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.007657499983906746,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "once_cell",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.00763574946904555,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "slab",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.007625313010066748,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "writeable",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.007597687508678064,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "log",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.007591916481032968,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "ryu",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.007565187494037673,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "want",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.007526750006945804,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "form_urlencoded",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.007518146012444049,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "find_msvc_tools",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.007486938004149124,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "pulldown_cmark_escape",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.007456104503944516,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "utf8_iter",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.0074346045148558915,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "litemap",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.007423478993587196,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "unicode_ident",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.007358166505582631,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "unicase",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.007354958506766707,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "zmij",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.007301207981072366,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "version_check",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.0072498540102969855,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "crc32fast",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.0072376875032205135,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "sync_wrapper",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.007203771005151793,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "cfg_if",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.007061083510052413,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "itoa",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.006983125495025888,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "stable_deref_trait",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.006945750006707385,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "subtle",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.006876437517348677,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "futures_core",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.006846395990578458,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "percent_encoding",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.00683443748857826,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "shlex",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.006749229476554319,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "tower_service",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.006728958513122052,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "pin_project_lite",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.006718604010529816,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "untrusted",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.0067056670086458325,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "scopeguard",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.00666089600417763,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "atomic_waker",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.006634062476223335,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "equivalent",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.006536000000778586,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    },
+    {
+      "crate": "futures_sink",
+      "type": "lib",
+      "samples": 2,
+      "median_invocation_seconds": 0.006281499983742833,
+      "decisions": [
+        "nanocompile: hit"
+      ]
+    }
+  ],
+  "binary_sha256": "4fc6b5141874079eff59aa828271bdcbc2346631d4f73a11c671249c63dbd15d",
+  "binary_identity_note": "hash of configured executable at summary time; retain that executable unchanged throughout capture",
+  "project_commit": "32b41cb0bff55e3c9cbfab3012acec2b179ad199",
+  "project_dirty": true,
+  "nanocompile_source_revision": "531885767b02a5e8ce6f8b76a70d3c805ab74e6c",
+  "policy": "reported",
+  "date": "2026-10-09",
+  "rustc": "rustc 1.97.1 (8bab26f4f 2026-07-14)\nbinary: rustc\ncommit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452\ncommit-date: 2026-07-14\nhost: aarch64-apple-darwin\nrelease: 1.97.1\nLLVM version: 22.1.6\n",
+  "cargo_builds_succeeded": true,
+  "nonzero_exit_note": "Three intentional build-script feature probes per phase: proc_macro2, anyhow and thiserror. Each Cargo build completed successfully; failed probe compilations remain uncached."
+}

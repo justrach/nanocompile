@@ -1,0 +1,201 @@
+{
+  "platform": "macOS-27.0-arm64-arm-64bit-Mach-O",
+  "files": [
+    {
+      "path": "/tmp/nanocompile-shared-toolchain-reported/target/release/deps/libharness_adapters-17d251dcff5f9858.rlib",
+      "bytes": 32551120,
+      "blake3": "090db52cd3129f9871fcebc2a6bd7c96e9f72f6afc162587b88b91193edc26b6"
+    },
+    {
+      "path": "/tmp/nanocompile-shared-toolchain-reported/target/release/deps/libtokio-06724a61f6594382.rlib",
+      "bytes": 13162816,
+      "blake3": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc"
+    },
+    {
+      "path": "/tmp/nanocompile-shared-toolchain-reported/target/release/deps/libsyn-bd9e1d5bf0bba7fc.rlib",
+      "bytes": 10280952,
+      "blake3": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff"
+    },
+    {
+      "path": "/tmp/nanocompile-shared-toolchain-reported/target/release/deps/libharness_proto-a9623e7cfcc2e9d0.rlib",
+      "bytes": 10133856,
+      "blake3": "5f362f25bc52b5db824da3e5d0f26ce9dc2f023c81191bf1030a947269a4be9a"
+    },
+    {
+      "path": "/tmp/nanocompile-shared-toolchain-reported/target/release/deps/libsyn-804e1da7bee6720d.rlib",
+      "bytes": 9562952,
+      "blake3": "6260400d8b0735c17f9dfc59a738c806c99b61ea0637c9fccc2ddf58c29e758d"
+    },
+    {
+      "path": "/tmp/nanocompile-shared-toolchain-reported/target/release/deps/librustls-cfdcb75ad1842407.rlib",
+      "bytes": 9327352,
+      "blake3": "5ad62219401f10957aac54f41e5b61a2ce2f01cfed982141f5c559e9b9b52155"
+    },
+    {
+      "path": "/tmp/nanocompile-shared-toolchain-reported/target/release/deps/libreqwest-fe6e4c1ab3fe0d6d.rlib",
+      "bytes": 6790744,
+      "blake3": "29c7ac6ccb8392f012a04baea1641e79c2024576f8e8125291b5cbd2ae5f6e55"
+    },
+    {
+      "path": "/tmp/nanocompile-shared-toolchain-reported/target/release/deps/libfutures_util-8a928e3dc8248b9b.rlib",
+      "bytes": 6553152,
+      "blake3": "9d0d0da9f6333db985f9ea8071690fb72ad778b2406f7da2cbaa665dfe41ed78"
+    },
+    {
+      "path": "/tmp/nanocompile-shared-toolchain-reported/target/release/deps/libserde_core-06480abe3dbf146e.rlib",
+      "bytes": 5453888,
+      "blake3": "99ee831a4ffd2c5ca7f3dabfe68b972c0f6600d2be5c7b8e01cac6e95d3daca4"
+    },
+    {
+      "path": "/tmp/nanocompile-shared-toolchain-reported/target/release/deps/libring-3421073a26f6c3c3.rlib",
+      "bytes": 3537840,
+      "blake3": "ea44ab36ee7c197402b942b6e1879118400ce789cf55da6c3a7fb00e4c3c0fa8"
+    },
+    {
+      "path": "/tmp/nanocompile-shared-toolchain-reported/target/release/deps/libicu_properties-c26e3ef68abf2a2b.rlib",
+      "bytes": 3442792,
+      "blake3": "4e6a8a91613f0b937f0a3da24a93ea22b7bbc38e911854d19728bf61eeb99885"
+    },
+    {
+      "path": "/tmp/nanocompile-shared-toolchain-reported/target/release/deps/libchrono-0542171e04b7d30b.rlib",
+      "bytes": 3260928,
+      "blake3": "1e97e868aea96adc0d5db9458664f0374f0462540716293b217afa7457a62ffa"
+    }
+  ],
+  "total_bytes": 114058392,
+  "samples": [
+    {
+      "repeat": 0,
+      "variant": "current",
+      "seconds": 0.45147324999561533
+    },
+    {
+      "repeat": 0,
+      "variant": "unbuffered-64k",
+      "seconds": 0.11059504200238734
+    },
+    {
+      "repeat": 0,
+      "variant": "unbuffered-256k",
+      "seconds": 0.10934441699646413
+    },
+    {
+      "repeat": 0,
+      "variant": "unbuffered-1m",
+      "seconds": 0.09985187498386949
+    },
+    {
+      "repeat": 0,
+      "variant": "unbuffered-4m",
+      "seconds": 0.10191170900361612
+    },
+    {
+      "repeat": 1,
+      "variant": "unbuffered-64k",
+      "seconds": 0.09956766699906439
+    },
+    {
+      "repeat": 1,
+      "variant": "unbuffered-256k",
+      "seconds": 0.09790112497285008
+    },
+    {
+      "repeat": 1,
+      "variant": "unbuffered-1m",
+      "seconds": 0.1038661670172587
+    },
+    {
+      "repeat": 1,
+      "variant": "unbuffered-4m",
+      "seconds": 0.10330450005130842
+    },
+    {
+      "repeat": 1,
+      "variant": "current",
+      "seconds": 0.10268837498733774
+    },
+    {
+      "repeat": 2,
+      "variant": "unbuffered-256k",
+      "seconds": 0.09851237502880394
+    },
+    {
+      "repeat": 2,
+      "variant": "unbuffered-1m",
+      "seconds": 0.09904295799788088
+    },
+    {
+      "repeat": 2,
+      "variant": "unbuffered-4m",
+      "seconds": 0.10478941595647484
+    },
+    {
+      "repeat": 2,
+      "variant": "current",
+      "seconds": 0.10245683300308883
+    },
+    {
+      "repeat": 2,
+      "variant": "unbuffered-64k",
+      "seconds": 0.09936304099392146
+    },
+    {
+      "repeat": 3,
+      "variant": "unbuffered-1m",
+      "seconds": 0.09850175003521144
+    },
+    {
+      "repeat": 3,
+      "variant": "unbuffered-4m",
+      "seconds": 0.10131254105363041
+    },
+    {
+      "repeat": 3,
+      "variant": "current",
+      "seconds": 0.10174495802493766
+    },
+    {
+      "repeat": 3,
+      "variant": "unbuffered-64k",
+      "seconds": 0.09946720796870068
+    },
+    {
+      "repeat": 3,
+      "variant": "unbuffered-256k",
+      "seconds": 0.09825312497559935
+    },
+    {
+      "repeat": 4,
+      "variant": "unbuffered-4m",
+      "seconds": 0.10095762502169237
+    },
+    {
+      "repeat": 4,
+      "variant": "current",
+      "seconds": 0.10359112499281764
+    },
+    {
+      "repeat": 4,
+      "variant": "unbuffered-64k",
+      "seconds": 0.09910779196070507
+    },
+    {
+      "repeat": 4,
+      "variant": "unbuffered-256k",
+      "seconds": 0.09811491699656472
+    },
+    {
+      "repeat": 4,
+      "variant": "unbuffered-1m",
+      "seconds": 0.09834308398421854
+    }
+  ],
+  "medians": {
+    "current": 0.10268837498733774,
+    "unbuffered-64k": 0.09946720796870068,
+    "unbuffered-256k": 0.09825312497559935,
+    "unbuffered-1m": 0.09904295799788088,
+    "unbuffered-4m": 0.10191170900361612
+  },
+  "method": "five rotated sequential samples over twelve largest current Harness rlibs; fresh process per file; same BLAKE3 digest verified for every buffer configuration; process startup included; OS file cache retained"
+}
