@@ -500,3 +500,38 @@ This is a comparison across separate runs, not a randomized producer-on/off
 experiment. It establishes real producer coverage and successful restore on
 this workload; kache remains roughly twice as fast for warm builds. Linux
 producer integration and broader debug/link configurations remain unfinished.
+
+## Explicit bundled static libraries
+
+The next warm diagnostic found `ring` as the largest remaining compiler bypass
+(0.62 s with tracing and the Python capture shim). Its command uses two plain
+`-l static=NAME` archives in an explicit native directory. The wrapper now
+requires a regular `libNAME.a` candidate in the provided native directories,
+then uses the existing complete native-directory membership/content snapshots
+before/after compilation and on restore. Native names with modifiers/renaming,
+dynamic libraries, explicit target overrides and absent candidates still bypass.
+Source `link(...)` declarations retain the conservative refusal.
+
+Rust's [bundled static-library semantics](https://doc.rust-lang.org/rustc/command-line-arguments.html#linking-modifiers-bundle)
+embed archive members in the rlib. [The real fixture](../tests/static_native_cache.py)
+checks equal direct/cold/restored artifacts and executes a consumer. It changes
+archive bytes while preserving mtime, introduces a preferred archive in an
+earlier directory, and checks missing, thin and unsupported-form fallback.
+[Local fixture evidence](static-native-cache-macos.json) records the exact binary.
+
+[Raw Harness results](harness-hill-static-native.json) retain twelve clean
+four-job builds under the same reported-input and producer policies. `ring` was
+stored, each warm run had 144 hits and two misses, and all library and macro
+dylib hashes matched direct Cargo. Tracked source files remained unchanged.
+
+| Implementation | Warm median | Cold build |
+| --- | ---: | ---: |
+| Direct Cargo | 23.126 s | 23.641 s prime |
+| nanocompile | 3.433 s | 40.636 s |
+| kache daemon | 2.172 s | 27.749 s |
+
+The observed nanocompile median is 18.9% below the previous 4.231 s macro-flag
+run. These are separate comparisons rather than a randomized static-library
+on/off experiment. Kache still leads. Native compilation by build scripts,
+source link declarations, executable producers and Linux proc-macro producers
+remain coverage gaps; the cold-cache cost remains larger too.

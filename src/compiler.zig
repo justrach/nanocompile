@@ -56,6 +56,7 @@ fn rustPlan(ctx: *cache.Context, argv: []const []const u8) !Plan {
     var search_dirs: std.ArrayList([]const u8) = .empty;
     var native_dirs: std.ArrayList([]const u8) = .empty;
     var configuration: ?cache.Dependency = null;
+    var static_libraries: std.ArrayList([]const u8) = .empty;
     var builtin_macro = false;
     var debug_info: []const u8 = "0";
     var producer_unsafe_codegen = false;
@@ -103,6 +104,14 @@ fn rustPlan(ctx: *cache.Context, argv: []const []const u8) !Plan {
             } else if (std.mem.startsWith(u8, v, "native=")) {
                 try addUnique(ctx, &native_dirs, v[7..]);
             } else return error.NativeSearchPath;
+            continue;
+        }
+        if ((try option(argv, &i, "-l")) orelse (if (std.mem.startsWith(u8, arg, "-l")) arg[2..] else null)) |v| {
+            if (!std.mem.startsWith(u8, v, "static=")) return error.UnsupportedNativeLibrary;
+            const library = v[7..];
+            if (library.len == 0) return error.UnsupportedNativeLibrary;
+            for (library) |ch| if (!std.ascii.isAlphanumeric(ch) and ch != '_' and ch != '-') return error.UnsupportedNativeLibrary;
+            try static_libraries.append(ctx.a, library);
             continue;
         }
         if (eq(arg, "-C") or std.mem.startsWith(u8, arg, "-C")) {
@@ -158,6 +167,25 @@ fn rustPlan(ctx: *cache.Context, argv: []const []const u8) !Plan {
     if (!producer and !eq(ct, "rlib") and !eq(ct, "lib")) return error.UnsupportedCrateType;
     if (!producer and builtin_macro) return error.UntrackedExtern;
     if (producer and (builtin.os.tag != .macos or !eq(debug_info, "0") or producer_unsafe_codegen or target != null)) return error.UnsupportedProducerConfiguration;
+    if (static_libraries.items.len != 0 and target != null) return error.UnsupportedNativeTarget;
+    // Plain static libraries bundle archive members into the rlib. Require a
+    // candidate in explicit native search paths; the complete directory/file
+    // snapshot guards content changes and newly preferred candidates.
+    for (static_libraries.items) |library| {
+        const filename = try std.fmt.allocPrint(ctx.a, "lib{s}.a", .{library});
+        var found = false;
+        for (native_dirs.items) |path| {
+            const candidate = try std.fs.path.join(ctx.a, &.{ path, filename });
+            const st = Dir.cwd().statFile(ctx.io, candidate, .{}) catch |err| switch (err) {
+                error.FileNotFound, error.NotDir => continue,
+                else => return err,
+            };
+            if (st.kind != .file) return error.UnsupportedNativeLibrary;
+            found = true;
+            break;
+        }
+        if (!found) return error.UntrackedNativeLibrary;
+    }
     const crate = name orelse return error.NoCrateName;
     if (crate.len == 0 or std.mem.indexOfAny(u8, crate, "/\\\n") != null or std.mem.indexOfAny(u8, suffix, "/\\\n") != null) return error.InvalidOutputName;
     const src = try absolute(ctx, source orelse return error.NoSource);

@@ -313,3 +313,8 @@ The subsequent [Cargo flag iteration](../benchmarks/harness-hill.md#cargo-macro-
 supports those two flags, stores all ten Harness producers, and records 142 hits
 per warm build with matching library and macro dylib hashes. Default behavior
 and the remaining platform/debug/linker gates are unchanged.
+
+Cargo macro flag coverage and the full suite passed on both platforms in
+[run 37950601653](https://github.com/justrach/nanocompile/actions/runs/37950601653)
+at `3bc48d7ebf6b77c9e7040235cbcb27d9eb60ef4b`. Linux continues to bypass
+producer compilation; the Apple producer fixture executes on the hosted Mac.

@@ -1,7 +1,7 @@
 {
   "platform": "darwin",
   "cargo_flags": true,
-  "binary_sha256": "b0476f8b4ab0feb8d180aae88a81826c1c322c9a606cfe5b8117e18fb7978b22",
+  "binary_sha256": "8e6b985f9d2f7691559b613bc52e31e49dd7912e0916143cd44686fb31aa5d27",
   "probe_sha256": "8934768ef686edca06564be6b0111cfe7bb89a850dac5165d2f643a995c3f124",
   "direct_cold_warm_artifacts_equal": true,
   "diagnostics_replayed": true,
