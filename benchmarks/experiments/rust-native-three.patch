@@ -1,0 +1,14 @@
+--- a/src/native_identity.zig
++++ b/src/native_identity.zig
+@@ -180,8 +180,9 @@
+     var next: std.atomic.Value(usize) = .init(0);
+     var group: std.Io.Group = .init;
+     defer group.cancel(ctx.io);
+-    // At most two active queries per invocation, including this calling worker.
+-    if ((std.Thread.getCpuCount() catch 1) > 1)
++    // Experimental: at most three active live queries, including the caller.
++    const active = @min(3, @max(1, std.Thread.getCpuCount() catch 1));
++    for (1..active) |_|
+         group.concurrent(ctx.io, queryWorker, .{ &queries, &next, ctx.io, ctx.env }) catch {};
+     queryWorker(&queries, &next, ctx.io, ctx.env);
+     try group.await(ctx.io);

@@ -1328,3 +1328,14 @@ and all tracked source hashes remain unchanged. Nano retains 167 Rust and
 26.514397 s kache**. No source optimization is adopted from this measurement.
 [Method and interpretation](../docs/clang-selection-overlap-experiment.md#nine-sample-repeatability-run);
 [full nine-sample report](harness-clang-selection-nine-samples.json).
+
+## Rust native query cap retest after native CAS: rejected
+
+With the accepted native Clang adapter held fixed, raising the Rust selection
+query cap from two to three yields medians **2.051625 → 2.035867 s** but wins
+only **13/27 pairs**. Mean paired saving is **−22.41 ms** (standard error
+21.37 ms), so no repeatable gain is demonstrated. All 54 warm builds retain
+167 Rust and 24 native hits, with 193 exact artifacts and unchanged sources.
+The two-query production limit is retained.
+[Protocol and decision](../docs/rust-native-three-experiment.md);
+[raw paired samples](harness-rust-native-three-paired.json).

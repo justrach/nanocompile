@@ -1,0 +1,51 @@
+{
+  "base_commit": "9c41868f30790eff86b31a034d06555ce9c8a64f",
+  "zig_version": "0.17.0",
+  "binary_sha256": {
+    "baseline": "4006ac4f93d81d5bfed50a9ce5bd8d89b567a6ecfba42277335c2977768946ac",
+    "candidate": "0e8e04d7a35974827a6b1207f80908406f497d33e2dccc140cc98b4213066d27"
+  },
+  "fixed_clang_adapter_sha256": "4006ac4f93d81d5bfed50a9ce5bd8d89b567a6ecfba42277335c2977768946ac",
+  "source_sha256": {
+    "baseline": {
+      "src/cache.zig": "be609fc763131a55ed9921e1a3fb62279a3b3002e29a59b21e9364ff2ae014f2",
+      "src/clang.zig": "25fc88a6d43eef9091bb3914d75376d32e6c517fe4b200a735c7a67eb93c79be",
+      "src/compiler.zig": "0bd5bb7678afd7b7609be08d0ea10aae1e5537967adcbfe8e6e5b51db4449209",
+      "src/identity.zig": "34a910d4900c9df0f6948509047ddaa2881375f6a961b896d2b7a2dfc3fe4a52",
+      "src/link_dependencies.zig": "f60fe853a5260fe7e9445fc257b085a4e45d8bbc48a8272d065b41de7fa1e0fb",
+      "src/link_observer.zig": "219118d1f42a63c0af6070dee0e8f04aa6d27242931ab48be6c760044e6368e8",
+      "src/main.zig": "8cc9bfd571ebdc226082e76352fb1f7abbc922606579eaff0f28ada895524b53",
+      "src/native_identity.zig": "8c96d315f316b620f9d71898b9d4dfd4e8c2c79c1e86c404b56479658034365d",
+      "src/native_metadata.zig": "ad8a21566e9e3f11e3d10e571a1f943444906ec0fb02317a8dd41a2d74f83611",
+      "src/producer_dependencies.zig": "a2cd64a9d507db26879785c6f268d8b01bc3274660ad13ac3d2344c43fddf464",
+      "src/producer_job.zig": "8861c822b59aa9469e57d655cda4b93120d111d427944b2e55450a125364dcda",
+      "src/response_files.zig": "09e0ed7ef53d9e801261d5d70979f638ae6de2872d9d27354ed194913531d0c4",
+      "src/rust_dependencies.zig": "8665b5f431411cf4c575aa16f5a25389e5cea0648e785442052d61298f5377fa",
+      "src/rust_metadata.zig": "99019a00891dbeb3e1837bad8c4a6290012eccbf5db1b4f78c03549f9efd7022",
+      "src/xcode.zig": "5ad1d00ed39577a0dd1dab3d09421477de653d3eb70aef221e056170c950ff48"
+    },
+    "candidate": {
+      "src/cache.zig": "be609fc763131a55ed9921e1a3fb62279a3b3002e29a59b21e9364ff2ae014f2",
+      "src/clang.zig": "25fc88a6d43eef9091bb3914d75376d32e6c517fe4b200a735c7a67eb93c79be",
+      "src/compiler.zig": "0bd5bb7678afd7b7609be08d0ea10aae1e5537967adcbfe8e6e5b51db4449209",
+      "src/identity.zig": "34a910d4900c9df0f6948509047ddaa2881375f6a961b896d2b7a2dfc3fe4a52",
+      "src/link_dependencies.zig": "f60fe853a5260fe7e9445fc257b085a4e45d8bbc48a8272d065b41de7fa1e0fb",
+      "src/link_observer.zig": "219118d1f42a63c0af6070dee0e8f04aa6d27242931ab48be6c760044e6368e8",
+      "src/main.zig": "8cc9bfd571ebdc226082e76352fb1f7abbc922606579eaff0f28ada895524b53",
+      "src/native_identity.zig": "56b100e1d2475a7def6009a4859063941e985e76f2fc29fcb012a69bbce9a755",
+      "src/native_metadata.zig": "ad8a21566e9e3f11e3d10e571a1f943444906ec0fb02317a8dd41a2d74f83611",
+      "src/producer_dependencies.zig": "a2cd64a9d507db26879785c6f268d8b01bc3274660ad13ac3d2344c43fddf464",
+      "src/producer_job.zig": "8861c822b59aa9469e57d655cda4b93120d111d427944b2e55450a125364dcda",
+      "src/response_files.zig": "09e0ed7ef53d9e801261d5d70979f638ae6de2872d9d27354ed194913531d0c4",
+      "src/rust_dependencies.zig": "8665b5f431411cf4c575aa16f5a25389e5cea0648e785442052d61298f5377fa",
+      "src/rust_metadata.zig": "99019a00891dbeb3e1837bad8c4a6290012eccbf5db1b4f78c03549f9efd7022",
+      "src/xcode.zig": "5ad1d00ed39577a0dd1dab3d09421477de653d3eb70aef221e056170c950ff48"
+    }
+  },
+  "patch_sha256": "03673b94e660c391267c0653f5642a8263a56afdaf98b347156ebcc7f2f3b8c6",
+  "validation": {
+    "build": "passed: zig build -Doptimize=ReleaseFast",
+    "unit": "passed: zig build test",
+    "real_rust_zig_integration": "passed: restoration, invalidation, corruption, isolation, failures, environment, escaped paths, single-flight and bypass"
+  }
+}
