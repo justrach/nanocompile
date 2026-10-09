@@ -27,6 +27,56 @@ fn query(ctx: *cache.Context, argv: []const []const u8) ![]const u8 {
     return value;
 }
 
+// Query buffers use independent allocations; the caller's arena is not
+// threadsafe. Results are consumed only after both workers have joined.
+const Query = struct {
+    argv: []const []const u8,
+    result: ?std.process.RunResult = null,
+    failure: ?anyerror = null,
+
+    fn run(q: *Query, io: std.Io, env: *const std.process.Environ.Map) void {
+        q.result = std.process.run(std.heap.page_allocator, io, .{ .argv = q.argv, .environ_map = env }) catch |err| {
+            q.failure = err;
+            return;
+        };
+    }
+
+    fn deinit(q: *Query) void {
+        if (q.result) |result| {
+            std.heap.page_allocator.free(result.stdout);
+            std.heap.page_allocator.free(result.stderr);
+        }
+    }
+
+    fn raw(q: *const Query) !std.process.RunResult {
+        if (q.failure) |err| return err;
+        return q.result orelse error.NativeSelectionFailed;
+    }
+
+    fn value(q: *const Query) ![]const u8 {
+        const result = try q.raw();
+        switch (result.term) {
+            .exited => |code| if (code != 0) return error.NativeSelectionFailed,
+            else => return error.NativeSelectionFailed,
+        }
+        const text = std.mem.trim(u8, result.stdout, "\r\n");
+        if (text.len == 0 or std.mem.indexOfScalar(u8, text, '\n') != null) return error.NativeSelectionFailed;
+        return text;
+    }
+
+    fn plan(q: *const Query, ctx: *cache.Context) !DriverPlan {
+        return checkedPlan(ctx, try q.raw());
+    }
+};
+
+fn queryWorker(queries: []Query, next: *std.atomic.Value(usize), io: std.Io, env: *const std.process.Environ.Map) void {
+    while (true) {
+        const index = next.fetchAdd(1, .monotonic);
+        if (index >= queries.len) return;
+        queries[index].run(io, env);
+    }
+}
+
 fn real(ctx: *cache.Context, path: []const u8) ![]const u8 {
     if (!std.fs.path.isAbsolute(path)) return error.NativeSelectionFailed;
     return Dir.cwd().realPathFileAlloc(ctx.io, path, ctx.a);
@@ -101,8 +151,7 @@ fn parsePlan(a: std.mem.Allocator, bytes: []const u8) !DriverPlan {
     return .{ .clang = frontend[0], .linker = link[0], .resource = resource orelse return error.UnsupportedDriverPlan };
 }
 
-fn livePlan(ctx: *cache.Context, driver: []const u8) !DriverPlan {
-    const result = try std.process.run(ctx.a, ctx.io, .{ .argv = &.{ driver, "-v", "-###", "-x", "c", "/dev/null", "-o", "/dev/null" }, .environ_map = ctx.env });
+fn checkedPlan(ctx: *cache.Context, result: std.process.RunResult) !DriverPlan {
     if (std.mem.indexOf(u8, result.stdout, "Configuration file:") != null or std.mem.indexOf(u8, result.stderr, "Configuration file:") != null) return error.UnsupportedNativeConfiguration;
     switch (result.term) {
         .exited => |code| if (code != 0) return error.UnsupportedDriverPlan,
@@ -121,13 +170,28 @@ pub fn apple(ctx: *cache.Context, driver: []const u8) !Selection {
     const resolved_driver = try real(ctx, driver);
     if (!std.mem.eql(u8, resolved_driver, "/usr/bin/clang") and
         !std.mem.eql(u8, resolved_driver, "/usr/bin/cc")) return error.UnsupportedNativeSelection;
-    const plan = livePlan(ctx, driver) catch |err| switch (err) {
+    var queries = [_]Query{
+        .{ .argv = &.{ driver, "-v", "-###", "-x", "c", "/dev/null", "-o", "/dev/null" } },
+        .{ .argv = &.{ "/usr/bin/xcrun", "--find", "clang" } },
+        .{ .argv = &.{ "/usr/bin/xcrun", "--find", "ld" } },
+        .{ .argv = &.{ "/usr/bin/xcrun", "--sdk", "macosx", "--show-sdk-path" } },
+    };
+    defer for (&queries) |*q| q.deinit();
+    var next: std.atomic.Value(usize) = .init(0);
+    var group: std.Io.Group = .init;
+    defer group.cancel(ctx.io);
+    // At most two active queries per invocation, including this calling worker.
+    if ((std.Thread.getCpuCount() catch 1) > 1)
+        group.concurrent(ctx.io, queryWorker, .{ &queries, &next, ctx.io, ctx.env }) catch {};
+    queryWorker(&queries, &next, ctx.io, ctx.env);
+    try group.await(ctx.io);
+    const plan = queries[0].plan(ctx) catch |err| switch (err) {
         error.UnsupportedNativeConfiguration => return err,
         else => null,
     };
-    const clang = try real(ctx, try query(ctx, &.{ "/usr/bin/xcrun", "--find", "clang" }));
+    const clang = try real(ctx, try queries[1].value());
     const linker = try real(ctx, if (plan) |selected| selected.linker else try query(ctx, &.{ driver, "-print-prog-name=ld" }));
-    const xcrun_linker = try real(ctx, try query(ctx, &.{ "/usr/bin/xcrun", "--find", "ld" }));
+    const xcrun_linker = try real(ctx, try queries[2].value());
     if (!std.mem.eql(u8, linker, xcrun_linker)) return error.NativeSelectionFailed;
     const resource = try real(ctx, if (plan) |selected| selected.resource else try query(ctx, &.{ driver, "-print-resource-dir" }));
     if (plan) |selected| {
@@ -140,7 +204,7 @@ pub fn apple(ctx: *cache.Context, driver: []const u8) !Selection {
         }
         if (std.mem.indexOf(u8, verbose.stdout, "Configuration file:") != null or std.mem.indexOf(u8, verbose.stderr, "Configuration file:") != null) return error.UnsupportedNativeConfiguration;
     }
-    const default_sdk = try query(ctx, &.{ "/usr/bin/xcrun", "--sdk", "macosx", "--show-sdk-path" });
+    const default_sdk = try queries[3].value();
     const selected_sdk = ctx.env.get("SDKROOT") orelse default_sdk;
     const sdk = try real(ctx, selected_sdk);
     const bin = std.fs.path.dirname(clang) orelse return error.NativeSelectionFailed;

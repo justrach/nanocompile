@@ -1,7 +1,8 @@
 # Harness hill climb against kache
 
-The first coverage change produces a measurable project-level improvement, but
-kache remains much faster. Each row is a separate three-way comparison with
+The opening table records early coverage iterations; later sections track
+producer caching and controlled optimization experiments. Kache still leads
+in the latest three-way run. Each row below is a separate comparison with
 three warm samples per implementation, rotated order, four Cargo jobs, and a
 clean target directory for every build. Workload, machine, toolchain and
 artifact validation are the same as [the original comparison](kache-harness.md).
@@ -17,9 +18,9 @@ controlled before/after A/B experiment.
 | Native paths, comment/literal scanner, default macro policy | 22.86 s | **19.18 s** | 2.09 s | 84–88 |
 | Native paths and scanner, reported-input macro policy | 22.96 s | **5.30 s** | 2.80 s | 115–123 |
 
-The latest reported-input implementation is 4.33× faster than its concurrent
+In this early series, the reported-input implementation is 4.33× faster than its concurrent
 direct baseline, while kache remains 1.89× faster than nanocompile in that run.
-The latest default mode is only 1.19× faster than direct and still 9.16× slower
+The corresponding default mode is only 1.19× faster than direct and still 9.16× slower
 than kache. Earlier, enabling reported macro inputs without native-path coverage
 increased hit counts but left the median around 19 seconds. The improvement
 depends on the combined native-path coverage and reported-input policy, not a
@@ -1007,3 +1008,72 @@ Candidate unit tests and real Rust/Zig integration pass, along with
 [executable restore/invalidation](fixed-digest-executable-regression.json)
 checks. Production source and the measured accepted executable were restored.
 This experiment adds no project speedup claim.
+
+## Two active native queries: adopted
+
+The current four live Apple selection commands run through a queue with at
+most two active queries. The calling worker participates; unavailable
+concurrency or a single CPU runs the queue synchronously. Each subprocess owns
+its buffers, and parsing/fingerprinting happens after workers join. Driver,
+xcrun compiler/linker agreement, SDK selection, configuration rejection,
+fallback queries and identity fields remain unchanged. There is no persistent
+selection memo. Full input/blob verification and producer keys remain intact.
+
+This revisits concurrency under a different implementation and workload from
+the earlier rejected six-query experiment. That experiment launched all six
+queries and used separate three-sample sessions while ordinary library misses
+remained on the project path. This candidate caps the current four-query path
+at two active commands and uses controlled paired builds with 167 warm hits.
+
+The [25-pair isolated comparison](native-two-query-comparison.json) lowers
+complete process selection latency from **26.719 ms to 17.522 ms**, about 34.4%.
+Every selected field and fingerprint matches. The
+[real selector comparison](native-two-selection-comparison.json) also matches
+cc/clang, developer roots, explicit/private SDKs, preserved-mtime metadata
+changes, invalid deployment-plan fallback and invalid/unsupported selectors.
+
+The [first 27 Harness pairs](harness-native-two-paired.json) lower median build
+time from **2.763 s to 2.707 s**, with 22 candidate wins. Median paired savings
+are 46.00 ms; mean savings 97.88 ms, sample standard deviation 280.34 ms,
+and standard error 53.95 ms. Slow samples broaden the mean's uncertainty, so
+a second complete batch was run rather than removing observations.
+
+The [confirmation batch](harness-native-two-paired-confirm.json) lowers medians
+from **2.755 s to 2.719 s**, with 20 wins in 27 pairs. Median paired savings
+are 26.67 ms; mean savings 26.88 ms, sample standard deviation 84.20 ms,
+and standard error 16.20 ms. Across both batches, **42 of 54 pairs** favor
+the candidate. Combined median paired savings are **35.75 ms**, mean savings
+62.38 ms and standard error 28.32 ms. This supports adopting a modest gain;
+it does not establish a large improvement or parity with kache.
+
+Baseline SHA-256 is
+`531207e9947654f5b989608d4227ca8ec0d63ca5287f2cb43c55ea519c86e003`;
+candidate SHA-256 is
+`1f8f2a76a8bd66450fb24065a64556d74b254a946fb207cfbe7e4a83d96f0658`.
+Each batch uses one stable wrapper, identical environment/target and a shared
+cache after priming both binaries. All 108 warm builds have 167 hits, eight
+bypasses and three failed probes. All 167 collected artifacts match the first
+prime in their batch, and tracked sources remain unchanged. Second prime times
+reuse ordinary entries and are not cold-cache A/B measurements. No samples are
+discarded. R2 transport is excluded.
+
+Unit tests and real Rust/Zig integration pass. Final-binary records also cover
+[Apple identity/SDK metadata/corruption/fallback](native-two-identity-regression.json),
+[macro producer restore/loading and Cargo flags](native-two-producer-regression.json),
+and [executable restore/invalidation/failure behavior](native-two-executable-regression.json).
+Linux producer policy and ordinary library behavior remain unchanged.
+
+The [fresh twelve-build three-way run](harness-hill-native-two.json) records:
+
+| Implementation | Warm median | Cold sample |
+| --- | ---: | ---: |
+| Direct Cargo | 22.814 s | 23.457 s prime |
+| nanocompile | 2.889 s | 37.550 s |
+| kache daemon | 2.042 s | 26.715 s |
+
+All Nano warm samples are retained: **3.057, 2.889 and 2.642 s**. Separate
+three-way sessions do not establish a before/after improvement; the controlled
+paired batches above supply that evidence. Kache remains faster, and no
+cold-build gain is claimed. All 135 rlibs, 10 macro dylibs and 21 build-script
+executables match direct output and their own cold builds. Tracked Rust sources
+and manifests remain unchanged. R2 transfer time is excluded.

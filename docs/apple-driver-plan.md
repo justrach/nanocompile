@@ -21,8 +21,16 @@ and one resource directory. Quoted spaces, quotes and backslashes are decoded;
 unknown escaping, extra commands, incomplete headers, missing/duplicate
 resources and other diagnostics use the older six selection queries. Clang
 configuration files continue to refuse producer storage. A recognized plan
-needs four queries in total; fallback includes the attempted plan and then the
-older queries. No selection is reused across invocations.
+needs four queries in total. These four independent queries run through a
+queue with at most two active queries, including the calling worker. Workers
+use independent subprocess allocations; parsing and native file fingerprinting
+begin after they join. A single CPU or unavailable concurrency uses the calling
+worker alone. No selection is reused across invocations.
+
+When the plan needs fallback, the three independent xcrun results remain live
+and the older driver queries run afterward. The fallback still executes seven
+commands in total, including the attempted plan. Configuration markers continue
+to refuse storage, and compiler/linker agreement with xcrun remains mandatory.
 
 `tests/driver_plan_selection.py` compares the earlier executable and candidate
 under the same private environment and cache. The local comparison covers cc
@@ -37,3 +45,10 @@ invalid-plan fallback, SDK metadata changes, corrupt memos and invalid
 selectors. Linux retains its existing producer policy. Parser unit tests and
 real macro/executable restore fixtures cover the new path; this does not add
 Linux producer support or broader driver/configuration support.
+
+The [two-query-limit comparison](../benchmarks/native-two-selection-comparison.json)
+repeats those real selector cases against the accepted sequential live-plan
+binary. Every accepted selection and fingerprint matches. The
+[isolated 25-pair comparison](../benchmarks/native-two-query-comparison.json)
+and [controlled Harness batches](../benchmarks/harness-hill.md#two-active-native-queries-adopted)
+record latency and project behavior separately.

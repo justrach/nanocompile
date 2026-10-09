@@ -1,0 +1,28 @@
+{
+  "platform": "darwin",
+  "selected": {
+    "driver": "/usr/bin/cc",
+    "clang": "/Library/Developer/CommandLineTools/usr/bin/clang",
+    "linker": "/Library/Developer/CommandLineTools/usr/bin/ld",
+    "sdk": "/Library/Developer/CommandLineTools/SDKs/MacOSX27.0.sdk",
+    "resource_dir": "/Library/Developer/CommandLineTools/usr/lib/clang/21",
+    "files": [
+      "/usr/bin/cc",
+      "/usr/bin/xcrun",
+      "/Library/Developer/CommandLineTools/usr/bin/clang",
+      "/Library/Developer/CommandLineTools/usr/bin/ld",
+      "/Library/Developer/CommandLineTools/usr/lib/libLTO.dylib",
+      "/Library/Developer/CommandLineTools/SDKs/MacOSX27.0.sdk/SDKSettings.json"
+    ],
+    "hash": "c105346a7f5747b604f7a9fb2e9c80687111c6b2aa7f9ed824c1bc4f66e3c907"
+  },
+  "observer_sha256": "1f8f2a76a8bd66450fb24065a64556d74b254a946fb207cfbe7e4a83d96f0658",
+  "probe_sha256": "75f9f1fc9b794f7633f687622dd44e10e0cf04cdc000ec01deced7ad1ec3ca92",
+  "stable_warm_identity": true,
+  "invalid_driver_plan_legacy_fallback": true,
+  "private_sdk_selection_changes_identity": true,
+  "preserved_mtime_sdk_metadata_change_detected": true,
+  "corrupt_memos_recomputed": true,
+  "invalid_selections_rejected": true,
+  "limits": "Apple dispatch shim only; experimental producer keys; link input contents and negative lookup guards remain separate"
+}
