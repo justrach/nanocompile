@@ -1,0 +1,13 @@
+{
+  "binary_sha256": "314613d94792178dc9947953cdd2432f4787592d73435e4eb3378c478dfc85d4",
+  "script_sha256": "69eab5d407a70f36015378cfa9533cd0b3de13ed523d8406c6cd4b7f1ef00b3c",
+  "checks": [
+    "different caller directories retain different complete compilation fingerprints",
+    "identical present compiler/resource state shares decoder identity",
+    "toolchain root-classification memos reused without rewriting across callers",
+    "adding a caller selector invalidates both full and present-state identities",
+    "complete compilation fingerprint matches baseline for identical caller state"
+  ],
+  "shared_toolchain_classifications": 19,
+  "baseline_sha256": "f03c9570446371873565886f4e6ba980629547f99284437240c13a2003200be1"
+}

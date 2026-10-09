@@ -1432,3 +1432,20 @@ real Rust/Zig integration pass.
 [Method and limits](../docs/graph-detail-profile.md);
 [all graph records](harness-graph-detail-profile.json);
 [identity memo observations](harness-graph-detail-identities.json).
+
+## Isolated decoder scope: first cold comparison
+
+A candidate retains the complete compilation identity and selector guards,
+while sharing content-addressed Rust classification memos under a separate
+identity of the present compiler/resource state. Six alternating cold pairs
+reduce Harness medians from **40.728340 s to 31.935735 s** (21.59%), winning
+6/6 pairs. Every build starts with empty cache and target; all twelve builds
+match 193 artifacts, with 167 Rust misses and 24 native misses, no hits,
+and unchanged tracked sources. Unit and real Rust/Zig integration pass.
+The scope fixture proves cross-directory reuse of 19 classifications and
+selector invalidation without merging compilation fingerprints.
+This is one host and checkout; independent confirmation and warm checks
+remain pending. Production is unchanged. This batch does not compare kache.
+[Method and patch](../docs/decoder-scope-experiment.md);
+[all twelve cold builds](harness-decoder-cold-paired.json);
+[scope regression check](decoder-scope-check.json).

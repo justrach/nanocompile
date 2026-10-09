@@ -1,0 +1,125 @@
+diff --git a/src/cache.zig b/src/cache.zig
+index f52e3ef..e04cfce 100644
+--- a/src/cache.zig
++++ b/src/cache.zig
+@@ -36,6 +36,7 @@ pub const Context = struct {
+     root: []const u8,
+     cwd: []const u8,
+     compiler_identity: ?[]const u8 = null,
++    compiler_decoder_identity: ?[]const u8 = null,
+     compiler_epoch: ?[]const u8 = null,
+ 
+     pub fn init(a: std.mem.Allocator, io: std.Io, env: *std.process.Environ.Map) !Context {
+diff --git a/src/identity.zig b/src/identity.zig
+index 5f82deb..5e0dd6b 100644
+--- a/src/identity.zig
++++ b/src/identity.zig
+@@ -13,7 +13,7 @@ const Stamp = struct {
+     ctime: i96 = 0,
+     kind: std.Io.File.Kind = .unknown,
+ };
+-const Memo = struct { schema: u32 = 3, hash: []const u8, stamps: []const Stamp };
++const Memo = struct { schema: u32 = 4, hash: []const u8, decoder_hash: []const u8, stamps: []const Stamp };
+ 
+ fn rememberEpoch(ctx: *cache.Context, payload: []const u8) !void {
+     var h = cache.Hash.init(.{});
+@@ -82,12 +82,13 @@ fn readMemo(ctx: *cache.Context, path: []const u8, minimum_stamps: usize) ?[]con
+     const payload = cache.unseal(ctx, bytes) catch return null;
+     const parsed = std.json.parseFromSlice(Memo, ctx.a, payload, .{ .allocate = .alloc_always }) catch return null;
+     const memo = parsed.value;
+-    if (memo.schema != 3 or !cache.validHash(memo.hash) or memo.stamps.len < minimum_stamps) return null;
++    if (memo.schema != 4 or !cache.validHash(memo.decoder_hash) or !cache.validHash(memo.hash) or memo.stamps.len < minimum_stamps) return null;
+     for (memo.stamps) |s| {
+         const current = stamp(ctx, s.path) catch return null;
+         if (!equal(current, s)) return null;
+     }
+     rememberEpoch(ctx, payload) catch return null;
++    ctx.compiler_decoder_identity = memo.decoder_hash;
+     return memo.hash;
+ }
+ 
+@@ -272,6 +273,10 @@ pub fn fingerprint(ctx: *cache.Context, is_zig: bool, executable: []const u8) ![
+     h = cache.Hash.init(.{});
+     cache.field(&h, version.stdout);
+     cache.field(&h, version.stderr);
++    var decoder = cache.Hash.init(.{});
++    cache.field(&decoder, "metadata-decoder-existing-state-v1");
++    cache.field(&decoder, version.stdout);
++    cache.field(&decoder, version.stderr);
+     // Stable sorting makes the content identity independent of enumeration order.
+     std.mem.sort(Stamp, stamps.items, {}, struct {
+         fn less(_: void, a: Stamp, b: Stamp) bool {
+@@ -280,20 +285,26 @@ pub fn fingerprint(ctx: *cache.Context, is_zig: bool, executable: []const u8) ![
+     }.less);
+     for (stamps.items) |s| {
+         cache.field(&h, s.path);
++        // Classification sees the validated decoder and installed resources;
++        // negative selector paths remain in the complete compilation identity.
++        if (s.exists) cache.field(&decoder, s.path);
+         if (s.exists and s.kind == .file) {
+             const digest = (if (is_zig) ctx.digest(s.path) else rustFileDigest(ctx, s)) catch |err| {
+                 ctx.trace(try std.fmt.allocPrint(ctx.a, "toolchain file unavailable: {s} ({s})", .{ s.path, @errorName(err) }));
+                 return err;
+             };
+             cache.field(&h, digest);
++            cache.field(&decoder, digest);
+         }
+     }
+     // A compiler update concurrent with fingerprinting is not a valid identity.
+     for (stamps.items) |s| if (!equal(s, try stamp(ctx, s.path))) return error.ToolchainChanged;
+     const hash = try cache.finish(ctx.a, &h);
+-    const bytes = try std.json.Stringify.valueAlloc(ctx.a, Memo{ .hash = hash, .stamps = stamps.items }, .{});
++    const decoder_hash = try cache.finish(ctx.a, &decoder);
++    const bytes = try std.json.Stringify.valueAlloc(ctx.a, Memo{ .hash = hash, .decoder_hash = decoder_hash, .stamps = stamps.items }, .{});
+     try ctx.atomic(path, try cache.seal(ctx, bytes));
+     try rememberEpoch(ctx, bytes);
++    ctx.compiler_decoder_identity = decoder_hash;
+     return hash;
+ }
+ 
+diff --git a/src/rust_metadata.zig b/src/rust_metadata.zig
+index 660245b..7976a42 100644
+--- a/src/rust_metadata.zig
++++ b/src/rust_metadata.zig
+@@ -55,7 +55,7 @@ pub fn parse(bytes: []const u8) !Root {
+     return root;
+ }
+ 
+-const Memo = struct { schema: u32 = 1, compiler: []const u8, identity: []const u8, root: Root };
++const Memo = struct { schema: u32 = 2, compiler: []const u8, identity: []const u8, root: Root };
+ pub const Resolver = struct {
+     ctx: *cache.Context,
+     compiler: []const u8,
+@@ -82,16 +82,20 @@ pub const Resolver = struct {
+         return checked.hash;
+     }
+ 
++    fn decoderIdentity(self: *Resolver) ![]const u8 {
++        return self.ctx.compiler_decoder_identity orelse self.ctx.compiler_identity orelse error.NoCompilerIdentity;
++    }
++
+     fn location(self: *Resolver, identity: []const u8) ![]const u8 {
+         var hash = cache.Hash.init(.{});
+-        cache.field(&hash, "rust-root-classification-v1");
+-        cache.field(&hash, self.ctx.compiler_identity orelse return error.NoCompilerIdentity);
++        cache.field(&hash, "rust-root-classification-v2");
++        cache.field(&hash, try self.decoderIdentity());
+         cache.field(&hash, identity);
+         return self.ctx.path(&.{ "metadata", try cache.finish(self.ctx.a, &hash) });
+     }
+ 
+     fn write(self: *Resolver, identity: []const u8, root: Root) !void {
+-        const memo: Memo = .{ .compiler = self.ctx.compiler_identity orelse return error.NoCompilerIdentity, .identity = identity, .root = root };
++        const memo: Memo = .{ .compiler = try self.decoderIdentity(), .identity = identity, .root = root };
+         const bytes = try std.json.Stringify.valueAlloc(self.ctx.a, memo, .{});
+         try self.ctx.atomic(try self.location(identity), try cache.seal(self.ctx, bytes));
+     }
+@@ -116,7 +120,7 @@ pub const Resolver = struct {
+             const payload = cache.unseal(self.ctx, bytes) catch break :read;
+             const parsed = std.json.parseFromSlice(Memo, self.ctx.a, payload, .{ .allocate = .alloc_always }) catch break :read;
+             const memo = parsed.value;
+-            if (memo.schema != 1 or !std.mem.eql(u8, memo.compiler, self.ctx.compiler_identity.?) or !std.mem.eql(u8, memo.identity, identity) or !validCrateHash(memo.root.hash)) break :read;
++            if (memo.schema != 2 or !std.mem.eql(u8, memo.compiler, try self.decoderIdentity()) or !std.mem.eql(u8, memo.identity, identity) or !validCrateHash(memo.root.hash)) break :read;
+             try self.roots.put(self.ctx.a, path, memo.root);
+             return memo.root;
+         } else |_| {}
