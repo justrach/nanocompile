@@ -27,6 +27,7 @@ def main():
     p.add_argument('--warm-runs', type=int, default=3)
     p.add_argument('--native-clang', action='store_true', help='Profile the accepted Apple Clang CAS configuration too')
     p.add_argument('--clang-wrapper', type=Path, help='Separate diagnostic Clang adapter; Rust wrapper stays fixed')
+    p.add_argument('--miss-profile', action='store_true', help='Enable phase records in an isolated diagnostic Rust wrapper')
     args = p.parse_args()
     assert args.warm_runs > 0
     binary, project, root = args.binary.resolve(), args.project.resolve(), args.state.resolve()
@@ -40,6 +41,8 @@ def main():
                CARGO_INCREMENTAL='0', NANOCOMPILE_DIR=str(root / 'cache'),
                NANOCOMPILE_PROC_MACROS='reported', NANOCOMPILE_PROC_MACRO_PRODUCERS='1',
                NANOCOMPILE_EXECUTABLE_PRODUCERS='1')
+    if args.miss_profile:
+        env['NANOCOMPILE_MISS_PROFILE'] = '1'
     if args.native_clang:
         env.update(CC=str(clang_wrapper)+' clang', CC_KNOWN_WRAPPER_CUSTOM='nanocompile',
                    NANOCOMPILE_CLANG_REMARKS='1')
@@ -48,10 +51,11 @@ def main():
     names = subprocess.check_output(['git', 'ls-files', '-z'], cwd=project).decode().split('\0')
     sources = {name: sha(project/name) for name in names if name and (project/name).is_file()
                and (name.endswith(('.rs', '.toml')) or Path(name).name == 'Cargo.lock')}
-    report = {'method': 'Accepted executable used directly as RUSTC_WRAPPER; stable Cargo --timings, one prime and clean warm builds, four jobs, fixed environment/target/cache. Timing instrumentation is diagnostic, not an A/B performance comparison. No extra Python compiler shim.',
+    report = {'method': 'Supplied executable used directly as RUSTC_WRAPPER; stable Cargo --timings, one prime and clean warm builds, four jobs, fixed environment/target/cache. Timing instrumentation is diagnostic, not an A/B performance comparison. No extra Python compiler shim.',
               'core_revision': subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip(),
               'binary_sha256': sha(binary), 'script_sha256': sha(Path(__file__)),
               'native_clang': args.native_clang,
+              'miss_profile': args.miss_profile,
               'clang_wrapper_sha256': sha(clang_wrapper) if args.native_clang else None,
               'project_commit': subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=project, text=True).strip(),
               'project_dirty': bool(subprocess.check_output(['git', 'status', '--porcelain'], cwd=project)),

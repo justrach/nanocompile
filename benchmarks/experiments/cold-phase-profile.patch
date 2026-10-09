@@ -1,0 +1,106 @@
+diff --git a/src/compiler.zig b/src/compiler.zig
+index aab3d65..22452bd 100644
+--- a/src/compiler.zig
++++ b/src/compiler.zig
+@@ -529,7 +529,7 @@ fn replacePath(ctx: *cache.Context, bytes: []const u8, old: []const u8, new: []c
+     return out.items;
+ }
+ 
+-fn executeProducer(ctx: *cache.Context, plan: Plan, argv: []const []const u8) !u8 {
++fn executeProducer(ctx: *cache.Context, plan: Plan, argv: []const []const u8, profile_start: i96) !u8 {
+     const native_identity = @import("native_identity.zig");
+     const observer = @import("link_observer.zig");
+     ctx.prepare() catch return bypass(ctx, argv, "bypass: cache unavailable");
+@@ -595,9 +595,11 @@ fn executeProducer(ctx: *cache.Context, plan: Plan, argv: []const []const u8) !u
+         for ([_][]const u8{ "-Xlinker", "-install_name", "-Xlinker", install_name }) |arg|
+             try command.appendSlice(ctx.a, &.{ "-C", try std.fmt.allocPrint(ctx.a, "link-arg={s}", .{arg}) });
+     }
++    const profile_ready = std.Io.Clock.awake.now(ctx.io).nanoseconds;
+     const started = std.Io.Clock.real.now(ctx.io).nanoseconds;
+     ctx.trace(if (plan.producer_dylib) "miss: compiling proc-macro producer" else "miss: compiling executable producer");
+     var result = try std.process.run(ctx.a, ctx.io, .{ .argv = command.items, .environ_map = ctx.env });
++    const profile_compiled = std.Io.Clock.awake.now(ctx.io).nanoseconds;
+     result.stdout = try replacePath(ctx, result.stdout, job.out, plan.out_dir.?);
+     result.stderr = try replacePath(ctx, result.stderr, job.out, plan.out_dir.?);
+     result.stderr = try replacePath(ctx, result.stderr, linker, "cc");
+@@ -638,14 +640,16 @@ fn executeProducer(ctx: *cache.Context, plan: Plan, argv: []const []const u8) !u
+     if (observer_stat.mtime.nanoseconds >= started or observer_stat.ctime.nanoseconds >= started) return 0;
+     save(ctx, key, plan, argv, before.items, directories, started, result, linked) catch |err|
+         ctx.trace(try std.fmt.allocPrint(ctx.a, "uncached producer: {s}", .{@errorName(err)}));
++    try missProfile(ctx, key, if (plan.producer_dylib) "macro-producer" else "executable-producer", argv, profile_start, profile_ready, profile_compiled);
+     return 0;
+ }
+ 
+ pub fn execute(ctx: *cache.Context, kind: Kind, argv: []const []const u8) !u8 {
++    const profile_start = std.Io.Clock.awake.now(ctx.io).nanoseconds;
+     if (ctx.env.get("NANOCOMPILE_DISABLE")) |v| if (eq(v, "1")) return bypass(ctx, argv, "bypass: disabled");
+     const plan = (if (kind == .rust) rustPlan(ctx, argv) else zigPlan(ctx, argv)) catch |err|
+         return bypass(ctx, argv, try std.fmt.allocPrint(ctx.a, "bypass: {s}", .{@errorName(err)}));
+-    if (plan.producer) return executeProducer(ctx, plan, argv);
++    if (plan.producer) return executeProducer(ctx, plan, argv, profile_start);
+     ctx.prepare() catch return bypass(ctx, argv, "bypass: cache unavailable");
+     const maintenance = cache.Lock.acquire(ctx, "maintenance", false) catch return bypass(ctx, argv, "bypass: cache lock unavailable");
+     defer maintenance.release();
+@@ -680,9 +684,11 @@ pub fn execute(ctx: *cache.Context, kind: Kind, argv: []const []const u8) !u8 {
+         return bypass(ctx, argv, try std.fmt.allocPrint(ctx.a, "bypass: native inputs unavailable ({s})", .{@errorName(err)}));
+     try before.appendSlice(ctx.a, native);
+     const directories = rust_dependencies.snapshot(ctx, plan.library_dirs, plan.outputs) catch return bypass(ctx, argv, "bypass: cannot enumerate dependency directories");
++    const profile_ready = std.Io.Clock.awake.now(ctx.io).nanoseconds;
+     const started = std.Io.Clock.real.now(ctx.io).nanoseconds;
+     ctx.trace("miss: compiling");
+     const result = try std.process.run(ctx.a, ctx.io, .{ .argv = argv, .environ_map = ctx.env });
++    const profile_compiled = std.Io.Clock.awake.now(ctx.io).nanoseconds;
+     try ctx.out(result.stdout);
+     try std.Io.File.stderr().writeStreamingAll(ctx.io, result.stderr);
+     const code = exitCode(result.term);
+@@ -692,10 +698,12 @@ pub fn execute(ctx: *cache.Context, kind: Kind, argv: []const []const u8) !u8 {
+     }
+     ctx.event("miss");
+     save(ctx, key, plan, argv, before.items, directories, started, result, &.{}) catch |err| ctx.trace(try std.fmt.allocPrint(ctx.a, "uncached: {s}", .{@errorName(err)}));
++    try missProfile(ctx, key, "ordinary", argv, profile_start, profile_ready, profile_compiled);
+     return 0;
+ }
+ 
+ fn save(ctx: *cache.Context, key: []const u8, plan: Plan, argv: []const []const u8, before: []const cache.Dependency, directories: []const rust_dependencies.Directory, started: i96, result: std.process.RunResult, linker: []const cache.Dependency) !void {
++    const profile_save = std.Io.Clock.awake.now(ctx.io).nanoseconds;
+     for (before) |dep| if (!dep.directory) {
+         for (plan.outputs) |out| if (eq(dep.path, out)) return error.OverlappingOutput;
+     };
+@@ -756,6 +764,7 @@ fn save(ctx: *cache.Context, key: []const u8, plan: Plan, argv: []const []const
+         if (st.mtime.nanoseconds >= started or st.ctime.nanoseconds >= started) return error.DirectoryChangedDuringCompilation;
+         try records.append(ctx.a, .{ .path = dir, .hash = try ctx.directoryDigest(dir, false, plan.outputs), .directory = true });
+     }
++    const profile_graph = std.Io.Clock.awake.now(ctx.io).nanoseconds;
+     if (!plan.producer and plan.dep_info != null and (directories.len != 0 or hidden_native))
+         try rust_dependencies.collect(ctx, argv, plan.outputs, directories, started, &records, true, &validated, hidden_native);
+     if (plan.producer) {
+@@ -764,7 +773,10 @@ fn save(ctx: *cache.Context, key: []const u8, plan: Plan, argv: []const []const
+         };
+         try records.appendSlice(ctx.a, linker);
+     }
++    const profile_store = std.Io.Clock.awake.now(ctx.io).nanoseconds;
+     try cache.store(ctx, key, records.items, plan.outputs, result.stdout, result.stderr);
++    const profile_done = std.Io.Clock.awake.now(ctx.io).nanoseconds;
++    try profileLine(ctx, "NANOCOMPILE_SAVE_PHASE", .{ .key = key, .validation_ns = profile_graph - profile_save, .graph_ns = profile_store - profile_graph, .store_ns = profile_done - profile_store });
+ }
+ 
+ test "dep-info handles escaped paths and continuations" {
+@@ -788,3 +800,18 @@ test "native link attributes include comments and cfg_attr forms" {
+     try std.testing.expect(hiddenNativeLink("const C: char = '\"'; const S: &str=\"/*\"; #[link(name=\"native\")] extern {}"));
+     try std.testing.expect(!hiddenNativeLink("const S: &str = \"link(name=foo)\"; pub fn link<'a>(x: &'a str) {}"));
+ }
++
++fn profileLine(ctx: *cache.Context, label: []const u8, value: anytype) !void {
++    if (!std.mem.eql(u8, ctx.env.get("NANOCOMPILE_MISS_PROFILE") orelse "", "1")) return;
++    const payload = try std.json.Stringify.valueAlloc(ctx.a, value, .{});
++    const folder = try ctx.path(&.{"cold-profile"});
++    try std.Io.Dir.cwd().createDirPath(ctx.io, folder);
++    const path = try std.fs.path.join(ctx.a, &.{ folder, try std.fmt.allocPrint(ctx.a, "{s}-{s}.json", .{ label, value.key }) });
++    try ctx.atomic(path, payload);
++}
++fn missProfile(ctx: *cache.Context, key: []const u8, mode: []const u8, argv: []const []const u8, start: i96, ready: i96, compiled: i96) !void {
++    const done = std.Io.Clock.awake.now(ctx.io).nanoseconds;
++    var name: []const u8 = "unknown";
++    for (argv, 0..) |arg, i| if (std.mem.eql(u8, arg, "--crate-name") and i + 1 < argv.len) { name = argv[i + 1]; break; };
++    try profileLine(ctx, "NANOCOMPILE_MISS_PHASE", .{ .key = key, .mode = mode, .crate = name, .precompile_ns = ready - start, .compiler_ns = compiled - ready, .postcompile_ns = done - compiled, .total_ns = done - start });
++}

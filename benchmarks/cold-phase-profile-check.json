@@ -1,0 +1,18 @@
+{
+  "base_revision": "232f01687c4d9ab498996433a2772e968a479a8b",
+  "zig_version": "0.17.0",
+  "production_binary_sha256": "f03c9570446371873565886f4e6ba980629547f99284437240c13a2003200be1",
+  "diagnostic_binary_sha256": "46d426ca147787e1511b9e340dd373428f80344396ccb981420069d50c24b957",
+  "diagnostic_compiler_source_sha256": "fe52c09aa92bc7c26c2b1d5578f210b8227b7939b5fac2008e65739d3207937d",
+  "patch_sha256": "c866ae33228259608980b6567e7cea5fb8f69b03e74d905f20f648cb60009708",
+  "checks": {
+    "unit": "zig build test exited 0",
+    "integration_disabled": "Rust 1.97.1 real Rust/Zig integration exited 0",
+    "integration_enabled": "NANOCOMPILE_MISS_PROFILE=1 real Rust/Zig integration exited 0 including stderr replay equivalence",
+    "cold_profile_records": 167,
+    "warm_restores": 3,
+    "exact_artifacts": 193,
+    "tracked_sources_unchanged": true
+  },
+  "production_changed": false
+}

@@ -1396,3 +1396,19 @@ unchanged. Linux/macOS CI passes on core 8f6dace.
 [Protocol and limits](../docs/clang-integrated-nine-samples.md);
 [all builds](harness-clang-integrated-nine-samples.json);
 [complete statistical summary](harness-clang-integrated-nine-analysis.json).
+
+## Complete cold miss phase profile
+
+An isolated diagnostic capture covers all 167 cold misses and joins 334
+atomic phase-record files. Aggregate per-job graph-discovery time is
+56.536667 s versus 1.064325 s storing artifacts. These durations overlap
+across four jobs and are not promised end-to-end savings. The final Harness
+unit spends 9.107874 s in rustc plus 1.826996 s postcompile; graph discovery
+accounts for 1.771901 s of that tail. This makes graph classification/query
+work the next diagnostic target. Production remains unchanged.
+All three warm restores match 193 artifacts and retain 167 Rust/24 native
+hits, with unchanged tracked sources. Unit tests pass; real Rust/Zig integration
+passes with diagnostic profiling disabled/enabled.
+[Method and limits](../docs/cold-phase-profile.md);
+[all 167 phase records](harness-cold-phase-profile.json);
+[build evidence](harness-cold-phase-builds.json).
