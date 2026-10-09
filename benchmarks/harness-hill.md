@@ -1135,3 +1135,24 @@ the same 64 KiB reader and no extra threads, pass all 35 official unkeyed
 vectors, and agree on every real digest. This is an isolated candidate signal,
 not a project gain. Production retains the accepted Zig digest; platform and
 real-project validation remain required before considering a backend change.
+
+## Upstream file digest prototype: rejected
+
+The [private prototype](../docs/upstream-file-digest-experiment.md) replaces
+only file-content hashing with the pinned upstream implementation from the
+streaming probe. The reader, complete content checks, worker counts, locks,
+schema, keys and eligibility policy remain unchanged. All 20 unit tests and
+real Rust/Zig integration pass, along with native/macro/executable regressions.
+
+The [27-pair project comparison](harness-upstream-digest-paired.json) is
+effectively tied: **2.683367 s accepted versus 2.681208 s prototype** medians,
+17 candidate wins, 8.27 ms median paired savings and 12.09 ms mean savings.
+Sample standard deviation is 44.68 ms and standard error 8.60 ms. All warm
+builds retain 167 hits and all 167 collected artifacts match. Tracked sources
+remain unchanged; no samples are discarded and R2 transport is excluded.
+
+The roughly 12% isolated digest improvement did not establish a reliable
+project gain. The prototype is rejected and its patch, build instructions,
+binary checksums and raw results remain available. Production retains its
+accepted Zig digest and two-query selection limit. No new production
+dependency, project speedup or cold-build claim is added.

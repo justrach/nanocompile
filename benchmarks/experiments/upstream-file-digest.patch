@@ -1,0 +1,32 @@
+--- a/src/cache.zig
++++ b/src/cache.zig
+@@ -1,5 +1,6 @@
+ const std = @import("std");
+ const builtin = @import("builtin");
++const blake3_c = @import("blake3");
+ const c = struct {
+     extern "c" fn open(path: [*:0]const u8, flags: c_int, ...) c_int;
+     extern "c" fn close(fd: c_int) c_int;
+@@ -77,16 +78,19 @@
+         const file = try Dir.cwd().openFile(self.io, path_, .{});
+         defer file.close(self.io);
+         if ((try file.stat(self.io)).kind != .file) return error.NotRegularFile;
+-        var h = Hash.init(.{});
++        var h: blake3_c.blake3_hasher = undefined;
++        blake3_c.blake3_hasher_init(&h);
+         var buffer: [64 * 1024]u8 = undefined;
+         var reader = file.reader(self.io, &buffer);
+         var block: [64 * 1024]u8 = undefined;
+         while (true) {
+             const n = try reader.interface.readSliceShort(&block);
+             if (n == 0) break;
+-            h.update(block[0..n]);
++            blake3_c.blake3_hasher_update(&h, block[0..n].ptr, n);
+         }
+-        return finish(self.a, &h);
++        var bytes: [32]u8 = undefined;
++        blake3_c.blake3_hasher_finalize(&h, &bytes, bytes.len);
++        return self.a.dupe(u8, &std.fmt.bytesToHex(bytes, .lower));
+     }
+ 
+     pub fn checkedDigest(self: *Context, path_: []const u8) !CheckedDigest {

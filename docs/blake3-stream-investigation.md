@@ -34,6 +34,10 @@ all full-content verification. Integrating a candidate requires real compiler
 regressions, a controlled Harness comparison and platform validation before
 adoption.
 
+The subsequent [private cache prototype](upstream-file-digest-experiment.md)
+showed no reliable project gain across 27 controlled Harness pairs and was
+rejected. Production still uses the existing Zig digest.
+
 The [Zig probe](../benchmarks/experiments/blake3_stream.zig) and
 [vector/comparison driver](../benchmarks/experiments/blake3_stream.py) are
 retained. Upstream source and generated bindings remain outside the project;
