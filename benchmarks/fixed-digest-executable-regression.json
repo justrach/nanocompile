@@ -1,0 +1,14 @@
+{
+  "platform": "darwin",
+  "binary_sha256": "8ef3c93e6f959b163b688a176fdae2c28b08e0800cac70ad25c9d68ebe36bbcc",
+  "probe_sha256": "f9d44f74ef3cc1d0bef4fbf43f8c3301a9d87f945d6a80d092bd7c68c8f38a48",
+  "direct_cold_warm_artifacts_equal": true,
+  "diagnostics_replayed": true,
+  "executable_permissions_preserved": true,
+  "runtime_reads_stay_live_after_restore": true,
+  "source_and_preserved_mtime_native_changes_detected": true,
+  "corrupt_blob_and_manifest_repaired": true,
+  "failed_compilation_not_cached": true,
+  "debug_and_default_policy_bypass": true,
+  "limits": "Apple native zero-debug executable compilation only; execution is not cached; no project speed claim"
+}

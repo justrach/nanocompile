@@ -36,7 +36,7 @@ This implementation targets repeated compilation of unchanged inputs. It is an e
 
 Measured performance and its limits are published with raw samples: [Rust versus kache](benchmarks/harness-hill.md), [Xcode](benchmarks/xcode.md), and [Turborepo with R2 restores](benchmarks/turborepo.md).
 
-The [producer phase profile](docs/producer-phase-profile.md) also records where warm-hit time goes and links the latest rejected scheduling experiment.
+The [producer phase profile](docs/producer-phase-profile.md) and [restore breakdown](docs/restore-phase-profile.md) also record where warm-hit time goes and link rejected optimization experiments.
 
 **Try it today:** Cargo library builds, supported direct Zig invocations, and the runnable Turbo example. Rust proc-macro producers run directly by default. Xcode uses Apple's native cache, and R2 currently transports explicit snapshots. See [supported builds](#current-eligibility) before choosing a workload.
 

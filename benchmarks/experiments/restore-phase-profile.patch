@@ -1,0 +1,57 @@
+diff --git a/src/cache.zig b/src/cache.zig
+index 63bbfd1..6f1b25b 100644
+--- a/src/cache.zig
++++ b/src/cache.zig
+@@ -466,10 +466,19 @@ fn parallelFileHashes(ctx: *Context, dependencies: []const Dependency, hashes: *
+     return true;
+ }
+ 
++fn restorePhase(ctx: *Context, previous: *i96, phase: []const u8) void {
++    if (!std.mem.eql(u8, ctx.env.get("NANOCOMPILE_PROFILE_PRODUCER") orelse "", "1")) return;
++    const now = std.Io.Clock.awake.now(ctx.io).nanoseconds;
++    std.debug.print("nanocompile: profile restore {s} {d} ns\n", .{ phase, now - previous.* });
++    previous.* = now;
++}
++
+ pub fn restore(ctx: *Context, key: []const u8, allowed_outputs: []const []const u8) !bool {
++    var checkpoint = std.Io.Clock.awake.now(ctx.io).nanoseconds;
+     const bytes = ctx.read(try ctx.path(&.{ "entries", key })) catch return false;
+     const entry = parseEntry(ctx, bytes) catch return false;
+     if (entry.artifact != null or entry.schema != entry_schema or entry.outputs.len != allowed_outputs.len) return false;
++    restorePhase(ctx, &checkpoint, "read-entry");
+     // One crate graph can record many prefixes in the same Cargo directory,
+     // and explicit externs can also appear in the transitive graph. Reuse the
+     // enumeration and content hashes only within this restore. No metadata
+@@ -479,6 +488,7 @@ pub fn restore(ctx: *Context, key: []const u8, allowed_outputs: []const []const
+     var file_hashes: std.StringHashMapUnmanaged([]const u8) = .empty;
+     defer file_hashes.deinit(ctx.a);
+     if (!try parallelFileHashes(ctx, entry.dependencies, &file_hashes)) return false;
++    restorePhase(ctx, &checkpoint, "parallel-inputs");
+     for (entry.dependencies) |dep| {
+         if (dep.symlink_target != null) {
+             if (!(symlinkValid(ctx, dep) catch false)) return false;
+@@ -509,12 +519,14 @@ pub fn restore(ctx: *Context, key: []const u8, allowed_outputs: []const []const
+             return false;
+         }
+     }
++    restorePhase(ctx, &checkpoint, "dependency-guards");
+     // Validate every blob and destination before writing any output.
+     for (entry.outputs, allowed_outputs) |output, allowed| {
+         if (!std.mem.eql(u8, output.path, allowed)) return false;
+         const hash = ctx.digest(try blobPath(ctx, output.hash)) catch return false;
+         if (!std.mem.eql(u8, hash, output.hash)) return false;
+     }
++    restorePhase(ctx, &checkpoint, "output-blobs");
+     const stdout = ctx.read(try blobPath(ctx, entry.stdout)) catch return false;
+     const stderr = ctx.read(try blobPath(ctx, entry.stderr)) catch return false;
+     var h = Hash.init(.{});
+@@ -523,7 +535,9 @@ pub fn restore(ctx: *Context, key: []const u8, allowed_outputs: []const []const
+     h = Hash.init(.{});
+     h.update(stderr);
+     if (!std.mem.eql(u8, try finish(ctx.a, &h), entry.stderr)) return false;
++    restorePhase(ctx, &checkpoint, "streams");
+     for (entry.outputs) |output| try materialize(ctx, try blobPath(ctx, output.hash), output.path, output.mode);
++    restorePhase(ctx, &checkpoint, "materialize");
+     try ctx.out(stdout);
+     try std.Io.File.stderr().writeStreamingAll(ctx.io, stderr);
+     return true;

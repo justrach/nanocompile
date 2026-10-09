@@ -959,3 +959,51 @@ Candidate unit tests and Rust/Zig integration pass, along with real
 checks. The candidate and profiler were removed from production. The accepted
 live-driver-plan implementation remains in place; this experiment supplies no
 new project speedup claim.
+
+## Restore stage attribution
+
+The [follow-up private profile](../docs/restore-phase-profile.md) measures 272
+ordinary and 62 producer warm hits. Producer parallel input hashing takes
+8.688 ms median; dependency guards take 0.472 ms, output blob hashing 0.913 ms,
+stream validation 0.046 ms, and materialization 0.446 ms. Entry read and parsing
+take 0.275 ms. Ordinary library restore costs are recorded separately. These
+overlapping instrumented stage timings are not a project speedup comparison.
+The timing patch is retained for reproduction and removed from production.
+
+## Fixed-buffer worker digest: rejected
+
+The [candidate patch](experiments/fixed-digest-buffer.patch) factors file hashing
+into a fixed-size hex digest. Parallel workers write directly to their job
+buffer, removing a private arena allocation and deallocation per input file.
+The ordinary allocating digest API keeps its behavior. File reads, full Blake3
+content hashes, four-worker limit, queue order, guards, keys and schema remain
+unchanged.
+
+The [25-pair isolated restore fixture](fixed-digest-restore-comparison.json)
+is tied: 43.386 ms baseline and 43.364 ms candidate medians, 13 candidate wins,
+0.007 ms mean paired savings and 0.086 ms standard error. Every restore hits
+the same unchanged entry and preserves all output bytes and modes.
+
+The [27-pair Harness comparison](harness-fixed-digest-paired.json) is also tied:
+**2.751 s baseline versus 2.755 s candidate** medians, with 14 candidate wins.
+Mean paired savings are **−4.67 ms**, sample standard deviation 99.66 ms,
+and standard error **19.18 ms**. Removing allocations did not demonstrate a
+project performance benefit, so the candidate is rejected.
+
+Baseline SHA-256 is
+`531207e9947654f5b989608d4227ca8ec0d63ca5287f2cb43c55ea519c86e003`;
+candidate SHA-256 is
+`8ef3c93e6f959b163b688a176fdae2c28b08e0800cac70ad25c9d68ebe36bbcc`.
+One stable wrapper, identical environment/target and shared cache are used,
+with both binaries primed before rotating measurement order. All 54 warm
+builds have 167 hits, eight bypasses and three failed probes. All 167 collected
+artifacts match the first prime; tracked sources remain unchanged. The second
+prime reuses 136 ordinary entries, so its time is not a cold-cache comparison.
+R2 transport is excluded.
+
+Candidate unit tests and real Rust/Zig integration pass, along with
+[metadata priority](fixed-digest-rmeta-regression.json),
+[macro producers and Cargo flags](fixed-digest-producer-regression.json), and
+[executable restore/invalidation](fixed-digest-executable-regression.json)
+checks. Production source and the measured accepted executable were restored.
+This experiment adds no project speedup claim.

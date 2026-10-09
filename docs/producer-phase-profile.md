@@ -55,3 +55,7 @@ Read the `nanocompile: profile producer STAGE N ns` lines in the private capture
 The timings are not interchangeable with the uninstrumented paired or kache
 comparisons. Do not use this diagnostic executable for published performance
 comparisons.
+
+The follow-up [restore phase profile](restore-phase-profile.md) separates the
+restore stage into input hashing, dependency guards, output verification and
+materialization, with ordinary and producer hits reported independently.

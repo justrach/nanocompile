@@ -1,0 +1,42 @@
+diff --git a/src/cache.zig b/src/cache.zig
+index 63bbfd1..0e6690a 100644
+--- a/src/cache.zig
++++ b/src/cache.zig
+@@ -74,6 +74,10 @@ pub const Context = struct {
+     }
+ 
+     pub fn digest(self: *Context, path_: []const u8) ![]const u8 {
++        return self.a.dupe(u8, &try self.digestHex(path_));
++    }
++
++    fn digestHex(self: *const Context, path_: []const u8) ![64]u8 {
+         const file = try Dir.cwd().openFile(self.io, path_, .{});
+         defer file.close(self.io);
+         if ((try file.stat(self.io)).kind != .file) return error.NotRegularFile;
+@@ -86,7 +90,9 @@ pub const Context = struct {
+             if (n == 0) break;
+             h.update(block[0..n]);
+         }
+-        return finish(self.a, &h);
++        var bytes: [32]u8 = undefined;
++        h.final(&bytes);
++        return std.fmt.bytesToHex(bytes, .lower);
+     }
+ 
+     pub fn checkedDigest(self: *Context, path_: []const u8) !CheckedDigest {
+@@ -425,13 +431,8 @@ fn digestWorker(ctx: *const Context, jobs: []DigestJob, next: *std.atomic.Value(
+     while (true) {
+         const index = next.fetchAdd(1, .monotonic);
+         if (index >= jobs.len) return;
+-        // Each worker owns its arena; Context.digest only reads shared fields.
+-        var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
+-        defer arena.deinit();
+-        var local = ctx.*;
+-        local.a = arena.allocator();
+-        const hash = local.digest(jobs[index].path) catch continue;
+-        @memcpy(&jobs[index].hash, hash);
++        // Hash into the job's fixed buffer without allocating a per-file arena.
++        jobs[index].hash = ctx.digestHex(jobs[index].path) catch continue;
+         jobs[index].valid = true;
+     }
+ }
