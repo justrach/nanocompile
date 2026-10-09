@@ -1,6 +1,20 @@
 # README artwork
 
-The README now uses `images/readme-cache-rat-v2.png`, a transparent refinement made with the built-in imagegen tool. It preserves the original character and cabinet while removing the paper backdrop for light and dark GitHub themes. The original below remains available. This changes presentation only; benchmark results and compiler behavior are unaffected.
+The current README uses `images/readme-cache-banner.png`, a wide editorial banner made with the built-in imagegen tool from the transparent mascot below. It keeps the character, coral coat and golden cache cubes, adds the project name and tagline, and leaves benchmark claims in ordinary text. The previous assets remain available. The banner's alt text includes its wording; the README also retains a text heading.
+
+Final banner edit prompt (edit target and character identity reference: `images/readme-cache-rat-v2.png`):
+
+```text
+Use case: precise-object-edit
+Asset type: polished wide GitHub README hero banner for nanocompile.
+Input image: edit target and character identity reference, the supplied transparent cache-rat illustration.
+Primary request: redesign the composition as a refined landscape editorial banner, roughly 2.5:1 aspect ratio. Preserve the same original gray workshop rat, coral coat, wooden parts cabinet, golden artifact cubes and hand-painted ink/gouache character. On the right half, draw a smaller complete rat carefully shelving a golden cube in a compact cabinet; simplify fine strokes for readability. On the left half, generous whitespace with large beautifully typeset lowercase text exactly "nanocompile", and below it the exact subtitle "Reuse the build work you've already done." Use dark warm charcoal lettering, clean restrained readable typography, no distorted letters.
+Scene/backdrop: warm ivory paper with extremely subtle grain, a quiet flat background and soft ground shadow. Keep generous margins around all text and the complete illustration.
+Style: warm polished original editorial illustration and restrained developer-tool branding, clear at 800 pixels wide.
+Constraints: no extra characters, code snippets, performance numbers, logos of other products, badges, watermark, decorative borders or busy props. Preserve character identity and existing coral/gold palette. The title and subtitle must be verbatim and are the only text. This is decorative branding, not a diagram.
+```
+
+The earlier README mascot, `images/readme-cache-rat-v2.png`, is a transparent refinement made with the built-in imagegen tool. It preserves the original character and cabinet while removing the paper backdrop for light and dark GitHub themes. The original below remains available. This changes presentation only; benchmark results and compiler behavior are unaffected.
 
 Final v2 edit prompt (reference image: `images/readme-cache-rat.png`):
 

@@ -1,10 +1,8 @@
 <p align="center">
-  <img src="docs/images/readme-cache-rat-v2.png" alt="A workshop rat in a coral coat shelving reusable build artifacts" width="280" height="280">
+  <img src="docs/images/readme-cache-banner.png" alt="nanocompile — Reuse the build work you've already done. A workshop rat in a coral coat shelves golden build artifacts." width="960">
 </p>
 
 <h1 align="center">nanocompile</h1>
-
-<p align="center">Reuse the build work you've already done.</p>
 
 <p align="center">Rust and Zig compiler caching · Xcode native cache · Turborepo task artifacts</p>
 
