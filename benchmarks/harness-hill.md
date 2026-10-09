@@ -847,3 +847,17 @@ suite, [native metadata restores and downstream execution](native-metadata-cache
 [macro producers with Cargo flags](native-metadata-producer-regression.json),
 and [executable producers](native-metadata-executable-regression.json).
 Linux and macOS CI run the new real metadata and restoration fixtures too.
+
+A [fresh diagnostic capture](native-metadata-diagnostic.json) after this change
+runs one cold and two warm Cargo builds through the existing Python capture
+wrapper. It confirms 136 ordinary library hits, 21 executable-producer hits
+and 10 macro-producer hits in both warm phases. The three remaining compiling
+invocations are failing compiler probes, not successful library misses.
+
+Ordinary library hit medians in the capture are about 9 ms; macro/executable
+producer hit medians are about 61–66 ms. Capture overhead and concurrency are
+included, and invocation times overlap, so these are diagnostic observations,
+not a new project benchmark. Producers currently run native tool-selection
+queries before every cache lookup. This makes verified selection reuse a
+candidate to investigate next; no such reuse or selection guard relaxation has
+been implemented here. The earlier parallel-query experiment remains rejected.

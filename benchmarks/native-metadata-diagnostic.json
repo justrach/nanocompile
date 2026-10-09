@@ -1,0 +1,378 @@
+{
+  "method": "One clean cold and two clean warm Cargo release builds through a Python capture wrapper. Diagnostic subprocess times include wrapper/capture overhead and concurrent contention; summed invocation times overlap and are not project wall time. Compiler arguments and environments are omitted.",
+  "binary_sha256": "33100a369757582d2d880f85f2de0f823ab408cf4f2b1e25c75f4928608a33ad",
+  "diagnostic_script_sha256": "2724ada83ce48f455dc8f94a3e42e7139ed6b30f8e1d5d30ad215500919287ed",
+  "rustc": "rustc 1.97.1 (8bab26f4f 2026-07-14)\nbinary: rustc\ncommit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452\ncommit-date: 2026-07-14\nhost: aarch64-apple-darwin\nrelease: 1.97.1\nLLVM version: 22.1.6\n",
+  "command": [
+    "cargo",
+    "build",
+    "--release",
+    "--locked",
+    "--offline",
+    "--lib",
+    "-p",
+    "harness-adapters",
+    "-j",
+    "4",
+    "--message-format=json-render-diagnostics"
+  ],
+  "jobs": 4,
+  "proc_macros": "reported",
+  "proc_macro_producers": true,
+  "executable_producers": true,
+  "tracked_sources_match_three_way_run": true,
+  "phases": {
+    "cold": {
+      "invocations": 178,
+      "decision_counts": {
+        "nanocompile: unsupported Rust option: -vV": 2,
+        "nanocompile: bypass: UnsupportedRustOption": 7,
+        "nanocompile: unsupported Rust option: -": 3,
+        "nanocompile: miss: compiling": 139,
+        "nanocompile: miss: compiling executable producer": 21,
+        "nanocompile: unsupported Rust option: --version": 2,
+        "nanocompile: miss: compiling proc-macro producer": 10,
+        "nanocompile: bypass: UnsupportedNativeLibrary": 1
+      },
+      "successful_hit_types": {},
+      "slowest": [
+        {
+          "crate": "harness_adapters",
+          "type": "lib",
+          "seconds": 7.275390333030373,
+          "exit_code": 0,
+          "decisions": [
+            "nanocompile: miss: compiling"
+          ]
+        },
+        {
+          "crate": "tokio",
+          "type": "lib",
+          "seconds": 2.956276417011395,
+          "exit_code": 0,
+          "decisions": [
+            "nanocompile: miss: compiling"
+          ]
+        },
+        {
+          "crate": "reqwest",
+          "type": "lib",
+          "seconds": 2.5834777079871856,
+          "exit_code": 0,
+          "decisions": [
+            "nanocompile: miss: compiling"
+          ]
+        },
+        {
+          "crate": "harness_proto",
+          "type": "lib",
+          "seconds": 2.386496291961521,
+          "exit_code": 0,
+          "decisions": [
+            "nanocompile: miss: compiling"
+          ]
+        },
+        {
+          "crate": "rustls",
+          "type": "lib",
+          "seconds": 2.2725471669691615,
+          "exit_code": 0,
+          "decisions": [
+            "nanocompile: miss: compiling"
+          ]
+        },
+        {
+          "crate": "futures_util",
+          "type": "lib",
+          "seconds": 1.8043760000145994,
+          "exit_code": 0,
+          "decisions": [
+            "nanocompile: miss: compiling"
+          ]
+        },
+        {
+          "crate": "syn",
+          "type": "lib",
+          "seconds": 1.7675337080145255,
+          "exit_code": 0,
+          "decisions": [
+            "nanocompile: miss: compiling"
+          ]
+        },
+        {
+          "crate": "zlib_rs",
+          "type": "lib",
+          "seconds": 1.7335979590425268,
+          "exit_code": 0,
+          "decisions": [
+            "nanocompile: miss: compiling"
+          ]
+        },
+        {
+          "crate": "syn",
+          "type": "lib",
+          "seconds": 1.6464252079604194,
+          "exit_code": 0,
+          "decisions": [
+            "nanocompile: miss: compiling"
+          ]
+        },
+        {
+          "crate": "hyper_util",
+          "type": "lib",
+          "seconds": 1.5111891249543987,
+          "exit_code": 0,
+          "decisions": [
+            "nanocompile: miss: compiling"
+          ]
+        }
+      ]
+    },
+    "warm-1": {
+      "invocations": 178,
+      "decision_counts": {
+        "nanocompile: unsupported Rust option: -vV": 2,
+        "nanocompile: bypass: UnsupportedRustOption": 7,
+        "nanocompile: unsupported Rust option: -": 3,
+        "nanocompile: hit": 136,
+        "nanocompile: hit: executable producer": 21,
+        "nanocompile: unsupported Rust option: --version": 2,
+        "nanocompile: miss: compiling": 3,
+        "nanocompile: hit: proc-macro producer": 10,
+        "nanocompile: bypass: UnsupportedNativeLibrary": 1
+      },
+      "successful_hit_types": {
+        "lib": {
+          "count": 136,
+          "median_seconds": 0.010176104464335367,
+          "sum_seconds": 1.680466291087214
+        },
+        "proc-macro": {
+          "count": 10,
+          "median_seconds": 0.06762254150817171,
+          "sum_seconds": 0.6767403749981895
+        },
+        "bin": {
+          "count": 21,
+          "median_seconds": 0.0626897499896586,
+          "sum_seconds": 1.346586999075953
+        }
+      },
+      "slowest": [
+        {
+          "crate": "build_script_build",
+          "type": "bin",
+          "seconds": 0.07576949999202043,
+          "exit_code": 0,
+          "decisions": [
+            "nanocompile: hit: executable producer"
+          ]
+        },
+        {
+          "crate": "build_script_build",
+          "type": "bin",
+          "seconds": 0.07437408401165158,
+          "exit_code": 0,
+          "decisions": [
+            "nanocompile: hit: executable producer"
+          ]
+        },
+        {
+          "crate": "build_script_build",
+          "type": "bin",
+          "seconds": 0.07151600002544001,
+          "exit_code": 0,
+          "decisions": [
+            "nanocompile: hit: executable producer"
+          ]
+        },
+        {
+          "crate": "zerovec_derive",
+          "type": "proc-macro",
+          "seconds": 0.07090687495656312,
+          "exit_code": 0,
+          "decisions": [
+            "nanocompile: hit: proc-macro producer"
+          ]
+        },
+        {
+          "crate": "displaydoc",
+          "type": "proc-macro",
+          "seconds": 0.07001270801993087,
+          "exit_code": 0,
+          "decisions": [
+            "nanocompile: hit: proc-macro producer"
+          ]
+        },
+        {
+          "crate": "thiserror_impl",
+          "type": "proc-macro",
+          "seconds": 0.06913429195992649,
+          "exit_code": 0,
+          "decisions": [
+            "nanocompile: hit: proc-macro producer"
+          ]
+        },
+        {
+          "crate": "zerofrom_derive",
+          "type": "proc-macro",
+          "seconds": 0.06871316704200581,
+          "exit_code": 0,
+          "decisions": [
+            "nanocompile: hit: proc-macro producer"
+          ]
+        },
+        {
+          "crate": "serde_derive",
+          "type": "proc-macro",
+          "seconds": 0.0677551249973476,
+          "exit_code": 0,
+          "decisions": [
+            "nanocompile: hit: proc-macro producer"
+          ]
+        },
+        {
+          "crate": "yoke_derive",
+          "type": "proc-macro",
+          "seconds": 0.06748995801899582,
+          "exit_code": 0,
+          "decisions": [
+            "nanocompile: hit: proc-macro producer"
+          ]
+        },
+        {
+          "crate": "async_trait",
+          "type": "proc-macro",
+          "seconds": 0.06708237499697134,
+          "exit_code": 0,
+          "decisions": [
+            "nanocompile: hit: proc-macro producer"
+          ]
+        }
+      ]
+    },
+    "warm-2": {
+      "invocations": 178,
+      "decision_counts": {
+        "nanocompile: unsupported Rust option: -vV": 2,
+        "nanocompile: bypass: UnsupportedRustOption": 7,
+        "nanocompile: unsupported Rust option: -": 3,
+        "nanocompile: hit": 136,
+        "nanocompile: hit: executable producer": 21,
+        "nanocompile: unsupported Rust option: --version": 2,
+        "nanocompile: miss: compiling": 3,
+        "nanocompile: hit: proc-macro producer": 10,
+        "nanocompile: bypass: UnsupportedNativeLibrary": 1
+      },
+      "successful_hit_types": {
+        "lib": {
+          "count": 136,
+          "median_seconds": 0.008993333496619016,
+          "sum_seconds": 1.5183014167123474
+        },
+        "proc-macro": {
+          "count": 10,
+          "median_seconds": 0.06491799998912029,
+          "sum_seconds": 0.6484110820456408
+        },
+        "bin": {
+          "count": 21,
+          "median_seconds": 0.06143895798595622,
+          "sum_seconds": 1.3112687508692034
+        }
+      },
+      "slowest": [
+        {
+          "crate": "zerovec_derive",
+          "type": "proc-macro",
+          "seconds": 0.06973799999104813,
+          "exit_code": 0,
+          "decisions": [
+            "nanocompile: hit: proc-macro producer"
+          ]
+        },
+        {
+          "crate": "build_script_build",
+          "type": "bin",
+          "seconds": 0.06833691598149016,
+          "exit_code": 0,
+          "decisions": [
+            "nanocompile: hit: executable producer"
+          ]
+        },
+        {
+          "crate": "build_script_build",
+          "type": "bin",
+          "seconds": 0.0677734169876203,
+          "exit_code": 0,
+          "decisions": [
+            "nanocompile: hit: executable producer"
+          ]
+        },
+        {
+          "crate": "build_script_build",
+          "type": "bin",
+          "seconds": 0.06660583399934694,
+          "exit_code": 0,
+          "decisions": [
+            "nanocompile: hit: executable producer"
+          ]
+        },
+        {
+          "crate": "yoke_derive",
+          "type": "proc-macro",
+          "seconds": 0.06649420800385997,
+          "exit_code": 0,
+          "decisions": [
+            "nanocompile: hit: proc-macro producer"
+          ]
+        },
+        {
+          "crate": "build_script_build",
+          "type": "bin",
+          "seconds": 0.06542712496593595,
+          "exit_code": 0,
+          "decisions": [
+            "nanocompile: hit: executable producer"
+          ]
+        },
+        {
+          "crate": "zerofrom_derive",
+          "type": "proc-macro",
+          "seconds": 0.06530975003261119,
+          "exit_code": 0,
+          "decisions": [
+            "nanocompile: hit: proc-macro producer"
+          ]
+        },
+        {
+          "crate": "tracing_attributes",
+          "type": "proc-macro",
+          "seconds": 0.06526845804182813,
+          "exit_code": 0,
+          "decisions": [
+            "nanocompile: hit: proc-macro producer"
+          ]
+        },
+        {
+          "crate": "tokio_macros",
+          "type": "proc-macro",
+          "seconds": 0.06496833398705348,
+          "exit_code": 0,
+          "decisions": [
+            "nanocompile: hit: proc-macro producer"
+          ]
+        },
+        {
+          "crate": "displaydoc",
+          "type": "proc-macro",
+          "seconds": 0.0648676659911871,
+          "exit_code": 0,
+          "decisions": [
+            "nanocompile: hit: proc-macro producer"
+          ]
+        }
+      ]
+    }
+  }
+}
