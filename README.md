@@ -1,8 +1,34 @@
-# nanocompile
+<p align="center">
+  <img src="docs/images/readme-cache-rat.png" alt="A workshop rat in a coral coat shelving reusable build artifacts" width="280" height="280">
+</p>
+
+<h1 align="center">nanocompile</h1>
+
+<p align="center">Reuse the build work you've already done.</p>
+
+<p align="center">Rust and Zig compiler caching · Xcode native cache · Turborepo task artifacts</p>
+
+<p align="center">
+  <a href="#build-and-use">Build and use</a> ·
+  <a href="examples/turborepo/README.md">Turborepo example</a> ·
+  <a href="#xcode-native-cache">Xcode</a> ·
+  <a href="benchmarks/README.md">Benchmarks</a> ·
+  <a href="#current-eligibility">Supported builds</a> ·
+  <a href="#experimental-r2-testing">R2 snapshots</a>
+</p>
 
 A local, content-addressed compiler cache written in **stable Zig 0.17.0**, for Rust and Zig, with an opt-in Xcode native-cache command. It adapts kache's shared-blob storage, copy-on-write restoration, and single-flight compilation ideas into a small standalone program.
 
 This implementation targets repeated compilation of unchanged inputs. It is an early implementation with explicit eligibility gates; unsupported invocations run the original compiler.
+
+| Your build | Start here |
+| --- | --- |
+| Cargo libraries | Set `RUSTC_WRAPPER` to nanocompile; release builds and non-incremental checks are supported. |
+| Pure Zig | Wrap a supported `zig build-exe`, `build-obj` or static `build-lib` invocation. |
+| Xcode | Use `nanocompile xcodebuild` to manage Apple's native Swift/Clang compilation cache. |
+| Turborepo | Run the [two-package example](examples/turborepo/README.md) with the loopback remote-cache adapter. |
+
+Measured performance and its limits are published with raw samples: [Rust versus kache](benchmarks/harness-hill.md), [Xcode](benchmarks/xcode.md), and [Turborepo with R2 restores](benchmarks/turborepo.md).
 
 ## Build and use
 
