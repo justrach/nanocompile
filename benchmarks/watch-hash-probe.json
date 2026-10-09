@@ -1,0 +1,317 @@
+{
+  "scope": "standalone persistent hash worker; not a project build or production integration",
+  "platform": "macOS-27.0-arm64-arm-64bit-Mach-O",
+  "machine": "arm64",
+  "zig": "0.17.0",
+  "sources_sha256": {
+    "watch_hash.zig": "5e2e77bd2d6846e52d02834f883c6953eba982bb0bfdd54097072995a378a6e8",
+    "watch_hash_fs.c": "b013ea7ed9b1db529e1ee127d257be7c6dcdffae9bd69dcb5ad426c00d073f05",
+    "watch_hash.py": "d467d35a7e97fafd2941c5ff72d0a2e3641bafbcb5f0bd2be9507195767be76a"
+  },
+  "binary_sha256": "9ad394d90bc5a89516d4a23fc4f2fe7e7fb31fd3d1d6c073ab1de8f796f6e6f2",
+  "correctness": {
+    "passed": 16,
+    "cases": [
+      "unchanged file reuses canonical BLAKE3",
+      "same-size write with preserved mtime invalidates",
+      "write then restore identical bytes still rehashes",
+      "writable mmap mutation invalidates",
+      "atomic inode replacement invalidates",
+      "rename, missing pathname and recreation cannot reuse old fd",
+      "delete/recreate invalidates",
+      "mutation through hardlink invalidates",
+      "symlink target inode retarget invalidates",
+      "truncate and canonical empty BLAKE3",
+      "attribute change invalidates",
+      "bounded descriptors and fd recycling eviction",
+      "invalid/missing/directory/FIFO requests fail without digest or blocking",
+      "concurrent writes during initial read reject digest; stable retry succeeds",
+      "lost queue clears all memos and permanently falls back to full hashing",
+      "oversized/truncated/malformed frames terminate without output"
+    ]
+  },
+  "mmap_counterexample": {
+    "stale_digest_observed": true,
+    "same_metadata": true,
+    "primed_watched": true,
+    "warm_reused": true,
+    "after_write_reused": true,
+    "invalidations_after_write": 0,
+    "watched_hash": "35868e981fe13a741d5ef1cb8caa6cfa62f3e94e001029a5638b12117029428c",
+    "full_hash": "4f783304c357b16f0ad325b580c26055d6305bfad3de895553d39433f17907b5"
+  },
+  "decision": "rejected: watch events and metadata can miss writes through an already-dirty writable mmap",
+  "benchmark": {
+    "pairs": 25,
+    "capacity": 256,
+    "samples": [
+      {
+        "full": {
+          "worker_ns": 32135833,
+          "roundtrip_ns": 32209959
+        },
+        "watch": {
+          "worker_ns": 127459,
+          "roundtrip_ns": 166916
+        }
+      },
+      {
+        "watch": {
+          "worker_ns": 112333,
+          "roundtrip_ns": 138625
+        },
+        "full": {
+          "worker_ns": 31463291,
+          "roundtrip_ns": 31519958
+        }
+      },
+      {
+        "full": {
+          "worker_ns": 32229250,
+          "roundtrip_ns": 32283500
+        },
+        "watch": {
+          "worker_ns": 116459,
+          "roundtrip_ns": 147708
+        }
+      },
+      {
+        "watch": {
+          "worker_ns": 106208,
+          "roundtrip_ns": 128709
+        },
+        "full": {
+          "worker_ns": 31643542,
+          "roundtrip_ns": 31697958
+        }
+      },
+      {
+        "full": {
+          "worker_ns": 33982708,
+          "roundtrip_ns": 34059959
+        },
+        "watch": {
+          "worker_ns": 125042,
+          "roundtrip_ns": 211292
+        }
+      },
+      {
+        "watch": {
+          "worker_ns": 113750,
+          "roundtrip_ns": 159917
+        },
+        "full": {
+          "worker_ns": 34560834,
+          "roundtrip_ns": 34634666
+        }
+      },
+      {
+        "full": {
+          "worker_ns": 34086375,
+          "roundtrip_ns": 34172333
+        },
+        "watch": {
+          "worker_ns": 120292,
+          "roundtrip_ns": 182375
+        }
+      },
+      {
+        "watch": {
+          "worker_ns": 126333,
+          "roundtrip_ns": 163417
+        },
+        "full": {
+          "worker_ns": 34003417,
+          "roundtrip_ns": 34055208
+        }
+      },
+      {
+        "full": {
+          "worker_ns": 34248334,
+          "roundtrip_ns": 34312292
+        },
+        "watch": {
+          "worker_ns": 119709,
+          "roundtrip_ns": 152125
+        }
+      },
+      {
+        "watch": {
+          "worker_ns": 111042,
+          "roundtrip_ns": 130333
+        },
+        "full": {
+          "worker_ns": 33932542,
+          "roundtrip_ns": 33997125
+        }
+      },
+      {
+        "full": {
+          "worker_ns": 32762625,
+          "roundtrip_ns": 32833333
+        },
+        "watch": {
+          "worker_ns": 122625,
+          "roundtrip_ns": 174916
+        }
+      },
+      {
+        "watch": {
+          "worker_ns": 108959,
+          "roundtrip_ns": 142500
+        },
+        "full": {
+          "worker_ns": 32816167,
+          "roundtrip_ns": 32873667
+        }
+      },
+      {
+        "full": {
+          "worker_ns": 32479416,
+          "roundtrip_ns": 32553875
+        },
+        "watch": {
+          "worker_ns": 119959,
+          "roundtrip_ns": 157708
+        }
+      },
+      {
+        "watch": {
+          "worker_ns": 113125,
+          "roundtrip_ns": 138250
+        },
+        "full": {
+          "worker_ns": 32750958,
+          "roundtrip_ns": 32805125
+        }
+      },
+      {
+        "full": {
+          "worker_ns": 31947416,
+          "roundtrip_ns": 32007334
+        },
+        "watch": {
+          "worker_ns": 111083,
+          "roundtrip_ns": 144000
+        }
+      },
+      {
+        "watch": {
+          "worker_ns": 112542,
+          "roundtrip_ns": 135750
+        },
+        "full": {
+          "worker_ns": 31605708,
+          "roundtrip_ns": 31658125
+        }
+      },
+      {
+        "full": {
+          "worker_ns": 31437167,
+          "roundtrip_ns": 31489833
+        },
+        "watch": {
+          "worker_ns": 115459,
+          "roundtrip_ns": 146042
+        }
+      },
+      {
+        "watch": {
+          "worker_ns": 108917,
+          "roundtrip_ns": 132375
+        },
+        "full": {
+          "worker_ns": 31674625,
+          "roundtrip_ns": 31717208
+        }
+      },
+      {
+        "full": {
+          "worker_ns": 31536667,
+          "roundtrip_ns": 31595166
+        },
+        "watch": {
+          "worker_ns": 113291,
+          "roundtrip_ns": 147542
+        }
+      },
+      {
+        "watch": {
+          "worker_ns": 104375,
+          "roundtrip_ns": 127291
+        },
+        "full": {
+          "worker_ns": 31499042,
+          "roundtrip_ns": 31544125
+        }
+      },
+      {
+        "full": {
+          "worker_ns": 31469458,
+          "roundtrip_ns": 31522792
+        },
+        "watch": {
+          "worker_ns": 122167,
+          "roundtrip_ns": 155500
+        }
+      },
+      {
+        "watch": {
+          "worker_ns": 105166,
+          "roundtrip_ns": 126666
+        },
+        "full": {
+          "worker_ns": 31431792,
+          "roundtrip_ns": 31491666
+        }
+      },
+      {
+        "full": {
+          "worker_ns": 31500625,
+          "roundtrip_ns": 31557292
+        },
+        "watch": {
+          "worker_ns": 112750,
+          "roundtrip_ns": 139333
+        }
+      },
+      {
+        "watch": {
+          "worker_ns": 111667,
+          "roundtrip_ns": 132709
+        },
+        "full": {
+          "worker_ns": 31376125,
+          "roundtrip_ns": 31426833
+        }
+      },
+      {
+        "full": {
+          "worker_ns": 31403958,
+          "roundtrip_ns": 31454417
+        },
+        "watch": {
+          "worker_ns": 123000,
+          "roundtrip_ns": 156250
+        }
+      }
+    ],
+    "prime_worker_ns": 32916542,
+    "full_roundtrip_median_ns": 32007334,
+    "watch_roundtrip_median_ns": 146042,
+    "files": [
+      {
+        "bytes": 32551120,
+        "sha256": "7f12e283c88ee0e8176701e72bad2159b2cfcaf9c165b57e14dc0f778bfb2883"
+      },
+      {
+        "bytes": 13162816,
+        "sha256": "e6ee9cf088d11a33e430e7d7a1b4ad51728444d254c1a48a180b86f0891bd065"
+      },
+      {
+        "bytes": 10280952,
+        "sha256": "2982a61fffc4b1ecd427fa75d7401c534390fe5f6eee93a6b3191d457dc0eee4"
+      }
+    ]
+  }
+}

@@ -53,3 +53,8 @@ script and executable checksums identify the measurement. Timings include
 instrumentation/capture overhead and concurrent contention. They are diagnostic
 evidence, not a project performance comparison. Profiling source and the
 instrumented executable were removed from production.
+
+A subsequent [watched digest experiment](watch-hash-experiment.md) tested
+cross-invocation hash reuse. It was rejected: unflushed writes through an
+already-dirty writable mmap can escape vnode events and metadata checks.
+Its low reuse timings do not justify replacing full content verification.

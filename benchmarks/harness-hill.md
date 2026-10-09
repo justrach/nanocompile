@@ -1156,3 +1156,14 @@ project gain. The prototype is rejected and its patch, build instructions,
 binary checksums and raw results remain available. Production retains its
 accepted Zig digest and two-query selection limit. No new production
 dependency, project speedup or cold-build claim is added.
+
+## Persistent watched digest prototype: rejected
+
+The [Zig watch experiment](../docs/watch-hash-experiment.md) shows very low
+unmodified-file reuse cost, but fails a required content check. A second write
+through an already-dirty, still-open writable mmap changes bytes without a
+new vnode event or checked metadata change on local APFS. The memoized digest
+then differs from a direct full read. The public driver reproduces that stale
+digest alongside 16 ordinary passing checks. The prototype is rejected before
+compiler integration or project benchmarking. Its isolated timings are not a
+Harness build speedup; production retains full source and blob hashing.
