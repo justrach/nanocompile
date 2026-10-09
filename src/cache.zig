@@ -401,6 +401,57 @@ pub fn fetchArtifact(ctx: *Context, namespace: []const u8, key: []const u8, dest
     return true;
 }
 
+const DigestJob = struct {
+    path: []const u8,
+    hash: [64]u8 = undefined,
+    valid: bool = false,
+};
+
+fn digestWorker(ctx: *const Context, jobs: []DigestJob, next: *std.atomic.Value(usize)) void {
+    while (true) {
+        const index = next.fetchAdd(1, .monotonic);
+        if (index >= jobs.len) return;
+        // Each worker owns its arena; Context.digest only reads shared fields.
+        var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
+        defer arena.deinit();
+        var local = ctx.*;
+        local.a = arena.allocator();
+        const hash = local.digest(jobs[index].path) catch continue;
+        @memcpy(&jobs[index].hash, hash);
+        jobs[index].valid = true;
+    }
+}
+
+fn parallelFileHashes(ctx: *Context, dependencies: []const Dependency, hashes: *std.StringHashMapUnmanaged([]const u8)) !bool {
+    var paths: std.StringHashMapUnmanaged(void) = .empty;
+    defer paths.deinit(ctx.a);
+    var jobs: std.ArrayList(DigestJob) = .empty;
+    var size: u64 = 0;
+    for (dependencies) |dep| {
+        if (dep.directory or dep.missing != null or dep.symlink_target != null) continue;
+        const slot = try paths.getOrPut(ctx.a, dep.path);
+        if (slot.found_existing) continue;
+        const st = Dir.cwd().statFile(ctx.io, dep.path, .{}) catch return false;
+        size +|= st.size;
+        try jobs.append(ctx.a, .{ .path = dep.path });
+    }
+    // Small restores retain their serial path. Large graphs use at most four
+    // workers, leaving the same full hashes and per-restore lifetime intact.
+    if (jobs.items.len < 32 or size < 8 * 1024 * 1024) return true;
+    var next: std.atomic.Value(usize) = .init(0);
+    var group: std.Io.Group = .init;
+    defer group.cancel(ctx.io);
+    const workers = @min(@as(usize, 4), std.Thread.getCpuCount() catch 1);
+    for (1..@max(workers, 1)) |_| group.concurrent(ctx.io, digestWorker, .{ ctx, jobs.items, &next }) catch break;
+    digestWorker(ctx, jobs.items, &next);
+    try group.await(ctx.io);
+    for (jobs.items) |job| {
+        if (!job.valid) return false;
+        try hashes.put(ctx.a, job.path, try ctx.a.dupe(u8, &job.hash));
+    }
+    return true;
+}
+
 pub fn restore(ctx: *Context, key: []const u8, allowed_outputs: []const []const u8) !bool {
     const bytes = ctx.read(try ctx.path(&.{ "entries", key })) catch return false;
     const entry = parseEntry(ctx, bytes) catch return false;
@@ -413,6 +464,7 @@ pub fn restore(ctx: *Context, key: []const u8, allowed_outputs: []const []const 
     defer library_names.deinit(ctx.a);
     var file_hashes: std.StringHashMapUnmanaged([]const u8) = .empty;
     defer file_hashes.deinit(ctx.a);
+    if (!try parallelFileHashes(ctx, entry.dependencies, &file_hashes)) return false;
     for (entry.dependencies) |dep| {
         if (dep.symlink_target != null) {
             if (!(symlinkValid(ctx, dep) catch false)) return false;
@@ -708,4 +760,49 @@ pub fn prefixDigest(a: std.mem.Allocator, names: []const []const u8, prefix: []c
     var hash = Hash.init(.{});
     for (names) |name| if (std.mem.startsWith(u8, name, prefix)) field(&hash, name);
     return finish(a, &hash);
+}
+
+test "large restore hashes every unique file and refuses changes before writes" {
+    var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer arena.deinit();
+    const a = arena.allocator();
+    const io = std.testing.io;
+    var tmp = std.testing.tmpDir(.{});
+    defer tmp.cleanup();
+    const cwd = try Dir.cwd().realPathFileAlloc(io, try std.fs.path.join(a, &.{ ".zig-cache", "tmp", &tmp.sub_path }), a);
+    var env = std.process.Environ.Map.init(a);
+    var ctx: Context = .{ .a = a, .io = io, .env = &env, .root = try std.fs.path.join(a, &.{ cwd, "cache" }), .cwd = cwd };
+    try ctx.prepare();
+    var records: std.ArrayList(Dependency) = .empty;
+    const data = try a.alloc(u8, 256 * 1024);
+    @memset(data, 1);
+    for (0..32) |i| {
+        data[0] = @intCast(i);
+        const name = try std.fmt.allocPrint(a, "input-{d}", .{i});
+        try tmp.dir.writeFile(io, .{ .sub_path = name, .data = data });
+        const path = try std.fs.path.join(a, &.{ cwd, name });
+        try records.append(a, .{ .path = path, .hash = try ctx.digest(path) });
+    }
+    try records.append(a, records.items[3]);
+    const output = try std.fs.path.join(a, &.{ cwd, "output" });
+    try tmp.dir.writeFile(io, .{ .sub_path = "output", .data = "compiled" });
+    const key = "123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0";
+    const output_hash = try ctx.digest(output);
+    try store(&ctx, key, records.items, &.{output}, "", "");
+    try tmp.dir.deleteFile(io, "output");
+    try std.testing.expect(try restore(&ctx, key, &.{output}));
+    try std.testing.expectEqualStrings("compiled", try ctx.read(output));
+    data[0] = 99;
+    try tmp.dir.writeFile(io, .{ .sub_path = "input-17", .data = data });
+    try tmp.dir.writeFile(io, .{ .sub_path = "output", .data = "untouched" });
+    try std.testing.expect(!try restore(&ctx, key, &.{output}));
+    try std.testing.expectEqualStrings("untouched", try ctx.read(output));
+    data[0] = 17;
+    try tmp.dir.writeFile(io, .{ .sub_path = "input-17", .data = data });
+    try ctx.atomic(try blobPath(&ctx, output_hash), "corrupt");
+    try std.testing.expect(!try restore(&ctx, key, &.{output}));
+    try std.testing.expectEqualStrings("untouched", try ctx.read(output));
+    try tmp.dir.deleteFile(io, "input-0");
+    try std.testing.expect(!try restore(&ctx, key, &.{output}));
+    try std.testing.expectEqualStrings("untouched", try ctx.read(output));
 }

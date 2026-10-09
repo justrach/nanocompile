@@ -601,3 +601,42 @@ compiler miss is `libc` (0.222 s, source-native-link refusal); the slowest
 library restores are `harness_adapters` (0.203 s) and `reqwest` (0.123 s).
 These include Python shim and trace overhead. They identify the next
 validation/coverage work rather than measuring project speed.
+
+## Bounded parallel dependency hashing
+
+[Manifest inspection](harness-restore-inputs.json) found that `harness_adapters`
+validates 322 unique dependency files totaling 252 MB, and `reqwest` 231 files
+totaling 170 MB. Directory enumeration was already shared within a restore;
+the content hashes still dominated these large graphs.
+
+The cache now hashes large dependency sets with up to four workers (bounded
+by available CPUs). A set qualifies only with at least 32 unique files and
+8 MiB of content. Workers own allocation arenas and claim independent files
+from an atomic index. File hashes are copied into the existing per-restore map
+after the group joins. Small sets retain serial hashing. Every file still gets
+a full BLAKE3 hash, and directory, negative/symlink, output-blob and diagnostic
+validation finish before materialization. There is no cross-invocation source
+metadata shortcut, key change or new entry format.
+
+A real large-set unit fixture compares restore against serial reference hashes,
+includes duplicate dependencies, and verifies changed/missing input and corrupt
+output blob refusal without changing existing output. Existing compiler tests
+and the producer/static-native fixtures also exercise the normal cache paths.
+
+[Full Harness results](harness-hill-parallel-hashes.json) retain all twelve clean
+builds and artifact checks under the same four jobs and opt-in producer/reported
+consumer policies. All 135 libraries, ten macro dylibs and 21 build-script
+executables match direct Cargo; each warm sample records 165 hits. Tracked
+source files remained unchanged, and the final release binary checksum matches
+the measured binary after the regression checks.
+
+| Implementation | Warm median | Cold build |
+| --- | ---: | ---: |
+| Direct Cargo | 23.291 s | 24.836 s prime |
+| nanocompile | 2.961 s | 41.646 s |
+| kache daemon | 2.153 s | 26.930 s |
+
+The observed warm median is 9.3% below the last accepted 3.264 s run, across
+separate comparisons. Samples are 2.999, 2.932 and 2.961 s. This iteration is
+adopted; kache still leads and the cold-cache overhead remains substantial.
+The performance evidence is local macOS, not a Linux speedup claim.
