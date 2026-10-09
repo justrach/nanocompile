@@ -1,0 +1,57 @@
+name: Harness clean-build benchmark
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  harness:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, macos-15]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    env:
+      R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+      R2_BUCKET: ${{ secrets.R2_BUCKET }}
+      R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          repository: justrach/harness
+          ref: 32b41cb0bff55e3c9cbfab3012acec2b179ad199
+          path: workload
+      - name: Install verified Zig and Rust
+        run: |
+          python3 tools/install_zig.py "$RUNNER_TEMP/zig"
+          rustup toolchain install 1.97.1 --profile minimal
+      - name: Prepare transport and build wrapper
+        run: |
+          zig build -Doptimize=ReleaseFast
+          python3 -m venv "$RUNNER_TEMP/r2-venv"
+          "$RUNNER_TEMP/r2-venv/bin/pip" install 'boto3>=1.36,<2'
+          python3 - <<'PY'
+          import json, os
+          path = os.environ['RUNNER_TEMP'] + '/r2-config.json'
+          fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+          with os.fdopen(fd, 'w') as f:
+              json.dump({k: os.environ['R2_' + k.upper()] for k in
+                         ('endpoint', 'bucket', 'access_key_id', 'secret_access_key')}, f)
+          PY
+      - name: Clean release builds and R2 restore
+        run: |
+          "$RUNNER_TEMP/r2-venv/bin/python" tests/project_benchmark.py \
+            zig-out/bin/nanocompile workload --package harness-adapters \
+            --state "$RUNNER_TEMP/harness-benchmark" --jobs 4 --runs 2 \
+            --output bench-results/harness.json --r2-config "$RUNNER_TEMP/r2-config.json" \
+            --snapshot "harness-${{ matrix.os }}-${{ github.run_id }}"
+      - name: Remove temporary credential file
+        if: always()
+        run: rm -f "$RUNNER_TEMP/r2-config.json"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: harness-${{ matrix.os }}
+          path: bench-results/

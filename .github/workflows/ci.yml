@@ -21,6 +21,7 @@ jobs:
         run: rustup toolchain install 1.97.1 --profile minimal && rustup default 1.97.1
       - name: Build and real compiler tests
         run: |
+          python3 tests/r2_transport.py
           zig build -Doptimize=ReleaseFast
           zig build test
           zig build integration -Doptimize=ReleaseFast
