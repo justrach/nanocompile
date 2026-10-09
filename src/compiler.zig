@@ -475,6 +475,7 @@ fn keyFor(ctx: *cache.Context, kind: Kind, argv: []const []const u8) ![]const u8
     var hash = cache.Hash.init(.{});
     cache.field(&hash, "nanocompile-v8");
     cache.field(&hash, @tagName(kind));
+    if (kind == .rust) cache.field(&hash, "native-metadata-eligibility-v1");
     cache.field(&hash, ctx.cwd);
     const host = std.zig.system.resolveTargetQuery(ctx.io, .{}) catch |err| {
         ctx.trace(try std.fmt.allocPrint(ctx.a, "host detection failed ({s})", .{@errorName(err)}));
@@ -735,13 +736,14 @@ fn save(ctx: *cache.Context, key: []const u8, plan: Plan, argv: []const []const 
         if (st.mtime.nanoseconds >= started or st.ctime.nanoseconds >= started) return error.InputChangedDuringCompilation;
         try records.append(ctx.a, dep);
     }
+    var hidden_native = false;
     var dirs: std.ArrayList([]const u8) = .empty;
     for (paths.items) |dep| {
         const st = try Dir.cwd().statFile(ctx.io, dep, .{});
         // Dependencies discovered after rustc finishes must predate its start.
         // ctime also catches writes followed by restoring the old mtime.
         if (st.mtime.nanoseconds >= started or st.ctime.nanoseconds >= started) return error.InputChangedDuringCompilation;
-        if (!plan.producer and plan.dep_info != null and std.mem.endsWith(u8, dep, ".rs") and hiddenNativeLink(try ctx.read(dep))) return error.HiddenNativeLinkInput;
+        if (!plan.producer and plan.dep_info != null and std.mem.endsWith(u8, dep, ".rs") and hiddenNativeLink(try ctx.read(dep))) hidden_native = true;
         const digest = if (validated.get(dep)) |checked| checked else try ctx.checkedDigest(dep);
         if (!cache.sameFileState(st, digest.state)) return error.InputChangedDuringCompilation;
         try validated.put(ctx.a, dep, digest);
@@ -754,11 +756,11 @@ fn save(ctx: *cache.Context, key: []const u8, plan: Plan, argv: []const []const 
         if (st.mtime.nanoseconds >= started or st.ctime.nanoseconds >= started) return error.DirectoryChangedDuringCompilation;
         try records.append(ctx.a, .{ .path = dir, .hash = try ctx.directoryDigest(dir, false, plan.outputs), .directory = true });
     }
-    if (!plan.producer and plan.dep_info != null and directories.len != 0)
-        try rust_dependencies.collect(ctx, argv, plan.outputs, directories, started, &records, true, &validated);
+    if (!plan.producer and plan.dep_info != null and (directories.len != 0 or hidden_native))
+        try rust_dependencies.collect(ctx, argv, plan.outputs, directories, started, &records, true, &validated, hidden_native);
     if (plan.producer) {
         for (plan.dependencies) |path| if (std.mem.endsWith(u8, path, ".rlib") or std.mem.endsWith(u8, path, ".rmeta")) {
-            try rust_dependencies.collect(ctx, argv, &.{path}, directories, started, &records, false, &validated);
+            try rust_dependencies.collect(ctx, argv, &.{path}, directories, started, &records, false, &validated, false);
         };
         try records.appendSlice(ctx.a, linker);
     }

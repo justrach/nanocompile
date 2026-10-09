@@ -794,3 +794,56 @@ python3 tests/project_pair_comparison.py /path/to/baseline/nanocompile \
 The paired helper deliberately enables reported consumers and both experimental
 producer policies and requires at least 165 warm hits for this Harness workload.
 R2 is excluded from all these measurements.
+
+## Completed native metadata: adopted for the pinned compiler
+
+Source-level native link attributes no longer force refusal when the completed
+ordinary library metadata records only default/dynamic/framework libraries, or
+no native libraries. The [Zig reader and real restore checks](../docs/native-metadata-investigation.md)
+accept exactly Rust 1.97.1 on Darwin and GNU/musl Linux. Active static links,
+including macro-generated ones, unsupported fields, other compiler versions,
+link-only outputs and all producer paths retain their prior policy. Existing
+source/native/extern content checks remain intact. A separate Rust eligibility
+key tag prevents old binaries from reusing newly eligible entries.
+
+The [nine-pair project comparison](harness-native-metadata-paired.json) uses
+one stable wrapper path and identical environment and target path, rotating
+order after both binaries are primed. The baseline is the accepted executable
+`bf9ed504a41b66eab0fdcf040707f5efea880c79ef0ef89c6a3e5b2e638e8bf7`;
+the candidate is
+`33100a369757582d2d880f85f2de0f823ab408cf4f2b1e25c75f4928608a33ad`.
+Ordinary entry keys differ, while toolchain/classification storage is shared;
+prime timings are not an independent cold-cache comparison.
+
+Median time fell from **2.872 s to 2.813 s**, about 2.0%. Eight of nine pairs
+favored the candidate. Mean paired savings were 48.05 ms, with 51.72 ms sample
+standard deviation and 17.24 ms standard error. All 167 collected libraries,
+macro dylibs and build-script executables matched the first prime. Baseline
+warm builds recorded 165 hits and two misses; candidate warm builds recorded
+**167 hits and zero misses**, with the same eight bypasses and three failed
+compiler probes. Tracked Rust files and manifests remained unchanged.
+
+The [separate twelve-build three-way comparison](harness-hill-native-metadata.json)
+measures the final executable against direct Cargo and kache with its daemon:
+
+| Implementation | Warm median | Cold sample |
+| --- | ---: | ---: |
+| Direct Cargo | 22.866 s | 23.499 s prime |
+| nanocompile | **2.770 s** | 37.887 s |
+| kache daemon | 2.071 s | 26.954 s |
+
+Nano's complete warm samples are **2.770, 2.735 and 3.731 s**. The slower third
+sample is retained; the median alone does not describe that variation. This
+separate run supports the coverage change and records current performance;
+the controlled paired run supplies the before/after evidence. Kache remains
+faster, and there is no demonstrated cold-build improvement. All 135 rlibs,
+10 macro dylibs and 21 build-script executables match direct builds and their
+own cold outputs. Tracked sources remain unchanged; R2 transport is excluded.
+
+Final-binary local checks include unit tests and the real Rust/Zig integration
+suite, [native metadata restores and downstream execution](native-metadata-cache.json),
+[metadata priority/corruption/invalidation](native-metadata-rmeta-regression.json),
+[bundled static archive changes](native-metadata-static-regression.json),
+[macro producers with Cargo flags](native-metadata-producer-regression.json),
+and [executable producers](native-metadata-executable-regression.json).
+Linux and macOS CI run the new real metadata and restoration fixtures too.

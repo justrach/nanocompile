@@ -1,0 +1,21 @@
+{
+  "rustc_verbose_version": "rustc 1.97.1 (8bab26f4f 2026-07-14)\nbinary: rustc\ncommit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452\ncommit-date: 2026-07-14\nhost: aarch64-apple-darwin\nrelease: 1.97.1\nLLVM version: 22.1.6",
+  "probe_sha256": "b372f98cb5636f07dffb7f55cf688b3aa7ee1bd1c4b8f5f0cc628bbc30e62e2c",
+  "transitive_corrupt_companion_rlib_outputs_equal": true,
+  "preserved_mtime_archive_change_ignored_with_valid_rmeta": true,
+  "missing_corrupt_and_mismatched_rmeta_fall_back_to_archive": true,
+  "explicit_rlib_and_final_binary_reject_corrupt_archive": true,
+  "no_valid_metadata_or_archive_rejected": true,
+  "linked_executable_value": 12,
+  "output_sha256": {
+    "libtop.rlib": "f00a59bb263a1dbdca0925fbc190cf2b8e87782ed625662ff63bc7dff6c9d7bd",
+    "libtop.rmeta": "480e29f4e7413bd16e8912cffb6531ea44bc673f76f2fb94248c31de48c85c48",
+    "top.d": "de1a76570f888b62c5f0e548500d8c5423acd89c299f2a0e8f1d81b8b4945fe5"
+  },
+  "binary_sha256": "33100a369757582d2d880f85f2de0f823ab408cf4f2b1e25c75f4928608a33ad",
+  "cache_ignores_unused_companion": true,
+  "cache_detects_metadata_removal_corruption_and_mismatch": true,
+  "full_metadata_bytes_checked_with_same_root_and_preserved_mtime": true,
+  "competing_candidate_content_and_membership_checked": true,
+  "explicit_archive_cache_mutation_detected": true
+}

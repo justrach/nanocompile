@@ -1,0 +1,52 @@
+{
+  "other_compiler_available": true,
+  "other_compiler_version": "rustc 1.94.1 (e408947bf 2026-03-25)",
+  "other_compiler_refused_native_metadata_storage": true,
+  "binary_sha256": "33100a369757582d2d880f85f2de0f823ab408cf4f2b1e25c75f4928608a33ad",
+  "probe_sha256": "7ca593139825a70291f4e62369635ccd43096ee7d9d38dad8d2ca028ba4365c8",
+  "compiler": "rustc 1.97.1 (8bab26f4f 2026-07-14)\nbinary: rustc\ncommit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452\ncommit-date: 2026-07-14\nhost: aarch64-apple-darwin\nrelease: 1.97.1\nLLVM version: 22.1.6\n",
+  "cases": {
+    "default": {
+      "restored": true,
+      "direct_cold_warm_bytes_and_modes_equal": true,
+      "native_change_execution_verified": true,
+      "source_preserved_mtime_change_detected": true
+    },
+    "dynamic": {
+      "restored": true,
+      "direct_cold_warm_bytes_and_modes_equal": true,
+      "native_change_execution_verified": true,
+      "source_preserved_mtime_change_detected": true
+    },
+    "two_dynamic": {
+      "restored": true,
+      "direct_cold_warm_bytes_and_modes_equal": true,
+      "native_change_execution_verified": true,
+      "source_preserved_mtime_change_detected": true
+    },
+    "inactive": {
+      "restored": true,
+      "direct_cold_warm_bytes_and_modes_equal": true,
+      "native_change_execution_verified": true,
+      "source_preserved_mtime_change_detected": true
+    },
+    "static": {
+      "restored": false,
+      "direct_cold_warm_bytes_and_modes_equal": true,
+      "native_change_execution_verified": true,
+      "source_preserved_mtime_change_detected": false
+    },
+    "macro_static": {
+      "restored": false,
+      "direct_cold_warm_bytes_and_modes_equal": true,
+      "native_change_execution_verified": true,
+      "source_preserved_mtime_change_detected": false
+    },
+    "framework": {
+      "restored": true,
+      "direct_cold_warm_bytes_and_modes_equal": true,
+      "native_change_execution_verified": true,
+      "source_preserved_mtime_change_detected": true
+    }
+  }
+}

@@ -29,6 +29,7 @@ jobs:
           python3 tests/static_native_cache.py zig-out/bin/nanocompile --output bench-results/static-native-cache.json
           python3 tests/rmeta_priority_probe.py zig-out/bin/nanocompile --output bench-results/rmeta-priority-probe.json
           python3 tests/native_metadata_probe.py --output bench-results/native-metadata-probe.json
+          python3 tests/native_metadata_cache.py zig-out/bin/nanocompile --output bench-results/native-metadata-cache.json
           python3 tests/executable_cache.py zig-out/bin/nanocompile --output bench-results/executable-cache.json
           zig build-exe -O ReleaseFast -lc --dep link_dependencies -Mroot=tools/link_report.zig -Mlink_dependencies=src/link_dependencies.zig -femit-bin="$RUNNER_TEMP/link-report"
           python3 tests/producer_link_probe.py --state "$RUNNER_TEMP/producer, link probe" --output bench-results/producer-link-probe.json --decoder "$RUNNER_TEMP/link-report" --observer zig-out/bin/nanocompile

@@ -316,8 +316,8 @@ pub fn value() -> u32 { Queue.link(41) }
         p = run(native_consumer)
         assert events()[-1] == "bypass" and b"ThinNativeArchive" in p.stderr, p.stderr
         thin.unlink()
-        # Genuine native declarations remain ineligible. Strings containing
-        # comment markers must not hide an attribute that follows the string.
+        # Native declarations are classified from completed metadata on the pinned
+        # compiler. Strings must not hide an attribute following the string.
         (root / "native_attr.rs").write_text('''const MARKER: &str = "/*";
 #[link(name="c")] extern "C" { fn puts(s: *const u8) -> i32; }
 pub fn value() -> u32 { 42 }
@@ -325,7 +325,11 @@ pub fn value() -> u32 { 42 }
         native_attribute = library("native_attr.rs", "native_attr", "out")
         run(native_attribute)
         p = run(native_attribute)
-        assert events()[-1] == "miss" and b"HiddenNativeLinkInput" in p.stderr, p.stderr
+        rust_version = subprocess.check_output(["rustc", "-V"], env=env)
+        if rust_version.strip() == b"rustc 1.97.1 (8bab26f4f 2026-07-14)":
+            assert events()[-1] == "hit", p.stderr
+        else:
+            assert events()[-1] == "miss" and b"nanocompile: uncached:" in p.stderr, p.stderr
         # Exercise a real bundled C archive through a Rust provider and cached
         # consumer, then relink/run after changing the native implementation.
         (root / "native_provider.rs").write_text('''#[link(name="answer", kind="static")]

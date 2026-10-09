@@ -96,7 +96,7 @@ fn unusedCompanion(resolver: *metadata.Resolver, dir: Directory, filename: []con
     return false;
 }
 
-pub fn collect(ctx: *cache.Context, argv: []const []const u8, outputs: []const []const u8, before: []const Directory, started: i96, records: *std.ArrayList(cache.Dependency), metadata_only: bool, validated: *const std.StringHashMapUnmanaged(cache.CheckedDigest)) !void {
+pub fn collect(ctx: *cache.Context, argv: []const []const u8, outputs: []const []const u8, before: []const Directory, started: i96, records: *std.ArrayList(cache.Dependency), metadata_only: bool, validated: *const std.StringHashMapUnmanaged(cache.CheckedDigest), hidden_native: bool) !void {
     var artifact: ?[]const u8 = null;
     for (outputs) |out| if (std.mem.endsWith(u8, out, ".rmeta")) {
         artifact = out;
@@ -131,10 +131,18 @@ pub fn collect(ctx: *cache.Context, argv: []const []const u8, outputs: []const [
     const reader_compiler = try metadata.readerCompiler(ctx, argv[0]);
     const query_cwd = try ctx.path(&.{"metadata-queries"});
     try Dir.cwd().createDirPath(ctx.io, query_cwd);
+    const native_checked = if (hidden_native) try ctx.checkedDigest(path) else null;
     const result = try std.process.run(ctx.a, ctx.io, .{ .argv = &.{ reader_compiler, "-Zls=root", path }, .environ_map = &query_env, .cwd = .{ .path = query_cwd } });
     if (!success(result)) return error.RustMetadataQueryFailed;
     const names = try parse(ctx.a, result.stdout, reportedMacros(ctx));
     const own_root = try metadata.parse(result.stdout);
+    if (native_checked) |checked| {
+        if (!std.mem.endsWith(u8, path, ".rmeta")) return error.HiddenNativeLinkInput;
+        const bytes = try ctx.read(path);
+        try @import("native_metadata.zig").dynamicOnly(bytes, own_root);
+        const after = try ctx.checkedDigest(path);
+        if (!std.mem.eql(u8, checked.hash, after.hash) or !cache.sameFileState(checked.state, after.state)) return error.InputChangedDuringMetadataQuery;
+    }
     var resolver: metadata.Resolver = .{ .ctx = ctx, .compiler = reader_compiler, .query_env = &query_env, .query_cwd = query_cwd };
     defer resolver.roots.deinit(ctx.a);
     defer resolver.hashes.deinit(ctx.a);

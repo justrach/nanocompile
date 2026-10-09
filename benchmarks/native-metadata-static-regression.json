@@ -1,0 +1,15 @@
+{
+  "binary_sha256": "33100a369757582d2d880f85f2de0f823ab408cf4f2b1e25c75f4928608a33ad",
+  "probe_sha256": "6b83d5c8dea9136840d8830631d7b7954131f2f10df389dee2e18e5cd25b3b1c",
+  "direct_cold_warm_artifacts_equal": true,
+  "loaded_values": [
+    12,
+    12,
+    13,
+    14,
+    14
+  ],
+  "preserved_mtime_archive_change_detected": true,
+  "new_preferred_candidate_detected": true,
+  "unsupported_forms_missing_and_thin_bypass": true
+}
