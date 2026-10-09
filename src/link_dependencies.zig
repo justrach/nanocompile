@@ -19,6 +19,30 @@ pub fn parse(a: std.mem.Allocator, bytes: []const u8, format: Format) !Report {
     };
 }
 
+/// LLD escapes prerequisite paths but emits its output path verbatim. Bind
+/// that raw header to the caller's known destination instead of guessing how
+/// several whitespace-separated target tokens should be combined.
+pub fn parseForOutput(a: std.mem.Allocator, bytes: []const u8, format: Format, output: []const u8) !Report {
+    if (output.len == 0 or std.mem.indexOfAny(u8, output, "\x00\r\n") != null) return error.InvalidLinkReport;
+    var normalized = bytes;
+    if (format == .make and bytes.len > output.len and std.mem.startsWith(u8, bytes, output) and bytes[output.len] == ':') {
+        var header: std.ArrayList(u8) = .empty;
+        for (output) |ch| {
+            switch (ch) {
+                ' ', '\t', '#', ':', '\\' => try header.append(a, '\\'),
+                '$' => try header.append(a, '$'),
+                else => {},
+            }
+            try header.append(a, ch);
+        }
+        try header.appendSlice(a, bytes[output.len..]);
+        normalized = header.items;
+    }
+    const report = try parse(a, normalized, format);
+    if (report.outputs.len != 1 or !std.mem.eql(u8, report.outputs[0], output)) return error.UnexpectedLinkOutput;
+    return report;
+}
+
 fn parseDarwin(a: std.mem.Allocator, bytes: []const u8) !Report {
     var inputs: std.ArrayList([]const u8) = .empty;
     var missing: std.ArrayList([]const u8) = .empty;
@@ -170,4 +194,18 @@ test "ELF reports reject expansion, malformed rules and multiple link rules" {
     try std.testing.expectError(error.InvalidLinkReport, parse(a, "out:\n", .make));
     try std.testing.expectError(error.UnsupportedLinkReport, parse(a, "out: one\nother: two\n", .make));
     try std.testing.expectError(error.InvalidLinkReport, parse(a, "out: in\x00put\n", .make));
+}
+
+test "LLD raw output paths are accepted only with a known matching destination" {
+    var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer arena.deinit();
+    const a = arena.allocator();
+    const bytes = "/out, with spaces/libmacro.so: \\\n /lib\\ with\\ spaces/dep.rlib \\\n /native.a\n\n/native.a:\n";
+    try std.testing.expectError(error.UnsupportedLinkReport, parse(a, bytes, .make));
+    const report = try parseForOutput(a, bytes, .make, "/out, with spaces/libmacro.so");
+    try std.testing.expectEqualStrings("/out, with spaces/libmacro.so", report.outputs[0]);
+    try std.testing.expectEqualStrings("/lib with spaces/dep.rlib", report.inputs[0]);
+    try std.testing.expectError(error.UnsupportedLinkReport, parseForOutput(a, bytes, .make, "/other.so"));
+    try std.testing.expectError(error.UnexpectedLinkOutput, parseForOutput(a, "out: a\n", .make, "different"));
+    try std.testing.expectError(error.UnsupportedLinkReport, parseForOutput(a, "out with spaces: a\nother: b\n", .make, "out with spaces"));
 }

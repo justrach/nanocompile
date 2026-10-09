@@ -173,7 +173,7 @@ def main():
         zig_report = None
         if decoder:
             zig_report = json.loads(run([str(decoder), "darwin" if sys.platform == "darwin" else "make",
-                                         str(report)], "zig-report-" + str(value)))
+                                         str(report), str(dylib)], "zig-report-" + str(value)))
             assert str(native) in zig_report["inputs"], zig_report
             assert any("libleaf" in path for path in zig_report["inputs"]), zig_report
             assert any("libmiddle" in path for path in zig_report["inputs"]), zig_report
