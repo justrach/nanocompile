@@ -1,0 +1,146 @@
+{
+  "platform": "darwin",
+  "probe_sha256": "ffc4f973db707a3fd6500db80b11258e4c4be770ba1f5c6758f99540c1582afc",
+  "method": "same source, cwd and environment; output directory changed; Darwin install name preserved; all macros loaded and executed",
+  "cases": [
+    {
+      "case": "absolute-default",
+      "byte_identical": true,
+      "dep_info_equal_after_output_mapping": true,
+      "ordinary": {
+        "sha256": "5ab24a3e4aff18eee3c43c13898a1cde40c620ec137954f0ee418fc4127d9d08",
+        "loaded_value": 42,
+        "artifacts": [
+          "/private/var/folders/t3/zjm3hgy56l551q_ygry8mbjm0000gn/T/nano producer, placement 92qt6970/absolute-default/ordinary/producer.d",
+          "/private/var/folders/t3/zjm3hgy56l551q_ygry8mbjm0000gn/T/nano producer, placement 92qt6970/absolute-default/ordinary/libproducer.dylib"
+        ],
+        "normalized_dep_info": "<output>/producer.d: producer.rs\n\n<output>/libproducer.dylib: producer.rs\n\nproducer.rs:\n"
+      },
+      "isolated": {
+        "sha256": "5ab24a3e4aff18eee3c43c13898a1cde40c620ec137954f0ee418fc4127d9d08",
+        "loaded_value": 42,
+        "artifacts": [
+          "/private/var/folders/t3/zjm3hgy56l551q_ygry8mbjm0000gn/T/nano producer, placement 92qt6970/absolute-default/isolated/producer.d",
+          "/private/var/folders/t3/zjm3hgy56l551q_ygry8mbjm0000gn/T/nano producer, placement 92qt6970/absolute-default/isolated/libproducer.dylib"
+        ],
+        "normalized_dep_info": "<output>/producer.d: producer.rs\n\n<output>/libproducer.dylib: producer.rs\n\nproducer.rs:\n"
+      }
+    },
+    {
+      "case": "absolute-release",
+      "byte_identical": true,
+      "dep_info_equal_after_output_mapping": true,
+      "ordinary": {
+        "sha256": "30161c2845e956cb1c66b76a80d465dcc354b600df44393235586d15bece445c",
+        "loaded_value": 42,
+        "artifacts": [
+          "/private/var/folders/t3/zjm3hgy56l551q_ygry8mbjm0000gn/T/nano producer, placement 92qt6970/absolute-release/ordinary/producer.d",
+          "/private/var/folders/t3/zjm3hgy56l551q_ygry8mbjm0000gn/T/nano producer, placement 92qt6970/absolute-release/ordinary/libproducer.dylib"
+        ],
+        "normalized_dep_info": "<output>/producer.d: producer.rs\n\n<output>/libproducer.dylib: producer.rs\n\nproducer.rs:\n"
+      },
+      "isolated": {
+        "sha256": "30161c2845e956cb1c66b76a80d465dcc354b600df44393235586d15bece445c",
+        "loaded_value": 42,
+        "artifacts": [
+          "/private/var/folders/t3/zjm3hgy56l551q_ygry8mbjm0000gn/T/nano producer, placement 92qt6970/absolute-release/isolated/producer.d",
+          "/private/var/folders/t3/zjm3hgy56l551q_ygry8mbjm0000gn/T/nano producer, placement 92qt6970/absolute-release/isolated/libproducer.dylib"
+        ],
+        "normalized_dep_info": "<output>/producer.d: producer.rs\n\n<output>/libproducer.dylib: producer.rs\n\nproducer.rs:\n"
+      }
+    },
+    {
+      "case": "absolute-debug2",
+      "byte_identical": false,
+      "dep_info_equal_after_output_mapping": true,
+      "ordinary": {
+        "sha256": "a8ff9921074be9777e377a01ed56ed54cc3c550b2c277cccba3e78d260e69f51",
+        "loaded_value": 42,
+        "artifacts": [
+          "/private/var/folders/t3/zjm3hgy56l551q_ygry8mbjm0000gn/T/nano producer, placement 92qt6970/absolute-debug2/ordinary/producer.d",
+          "/private/var/folders/t3/zjm3hgy56l551q_ygry8mbjm0000gn/T/nano producer, placement 92qt6970/absolute-debug2/ordinary/libproducer.dylib"
+        ],
+        "normalized_dep_info": "<output>/producer.d: producer.rs\n\n<output>/libproducer.dylib: producer.rs\n\nproducer.rs:\n"
+      },
+      "isolated": {
+        "sha256": "d44d65ae447410d0a236d2e1c6bb70d91ad71ca97571fceb5983b438780af726",
+        "loaded_value": 42,
+        "artifacts": [
+          "/private/var/folders/t3/zjm3hgy56l551q_ygry8mbjm0000gn/T/nano producer, placement 92qt6970/absolute-debug2/isolated/producer.d",
+          "/private/var/folders/t3/zjm3hgy56l551q_ygry8mbjm0000gn/T/nano producer, placement 92qt6970/absolute-debug2/isolated/libproducer.dylib"
+        ],
+        "normalized_dep_info": "<output>/producer.d: producer.rs\n\n<output>/libproducer.dylib: producer.rs\n\nproducer.rs:\n"
+      }
+    },
+    {
+      "case": "relative-default",
+      "byte_identical": true,
+      "dep_info_equal_after_output_mapping": true,
+      "ordinary": {
+        "sha256": "e80d5a2d8cf35bd585d2206d05d3a3a9b1ecebe648742bd74ff108b5aaeccb0f",
+        "loaded_value": 42,
+        "artifacts": [
+          "relative-default/ordinary/producer.d",
+          "relative-default/ordinary/libproducer.dylib"
+        ],
+        "normalized_dep_info": "<output>/producer.d: producer.rs\n\n<output>/libproducer.dylib: producer.rs\n\nproducer.rs:\n"
+      },
+      "isolated": {
+        "sha256": "e80d5a2d8cf35bd585d2206d05d3a3a9b1ecebe648742bd74ff108b5aaeccb0f",
+        "loaded_value": 42,
+        "artifacts": [
+          "relative-default/isolated/producer.d",
+          "relative-default/isolated/libproducer.dylib"
+        ],
+        "normalized_dep_info": "<output>/producer.d: producer.rs\n\n<output>/libproducer.dylib: producer.rs\n\nproducer.rs:\n"
+      }
+    },
+    {
+      "case": "relative-release",
+      "byte_identical": true,
+      "dep_info_equal_after_output_mapping": true,
+      "ordinary": {
+        "sha256": "cac317f9f817c6d0a6e6c1e49e79a74bc800467acaba12f241d669d4d0a6fe4b",
+        "loaded_value": 42,
+        "artifacts": [
+          "relative-release/ordinary/producer.d",
+          "relative-release/ordinary/libproducer.dylib"
+        ],
+        "normalized_dep_info": "<output>/producer.d: producer.rs\n\n<output>/libproducer.dylib: producer.rs\n\nproducer.rs:\n"
+      },
+      "isolated": {
+        "sha256": "cac317f9f817c6d0a6e6c1e49e79a74bc800467acaba12f241d669d4d0a6fe4b",
+        "loaded_value": 42,
+        "artifacts": [
+          "relative-release/isolated/producer.d",
+          "relative-release/isolated/libproducer.dylib"
+        ],
+        "normalized_dep_info": "<output>/producer.d: producer.rs\n\n<output>/libproducer.dylib: producer.rs\n\nproducer.rs:\n"
+      }
+    },
+    {
+      "case": "relative-debug2",
+      "byte_identical": false,
+      "dep_info_equal_after_output_mapping": true,
+      "ordinary": {
+        "sha256": "1cf511069a7c1ab1ac639a772fb01a47cabe495b816b1b79468a85c22367ca32",
+        "loaded_value": 42,
+        "artifacts": [
+          "relative-debug2/ordinary/producer.d",
+          "relative-debug2/ordinary/libproducer.dylib"
+        ],
+        "normalized_dep_info": "<output>/producer.d: producer.rs\n\n<output>/libproducer.dylib: producer.rs\n\nproducer.rs:\n"
+      },
+      "isolated": {
+        "sha256": "09b0c523d662e0b240531d9bd4a3d7cd6fa125914b1f1dbbb69a89d3b28c6358",
+        "loaded_value": 42,
+        "artifacts": [
+          "relative-debug2/isolated/producer.d",
+          "relative-debug2/isolated/libproducer.dylib"
+        ],
+        "normalized_dep_info": "<output>/producer.d: producer.rs\n\n<output>/libproducer.dylib: producer.rs\n\nproducer.rs:\n"
+      }
+    }
+  ],
+  "rustc": "rustc 1.97.1 (8bab26f4f 2026-07-14)\nbinary: rustc\ncommit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452\ncommit-date: 2026-07-14\nhost: aarch64-apple-darwin\nrelease: 1.97.1\nLLVM version: 22.1.6"
+}

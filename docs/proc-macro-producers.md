@@ -97,6 +97,18 @@ CI suite has its own independent status.
 
 ## Miss and discovery
 
+Output placement is now probed by `tests/producer_placement.py` with absolute
+and relative directories, default and optimized codegen, and full debug info.
+Every resulting macro is loaded by rustc and its expansion executed. On the
+local Mac, default and optimized dylibs are byte-identical after preserving
+the original `LC_ID_DYLIB` install name with separate `-Xlinker` arguments;
+full debug-info dylibs differ. The original install name must retain its
+relative or absolute spelling. Dep-info targets need output-path mapping;
+rustc writes literal spaces in these target names. CI records each mode on
+Linux and macOS. These results support further private-output investigation,
+not producer eligibility or a performance claim. Debug output equivalence,
+scratch ownership, diagnostic mapping and driver/SDK identity remain unresolved.
+
 1. Keep the user's compiler selection, compilation environment and original
    arguments as key inputs. A producer-specific implementation/version domain
    and validated linker-driver/toolchain/SDK selection must also enter its key.
