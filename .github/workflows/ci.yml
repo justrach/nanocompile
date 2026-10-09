@@ -27,6 +27,7 @@ jobs:
           zig build integration -Doptimize=ReleaseFast
       - name: Verify real Turborepo task cache
         run: |
+          python3 tests/turbo_server.py
           npm ci --prefix examples/turborepo --ignore-scripts --no-audit --no-fund
           python3 tests/turbo_integration.py zig-out/bin/nanocompile --output bench-results/turborepo.json
       - name: Benchmark complete compiler invocations

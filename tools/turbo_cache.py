@@ -11,11 +11,21 @@ import os
 from pathlib import Path
 import re
 import shutil
+import socketserver
 import subprocess
 import tempfile
 from urllib.parse import parse_qs, urlsplit
 
 HASH = re.compile(r'[a-fA-F0-9]{1,128}\Z')
+
+
+class Server(ThreadingHTTPServer):
+    def server_bind(self):
+        # The standard HTTPServer resolves a reverse DNS name during bind.
+        # A loopback cache must start even when the host's resolver is offline.
+        socketserver.TCPServer.server_bind(self)
+        self.server_name = 'localhost'
+        self.server_port = self.server_address[1]
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -192,7 +202,7 @@ def main():
         p.error('set NANOCOMPILE_TURBO_TOKEN to an ASCII token of at least 16 characters')
     if not re.fullmatch(r'[a-zA-Z0-9_.-]{1,128}', args.team) or args.max_bytes < 1:
         p.error('invalid team or size limit')
-    server = ThreadingHTTPServer(('127.0.0.1', args.port), Handler)
+    server = Server(('127.0.0.1', args.port), Handler)
     server.token, server.team = token, args.team
     server.binary = str(Path(args.nanocompile).resolve())
     server.env = dict(os.environ, NANOCOMPILE_DIR=str(Path(args.cache).resolve()))
