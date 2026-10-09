@@ -127,3 +127,12 @@ measured executable checksum and all samples. Cold cache still took 52.727 s.
 The final implementation uses entry schema 5 and key namespace v7. The project
 benchmark now enforces a sampled 40 GiB process-tree RSS guard, records tracked
 Rust/manifests' hashes, and checks they stayed unchanged during a comparison.
+
+The manual `Harness comparison against kache` workflow compares all three
+pipelines on Ubuntu 24.04 and macOS 26, with pinned Rust 1.97.1, Zig 0.17.0 and
+checksum-verified kache 1.0.0. It uses public Harness revision
+`20c4019201e4b1eee5e04cfbb8dc7bda941b11b9`, since the local checkout's revision
+is unavailable on GitHub. Hosted results are a separate workload and must be
+compared within their own runner/revision; they are not an A/B against the
+dirty local checkout. R2 credentials and transport are excluded from this
+three-way performance workflow.

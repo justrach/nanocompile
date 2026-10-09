@@ -1,0 +1,49 @@
+name: Harness comparison against kache
+on:
+  workflow_dispatch:
+    inputs:
+      proc_macros:
+        description: Nanocompile macro input policy
+        type: choice
+        default: reported
+        options: [tracked, reported]
+permissions:
+  contents: read
+jobs:
+  comparison:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, macos-26]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    env:
+      RUSTUP_TOOLCHAIN: 1.97.1
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          repository: justrach/harness
+          ref: 20c4019201e4b1eee5e04cfbb8dc7bda941b11b9
+          path: workload
+      - name: Install pinned compilers and kache
+        run: |
+          python3 tools/install_zig.py "$RUNNER_TEMP/zig"
+          rustup toolchain install 1.97.1 --profile minimal
+          python3 tools/install_kache.py "$RUNNER_TEMP/kache"
+      - name: Build nanocompile
+        run: zig build -Doptimize=ReleaseFast
+      - name: Compare clean release library builds
+        run: |
+          python3 tests/project_comparison.py zig-out/bin/nanocompile workload \
+            --kache "$RUNNER_TEMP/kache/kache" --package harness-adapters \
+            --state "$RUNNER_TEMP/harness-kache-comparison" --jobs 4 --runs 3 \
+            --proc-macros "${{ inputs.proc_macros }}" \
+            --output bench-results/harness-kache.json
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: harness-kache-${{ matrix.os }}
+          path: |
+            bench-results/
+            ${{ runner.temp }}/harness-kache-comparison/*.log
