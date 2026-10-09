@@ -1310,3 +1310,21 @@ See [method, correctness and limitations](../docs/clang-selection-overlap-experi
 [paired samples](harness-clang-selection-paired.json),
 [confirmation](harness-clang-selection-paired-confirm.json), and
 [fresh three-way results](harness-clang-selection-three-way.json).
+
+## Longer accepted-command comparison
+
+A nine-sample repeatability run on the unchanged accepted executable measures
+warm medians **2.005335 s Nano, 1.962289 s kache, and 22.644105 s direct**.
+Means are 2.024423, 2.004796 and 22.920641 s respectively. Kache's median leads
+by 43.05 ms in this session, reversing the previous three-sample ordering;
+Nano wins 3/9 corresponding rounds. Mean same-round difference is +19.63 ms,
+with descriptive standard error 45.05 ms. A general Nano lead is not established.
+The earlier 2.854 s Nano outlier did not recur; all samples from both sessions
+are retained.
+
+All 27 warm builds pass their own cold Rust/producer/native artifact checks,
+and all tracked source hashes remain unchanged. Nano retains 167 Rust and
+24 native hits per warm build. Cold remains **37.285164 s Nano versus
+26.514397 s kache**. No source optimization is adopted from this measurement.
+[Method and interpretation](../docs/clang-selection-overlap-experiment.md#nine-sample-repeatability-run);
+[full nine-sample report](harness-clang-selection-nine-samples.json).

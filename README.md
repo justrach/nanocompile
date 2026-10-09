@@ -215,16 +215,19 @@ remains local. `stats` reports native invocations/failures; hit/miss observation
 require `NANOCOMPILE_CLANG_REMARKS=1`, which adds remarks and uses bounded capture.
 Default mode streams the compiler's inherited descriptors normally.
 
-The [latest installed-command comparison](benchmarks/harness-clang-selection-three-way.json)
-measures warm medians of **1.983 s Nano versus 22.58 s direct and 2.080 s kache**
+The [latest nine-sample comparison](benchmarks/harness-clang-selection-nine-samples.json)
+measures warm medians of **2.005 s Nano versus 22.64 s direct and 1.962 s kache**
 on Harness, with 167 Rust and 24 native warm hits. It uses explicit reported-macro
-and Apple macro/executable-producer policies. These are three warm samples per
-mode: Nano's samples include a retained 2.854 s outlier, and its mean exceeds
-kache's mean. This does not establish a broad latency advantage over kache.
+and Apple macro/executable-producer policies. Kache's median leads by 43 ms in
+this session, reversing the previous three-sample ordering; Nano is faster in
+3/9 corresponding rounds. The mean same-round difference is 20 ms, with
+descriptive standard error 45 ms. A broad Nano latency advantage is not
+established. The earlier 2.854 s Nano outlier did not recur; both datasets
+remain public.
 Two independent [27-pair lookup comparisons](docs/clang-selection-overlap-experiment.md)
 confirm the adopted live-query overlap gains **5.6% and 5.1%**, winning 51/54
 pairs with 193 exact artifacts. Compiler and SDK selection remain live.
-Nano cold is 37.46 s versus kache's 26.50 s. The native cache does not establish
+Nano cold is 37.29 s versus kache's 26.51 s. The native cache does not establish
 a cold-build improvement. All warm modes match their own cold Rust/native
 artifacts; scanner debug changes and kache remapping prevent treating every
 mode as byte-identical to default direct builds.

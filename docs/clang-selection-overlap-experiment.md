@@ -90,3 +90,38 @@ kache's **26.502405 s**; direct's initial build is 23.399754 s. No cold-build
 improvement is established. Tracked source hashes remain unchanged.
 
 [Full three-way samples and checks](../benchmarks/harness-clang-selection-three-way.json).
+
+## Nine-sample repeatability run
+
+The accepted installed executable was unchanged for a new session with nine
+warm samples per mode (27 warm builds), the same pinned Rust 1.97.1 and kache
+1.0.0, four jobs, native remarks and the previously stated macro/producer policies.
+All timings are retained, including the 24.634 s direct sample.
+
+| Mode | Warm median | Warm mean | Observed minimum–maximum |
+| --- | ---: | ---: | ---: |
+| Direct | 22.644105 s | 22.920641 s | 22.484260–24.634416 s |
+| Nano | 2.005335 s | 2.024423 s | 1.955546–2.158802 s |
+| Kache | 1.962289 s | 2.004796 s | 1.903651–2.164960 s |
+
+Kache has the lower median by **43.05 ms** in this session, reversing the
+shorter run's median ordering. Nano is faster in 3 of the 9 corresponding
+rotation rounds. The mean same-round Nano-minus-kache difference is **19.63 ms**,
+with descriptive standard error **45.05 ms**. These are measurements from one
+local session, not independent-machine evidence or a general latency ranking.
+The correct conclusion is that the tools are close on this workload, with
+kache's median ahead here; a broad Nano advantage remains unproven.
+
+Nano's first warm sample is 1.990365 s, and its maximum is 2.158802 s. The earlier
+2.853956 s sample did not recur in this session. That does not explain its cause
+or establish that such delays cannot recur. Both datasets remain public.
+
+All 27 warm builds match their own cold Rust, producer and native artifact
+hashes. Every Nano warm build records 167 Rust and 24 native hits; every kache
+warm build records 187 local hits. Tracked source hashes are unchanged.
+Cold Nano is **37.285164 s** versus kache **26.514397 s**, while the direct prime
+is 24.275025 s. No cold-build advantage is demonstrated.
+
+[Full nine-sample timings, artifact checks and descriptive statistics](../benchmarks/harness-clang-selection-nine-samples.json).
+The controlled 54-pair evidence for the adopted lookup optimization remains
+valid; this longer comparison qualifies the broader kache ranking.
