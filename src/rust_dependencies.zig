@@ -3,6 +3,7 @@
 //! confined to that diagnostic subprocess, never the user's compilation.
 const std = @import("std");
 const cache = @import("cache.zig");
+const metadata = @import("rust_metadata.zig");
 const Dir = std.Io.Dir;
 
 pub const Directory = struct { path: []const u8, names: []const []const u8 };
@@ -47,12 +48,20 @@ fn success(result: std.process.RunResult) bool {
 }
 
 // Unknown diagnostic formats cannot silently produce an incomplete graph.
-pub fn parse(a: std.mem.Allocator, bytes: []const u8, reported: bool) ![]const []const u8 {
+pub const Crate = struct { name: []const u8, hash: []const u8, proc_macro: bool };
+pub fn parse(a: std.mem.Allocator, bytes: []const u8, reported: bool) ![]const Crate {
     if (!std.mem.startsWith(u8, bytes, "Crate info:\n") or std.mem.indexOf(u8, bytes, "\nproc_macro false\n") == null) return error.UnsupportedRustMetadata;
     const marker = "=External Dependencies=\n";
     const offset = std.mem.indexOf(u8, bytes, marker) orelse return error.UnsupportedRustMetadata;
     var lines = std.mem.splitScalar(u8, bytes[offset + marker.len ..], '\n');
-    var names: std.ArrayList([]const u8) = .empty;
+    var names: std.ArrayList(Crate) = .empty;
+    errdefer {
+        for (names.items) |crate| {
+            a.free(crate.name);
+            a.free(crate.hash);
+        }
+        names.deinit(a);
+    }
     while (lines.next()) |line| {
         if (line.len == 0) break;
         if (!reported and std.mem.indexOf(u8, line, "kind MacrosOnly") != null) return error.ProceduralMacroDependency;
@@ -61,40 +70,29 @@ pub fn parse(a: std.mem.Allocator, bytes: []const u8, reported: bool) ![]const [
         const name = words.next() orelse return error.UnsupportedRustMetadata;
         if (!std.mem.eql(u8, words.next() orelse "", "hash")) return error.UnsupportedRustMetadata;
         const hash = words.next() orelse return error.UnsupportedRustMetadata;
-        if (hash.len != 32) return error.UnsupportedRustMetadata;
-        for (hash) |ch| if (!std.ascii.isHex(ch)) return error.UnsupportedRustMetadata;
+        if (!metadata.validCrateHash(hash)) return error.UnsupportedRustMetadata;
         for (name) |ch| if (!std.ascii.isAlphanumeric(ch) and ch != '_' and ch != '-') return error.UnsupportedRustMetadata;
         if (name.len == 0) return error.UnsupportedRustMetadata;
-        try names.append(a, try a.dupe(u8, name));
+        try names.append(a, .{ .name = try a.dupe(u8, name), .hash = try a.dupe(u8, hash), .proc_macro = std.mem.indexOf(u8, line, "kind MacrosOnly") != null });
     }
     return names.items;
 }
 
 pub fn collect(ctx: *cache.Context, argv: []const []const u8, outputs: []const []const u8, before: []const Directory, started: i96, records: *std.ArrayList(cache.Dependency)) !void {
     var artifact: ?[]const u8 = null;
-    for (outputs) |out| if (std.mem.endsWith(u8, out, ".rlib")) {
+    for (outputs) |out| if (std.mem.endsWith(u8, out, ".rmeta")) {
         artifact = out;
         break;
     };
-    if (artifact == null) for (outputs) |out| if (std.mem.endsWith(u8, out, ".rmeta")) {
+    if (artifact == null) for (outputs) |out| if (std.mem.endsWith(u8, out, ".rlib")) {
         artifact = out;
         break;
     };
     const path = artifact orelse return error.UnsupportedRustMetadata;
-    var query_env = try ctx.env.clone(ctx.a);
-    // -Zls=root decodes existing compiler metadata without loading or running
-    // proc macros. Keep the original environment on all actual compilations.
-    try query_env.put("RUSTC_BOOTSTRAP", "1");
-    const result = try std.process.run(ctx.a, ctx.io, .{ .argv = &.{ argv[0], "-Zls=root", path }, .environ_map = &query_env });
-    if (!success(result)) return error.RustMetadataQueryFailed;
-    const names = try parse(ctx.a, result.stdout, reportedMacros(ctx));
-    var current: std.ArrayList(Directory) = .empty;
-    for (before) |dir| try current.append(ctx.a, .{ .path = dir.path, .names = try ctx.libraryNames(dir.path, outputs) });
-    // Toolchain resources are already content-fingerprinted. Resolve missing
-    // directory candidates against the selected target's sysroot, not a list of
-    // presumed built-in names (the standard library itself includes crates).
+    // Resolve the toolchain from the original cwd before moving diagnostic
+    // readers into private storage. rustup accepts an absolute toolchain root.
     var print_args: std.ArrayList([]const u8) = .empty;
-    try print_args.appendSlice(ctx.a, &.{ argv[0], "--print", "target-libdir" });
+    try print_args.appendSlice(ctx.a, &.{ argv[0], "--print", "sysroot", "--print", "target-libdir" });
     var i: usize = 1;
     while (i < argv.len) : (i += 1) {
         if (std.mem.eql(u8, argv[i], "--target")) {
@@ -105,11 +103,53 @@ pub fn collect(ctx: *cache.Context, argv: []const []const u8, outputs: []const [
     }
     const sysroot_result = try std.process.run(ctx.a, ctx.io, .{ .argv = print_args.items, .environ_map = ctx.env });
     if (!success(sysroot_result)) return error.RustSysrootQueryFailed;
-    const sysroot = std.mem.trim(u8, sysroot_result.stdout, "\r\n");
-    if (!std.fs.path.isAbsolute(sysroot)) return error.InvalidSysroot;
-    for (names) |name| {
-        const crate = name[0 .. std.mem.indexOfScalar(u8, name, '-') orelse name.len];
-        const prefix = try std.fmt.allocPrint(ctx.a, "lib{s}", .{crate});
+    var locations = std.mem.tokenizeAny(u8, sysroot_result.stdout, "\r\n");
+    const selected_sysroot = locations.next() orelse return error.InvalidSysroot;
+    const sysroot = locations.next() orelse return error.InvalidSysroot;
+    if (locations.next() != null or !std.fs.path.isAbsolute(selected_sysroot) or !std.fs.path.isAbsolute(sysroot)) return error.InvalidSysroot;
+    var query_env = try ctx.env.clone(ctx.a);
+    try query_env.put("RUSTC_BOOTSTRAP", "1");
+    try query_env.put("RUSTUP_TOOLCHAIN", selected_sysroot);
+    const reader_compiler = try metadata.readerCompiler(ctx, argv[0]);
+    const query_cwd = try ctx.path(&.{"metadata-queries"});
+    try Dir.cwd().createDirPath(ctx.io, query_cwd);
+    const result = try std.process.run(ctx.a, ctx.io, .{ .argv = &.{ reader_compiler, "-Zls=root", path }, .environ_map = &query_env, .cwd = .{ .path = query_cwd } });
+    if (!success(result)) return error.RustMetadataQueryFailed;
+    const names = try parse(ctx.a, result.stdout, reportedMacros(ctx));
+    const own_root = try metadata.parse(result.stdout);
+    var resolver: metadata.Resolver = .{ .ctx = ctx, .compiler = reader_compiler, .query_env = &query_env, .query_cwd = query_cwd };
+    defer resolver.roots.deinit(ctx.a);
+    defer resolver.hashes.deinit(ctx.a);
+    // Classification memos save subprocesses, but consumers still hash every
+    // non-toolchain input before using them.
+    for (outputs) |out| if (std.mem.endsWith(u8, out, ".rlib") or std.mem.endsWith(u8, out, ".rmeta"))
+        try resolver.remember(out, own_root);
+    var current: std.ArrayList(Directory) = .empty;
+    for (before) |dir| try current.append(ctx.a, .{ .path = dir.path, .names = try ctx.libraryNames(dir.path, outputs) });
+    for (names) |crate| {
+        const name = crate.name;
+        const full_prefix = try std.fmt.allocPrint(ctx.a, "lib{s}", .{name});
+        const builtin_path = try std.fs.path.join(ctx.a, &.{ sysroot, try std.fmt.allocPrint(ctx.a, "lib{s}.rmeta", .{name}) });
+        var primary_found = false;
+        for (current.items) |dir| {
+            for (dir.names) |entry| {
+                if (!std.mem.startsWith(u8, entry, full_prefix)) continue;
+                const filename = entry[0 .. std.mem.lastIndexOfScalar(u8, entry, ':') orelse return error.UnsupportedLibraryName];
+                const input = try std.fs.path.join(ctx.a, &.{ dir.path, filename });
+                const root = (resolver.inspect(input, false) catch null) orelse continue;
+                if (root.matches(name, crate.hash, own_root.triple, crate.proc_macro)) primary_found = true;
+            }
+        }
+        if (!primary_found) {
+            if (resolver.inspect(builtin_path, true) catch null) |root|
+                primary_found = root.matches(name, crate.hash, own_root.triple, crate.proc_macro);
+        }
+        // rustc first tries the dependency's full extra-filename prefix, then
+        // searches broadly only when that finds no matching metadata. When
+        // falling back, guard all candidates: the diagnostic display combines
+        // crate name and arbitrary extra-filename, so splitting on '-' would
+        // guess the semantic name for nonstandard or renamed artifacts.
+        const prefix = if (primary_found) full_prefix else "";
         var found = false;
         for (before, current.items) |old, dir| {
             const old_hash = try cache.prefixDigest(ctx.a, old.names, prefix);
@@ -119,18 +159,23 @@ pub fn collect(ctx: *cache.Context, argv: []const []const u8, outputs: []const [
             for (dir.names) |entry| {
                 if (!std.mem.startsWith(u8, entry, prefix)) continue;
                 const filename = entry[0 .. std.mem.lastIndexOfScalar(u8, entry, ':') orelse return error.UnsupportedLibraryName];
-                // The conservative prefix includes every rustc candidate, so
-                // adding a competing version or replacing one invalidates hits.
+                // Include every candidate in the selected search phase. A
+                // competing matching library still invalidates the restore.
                 const input = try std.fs.path.join(ctx.a, &.{ dir.path, filename });
                 const st = try Dir.cwd().statFile(ctx.io, input, .{});
                 if (st.mtime.nanoseconds >= started or st.ctime.nanoseconds >= started) return error.InputChangedDuringCompilation;
-                try records.append(ctx.a, .{ .path = input, .hash = try ctx.digest(input) });
+                try records.append(ctx.a, .{ .path = input, .hash = try resolver.digest(input) });
                 const exact = try std.fmt.allocPrint(ctx.a, "lib{s}.", .{name});
                 if (std.mem.startsWith(u8, filename, exact)) found = true;
+                if (!primary_found and !found) {
+                    if (resolver.inspect(input, false) catch null) |root|
+                        if (root.matches(name, crate.hash, own_root.triple, crate.proc_macro)) {
+                            found = true;
+                        };
+                }
             }
         }
         if (!found) {
-            const builtin_path = try std.fs.path.join(ctx.a, &.{ sysroot, try std.fmt.allocPrint(ctx.a, "lib{s}.rlib", .{name}) });
             _ = Dir.cwd().statFile(ctx.io, builtin_path, .{}) catch return error.UnresolvedRustDependency;
         }
     }
@@ -140,10 +185,13 @@ test "Rust metadata rejects incomplete and procedural macro graphs" {
     const prefix = "Crate info:\nproc_macro false\n=External Dependencies=\n";
     const names = try parse(std.testing.allocator, prefix ++ "1 dep-abcd hash 0123456789abcdef0123456789abcdef host_hash None kind Unconditional public\n\n", false);
     defer {
-        for (names) |name| std.testing.allocator.free(name);
+        for (names) |crate| {
+            std.testing.allocator.free(crate.name);
+            std.testing.allocator.free(crate.hash);
+        }
         std.testing.allocator.free(names);
     }
-    try std.testing.expectEqualStrings("dep-abcd", names[0]);
+    try std.testing.expectEqualStrings("dep-abcd", names[0].name);
     try std.testing.expectError(error.ProceduralMacroDependency, parse(std.testing.allocator, prefix ++ "1 macro-abcd hash 0123456789abcdef0123456789abcdef host_hash None kind MacrosOnly public\n", false));
     try std.testing.expectError(error.UnsupportedRustMetadata, parse(std.testing.allocator, "=External Dependencies=\n", false));
 }

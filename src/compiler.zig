@@ -418,7 +418,7 @@ fn hiddenNativeLink(bytes: []const u8) bool {
 
 fn keyFor(ctx: *cache.Context, kind: Kind, argv: []const []const u8) ![]const u8 {
     var hash = cache.Hash.init(.{});
-    cache.field(&hash, "nanocompile-v7");
+    cache.field(&hash, "nanocompile-v8");
     cache.field(&hash, @tagName(kind));
     cache.field(&hash, ctx.cwd);
     const host = std.zig.system.resolveTargetQuery(ctx.io, .{}) catch |err| {
@@ -430,7 +430,9 @@ fn keyFor(ctx: *cache.Context, kind: Kind, argv: []const []const u8) ![]const u8
     cache.field(&hash, std.mem.asBytes(&host.cpu.features.ints));
     cache.field(&hash, try std.fmt.allocPrint(ctx.a, "{any}", .{host.os}));
     for (argv) |arg| cache.field(&hash, arg);
-    cache.field(&hash, try identity.fingerprint(ctx, kind == .zig, argv[0]));
+    const toolchain = try identity.fingerprint(ctx, kind == .zig, argv[0]);
+    ctx.compiler_identity = toolchain;
+    cache.field(&hash, toolchain);
     const keys = try ctx.a.dupe([]const u8, ctx.env.keys());
     std.mem.sort([]const u8, keys, {}, less);
     for (keys) |key| {

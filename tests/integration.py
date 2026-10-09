@@ -230,6 +230,48 @@ def main():
         assert events()[-1] != "hit"
         direct = subprocess.run(consumer, cwd=root, env=env, capture_output=True)
         assert p.returncode == direct.returncode
+        # Follow rustc's full extra-filename search before its broad fallback.
+        # An alternate suffix is irrelevant while the primary remains valid;
+        # a competing primary candidate or fallback replacement must invalidate.
+        (root / "hashed").mkdir()
+        (root / "hashed.rs").write_text('pub const VALUE: u32 = 41;\n')
+        (root / "hashed_bridge.rs").write_text('pub fn value() -> u32 { hashdep::VALUE }\n')
+        (root / "hashed_consumer.rs").write_text('pub fn value() -> u32 { hashbridge::value() }\n')
+        provider = library("hashed.rs", "hashdep", "hashed", ["-C", "extra-filename=-first"])
+        run(provider)
+        run(library("hashed_bridge.rs", "hashbridge", "hashed", ["--extern", "hashdep=hashed/libhashdep-first.rlib", "-L", "dependency=hashed"]))
+        hashed_consumer = library("hashed_consumer.rs", "hashconsumer", "out", ["--extern", "hashbridge=hashed/libhashbridge.rlib", "-L", "dependency=hashed"])
+        run(hashed_consumer)
+        run(hashed_consumer)
+        assert events()[-1] == "hit"
+        shutil.copyfile(root / "hashed/libhashdep-first.rlib", root / "hashed/libhashdep-second.rlib")
+        run(hashed_consumer)
+        assert events()[-1] == "hit"
+        shutil.copyfile(root / "hashed/libhashdep-first.rlib", root / "hashed/libhashdep-first-extra.rlib")
+        p = run(hashed_consumer, success=False)
+        direct = subprocess.run(hashed_consumer, cwd=root, env=env, capture_output=True)
+        assert events()[-1] != "hit" and p.returncode == direct.returncode
+        (root / "hashed/libhashdep-first-extra.rlib").unlink()
+        (root / "hashed/libhashdep-first.rlib").unlink()
+        (root / "hashed/libhashdep-first.rmeta").unlink()
+        run(hashed_consumer)
+        assert events()[-1] != "hit"
+        run(hashed_consumer)
+        assert events()[-1] == "hit"
+        # A filename match with the wrong metadata cannot select primary mode.
+        shutil.copyfile(root / "deps/libunrelated.rlib", root / "hashed/libhashdep-first.rlib")
+        run(hashed_consumer)
+        assert events()[-1] != "hit"
+        run(hashed_consumer)
+        assert events()[-1] == "hit"
+        # The valid fallback's content is still an input, including mtime edits.
+        fallback = root / "hashed/libhashdep-second.rlib"
+        stamp = fallback.stat()
+        fallback.write_bytes(b"not Rust metadata")
+        os.utime(fallback, ns=(stamp.st_atime_ns, stamp.st_mtime_ns))
+        p = run(hashed_consumer, success=False)
+        direct = subprocess.run(hashed_consumer, cwd=root, env=env, capture_output=True)
+        assert events()[-1] != "hit" and p.returncode == direct.returncode != 0
         # Native -L paths on consumers must track full directory membership,
         # regular files, and symlink targets, including preserved-mtime edits.
         (root / "native").mkdir()

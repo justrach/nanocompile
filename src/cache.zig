@@ -29,6 +29,7 @@ pub const Context = struct {
     env: *std.process.Environ.Map,
     root: []const u8,
     cwd: []const u8,
+    compiler_identity: ?[]const u8 = null,
 
     pub fn init(a: std.mem.Allocator, io: std.Io, env: *std.process.Environ.Map) !Context {
         const root = env.get("NANOCOMPILE_DIR") orelse try std.fs.path.join(a, &.{
@@ -386,7 +387,7 @@ pub fn clear(ctx: *Context) !void {
     try ctx.prepare();
     const lock = try Lock.acquire(ctx, "maintenance", true);
     defer lock.release();
-    for ([_][]const u8{ "entries", "blobs", "xcode" }) |sub| {
+    for ([_][]const u8{ "entries", "blobs", "xcode", "metadata", "metadata-queries" }) |sub| {
         try Dir.cwd().deleteTree(ctx.io, try ctx.path(&.{sub}));
         try Dir.cwd().createDirPath(ctx.io, try ctx.path(&.{sub}));
     }

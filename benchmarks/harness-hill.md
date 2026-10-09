@@ -169,3 +169,66 @@ is unavailable on GitHub. Hosted results are a separate workload and must be
 compared within their own runner/revision; they are not an A/B against the
 dirty local checkout. R2 credentials and transport are excluded from this
 three-way performance workflow.
+
+
+## Hosted three-way comparison
+
+The [hosted run](https://github.com/justrach/nanocompile/actions/runs/37919336094)
+completed successfully on both runners with implementation `6f6094c` and public
+Harness `20c4019201e4b1eee5e04cfbb8dc7bda941b11b9`. Reported-input macro mode,
+Rust 1.97.1, Zig 0.17.0, kache 1.0.0, four jobs and three warm samples were used.
+Every build starts with a removed Cargo target directory; local artifact caches
+remain populated. Dependencies are fetched outside timing. No R2 transport is
+timed. Rows are independent workloads and machines.
+
+| Runner | Direct warm median | nanocompile | kache |
+| --- | ---: | ---: | ---: |
+| Ubuntu 24.04, x86_64 | 52.97 s | 14.39 s | 1.44 s |
+| macOS 26, arm64 | 81.68 s | 15.15 s | 2.60 s |
+
+All 24 builds succeeded. Warm library hashes match their own cold builds, and
+nanocompile matches direct. The Linux workload produced 131 rlibs and the Mac
+workload 135. Tracked Rust sources and manifests stayed unchanged. These checks
+cover library builds, not GUI execution. Kache still wins both comparisons.
+Nanocompile warm samples were 24.019/14.393/14.227 seconds on Linux and
+23.785/15.152/14.584 on Mac, so the first warm build still fills missing entries.
+The Mac direct samples varied from 70.175 to 88.409 seconds; exact speed ratios
+should not be generalized beyond these runs.
+
+[Linux raw results](harness-hosted-ubuntu-24.04.json) and
+[Mac raw results](harness-hosted-macos-26.json) include every sample, artifact
+hash, source hash, tool version and executable checksum.
+
+
+## Full-prefix candidate
+
+Per-crate traces of the native-path implementation found seven directory-change
+refusals in the second warm build. A hashed crate prefix such as `syn-…` was
+reduced to `syn`, so other build profiles and crates such as `proc_macro2` could
+change broad prefix membership while an unrelated consumer compiled.
+
+The candidate follows rustc's two-phase resolver: first try the dependency's
+full extra-filename prefix, then fall back to broad lookup only when no matching
+metadata is found. See the [Rust 1.97.1 metadata loader](https://github.com/rust-lang/rust/blob/1.97.1/compiler/rustc_metadata/src/locator.rs).
+A narrow guard requires a matching root name, crate hash, target and macro kind.
+Fallback guards all library candidates because arbitrary suffixes and renamed
+files prevent safely inferring the semantic crate name from the display name.
+Every candidate in the selected phase is content-hashed; new competing primary
+candidates still invalidate. Classification memos are content-addressed and
+compiler-scoped, while standard-library metadata uses the already validated
+complete toolchain identity. They save readers, not dependency validation.
+
+Readers prefer `.rmeta` because distributed standard-library `.rlib` files can
+contain link-only metadata. Diagnostic subprocesses use a private cache cwd and
+the originally selected toolchain; actual compilation environments are unchanged.
+Key namespace v8 isolates these semantics from old entries. `clear` removes the
+new classification memos and diagnostic files. These memos are not transported
+through R2; restored entries validate their recorded inputs directly.
+
+The real-compiler tests cover alternate suffixes, competing primary candidates,
+renamed fallback libraries, a primary filename with the wrong crate metadata,
+and preserved-mtime fallback corruption, checking direct/wrapped exit statuses.
+The existing source, transitive, proc-macro, native C-link/run, output corruption,
+concurrency and Zig tests also pass. `tests/rust_diagnostic.py` can collect private
+per-crate traces; its capture wrapper adds instrumentation overhead and its timing
+must not be used as a performance comparison.
