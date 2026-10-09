@@ -1278,3 +1278,15 @@ R2 transfer is excluded. Nano's native command is opt-in and its own Clang CAS
 is local; ordinary Rust/Zig caching behavior retains its existing policies.
 The preceding 27-pair scanner/replay comparison supplies the controlled
 performance evidence; this three-way run supplies the current kache comparison.
+
+## Native Clang remarks/capture cost: no gain found
+
+A controlled 27-pair run compared the installed Clang adapter's opt-in remarks
+and capture with normal inherited-descriptor streaming, keeping the full Cargo
+environment and Rust observer identity fixed. Medians were **2.239760 s with
+remarks versus 2.258781 s streaming**; streaming won 12 pairs, with mean paired
+saving −5.82 ms and standard error 12.54 ms. This does not justify a performance
+change. All 193 artifact hashes and tracked source hashes matched.
+See [method and limits](../docs/clang-remarks-experiment.md) and
+[raw results](harness-clang-remarks-paired.json). These paired durations do not
+establish a new direct/kache ranking.
