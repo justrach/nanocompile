@@ -113,7 +113,7 @@ pub const Context = struct {
     }
 
     pub fn atomic(self: *Context, path_: []const u8, bytes: []const u8) !void {
-        var file = try Dir.cwd().createFileAtomic(self.io, path_, .{ .make_path = true, .permissions = .fromMode(0o600) });
+        var file = try Dir.cwd().createFileAtomic(self.io, path_, .{ .make_path = true, .replace = true, .permissions = .fromMode(0o600) });
         defer file.deinit(self.io);
         try file.file.writeStreamingAll(self.io, bytes);
         try file.replace(self.io);
