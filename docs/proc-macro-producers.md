@@ -40,6 +40,11 @@ The preceding observer fixture passed on hosted
 Those files predate the Zig reader. The
 [local Zig reader check](../benchmarks/producer-link-probe-zig-macos.json) also
 passed; hosted decoder verification runs in the regular CI workflow.
+The real-linker decoder step passed on both Linux and macOS in
+[run 37931953779](https://github.com/justrach/nanocompile/actions/runs/37931953779)
+at source `e2712a605fb005fcd216bb76703d685b433d70df`. This confirms the report
+reader on both platforms; producer eligibility remains gated and the complete
+CI suite has its own independent status.
 
 ## Miss and discovery
 
