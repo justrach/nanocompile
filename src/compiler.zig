@@ -394,7 +394,7 @@ pub fn execute(ctx: *cache.Context, kind: Kind, argv: []const []const u8) !u8 {
     ctx.prepare() catch return bypass(ctx, argv, "bypass: cache unavailable");
     const maintenance = cache.Lock.acquire(ctx, "maintenance", false) catch return bypass(ctx, argv, "bypass: cache lock unavailable");
     defer maintenance.release();
-    const key = keyFor(ctx, kind, argv) catch return bypass(ctx, argv, "bypass: compiler identity unavailable");
+    const key = keyFor(ctx, kind, argv) catch |err| return bypass(ctx, argv, try std.fmt.allocPrint(ctx.a, "bypass: compiler identity unavailable ({s})", .{@errorName(err)}));
     const flight = cache.Lock.acquire(ctx, key, true) catch return bypass(ctx, argv, "bypass: key lock unavailable");
     defer flight.release();
     // Different argument sets can still write the same output. Serialize those

@@ -36,9 +36,9 @@ def main():
         (root / "child.rs").write_text('pub const VALUE: u32 = 42;\n')
         rust = ["rustc", "lib.rs", "--crate-name", "fixture", "--crate-type", "rlib",
                 "--emit=dep-info,metadata,link", "--out-dir", "out", "-C", "opt-level=2"]
-        run(rust)
+        first = run(rust)
         expected = {p.name: digest(p) for p in (root / "out").iterdir()}
-        assert events()[-1] == "miss"
+        assert events()[-1] == "miss", first.stderr.decode(errors="replace")
         shutil.rmtree(root / "out")
         p = run(rust)
         assert b"nanocompile: hit" in p.stderr, p.stderr
