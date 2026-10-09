@@ -1,0 +1,12 @@
+{
+  "$schema": "https://turborepo.dev/schema.json",
+  "remoteCache": {"signature": true},
+  "globalPassThroughEnv": ["NANO_TURBO_EXECUTION_LOG"],
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**"],
+      "env": ["EXAMPLE_LABEL"]
+    }
+  }
+}

@@ -18,6 +18,7 @@ const help =
     \\  nanocompile rustc [RUSTC FLAGS]
     \\  nanocompile xcodebuild [XCODE FLAGS]  use Xcode native Swift/Clang CAS (macOS)
     \\  RUSTC_WRAPPER=/absolute/path/nanocompile cargo build
+    \\  nanocompile artifact put|get|head NAMESPACE KEY [FILE] [METADATA_JSON]
     \\  nanocompile stats | clear | doctor
     \\  nanocompile gc [MAX_BYTES]  remove orphan blobs and evict to a budget
     \\Environment:
@@ -53,6 +54,30 @@ fn dispatch(ctx: *cache.Context, args: []const [:0]const u8) !u8 {
     }
     const command = args[1];
     if (std.mem.eql(u8, command, "xcodebuild")) return xcode.execute(ctx, args[2..]);
+    if (std.mem.eql(u8, command, "artifact")) {
+        if (args.len < 5) return error.MissingArtifactArguments;
+        const op = args[2];
+        const namespace = args[3];
+        const key = args[4];
+        const put = std.mem.eql(u8, op, "put");
+        const get = std.mem.eql(u8, op, "get");
+        const head = std.mem.eql(u8, op, "head");
+        if ((!put and !get and !head) or (put and (args.len < 6 or args.len > 7)) or
+            (get and args.len != 6) or (head and args.len != 5)) return error.InvalidArtifactArguments;
+        try ctx.prepare();
+        const maintenance = try cache.Lock.acquire(ctx, "maintenance", false);
+        defer maintenance.release();
+        const lock = try cache.Lock.acquire(ctx, try cache.artifactKey(ctx, namespace, key), put);
+        defer lock.release();
+        if (put) {
+            try cache.storeArtifact(ctx, namespace, key, args[5], if (args.len == 7) args[6] else "{}");
+            try ctx.out("{\"stored\":true}\n");
+            return 0;
+        }
+        if (try cache.fetchArtifact(ctx, namespace, key, if (get) args[5] else null)) return 0;
+        try ctx.out("{\"hit\":false}\n");
+        return 3;
+    }
     if (std.mem.eql(u8, command, "--version")) {
         try ctx.out("nanocompile 0.1.0 (Zig 0.17.0)\n");
         return 0;

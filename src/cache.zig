@@ -218,7 +218,9 @@ pub fn unseal(ctx: *Context, bytes: []const u8) ![]const u8 {
 pub const Dependency = struct { path: []const u8, hash: []const u8, directory: bool = false, libraries: bool = false, library_prefix: ?[]const u8 = null, all_members: bool = false };
 pub const Output = struct { path: []const u8, hash: []const u8, mode: u32 };
 const entry_schema = 5;
+pub const ArtifactInfo = struct { namespace: []const u8, key: []const u8, metadata: []const u8 };
 pub const Entry = struct {
+    artifact: ?ArtifactInfo = null,
     schema: u32 = entry_schema,
     dependencies: []const Dependency,
     outputs: []const Output,
@@ -294,14 +296,57 @@ pub fn store(ctx: *Context, key: []const u8, dependencies: []const Dependency, o
         .stdout = try putBytes(ctx, stdout),
         .stderr = try putBytes(ctx, stderr),
     };
-    const bytes = try std.json.Stringify.valueAlloc(ctx.a, entry, .{});
+    const bytes = try std.json.Stringify.valueAlloc(ctx.a, entry, .{ .emit_null_optional_fields = false });
     try ctx.atomic(try ctx.path(&.{ "entries", key }), try seal(ctx, bytes));
+}
+
+/// Opaque task artifacts share sealed entries, CAS blobs, GC and R2 transport.
+/// Task input discovery and archive extraction belong to the calling build tool.
+pub fn artifactKey(ctx: *Context, namespace: []const u8, key: []const u8) ![]const u8 {
+    if (namespace.len == 0 or namespace.len > 1024 or key.len == 0 or key.len > 1024) return error.InvalidArtifactIdentity;
+    var h = Hash.init(.{});
+    field(&h, "nanocompile-opaque-artifact-v1");
+    field(&h, namespace);
+    field(&h, key);
+    return finish(ctx.a, &h);
+}
+
+pub fn storeArtifact(ctx: *Context, namespace: []const u8, key: []const u8, source: []const u8, metadata_: []const u8) !void {
+    if (metadata_.len > 8192) return error.ArtifactMetadataTooLarge;
+    _ = try std.json.parseFromSlice(std.json.Value, ctx.a, metadata_, .{});
+    const entry: Entry = .{
+        .artifact = .{ .namespace = namespace, .key = key, .metadata = metadata_ },
+        .dependencies = &.{},
+        .outputs = &.{.{ .path = "artifact", .hash = try putFile(ctx, source), .mode = 0o600 }},
+        .stdout = try putBytes(ctx, ""),
+        .stderr = try putBytes(ctx, ""),
+    };
+    const bytes = try std.json.Stringify.valueAlloc(ctx.a, entry, .{});
+    try ctx.atomic(try ctx.path(&.{ "entries", try artifactKey(ctx, namespace, key) }), try seal(ctx, bytes));
+}
+
+pub fn fetchArtifact(ctx: *Context, namespace: []const u8, key: []const u8, destination: ?[]const u8) !bool {
+    const identity = try artifactKey(ctx, namespace, key);
+    const entry = parseEntry(ctx, ctx.read(try ctx.path(&.{ "entries", identity })) catch return false) catch return false;
+    const info = entry.artifact orelse return false;
+    if (entry.schema != entry_schema or entry.dependencies.len != 0 or entry.outputs.len != 1 or
+        !std.mem.eql(u8, info.namespace, namespace) or !std.mem.eql(u8, info.key, key) or
+        !std.mem.eql(u8, entry.outputs[0].path, "artifact")) return false;
+    const source = blobPath(ctx, entry.outputs[0].hash) catch return false;
+    const actual = ctx.digest(source) catch return false;
+    if (!std.mem.eql(u8, actual, entry.outputs[0].hash)) return false;
+    const st = try Dir.cwd().statFile(ctx.io, source, .{});
+    if (destination) |out_| try materialize(ctx, source, out_, 0o600);
+    const result = try std.json.Stringify.valueAlloc(ctx.a, .{ .hit = true, .bytes = st.size, .metadata = info.metadata }, .{});
+    try ctx.out(result);
+    try ctx.out("\n");
+    return true;
 }
 
 pub fn restore(ctx: *Context, key: []const u8, allowed_outputs: []const []const u8) !bool {
     const bytes = ctx.read(try ctx.path(&.{ "entries", key })) catch return false;
     const entry = parseEntry(ctx, bytes) catch return false;
-    if (entry.schema != entry_schema or entry.outputs.len != allowed_outputs.len) return false;
+    if (entry.artifact != null or entry.schema != entry_schema or entry.outputs.len != allowed_outputs.len) return false;
     // One crate graph can record many prefixes in the same Cargo directory,
     // and explicit externs can also appear in the transitive graph. Reuse the
     // enumeration and content hashes only within this restore. No metadata

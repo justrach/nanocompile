@@ -52,6 +52,23 @@ Set `NANOCOMPILE_DIR` to choose a shared cache location. Its default is `$XDG_CA
 
 GC is explicit, so the normal compilation path does not scan the entire store. It removes orphan blobs and evicts entries by recorded access time until the unique artifact bytes fit the requested budget. Filesystem access-time policies make this an approximate eviction order. The quota covers blobs; metadata and toolchain identities are additional space. `clear` removes artifacts, Rust classification memos, private diagnostic files and counters while retaining validated toolchain identities and shared Rust toolchain-file digests to avoid paying their initial fingerprinting cost again.
 
+## Turborepo task artifacts
+
+The [Turborepo example](examples/turborepo/README.md) adds a signed remote task
+cache backed by the same Zig CAS. Turbo discovers task inputs and restores
+archives; a small Python loopback API adapter stores/verifies opaque artifacts
+through `nanocompile artifact put|get|head`. The two-package JSON/HTML example
+proves remote hits after outputs and client-local cache are removed, dependency
+and environment invalidation, corruption repair, GC, clear and snapshot restore.
+Task artifacts also travel through the existing R2 snapshot transport. This is
+a development adapter, with the hosted actual-R2 check available as a manual
+workflow; it is not a deployed public cache service.
+
+```sh
+npm ci --prefix examples/turborepo --ignore-scripts --no-audit --no-fund
+python3 tests/turbo_integration.py zig-out/bin/nanocompile
+```
+
 ## Cache correctness and storage
 
 Compilation keys include compiler arguments, the full environment, working directory, runtime host CPU/OS identity, and a toolchain content fingerprint. Rust dependencies come from rustc's dep-info, explicit externs, and the compiled crate's dependency metadata. Source directory membership tracks file-versus-directory module resolution; library lookup guards track the dependency graph's full filename prefixes when matching metadata confirms rustc's primary search succeeds, and all candidates when it falls back. Unrelated Cargo outputs can appear without invalidating an entry. Zig dependencies come from tokenized literal imports, module definitions, and embedded files.

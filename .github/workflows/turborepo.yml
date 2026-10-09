@@ -1,0 +1,40 @@
+name: Turborepo task cache and R2
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  task-cache:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, macos-26]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    env:
+      R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+      R2_BUCKET: ${{ secrets.R2_BUCKET }}
+      R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - name: Install Zig and locked Turborepo example
+        run: |
+          python3 tools/install_zig.py "$RUNNER_TEMP/zig"
+          npm ci --prefix examples/turborepo --ignore-scripts --no-audit --no-fund
+      - name: Build Zig artifact backend
+        run: zig build -Doptimize=ReleaseFast
+      - name: Prepare R2 SDK
+        run: |
+          python3 -m venv "$RUNNER_TEMP/r2-venv"
+          "$RUNNER_TEMP/r2-venv/bin/pip" install 'boto3>=1.36,<2'
+      - name: Restore signed task artifacts through actual R2
+        run: |
+          "$RUNNER_TEMP/r2-venv/bin/python" tests/turbo_integration.py \
+            zig-out/bin/nanocompile --output bench-results/turborepo.json \
+            --r2-snapshot "turbo-${{ matrix.os }}-${{ github.run_id }}"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: turborepo-${{ matrix.os }}
+          path: bench-results/
