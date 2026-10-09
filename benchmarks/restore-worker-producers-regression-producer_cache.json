@@ -1,0 +1,49 @@
+{
+  "platform": "darwin",
+  "cargo_flags": true,
+  "binary_sha256": "0edfe90cdc1ed5a6354bc24361fca1e0acb31454ba27dc832616aa5c6efc96c5",
+  "probe_sha256": "8934768ef686edca06564be6b0111cfe7bb89a850dac5165d2f643a995c3f124",
+  "direct_cold_warm_artifacts_equal": true,
+  "diagnostics_replayed": true,
+  "loaded_macro_values": [
+    12,
+    12,
+    12,
+    13,
+    14,
+    14,
+    14,
+    14,
+    14,
+    14
+  ],
+  "native_preserved_mtime_change_detected": true,
+  "source_change_detected": true,
+  "corrupt_blob_and_manifest_repaired": true,
+  "failed_compilation_not_cached": true,
+  "unsupported_debug_and_default_policy_bypass": true,
+  "limits": "experimental opt-in; Apple default driver; debug-info zero; no cross-target or custom linker; no project speed claim",
+  "provenance": {
+    "core_revision": "80e72e4f959c4458c4f680a93a2b03070514ddf1",
+    "zig_version": "0.17.0",
+    "source_sha256": {
+      "benchmarks/experiments/restore_worker_producers.zig": "fdd0560533fbd8b97a39c7f1dd9b2a6df2f7e01940d74f26ab48265cfb3b15ed",
+      "benchmarks/experiments/restore_worker_front_producers.c": "2388fe1d813f98d3df1cce93e76cc2c8f8835cdd331c570d95cf57bcdc8b153d",
+      "benchmarks/experiments/restore_worker_transport_memory.c": "76c13e94d13f06326686b8a1af8116c968e355f95f4f1c35ead3919a8b0a0b56",
+      "benchmarks/experiments/restore-worker-producers.patch": "21f96c156c8f715c127039d3f980f0afa99798fab2928d487d502c2d7e43566c",
+      "benchmarks/experiments/restore_worker_producer_check.py": "1cc8c1042b39fbb143690d6b02efc3c2a6cd5d03df3f530d9ecd54d08d40f3d1",
+      "benchmarks/experiments/restore_worker_producer_pair.py": "7346f17bd9f1dded38ae0fefb7555424fe3f94114ac96a8c011c85ea0b2b39b1",
+      "benchmarks/experiments/restore_worker_pair.py": "a5d2330bd895ff9b1b8386a7a04d5805f2034ba156da7b0a941ea94e424ab40f",
+      "benchmarks/experiments/restore_worker_pool.py": "3e2c2037ec3a364fbc72a306caca14779d035a09e6194fc77f4d9d25c1dafa4b",
+      "benchmarks/experiments/restore_worker_check.py": "b0b1a39cf26b6cf6eed798822b5f00c34c168acc53f19a039fc997856d1e95d9",
+      "tests/producer_cache.py": "8934768ef686edca06564be6b0111cfe7bb89a850dac5165d2f643a995c3f124",
+      "tests/executable_cache.py": "f9d44f74ef3cc1d0bef4fbf43f8c3301a9d87f945d6a80d092bd7c68c8f38a48"
+    },
+    "executable_sha256": {
+      "/tmp/nanocompile-restore-worker-producers": "774e6ee6346cd949c59f9d1c9d925ec0d04888c35b87702aa84607f31e45e05c",
+      "/tmp/nanocompile-restore-front-producers": "0edfe90cdc1ed5a6354bc24361fca1e0acb31454ba27dc832616aa5c6efc96c5",
+      "/tmp/nanocompile-restore-front-memory": "ac0f6416a5f848395ee92ecd44ec17e52e64d5742cbac12e2bf072db074860a4",
+      "zig-out/bin/nanocompile": "1f8f2a76a8bd66450fb24065a64556d74b254a946fb207cfbe7e4a83d96f0658"
+    }
+  }
+}

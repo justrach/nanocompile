@@ -1195,3 +1195,17 @@ mean savings 26.83 ms (13.73 ms standard error). IPC declines fall from 42 to
 six per candidate build; 136 hits are actually served by workers. The gain is
 modest and variable. The prototype remains experimental and production is
 unchanged; raw samples, source patches and reproduction instructions are public.
+
+## Producer worker dispatch
+
+The [third worker experiment](../docs/restore-worker-producers-experiment.md)
+serves cached opt-in macro and executable producers with the accepted observer
+identity, live Apple queries and full content validation. Fifteen general checks
+and the actual macro/executable regression suites pass. A 27-pair session against
+the accepted wrapper measures 2.694806 → 2.660769 s, with 22 wins, but includes
+earlier worker changes. The separate comparison with ordinary-only dispatch and
+the same Zig backend measures 2.680255 → 2.687345 s, with 15 wins; mean paired
+savings are 11.84 ms with 17.52 ms standard error. Serving 167 versus 136 worker
+hits is proven, but a dependable incremental speed gain is not. All artifacts
+match and tracked source contents remain unchanged. This remains experimental;
+production and the accepted kache comparison are unchanged.

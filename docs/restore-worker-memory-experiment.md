@@ -119,3 +119,8 @@ sources and measurements remain available. Normal production code, CLI and
 installed executable are unchanged. The next worker iteration can investigate
 the producer hits still executing in the normal wrapper, while retaining its
 observer identity, live native selection, complete validation and miss fallback.
+
+The subsequent [producer-worker experiment](restore-worker-producers-experiment.md)
+serves cached opt-in producers using the accepted observer identity. Its direct
+27-pair dispatch comparison serves 31 additional worker hits per build, but does
+not establish a dependable incremental speed gain. Production remains unchanged.

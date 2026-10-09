@@ -1,0 +1,108 @@
+--- a/src/cache.zig
++++ b/src/cache.zig
+@@ -37,6 +37,10 @@
+     cwd: []const u8,
+     compiler_identity: ?[]const u8 = null,
+     compiler_epoch: ?[]const u8 = null,
++    restore_only: bool = false,
++    producer_observer: ?[]const u8 = null,
++    stdout_capture: ?*std.ArrayList(u8) = null,
++    stderr_capture: ?*std.ArrayList(u8) = null,
+ 
+     pub fn init(a: std.mem.Allocator, io: std.Io, env: *std.process.Environ.Map) !Context {
+         const root = env.get("NANOCOMPILE_DIR") orelse try std.fs.path.join(a, &.{
+@@ -60,12 +64,28 @@
+     }
+ 
+     pub fn out(self: *Context, bytes: []const u8) !void {
++        if (self.stdout_capture) |buffer| {
++            if (bytes.len > 64 * 1024 * 1024 -| buffer.items.len) return error.DiagnosticTooLarge;
++            return buffer.appendSlice(self.a, bytes);
++        }
+         try std.Io.File.stdout().writeStreamingAll(self.io, bytes);
++    }
++
++    pub fn err(self: *Context, bytes: []const u8) !void {
++        if (self.stderr_capture) |buffer| {
++            if (bytes.len > 64 * 1024 * 1024 -| buffer.items.len) return error.DiagnosticTooLarge;
++            return buffer.appendSlice(self.a, bytes);
++        }
++        try std.Io.File.stderr().writeStreamingAll(self.io, bytes);
+     }
+ 
+     pub fn trace(self: *Context, reason: []const u8) void {
+         if (self.env.get("NANOCOMPILE_TRACE")) |v| {
+-            if (std.mem.eql(u8, v, "1")) std.debug.print("nanocompile: {s}\n", .{reason});
++            if (std.mem.eql(u8, v, "1")) {
++                if (self.stderr_capture != null) {
++                    self.err(std.fmt.allocPrint(self.a, "nanocompile: {s}\n", .{reason}) catch return) catch {};
++                } else std.debug.print("nanocompile: {s}\n", .{reason});
++            }
+         }
+     }
+ 
+@@ -525,7 +545,7 @@
+     if (!std.mem.eql(u8, try finish(ctx.a, &h), entry.stderr)) return false;
+     for (entry.outputs) |output| try materialize(ctx, try blobPath(ctx, output.hash), output.path, output.mode);
+     try ctx.out(stdout);
+-    try std.Io.File.stderr().writeStreamingAll(ctx.io, stderr);
++    try ctx.err(stderr);
+     return true;
+ }
+ 
+--- a/src/compiler.zig
++++ b/src/compiler.zig
+@@ -511,6 +511,7 @@
+ }
+ 
+ fn bypass(ctx: *cache.Context, argv: []const []const u8, reason: []const u8) !u8 {
++    if (ctx.restore_only) return 200;
+     ctx.trace(reason);
+     ctx.event("bypass");
+     var child = try std.process.spawn(ctx.io, .{ .argv = argv, .environ_map = ctx.env });
+@@ -537,7 +538,10 @@
+     defer maintenance.release();
+     const driver = identity.selectedExecutable(ctx, "cc") catch return bypass(ctx, argv, "bypass: producer driver unavailable");
+     const selected = native_identity.apple(ctx, driver) catch return bypass(ctx, argv, "bypass: producer driver selection unsupported");
+-    const binary = std.process.executablePathAlloc(ctx.io, ctx.a) catch return bypass(ctx, argv, "bypass: producer observer unavailable");
++    const binary = if (ctx.restore_only)
++        ctx.producer_observer orelse return bypass(ctx, argv, "bypass: worker observer unavailable")
++    else std.process.executablePathAlloc(ctx.io, ctx.a) catch return bypass(ctx, argv, "bypass: producer observer unavailable");
++    if (!std.fs.path.isAbsolute(binary)) return bypass(ctx, argv, "bypass: observer must be absolute");
+     const base_key = keyFor(ctx, .rust, argv) catch return bypass(ctx, argv, "bypass: producer compiler identity unavailable");
+     const compiler_epoch = ctx.compiler_epoch orelse return bypass(ctx, argv, "bypass: producer compiler state unavailable");
+     const binary_hash = ctx.digest(binary) catch return bypass(ctx, argv, "bypass: producer observer cannot be fingerprinted");
+@@ -569,6 +573,7 @@
+         ctx.event("hit");
+         return 0;
+     }
++    if (ctx.restore_only) return 200;
+     var before: std.ArrayList(cache.Dependency) = .empty;
+     try before.appendSlice(ctx.a, dependencyRecords(ctx, plan.dependencies) catch return bypass(ctx, argv, "bypass: producer inputs unavailable"));
+     try before.appendSlice(ctx.a, rust_dependencies.nativeSnapshot(ctx, plan.native_dirs) catch return bypass(ctx, argv, "bypass: producer native search unsupported"));
+@@ -612,7 +617,7 @@
+         try cache.materialize(ctx, private, path, @intCast(st.permissions.toMode()));
+     }
+     try ctx.out(result.stdout);
+-    try std.Io.File.stderr().writeStreamingAll(ctx.io, result.stderr);
++    try ctx.err(result.stderr);
+     const code = exitCode(result.term);
+     if (code != 0) {
+         ctx.event("failed");
+@@ -675,6 +680,7 @@
+         return 0;
+     }
+     var before: std.ArrayList(cache.Dependency) = .empty;
++    if (ctx.restore_only) return 200;
+     try before.appendSlice(ctx.a, dependencyRecords(ctx, plan.dependencies) catch return bypass(ctx, argv, "bypass: cannot fingerprint inputs"));
+     const native = rust_dependencies.nativeSnapshot(ctx, plan.native_dirs) catch |err|
+         return bypass(ctx, argv, try std.fmt.allocPrint(ctx.a, "bypass: native inputs unavailable ({s})", .{@errorName(err)}));
+@@ -684,7 +690,7 @@
+     ctx.trace("miss: compiling");
+     const result = try std.process.run(ctx.a, ctx.io, .{ .argv = argv, .environ_map = ctx.env });
+     try ctx.out(result.stdout);
+-    try std.Io.File.stderr().writeStreamingAll(ctx.io, result.stderr);
++    try ctx.err(result.stderr);
+     const code = exitCode(result.term);
+     if (code != 0) {
+         ctx.event("failed");
