@@ -51,7 +51,7 @@ else:
         warm, second = run()
         assert first == second
         if capable:
-            assert 'clang_native_hit' in events()[len(before):]
+            assert 'clang_native_hit' in events()[len(before):], {'compiler': report['compiler_version'], 'cold_stderr': cold.stderr.decode(errors='replace'), 'warm_stderr': warm.stderr.decode(errors='replace'), 'events': events()[len(before):]}
             assert b'compile job cache miss' in cold.stderr and b'compile job cache hit' in warm.stderr
             direct = [clang, '-isysroot', sdk, '-fdepscan=inline', '-Xclang', '-fcas-path', '-Xclang', str(root/'direct-cas'),
                       '-Xclang', '-fcache-compile-job', '-Xclang', '-fcache-disable-replay', *flags]
