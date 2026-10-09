@@ -145,10 +145,17 @@ unfinished.
 Hosted live ownership capture passed on Mac in
 [run 37939634123](https://github.com/justrach/nanocompile/actions/runs/37939634123),
 but the Linux real C-link check failed with `FileNotFound` during reported-input
-classification after the driver returned success. Missing reported inputs
-continue to invalidate discovery. The observer now records the failing input
-path for diagnosis; driver-created temporary inputs and the final-link capture
-boundary need verification before Linux producer eligibility can be enabled.
+classification after the driver returned success. The follow-up
+[run 37940933136](https://github.com/justrach/nanocompile/actions/runs/37940933136)
+identified `/tmp/nano` as the failing input: the Make lexer split a filename
+containing spaces. GNU ld's [dependency writer](https://github.com/RTEMS/sourceware-mirror-binutils-gdb/blob/master/ld/ldmain.c)
+writes raw filenames on individually indented lines and repeats them as phony
+rules; LLD escapes prerequisite names. The reader now binds GNU's exact layout
+to the expected output and requires every matching raw phony rule, preserving
+spaces, dollars, colons and backslashes without guessing token combinations.
+Truncated or mismatched layouts are rejected. Missing actual inputs still
+invalidate discovery. Local parser tests pass; hosted verification of this
+fix remains pending.
 
 Output placement is now probed by `tests/producer_placement.py` with absolute
 and relative directories, default and optimized codegen, and full debug info.
