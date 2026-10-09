@@ -1,0 +1,38 @@
+{
+  "scope": "Local Apple Clang fixture verification only; no Cargo speedup or production adapter claim.",
+  "compiler": "/Library/Developer/CommandLineTools/usr/bin/clang",
+  "compiler_sha256": "1590ac950a3d627817d09ade5cb60b2115f17a72182a3141e010b4bcc482a0c9",
+  "compiler_version": "Apple clang version 21.0.0 (clang-2100.3.34.2)\nTarget: arm64-apple-darwin27.0.0\nThread model: posix\nInstalledDir: /Library/Developer/CommandLineTools/usr/bin\n",
+  "script_sha256": "434835851cc544d6c35967ea840d119f9677989d6184a782077480cb43c5c2d0",
+  "cache_flags": [
+    "-fdepscan=inline",
+    "-Xclang",
+    "-fcas-path",
+    "-Xclang",
+    "<private CAS>",
+    "-Xclang",
+    "-fcache-compile-job",
+    "-Rcompile-job-cache"
+  ],
+  "checks": [
+    {
+      "source_kind": ".c",
+      "cold_miss": true,
+      "warm_hit": true,
+      "direct_cold_warm_object_bytes_equal": true
+    },
+    {
+      "source_kind": ".S",
+      "cold_miss": true,
+      "warm_hit": true,
+      "direct_cold_warm_object_bytes_equal": true
+    },
+    {
+      "preserved_mtime_same_size_header_change_causes_miss": true,
+      "changed_object_matches_direct": true
+    },
+    {
+      "failed_compilation_returns_failure_without_object": true
+    }
+  ]
+}

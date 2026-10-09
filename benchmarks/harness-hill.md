@@ -1222,3 +1222,15 @@ error. The confirmation mean is smaller than its standard error. Every warm
 build has 167 hits and matching artifacts; tracked sources remain unchanged.
 The evidence does not justify adoption or a dependable project speedup claim.
 Production keeps the accepted buffered reader.
+
+## Warm native build-script bottleneck
+
+The [accepted Cargo timing capture](../docs/cargo-native-critical-path.md)
+shows ring's native build-script execution taking 1.88 s in each of three
+2.677–2.726 s warm builds, releasing its Rust dependencies near the end.
+All 167 artifacts match and tracked sources remain unchanged. This is diagnostic
+evidence, not a new performance comparison. Local Apple Clang CAS fixtures
+restore C and preprocessed assembly with exact object bytes and invalidate a
+preserved-mtime header change. Production is unchanged; these checks motivate
+an explicit Cargo native compiler adapter while retaining live build-script
+execution and compiler-owned dependency discovery.

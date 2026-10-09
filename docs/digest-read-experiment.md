@@ -103,3 +103,8 @@ python3 tests/project_pair_comparison.py /absolute/path/to/accepted/nanocompile 
   --state /tmp/digest-read-paired-new --runs 27 \
   --output /tmp/digest-read-paired-new.json
 ```
+
+The subsequent [accepted Cargo timing capture](cargo-native-critical-path.md)
+identifies ring's native build-script execution as a larger late-build target.
+Its 1.88 s execution persists despite Rust wrapper hits; fixture probes establish
+local Apple Clang CAS feasibility for the next native adapter experiment.
