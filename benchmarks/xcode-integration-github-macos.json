@@ -1,0 +1,115 @@
+{
+  "xcode": "Xcode 26.6\nBuild version 17F113",
+  "cases": [
+    {
+      "case": "disabled",
+      "exit_code": 0,
+      "objects": {
+        "main.o": "45197584a33170c9538b21606082278c0d75cede1afe51e015b9b5ece822b151",
+        "unit0.o": "1a999d39e5699726cb7e553a88d5da08cce306ff65840854e8d11b5028dddb16",
+        "unit3.o": "b15dc19338705e4413e3249ca5e5d9eeadb5bd32a3bfba951ea75a7d4a7bafed",
+        "unit2.o": "21e6e805644ba1dd80757a5d2eeefad025649052ad841897f7b893dee99d1712",
+        "unit1.o": "93fbef03691e3fb734e13d161037f7e4e7898b1b2b10a203f3e494ccbe8362f4"
+      },
+      "cache_hits": 0
+    },
+    {
+      "case": "explicit-no",
+      "exit_code": 0,
+      "objects": {
+        "main.o": "45197584a33170c9538b21606082278c0d75cede1afe51e015b9b5ece822b151",
+        "unit0.o": "1a999d39e5699726cb7e553a88d5da08cce306ff65840854e8d11b5028dddb16",
+        "unit3.o": "b15dc19338705e4413e3249ca5e5d9eeadb5bd32a3bfba951ea75a7d4a7bafed",
+        "unit2.o": "21e6e805644ba1dd80757a5d2eeefad025649052ad841897f7b893dee99d1712",
+        "unit1.o": "93fbef03691e3fb734e13d161037f7e4e7898b1b2b10a203f3e494ccbe8362f4"
+      },
+      "cache_hits": 0
+    },
+    {
+      "case": "cold",
+      "exit_code": 0,
+      "objects": {
+        "main.o": "4f6669a9427baf06e7f7688cf5e904d3f82e51773e5c119efd19e02250457e4f",
+        "unit0.o": "4f13f1da3e17a7a6bedd1fc0e13632449fe01eb3f9f2c871d6baa70d8ab45b8f",
+        "unit3.o": "1f8c7f5b6858331d319a3e000dfd2526801d16f4b932fe5609ef9bba66f6dea9",
+        "unit2.o": "833f8016ef6a10fae17db82c34c3c8c09d4154c529eac2578b5b482c2dcf63d5",
+        "unit1.o": "60113d28e392e60d17e949fb0754cf9dbc0554d07e6882ed668488bb80d733e0"
+      },
+      "cache_hits": 0
+    },
+    {
+      "case": "warm",
+      "exit_code": 0,
+      "objects": {
+        "main.o": "4f6669a9427baf06e7f7688cf5e904d3f82e51773e5c119efd19e02250457e4f",
+        "unit0.o": "4f13f1da3e17a7a6bedd1fc0e13632449fe01eb3f9f2c871d6baa70d8ab45b8f",
+        "unit3.o": "1f8c7f5b6858331d319a3e000dfd2526801d16f4b932fe5609ef9bba66f6dea9",
+        "unit2.o": "833f8016ef6a10fae17db82c34c3c8c09d4154c529eac2578b5b482c2dcf63d5",
+        "unit1.o": "60113d28e392e60d17e949fb0754cf9dbc0554d07e6882ed668488bb80d733e0"
+      },
+      "cache_hits": 10
+    },
+    {
+      "case": "header-preserved-mtime",
+      "exit_code": 0,
+      "objects": {
+        "main.o": "3f6c796cf5a81d012bbaee3e67c0593f7f9ebc4aa3848773d9a9be6799094b2e",
+        "unit0.o": "4f13f1da3e17a7a6bedd1fc0e13632449fe01eb3f9f2c871d6baa70d8ab45b8f",
+        "unit3.o": "1f8c7f5b6858331d319a3e000dfd2526801d16f4b932fe5609ef9bba66f6dea9",
+        "unit2.o": "833f8016ef6a10fae17db82c34c3c8c09d4154c529eac2578b5b482c2dcf63d5",
+        "unit1.o": "60113d28e392e60d17e949fb0754cf9dbc0554d07e6882ed668488bb80d733e0"
+      },
+      "cache_hits": 8
+    },
+    {
+      "case": "failed-input",
+      "exit_code": 65,
+      "objects": {
+        "unit0.o": "4f13f1da3e17a7a6bedd1fc0e13632449fe01eb3f9f2c871d6baa70d8ab45b8f",
+        "unit3.o": "1f8c7f5b6858331d319a3e000dfd2526801d16f4b932fe5609ef9bba66f6dea9",
+        "unit2.o": "833f8016ef6a10fae17db82c34c3c8c09d4154c529eac2578b5b482c2dcf63d5",
+        "unit1.o": "60113d28e392e60d17e949fb0754cf9dbc0554d07e6882ed668488bb80d733e0"
+      },
+      "cache_hits": 8
+    },
+    {
+      "case": "restored-header",
+      "exit_code": 0,
+      "objects": {
+        "main.o": "4f6669a9427baf06e7f7688cf5e904d3f82e51773e5c119efd19e02250457e4f",
+        "unit0.o": "4f13f1da3e17a7a6bedd1fc0e13632449fe01eb3f9f2c871d6baa70d8ab45b8f",
+        "unit3.o": "1f8c7f5b6858331d319a3e000dfd2526801d16f4b932fe5609ef9bba66f6dea9",
+        "unit2.o": "833f8016ef6a10fae17db82c34c3c8c09d4154c529eac2578b5b482c2dcf63d5",
+        "unit1.o": "60113d28e392e60d17e949fb0754cf9dbc0554d07e6882ed668488bb80d733e0"
+      },
+      "cache_hits": 10
+    },
+    {
+      "case": "explicit-cas",
+      "exit_code": 0,
+      "objects": {
+        "main.o": "4f6669a9427baf06e7f7688cf5e904d3f82e51773e5c119efd19e02250457e4f",
+        "unit0.o": "4f13f1da3e17a7a6bedd1fc0e13632449fe01eb3f9f2c871d6baa70d8ab45b8f",
+        "unit3.o": "1f8c7f5b6858331d319a3e000dfd2526801d16f4b932fe5609ef9bba66f6dea9",
+        "unit2.o": "833f8016ef6a10fae17db82c34c3c8c09d4154c529eac2578b5b482c2dcf63d5",
+        "unit1.o": "60113d28e392e60d17e949fb0754cf9dbc0554d07e6882ed668488bb80d733e0"
+      },
+      "cache_hits": 0
+    },
+    {
+      "case": "after-clear",
+      "exit_code": 0,
+      "objects": {
+        "main.o": "4f6669a9427baf06e7f7688cf5e904d3f82e51773e5c119efd19e02250457e4f",
+        "unit0.o": "4f13f1da3e17a7a6bedd1fc0e13632449fe01eb3f9f2c871d6baa70d8ab45b8f",
+        "unit3.o": "1f8c7f5b6858331d319a3e000dfd2526801d16f4b932fe5609ef9bba66f6dea9",
+        "unit2.o": "833f8016ef6a10fae17db82c34c3c8c09d4154c529eac2578b5b482c2dcf63d5",
+        "unit1.o": "60113d28e392e60d17e949fb0754cf9dbc0554d07e6882ed668488bb80d733e0"
+      },
+      "cache_hits": 0
+    }
+  ],
+  "passed": true,
+  "github_run_url": "https://github.com/justrach/nanocompile/actions/runs/37915406846",
+  "git_revision": "9d91c0f4d2936ad6056927c2fb0dbeabc98db14c"
+}

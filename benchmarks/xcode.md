@@ -144,6 +144,57 @@ hashes. Queries, disabled caching and explicit custom CAS paths behaved as
 requested; clearing removed the managed store and retained the external one.
 [Raw correctness results](xcode-integration.json) record every case.
 
+The completed real Harness app comparison includes the new command on the
+same local M3 Ultra / Xcode 27.1 machine, four jobs, unsigned Release iOS
+Simulator build. A fresh snapshot records Git revision
+`32b41cb0bff55e3c9cbfab3012acec2b179ad199` with local modifications and hashes
+of all 180 source files. Packages were resolved before timing; each build
+deleted dedicated Build products, preserving module/SDK caches equally.
+
+| Pipeline | Harness warm clean-build median |
+| --- | ---: |
+| Direct, native compilation cache disabled | 45.598 s |
+| nanocompile external Clang launcher | 47.086 s |
+| kache 1.0.0 external Clang launcher | 46.957 s |
+| Xcode native cache | 4.157 s |
+| `nanocompile xcodebuild`, managed native cache | **4.160 s** |
+
+The new command is **10.96× faster than the direct build** on this workload.
+Its three warm samples were 4.308, 4.147 and 4.160 seconds, each with 122
+Xcode `Cache hit` markers. The near-identical Apple-cache median confirms
+that Apple's engine supplies the gain. The managed command's cold build
+took 52.291 s, versus 52.215 s for the Apple-cache cold build; these single
+samples establish no cold-build advantage.
+
+All 20 builds succeeded and produced 440 objects/archives. Every warm build
+matches its pipeline's cold artifacts by SHA-256, and all 20 app executable
+checksums are identical. Sampled process-tree RSS peaked at 5.09 GiB. Both
+external Clang launchers again had zero hits and 73 bypass/passthrough calls
+per build. [Raw Harness results](xcode-managed-harness.json) include every
+sample, source hash, artifact hash, refusal reason and app check.
+
+The new command and the same invalidation suite also passed on a hosted
+macOS 26.6.2 arm64 machine with Xcode 26.6 (17F113). The 33-object C fixture
+completed 20 builds, three warm samples for each pipeline, with matching warm
+object hashes and successful executable checks:
+
+| Pipeline | Hosted Mac warm median |
+| --- | ---: |
+| Direct, native compilation cache disabled | 2.962 s |
+| nanocompile Clang launcher, zero cache hits | 2.694 s |
+| kache Clang launcher, zero cache hits | 2.973 s |
+| Xcode native cache | 2.206 s |
+| `nanocompile xcodebuild`, managed native cache | 2.118 s |
+
+Small differences between the two native-cache pipelines are ordinary
+measurement variation, not evidence that nanocompile improves Apple's cache
+engine. Likewise the external launcher's lower median has no recorded cache
+hits and cannot be credited to compiler caching.
+[Raw comparison](xcode-managed-github-macos.json),
+[invalidation results](xcode-integration-github-macos.json) and the
+[successful hosted run](https://github.com/justrach/nanocompile/actions/runs/37915406846)
+record the measurements and checks.
+
 The managed CAS is currently local. R2 snapshots and the nanocompile GC blob
 budget do not include it. Clang compatibility work can still follow kache's
 recorded refusal flags, while Rust coverage and cold-cache costs remain

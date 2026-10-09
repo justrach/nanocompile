@@ -96,7 +96,7 @@ Working directories and output paths remain in keys, preserving embedded paths a
 
 The [Harness hill climb](benchmarks/harness-hill.md) now measures **19.31 s for the default mode versus 25.16 s direct**, with 90–91 cache hits. Kache still takes 2.16 s on that comparison. The cold-cache regression and the optional reported-input macro experiment are recorded alongside the results.
 
-The [Xcode comparison](benchmarks/xcode.md) adds real `xcodebuild` workloads and an Xcode-native compilation-cache baseline. On the real Harness iOS app, direct builds take 46.77 s, nanocompile 48.43 s, kache 48.75 s, and Xcode's native cache 4.17 s. Both external tools record zero hits for this Xcode command profile; Swift caching is not implemented by either external tool.
+The [Xcode comparison](benchmarks/xcode.md) measures real `xcodebuild` workloads against kache and Xcode's native compilation cache. On the latest Harness iOS app comparison, direct builds take **45.60 s**, the external nanocompile Clang launcher 47.09 s, kache 46.96 s, and **`nanocompile xcodebuild` 4.16 s**. The new command uses Apple's native Swift/Clang cache; the two external compiler launchers record zero cache hits for this Xcode command profile. Correctness checks and the five-pipeline comparison also passed on a hosted Mac.
 
 ## Xcode native cache
 
