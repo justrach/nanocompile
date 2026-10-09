@@ -1,6 +1,6 @@
 # nanocompile
 
-A local, content-addressed compiler cache written in **stable Zig 0.17.0**, for Rust and Zig. It adapts kache's shared-blob storage, copy-on-write restoration, and single-flight compilation ideas into a small standalone program.
+A local, content-addressed compiler cache written in **stable Zig 0.17.0**, for Rust and Zig, with an opt-in Xcode native-cache command. It adapts kache's shared-blob storage, copy-on-write restoration, and single-flight compilation ideas into a small standalone program.
 
 This implementation targets repeated compilation of unchanged inputs. It is an early implementation with explicit eligibility gates; unsupported invocations run the original compiler.
 
@@ -97,6 +97,22 @@ Working directories and output paths remain in keys, preserving embedded paths a
 The [Harness hill climb](benchmarks/harness-hill.md) now measures **19.31 s for the default mode versus 25.16 s direct**, with 90–91 cache hits. Kache still takes 2.16 s on that comparison. The cold-cache regression and the optional reported-input macro experiment are recorded alongside the results.
 
 The [Xcode comparison](benchmarks/xcode.md) adds real `xcodebuild` workloads and an Xcode-native compilation-cache baseline. On the real Harness iOS app, direct builds take 46.77 s, nanocompile 48.43 s, kache 48.75 s, and Xcode's native cache 4.17 s. Both external tools record zero hits for this Xcode command profile; Swift caching is not implemented by either external tool.
+
+## Xcode native cache
+
+Use `nanocompile xcodebuild` on macOS to enable Xcode's own Swift/Clang compilation cache. This command manages a private CAS directory under `NANOCOMPILE_DIR/xcode`, separated by Xcode version/build, developer directory and CPU architecture. Xcode owns the dependency discovery, cache keys and diagnostic replay. Signing, destinations, project settings and output paths retain their normal Xcode behavior.
+
+```sh
+DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer \
+  "$nano_wrapper" xcodebuild -project MyApp.xcodeproj -scheme MyApp build
+
+# Verify native restoration and changed-header invalidation with real Xcode
+python3 tests/xcode_integration.py --nanocompile "$nano_wrapper"
+```
+
+The command defaults `COMPILATION_CACHE_ENABLE_CACHING=YES`, `COMPILATION_CACHE_KEEP_CAS_DIRECTORY=YES` and a managed `COMPILATION_CACHE_CAS_PATH`. Explicit command-line values take precedence. `NANOCOMPILE_DISABLE=1`, explicit caching `NO`/`0`, queries and package-resolution/export commands pass through. A full Xcode installation must already be selected or supplied through `DEVELOPER_DIR`.
+
+`stats` reports native invocations/failures separately from Rust/Zig hits. `clear` removes the managed Xcode CAS while coordinating with active wrapper builds; it preserves explicit external CAS paths. The blob budget in `gc` and the R2 transport currently cover Rust/Zig storage only. Native Xcode CAS storage is local and has no nanocompile size quota yet.
 
 ## Experimental R2 testing
 

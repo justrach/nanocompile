@@ -328,12 +328,16 @@ pub fn stats(ctx: *Context) !void {
     var miss: usize = 0;
     var bypass: usize = 0;
     var failed: usize = 0;
+    var xcode_runs: usize = 0;
+    var xcode_failed: usize = 0;
     var it = std.mem.tokenizeScalar(u8, events, '\n');
     while (it.next()) |event| {
         if (std.mem.eql(u8, event, "hit")) hit += 1;
         if (std.mem.eql(u8, event, "miss")) miss += 1;
         if (std.mem.eql(u8, event, "bypass")) bypass += 1;
         if (std.mem.eql(u8, event, "failed")) failed += 1;
+        if (std.mem.eql(u8, event, "xcode_native_run")) xcode_runs += 1;
+        if (std.mem.eql(u8, event, "xcode_native_failed")) xcode_failed += 1;
     }
     var blobs: usize = 0;
     var size: u64 = 0;
@@ -346,13 +350,14 @@ pub fn stats(ctx: *Context) !void {
         size += (try item.dir.statFile(ctx.io, item.basename, .{})).size;
     };
     try ctx.out(try std.fmt.allocPrint(ctx.a, "hits: {d}\nmisses: {d}\nbypasses: {d}\nfailed compilations: {d}\nblobs: {d}\nlogical bytes: {d}\n", .{ hit, miss, bypass, failed, blobs, size }));
+    try ctx.out(try std.fmt.allocPrint(ctx.a, "native Xcode invocations: {d}\nnative Xcode failures: {d}\n", .{ xcode_runs, xcode_failed }));
 }
 
 pub fn clear(ctx: *Context) !void {
     try ctx.prepare();
     const lock = try Lock.acquire(ctx, "maintenance", true);
     defer lock.release();
-    for ([_][]const u8{ "entries", "blobs" }) |sub| {
+    for ([_][]const u8{ "entries", "blobs", "xcode" }) |sub| {
         try Dir.cwd().deleteTree(ctx.io, try ctx.path(&.{sub}));
         try Dir.cwd().createDirPath(ctx.io, try ctx.path(&.{sub}));
     }

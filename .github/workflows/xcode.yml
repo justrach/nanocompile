@@ -13,6 +13,8 @@ jobs:
         run: python3 tools/install_zig.py "$RUNNER_TEMP/zig"
       - name: Build nanocompile
         run: zig build -Doptimize=ReleaseFast
+      - name: Verify managed native Xcode cache
+        run: python3 tests/xcode_integration.py --nanocompile zig-out/bin/nanocompile --output bench-results/xcode-integration.json
       - name: Install pinned, verified kache 1.0.0
         run: |
           python3 - <<'PY'
@@ -39,7 +41,7 @@ jobs:
           python3 tests/xcode_comparison.py "$RUNNER_TEMP/xcode-fixture/ClangFixture.xcodeproj" \
             --scheme ClangFixture --destination platform=macOS \
             --nanocompile zig-out/bin/nanocompile --kache "$RUNNER_TEMP/kache/kache" \
-            --state "$RUNNER_TEMP/xcode-comparison" --runs 3 --native-cache \
+            --state "$RUNNER_TEMP/xcode-comparison" --runs 3 --native-cache --managed-xcode \
             --verify-executable Release/ClangFixture --output bench-results/xcode-runner.json
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()

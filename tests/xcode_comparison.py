@@ -78,6 +78,7 @@ def main():
     p.add_argument('--wrap-swift', action='store_true', help='diagnostic variant: wrap Swift and disable the integrated driver')
     p.add_argument('--verify-app', help='relative Products path of an iOS app bundle to validate')
     p.add_argument('--native-cache', action='store_true', help="also compare Xcode's compilation cache")
+    p.add_argument('--managed-xcode', action='store_true', help='also compare nanocompile xcodebuild using the native CAS')
     p.add_argument('--verify-executable', help='relative Products path of a CLI fixture to execute')
     args = p.parse_args()
     if args.runs < 1 or args.jobs < 1:
@@ -135,17 +136,17 @@ def main():
               'nanocompile_sha256': sha(Path(binary)), 'kache_sha256': sha(Path(kache)),
               'kache_version': subprocess.check_output([kache, '--version'], text=True).strip(),
               'source_files': {str(f.relative_to(source)): sha(f) for f in sorted(source.rglob('*')) if f.is_file()},
-              'method': 'copied source snapshot; resolve packages outside timing; delete only dedicated DerivedData/Build before each build; preserve SDK/module caches equally; no signing; direct and apple-cache use native tools; nanocompile/kache include Python launcher overhead; native Swift driver retained unless wrap_swift is explicit; neither external cache supports Swift; compilation caching disabled except apple-cache mode',
+              'method': 'copied source snapshot; resolve packages outside timing; delete only dedicated DerivedData/Build before each build; preserve SDK/module caches equally; no signing; direct, apple-cache and nanocompile-xcode use native tools; nanocompile/kache compiler launcher modes include Python instrumentation overhead; native Swift driver retained unless wrap_swift is explicit; native compilation caching enabled only in apple-cache and nanocompile-xcode modes',
               'wrap_swift': args.wrap_swift, 'builds': []}
     output = Path(args.output)
     output.parent.mkdir(parents=True, exist_ok=True)
     def save():
         output.write_text(json.dumps(result, indent=2) + '\n')
     def events(mode):
-        file = state / ('nano-cache/events' if mode == 'nanocompile' else 'kache-cache/events.jsonl')
+        file = state / ('nano-cache/events' if mode in ('nanocompile', 'nanocompile-xcode') else 'kache-cache/events.jsonl')
         if not file.exists():
             return collections.Counter()
-        if mode == 'nanocompile':
+        if mode in ('nanocompile', 'nanocompile-xcode'):
             return collections.Counter(file.read_text().splitlines())
         return collections.Counter(json.loads(line).get('result', 'unknown') for line in file.read_text().splitlines())
     def refused():
@@ -166,10 +167,14 @@ def main():
         peak = 0
         last_sample = 0
         build_command = list(command)
-        if mode in ('direct', 'apple-cache'):
+        if mode in ('direct', 'apple-cache', 'nanocompile-xcode'):
             build_command = [v for v in build_command if not v.startswith(('CC=', 'CXX=', 'SWIFT_EXEC=', 'SWIFT_USE_INTEGRATED_DRIVER='))]
+        if mode == 'nanocompile-xcode':
+            build_command = [binary, 'xcodebuild', *build_command[1:]]
+        if mode != 'nanocompile-xcode':
+            build_command.append('COMPILATION_CACHE_ENABLE_CACHING=' + ('YES' if mode == 'apple-cache' else 'NO'))
         with log_path.open('w') as log:
-            proc = subprocess.Popen([*build_command, 'COMPILATION_CACHE_ENABLE_CACHING=' + ('YES' if mode == 'apple-cache' else 'NO')], cwd=source, env=env, stdout=log, stderr=log, start_new_session=True)
+            proc = subprocess.Popen(build_command, cwd=source, env=env, stdout=log, stderr=log, start_new_session=True)
             while proc.poll() is None:
                 if time.monotonic() - last_sample > .5:
                     peak = max(peak, tree_rss(proc.pid))
@@ -222,7 +227,7 @@ def main():
             raise RuntimeError('Build produced no objects: cannot validate the workload')
         if row.get('matches_own_cold_objects') is False:
             raise RuntimeError('Object hashes changed; result retained but cache restoration is unproven')
-        if mode not in ('direct', 'apple-cache') and not calls:
+        if mode not in ('direct', 'apple-cache', 'nanocompile-xcode') and not calls:
             raise RuntimeError('No compiler interception: comparison is unproven')
         # A zero-hit result is valid evidence of missing Xcode coverage. Do not
         # turn passthrough builds into a claimed cache speedup.
@@ -236,7 +241,7 @@ def main():
             if daemon.poll() is not None or time.monotonic() > deadline:
                 raise RuntimeError('Private kache daemon failed to start')
             time.sleep(.1)
-        modes = ['direct', 'nanocompile', 'kache'] + (['apple-cache'] if args.native_cache else [])
+        modes = ['direct', 'nanocompile', 'kache'] + (['apple-cache'] if args.native_cache else []) + (['nanocompile-xcode'] if args.managed_xcode else [])
         build('direct', 'prime')
         for mode in modes[1:]:
             build(mode, 'cold')

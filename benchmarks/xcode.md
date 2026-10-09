@@ -110,12 +110,12 @@ python3 tests/xcode_comparison.py /tmp/xcode-fixture-new/ClangFixture.xcodeproj 
   --scheme ClangFixture --destination platform=macOS \
   --nanocompile zig-out/bin/nanocompile --kache /path/to/kache \
   --state /tmp/xcode-comparison-new --output bench-results/xcode.json \
-  --runs 3 --native-cache --verify-executable Release/ClangFixture
+  --runs 3 --native-cache --managed-xcode --verify-executable Release/ClangFixture
 
 python3 tests/xcode_comparison.py /path/to/harness/apps/ios/Harness.xcodeproj \
   --scheme Harness --nanocompile zig-out/bin/nanocompile --kache /path/to/kache \
   --state /tmp/harness-xcode-new --output bench-results/xcode-harness.json \
-  --runs 3 --native-cache --verify-app Release-iphonesimulator/Harness.app
+  --runs 3 --native-cache --managed-xcode --verify-app Release-iphonesimulator/Harness.app
 ```
 
 `--developer-dir` selects an Xcode installation for just this process; it does
@@ -125,9 +125,26 @@ diagnostic variant which disables the integrated Swift driver; it is not used
 for these default-driver results. The manual `Xcode build comparison` GitHub
 workflow runs the Clang fixture on a real Mac runner and uploads its logs/data.
 
-The measured improvement target is an explicit integration with Xcode's native
-compilation cache, whose Swift/C dependency and replay machinery already works
-for this app. This native-cache result is not a speedup supplied by nanocompile.
-Clang compatibility work should also follow the recorded refusal flags. Supporting Swift requires a Swift-specific dependency and output
-model, or an explicit integration with Xcode's native CAS. Treating a complete
-app bundle as an opaque cache entry would hide dependency errors.
+## Managed native Xcode command
+
+`nanocompile xcodebuild` now enables Xcode's native Swift/Clang cache and manages
+its CAS directory under the nanocompile cache root. The original tables above
+measure the external Clang launcher mode, not this new command. Run with
+`--managed-xcode` to add a separate `nanocompile-xcode` pipeline using native
+compiler tools and a private managed CAS. Any speedup in that pipeline comes
+from Apple's compiler cache; nanocompile supplies configuration and lifecycle
+management.
+
+The real-Xcode integration test passed locally on Xcode 27.1. It deletes the
+entire DerivedData directory between builds and checks object hashes and the
+executable's output. Warm compilation restored all five jobs. A header edit
+with preserved mtime changed the executable output, an invalid header produced
+Xcode exit code 65, and restoring the header recovered the original object
+hashes. Queries, disabled caching and explicit custom CAS paths behaved as
+requested; clearing removed the managed store and retained the external one.
+[Raw correctness results](xcode-integration.json) record every case.
+
+The managed CAS is currently local. R2 snapshots and the nanocompile GC blob
+budget do not include it. Clang compatibility work can still follow kache's
+recorded refusal flags, while Rust coverage and cold-cache costs remain
+separate improvement targets.

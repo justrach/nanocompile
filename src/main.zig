@@ -2,6 +2,7 @@ const std = @import("std");
 const builtin = @import("builtin");
 const cache = @import("cache.zig");
 const compiler = @import("compiler.zig");
+const xcode = @import("xcode.zig");
 
 comptime {
     if (builtin.os.tag != .macos and builtin.os.tag != .linux)
@@ -15,6 +16,7 @@ const help =
     \\Usage:
     \\  nanocompile zig build-exe|build-obj|build-lib FILE -femit-bin=OUTPUT [FLAGS]
     \\  nanocompile rustc [RUSTC FLAGS]
+    \\  nanocompile xcodebuild [XCODE FLAGS]  use Xcode native Swift/Clang CAS (macOS)
     \\  RUSTC_WRAPPER=/absolute/path/nanocompile cargo build
     \\  nanocompile stats | clear | doctor
     \\  nanocompile gc [MAX_BYTES]  remove orphan blobs and evict to a budget
@@ -50,6 +52,7 @@ fn dispatch(ctx: *cache.Context, args: []const [:0]const u8) !u8 {
         return 0;
     }
     const command = args[1];
+    if (std.mem.eql(u8, command, "xcodebuild")) return xcode.execute(ctx, args[2..]);
     if (std.mem.eql(u8, command, "--version")) {
         try ctx.out("nanocompile 0.1.0 (Zig 0.17.0)\n");
         return 0;
