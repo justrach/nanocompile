@@ -1,0 +1,25 @@
+{
+  "source": "rmeta-priority Harness comparison manifests",
+  "binary_sha256": "5084c1b9a76b0e403aff6b7518d45f56dbc7eed615cc77c77af3c7b4444310b8",
+  "baseline_report": "harness-restore-inputs.json",
+  "manifest_summaries": [
+    {
+      "crate": "harness_adapters",
+      "manifest_bytes": 91538,
+      "dependencies": 377,
+      "unique_files": 202,
+      "dependency_bytes": 121963373,
+      "rlib_files": 0,
+      "rmeta_files": 120
+    },
+    {
+      "crate": "reqwest",
+      "manifest_bytes": 72448,
+      "dependencies": 290,
+      "unique_files": 143,
+      "dependency_bytes": 84881734,
+      "rlib_files": 0,
+      "rmeta_files": 88
+    }
+  ]
+}

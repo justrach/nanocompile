@@ -740,10 +740,10 @@ fn save(ctx: *cache.Context, key: []const u8, plan: Plan, argv: []const []const 
         try records.append(ctx.a, .{ .path = dir, .hash = try ctx.directoryDigest(dir, false, plan.outputs), .directory = true });
     }
     if (!plan.producer and plan.dep_info != null and directories.len != 0)
-        try rust_dependencies.collect(ctx, argv, plan.outputs, directories, started, &records);
+        try rust_dependencies.collect(ctx, argv, plan.outputs, directories, started, &records, true);
     if (plan.producer) {
         for (plan.dependencies) |path| if (std.mem.endsWith(u8, path, ".rlib") or std.mem.endsWith(u8, path, ".rmeta")) {
-            try rust_dependencies.collect(ctx, argv, &.{path}, directories, started, &records);
+            try rust_dependencies.collect(ctx, argv, &.{path}, directories, started, &records, false);
         };
         try records.appendSlice(ctx.a, linker);
     }

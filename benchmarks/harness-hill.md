@@ -640,3 +640,46 @@ The observed warm median is 9.3% below the last accepted 3.264 s run, across
 separate comparisons. Samples are 2.999, 2.932 and 2.961 s. This iteration is
 adopted; kache still leads and the cold-cache overhead remains substantial.
 The performance evidence is local macOS, not a Linux speedup claim.
+
+## Metadata priority for ordinary Rust libraries
+
+The [Rust 1.97.1 loader](https://github.com/rust-lang/rust/blob/8bab26f4f68e0e26f0bb7960be334d5b520ea452/compiler/rustc_metadata/src/locator.rs#L500)
+reads rmeta first and can skip the companion rlib flavor when compiling a
+library. The cache now omits an archive from transitive content validation
+only when its exact same-stem rmeta matches the dependency's name, crate hash,
+target and ordinary-crate kind. It still hashes the entire metadata file and
+guards directory membership. Explicit extern archives, unmatched candidates,
+broad fallback, proc macros and producer collection retain their full checks.
+
+The [real three-crate probe](../tests/rmeta_priority_probe.py) verifies identical
+direct and restored artifacts after corrupting an unused companion archive,
+including a preserved-mtime mutation. Missing, corrupt and mismatched metadata
+force archive fallback. A metadata byte change with an unchanged root identity
+still causes a miss; competing candidate changes and explicit archive mutation
+also invalidate entries. A final executable rejects the corrupt archive.
+[Probe results](rmeta-priority-probe.json) record the compiler and binary checksums.
+The fixture runs in both Linux and macOS CI.
+
+[Manifest inspection](harness-rmeta-restore-inputs.json) shows `harness_adapters`
+now validates 202 unique files totaling 122 MB, versus the earlier 322 files
+and 252 MB. Reqwest validates 143 files and 85 MB, versus 231 files and 170 MB.
+These are fewer unused inputs, not partial hashes of consumed inputs.
+
+[Full Harness results](harness-hill-rmeta-priority.json) retain twelve clean
+builds with four jobs and the same reported consumer and experimental Apple
+producer policies. All 135 libraries, ten macro dylibs and 21 build-script
+executables match direct Cargo. Each warm Nano build records 165 hits and the
+tracked Rust source/manifests remain unchanged. R2 is excluded.
+
+| Implementation | Warm median | Cold build |
+| --- | ---: | ---: |
+| Direct Cargo | 22.710 s | 25.240 s prime |
+| nanocompile | 2.822 s | 38.115 s |
+| kache daemon | 2.095 s | 26.684 s |
+
+Nano samples are 2.822, 2.817 and 2.873 s. The warm median is 4.7% below the
+preceding accepted 2.961 s measurement, across separate comparisons; the
+direct and kache medians also changed, so this is not a controlled A/B
+attribution. This iteration is adopted for the proven reduction in validation
+work and the observed project result. Kache remains faster, cold overhead is
+still substantial, and these timings establish only local macOS performance.

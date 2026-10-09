@@ -78,7 +78,25 @@ pub fn parse(a: std.mem.Allocator, bytes: []const u8, reported: bool) ![]const C
     return names.items;
 }
 
-pub fn collect(ctx: *cache.Context, argv: []const []const u8, outputs: []const []const u8, before: []const Directory, started: i96, records: *std.ArrayList(cache.Dependency)) !void {
+// rustc's metadata-only loader skips the rlib flavor after loading a matching
+// rmeta in the same filename group. Only use an exact same-stem companion;
+// broad fallback and nonmatching metadata retain full candidate validation.
+fn unusedCompanion(resolver: *metadata.Resolver, dir: Directory, filename: []const u8, crate: Crate, triple: []const u8) !bool {
+    if (crate.proc_macro or !std.mem.endsWith(u8, filename, ".rlib")) return false;
+    const expected = try std.fmt.allocPrint(resolver.ctx.a, "lib{s}.rlib", .{crate.name});
+    if (!std.mem.eql(u8, filename, expected)) return false;
+    const companion = try std.fmt.allocPrint(resolver.ctx.a, "lib{s}.rmeta", .{crate.name});
+    for (dir.names) |entry| {
+        const name = entry[0 .. std.mem.lastIndexOfScalar(u8, entry, ':') orelse return error.UnsupportedLibraryName];
+        if (!std.mem.eql(u8, name, companion)) continue;
+        const path = try std.fs.path.join(resolver.ctx.a, &.{ dir.path, companion });
+        const root = (resolver.inspect(path, false) catch null) orelse return false;
+        return root.matches(crate.name, crate.hash, triple, false);
+    }
+    return false;
+}
+
+pub fn collect(ctx: *cache.Context, argv: []const []const u8, outputs: []const []const u8, before: []const Directory, started: i96, records: *std.ArrayList(cache.Dependency), metadata_only: bool) !void {
     var artifact: ?[]const u8 = null;
     for (outputs) |out| if (std.mem.endsWith(u8, out, ".rmeta")) {
         artifact = out;
@@ -135,6 +153,10 @@ pub fn collect(ctx: *cache.Context, argv: []const []const u8, outputs: []const [
             for (dir.names) |entry| {
                 if (!std.mem.startsWith(u8, entry, full_prefix)) continue;
                 const filename = entry[0 .. std.mem.lastIndexOfScalar(u8, entry, ':') orelse return error.UnsupportedLibraryName];
+                if (metadata_only and try unusedCompanion(&resolver, dir, filename, crate, own_root.triple)) {
+                    primary_found = true;
+                    continue;
+                }
                 const input = try std.fs.path.join(ctx.a, &.{ dir.path, filename });
                 const root = (resolver.inspect(input, false) catch null) orelse continue;
                 if (root.matches(name, crate.hash, own_root.triple, crate.proc_macro)) primary_found = true;
@@ -159,6 +181,7 @@ pub fn collect(ctx: *cache.Context, argv: []const []const u8, outputs: []const [
             for (dir.names) |entry| {
                 if (!std.mem.startsWith(u8, entry, prefix)) continue;
                 const filename = entry[0 .. std.mem.lastIndexOfScalar(u8, entry, ':') orelse return error.UnsupportedLibraryName];
+                if (metadata_only and primary_found and try unusedCompanion(&resolver, dir, filename, crate, own_root.triple)) continue;
                 // Include every candidate in the selected search phase. A
                 // competing matching library still invalidates the restore.
                 const input = try std.fs.path.join(ctx.a, &.{ dir.path, filename });
