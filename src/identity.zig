@@ -15,6 +15,13 @@ const Stamp = struct {
 };
 const Memo = struct { schema: u32 = 3, hash: []const u8, stamps: []const Stamp };
 
+fn rememberEpoch(ctx: *cache.Context, payload: []const u8) !void {
+    var h = cache.Hash.init(.{});
+    cache.field(&h, "installed-file-state-v1");
+    cache.field(&h, payload);
+    ctx.compiler_epoch = try cache.finish(ctx.a, &h);
+}
+
 fn stamp(ctx: *cache.Context, path: []const u8) !Stamp {
     const st = Dir.cwd().statFile(ctx.io, path, .{}) catch |err| switch (err) {
         error.FileNotFound => return .{ .path = path, .exists = false },
@@ -38,6 +45,10 @@ fn resolveExecutable(ctx: *cache.Context, arg: []const u8) ![]const u8 {
         if (st.kind == .file and st.permissions.toMode() & 0o111 != 0) return real;
     }
     return error.CompilerNotFound;
+}
+
+pub fn selectedExecutable(ctx: *cache.Context, arg: []const u8) ![]const u8 {
+    return resolveExecutable(ctx, arg);
 }
 
 fn add(ctx: *cache.Context, stamps: *std.ArrayList(Stamp), path: []const u8) !void {
@@ -76,6 +87,7 @@ fn readMemo(ctx: *cache.Context, path: []const u8, minimum_stamps: usize) ?[]con
         const current = stamp(ctx, s.path) catch return null;
         if (!equal(current, s)) return null;
     }
+    rememberEpoch(ctx, payload) catch return null;
     return memo.hash;
 }
 
@@ -275,6 +287,7 @@ pub fn fingerprint(ctx: *cache.Context, is_zig: bool, executable: []const u8) ![
     const hash = try cache.finish(ctx.a, &h);
     const bytes = try std.json.Stringify.valueAlloc(ctx.a, Memo{ .hash = hash, .stamps = stamps.items }, .{});
     try ctx.atomic(path, try cache.seal(ctx, bytes));
+    try rememberEpoch(ctx, bytes);
     return hash;
 }
 

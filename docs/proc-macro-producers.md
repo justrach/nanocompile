@@ -1,6 +1,7 @@
 # Proc-macro producer caching: implementation requirements
 
-Producer caching remains unimplemented. This describes the next coverage change
+Default producer caching remains disabled. An experimental Apple-only path is
+now implemented behind `NANOCOMPILE_PROC_MACRO_PRODUCERS=1`. This describes the coverage change
 against the actual [linker fixture](../tests/producer_link_probe.py), rather than
 enabling `proc-macro` in the existing library parser prematurely.
 
@@ -115,7 +116,7 @@ dispatch shims; it does not yet cover Linux, alternate driver overrides,
 driver configuration/resource coverage, or the complete producer key. Actual
 link-input contents, missing candidates, source validation and before/after
 selection validation remain separate requirements. Producer caching is still
-disabled.
+disabled by default.
 
 `src/producer_job.zig` now provides exclusive, randomized mode-0700 job and
 output directories. The output starts empty; observer configuration and records
@@ -125,8 +126,8 @@ objects, sibling-prefix paths, symlinks into or out of the directory, missing
 files and directories cannot be treated as owned compiler inputs. Tests verify
 independent job identities, an initially empty output, and these boundaries.
 Future callers must hold the maintenance lock and reserve this directory for
-the compiler job. The production compiler wrapper does not yet use this helper;
-producer eligibility remains unchanged.
+the compiler job. The experimental Apple producer path now uses this helper;
+default eligibility remains unchanged.
 
 Private jobs can now install a native observer symlink named
 `nanocompile-internal-linker` beside `observer.json`. That argv[0] dispatches
@@ -147,8 +148,8 @@ delegation; missing or invalid discovery retains the native exit code and
 invalidates capture. Real C linking exercises generated objects and foreign
 symlinks; the placement fixture now captures real proc-macro scratch inputs
 for all twelve builds and loads every macro. Driver/SDK identity, complete
-persistent dependency validation and producer compilation integration remain
-unfinished.
+persistent dependency validation and broader producer compilation integration
+remain requirements; the experimental Apple path below integrates the initial subset.
 
 Hosted live ownership capture passed on Mac in
 [run 37939634123](https://github.com/justrach/nanocompile/actions/runs/37939634123),
@@ -190,7 +191,41 @@ all twelve local macro builds also exercise conversion after rustc returns.
 This converter is not a complete producer plan: source/extern before-and-after
 snapshots, lookup-directory guards, macro-consumer input policy, tool/SDK
 selection and output/diagnostic handling still require compiler integration.
-Producer eligibility remains disabled.
+Default producer eligibility remains disabled.
+
+The dependency-conversion stage and full existing suite passed on both platforms
+in [run 37943855759](https://github.com/justrach/nanocompile/actions/runs/37943855759)
+at `791328fe4de276f5bd34bf4ee36b2dcca6c4cbda`, before experimental storage
+was added.
+
+## Experimental storage and restore
+
+The compiler wrapper now has an opt-in producer path for Apple's default driver,
+native host builds, zero debug information and supported ordinary codegen flags.
+It uses a distinct producer key containing the ordinary Rust key, selected
+native-tool fingerprint, installed Rust file-state signature and full observer executable digest. Existing library
+keys are unchanged. Cross targets, custom linker flags, LTO, dynamic preference,
+strip/relocation overrides and unusual escaped output paths still pass through.
+Linux integration remains unfinished.
+
+On a miss it snapshots known source/extern/native inputs, compiles into the
+private job output, preserves the original dylib install name, maps dep-info
+and diagnostic output prefixes back to the requested directory and independently
+materializes outputs. The actual compilation environment remains unchanged.
+It collects the sealed live linker dependencies, checks tool selection again,
+verifies known inputs and source dep-info, and stores through the existing CAS.
+Explicit Rust library metadata is checked under the existing default/reported
+macro-consumer policy rather than trusting the producer's empty macro metadata.
+Thin reported archives and changed tool/observer files prevent storage.
+
+On a hit the normal CAS validates all dependencies and outputs before restoring
+and replaying diagnostics. The real test compares direct/cold/restored dylib and
+dep-info bytes, loads and executes every macro, tests preserved-mtime native
+archive edits, source changes, corrupt blobs/manifests and a failed compilation.
+This experiment does not establish full producer coverage, all failure-output
+side effects, complete native driver configuration coverage, or a project
+speedup. Broader gates and the Harness/kache comparison remain required before
+changing default behavior.
 
 Output placement is now probed by `tests/producer_placement.py` with absolute
 and relative directories, default and optimized codegen, and full debug info.

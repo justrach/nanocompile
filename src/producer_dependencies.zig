@@ -51,6 +51,14 @@ pub fn collect(ctx: *cache.Context, config: observer.Config, sealed: []const u8,
         try predate(before, started);
         try links(ctx, input.lexical, started, &records);
         const hash = try ctx.digest(input.path);
+        if (std.mem.endsWith(u8, input.path, ".a") or std.mem.endsWith(u8, input.path, ".rlib")) {
+            const file = try Dir.cwd().openFile(ctx.io, input.path, .{});
+            defer file.close(ctx.io);
+            var magic: [8]u8 = undefined;
+            var reader = file.reader(ctx.io, &.{});
+            const n = try reader.interface.readSliceShort(&magic);
+            if (std.mem.eql(u8, magic[0..n], "!<thin>\n")) return error.ThinNativeArchive;
+        }
         if (!std.mem.eql(u8, input.lexical, input.path) and !std.mem.eql(u8, hash, try ctx.digest(input.lexical))) return error.LinkInputChanged;
         if (!equal(before, try Dir.cwd().statFile(ctx.io, input.path, .{}))) return error.LinkInputChanged;
         if (!std.mem.eql(u8, input.path, try Dir.cwd().realPathFileAlloc(ctx.io, input.lexical, ctx.a))) return error.LinkInputChanged;

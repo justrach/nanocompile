@@ -36,7 +36,7 @@ This implementation targets repeated compilation of unchanged inputs. It is an e
 
 Measured performance and its limits are published with raw samples: [Rust versus kache](benchmarks/harness-hill.md), [Xcode](benchmarks/xcode.md), and [Turborepo with R2 restores](benchmarks/turborepo.md).
 
-**Try it today:** Cargo library builds, supported direct Zig invocations, and the runnable Turbo example. Rust proc-macro producers still run directly. Xcode uses Apple's native cache, and R2 currently transports explicit snapshots. See [supported builds](#current-eligibility) before choosing a workload.
+**Try it today:** Cargo library builds, supported direct Zig invocations, and the runnable Turbo example. Rust proc-macro producers run directly by default. Xcode uses Apple's native cache, and R2 currently transports explicit snapshots. See [supported builds](#current-eligibility) before choosing a workload.
 
 ## Build and use
 
@@ -150,6 +150,19 @@ Working directories and output paths remain in keys, preserving embedded paths a
 The [Harness hill climb](benchmarks/harness-hill.md) now measures **4.81 s versus 22.95 s direct** with full-prefix resolution, native-path tracking and explicit reported-input macros, with 132 hits on every warm build. Kache still leads at 2.01 s. Sharing validated Rust toolchain file digests reduced repeated initialization in a controlled test from 5.21 s to 1.37 s; the latest project cold sample was 39.76 s versus kache's 26.98 s. The last default-policy project run, on the preceding revision, took 17.36 s versus 22.96 s direct and 2.18 s kache, with 97 hits. Full-prefix hosted comparisons also passed: Linux warm medians were 36.31 s direct, 6.96 s nanocompile and 1.09 s kache; Mac medians were 87.05 s, 14.25 s and 3.88 s. Hosted and local workloads are separate. Raw samples, executable checksums and policy limits are recorded alongside the results.
 
 The [Xcode comparison](benchmarks/xcode.md) measures real `xcodebuild` workloads against kache and Xcode's native compilation cache. On the latest Harness iOS app comparison, direct builds take **45.60 s**, the external nanocompile Clang launcher 47.09 s, kache 46.96 s, and **`nanocompile xcodebuild` 4.16 s**. The new command uses Apple's native Swift/Clang cache; the two external compiler launchers record zero cache hits for this Xcode command profile. Correctness checks and the five-pipeline comparison also passed on a hosted Mac.
+
+## Experimental proc-macro producer cache
+
+Mac producer caching is available with `NANOCOMPILE_PROC_MACRO_PRODUCERS=1`.
+It currently supports Apple's default tools, native builds with debug information
+disabled, and a restricted set of codegen flags. Linux, cross targets and broader
+linker/debug configurations still run directly. The [requirements and limits](docs/proc-macro-producers.md)
+describe the tested restore/invalidation path; a fresh project comparison is
+still required. This flag does not opt macro consumers into reported-input mode.
+
+```sh
+NANOCOMPILE_PROC_MACRO_PRODUCERS=1 RUSTC_WRAPPER="$nano_wrapper" cargo build --release
+```
 
 ## Xcode native cache
 

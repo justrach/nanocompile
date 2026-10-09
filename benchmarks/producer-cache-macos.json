@@ -1,0 +1,25 @@
+{
+  "platform": "darwin",
+  "binary_sha256": "8449f3f8738abff8d35d8f19ebbdf1e37f7428ef7b82390f9cc5d5c00a270c56",
+  "probe_sha256": "43e73a5b2c0704ef86ba879536f923f36b85ab67e7972bebd3b3c896024f6d7c",
+  "direct_cold_warm_artifacts_equal": true,
+  "diagnostics_replayed": true,
+  "loaded_macro_values": [
+    12,
+    12,
+    12,
+    13,
+    14,
+    14,
+    14,
+    14,
+    14,
+    14
+  ],
+  "native_preserved_mtime_change_detected": true,
+  "source_change_detected": true,
+  "corrupt_blob_and_manifest_repaired": true,
+  "failed_compilation_not_cached": true,
+  "unsupported_debug_and_default_policy_bypass": true,
+  "limits": "experimental opt-in; Apple default driver; debug-info zero; no cross-target or custom linker; no project speed claim"
+}

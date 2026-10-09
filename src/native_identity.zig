@@ -34,6 +34,8 @@ fn real(ctx: *cache.Context, path: []const u8) ![]const u8 {
 
 pub fn apple(ctx: *cache.Context, driver: []const u8) !Selection {
     if (builtin.os.tag != .macos) return error.UnsupportedNativeSelection;
+    for ([_][]const u8{ "CCC_OVERRIDE_OPTIONS", "CCC_ADD_ARGS", "DYLD_INSERT_LIBRARIES", "LD_PRELOAD" }) |key|
+        if (ctx.env.get(key) != null) return error.UnsupportedNativeConfiguration;
     // Only Apple's default dispatch shim is covered initially. Other native
     // drivers, target/linker overrides and SDK flags need their own selection.
     const resolved_driver = try real(ctx, driver);
@@ -44,6 +46,13 @@ pub fn apple(ctx: *cache.Context, driver: []const u8) !Selection {
     const xcrun_linker = try real(ctx, try query(ctx, &.{ "/usr/bin/xcrun", "--find", "ld" }));
     if (!std.mem.eql(u8, linker, xcrun_linker)) return error.NativeSelectionFailed;
     const resource = try real(ctx, try query(ctx, &.{ driver, "-print-resource-dir" }));
+    const verbose = try std.process.run(ctx.a, ctx.io, .{ .argv = &.{ driver, "-v", "--version" }, .environ_map = ctx.env });
+    switch (verbose.term) {
+        .exited => |code| if (code != 0) return error.NativeSelectionFailed,
+        else => return error.NativeSelectionFailed,
+    }
+    if (std.mem.indexOf(u8, verbose.stdout, "Configuration file:") != null or
+        std.mem.indexOf(u8, verbose.stderr, "Configuration file:") != null) return error.UnsupportedNativeConfiguration;
     const default_sdk = try query(ctx, &.{ "/usr/bin/xcrun", "--sdk", "macosx", "--show-sdk-path" });
     const selected_sdk = ctx.env.get("SDKROOT") orelse default_sdk;
     const sdk = try real(ctx, selected_sdk);

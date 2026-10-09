@@ -2,6 +2,7 @@ const std = @import("std");
 const cache = @import("cache.zig");
 const identity = @import("identity.zig");
 const rust_dependencies = @import("rust_dependencies.zig");
+const builtin = @import("builtin");
 const Dir = std.Io.Dir;
 pub const Kind = enum { rust, zig };
 const Plan = struct {
@@ -12,6 +13,8 @@ const Plan = struct {
     library_dirs: []const []const u8 = &.{},
     native_dirs: []const []const u8 = &.{},
     configuration: ?cache.Dependency = null,
+    producer: bool = false,
+    out_dir: ?[]const u8 = null,
 };
 const Module = struct { name: []const u8, source: []const u8 };
 
@@ -53,6 +56,10 @@ fn rustPlan(ctx: *cache.Context, argv: []const []const u8) !Plan {
     var search_dirs: std.ArrayList([]const u8) = .empty;
     var native_dirs: std.ArrayList([]const u8) = .empty;
     var configuration: ?cache.Dependency = null;
+    var builtin_macro = false;
+    var debug_info: []const u8 = "0";
+    var producer_unsafe_codegen = false;
+    var target: ?[]const u8 = null;
     var i: usize = 1;
     while (i < argv.len) : (i += 1) {
         const arg = argv[i];
@@ -73,6 +80,10 @@ fn rustPlan(ctx: *cache.Context, argv: []const []const u8) !Plan {
             continue;
         }
         if (try option(argv, &i, "--extern")) |v| {
+            if (eq(v, "proc_macro") and eq(ctx.env.get("NANOCOMPILE_PROC_MACRO_PRODUCERS") orelse "", "1")) {
+                builtin_macro = true;
+                continue;
+            }
             const split = std.mem.indexOfScalar(u8, v, '=') orelse return error.UntrackedExtern;
             const path = v[split + 1 ..];
             if (!std.mem.endsWith(u8, path, ".rlib") and !std.mem.endsWith(u8, path, ".rmeta")) {
@@ -102,6 +113,10 @@ fn rustPlan(ctx: *cache.Context, argv: []const []const u8) !Plan {
             } else arg[2..];
             const split = std.mem.indexOfScalar(u8, v, '=') orelse v.len;
             const key = v[0..split];
+            if (eq(key, "debuginfo")) debug_info = v[@min(split + 1, v.len)..];
+            for ([_][]const u8{ "lto", "linker-plugin-lto", "prefer-dynamic", "strip", "relocation-model" }) |unsupported| {
+                if (eq(key, unsupported)) producer_unsafe_codegen = true;
+            }
             if (eq(key, "extra-filename")) {
                 suffix = v[@min(split + 1, v.len)..];
                 continue;
@@ -125,6 +140,7 @@ fn rustPlan(ctx: *cache.Context, argv: []const []const u8) !Plan {
         const safe = [_][]const u8{ "--edition", "--cap-lints", "--error-format", "--json", "--diagnostic-width", "--color", "--cfg", "--check-cfg", "--remap-path-prefix", "--target", "--allow", "--warn", "--deny", "--forbid", "--force-warn", "-A", "-W", "-D", "-F" };
         var accepted = false;
         for (safe) |s| if (try option(argv, &i, s)) |v| {
+            if (eq(s, "--target")) target = v;
             if (eq(s, "--target") and (std.mem.endsWith(u8, v, ".json") or std.mem.indexOfScalar(u8, v, '/') != null)) return error.CustomTarget;
             accepted = true;
             break;
@@ -138,7 +154,10 @@ fn rustPlan(ctx: *cache.Context, argv: []const []const u8) !Plan {
         source = arg;
     }
     const ct = crate_type orelse return error.NoCrateType;
-    if (!eq(ct, "rlib") and !eq(ct, "lib")) return error.UnsupportedCrateType;
+    const producer = eq(ct, "proc-macro") and eq(ctx.env.get("NANOCOMPILE_PROC_MACRO_PRODUCERS") orelse "", "1");
+    if (!producer and !eq(ct, "rlib") and !eq(ct, "lib")) return error.UnsupportedCrateType;
+    if (!producer and builtin_macro) return error.UntrackedExtern;
+    if (producer and (builtin.os.tag != .macos or !eq(debug_info, "0") or producer_unsafe_codegen or target != null)) return error.UnsupportedProducerConfiguration;
     const crate = name orelse return error.NoCrateName;
     if (crate.len == 0 or std.mem.indexOfAny(u8, crate, "/\\\n") != null or std.mem.indexOfAny(u8, suffix, "/\\\n") != null) return error.InvalidOutputName;
     const src = try absolute(ctx, source orelse return error.NoSource);
@@ -166,7 +185,7 @@ fn rustPlan(ctx: *cache.Context, argv: []const []const u8) !Plan {
         else if (eq(e, "metadata"))
             try std.fmt.allocPrint(ctx.a, "lib{s}{s}.rmeta", .{ crate, suffix })
         else if (eq(e, "link"))
-            try std.fmt.allocPrint(ctx.a, "lib{s}{s}.rlib", .{ crate, suffix })
+            try std.fmt.allocPrint(ctx.a, "lib{s}{s}{s}", .{ crate, suffix, if (producer) ".dylib" else ".rlib" })
         else
             return error.UnsupportedEmission;
         const path = try absolute(ctx, try std.fs.path.join(ctx.a, &.{ dir, filename }));
@@ -175,7 +194,8 @@ fn rustPlan(ctx: *cache.Context, argv: []const []const u8) !Plan {
         if (eq(e, "dep-info")) dep_info = path;
     }
     if (dep_info == null) return error.NoDependencyInfo;
-    return .{ .source = src, .outputs = outputs.items, .dependencies = inputs.items, .dep_info = dep_info, .library_dirs = search_dirs.items, .native_dirs = native_dirs.items, .configuration = configuration };
+    if (producer and (std.mem.indexOfAny(u8, dir, "\r\n\t\"\\") != null or std.mem.indexOfAny(u8, ctx.root, "\r\n\t\"\\") != null or std.mem.indexOf(u8, dir, "//") != null)) return error.UnsupportedProducerPath;
+    return .{ .source = src, .outputs = outputs.items, .dependencies = inputs.items, .dep_info = dep_info, .library_dirs = search_dirs.items, .native_dirs = native_dirs.items, .configuration = configuration, .producer = producer, .out_dir = dir };
 }
 
 fn zigPlan(ctx: *cache.Context, argv: []const []const u8) !Plan {
@@ -461,10 +481,137 @@ fn bypass(ctx: *cache.Context, argv: []const []const u8, reason: []const u8) !u8
     return exitCode(try child.wait(ctx.io));
 }
 
+fn replacePath(ctx: *cache.Context, bytes: []const u8, old: []const u8, new: []const u8) ![]u8 {
+    var out: std.ArrayList(u8) = .empty;
+    var cursor: usize = 0;
+    while (std.mem.indexOfPos(u8, bytes, cursor, old)) |at| {
+        try out.appendSlice(ctx.a, bytes[cursor..at]);
+        try out.appendSlice(ctx.a, new);
+        cursor = at + old.len;
+    }
+    try out.appendSlice(ctx.a, bytes[cursor..]);
+    return out.items;
+}
+
+fn executeProducer(ctx: *cache.Context, plan: Plan, argv: []const []const u8) !u8 {
+    const native_identity = @import("native_identity.zig");
+    const observer = @import("link_observer.zig");
+    ctx.prepare() catch return bypass(ctx, argv, "bypass: cache unavailable");
+    const maintenance = cache.Lock.acquire(ctx, "maintenance", false) catch return bypass(ctx, argv, "bypass: producer cache lock unavailable");
+    defer maintenance.release();
+    const driver = identity.selectedExecutable(ctx, "cc") catch return bypass(ctx, argv, "bypass: producer driver unavailable");
+    const selected = native_identity.apple(ctx, driver) catch return bypass(ctx, argv, "bypass: producer driver selection unsupported");
+    const binary = std.process.executablePathAlloc(ctx.io, ctx.a) catch return bypass(ctx, argv, "bypass: producer observer unavailable");
+    const base_key = keyFor(ctx, .rust, argv) catch return bypass(ctx, argv, "bypass: producer compiler identity unavailable");
+    const compiler_epoch = ctx.compiler_epoch orelse return bypass(ctx, argv, "bypass: producer compiler state unavailable");
+    const binary_hash = ctx.digest(binary) catch return bypass(ctx, argv, "bypass: producer observer cannot be fingerprinted");
+    var h = cache.Hash.init(.{});
+    cache.field(&h, "nanocompile-experimental-producer-v1");
+    cache.field(&h, base_key);
+    cache.field(&h, compiler_epoch);
+    cache.field(&h, selected.hash);
+    cache.field(&h, binary_hash);
+    const key = try cache.finish(ctx.a, &h);
+    const flight = cache.Lock.acquire(ctx, key, true) catch return bypass(ctx, argv, "bypass: producer key lock unavailable");
+    defer flight.release();
+    const destinations = try ctx.a.dupe([]const u8, plan.outputs);
+    std.mem.sort([]const u8, destinations, {}, less);
+    var locks: std.ArrayList(cache.Lock) = .empty;
+    defer for (locks.items) |lock| lock.release();
+    for (destinations) |path| {
+        var hash = cache.Hash.init(.{});
+        cache.field(&hash, path);
+        const lock = cache.Lock.acquire(ctx, try std.fmt.allocPrint(ctx.a, "output-{s}", .{try cache.finish(ctx.a, &hash)}), true) catch return bypass(ctx, argv, "bypass: producer output lock unavailable");
+        try locks.append(ctx.a, lock);
+    }
+    if (plan.configuration) |config| {
+        if (!eq(config.hash, ctx.digest(config.path) catch return bypass(ctx, argv, "bypass: cannot read producer declaration")))
+            return bypass(ctx, argv, "bypass: producer input declaration changed");
+    }
+    if (cache.restore(ctx, key, plan.outputs) catch false) {
+        ctx.trace("hit: proc-macro producer");
+        ctx.event("hit");
+        return 0;
+    }
+    var before: std.ArrayList(cache.Dependency) = .empty;
+    try before.appendSlice(ctx.a, dependencyRecords(ctx, plan.dependencies) catch return bypass(ctx, argv, "bypass: producer inputs unavailable"));
+    try before.appendSlice(ctx.a, rust_dependencies.nativeSnapshot(ctx, plan.native_dirs) catch return bypass(ctx, argv, "bypass: producer native search unsupported"));
+    const directories = rust_dependencies.snapshot(ctx, plan.library_dirs, plan.outputs) catch return bypass(ctx, argv, "bypass: producer dependency lookup unavailable");
+    const job = @import("producer_job.zig").Job.create(ctx) catch return bypass(ctx, argv, "bypass: producer staging unavailable");
+    defer job.cleanup(ctx) catch {};
+    var dylib: ?[]const u8 = null;
+    for (plan.outputs) |path| if (std.mem.endsWith(u8, path, ".dylib")) {
+        dylib = path;
+    };
+    const original = dylib orelse return bypass(ctx, argv, "bypass: producer needs link output");
+    const output = try std.fs.path.join(ctx.a, &.{ job.out, std.fs.path.basename(original) });
+    const config: observer.Config = .{ .driver = driver, .format = .darwin, .report = try std.fs.path.join(ctx.a, &.{ job.root, "link.deps" }), .invocation = try std.fs.path.join(ctx.a, &.{ job.root, "invocation" }), .capture_id = job.capture_id, .ownership = .{ .out = job.out, .canonical_out = job.canonical_out, .output = output } };
+    const linker = job.installObserver(ctx, binary, try std.json.Stringify.valueAlloc(ctx.a, config, .{})) catch return bypass(ctx, argv, "bypass: producer observer installation unavailable");
+    var command: std.ArrayList([]const u8) = .empty;
+    var i: usize = 0;
+    while (i < argv.len) : (i += 1) {
+        if (eq(argv[i], "--out-dir")) {
+            try command.appendSlice(ctx.a, &.{ "--out-dir", job.out });
+            i += 1;
+        } else if (std.mem.startsWith(u8, argv[i], "--out-dir=")) {
+            try command.append(ctx.a, try std.fmt.allocPrint(ctx.a, "--out-dir={s}", .{job.out}));
+        } else try command.append(ctx.a, argv[i]);
+    }
+    try command.appendSlice(ctx.a, &.{ "-C", try std.fmt.allocPrint(ctx.a, "linker={s}", .{linker}) });
+    const install_name = try std.fs.path.join(ctx.a, &.{ plan.out_dir.?, std.fs.path.basename(original) });
+    for ([_][]const u8{ "-Xlinker", "-install_name", "-Xlinker", install_name }) |arg|
+        try command.appendSlice(ctx.a, &.{ "-C", try std.fmt.allocPrint(ctx.a, "link-arg={s}", .{arg}) });
+    const started = std.Io.Clock.real.now(ctx.io).nanoseconds;
+    ctx.trace("miss: compiling proc-macro producer");
+    var result = try std.process.run(ctx.a, ctx.io, .{ .argv = command.items, .environ_map = ctx.env });
+    result.stdout = try replacePath(ctx, result.stdout, job.out, plan.out_dir.?);
+    result.stderr = try replacePath(ctx, result.stderr, job.out, plan.out_dir.?);
+    result.stderr = try replacePath(ctx, result.stderr, linker, "cc");
+    for (plan.outputs) |path| {
+        const private = try std.fs.path.join(ctx.a, &.{ job.out, std.fs.path.basename(path) });
+        const st = Dir.cwd().statFile(ctx.io, private, .{}) catch |err| switch (err) {
+            error.FileNotFound => continue,
+            else => return err,
+        };
+        if (plan.dep_info != null and eq(path, plan.dep_info.?))
+            try ctx.atomic(private, try replacePath(ctx, try ctx.read(private), job.out, plan.out_dir.?));
+        try cache.materialize(ctx, private, path, @intCast(st.permissions.toMode()));
+    }
+    try ctx.out(result.stdout);
+    try std.Io.File.stderr().writeStreamingAll(ctx.io, result.stderr);
+    const code = exitCode(result.term);
+    if (code != 0) {
+        ctx.event("failed");
+        return code;
+    }
+    ctx.event("miss");
+    const linked = @import("producer_dependencies.zig").collect(ctx, config, ctx.read(config.invocation) catch return 0, started) catch |err| {
+        ctx.trace(try std.fmt.allocPrint(ctx.a, "uncached producer inputs: {s}", .{@errorName(err)}));
+        return 0;
+    };
+    const after = native_identity.apple(ctx, driver) catch return 0;
+    if (!eq(selected.hash, after.hash)) {
+        ctx.trace("uncached: producer tool selection changed");
+        return 0;
+    }
+    if (!eq(base_key, keyFor(ctx, .rust, argv) catch return 0) or !eq(binary_hash, try ctx.digest(binary))) return 0;
+    if (!eq(compiler_epoch, ctx.compiler_epoch orelse return 0)) return 0;
+    for (selected.files) |path| {
+        const st = try Dir.cwd().statFile(ctx.io, path, .{});
+        if (st.mtime.nanoseconds >= started or st.ctime.nanoseconds >= started) return 0;
+    }
+    const observer_stat = try Dir.cwd().statFile(ctx.io, binary, .{});
+    if (observer_stat.mtime.nanoseconds >= started or observer_stat.ctime.nanoseconds >= started) return 0;
+    save(ctx, key, plan, argv, before.items, directories, started, result, linked) catch |err|
+        ctx.trace(try std.fmt.allocPrint(ctx.a, "uncached producer: {s}", .{@errorName(err)}));
+    return 0;
+}
+
 pub fn execute(ctx: *cache.Context, kind: Kind, argv: []const []const u8) !u8 {
     if (ctx.env.get("NANOCOMPILE_DISABLE")) |v| if (eq(v, "1")) return bypass(ctx, argv, "bypass: disabled");
     const plan = (if (kind == .rust) rustPlan(ctx, argv) else zigPlan(ctx, argv)) catch |err|
         return bypass(ctx, argv, try std.fmt.allocPrint(ctx.a, "bypass: {s}", .{@errorName(err)}));
+    if (plan.producer) return executeProducer(ctx, plan, argv);
     ctx.prepare() catch return bypass(ctx, argv, "bypass: cache unavailable");
     const maintenance = cache.Lock.acquire(ctx, "maintenance", false) catch return bypass(ctx, argv, "bypass: cache lock unavailable");
     defer maintenance.release();
@@ -510,11 +657,11 @@ pub fn execute(ctx: *cache.Context, kind: Kind, argv: []const []const u8) !u8 {
         return code;
     }
     ctx.event("miss");
-    save(ctx, key, plan, argv, before.items, directories, started, result) catch |err| ctx.trace(try std.fmt.allocPrint(ctx.a, "uncached: {s}", .{@errorName(err)}));
+    save(ctx, key, plan, argv, before.items, directories, started, result, &.{}) catch |err| ctx.trace(try std.fmt.allocPrint(ctx.a, "uncached: {s}", .{@errorName(err)}));
     return 0;
 }
 
-fn save(ctx: *cache.Context, key: []const u8, plan: Plan, argv: []const []const u8, before: []const cache.Dependency, directories: []const rust_dependencies.Directory, started: i96, result: std.process.RunResult) !void {
+fn save(ctx: *cache.Context, key: []const u8, plan: Plan, argv: []const []const u8, before: []const cache.Dependency, directories: []const rust_dependencies.Directory, started: i96, result: std.process.RunResult, linker: []const cache.Dependency) !void {
     for (before) |dep| if (!dep.directory) {
         for (plan.outputs) |out| if (eq(dep.path, out)) return error.OverlappingOutput;
     };
@@ -549,7 +696,7 @@ fn save(ctx: *cache.Context, key: []const u8, plan: Plan, argv: []const []const 
         // Dependencies discovered after rustc finishes must predate its start.
         // ctime also catches writes followed by restoring the old mtime.
         if (st.mtime.nanoseconds >= started or st.ctime.nanoseconds >= started) return error.InputChangedDuringCompilation;
-        if (plan.dep_info != null and std.mem.endsWith(u8, dep, ".rs") and hiddenNativeLink(try ctx.read(dep))) return error.HiddenNativeLinkInput;
+        if (!plan.producer and plan.dep_info != null and std.mem.endsWith(u8, dep, ".rs") and hiddenNativeLink(try ctx.read(dep))) return error.HiddenNativeLinkInput;
         try records.append(ctx.a, .{ .path = dep, .hash = try ctx.digest(dep) });
         if (plan.dep_info != null and std.mem.endsWith(u8, dep, ".rs"))
             try addUnique(ctx, &dirs, std.fs.path.dirname(dep).?);
@@ -559,8 +706,14 @@ fn save(ctx: *cache.Context, key: []const u8, plan: Plan, argv: []const []const 
         if (st.mtime.nanoseconds >= started or st.ctime.nanoseconds >= started) return error.DirectoryChangedDuringCompilation;
         try records.append(ctx.a, .{ .path = dir, .hash = try ctx.directoryDigest(dir, false, plan.outputs), .directory = true });
     }
-    if (plan.dep_info != null and directories.len != 0)
+    if (!plan.producer and plan.dep_info != null and directories.len != 0)
         try rust_dependencies.collect(ctx, argv, plan.outputs, directories, started, &records);
+    if (plan.producer) {
+        for (plan.dependencies) |path| if (std.mem.endsWith(u8, path, ".rlib") or std.mem.endsWith(u8, path, ".rmeta")) {
+            try rust_dependencies.collect(ctx, argv, &.{path}, directories, started, &records);
+        };
+        try records.appendSlice(ctx.a, linker);
+    }
     try cache.store(ctx, key, records.items, plan.outputs, result.stdout, result.stderr);
 }
 
