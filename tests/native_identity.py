@@ -63,7 +63,7 @@ def main():
                     'stable_warm_identity': True, 'private_sdk_selection_changes_identity': True,
                     'preserved_mtime_sdk_metadata_change_detected': True,
                     'corrupt_memos_recomputed': True, 'invalid_selections_rejected': True,
-                    'limits': 'Apple dispatch shim only; no production producer keys yet; '
+                    'limits': 'Apple dispatch shim only; experimental producer keys; '
                               'link input contents and negative lookup guards remain separate'}
         if args.output:
             args.output.parent.mkdir(parents=True, exist_ok=True)

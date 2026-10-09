@@ -35,3 +35,8 @@ stores and restores all 21 build-script executables, with matching direct Cargo
 bytes and matching downstream library/macro artifacts. This establishes the
 compiled-artifact path on that workload, not cached script execution or full
 producer coverage.
+
+The implementation and full existing suite passed on hosted Linux and macOS
+in [run 37952952464](https://github.com/justrach/nanocompile/actions/runs/37952952464)
+at `4fbcf890f47a2858c86bb930a25566a5e4ee3f64`. The Apple executable test runs
+on the hosted Mac; unsupported Linux producer invocations retain fallback.

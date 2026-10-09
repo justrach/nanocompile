@@ -570,3 +570,34 @@ by running scripts remain costs to investigate. Linux producer integration
 and broader debug/link coverage remain unfinished.
 
 Reproduce with the previous comparison arguments plus `--executable-producers`.
+
+## Parallel native-selection experiment
+
+A [candidate patch](experiments/native-query-parallel.patch) ran all six
+independent Apple selection queries concurrently in a Zig I/O group. Each
+worker owned subprocess allocations; results were joined before parsing and
+native fingerprinting, and synchronous execution handled unavailable concurrency.
+The commands, environment, validation and identity fields were unchanged.
+
+A [controlled isolated comparison](native-query-parallel-macos.json) rotated
+25 calls per binary against the same environment/cache after priming both. Every
+identity field and fingerprint matched. Median full-process selection latency
+fell from **39.054 ms to 13.588 ms**. Private SDK edits, corrupt memos and invalid
+selectors also passed with the candidate.
+
+The [full Harness candidate comparison](harness-hill-parallel-native.json)
+retained all artifact checks and 165 hits per warm sample. Its warm medians were
+22.887 s direct, **3.267 s nanocompile** and 2.155 s kache; the preceding
+sequential implementation measured 3.264 s. Candidate samples were 3.267, 3.283
+and 3.099 s. Cold nanocompile took 41.218 s. There is no demonstrated project
+median improvement, so this candidate was **not adopted**. The source patch
+and exact binary checksums remain available for reproduction. The production
+implementation and the latest accepted result remain the executable-cache
+iteration above. Lower isolated latency alone does not establish a build win.
+
+A [fresh accepted-binary trace](harness-executable-diagnostic.json) with both
+producer flags confirms 31 macro/executable producer hits. Its slowest warm
+compiler miss is `libc` (0.222 s, source-native-link refusal); the slowest
+library restores are `harness_adapters` (0.203 s) and `reqwest` (0.123 s).
+These include Python shim and trace overhead. They identify the next
+validation/coverage work rather than measuring project speed.

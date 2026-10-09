@@ -322,3 +322,8 @@ producer compilation; the Apple producer fixture executes on the hosted Mac.
 The explicit bundled static-library implementation and real fixture passed
 on both platforms in [run 37951786539](https://github.com/justrach/nanocompile/actions/runs/37951786539)
 at `3391aad639e5506caa332b4cabc3fbd8a5b48b76`.
+
+The [parallel native-query experiment](../benchmarks/harness-hill.md#parallel-native-selection-experiment)
+reduced isolated selection latency but showed no Harness median improvement.
+Its patch and measurements are preserved; the production path retains
+sequential selection queries.
