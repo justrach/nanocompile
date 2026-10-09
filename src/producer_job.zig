@@ -36,6 +36,18 @@ pub const Job = struct {
         try Dir.cwd().deleteTree(ctx.io, self.root);
     }
 
+    /// Native linker argv[0] selects sibling observer.json. No generated shell
+    /// script or environment-variable injection is needed by the compiler.
+    pub fn installObserver(self: Job, ctx: *cache.Context, binary: []const u8, config: []const u8) ![]const u8 {
+        if (!std.fs.path.isAbsolute(binary)) return error.InvalidLinkObserver;
+        const executable = try Dir.cwd().statFile(ctx.io, binary, .{});
+        if (executable.kind != .file or executable.permissions.toMode() & 0o111 == 0) return error.InvalidLinkObserver;
+        const path = try std.fs.path.join(ctx.a, &.{ self.root, "nanocompile-internal-linker" });
+        try ctx.atomic(try std.fs.path.join(ctx.a, &.{ self.root, "observer.json" }), config);
+        try Dir.cwd().symLink(ctx.io, binary, path, .{});
+        return path;
+    }
+
     pub const Input = struct { lexical: []const u8, path: []const u8, owned: bool };
 
     pub fn ownsPaths(self: Job, lexical: []const u8, canonical: []const u8) bool {
@@ -82,6 +94,14 @@ test "private jobs own only regular inputs beneath both output spellings" {
     try tmp.dir.writeFile(io, .{ .sub_path = "foreign.o", .data = "persistent" });
     const foreign = try std.fs.path.join(a, &.{ cwd, "foreign.o" });
     try std.testing.expect(!(try first.classify(&ctx, foreign)).owned);
+    try std.testing.expectError(error.InvalidLinkObserver, first.installObserver(&ctx, "relative-binary", "{}"));
+    try std.testing.expectError(error.InvalidLinkObserver, first.installObserver(&ctx, foreign, "{}"));
+    const executable = try Dir.cwd().openFile(io, foreign, .{});
+    defer executable.close(io);
+    try executable.setPermissions(io, .fromMode(0o700));
+    const observer = try first.installObserver(&ctx, foreign, "observer fixture");
+    try std.testing.expectEqualStrings(foreign, try Dir.cwd().realPathFileAlloc(io, observer, a));
+    try std.testing.expectEqualStrings("observer fixture", try ctx.read(try std.fs.path.join(a, &.{ first.root, "observer.json" })));
     const linked = try std.fs.path.join(a, &.{ first.out, "linked.o" });
     try Dir.cwd().symLink(io, foreign, linked, .{});
     try std.testing.expect(!(try first.classify(&ctx, linked)).owned);

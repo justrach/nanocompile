@@ -48,6 +48,11 @@ pub fn main(init: std.process.Init) void {
 }
 
 fn dispatch(ctx: *cache.Context, args: []const [:0]const u8) !u8 {
+    if (args.len != 0 and std.mem.eql(u8, std.fs.path.basename(args[0]), "nanocompile-internal-linker")) {
+        if (!std.fs.path.isAbsolute(args[0])) return error.InvalidLinkObserver;
+        const config = try std.fs.path.join(ctx.a, &.{ std.fs.path.dirname(args[0]) orelse return error.InvalidLinkObserver, "observer.json" });
+        return @import("link_observer.zig").execute(ctx, config, args[1..]);
+    }
     if (args.len < 2 or std.mem.eql(u8, args[1], "--help") or std.mem.eql(u8, args[1], "help")) {
         try ctx.out(help);
         return 0;

@@ -50,14 +50,11 @@ def main():
         suffix = '.dylib' if sys.platform == 'darwin' else '.so'
         cc = shutil.which('cc')
         assert cc
-        linker = root / 'linker'
+        linker = root / 'nanocompile-internal-linker'
         config = root / 'observer.json'
         invocation = root / 'invocation.json'
         if observer:
-            linker.write_text('#!/usr/bin/env python3\nimport subprocess,sys\n'
-                              'sys.exit(subprocess.call(' + repr([str(observer), 'internal-linker', str(config)])
-                              + '+sys.argv[1:]))\n')
-            linker.chmod(0o700)
+            linker.symlink_to(observer)
         for relative in (False, True):
             for name, flags in [('default', []), ('release', ['-C', 'opt-level=3']),
                                 ('debug2', ['-C', 'debuginfo=2'])]:

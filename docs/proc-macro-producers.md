@@ -128,6 +128,14 @@ Future callers must hold the maintenance lock and reserve this directory for
 the compiler job. The production compiler wrapper does not yet use this helper;
 producer eligibility remains unchanged.
 
+Private jobs can now install a native observer symlink named
+`nanocompile-internal-linker` beside `observer.json`. That argv[0] dispatches
+directly to the observer with all linker arguments preserved. The real macro
+placement fixture uses this entry point instead of a Python linker shim.
+It does not introduce a shell or helper environment variables. The installer
+rejects relative/non-executable targets, and the native-entry test preserves
+the driver's stdout, stderr, status and argument list.
+
 The observer now accepts an explicit private output boundary and captures the
 complete raw linker report plus each input's lexical path, resolved path and
 ownership while scratch files still live. Parent parsing binds the captured

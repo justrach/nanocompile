@@ -43,6 +43,14 @@ def main():
         assert payload["args"] == ["object with, spaces.o"], payload
         assert "env" not in payload, payload
         assert payload["capture_valid"] and payload["expanded_args"] == payload["args"]
+        alias = root / 'nanocompile-internal-linker'
+        alias.symlink_to(binary)
+        (root / 'observer.json').write_bytes(config.read_bytes())
+        result = subprocess.run([str(alias), 'object with, spaces.o'], env=env,
+                                capture_output=True, timeout=20)
+        assert result.returncode == 7 and result.stdout == b'native stdout\n' and result.stderr == b'native stderr\n', result
+        payload = json.loads(record.read_bytes().split(b'\n', 1)[1])
+        assert payload['args'] == ['object with, spaces.o'] and payload['capture_valid']
         inner = root / "inner response.rsp"
         outer = root / "outer response.rsp"
         inner.write_text("'nested object, with spaces.o' -L \"library with spaces\"")
