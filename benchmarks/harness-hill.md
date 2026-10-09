@@ -743,3 +743,54 @@ cover [metadata priority and full-byte invalidation](postcompile-rmeta-regressio
 [executable restore and runtime behavior](postcompile-executable-regression.json),
 and [bundled static archive invalidation](postcompile-static-regression.json).
 Their executable checksums match the measured final binary.
+
+## Eight-worker restore candidate: not adopted
+
+A [two-line candidate patch](experiments/restore-eight-workers.patch) increased
+the maximum full-content hashing workers from four to eight, still capped by
+available CPUs. Eligibility thresholds and all dependency/blob guards stayed
+the same. Unit tests passed.
+
+The [isolated rotating comparison](restore-workers-comparison.json) restored
+the same real Rust entry through both binaries 25 times each, checking output
+bytes, modes and unchanged manifest after every hit. Its 32 explicit metadata
+files total 130 MB. On this 28-CPU Mac, median wrapper time fell from
+**44.45 ms to 26.57 ms**, a 40.2% fixture improvement.
+
+The [twelve-build project comparison](harness-hill-eight-workers.json) measured
+22.968 s direct, 2.939 s Nano and 2.086 s kache warm medians, with 38.354 s Nano
+cold. All artifacts matched and warm hits stayed at 165. That separate session
+did not establish an improvement over the accepted 2.825 s project result.
+
+A [paired project comparison](harness-eight-workers-paired.json) then copied
+each binary to one stable wrapper path between completed builds, preserving
+the same environment, target path and shared cache. Each binary was primed;
+producer identities still use their distinct binary hashes. Nine warm pairs
+rotated order. Every build restored 165 entries and all 167 collected library,
+dylib and build-script artifacts matched the first prime. Tracked sources
+remained unchanged. This comparison does not measure separate cold-cache
+performance: the second prime shares ordinary library entries with the first.
+
+The four-worker median was 2.888 s and eight-worker median 2.858 s. The mean
+paired saving was only 7.25 ms, with 51.93 ms sample standard deviation and
+17.31 ms standard error. Six of nine pairs favored eight workers. These samples
+do not establish a reliable project gain, so the production maximum remains
+**four workers** and the latest accepted performance result remains the
+post-compilation hash-reuse iteration above. Faster isolated hashing alone is
+insufficient to double the per-invocation concurrency limit.
+
+Both helpers are reusable for subsequent candidates:
+
+```sh
+python3 tests/restore_worker_comparison.py /path/to/baseline/nanocompile \
+  /path/to/candidate/nanocompile --runs 25 \
+  --output bench-results/restore-workers.json
+python3 tests/project_pair_comparison.py /path/to/baseline/nanocompile \
+  /path/to/candidate/nanocompile /path/to/harness \
+  --state /tmp/nano-project-pair-new --runs 9 --jobs 4 \
+  --output bench-results/project-pair.json
+```
+
+The paired helper deliberately enables reported consumers and both experimental
+producer policies and requires at least 165 warm hits for this Harness workload.
+R2 is excluded from all these measurements.

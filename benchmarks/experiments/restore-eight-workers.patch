@@ -1,0 +1,20 @@
+diff --git a/src/cache.zig b/src/cache.zig
+index 63bbfd1..a288c28 100644
+--- a/src/cache.zig
++++ b/src/cache.zig
+@@ -449,13 +449,13 @@ fn parallelFileHashes(ctx: *Context, dependencies: []const Dependency, hashes: *
+         size +|= st.size;
+         try jobs.append(ctx.a, .{ .path = dep.path });
+     }
+-    // Small restores retain their serial path. Large graphs use at most four
++    // Small restores retain their serial path. Large graphs use at most eight
+     // workers, leaving the same full hashes and per-restore lifetime intact.
+     if (jobs.items.len < 32 or size < 8 * 1024 * 1024) return true;
+     var next: std.atomic.Value(usize) = .init(0);
+     var group: std.Io.Group = .init;
+     defer group.cancel(ctx.io);
+-    const workers = @min(@as(usize, 4), std.Thread.getCpuCount() catch 1);
++    const workers = @min(@as(usize, 8), std.Thread.getCpuCount() catch 1);
+     for (1..@max(workers, 1)) |_| group.concurrent(ctx.io, digestWorker, .{ ctx, jobs.items, &next }) catch break;
+     digestWorker(ctx, jobs.items, &next);
+     try group.await(ctx.io);

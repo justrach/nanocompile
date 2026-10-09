@@ -1,0 +1,221 @@
+{
+  "method": "rotating two-binary restores of the same entry; identical arguments, environment and paths; toolchain and page cache primed; output bytes/modes and unchanged entry checked after every restore",
+  "rustc": "rustc 1.97.1 (8bab26f4f 2026-07-14)\nbinary: rustc\ncommit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452\ncommit-date: 2026-07-14\nhost: aarch64-apple-darwin\nrelease: 1.97.1\nLLVM version: 22.1.6",
+  "binary_sha256": {
+    "baseline": "bf9ed504a41b66eab0fdcf040707f5efea880c79ef0ef89c6a3e5b2e638e8bf7",
+    "candidate": "eb85ccd0571d6c97933d0414d2429f46b8b41091d14d7b1517c12001ade24f33"
+  },
+  "script_sha256": "adcfddf067255bd638188c1c3d45656e6136ec94e05d7665748a4cdc371a554f",
+  "runs_per_binary": 25,
+  "host_cpu_count": 28,
+  "explicit_metadata_files": 32,
+  "explicit_metadata_bytes": 130103266,
+  "samples": [
+    {
+      "implementation": "baseline",
+      "seconds": 0.04801312502240762
+    },
+    {
+      "implementation": "candidate",
+      "seconds": 0.026129833015147597
+    },
+    {
+      "implementation": "candidate",
+      "seconds": 0.02612408297136426
+    },
+    {
+      "implementation": "baseline",
+      "seconds": 0.043809875031001866
+    },
+    {
+      "implementation": "baseline",
+      "seconds": 0.04330750001827255
+    },
+    {
+      "implementation": "candidate",
+      "seconds": 0.026080667041242123
+    },
+    {
+      "implementation": "candidate",
+      "seconds": 0.025970540998969227
+    },
+    {
+      "implementation": "baseline",
+      "seconds": 0.043584250030107796
+    },
+    {
+      "implementation": "baseline",
+      "seconds": 0.04508458299096674
+    },
+    {
+      "implementation": "candidate",
+      "seconds": 0.02675754204392433
+    },
+    {
+      "implementation": "candidate",
+      "seconds": 0.026873749971855432
+    },
+    {
+      "implementation": "baseline",
+      "seconds": 0.04458216595230624
+    },
+    {
+      "implementation": "baseline",
+      "seconds": 0.044688249996397644
+    },
+    {
+      "implementation": "candidate",
+      "seconds": 0.026176124985795468
+    },
+    {
+      "implementation": "candidate",
+      "seconds": 0.026616457966156304
+    },
+    {
+      "implementation": "baseline",
+      "seconds": 0.04434237501118332
+    },
+    {
+      "implementation": "baseline",
+      "seconds": 0.044229583989363164
+    },
+    {
+      "implementation": "candidate",
+      "seconds": 0.026391791994683444
+    },
+    {
+      "implementation": "candidate",
+      "seconds": 0.026809958973899484
+    },
+    {
+      "implementation": "baseline",
+      "seconds": 0.04485666600521654
+    },
+    {
+      "implementation": "baseline",
+      "seconds": 0.04447862500092015
+    },
+    {
+      "implementation": "candidate",
+      "seconds": 0.026567458000499755
+    },
+    {
+      "implementation": "candidate",
+      "seconds": 0.026752667035907507
+    },
+    {
+      "implementation": "baseline",
+      "seconds": 0.04516491701360792
+    },
+    {
+      "implementation": "baseline",
+      "seconds": 0.0448674579965882
+    },
+    {
+      "implementation": "candidate",
+      "seconds": 0.02736416697734967
+    },
+    {
+      "implementation": "candidate",
+      "seconds": 0.0269029579940252
+    },
+    {
+      "implementation": "baseline",
+      "seconds": 0.04455487499944866
+    },
+    {
+      "implementation": "baseline",
+      "seconds": 0.04476249997969717
+    },
+    {
+      "implementation": "candidate",
+      "seconds": 0.026399374997708946
+    },
+    {
+      "implementation": "candidate",
+      "seconds": 0.02623725001467392
+    },
+    {
+      "implementation": "baseline",
+      "seconds": 0.043480291962623596
+    },
+    {
+      "implementation": "baseline",
+      "seconds": 0.04344266699627042
+    },
+    {
+      "implementation": "candidate",
+      "seconds": 0.02624783298233524
+    },
+    {
+      "implementation": "candidate",
+      "seconds": 0.026265499996952713
+    },
+    {
+      "implementation": "baseline",
+      "seconds": 0.04360441700555384
+    },
+    {
+      "implementation": "baseline",
+      "seconds": 0.04391629196470603
+    },
+    {
+      "implementation": "candidate",
+      "seconds": 0.028711624967399985
+    },
+    {
+      "implementation": "candidate",
+      "seconds": 0.02655795798636973
+    },
+    {
+      "implementation": "baseline",
+      "seconds": 0.04391383402980864
+    },
+    {
+      "implementation": "baseline",
+      "seconds": 0.044447500025853515
+    },
+    {
+      "implementation": "candidate",
+      "seconds": 0.02709220803808421
+    },
+    {
+      "implementation": "candidate",
+      "seconds": 0.026912083034403622
+    },
+    {
+      "implementation": "baseline",
+      "seconds": 0.044480541022494435
+    },
+    {
+      "implementation": "baseline",
+      "seconds": 0.04462837497703731
+    },
+    {
+      "implementation": "candidate",
+      "seconds": 0.027231834013946354
+    },
+    {
+      "implementation": "candidate",
+      "seconds": 0.026514583034440875
+    },
+    {
+      "implementation": "baseline",
+      "seconds": 0.042895250022411346
+    },
+    {
+      "implementation": "baseline",
+      "seconds": 0.0433174169738777
+    },
+    {
+      "implementation": "candidate",
+      "seconds": 0.02841441601049155
+    }
+  ],
+  "median_seconds": {
+    "baseline": 0.044447500025853515,
+    "candidate": 0.026567458000499755
+  },
+  "all_outputs_and_modes_equal": true,
+  "all_restores_hit_same_unchanged_entry": true
+}
