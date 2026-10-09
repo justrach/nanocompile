@@ -194,7 +194,8 @@ NANOCOMPILE_CLANG_REMARKS=1 "$nano_wrapper" clang -c example.c -o example.o
 ```
 
 Build scripts continue to execute. The command queries the selected Clang and
-SDK live, namespaces the managed `NANOCOMPILE_DIR/native-clang` CAS by installed
+SDK live (overlapping the two default lookups), namespaces the managed
+`NANOCOMPILE_DIR/native-clang` CAS by installed
 compiler content, SDK selection and host architecture, and lets Clang discover
 inputs and replay compilations. Caller sysroots and SDKROOT take precedence;
 `NANOCOMPILE_CLANG` selects an explicit compiler. Unsupported compiler capability,
@@ -214,15 +215,19 @@ remains local. `stats` reports native invocations/failures; hit/miss observation
 require `NANOCOMPILE_CLANG_REMARKS=1`, which adds remarks and uses bounded capture.
 Default mode streams the compiler's inherited descriptors normally.
 
-The [installed-command comparison](benchmarks/harness-clang-command-three-way.json)
-measures **2.095 s Nano versus 22.54 s direct and 2.054 s kache** on Harness,
-with 167 Rust and 24 native warm hits. It uses the explicit reported-macro,
-macro/executable-producer policies from the Rust hill climb. These are three
-warm samples per mode; the preceding [27-pair replay experiment](docs/cargo-clang-cas-experiment.md)
-establishes the native replay gain. Nano cold is 37.54 s versus kache's 26.57 s.
-The native cache does not establish a cold-build improvement. All warm modes
-match their own cold Rust/native artifacts; scanner debug changes and kache
-remapping prevent treating every mode as byte-identical to default direct builds.
+The [latest installed-command comparison](benchmarks/harness-clang-selection-three-way.json)
+measures warm medians of **1.983 s Nano versus 22.58 s direct and 2.080 s kache**
+on Harness, with 167 Rust and 24 native warm hits. It uses explicit reported-macro
+and Apple macro/executable-producer policies. These are three warm samples per
+mode: Nano's samples include a retained 2.854 s outlier, and its mean exceeds
+kache's mean. This does not establish a broad latency advantage over kache.
+Two independent [27-pair lookup comparisons](docs/clang-selection-overlap-experiment.md)
+confirm the adopted live-query overlap gains **5.6% and 5.1%**, winning 51/54
+pairs with 193 exact artifacts. Compiler and SDK selection remain live.
+Nano cold is 37.46 s versus kache's 26.50 s. The native cache does not establish
+a cold-build improvement. All warm modes match their own cold Rust/native
+artifacts; scanner debug changes and kache remapping prevent treating every
+mode as byte-identical to default direct builds.
 
 ## Xcode native cache
 

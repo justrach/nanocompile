@@ -41,6 +41,9 @@ jobs:
           zig build test
           python3 tests/clang_cache.py zig-out/bin/nanocompile --output bench-results/clang-cache.json
           zig build integration -Doptimize=ReleaseFast
+      - name: Verify live native selector overlap
+        if: runner.os == 'macOS'
+        run: python3 tests/clang_selection.py zig-out/bin/nanocompile --output bench-results/clang-selection.json
       - name: Verify real Turborepo task cache
         run: |
           python3 tests/turbo_server.py

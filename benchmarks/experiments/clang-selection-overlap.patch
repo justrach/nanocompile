@@ -1,0 +1,72 @@
+--- a/src/clang.zig
++++ b/src/clang.zig
+@@ -57,6 +57,33 @@
+     if (!std.fs.path.isAbsolute(root)) return error.InvalidClangSDK;
+     return root;
+ }
++// Experimental overlap: SDK query buffers never share the caller's arena.
++const SdkQuery = struct {
++    result: ?std.process.RunResult = null,
++    failure: ?anyerror = null,
++
++    fn run(q: *SdkQuery, io: std.Io, env: *const std.process.Environ.Map) void {
++        q.result = std.process.run(std.heap.page_allocator, io, .{ .argv = &.{ "xcrun", "--sdk", "macosx", "--show-sdk-path" }, .environ_map = env }) catch |err| {
++            q.failure = err;
++            return;
++        };
++    }
++    fn deinit(q: *SdkQuery) void {
++        if (q.result) |r| {
++            std.heap.page_allocator.free(r.stdout);
++            std.heap.page_allocator.free(r.stderr);
++        }
++    }
++    fn value(q: *SdkQuery) ![]const u8 {
++        if (q.failure) |err| return err;
++        const result = q.result orelse return error.ClangSDKSelectionFailed;
++        if (code(result.term) != 0) return error.ClangSDKSelectionFailed;
++        const root = std.mem.trim(u8, result.stdout, "\r\n ");
++        if (!std.fs.path.isAbsolute(root)) return error.InvalidClangSDK;
++        return root;
++    }
++};
++
+ fn nativeExecutable(ctx: *cache.Context, tool: []const u8) bool {
+     const file = std.Io.Dir.cwd().openFile(ctx.io, tool, .{}) catch return false;
+     defer file.close(ctx.io);
+@@ -106,6 +133,17 @@
+ }
+ 
+ pub fn execute(ctx: *cache.Context, args: []const []const u8) !u8 {
++    const eligible = builtin.os.tag == .macos and compileOnly(args) and !enabled(ctx, "NANOCOMPILE_DISABLE");
++    var sdk_query: SdkQuery = .{};
++    defer sdk_query.deinit();
++    var group: std.Io.Group = .init;
++    defer group.cancel(ctx.io);
++    const explicit_sdk = if (ctx.env.get("SDKROOT")) |value| value.len != 0 else false;
++    const sdk_started = blk: {
++        if (!eligible or hasSysroot(args) or ctx.env.get("NANOCOMPILE_CLANG") != null or explicit_sdk) break :blk false;
++        group.concurrent(ctx.io, SdkQuery.run, .{ &sdk_query, ctx.io, ctx.env }) catch break :blk false;
++        break :blk true;
++    };
+     const tool = try selected(ctx);
+     var original: std.ArrayList([]const u8) = .empty;
+     try original.append(ctx.a, tool);
+@@ -113,12 +151,15 @@
+     var argv: std.ArrayList([]const u8) = .empty;
+     try argv.append(ctx.a, tool);
+     // Probes, unsupported jobs and explicit disabling use inherited descriptors.
+-    if (builtin.os.tag != .macos or !compileOnly(args) or enabled(ctx, "NANOCOMPILE_DISABLE")) {
++    if (!eligible) {
+         return run(ctx, original.items);
+     }
+     // SDK and default compiler selection are queried live on every eligible job.
+     // Clang scans included SDK/resource files; no source-content memo is added.
+-    const selected_sdk = if (hasSysroot(args)) "caller-sysroot" else sdk(ctx) catch {
++    const selected_sdk = if (hasSysroot(args)) "caller-sysroot" else if (sdk_started) blk: {
++        group.await(ctx.io) catch return run(ctx, original.items);
++        break :blk sdk_query.value() catch return run(ctx, original.items);
++    } else sdk(ctx) catch {
+         return run(ctx, original.items);
+     };
+     if (!nativeExecutable(ctx, tool) or (!hasSysroot(args) and !std.fs.path.isAbsolute(selected_sdk))) return run(ctx, original.items);

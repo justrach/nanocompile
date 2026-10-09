@@ -1290,3 +1290,23 @@ change. All 193 artifact hashes and tracked source hashes matched.
 See [method and limits](../docs/clang-remarks-experiment.md) and
 [raw results](harness-clang-remarks-paired.json). These paired durations do not
 establish a new direct/kache ranking.
+
+## Native Clang live selection overlap: adopted
+
+Overlapping the default live Clang and SDK lookups improves controlled Harness
+warm medians **2.104719 → 1.985952 s** and **2.109516 → 2.001227 s** in two
+independent 27-pair batches: **5.64% and 5.13%**, winning **51/54 pairs**.
+All 108 warm builds retain 167 Rust hits, 24 native hits and 193 exact artifacts.
+Both selections still execute on each eligible invocation. No input hashing
+or cache correctness policy is relaxed. Explicit compiler/SDK paths and
+unsupported jobs preserve their prior behavior.
+
+The rebuilt installed command's three-way medians are **1.982855 s Nano,
+22.584865 s direct and 2.080077 s kache**. Each has three warm samples; Nano's
+2.853956 s first sample is retained, and Nano's mean exceeds kache's mean.
+This short comparison does not establish a broad latency advantage over kache.
+Cold remains **37.463829 s Nano versus 26.502405 s kache**.
+See [method, correctness and limitations](../docs/clang-selection-overlap-experiment.md),
+[paired samples](harness-clang-selection-paired.json),
+[confirmation](harness-clang-selection-paired-confirm.json), and
+[fresh three-way results](harness-clang-selection-three-way.json).

@@ -1,0 +1,60 @@
+{
+  "binary_sha256": "ca5b1ed15f35173e8caf3a055efa3756b861c3ae7227b1b14bc5cb0eeb0c52ef",
+  "script_sha256": "45a2da03e2b4ee2ed0164facc173aea4e2220cef9c3cb5b85757a2e2d02dd8ef",
+  "checks": [
+    "both live selectors cross a two-way start barrier on cold and warm calls",
+    "failed SDK lookup falls back to unchanged original compiler arguments and bytes",
+    "failed tool lookup preserves failure without a compiler output"
+  ],
+  "provenance": {
+    "base_commit": "740c7dee4d22962731828c5c848db0bbf94c22e0",
+    "platform": "macOS-27.0-arm64-arm-64bit-Mach-O",
+    "cpu": "Apple M3 Ultra",
+    "logical_cpus": 28,
+    "zig_version": "0.17.0",
+    "build_command": "zig build -Doptimize=ReleaseFast",
+    "source_sha256": {
+      "baseline": {
+        "src/cache.zig": "be609fc763131a55ed9921e1a3fb62279a3b3002e29a59b21e9364ff2ae014f2",
+        "src/clang.zig": "d4132e0fe67cfd2aac8b1b388207957259813c81d3c0f0ab86a04e043a7c188a",
+        "src/compiler.zig": "0bd5bb7678afd7b7609be08d0ea10aae1e5537967adcbfe8e6e5b51db4449209",
+        "src/identity.zig": "34a910d4900c9df0f6948509047ddaa2881375f6a961b896d2b7a2dfc3fe4a52",
+        "src/link_dependencies.zig": "f60fe853a5260fe7e9445fc257b085a4e45d8bbc48a8272d065b41de7fa1e0fb",
+        "src/link_observer.zig": "219118d1f42a63c0af6070dee0e8f04aa6d27242931ab48be6c760044e6368e8",
+        "src/main.zig": "8cc9bfd571ebdc226082e76352fb1f7abbc922606579eaff0f28ada895524b53",
+        "src/native_identity.zig": "8c96d315f316b620f9d71898b9d4dfd4e8c2c79c1e86c404b56479658034365d",
+        "src/native_metadata.zig": "ad8a21566e9e3f11e3d10e571a1f943444906ec0fb02317a8dd41a2d74f83611",
+        "src/producer_dependencies.zig": "a2cd64a9d507db26879785c6f268d8b01bc3274660ad13ac3d2344c43fddf464",
+        "src/producer_job.zig": "8861c822b59aa9469e57d655cda4b93120d111d427944b2e55450a125364dcda",
+        "src/response_files.zig": "09e0ed7ef53d9e801261d5d70979f638ae6de2872d9d27354ed194913531d0c4",
+        "src/rust_dependencies.zig": "8665b5f431411cf4c575aa16f5a25389e5cea0648e785442052d61298f5377fa",
+        "src/rust_metadata.zig": "99019a00891dbeb3e1837bad8c4a6290012eccbf5db1b4f78c03549f9efd7022",
+        "src/xcode.zig": "5ad1d00ed39577a0dd1dab3d09421477de653d3eb70aef221e056170c950ff48"
+      },
+      "candidate": {
+        "src/cache.zig": "be609fc763131a55ed9921e1a3fb62279a3b3002e29a59b21e9364ff2ae014f2",
+        "src/clang.zig": "25fc88a6d43eef9091bb3914d75376d32e6c517fe4b200a735c7a67eb93c79be",
+        "src/compiler.zig": "0bd5bb7678afd7b7609be08d0ea10aae1e5537967adcbfe8e6e5b51db4449209",
+        "src/identity.zig": "34a910d4900c9df0f6948509047ddaa2881375f6a961b896d2b7a2dfc3fe4a52",
+        "src/link_dependencies.zig": "f60fe853a5260fe7e9445fc257b085a4e45d8bbc48a8272d065b41de7fa1e0fb",
+        "src/link_observer.zig": "219118d1f42a63c0af6070dee0e8f04aa6d27242931ab48be6c760044e6368e8",
+        "src/main.zig": "8cc9bfd571ebdc226082e76352fb1f7abbc922606579eaff0f28ada895524b53",
+        "src/native_identity.zig": "8c96d315f316b620f9d71898b9d4dfd4e8c2c79c1e86c404b56479658034365d",
+        "src/native_metadata.zig": "ad8a21566e9e3f11e3d10e571a1f943444906ec0fb02317a8dd41a2d74f83611",
+        "src/producer_dependencies.zig": "a2cd64a9d507db26879785c6f268d8b01bc3274660ad13ac3d2344c43fddf464",
+        "src/producer_job.zig": "8861c822b59aa9469e57d655cda4b93120d111d427944b2e55450a125364dcda",
+        "src/response_files.zig": "09e0ed7ef53d9e801261d5d70979f638ae6de2872d9d27354ed194913531d0c4",
+        "src/rust_dependencies.zig": "8665b5f431411cf4c575aa16f5a25389e5cea0648e785442052d61298f5377fa",
+        "src/rust_metadata.zig": "99019a00891dbeb3e1837bad8c4a6290012eccbf5db1b4f78c03549f9efd7022",
+        "src/xcode.zig": "5ad1d00ed39577a0dd1dab3d09421477de653d3eb70aef221e056170c950ff48"
+      }
+    },
+    "patch_sha256": "c517b6ef48686aaf48bbc0925306b68dd933dc3672540fc3a03cfb47ca28513b",
+    "validation": [
+      "candidate zig build test",
+      "real installed Clang regression",
+      "two-way live query barrier and lookup failure checks"
+    ],
+    "parent_sdkroot_present": false
+  }
+}
