@@ -22,6 +22,12 @@ const c = struct {
 };
 const Dir = std.Io.Dir;
 pub const Hash = std.crypto.hash.Blake3;
+pub const CheckedDigest = struct { hash: []const u8, state: std.Io.File.Stat };
+
+pub fn sameFileState(a: std.Io.File.Stat, b: std.Io.File.Stat) bool {
+    return a.inode == b.inode and a.size == b.size and a.kind == b.kind and
+        a.mtime.nanoseconds == b.mtime.nanoseconds and a.ctime.nanoseconds == b.ctime.nanoseconds;
+}
 
 pub const Context = struct {
     a: std.mem.Allocator,
@@ -81,6 +87,14 @@ pub const Context = struct {
             h.update(block[0..n]);
         }
         return finish(self.a, &h);
+    }
+
+    pub fn checkedDigest(self: *Context, path_: []const u8) !CheckedDigest {
+        const before = try Dir.cwd().statFile(self.io, path_, .{});
+        const hash = try self.digest(path_);
+        const after = try Dir.cwd().statFile(self.io, path_, .{});
+        if (!sameFileState(before, after)) return error.InputChangedDuringHashing;
+        return .{ .hash = hash, .state = after };
     }
 
     pub fn libraryNames(self: *Context, path_: []const u8, outputs: []const []const u8) ![]const []const u8 {

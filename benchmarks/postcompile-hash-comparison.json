@@ -1,0 +1,92 @@
+{
+  "method": "rotating two-binary cold entry compilation; identical arguments, environment and paths; toolchain and metadata reader memos primed; output/manifest bytes compared after every run",
+  "rustc": "rustc 1.97.1 (8bab26f4f 2026-07-14)\nbinary: rustc\ncommit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452\ncommit-date: 2026-07-14\nhost: aarch64-apple-darwin\nrelease: 1.97.1\nLLVM version: 22.1.6",
+  "binary_sha256": {
+    "baseline": "5084c1b9a76b0e403aff6b7518d45f56dbc7eed615cc77c77af3c7b4444310b8",
+    "candidate": "bf9ed504a41b66eab0fdcf040707f5efea880c79ef0ef89c6a3e5b2e638e8bf7"
+  },
+  "script_sha256": "cc7a6795e85586e60cd655eefa814bdcd4dbc5eda50c1b9b08a67a69fa0a029d",
+  "runs_per_binary": 9,
+  "explicit_metadata_files": 8,
+  "explicit_metadata_bytes": 260067280,
+  "samples": [
+    {
+      "implementation": "baseline",
+      "seconds": 0.7824427089653909
+    },
+    {
+      "implementation": "candidate",
+      "seconds": 0.4939083750359714
+    },
+    {
+      "implementation": "candidate",
+      "seconds": 0.5060047080041841
+    },
+    {
+      "implementation": "baseline",
+      "seconds": 0.7835899579804391
+    },
+    {
+      "implementation": "baseline",
+      "seconds": 0.7980908749741502
+    },
+    {
+      "implementation": "candidate",
+      "seconds": 0.4749462500330992
+    },
+    {
+      "implementation": "candidate",
+      "seconds": 0.4907298749894835
+    },
+    {
+      "implementation": "baseline",
+      "seconds": 0.771047540998552
+    },
+    {
+      "implementation": "baseline",
+      "seconds": 0.7719660840230063
+    },
+    {
+      "implementation": "candidate",
+      "seconds": 0.4778139169793576
+    },
+    {
+      "implementation": "candidate",
+      "seconds": 0.4760211670072749
+    },
+    {
+      "implementation": "baseline",
+      "seconds": 0.7702594169531949
+    },
+    {
+      "implementation": "baseline",
+      "seconds": 0.7692019999958575
+    },
+    {
+      "implementation": "candidate",
+      "seconds": 0.4768125420087017
+    },
+    {
+      "implementation": "candidate",
+      "seconds": 0.4755668750149198
+    },
+    {
+      "implementation": "baseline",
+      "seconds": 0.7722728749504313
+    },
+    {
+      "implementation": "baseline",
+      "seconds": 0.7673616670072079
+    },
+    {
+      "implementation": "candidate",
+      "seconds": 0.4745585829950869
+    }
+  ],
+  "median_seconds": {
+    "baseline": 0.7719660840230063,
+    "candidate": 0.4768125420087017
+  },
+  "all_outputs_and_manifests_equal": true,
+  "both_binaries_restore_same_entry": true
+}

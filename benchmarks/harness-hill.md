@@ -683,3 +683,63 @@ direct and kache medians also changed, so this is not a controlled A/B
 attribution. This iteration is adopted for the proven reduction in validation
 work and the observed project result. Kache remains faster, cold overhead is
 still substantial, and these timings establish only local macOS performance.
+
+## Reuse checked hashes after compilation
+
+Cold entry construction previously hashed explicit inputs once for the required
+after-compilation comparison, again for dependency records, and again for Rust
+metadata classification. Those steps now share fresh full-content hashes within
+the successful compilation's save operation. Before-compilation and
+after-compilation snapshots remain separate. No digest survives into another
+compiler invocation, and cache-hit validation is unchanged.
+
+Reusable hashes carry the inode, size, kind, mtime and ctime observed around the
+full read. A changing file refuses reuse. Metadata readers check that state
+again before querying or using a classification, preventing a changed artifact
+from receiving a classification under an earlier byte hash. The unit fixture
+changes bytes while preserving mtime and verifies refusal for both cached and
+unclassified metadata roots.
+
+The [controlled comparison](postcompile-hash-comparison.json) rotates the
+preceding accepted binary and the candidate through nine cold-entry builds
+each, with identical arguments, environment and paths. Toolchain and metadata
+reader memos are primed. Eight explicit metadata files total 260 MB. Every
+output and complete entry manifest matches, and both binaries restore the same
+entry. Median complete wrapper time is **0.772 s versus 0.477 s**, a 38.2%
+reduction in this metadata-heavy cold-entry fixture. This is not a general
+Rust compilation speedup or a warm-cache improvement.
+
+Reproduce with [the comparison script](../tests/postcompile_hash_benchmark.py):
+
+```sh
+python3 tests/postcompile_hash_benchmark.py /path/to/previous/nanocompile \
+  /path/to/candidate/nanocompile --runs 9 \
+  --output bench-results/postcompile-hashes.json
+```
+
+The [final-binary Harness comparison](harness-hill-postcompile-hashes.json)
+uses the same twelve-build protocol, four jobs, reported macro consumers and
+both experimental Apple producer policies. All 135 libraries, ten macro
+dylibs and 21 build-script executables match direct Cargo, with 165 hits in
+each warm Nano build. Tracked source/manifests remain unchanged; R2 is excluded.
+
+| Implementation | Warm median | Cold build |
+| --- | ---: | ---: |
+| Direct Cargo | 22.797 s | 23.377 s prime |
+| nanocompile | 2.825 s | 37.753 s |
+| kache daemon | 1.958 s | 26.696 s |
+
+Warm samples are 2.888, 2.790 and 2.825 s. Warm performance is essentially
+unchanged from the preceding 2.822 s result, as expected for an optimization
+to entry construction. The cold measurement is only slightly below the
+preceding 38.115 s run, across separate comparisons; it does not establish a
+large Harness build gain. The controlled fixture establishes the benefit for
+large repeated input validation, so the change is adopted with that limited
+claim. Kache still leads in both project phases.
+
+Unit and real Rust/Zig integration checks pass. Final-binary fixture results
+cover [metadata priority and full-byte invalidation](postcompile-rmeta-regression.json),
+[macro producer restore and loading](postcompile-producer-regression.json),
+[executable restore and runtime behavior](postcompile-executable-regression.json),
+and [bundled static archive invalidation](postcompile-static-regression.json).
+Their executable checksums match the measured final binary.

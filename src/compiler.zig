@@ -698,7 +698,19 @@ fn save(ctx: *cache.Context, key: []const u8, plan: Plan, argv: []const []const 
     for (before) |dep| if (!dep.directory) {
         for (plan.outputs) |out| if (eq(dep.path, out)) return error.OverlappingOutput;
     };
-    for (before) |dep| if (!eq(if (dep.all_members) try ctx.nativeDirectoryDigest(dep.path) else try ctx.digest(dep.path), dep.hash)) return error.InputChangedDuringCompilation;
+    // Fresh post-compilation hashes remain separate from the pre-compilation
+    // snapshot. Reuse them only while constructing this successful entry.
+    var validated: std.StringHashMapUnmanaged(cache.CheckedDigest) = .empty;
+    defer validated.deinit(ctx.a);
+    for (before) |dep| {
+        if (dep.all_members) {
+            if (!eq(try ctx.nativeDirectoryDigest(dep.path), dep.hash)) return error.InputChangedDuringCompilation;
+        } else {
+            const digest = try ctx.checkedDigest(dep.path);
+            if (!eq(digest.hash, dep.hash)) return error.InputChangedDuringCompilation;
+            if (!dep.directory) try validated.put(ctx.a, dep.path, digest);
+        }
+    }
     var paths: std.ArrayList([]const u8) = .empty;
     for (plan.dependencies) |path| try addUnique(ctx, &paths, path);
     if (plan.dep_info) |path| {
@@ -730,7 +742,10 @@ fn save(ctx: *cache.Context, key: []const u8, plan: Plan, argv: []const []const 
         // ctime also catches writes followed by restoring the old mtime.
         if (st.mtime.nanoseconds >= started or st.ctime.nanoseconds >= started) return error.InputChangedDuringCompilation;
         if (!plan.producer and plan.dep_info != null and std.mem.endsWith(u8, dep, ".rs") and hiddenNativeLink(try ctx.read(dep))) return error.HiddenNativeLinkInput;
-        try records.append(ctx.a, .{ .path = dep, .hash = try ctx.digest(dep) });
+        const digest = if (validated.get(dep)) |checked| checked else try ctx.checkedDigest(dep);
+        if (!cache.sameFileState(st, digest.state)) return error.InputChangedDuringCompilation;
+        try validated.put(ctx.a, dep, digest);
+        try records.append(ctx.a, .{ .path = dep, .hash = digest.hash });
         if (plan.dep_info != null and std.mem.endsWith(u8, dep, ".rs"))
             try addUnique(ctx, &dirs, std.fs.path.dirname(dep).?);
     }
@@ -740,10 +755,10 @@ fn save(ctx: *cache.Context, key: []const u8, plan: Plan, argv: []const []const 
         try records.append(ctx.a, .{ .path = dir, .hash = try ctx.directoryDigest(dir, false, plan.outputs), .directory = true });
     }
     if (!plan.producer and plan.dep_info != null and directories.len != 0)
-        try rust_dependencies.collect(ctx, argv, plan.outputs, directories, started, &records, true);
+        try rust_dependencies.collect(ctx, argv, plan.outputs, directories, started, &records, true, &validated);
     if (plan.producer) {
         for (plan.dependencies) |path| if (std.mem.endsWith(u8, path, ".rlib") or std.mem.endsWith(u8, path, ".rmeta")) {
-            try rust_dependencies.collect(ctx, argv, &.{path}, directories, started, &records, false);
+            try rust_dependencies.collect(ctx, argv, &.{path}, directories, started, &records, false, &validated);
         };
         try records.appendSlice(ctx.a, linker);
     }

@@ -96,7 +96,7 @@ fn unusedCompanion(resolver: *metadata.Resolver, dir: Directory, filename: []con
     return false;
 }
 
-pub fn collect(ctx: *cache.Context, argv: []const []const u8, outputs: []const []const u8, before: []const Directory, started: i96, records: *std.ArrayList(cache.Dependency), metadata_only: bool) !void {
+pub fn collect(ctx: *cache.Context, argv: []const []const u8, outputs: []const []const u8, before: []const Directory, started: i96, records: *std.ArrayList(cache.Dependency), metadata_only: bool, validated: *const std.StringHashMapUnmanaged(cache.CheckedDigest)) !void {
     var artifact: ?[]const u8 = null;
     for (outputs) |out| if (std.mem.endsWith(u8, out, ".rmeta")) {
         artifact = out;
@@ -138,6 +138,14 @@ pub fn collect(ctx: *cache.Context, argv: []const []const u8, outputs: []const [
     var resolver: metadata.Resolver = .{ .ctx = ctx, .compiler = reader_compiler, .query_env = &query_env, .query_cwd = query_cwd };
     defer resolver.roots.deinit(ctx.a);
     defer resolver.hashes.deinit(ctx.a);
+    defer resolver.states.deinit(ctx.a);
+    // These records were freshly content-validated after compilation. Share
+    // them within this entry construction, never across compilation or hits.
+    var checked = validated.iterator();
+    while (checked.next()) |record| {
+        try resolver.hashes.put(ctx.a, record.key_ptr.*, record.value_ptr.hash);
+        try resolver.states.put(ctx.a, record.key_ptr.*, record.value_ptr.state);
+    }
     // Classification memos save subprocesses, but consumers still hash every
     // non-toolchain input before using them.
     for (outputs) |out| if (std.mem.endsWith(u8, out, ".rlib") or std.mem.endsWith(u8, out, ".rmeta"))

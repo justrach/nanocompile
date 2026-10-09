@@ -63,12 +63,23 @@ pub const Resolver = struct {
     query_cwd: []const u8,
     roots: std.StringHashMapUnmanaged(?Root) = .empty,
     hashes: std.StringHashMapUnmanaged([]const u8) = .empty,
+    states: std.StringHashMapUnmanaged(std.Io.File.Stat) = .empty,
+
+    fn validateState(self: *Resolver, path: []const u8) !void {
+        if (self.states.get(path)) |state| {
+            if (!cache.sameFileState(state, try Dir.cwd().statFile(self.ctx.io, path, .{}))) return error.InputChangedDuringMetadataQuery;
+        }
+    }
 
     pub fn digest(self: *Resolver, path: []const u8) ![]const u8 {
-        if (self.hashes.get(path)) |hash| return hash;
-        const hash = try self.ctx.digest(path);
-        try self.hashes.put(self.ctx.a, path, hash);
-        return hash;
+        if (self.hashes.get(path)) |hash| {
+            try self.validateState(path);
+            return hash;
+        }
+        const checked = try self.ctx.checkedDigest(path);
+        try self.hashes.put(self.ctx.a, path, checked.hash);
+        try self.states.put(self.ctx.a, path, checked.state);
+        return checked.hash;
     }
 
     fn location(self: *Resolver, identity: []const u8) ![]const u8 {
@@ -92,7 +103,10 @@ pub const Resolver = struct {
     }
 
     pub fn inspect(self: *Resolver, path: []const u8, toolchain_file: bool) !?Root {
-        if (self.roots.get(path)) |root| return root;
+        if (self.roots.get(path)) |root| {
+            try self.validateState(path);
+            return root;
+        }
         const identity = if (toolchain_file)
             try std.fmt.allocPrint(self.ctx.a, "toolchain:{s}", .{path})
         else
@@ -107,6 +121,7 @@ pub const Resolver = struct {
             return memo.root;
         } else |_| {}
         const before = try Dir.cwd().statFile(self.ctx.io, path, .{});
+        try self.validateState(path);
         const result = try std.process.run(self.ctx.a, self.ctx.io, .{ .argv = &.{ self.compiler, "-Zls=root", path }, .environ_map = self.query_env, .cwd = .{ .path = self.query_cwd } });
         const root = switch (result.term) {
             .exited => |code| if (code == 0) parse(result.stdout) catch null else null,
@@ -132,6 +147,43 @@ test "root classifications require name hash target and ordinary crate" {
     try std.testing.expect(!macro.matches(root.name, root.hash, root.triple, false));
     try std.testing.expect(macro.matches(root.name, root.hash, root.triple, true));
     try std.testing.expectError(error.UnsupportedRustMetadata, parse("Crate info:\nname dep\n"));
+}
+
+test "post-compile digest reuse rejects edits before metadata classification" {
+    var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer arena.deinit();
+    const a = arena.allocator();
+    const io = std.testing.io;
+    var tmp = std.testing.tmpDir(.{});
+    defer tmp.cleanup();
+    const relative = try std.fs.path.join(a, &.{ ".zig-cache", "tmp", &tmp.sub_path });
+    const cwd = try Dir.cwd().realPathFileAlloc(io, relative, a);
+    var env = std.process.Environ.Map.init(a);
+    var ctx: cache.Context = .{ .a = a, .io = io, .env = &env, .root = cwd, .cwd = cwd };
+    const path = try std.fs.path.join(a, &.{ cwd, "input.rmeta" });
+    try tmp.dir.writeFile(io, .{ .sub_path = "input.rmeta", .data = "first_" });
+    const checked = try ctx.checkedDigest(path);
+    var resolver: Resolver = .{ .ctx = &ctx, .compiler = "unused", .query_env = &env, .query_cwd = cwd };
+    defer resolver.roots.deinit(a);
+    defer resolver.hashes.deinit(a);
+    defer resolver.states.deinit(a);
+    try resolver.hashes.put(a, path, checked.hash);
+    try resolver.states.put(a, path, checked.state);
+    try std.testing.expectEqualStrings(checked.hash, try resolver.digest(path));
+    try resolver.roots.put(a, path, .{ .name = "dep", .hash = "0123456789abcdef0123456789abcdef", .triple = "test", .proc_macro = false });
+    try std.testing.expect((try resolver.inspect(path, false)) != null);
+    try tmp.dir.writeFile(io, .{ .sub_path = "input.rmeta", .data = "second" });
+    const file = try tmp.dir.openFile(io, "input.rmeta", .{});
+    defer file.close(io);
+    try file.setTimestamps(io, .{ .modify_timestamp = .{ .new = checked.state.mtime } });
+    try std.testing.expectEqual(checked.state.mtime.nanoseconds, (try file.stat(io)).mtime.nanoseconds);
+    try std.testing.expectError(error.InputChangedDuringMetadataQuery, resolver.digest(path));
+    try std.testing.expectError(error.InputChangedDuringMetadataQuery, resolver.inspect(path, false));
+    _ = resolver.roots.remove(path);
+    // Refuse an unclassified path before launching a reader or writing a memo
+    // under the earlier byte hash.
+    try std.testing.expectError(error.InputChangedDuringMetadataQuery, resolver.inspect(path, false));
+    try std.testing.expect(!std.mem.eql(u8, checked.hash, (try ctx.checkedDigest(path)).hash));
 }
 
 pub fn readerCompiler(ctx: *cache.Context, arg: []const u8) ![]const u8 {
