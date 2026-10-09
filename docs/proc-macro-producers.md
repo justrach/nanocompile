@@ -97,6 +97,17 @@ CI suite has its own independent status.
 
 ## Miss and discovery
 
+`src/producer_job.zig` now provides exclusive, randomized mode-0700 job and
+output directories. The output starts empty; observer configuration and records
+belong beside it, not inside it. Its input classifier requires a live regular
+file beneath both the lexical and resolved output-directory paths. Foreign
+objects, sibling-prefix paths, symlinks into or out of the directory, missing
+files and directories cannot be treated as owned compiler inputs. Tests verify
+independent job identities, an initially empty output, and these boundaries.
+Future callers must hold the maintenance lock and reserve this directory for
+the compiler job. This helper is not yet wired into producer compilation or
+linker capture, so producer eligibility remains unchanged.
+
 Output placement is now probed by `tests/producer_placement.py` with absolute
 and relative directories, default and optimized codegen, and full debug info.
 Every resulting macro is loaded by rustc and its expansion executed. On the

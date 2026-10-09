@@ -122,4 +122,5 @@ test {
     _ = @import("link_dependencies.zig");
     _ = @import("response_files.zig");
     _ = @import("link_observer.zig");
+    _ = @import("producer_job.zig");
 }
