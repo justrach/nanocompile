@@ -124,6 +124,8 @@ Benchmarks time complete process invocations. They remove the primary output bef
 
 Measured results and the optimization trail are in `benchmarks/`. These synthetic workloads demonstrate warm-hit latency, not whole-project speed or an advantage across all workloads. A first-seen toolchain requires a full content fingerprint and makes the initial miss slower than direct compilation or kache. Later compilation units share that validated identity.
 
+The [Harness package benchmark](benchmarks/harness.md) measures clean release builds of a real Cargo dependency graph, including an R2 snapshot round-trip. It currently shows little benefit because most of that workload bypasses caching. This is a useful coverage baseline, not a whole-project speedup claim.
+
 GitHub Actions runs real compiler tests and the synthetic benchmark on Linux and macOS. Each run uploads its measured JSON as an artifact. No R2 credentials are needed by pull-request jobs.
 
 ## Attribution
