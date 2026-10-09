@@ -97,6 +97,26 @@ CI suite has its own independent status.
 
 ## Miss and discovery
 
+`src/native_identity.zig` now queries Apple's default dispatch driver, checks
+that its ld selection agrees with xcrun, and records the resolved Clang, linker,
+SDK and Clang resource directory. Its fingerprint includes the dispatch shim,
+xcrun, selected Clang/ld, libLTO and SDKSettings.json. Installed file digests use
+sealed per-file memos with inode/size/mtime/ctime validation and a separate
+native-resource namespace; existing Rust file identities and library keys stay
+unchanged. All files are checked again after fingerprinting. Project/native
+library contents cannot use this API's trusted-installation shortcut.
+
+The private `internal-native-identity /usr/bin/cc` diagnostic and
+`tests/native_identity.py` verify the actual selected installation, stable warm
+identity, a private SDKROOT selection, preserved-mtime SDK metadata edits,
+corrupt memos and invalid developer/SDK selections. Tests never edit the real
+tool installation. This initial selection helper supports Apple's default
+dispatch shims; it does not yet cover Linux, alternate driver overrides,
+driver configuration/resource coverage, or the complete producer key. Actual
+link-input contents, missing candidates, source validation and before/after
+selection validation remain separate requirements. Producer caching is still
+disabled.
+
 `src/producer_job.zig` now provides exclusive, randomized mode-0700 job and
 output directories. The output starts empty; observer configuration and records
 belong beside it, not inside it. Its input classifier requires a live regular
@@ -121,6 +141,14 @@ symlinks; the placement fixture now captures real proc-macro scratch inputs
 for all twelve builds and loads every macro. Driver/SDK identity, complete
 persistent dependency validation and producer compilation integration remain
 unfinished.
+
+Hosted live ownership capture passed on Mac in
+[run 37939634123](https://github.com/justrach/nanocompile/actions/runs/37939634123),
+but the Linux real C-link check failed with `FileNotFound` during reported-input
+classification after the driver returned success. Missing reported inputs
+continue to invalidate discovery. The observer now records the failing input
+path for diagnosis; driver-created temporary inputs and the final-link capture
+boundary need verification before Linux producer eligibility can be enabled.
 
 Output placement is now probed by `tests/producer_placement.py` with absolute
 and relative directories, default and optimized codegen, and full debug info.

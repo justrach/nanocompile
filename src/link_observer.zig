@@ -29,6 +29,7 @@ pub const Invocation = struct {
     responses: []const responses.Response,
     capture_valid: bool,
     capture_error: ?[]const u8 = null,
+    capture_error_path: ?[]const u8 = null,
     link: ?LinkCapture = null,
 };
 
@@ -38,7 +39,7 @@ pub fn parseInvocation(ctx: *cache.Context, config: Config, bytes: []const u8) !
     if (id.len == 0) return error.UnboundLinkCapture;
     const parsed = try std.json.parseFromSlice(Invocation, ctx.a, try cache.unseal(ctx, bytes), .{ .allocate = .alloc_always });
     const record = parsed.value;
-    if (record.schema != 1 or !record.capture_valid or record.capture_error != null) return error.InvalidLinkCapture;
+    if (record.schema != 1 or !record.capture_valid or record.capture_error != null or record.capture_error_path != null) return error.InvalidLinkCapture;
     if (!std.mem.eql(u8, record.capture_id orelse return error.UnboundLinkCapture, id) or
         !std.mem.eql(u8, record.cwd, ctx.cwd) or !std.mem.eql(u8, record.driver, config.driver)) return error.UnboundLinkCapture;
     for (record.responses) |response| if (!response.unchanged or !std.fs.path.isAbsolute(response.path) or
@@ -62,14 +63,18 @@ pub fn parseInvocation(ctx: *cache.Context, config: Config, bytes: []const u8) !
     return record;
 }
 
-fn collectLink(ctx: *cache.Context, config: Config, ownership: Ownership) !LinkCapture {
+fn collectLink(ctx: *cache.Context, config: Config, ownership: Ownership, failed_path: *?[]const u8) !LinkCapture {
     const report = try ctx.read(config.report);
     const parsed = try deps.parseForOutput(ctx.a, report, config.format, ownership.output);
     const job: jobs.Job = .{ .root = "", .out = ownership.out, .canonical_out = ownership.canonical_out, .capture_id = config.capture_id orelse return error.UnboundLinkCapture };
     const resolved = try std.Io.Dir.cwd().realPathFileAlloc(ctx.io, ownership.out, ctx.a);
     if (!std.mem.eql(u8, resolved, ownership.canonical_out)) return error.UnboundLinkCapture;
     var inputs: std.ArrayList(jobs.Job.Input) = .empty;
-    for (parsed.inputs) |path| try inputs.append(ctx.a, try job.classify(ctx, path));
+    for (parsed.inputs) |path| {
+        failed_path.* = path;
+        try inputs.append(ctx.a, try job.classify(ctx, path));
+    }
+    failed_path.* = null;
     return .{ .ownership = ownership, .report = report, .inputs = inputs.items };
 }
 
@@ -123,9 +128,10 @@ pub fn execute(ctx: *cache.Context, config_path: []const u8, args: []const []con
     };
     capture_valid = capture.validate() and capture_valid;
     var link: ?LinkCapture = null;
+    var capture_error_path: ?[]const u8 = null;
     if (config.ownership) |ownership| {
         if (code == 0) {
-            link = collectLink(ctx, config, ownership) catch |err| blk: {
+            link = collectLink(ctx, config, ownership, &capture_error_path) catch |err| blk: {
                 capture_valid = false;
                 capture_error = @errorName(err);
                 break :blk null;
@@ -135,7 +141,7 @@ pub fn execute(ctx: *cache.Context, config_path: []const u8, args: []const []con
             capture_error = "LinkFailed";
         }
     }
-    const record = std.json.Stringify.valueAlloc(ctx.a, Invocation{ .schema = 1, .capture_id = config.capture_id, .cwd = ctx.cwd, .driver = config.driver, .args = args, .expanded_args = capture.expanded.items, .responses = capture.responses.items, .capture_valid = capture_valid, .capture_error = capture_error, .link = link }, .{}) catch return code;
+    const record = std.json.Stringify.valueAlloc(ctx.a, Invocation{ .schema = 1, .capture_id = config.capture_id, .cwd = ctx.cwd, .driver = config.driver, .args = args, .expanded_args = capture.expanded.items, .responses = capture.responses.items, .capture_valid = capture_valid, .capture_error = capture_error, .capture_error_path = capture_error_path, .link = link }, .{}) catch return code;
     const sealed = cache.seal(ctx, record) catch return code;
     ctx.atomic(config.invocation, sealed) catch {};
     return code;

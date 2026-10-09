@@ -93,8 +93,12 @@ fn readFileMemo(ctx: *cache.Context, path: []const u8, expected: Stamp) ?[]const
 }
 
 fn rustFileDigest(ctx: *cache.Context, expected: Stamp) ![]const u8 {
+    return installedDigest(ctx, expected, "rust-toolchain-file-v1");
+}
+
+fn installedDigest(ctx: *cache.Context, expected: Stamp, domain: []const u8) ![]const u8 {
     var h = cache.Hash.init(.{});
-    cache.field(&h, "rust-toolchain-file-v1");
+    cache.field(&h, domain);
     cache.field(&h, expected.path);
     const key = try cache.finish(ctx.a, &h);
     const path = try ctx.path(&.{ "toolchain-files", key });
@@ -109,6 +113,26 @@ fn rustFileDigest(ctx: *cache.Context, expected: Stamp) ![]const u8 {
     const bytes = try std.json.Stringify.valueAlloc(ctx.a, FileMemo{ .stamp = expected, .hash = hash }, .{});
     try ctx.atomic(path, try cache.seal(ctx, bytes));
     return hash;
+}
+
+/// Explicit installed-tool resources only. Never call for project inputs.
+/// This uses the same trusted-installation metadata contract as rustc files.
+pub fn nativeFiles(ctx: *cache.Context, paths: []const []const u8) ![]const u8 {
+    var h = cache.Hash.init(.{});
+    cache.field(&h, "native-toolchain-files-v1");
+    var stamps: std.ArrayList(Stamp) = .empty;
+    for (paths) |path| {
+        if (!std.fs.path.isAbsolute(path)) return error.InvalidToolResource;
+        const current = try stamp(ctx, path);
+        if (!current.exists or current.kind != .file) return error.InvalidToolResource;
+        try stamps.append(ctx.a, current);
+    }
+    for (stamps.items) |current| {
+        cache.field(&h, current.path);
+        cache.field(&h, try installedDigest(ctx, current, "native-toolchain-file-v1"));
+    }
+    for (stamps.items) |current| if (!equal(current, try stamp(ctx, current.path))) return error.ToolchainChanged;
+    return cache.finish(ctx.a, &h);
 }
 
 fn rustResources(ctx: *cache.Context, stamps: *std.ArrayList(Stamp), root: []const u8) !void {

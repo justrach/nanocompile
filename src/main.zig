@@ -53,6 +53,16 @@ fn dispatch(ctx: *cache.Context, args: []const [:0]const u8) !u8 {
         return 0;
     }
     const command = args[1];
+    if (std.mem.eql(u8, command, "internal-native-identity")) {
+        if (args.len != 3) return error.InvalidNativeIdentity;
+        try ctx.prepare();
+        const maintenance = try cache.Lock.acquire(ctx, "maintenance", false);
+        defer maintenance.release();
+        const selected = try @import("native_identity.zig").apple(ctx, args[2]);
+        try ctx.out(try std.json.Stringify.valueAlloc(ctx.a, selected, .{}));
+        try ctx.out("\n");
+        return 0;
+    }
     if (std.mem.eql(u8, command, "internal-linker")) {
         if (args.len < 4) return error.InvalidLinkObserver;
         return @import("link_observer.zig").execute(ctx, args[2], args[3..]);
@@ -123,4 +133,5 @@ test {
     _ = @import("response_files.zig");
     _ = @import("link_observer.zig");
     _ = @import("producer_job.zig");
+    _ = @import("native_identity.zig");
 }
