@@ -58,3 +58,8 @@ A subsequent [watched digest experiment](watch-hash-experiment.md) tested
 cross-invocation hash reuse. It was rejected: unflushed writes through an
 already-dirty writable mmap can escape vnode events and metadata checks.
 Its low reuse timings do not justify replacing full content verification.
+
+The [first persistent cache-hit worker](restore-worker-experiment.md) keeps
+complete content verification and tests actual Harness builds. Its 27-pair
+comparison does not establish a dependable gain, so it remains a private
+prototype for transport and dispatch experiments.

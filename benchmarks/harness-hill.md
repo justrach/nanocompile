@@ -1167,3 +1167,18 @@ then differs from a direct full read. The public driver reproduces that stale
 digest alongside 16 ordinary passing checks. The prototype is rejected before
 compiler integration or project benchmarking. Its isolated timings are not a
 Harness build speedup; production retains full source and blob hashing.
+
+## Persistent cache-hit worker: first prototype
+
+The [worker experiment](../docs/restore-worker-experiment.md) preserves full
+content validation and runs ordinary hits in four persistent Zig processes.
+Misses, actual producers and unsupported requests return to the accepted
+wrapper through a lightweight C client. Real compiler/failure checks pass.
+
+The [27-pair actual Harness comparison](harness-restore-worker-paired.json)
+does not establish a dependable gain: 2.691545 s accepted versus 2.706421 s
+prototype medians. Candidate wins 17 pairs; mean paired savings are 11.76 ms
+with 20.36 ms standard error. Every candidate warm build serves 136 worker
+hits, all 167 artifacts match, and source contents remain unchanged. The
+prototype remains experimental; production is not changed. Raw samples and
+source/build instructions are published for further transport work.

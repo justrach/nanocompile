@@ -1,0 +1,34 @@
+{
+  "scope": "private macOS cache-hit worker and lightweight C client; not production adoption",
+  "checks": [
+    "miss falls back; worker hit preserves every artifact and diagnostic byte",
+    "source mutation causes normal compiler miss",
+    "per-request environment changes invalidate and previous environment restores correctly",
+    "per-request cwd isolation and original cwd reuse",
+    "artifact blob corruption recompiled and repaired",
+    "already-dirty live mmap source mutation is detected by full hashing",
+    "unsupported invocation preserves compiler failure status and diagnostics",
+    "fallback compiler receives original stdin and produces identical executable",
+    "stable Zig 0.17.0 executable restored by worker with identical bytes",
+    "concurrent same-key restores preserve outputs and locks",
+    "oversized/malformed requests leave workers usable",
+    "terminated workers and leftover sockets fall back to accepted wrapper"
+  ],
+  "passed": 12,
+  "binary_sha256": {
+    "worker": "a54ba27d82a40c2e90bac61caaae547d865d096cc41b16f0e9f033ab74618e6d",
+    "front": "69cc9dfc8d7de57c951c2ee56909333f78440743b5e8fa7d734989a5f8b99cf9",
+    "baseline": "1f8f2a76a8bd66450fb24065a64556d74b254a946fb207cfbe7e4a83d96f0658"
+  },
+  "core_source_revision": "98db85943913fdc235a8a997782520e1ba71a768",
+  "experimental_sources_sha256": {
+    "restore_worker.zig": "5a1adb637964aea2190bbdee6a7999e3acf9cf94dddab6d5e3e951d53ca04050",
+    "restore_worker_transport.c": "e3e86061ca587be9503be8738dc5cd083e8e350ad5133aec2130823cbcac8369",
+    "restore_worker_front.c": "fb2b0a88cd02091a80587f9d8fa36162643eab7e4400e968a5dceab0f9a520c1",
+    "restore_worker_pool.py": "3e2c2037ec3a364fbc72a306caca14779d035a09e6194fc77f4d9d25c1dafa4b",
+    "restore_worker_pair.py": "a5d2330bd895ff9b1b8386a7a04d5805f2034ba156da7b0a941ea94e424ab40f",
+    "restore_worker_check.py": "f2d1cea87b4a9f554157d0ca573c4f551184fccabe8652685879545467d6107b",
+    "restore-worker-only.patch": "f38b3e6fd16819feca0f536805126a9978fbbf193509d9afce17e5facdb1a030"
+  },
+  "production_adoption": false
+}

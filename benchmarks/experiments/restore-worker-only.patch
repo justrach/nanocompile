@@ -1,0 +1,40 @@
+--- a/src/cache.zig
++++ b/src/cache.zig
+@@ -37,6 +37,7 @@
+     cwd: []const u8,
+     compiler_identity: ?[]const u8 = null,
+     compiler_epoch: ?[]const u8 = null,
++    restore_only: bool = false,
+ 
+     pub fn init(a: std.mem.Allocator, io: std.Io, env: *std.process.Environ.Map) !Context {
+         const root = env.get("NANOCOMPILE_DIR") orelse try std.fs.path.join(a, &.{
+--- a/src/compiler.zig
++++ b/src/compiler.zig
+@@ -511,6 +511,7 @@
+ }
+ 
+ fn bypass(ctx: *cache.Context, argv: []const []const u8, reason: []const u8) !u8 {
++    if (ctx.restore_only) return 200;
+     ctx.trace(reason);
+     ctx.event("bypass");
+     var child = try std.process.spawn(ctx.io, .{ .argv = argv, .environ_map = ctx.env });
+@@ -645,7 +646,10 @@
+     if (ctx.env.get("NANOCOMPILE_DISABLE")) |v| if (eq(v, "1")) return bypass(ctx, argv, "bypass: disabled");
+     const plan = (if (kind == .rust) rustPlan(ctx, argv) else zigPlan(ctx, argv)) catch |err|
+         return bypass(ctx, argv, try std.fmt.allocPrint(ctx.a, "bypass: {s}", .{@errorName(err)}));
+-    if (plan.producer) return executeProducer(ctx, plan, argv);
++    if (plan.producer) {
++        if (ctx.restore_only) return 200;
++        return executeProducer(ctx, plan, argv);
++    }
+     ctx.prepare() catch return bypass(ctx, argv, "bypass: cache unavailable");
+     const maintenance = cache.Lock.acquire(ctx, "maintenance", false) catch return bypass(ctx, argv, "bypass: cache lock unavailable");
+     defer maintenance.release();
+@@ -675,6 +679,7 @@
+         return 0;
+     }
+     var before: std.ArrayList(cache.Dependency) = .empty;
++    if (ctx.restore_only) return 200;
+     try before.appendSlice(ctx.a, dependencyRecords(ctx, plan.dependencies) catch return bypass(ctx, argv, "bypass: cannot fingerprint inputs"));
+     const native = rust_dependencies.nativeSnapshot(ctx, plan.native_dirs) catch |err|
+         return bypass(ctx, argv, try std.fmt.allocPrint(ctx.a, "bypass: native inputs unavailable ({s})", .{@errorName(err)}));
