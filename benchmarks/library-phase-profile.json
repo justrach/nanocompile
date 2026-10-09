@@ -1,0 +1,4651 @@
+{
+  "method": "Private entry-point and ordinary-hit phase timers; one cold and two warm clean Cargo builds. Times include contention and profiler/capture overhead. Stage sums overlap; process duration includes Python launch/observation and runtime/exit work outside measured main. Compiler environments and arguments omitted.",
+  "source_revision": "c348d5bc93e3afb64a4e5f2640d0039b636a0047",
+  "rustc": "rustc 1.97.1 (8bab26f4f 2026-07-14)\nbinary: rustc\ncommit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452\ncommit-date: 2026-07-14\nhost: aarch64-apple-darwin\nrelease: 1.97.1\nLLVM version: 22.1.6\n",
+  "jobs": 4,
+  "ordinary_warm_hits": 272,
+  "tracked_sources_match_accepted_run": true,
+  "accepted_binary_sha256": "1f8f2a76a8bd66450fb24065a64556d74b254a946fb207cfbe7e4a83d96f0658",
+  "profile_binary_sha256": "6be786e409bc90df77c5ce0d95cf0a7951a6547956537716fb8858b7af890880",
+  "instrumentation_patch_sha256": "15badde7ee1e3ddf084379a40c056172dd24d2043faccd3952e2db4e9c85cc86",
+  "capture_patch_sha256": "402df3312a7af9e889c5ef93fd7f0ecee495061e1489549f9e967b12e1550e75",
+  "capture_script_sha256": "b5e25bae214342c6baa50c9057143f9aeefb1392730e3e2523b9fe21ef8cdefb",
+  "stage_median_ms": {
+    "front:init": 0.040479,
+    "library:plan": 0.009625,
+    "library:prepare": 0.034875,
+    "library:key": 1.240833,
+    "library:locks-config": 0.120271,
+    "library:restore": 4.245687,
+    "library:events": 0.043333,
+    "front:dispatch": 5.7400005
+  },
+  "median_process_ms": 9.79283353080973,
+  "median_outside_measured_main_ms": 3.986791013320624,
+  "samples": [
+    {
+      "phase": "warm-1",
+      "crate": "unicode_ident",
+      "type": "lib",
+      "process_seconds": 0.0070947500062175095,
+      "stages_nanoseconds": {
+        "front:init": 34916,
+        "library:plan": 7333,
+        "library:prepare": 32500,
+        "library:key": 1419458,
+        "library:locks-config": 134292,
+        "library:restore": 1730875,
+        "library:events": 52958,
+        "front:dispatch": 3402584
+      },
+      "outside_measured_main_seconds": 0.0036572500062175095
+    },
+    {
+      "phase": "warm-1",
+      "crate": "cfg_if",
+      "type": "lib",
+      "process_seconds": 0.006459416996221989,
+      "stages_nanoseconds": {
+        "front:init": 34583,
+        "library:plan": 9125,
+        "library:prepare": 34416,
+        "library:key": 1183375,
+        "library:locks-config": 109959,
+        "library:restore": 1293791,
+        "library:events": 29709,
+        "front:dispatch": 2688167
+      },
+      "outside_measured_main_seconds": 0.0037366669962219895
+    },
+    {
+      "phase": "warm-1",
+      "crate": "stable_deref_trait",
+      "type": "lib",
+      "process_seconds": 0.0064483340247534215,
+      "stages_nanoseconds": {
+        "front:init": 38125,
+        "library:plan": 9750,
+        "library:prepare": 29167,
+        "library:key": 1075166,
+        "library:locks-config": 136459,
+        "library:restore": 1242583,
+        "library:events": 36042,
+        "front:dispatch": 2551708
+      },
+      "outside_measured_main_seconds": 0.0038585010247534214
+    },
+    {
+      "phase": "warm-1",
+      "crate": "smallvec",
+      "type": "lib",
+      "process_seconds": 0.007892708003055304,
+      "stages_nanoseconds": {
+        "front:init": 44084,
+        "library:plan": 9708,
+        "library:prepare": 34792,
+        "library:key": 1307625,
+        "library:locks-config": 140250,
+        "library:restore": 2333541,
+        "library:events": 46084,
+        "front:dispatch": 3904333
+      },
+      "outside_measured_main_seconds": 0.003944291003055304
+    },
+    {
+      "phase": "warm-1",
+      "crate": "pin_project_lite",
+      "type": "lib",
+      "process_seconds": 0.007022292003966868,
+      "stages_nanoseconds": {
+        "front:init": 41125,
+        "library:plan": 12500,
+        "library:prepare": 34042,
+        "library:key": 1291833,
+        "library:locks-config": 135333,
+        "library:restore": 1632334,
+        "library:events": 35500,
+        "front:dispatch": 3170375
+      },
+      "outside_measured_main_seconds": 0.003810792003966868
+    },
+    {
+      "phase": "warm-1",
+      "crate": "futures_core",
+      "type": "lib",
+      "process_seconds": 0.007965833006892353,
+      "stages_nanoseconds": {
+        "front:init": 39042,
+        "library:plan": 10583,
+        "library:prepare": 41250,
+        "library:key": 1484667,
+        "library:locks-config": 135333,
+        "library:restore": 2086208,
+        "library:events": 61292,
+        "front:dispatch": 3847166
+      },
+      "outside_measured_main_seconds": 0.004079625006892353
+    },
+    {
+      "phase": "warm-1",
+      "crate": "bytes",
+      "type": "lib",
+      "process_seconds": 0.01049091701861471,
+      "stages_nanoseconds": {
+        "front:init": 37916,
+        "library:plan": 8917,
+        "library:prepare": 30542,
+        "library:key": 1229583,
+        "library:locks-config": 128542,
+        "library:restore": 4782041,
+        "library:events": 36000,
+        "front:dispatch": 6243209
+      },
+      "outside_measured_main_seconds": 0.004209792018614709
+    },
+    {
+      "phase": "warm-1",
+      "crate": "libc",
+      "type": "lib",
+      "process_seconds": 0.013791624980513006,
+      "stages_nanoseconds": {
+        "front:init": 42917,
+        "library:plan": 9458,
+        "library:prepare": 35792,
+        "library:key": 1262791,
+        "library:locks-config": 134917,
+        "library:restore": 8284042,
+        "library:events": 41458,
+        "front:dispatch": 9813042
+      },
+      "outside_measured_main_seconds": 0.003935665980513007
+    },
+    {
+      "phase": "warm-1",
+      "crate": "proc_macro2",
+      "type": "lib",
+      "process_seconds": 0.007242624997161329,
+      "stages_nanoseconds": {
+        "front:init": 45166,
+        "library:plan": 8125,
+        "library:prepare": 42167,
+        "library:key": 1683750,
+        "library:locks-config": 114875,
+        "library:restore": 1000375,
+        "library:events": 29917,
+        "front:dispatch": 2903709
+      },
+      "outside_measured_main_seconds": 0.004293749997161329
+    },
+    {
+      "phase": "warm-1",
+      "crate": "memchr",
+      "type": "lib",
+      "process_seconds": 0.01068412500899285,
+      "stages_nanoseconds": {
+        "front:init": 36459,
+        "library:plan": 8875,
+        "library:prepare": 43209,
+        "library:key": 1298916,
+        "library:locks-config": 125334,
+        "library:restore": 5192375,
+        "library:events": 48791,
+        "front:dispatch": 6744625
+      },
+      "outside_measured_main_seconds": 0.003903041008992851
+    },
+    {
+      "phase": "warm-1",
+      "crate": "itoa",
+      "type": "lib",
+      "process_seconds": 0.00711116602178663,
+      "stages_nanoseconds": {
+        "front:init": 40125,
+        "library:plan": 9084,
+        "library:prepare": 35416,
+        "library:key": 1248792,
+        "library:locks-config": 150875,
+        "library:restore": 1679417,
+        "library:events": 40625,
+        "front:dispatch": 3199000
+      },
+      "outside_measured_main_seconds": 0.0038720410217866303
+    },
+    {
+      "phase": "warm-1",
+      "crate": "proc_macro2",
+      "type": "lib",
+      "process_seconds": 0.00614516600035131,
+      "stages_nanoseconds": {
+        "front:init": 34708,
+        "library:plan": 7833,
+        "library:prepare": 31708,
+        "library:key": 1165709,
+        "library:locks-config": 95708,
+        "library:restore": 875250,
+        "library:events": 30875,
+        "front:dispatch": 2231792
+      },
+      "outside_measured_main_seconds": 0.00387866600035131
+    },
+    {
+      "phase": "warm-1",
+      "crate": "futures_sink",
+      "type": "lib",
+      "process_seconds": 0.007026833016425371,
+      "stages_nanoseconds": {
+        "front:init": 33584,
+        "library:plan": 9500,
+        "library:prepare": 32125,
+        "library:key": 1204083,
+        "library:locks-config": 116542,
+        "library:restore": 1446958,
+        "library:events": 37583,
+        "front:dispatch": 2872500
+      },
+      "outside_measured_main_seconds": 0.004120749016425371
+    },
+    {
+      "phase": "warm-1",
+      "crate": "proc_macro2",
+      "type": "lib",
+      "process_seconds": 0.008517124981153756,
+      "stages_nanoseconds": {
+        "front:init": 37167,
+        "library:plan": 9292,
+        "library:prepare": 30708,
+        "library:key": 1102875,
+        "library:locks-config": 132083,
+        "library:restore": 3543834,
+        "library:events": 34333,
+        "front:dispatch": 4877208
+      },
+      "outside_measured_main_seconds": 0.003602749981153756
+    },
+    {
+      "phase": "warm-1",
+      "crate": "quote",
+      "type": "lib",
+      "process_seconds": 0.008550708007533103,
+      "stages_nanoseconds": {
+        "front:init": 38375,
+        "library:plan": 9125,
+        "library:prepare": 34125,
+        "library:key": 1345750,
+        "library:locks-config": 128916,
+        "library:restore": 3282250,
+        "library:events": 38834,
+        "front:dispatch": 4864750
+      },
+      "outside_measured_main_seconds": 0.003647583007533103
+    },
+    {
+      "phase": "warm-1",
+      "crate": "scopeguard",
+      "type": "lib",
+      "process_seconds": 0.007061582989990711,
+      "stages_nanoseconds": {
+        "front:init": 38750,
+        "library:plan": 9041,
+        "library:prepare": 34042,
+        "library:key": 1170917,
+        "library:locks-config": 119750,
+        "library:restore": 1352125,
+        "library:events": 34541,
+        "front:dispatch": 2747292
+      },
+      "outside_measured_main_seconds": 0.004275540989990711
+    },
+    {
+      "phase": "warm-1",
+      "crate": "parking_lot_core",
+      "type": "lib",
+      "process_seconds": 0.011038666998501867,
+      "stages_nanoseconds": {
+        "front:init": 31500,
+        "library:plan": 9125,
+        "library:prepare": 31792,
+        "library:key": 1155917,
+        "library:locks-config": 126583,
+        "library:restore": 5689208,
+        "library:events": 31917,
+        "front:dispatch": 7068792
+      },
+      "outside_measured_main_seconds": 0.003938374998501867
+    },
+    {
+      "phase": "warm-1",
+      "crate": "syn",
+      "type": "lib",
+      "process_seconds": 0.020895041001494974,
+      "stages_nanoseconds": {
+        "front:init": 40041,
+        "library:plan": 10667,
+        "library:prepare": 39750,
+        "library:key": 1316666,
+        "library:locks-config": 114375,
+        "library:restore": 15753209,
+        "library:events": 40666,
+        "front:dispatch": 17302250
+      },
+      "outside_measured_main_seconds": 0.0035527500014949746
+    },
+    {
+      "phase": "warm-1",
+      "crate": "syn",
+      "type": "lib",
+      "process_seconds": 0.021683958009816706,
+      "stages_nanoseconds": {
+        "front:init": 39917,
+        "library:plan": 8833,
+        "library:prepare": 30875,
+        "library:key": 1279417,
+        "library:locks-config": 123167,
+        "library:restore": 16160000,
+        "library:events": 30291,
+        "front:dispatch": 17657042
+      },
+      "outside_measured_main_seconds": 0.0039869990098167045
+    },
+    {
+      "phase": "warm-1",
+      "crate": "lock_api",
+      "type": "lib",
+      "process_seconds": 0.009566334018018097,
+      "stages_nanoseconds": {
+        "front:init": 51875,
+        "library:plan": 10084,
+        "library:prepare": 45875,
+        "library:key": 2029458,
+        "library:locks-config": 126583,
+        "library:restore": 2716584,
+        "library:events": 43333,
+        "front:dispatch": 5004875
+      },
+      "outside_measured_main_seconds": 0.004509584018018097
+    },
+    {
+      "phase": "warm-1",
+      "crate": "errno",
+      "type": "lib",
+      "process_seconds": 0.008807041973341256,
+      "stages_nanoseconds": {
+        "front:init": 39458,
+        "library:plan": 8750,
+        "library:prepare": 35375,
+        "library:key": 1867000,
+        "library:locks-config": 143375,
+        "library:restore": 2941417,
+        "library:events": 30542,
+        "front:dispatch": 5057375
+      },
+      "outside_measured_main_seconds": 0.003710208973341256
+    },
+    {
+      "phase": "warm-1",
+      "crate": "find_msvc_tools",
+      "type": "lib",
+      "process_seconds": 0.007265250023920089,
+      "stages_nanoseconds": {
+        "front:init": 47667,
+        "library:plan": 10208,
+        "library:prepare": 33167,
+        "library:key": 1186291,
+        "library:locks-config": 125375,
+        "library:restore": 1875000,
+        "library:events": 38334,
+        "front:dispatch": 3310333
+      },
+      "outside_measured_main_seconds": 0.003907250023920089
+    },
+    {
+      "phase": "warm-1",
+      "crate": "synstructure",
+      "type": "lib",
+      "process_seconds": 0.013841584033798426,
+      "stages_nanoseconds": {
+        "front:init": 45334,
+        "library:plan": 10541,
+        "library:prepare": 36792,
+        "library:key": 1370667,
+        "library:locks-config": 126625,
+        "library:restore": 7989500,
+        "library:events": 30000,
+        "front:dispatch": 9591583
+      },
+      "outside_measured_main_seconds": 0.004204667033798426
+    },
+    {
+      "phase": "warm-1",
+      "crate": "shlex",
+      "type": "lib",
+      "process_seconds": 0.007774709025397897,
+      "stages_nanoseconds": {
+        "front:init": 36042,
+        "library:plan": 9292,
+        "library:prepare": 32875,
+        "library:key": 1202041,
+        "library:locks-config": 127875,
+        "library:restore": 1867500,
+        "library:events": 39459,
+        "front:dispatch": 3305583
+      },
+      "outside_measured_main_seconds": 0.004433084025397897
+    },
+    {
+      "phase": "warm-1",
+      "crate": "cc",
+      "type": "lib",
+      "process_seconds": 0.01077441597590223,
+      "stages_nanoseconds": {
+        "front:init": 37000,
+        "library:plan": 9375,
+        "library:prepare": 37166,
+        "library:key": 1228584,
+        "library:locks-config": 120083,
+        "library:restore": 4960458,
+        "library:events": 27542,
+        "front:dispatch": 6410417
+      },
+      "outside_measured_main_seconds": 0.004326998975902229
+    },
+    {
+      "phase": "warm-1",
+      "crate": "zerofrom",
+      "type": "lib",
+      "process_seconds": 0.009256041026674211,
+      "stages_nanoseconds": {
+        "front:init": 47167,
+        "library:plan": 12333,
+        "library:prepare": 34208,
+        "library:key": 1279500,
+        "library:locks-config": 113459,
+        "library:restore": 4110708,
+        "library:events": 36625,
+        "front:dispatch": 5614750
+      },
+      "outside_measured_main_seconds": 0.003594124026674211
+    },
+    {
+      "phase": "warm-1",
+      "crate": "signal_hook_registry",
+      "type": "lib",
+      "process_seconds": 0.008993000024929643,
+      "stages_nanoseconds": {
+        "front:init": 38500,
+        "library:plan": 9541,
+        "library:prepare": 38417,
+        "library:key": 1181750,
+        "library:locks-config": 117083,
+        "library:restore": 3624084,
+        "library:events": 33250,
+        "front:dispatch": 5034417
+      },
+      "outside_measured_main_seconds": 0.003920083024929643
+    },
+    {
+      "phase": "warm-1",
+      "crate": "parking_lot",
+      "type": "lib",
+      "process_seconds": 0.010865208052564412,
+      "stages_nanoseconds": {
+        "front:init": 36834,
+        "library:plan": 8333,
+        "library:prepare": 31125,
+        "library:key": 1185250,
+        "library:locks-config": 131083,
+        "library:restore": 5656625,
+        "library:events": 35709,
+        "front:dispatch": 7080000
+      },
+      "outside_measured_main_seconds": 0.0037483740525644125
+    },
+    {
+      "phase": "warm-1",
+      "crate": "serde_core",
+      "type": "lib",
+      "process_seconds": 0.016404124966356903,
+      "stages_nanoseconds": {
+        "front:init": 27875,
+        "library:plan": 9417,
+        "library:prepare": 34875,
+        "library:key": 1096000,
+        "library:locks-config": 106666,
+        "library:restore": 10920000,
+        "library:events": 38584,
+        "front:dispatch": 12231167
+      },
+      "outside_measured_main_seconds": 0.004145082966356904
+    },
+    {
+      "phase": "warm-1",
+      "crate": "yoke",
+      "type": "lib",
+      "process_seconds": 0.012988500006031245,
+      "stages_nanoseconds": {
+        "front:init": 45750,
+        "library:plan": 12709,
+        "library:prepare": 45125,
+        "library:key": 1358916,
+        "library:locks-config": 139125,
+        "library:restore": 7078917,
+        "library:events": 31292,
+        "front:dispatch": 8691125
+      },
+      "outside_measured_main_seconds": 0.004251625006031245
+    },
+    {
+      "phase": "warm-1",
+      "crate": "futures_channel",
+      "type": "lib",
+      "process_seconds": 0.0087016670149751,
+      "stages_nanoseconds": {
+        "front:init": 34125,
+        "library:plan": 9292,
+        "library:prepare": 34958,
+        "library:key": 1148375,
+        "library:locks-config": 111792,
+        "library:restore": 3276667,
+        "library:events": 31541,
+        "front:dispatch": 4640375
+      },
+      "outside_measured_main_seconds": 0.004027167014975101
+    },
+    {
+      "phase": "warm-1",
+      "crate": "socket2",
+      "type": "lib",
+      "process_seconds": 0.010320624976884574,
+      "stages_nanoseconds": {
+        "front:init": 39417,
+        "library:plan": 9334,
+        "library:prepare": 33333,
+        "library:key": 1207500,
+        "library:locks-config": 133042,
+        "library:restore": 4701166,
+        "library:events": 34584,
+        "front:dispatch": 6147750
+      },
+      "outside_measured_main_seconds": 0.004133457976884573
+    },
+    {
+      "phase": "warm-1",
+      "crate": "mio",
+      "type": "lib",
+      "process_seconds": 0.010606332973111421,
+      "stages_nanoseconds": {
+        "front:init": 37958,
+        "library:plan": 8500,
+        "library:prepare": 30291,
+        "library:key": 1206625,
+        "library:locks-config": 123084,
+        "library:restore": 5465166,
+        "library:events": 33709,
+        "front:dispatch": 6892208
+      },
+      "outside_measured_main_seconds": 0.003676166973111421
+    },
+    {
+      "phase": "warm-1",
+      "crate": "core_foundation_sys",
+      "type": "lib",
+      "process_seconds": 0.009840500017162412,
+      "stages_nanoseconds": {
+        "front:init": 38000,
+        "library:plan": 8583,
+        "library:prepare": 32375,
+        "library:key": 1414834,
+        "library:locks-config": 119000,
+        "library:restore": 4616208,
+        "library:events": 35250,
+        "front:dispatch": 6252250
+      },
+      "outside_measured_main_seconds": 0.0035502500171624126
+    },
+    {
+      "phase": "warm-1",
+      "crate": "zerovec",
+      "type": "lib",
+      "process_seconds": 0.01675891602644697,
+      "stages_nanoseconds": {
+        "front:init": 40375,
+        "library:plan": 11166,
+        "library:prepare": 35334,
+        "library:key": 1192083,
+        "library:locks-config": 124250,
+        "library:restore": 11290625,
+        "library:events": 35833,
+        "front:dispatch": 12718417
+      },
+      "outside_measured_main_seconds": 0.004000124026446969
+    },
+    {
+      "phase": "warm-1",
+      "crate": "writeable",
+      "type": "lib",
+      "process_seconds": 0.007858333003241569,
+      "stages_nanoseconds": {
+        "front:init": 42667,
+        "library:plan": 10791,
+        "library:prepare": 33000,
+        "library:key": 1223542,
+        "library:locks-config": 113500,
+        "library:restore": 2336208,
+        "library:events": 34292,
+        "front:dispatch": 3777583
+      },
+      "outside_measured_main_seconds": 0.004038083003241569
+    },
+    {
+      "phase": "warm-1",
+      "crate": "litemap",
+      "type": "lib",
+      "process_seconds": 0.007739874999970198,
+      "stages_nanoseconds": {
+        "front:init": 41042,
+        "library:plan": 11291,
+        "library:prepare": 32792,
+        "library:key": 1230000,
+        "library:locks-config": 117333,
+        "library:restore": 2279334,
+        "library:events": 32833,
+        "front:dispatch": 3732000
+      },
+      "outside_measured_main_seconds": 0.003966832999970198
+    },
+    {
+      "phase": "warm-1",
+      "crate": "potential_utf",
+      "type": "lib",
+      "process_seconds": 0.012604375020600855,
+      "stages_nanoseconds": {
+        "front:init": 36792,
+        "library:plan": 12042,
+        "library:prepare": 28500,
+        "library:key": 1176208,
+        "library:locks-config": 109000,
+        "library:restore": 7702959,
+        "library:events": 40541,
+        "front:dispatch": 9095542
+      },
+      "outside_measured_main_seconds": 0.0034720410206008547
+    },
+    {
+      "phase": "warm-1",
+      "crate": "tinystr",
+      "type": "lib",
+      "process_seconds": 0.016216333024203777,
+      "stages_nanoseconds": {
+        "front:init": 39625,
+        "library:plan": 11042,
+        "library:prepare": 35667,
+        "library:key": 1235041,
+        "library:locks-config": 115000,
+        "library:restore": 10896250,
+        "library:events": 35375,
+        "front:dispatch": 12354542
+      },
+      "outside_measured_main_seconds": 0.003822166024203778
+    },
+    {
+      "phase": "warm-1",
+      "crate": "zerotrie",
+      "type": "lib",
+      "process_seconds": 0.013350458990316838,
+      "stages_nanoseconds": {
+        "front:init": 45375,
+        "library:plan": 12083,
+        "library:prepare": 42709,
+        "library:key": 1292541,
+        "library:locks-config": 113125,
+        "library:restore": 7570834,
+        "library:events": 33708,
+        "front:dispatch": 9092875
+      },
+      "outside_measured_main_seconds": 0.0042122089903168375
+    },
+    {
+      "phase": "warm-1",
+      "crate": "tokio",
+      "type": "lib",
+      "process_seconds": 0.03187708300538361,
+      "stages_nanoseconds": {
+        "front:init": 37000,
+        "library:plan": 10583,
+        "library:prepare": 32167,
+        "library:key": 1178125,
+        "library:locks-config": 118333,
+        "library:restore": 26032542,
+        "library:events": 39416,
+        "front:dispatch": 27437708
+      },
+      "outside_measured_main_seconds": 0.00440237500538361
+    },
+    {
+      "phase": "warm-1",
+      "crate": "icu_locale_core",
+      "type": "lib",
+      "process_seconds": 0.014669208030682057,
+      "stages_nanoseconds": {
+        "front:init": 37500,
+        "library:plan": 11250,
+        "library:prepare": 29667,
+        "library:key": 1150333,
+        "library:locks-config": 112750,
+        "library:restore": 9713334,
+        "library:events": 38458,
+        "front:dispatch": 11079542
+      },
+      "outside_measured_main_seconds": 0.0035521660306820566
+    },
+    {
+      "phase": "warm-1",
+      "crate": "utf8_iter",
+      "type": "lib",
+      "process_seconds": 0.006941416999325156,
+      "stages_nanoseconds": {
+        "front:init": 38584,
+        "library:plan": 8959,
+        "library:prepare": 34625,
+        "library:key": 1253291,
+        "library:locks-config": 121334,
+        "library:restore": 1657791,
+        "library:events": 29584,
+        "front:dispatch": 3131166
+      },
+      "outside_measured_main_seconds": 0.0037716669993251564
+    },
+    {
+      "phase": "warm-1",
+      "crate": "slab",
+      "type": "lib",
+      "process_seconds": 0.00814466702286154,
+      "stages_nanoseconds": {
+        "front:init": 49042,
+        "library:plan": 9084,
+        "library:prepare": 37000,
+        "library:key": 1167083,
+        "library:locks-config": 109125,
+        "library:restore": 2439083,
+        "library:events": 35917,
+        "front:dispatch": 3828416
+      },
+      "outside_measured_main_seconds": 0.00426720902286154
+    },
+    {
+      "phase": "warm-1",
+      "crate": "futures_task",
+      "type": "lib",
+      "process_seconds": 0.007832667033653706,
+      "stages_nanoseconds": {
+        "front:init": 40542,
+        "library:plan": 10625,
+        "library:prepare": 38000,
+        "library:key": 1341667,
+        "library:locks-config": 134583,
+        "library:restore": 2319542,
+        "library:events": 51041,
+        "front:dispatch": 3926250
+      },
+      "outside_measured_main_seconds": 0.003865875033653706
+    },
+    {
+      "phase": "warm-1",
+      "crate": "futures_io",
+      "type": "lib",
+      "process_seconds": 0.007726916985120624,
+      "stages_nanoseconds": {
+        "front:init": 45958,
+        "library:plan": 9667,
+        "library:prepare": 44666,
+        "library:key": 1790334,
+        "library:locks-config": 143583,
+        "library:restore": 1670125,
+        "library:events": 33167,
+        "front:dispatch": 3720792
+      },
+      "outside_measured_main_seconds": 0.003960166985120624
+    },
+    {
+      "phase": "warm-1",
+      "crate": "futures_util",
+      "type": "lib",
+      "process_seconds": 0.027198457974009216,
+      "stages_nanoseconds": {
+        "front:init": 38333,
+        "library:plan": 10833,
+        "library:prepare": 33167,
+        "library:key": 1255083,
+        "library:locks-config": 110875,
+        "library:restore": 22050417,
+        "library:events": 35833,
+        "front:dispatch": 23522792
+      },
+      "outside_measured_main_seconds": 0.003637332974009217
+    },
+    {
+      "phase": "warm-1",
+      "crate": "icu_collections",
+      "type": "lib",
+      "process_seconds": 0.015895582968369126,
+      "stages_nanoseconds": {
+        "front:init": 41167,
+        "library:plan": 11709,
+        "library:prepare": 31916,
+        "library:key": 1184584,
+        "library:locks-config": 139291,
+        "library:restore": 10393000,
+        "library:events": 34542,
+        "front:dispatch": 11819417
+      },
+      "outside_measured_main_seconds": 0.004034998968369126
+    },
+    {
+      "phase": "warm-1",
+      "crate": "icu_provider",
+      "type": "lib",
+      "process_seconds": 0.021247416967526078,
+      "stages_nanoseconds": {
+        "front:init": 45375,
+        "library:plan": 13375,
+        "library:prepare": 36041,
+        "library:key": 1220792,
+        "library:locks-config": 107500,
+        "library:restore": 15975042,
+        "library:events": 42666,
+        "front:dispatch": 17426250
+      },
+      "outside_measured_main_seconds": 0.003775791967526077
+    },
+    {
+      "phase": "warm-1",
+      "crate": "http",
+      "type": "lib",
+      "process_seconds": 0.01227254094555974,
+      "stages_nanoseconds": {
+        "front:init": 43667,
+        "library:plan": 9959,
+        "library:prepare": 33458,
+        "library:key": 1223833,
+        "library:locks-config": 119292,
+        "library:restore": 7074083,
+        "library:events": 41834,
+        "front:dispatch": 8534583
+      },
+      "outside_measured_main_seconds": 0.0036942909455597393
+    },
+    {
+      "phase": "warm-1",
+      "crate": "percent_encoding",
+      "type": "lib",
+      "process_seconds": 0.0080420839949511,
+      "stages_nanoseconds": {
+        "front:init": 36792,
+        "library:plan": 8167,
+        "library:prepare": 31958,
+        "library:key": 1238958,
+        "library:locks-config": 114584,
+        "library:restore": 2090875,
+        "library:events": 35000,
+        "front:dispatch": 3545791
+      },
+      "outside_measured_main_seconds": 0.004459500994951099
+    },
+    {
+      "phase": "warm-1",
+      "crate": "zeroize",
+      "type": "lib",
+      "process_seconds": 0.008375208009965718,
+      "stages_nanoseconds": {
+        "front:init": 34791,
+        "library:plan": 10834,
+        "library:prepare": 32000,
+        "library:key": 1199875,
+        "library:locks-config": 110666,
+        "library:restore": 3232542,
+        "library:events": 37833,
+        "front:dispatch": 4650292
+      },
+      "outside_measured_main_seconds": 0.003690125009965718
+    },
+    {
+      "phase": "warm-1",
+      "crate": "version_check",
+      "type": "lib",
+      "process_seconds": 0.007592916954308748,
+      "stages_nanoseconds": {
+        "front:init": 42084,
+        "library:plan": 8917,
+        "library:prepare": 33875,
+        "library:key": 1204583,
+        "library:locks-config": 117792,
+        "library:restore": 2134667,
+        "library:events": 43291,
+        "front:dispatch": 3570625
+      },
+      "outside_measured_main_seconds": 0.003980207954308748
+    },
+    {
+      "phase": "warm-1",
+      "crate": "bitflags",
+      "type": "lib",
+      "process_seconds": 0.008123791019897908,
+      "stages_nanoseconds": {
+        "front:init": 40917,
+        "library:plan": 7666,
+        "library:prepare": 31875,
+        "library:key": 1223917,
+        "library:locks-config": 123875,
+        "library:restore": 2678458,
+        "library:events": 27334,
+        "front:dispatch": 4117958
+      },
+      "outside_measured_main_seconds": 0.003964916019897908
+    },
+    {
+      "phase": "warm-1",
+      "crate": "once_cell",
+      "type": "lib",
+      "process_seconds": 0.007756082981359214,
+      "stages_nanoseconds": {
+        "front:init": 39125,
+        "library:plan": 8916,
+        "library:prepare": 31750,
+        "library:key": 1135542,
+        "library:locks-config": 135125,
+        "library:restore": 2562542,
+        "library:events": 45791,
+        "front:dispatch": 3946042
+      },
+      "outside_measured_main_seconds": 0.003770915981359213
+    },
+    {
+      "phase": "warm-1",
+      "crate": "rustls_pki_types",
+      "type": "lib",
+      "process_seconds": 0.010202125005889684,
+      "stages_nanoseconds": {
+        "front:init": 41333,
+        "library:plan": 10542,
+        "library:prepare": 32583,
+        "library:key": 1231958,
+        "library:locks-config": 135584,
+        "library:restore": 4665125,
+        "library:events": 45000,
+        "front:dispatch": 6150125
+      },
+      "outside_measured_main_seconds": 0.004010667005889684
+    },
+    {
+      "phase": "warm-1",
+      "crate": "serde",
+      "type": "lib",
+      "process_seconds": 0.017217707994859666,
+      "stages_nanoseconds": {
+        "front:init": 38792,
+        "library:plan": 10291,
+        "library:prepare": 35500,
+        "library:key": 1203167,
+        "library:locks-config": 136708,
+        "library:restore": 11291542,
+        "library:events": 46708,
+        "front:dispatch": 12755625
+      },
+      "outside_measured_main_seconds": 0.004423290994859665
+    },
+    {
+      "phase": "warm-1",
+      "crate": "http_body",
+      "type": "lib",
+      "process_seconds": 0.009737415995914489,
+      "stages_nanoseconds": {
+        "front:init": 39167,
+        "library:plan": 8958,
+        "library:prepare": 32625,
+        "library:key": 1414917,
+        "library:locks-config": 112875,
+        "library:restore": 4272625,
+        "library:events": 34458,
+        "front:dispatch": 5902750
+      },
+      "outside_measured_main_seconds": 0.0037954989959144893
+    },
+    {
+      "phase": "warm-1",
+      "crate": "icu_normalizer_data",
+      "type": "lib",
+      "process_seconds": 0.008539583010133356,
+      "stages_nanoseconds": {
+        "front:init": 28458,
+        "library:plan": 8708,
+        "library:prepare": 32917,
+        "library:key": 1178042,
+        "library:locks-config": 130416,
+        "library:restore": 3142042,
+        "library:events": 43625,
+        "front:dispatch": 4563167
+      },
+      "outside_measured_main_seconds": 0.003947958010133356
+    },
+    {
+      "phase": "warm-1",
+      "crate": "icu_properties_data",
+      "type": "lib",
+      "process_seconds": 0.014965249982196838,
+      "stages_nanoseconds": {
+        "front:init": 26792,
+        "library:plan": 8125,
+        "library:prepare": 28959,
+        "library:key": 1110416,
+        "library:locks-config": 115167,
+        "library:restore": 9771625,
+        "library:events": 35833,
+        "front:dispatch": 11093542
+      },
+      "outside_measured_main_seconds": 0.003844915982196837
+    },
+    {
+      "phase": "warm-1",
+      "crate": "getrandom",
+      "type": "lib",
+      "process_seconds": 0.008574459003284574,
+      "stages_nanoseconds": {
+        "front:init": 35875,
+        "library:plan": 9333,
+        "library:prepare": 30083,
+        "library:key": 1177250,
+        "library:locks-config": 121292,
+        "library:restore": 3405625,
+        "library:events": 33542,
+        "front:dispatch": 4803084
+      },
+      "outside_measured_main_seconds": 0.0037355000032845732
+    },
+    {
+      "phase": "warm-1",
+      "crate": "untrusted",
+      "type": "lib",
+      "process_seconds": 0.006577041989658028,
+      "stages_nanoseconds": {
+        "front:init": 36791,
+        "library:plan": 8958,
+        "library:prepare": 31959,
+        "library:key": 1162000,
+        "library:locks-config": 113083,
+        "library:restore": 1766167,
+        "library:events": 37708,
+        "front:dispatch": 3148709
+      },
+      "outside_measured_main_seconds": 0.003391541989658028
+    },
+    {
+      "phase": "warm-1",
+      "crate": "icu_properties",
+      "type": "lib",
+      "process_seconds": 0.026659875002224,
+      "stages_nanoseconds": {
+        "front:init": 42708,
+        "library:plan": 12917,
+        "library:prepare": 36458,
+        "library:key": 1137167,
+        "library:locks-config": 107625,
+        "library:restore": 21360333,
+        "library:events": 27792,
+        "front:dispatch": 22714334
+      },
+      "outside_measured_main_seconds": 0.0039028330022239967
+    },
+    {
+      "phase": "warm-1",
+      "crate": "icu_normalizer",
+      "type": "lib",
+      "process_seconds": 0.021168290986679494,
+      "stages_nanoseconds": {
+        "front:init": 44417,
+        "library:plan": 14167,
+        "library:prepare": 38958,
+        "library:key": 1298417,
+        "library:locks-config": 109333,
+        "library:restore": 15424250,
+        "library:events": 36917,
+        "front:dispatch": 16949500
+      },
+      "outside_measured_main_seconds": 0.004174373986679494
+    },
+    {
+      "phase": "warm-1",
+      "crate": "tower_service",
+      "type": "lib",
+      "process_seconds": 0.006730499968398362,
+      "stages_nanoseconds": {
+        "front:init": 39916,
+        "library:plan": 10292,
+        "library:prepare": 34125,
+        "library:key": 1063875,
+        "library:locks-config": 137167,
+        "library:restore": 1612291,
+        "library:events": 45625,
+        "front:dispatch": 2929542
+      },
+      "outside_measured_main_seconds": 0.0037610419683983625
+    },
+    {
+      "phase": "warm-1",
+      "crate": "typenum",
+      "type": "lib",
+      "process_seconds": 0.011880624981131405,
+      "stages_nanoseconds": {
+        "front:init": 36042,
+        "library:plan": 9750,
+        "library:prepare": 37042,
+        "library:key": 1100041,
+        "library:locks-config": 127709,
+        "library:restore": 6973958,
+        "library:events": 27875,
+        "front:dispatch": 8300208
+      },
+      "outside_measured_main_seconds": 0.0035443749811314047
+    },
+    {
+      "phase": "warm-1",
+      "crate": "autocfg",
+      "type": "lib",
+      "process_seconds": 0.008399125013966113,
+      "stages_nanoseconds": {
+        "front:init": 42167,
+        "library:plan": 9250,
+        "library:prepare": 36500,
+        "library:key": 1301208,
+        "library:locks-config": 128375,
+        "library:restore": 2416125,
+        "library:events": 42959,
+        "front:dispatch": 3962750
+      },
+      "outside_measured_main_seconds": 0.004394208013966113
+    },
+    {
+      "phase": "warm-1",
+      "crate": "try_lock",
+      "type": "lib",
+      "process_seconds": 0.0071048339596018195,
+      "stages_nanoseconds": {
+        "front:init": 45209,
+        "library:plan": 7500,
+        "library:prepare": 35375,
+        "library:key": 1031459,
+        "library:locks-config": 105666,
+        "library:restore": 1522125,
+        "library:events": 32709,
+        "front:dispatch": 2764250
+      },
+      "outside_measured_main_seconds": 0.004295374959601819
+    },
+    {
+      "phase": "warm-1",
+      "crate": "want",
+      "type": "lib",
+      "process_seconds": 0.007607625040691346,
+      "stages_nanoseconds": {
+        "front:init": 35584,
+        "library:plan": 8541,
+        "library:prepare": 32167,
+        "library:key": 1263167,
+        "library:locks-config": 129458,
+        "library:restore": 2064375,
+        "library:events": 42542,
+        "front:dispatch": 3566125
+      },
+      "outside_measured_main_seconds": 0.004005916040691346
+    },
+    {
+      "phase": "warm-1",
+      "crate": "generic_array",
+      "type": "lib",
+      "process_seconds": 0.011357792012859136,
+      "stages_nanoseconds": {
+        "front:init": 28000,
+        "library:plan": 8042,
+        "library:prepare": 29541,
+        "library:key": 1129209,
+        "library:locks-config": 112458,
+        "library:restore": 6394792,
+        "library:events": 28208,
+        "front:dispatch": 7726375
+      },
+      "outside_measured_main_seconds": 0.003603417012859136
+    },
+    {
+      "phase": "warm-1",
+      "crate": "httparse",
+      "type": "lib",
+      "process_seconds": 0.00862300000153482,
+      "stages_nanoseconds": {
+        "front:init": 38500,
+        "library:plan": 9916,
+        "library:prepare": 32667,
+        "library:key": 1118583,
+        "library:locks-config": 115417,
+        "library:restore": 3378208,
+        "library:events": 37167,
+        "front:dispatch": 4722834
+      },
+      "outside_measured_main_seconds": 0.0038616660015348197
+    },
+    {
+      "phase": "warm-1",
+      "crate": "idna_adapter",
+      "type": "lib",
+      "process_seconds": 0.022930792008992285,
+      "stages_nanoseconds": {
+        "front:init": 41709,
+        "library:plan": 10500,
+        "library:prepare": 42083,
+        "library:key": 1311292,
+        "library:locks-config": 117583,
+        "library:restore": 17280250,
+        "library:events": 28208,
+        "front:dispatch": 18814083
+      },
+      "outside_measured_main_seconds": 0.004075000008992285
+    },
+    {
+      "phase": "warm-1",
+      "crate": "tracing_core",
+      "type": "lib",
+      "process_seconds": 0.01027125003747642,
+      "stages_nanoseconds": {
+        "front:init": 42917,
+        "library:plan": 10167,
+        "library:prepare": 34708,
+        "library:key": 1264084,
+        "library:locks-config": 117000,
+        "library:restore": 4359166,
+        "library:events": 41917,
+        "front:dispatch": 5858958
+      },
+      "outside_measured_main_seconds": 0.00436937503747642
+    },
+    {
+      "phase": "warm-1",
+      "crate": "form_urlencoded",
+      "type": "lib",
+      "process_seconds": 0.007444875023793429,
+      "stages_nanoseconds": {
+        "front:init": 37292,
+        "library:plan": 8875,
+        "library:prepare": 37334,
+        "library:key": 1179666,
+        "library:locks-config": 130042,
+        "library:restore": 1913250,
+        "library:events": 43333,
+        "front:dispatch": 3338416
+      },
+      "outside_measured_main_seconds": 0.004069167023793429
+    },
+    {
+      "phase": "warm-1",
+      "crate": "core_foundation",
+      "type": "lib",
+      "process_seconds": 0.012104041990824044,
+      "stages_nanoseconds": {
+        "front:init": 40709,
+        "library:plan": 9667,
+        "library:prepare": 46208,
+        "library:key": 1437459,
+        "library:locks-config": 115875,
+        "library:restore": 6174625,
+        "library:events": 36958,
+        "front:dispatch": 7869208
+      },
+      "outside_measured_main_seconds": 0.004194124990824043
+    },
+    {
+      "phase": "warm-1",
+      "crate": "atomic_waker",
+      "type": "lib",
+      "process_seconds": 0.007127124990802258,
+      "stages_nanoseconds": {
+        "front:init": 38334,
+        "library:plan": 8500,
+        "library:prepare": 31709,
+        "library:key": 1191083,
+        "library:locks-config": 136083,
+        "library:restore": 1438792,
+        "library:events": 33208,
+        "front:dispatch": 2865625
+      },
+      "outside_measured_main_seconds": 0.004223165990802259
+    },
+    {
+      "phase": "warm-1",
+      "crate": "subtle",
+      "type": "lib",
+      "process_seconds": 0.007694415980949998,
+      "stages_nanoseconds": {
+        "front:init": 42916,
+        "library:plan": 9333,
+        "library:prepare": 33834,
+        "library:key": 1227208,
+        "library:locks-config": 113792,
+        "library:restore": 2131958,
+        "library:events": 45375,
+        "front:dispatch": 3590000
+      },
+      "outside_measured_main_seconds": 0.004061499980949998
+    },
+    {
+      "phase": "warm-1",
+      "crate": "hyper",
+      "type": "lib",
+      "process_seconds": 0.01908391702454537,
+      "stages_nanoseconds": {
+        "front:init": 48708,
+        "library:plan": 18250,
+        "library:prepare": 48417,
+        "library:key": 1272375,
+        "library:locks-config": 116042,
+        "library:restore": 13064791,
+        "library:events": 35917,
+        "front:dispatch": 14585208
+      },
+      "outside_measured_main_seconds": 0.004450001024545371
+    },
+    {
+      "phase": "warm-1",
+      "crate": "tracing",
+      "type": "lib",
+      "process_seconds": 0.012240750016644597,
+      "stages_nanoseconds": {
+        "front:init": 39541,
+        "library:plan": 8167,
+        "library:prepare": 36291,
+        "library:key": 1063917,
+        "library:locks-config": 138958,
+        "library:restore": 6972167,
+        "library:events": 37875,
+        "front:dispatch": 8286584
+      },
+      "outside_measured_main_seconds": 0.003914625016644597
+    },
+    {
+      "phase": "warm-1",
+      "crate": "system_configuration",
+      "type": "lib",
+      "process_seconds": 0.012037042004521936,
+      "stages_nanoseconds": {
+        "front:init": 40250,
+        "library:plan": 10417,
+        "library:prepare": 36583,
+        "library:key": 1452834,
+        "library:locks-config": 117750,
+        "library:restore": 6385708,
+        "library:events": 42292,
+        "front:dispatch": 8075584
+      },
+      "outside_measured_main_seconds": 0.003921208004521936
+    },
+    {
+      "phase": "warm-1",
+      "crate": "zmij",
+      "type": "lib",
+      "process_seconds": 0.00775233400054276,
+      "stages_nanoseconds": {
+        "front:init": 50750,
+        "library:plan": 9042,
+        "library:prepare": 41625,
+        "library:key": 1568833,
+        "library:locks-config": 149959,
+        "library:restore": 2142416,
+        "library:events": 30834,
+        "front:dispatch": 3969292
+      },
+      "outside_measured_main_seconds": 0.00373229200054276
+    },
+    {
+      "phase": "warm-1",
+      "crate": "idna",
+      "type": "lib",
+      "process_seconds": 0.02340795798227191,
+      "stages_nanoseconds": {
+        "front:init": 48917,
+        "library:plan": 9125,
+        "library:prepare": 40583,
+        "library:key": 1568542,
+        "library:locks-config": 148833,
+        "library:restore": 17407417,
+        "library:events": 34208,
+        "front:dispatch": 19238625
+      },
+      "outside_measured_main_seconds": 0.0041204159822719084
+    },
+    {
+      "phase": "warm-1",
+      "crate": "sync_wrapper",
+      "type": "lib",
+      "process_seconds": 0.007222792017273605,
+      "stages_nanoseconds": {
+        "front:init": 39750,
+        "library:plan": 10250,
+        "library:prepare": 34542,
+        "library:key": 1351500,
+        "library:locks-config": 117041,
+        "library:restore": 1611084,
+        "library:events": 39750,
+        "front:dispatch": 3196542
+      },
+      "outside_measured_main_seconds": 0.003986500017273605
+    },
+    {
+      "phase": "warm-1",
+      "crate": "equivalent",
+      "type": "lib",
+      "process_seconds": 0.006708750035613775,
+      "stages_nanoseconds": {
+        "front:init": 38500,
+        "library:plan": 8666,
+        "library:prepare": 32834,
+        "library:key": 1171333,
+        "library:locks-config": 116250,
+        "library:restore": 1425542,
+        "library:events": 38041,
+        "front:dispatch": 2817958
+      },
+      "outside_measured_main_seconds": 0.003852292035613775
+    },
+    {
+      "phase": "warm-1",
+      "crate": "hashbrown",
+      "type": "lib",
+      "process_seconds": 0.011247416026890278,
+      "stages_nanoseconds": {
+        "front:init": 38083,
+        "library:plan": 10375,
+        "library:prepare": 34083,
+        "library:key": 1263583,
+        "library:locks-config": 112084,
+        "library:restore": 5446916,
+        "library:events": 41917,
+        "front:dispatch": 6934917
+      },
+      "outside_measured_main_seconds": 0.004274416026890278
+    },
+    {
+      "phase": "warm-1",
+      "crate": "ryu",
+      "type": "lib",
+      "process_seconds": 0.007299375021830201,
+      "stages_nanoseconds": {
+        "front:init": 37250,
+        "library:plan": 7708,
+        "library:prepare": 31375,
+        "library:key": 1152333,
+        "library:locks-config": 112375,
+        "library:restore": 2006917,
+        "library:events": 34083,
+        "front:dispatch": 3369417
+      },
+      "outside_measured_main_seconds": 0.003892708021830201
+    },
+    {
+      "phase": "warm-1",
+      "crate": "unicode_width",
+      "type": "lib",
+      "process_seconds": 0.01093216601293534,
+      "stages_nanoseconds": {
+        "front:init": 38042,
+        "library:plan": 9542,
+        "library:prepare": 43041,
+        "library:key": 1347542,
+        "library:locks-config": 121750,
+        "library:restore": 5071250,
+        "library:events": 50667,
+        "front:dispatch": 6676041
+      },
+      "outside_measured_main_seconds": 0.00421808301293534
+    },
+    {
+      "phase": "warm-1",
+      "crate": "base64",
+      "type": "lib",
+      "process_seconds": 0.008729959023185074,
+      "stages_nanoseconds": {
+        "front:init": 42792,
+        "library:plan": 9791,
+        "library:prepare": 37417,
+        "library:key": 1366375,
+        "library:locks-config": 124500,
+        "library:restore": 3175667,
+        "library:events": 36083,
+        "front:dispatch": 4779166
+      },
+      "outside_measured_main_seconds": 0.003908001023185074
+    },
+    {
+      "phase": "warm-1",
+      "crate": "tower_layer",
+      "type": "lib",
+      "process_seconds": 0.008173000009264797,
+      "stages_nanoseconds": {
+        "front:init": 45416,
+        "library:plan": 9208,
+        "library:prepare": 37917,
+        "library:key": 1496125,
+        "library:locks-config": 131666,
+        "library:restore": 1938125,
+        "library:events": 51792,
+        "front:dispatch": 3696292
+      },
+      "outside_measured_main_seconds": 0.004431292009264797
+    },
+    {
+      "phase": "warm-1",
+      "crate": "ipnet",
+      "type": "lib",
+      "process_seconds": 0.008085791952908039,
+      "stages_nanoseconds": {
+        "front:init": 47125,
+        "library:plan": 8458,
+        "library:prepare": 34459,
+        "library:key": 1329083,
+        "library:locks-config": 149417,
+        "library:restore": 2867625,
+        "library:events": 53875,
+        "front:dispatch": 4473583
+      },
+      "outside_measured_main_seconds": 0.003565083952908039
+    },
+    {
+      "phase": "warm-1",
+      "crate": "tower",
+      "type": "lib",
+      "process_seconds": 0.017651708039920777,
+      "stages_nanoseconds": {
+        "front:init": 44333,
+        "library:plan": 10125,
+        "library:prepare": 36708,
+        "library:key": 1362209,
+        "library:locks-config": 123333,
+        "library:restore": 11188083,
+        "library:events": 42084,
+        "front:dispatch": 12792167
+      },
+      "outside_measured_main_seconds": 0.004815208039920776
+    },
+    {
+      "phase": "warm-1",
+      "crate": "hyper_util",
+      "type": "lib",
+      "process_seconds": 0.021930291957687587,
+      "stages_nanoseconds": {
+        "front:init": 49708,
+        "library:plan": 15042,
+        "library:prepare": 38750,
+        "library:key": 1475208,
+        "library:locks-config": 170875,
+        "library:restore": 15636458,
+        "library:events": 33375,
+        "front:dispatch": 17401000
+      },
+      "outside_measured_main_seconds": 0.004479583957687588
+    },
+    {
+      "phase": "warm-1",
+      "crate": "num_traits",
+      "type": "lib",
+      "process_seconds": 0.01111125003080815,
+      "stages_nanoseconds": {
+        "front:init": 43500,
+        "library:plan": 10625,
+        "library:prepare": 38292,
+        "library:key": 1360125,
+        "library:locks-config": 121000,
+        "library:restore": 5967416,
+        "library:events": 42917,
+        "front:dispatch": 7568666
+      },
+      "outside_measured_main_seconds": 0.0034990840308081507
+    },
+    {
+      "phase": "warm-1",
+      "crate": "getopts",
+      "type": "lib",
+      "process_seconds": 0.009238208993338048,
+      "stages_nanoseconds": {
+        "front:init": 39500,
+        "library:plan": 9375,
+        "library:prepare": 40916,
+        "library:key": 1158834,
+        "library:locks-config": 114500,
+        "library:restore": 3794416,
+        "library:events": 31959,
+        "front:dispatch": 5178000
+      },
+      "outside_measured_main_seconds": 0.0040207089933380485
+    },
+    {
+      "phase": "warm-1",
+      "crate": "indexmap",
+      "type": "lib",
+      "process_seconds": 0.013464000017847866,
+      "stages_nanoseconds": {
+        "front:init": 37500,
+        "library:plan": 10833,
+        "library:prepare": 42833,
+        "library:key": 1398917,
+        "library:locks-config": 126000,
+        "library:restore": 7786125,
+        "library:events": 62375,
+        "front:dispatch": 9456917
+      },
+      "outside_measured_main_seconds": 0.003969583017847866
+    },
+    {
+      "phase": "warm-1",
+      "crate": "url",
+      "type": "lib",
+      "process_seconds": 0.013507707975804806,
+      "stages_nanoseconds": {
+        "front:init": 35375,
+        "library:plan": 9542,
+        "library:prepare": 32291,
+        "library:key": 1154417,
+        "library:locks-config": 109750,
+        "library:restore": 8072792,
+        "library:events": 29750,
+        "front:dispatch": 9436208
+      },
+      "outside_measured_main_seconds": 0.004036124975804805
+    },
+    {
+      "phase": "warm-1",
+      "crate": "serde_json",
+      "type": "lib",
+      "process_seconds": 0.016143374959938228,
+      "stages_nanoseconds": {
+        "front:init": 70750,
+        "library:plan": 10083,
+        "library:prepare": 43292,
+        "library:key": 1272166,
+        "library:locks-config": 149875,
+        "library:restore": 10454000,
+        "library:events": 32792,
+        "front:dispatch": 11993875
+      },
+      "outside_measured_main_seconds": 0.0040787499599382274
+    },
+    {
+      "phase": "warm-1",
+      "crate": "getrandom",
+      "type": "lib",
+      "process_seconds": 0.009749249962624162,
+      "stages_nanoseconds": {
+        "front:init": 39541,
+        "library:plan": 12125,
+        "library:prepare": 38333,
+        "library:key": 1366375,
+        "library:locks-config": 127209,
+        "library:restore": 4033625,
+        "library:events": 48583,
+        "front:dispatch": 5661459
+      },
+      "outside_measured_main_seconds": 0.004048249962624162
+    },
+    {
+      "phase": "warm-1",
+      "crate": "crypto_common",
+      "type": "lib",
+      "process_seconds": 0.010308749973773956,
+      "stages_nanoseconds": {
+        "front:init": 42333,
+        "library:plan": 9500,
+        "library:prepare": 33750,
+        "library:key": 1170250,
+        "library:locks-config": 121875,
+        "library:restore": 4679917,
+        "library:events": 32583,
+        "front:dispatch": 6076084
+      },
+      "outside_measured_main_seconds": 0.004190332973773956
+    },
+    {
+      "phase": "warm-1",
+      "crate": "block_buffer",
+      "type": "lib",
+      "process_seconds": 0.009667541016824543,
+      "stages_nanoseconds": {
+        "front:init": 34916,
+        "library:plan": 8458,
+        "library:prepare": 31500,
+        "library:key": 1161542,
+        "library:locks-config": 117583,
+        "library:restore": 4268958,
+        "library:events": 33250,
+        "front:dispatch": 5646042
+      },
+      "outside_measured_main_seconds": 0.003986583016824544
+    },
+    {
+      "phase": "warm-1",
+      "crate": "webpki_roots",
+      "type": "lib",
+      "process_seconds": 0.009294875024352223,
+      "stages_nanoseconds": {
+        "front:init": 43542,
+        "library:plan": 9458,
+        "library:prepare": 33750,
+        "library:key": 1388334,
+        "library:locks-config": 115250,
+        "library:restore": 3499875,
+        "library:events": 43666,
+        "front:dispatch": 5155250
+      },
+      "outside_measured_main_seconds": 0.004096083024352223
+    },
+    {
+      "phase": "warm-1",
+      "crate": "iana_time_zone",
+      "type": "lib",
+      "process_seconds": 0.007597832998726517,
+      "stages_nanoseconds": {
+        "front:init": 39250,
+        "library:plan": 9625,
+        "library:prepare": 34958,
+        "library:key": 1160459,
+        "library:locks-config": 118625,
+        "library:restore": 2017791,
+        "library:events": 40584,
+        "front:dispatch": 3410417
+      },
+      "outside_measured_main_seconds": 0.004148165998726517
+    },
+    {
+      "phase": "warm-1",
+      "crate": "pulldown_cmark_escape",
+      "type": "lib",
+      "process_seconds": 0.006840041023679078,
+      "stages_nanoseconds": {
+        "front:init": 41291,
+        "library:plan": 9375,
+        "library:prepare": 32167,
+        "library:key": 1171750,
+        "library:locks-config": 115208,
+        "library:restore": 1788750,
+        "library:events": 46542,
+        "front:dispatch": 3194209
+      },
+      "outside_measured_main_seconds": 0.0036045410236790775
+    },
+    {
+      "phase": "warm-1",
+      "crate": "zlib_rs",
+      "type": "lib",
+      "process_seconds": 0.010819041985087097,
+      "stages_nanoseconds": {
+        "front:init": 39583,
+        "library:plan": 9834,
+        "library:prepare": 34375,
+        "library:key": 1332833,
+        "library:locks-config": 114542,
+        "library:restore": 5554833,
+        "library:events": 41708,
+        "front:dispatch": 7118250
+      },
+      "outside_measured_main_seconds": 0.003661208985087097
+    },
+    {
+      "phase": "warm-1",
+      "crate": "unicase",
+      "type": "lib",
+      "process_seconds": 0.007392040977720171,
+      "stages_nanoseconds": {
+        "front:init": 41625,
+        "library:plan": 8417,
+        "library:prepare": 32417,
+        "library:key": 1188708,
+        "library:locks-config": 121917,
+        "library:restore": 1994375,
+        "library:events": 42250,
+        "front:dispatch": 3415792
+      },
+      "outside_measured_main_seconds": 0.003934623977720171
+    },
+    {
+      "phase": "warm-1",
+      "crate": "pulldown_cmark",
+      "type": "lib",
+      "process_seconds": 0.014461290964391083,
+      "stages_nanoseconds": {
+        "front:init": 42791,
+        "library:plan": 11500,
+        "library:prepare": 36708,
+        "library:key": 1221042,
+        "library:locks-config": 154500,
+        "library:restore": 8934958,
+        "library:events": 46750,
+        "front:dispatch": 10436250
+      },
+      "outside_measured_main_seconds": 0.003982249964391083
+    },
+    {
+      "phase": "warm-1",
+      "crate": "flate2",
+      "type": "lib",
+      "process_seconds": 0.011439624999184161,
+      "stages_nanoseconds": {
+        "front:init": 43500,
+        "library:plan": 9375,
+        "library:prepare": 36500,
+        "library:key": 1461417,
+        "library:locks-config": 130041,
+        "library:restore": 5329875,
+        "library:events": 34667,
+        "front:dispatch": 7027708
+      },
+      "outside_measured_main_seconds": 0.004368416999184162
+    },
+    {
+      "phase": "warm-1",
+      "crate": "chrono",
+      "type": "lib",
+      "process_seconds": 0.01713591697625816,
+      "stages_nanoseconds": {
+        "front:init": 34500,
+        "library:plan": 9042,
+        "library:prepare": 30917,
+        "library:key": 1075875,
+        "library:locks-config": 111791,
+        "library:restore": 11863750,
+        "library:events": 52209,
+        "front:dispatch": 13168958
+      },
+      "outside_measured_main_seconds": 0.003932458976258159
+    },
+    {
+      "phase": "warm-1",
+      "crate": "digest",
+      "type": "lib",
+      "process_seconds": 0.011333833972457796,
+      "stages_nanoseconds": {
+        "front:init": 37750,
+        "library:plan": 10291,
+        "library:prepare": 40292,
+        "library:key": 1281458,
+        "library:locks-config": 112250,
+        "library:restore": 5542125,
+        "library:events": 42750,
+        "front:dispatch": 7055667
+      },
+      "outside_measured_main_seconds": 0.004240416972457796
+    },
+    {
+      "phase": "warm-1",
+      "crate": "uuid",
+      "type": "lib",
+      "process_seconds": 0.01457825000397861,
+      "stages_nanoseconds": {
+        "front:init": 38042,
+        "library:plan": 10000,
+        "library:prepare": 33000,
+        "library:key": 1208542,
+        "library:locks-config": 112375,
+        "library:restore": 9091208,
+        "library:events": 42125,
+        "front:dispatch": 10525083
+      },
+      "outside_measured_main_seconds": 0.0040151250039786104
+    },
+    {
+      "phase": "warm-1",
+      "crate": "crc32fast",
+      "type": "lib",
+      "process_seconds": 0.007621125027071685,
+      "stages_nanoseconds": {
+        "front:init": 39000,
+        "library:plan": 9375,
+        "library:prepare": 35959,
+        "library:key": 1153625,
+        "library:locks-config": 129041,
+        "library:restore": 2195042,
+        "library:events": 40542,
+        "front:dispatch": 3595000
+      },
+      "outside_measured_main_seconds": 0.0039871250270716845
+    },
+    {
+      "phase": "warm-1",
+      "crate": "tower_http",
+      "type": "lib",
+      "process_seconds": 0.020237584016285837,
+      "stages_nanoseconds": {
+        "front:init": 47500,
+        "library:plan": 10834,
+        "library:prepare": 43416,
+        "library:key": 1421459,
+        "library:locks-config": 147875,
+        "library:restore": 13828041,
+        "library:events": 31334,
+        "front:dispatch": 15509875
+      },
+      "outside_measured_main_seconds": 0.004680209016285837
+    },
+    {
+      "phase": "warm-1",
+      "crate": "serde_urlencoded",
+      "type": "lib",
+      "process_seconds": 0.014157333003822714,
+      "stages_nanoseconds": {
+        "front:init": 42083,
+        "library:plan": 9917,
+        "library:prepare": 33208,
+        "library:key": 1298083,
+        "library:locks-config": 112167,
+        "library:restore": 8764792,
+        "library:events": 38166,
+        "front:dispatch": 10285625
+      },
+      "outside_measured_main_seconds": 0.0038296250038227144
+    },
+    {
+      "phase": "warm-1",
+      "crate": "http_body_util",
+      "type": "lib",
+      "process_seconds": 0.0106863749679178,
+      "stages_nanoseconds": {
+        "front:init": 44458,
+        "library:plan": 10083,
+        "library:prepare": 35167,
+        "library:key": 1284000,
+        "library:locks-config": 115000,
+        "library:restore": 5412583,
+        "library:events": 32750,
+        "front:dispatch": 6917792
+      },
+      "outside_measured_main_seconds": 0.0037241249679178003
+    },
+    {
+      "phase": "warm-1",
+      "crate": "futures_executor",
+      "type": "lib",
+      "process_seconds": 0.01359133399091661,
+      "stages_nanoseconds": {
+        "front:init": 34875,
+        "library:plan": 8958,
+        "library:prepare": 29417,
+        "library:key": 1122958,
+        "library:locks-config": 116333,
+        "library:restore": 8305292,
+        "library:events": 44417,
+        "front:dispatch": 9652167
+      },
+      "outside_measured_main_seconds": 0.00390429199091661
+    },
+    {
+      "phase": "warm-1",
+      "crate": "tokio_util",
+      "type": "lib",
+      "process_seconds": 0.015312333009205759,
+      "stages_nanoseconds": {
+        "front:init": 35583,
+        "library:plan": 10333,
+        "library:prepare": 34208,
+        "library:key": 1262625,
+        "library:locks-config": 115292,
+        "library:restore": 10160458,
+        "library:events": 42250,
+        "front:dispatch": 11655833
+      },
+      "outside_measured_main_seconds": 0.003620917009205759
+    },
+    {
+      "phase": "warm-1",
+      "crate": "cpufeatures",
+      "type": "lib",
+      "process_seconds": 0.008419582969509065,
+      "stages_nanoseconds": {
+        "front:init": 38584,
+        "library:plan": 8917,
+        "library:prepare": 36500,
+        "library:key": 1276708,
+        "library:locks-config": 118584,
+        "library:restore": 3077375,
+        "library:events": 32208,
+        "front:dispatch": 4578291
+      },
+      "outside_measured_main_seconds": 0.003802707969509065
+    },
+    {
+      "phase": "warm-1",
+      "crate": "log",
+      "type": "lib",
+      "process_seconds": 0.00758387497626245,
+      "stages_nanoseconds": {
+        "front:init": 43584,
+        "library:plan": 8459,
+        "library:prepare": 34250,
+        "library:key": 1215625,
+        "library:locks-config": 127500,
+        "library:restore": 2332541,
+        "library:events": 30500,
+        "front:dispatch": 3776291
+      },
+      "outside_measured_main_seconds": 0.0037639999762624503
+    },
+    {
+      "phase": "warm-1",
+      "crate": "unsafe_libyaml",
+      "type": "lib",
+      "process_seconds": 0.009641833021305501,
+      "stages_nanoseconds": {
+        "front:init": 44833,
+        "library:plan": 8708,
+        "library:prepare": 33250,
+        "library:key": 1187709,
+        "library:locks-config": 115666,
+        "library:restore": 3871917,
+        "library:events": 41083,
+        "front:dispatch": 5288959
+      },
+      "outside_measured_main_seconds": 0.004308041021305501
+    },
+    {
+      "phase": "warm-1",
+      "crate": "thiserror",
+      "type": "lib",
+      "process_seconds": 0.01317845901940018,
+      "stages_nanoseconds": {
+        "front:init": 41292,
+        "library:plan": 9416,
+        "library:prepare": 35167,
+        "library:key": 1276958,
+        "library:locks-config": 144917,
+        "library:restore": 7271208,
+        "library:events": 31542,
+        "front:dispatch": 8801042
+      },
+      "outside_measured_main_seconds": 0.004336125019400179
+    },
+    {
+      "phase": "warm-1",
+      "crate": "typed_path",
+      "type": "lib",
+      "process_seconds": 0.018471082963515073,
+      "stages_nanoseconds": {
+        "front:init": 39417,
+        "library:plan": 9208,
+        "library:prepare": 37875,
+        "library:key": 1335875,
+        "library:locks-config": 126917,
+        "library:restore": 13054416,
+        "library:events": 37959,
+        "front:dispatch": 14628083
+      },
+      "outside_measured_main_seconds": 0.003803582963515073
+    },
+    {
+      "phase": "warm-1",
+      "crate": "serde_yaml_ng",
+      "type": "lib",
+      "process_seconds": 0.022660165966954082,
+      "stages_nanoseconds": {
+        "front:init": 36666,
+        "library:plan": 9167,
+        "library:prepare": 30625,
+        "library:key": 1195542,
+        "library:locks-config": 137291,
+        "library:restore": 16857334,
+        "library:events": 39166,
+        "front:dispatch": 18294542
+      },
+      "outside_measured_main_seconds": 0.004328957966954081
+    },
+    {
+      "phase": "warm-1",
+      "crate": "sha2",
+      "type": "lib",
+      "process_seconds": 0.010491541004739702,
+      "stages_nanoseconds": {
+        "front:init": 33500,
+        "library:plan": 10167,
+        "library:prepare": 30000,
+        "library:key": 1122958,
+        "library:locks-config": 114042,
+        "library:restore": 5468916,
+        "library:events": 33542,
+        "front:dispatch": 6807041
+      },
+      "outside_measured_main_seconds": 0.0036510000047397014
+    },
+    {
+      "phase": "warm-1",
+      "crate": "zip",
+      "type": "lib",
+      "process_seconds": 0.018594207998830825,
+      "stages_nanoseconds": {
+        "front:init": 41041,
+        "library:plan": 10083,
+        "library:prepare": 31584,
+        "library:key": 1226125,
+        "library:locks-config": 116458,
+        "library:restore": 12717417,
+        "library:events": 42000,
+        "front:dispatch": 14168959
+      },
+      "outside_measured_main_seconds": 0.004384207998830825
+    },
+    {
+      "phase": "warm-1",
+      "crate": "futures",
+      "type": "lib",
+      "process_seconds": 0.014032791019417346,
+      "stages_nanoseconds": {
+        "front:init": 36667,
+        "library:plan": 10292,
+        "library:prepare": 31292,
+        "library:key": 1222958,
+        "library:locks-config": 127542,
+        "library:restore": 8592666,
+        "library:events": 37750,
+        "front:dispatch": 10048458
+      },
+      "outside_measured_main_seconds": 0.003947666019417345
+    },
+    {
+      "phase": "warm-1",
+      "crate": "anyhow",
+      "type": "lib",
+      "process_seconds": 0.00792574998922646,
+      "stages_nanoseconds": {
+        "front:init": 33375,
+        "library:plan": 9166,
+        "library:prepare": 30000,
+        "library:key": 1007709,
+        "library:locks-config": 108083,
+        "library:restore": 3276875,
+        "library:events": 34583,
+        "front:dispatch": 4491750
+      },
+      "outside_measured_main_seconds": 0.003400624989226461
+    },
+    {
+      "phase": "warm-1",
+      "crate": "harness_proto",
+      "type": "lib",
+      "process_seconds": 0.03696404199581593,
+      "stages_nanoseconds": {
+        "front:init": 34250,
+        "library:plan": 8125,
+        "library:prepare": 31125,
+        "library:key": 1177458,
+        "library:locks-config": 115167,
+        "library:restore": 31336583,
+        "library:events": 43917,
+        "front:dispatch": 32740250
+      },
+      "outside_measured_main_seconds": 0.004189541995815935
+    },
+    {
+      "phase": "warm-1",
+      "crate": "deser_hjson",
+      "type": "lib",
+      "process_seconds": 0.013530625030398369,
+      "stages_nanoseconds": {
+        "front:init": 37584,
+        "library:plan": 9333,
+        "library:prepare": 35042,
+        "library:key": 1193125,
+        "library:locks-config": 115291,
+        "library:restore": 8351750,
+        "library:events": 43625,
+        "front:dispatch": 9775833
+      },
+      "outside_measured_main_seconds": 0.003717208030398369
+    },
+    {
+      "phase": "warm-1",
+      "crate": "semver",
+      "type": "lib",
+      "process_seconds": 0.0071009169914759696,
+      "stages_nanoseconds": {
+        "front:init": 41292,
+        "library:plan": 9250,
+        "library:prepare": 33541,
+        "library:key": 1157125,
+        "library:locks-config": 109417,
+        "library:restore": 2312917,
+        "library:events": 37458,
+        "front:dispatch": 3689208
+      },
+      "outside_measured_main_seconds": 0.0033704169914759697
+    },
+    {
+      "phase": "warm-1",
+      "crate": "ring",
+      "type": "lib",
+      "process_seconds": 0.018921625043731183,
+      "stages_nanoseconds": {
+        "front:init": 31917,
+        "library:plan": 30583,
+        "library:prepare": 31625,
+        "library:key": 1225500,
+        "library:locks-config": 118083,
+        "library:restore": 13801792,
+        "library:events": 40500,
+        "front:dispatch": 15278250
+      },
+      "outside_measured_main_seconds": 0.0036114580437311833
+    },
+    {
+      "phase": "warm-1",
+      "crate": "webpki",
+      "type": "lib",
+      "process_seconds": 0.014822333992924541,
+      "stages_nanoseconds": {
+        "front:init": 38708,
+        "library:plan": 10208,
+        "library:prepare": 29500,
+        "library:key": 1046125,
+        "library:locks-config": 114417,
+        "library:restore": 9963917,
+        "library:events": 36166,
+        "front:dispatch": 11225000
+      },
+      "outside_measured_main_seconds": 0.0035586259929245405
+    },
+    {
+      "phase": "warm-1",
+      "crate": "rustls",
+      "type": "lib",
+      "process_seconds": 0.020585749996826053,
+      "stages_nanoseconds": {
+        "front:init": 37792,
+        "library:plan": 11250,
+        "library:prepare": 30541,
+        "library:key": 1090084,
+        "library:locks-config": 109666,
+        "library:restore": 15430250,
+        "library:events": 35459,
+        "front:dispatch": 16733708
+      },
+      "outside_measured_main_seconds": 0.003814249996826051
+    },
+    {
+      "phase": "warm-1",
+      "crate": "tokio_rustls",
+      "type": "lib",
+      "process_seconds": 0.013705375022254884,
+      "stages_nanoseconds": {
+        "front:init": 33792,
+        "library:plan": 9500,
+        "library:prepare": 29458,
+        "library:key": 1051750,
+        "library:locks-config": 104708,
+        "library:restore": 8737792,
+        "library:events": 35542,
+        "front:dispatch": 9994625
+      },
+      "outside_measured_main_seconds": 0.0036769580222548847
+    },
+    {
+      "phase": "warm-1",
+      "crate": "hyper_rustls",
+      "type": "lib",
+      "process_seconds": 0.016801582998596132,
+      "stages_nanoseconds": {
+        "front:init": 36834,
+        "library:plan": 11042,
+        "library:prepare": 29167,
+        "library:key": 1035500,
+        "library:locks-config": 108041,
+        "library:restore": 11914709,
+        "library:events": 35625,
+        "front:dispatch": 13159916
+      },
+      "outside_measured_main_seconds": 0.0036048329985961317
+    },
+    {
+      "phase": "warm-1",
+      "crate": "reqwest",
+      "type": "lib",
+      "process_seconds": 0.0287549999775365,
+      "stages_nanoseconds": {
+        "front:init": 37500,
+        "library:plan": 17584,
+        "library:prepare": 28333,
+        "library:key": 1040417,
+        "library:locks-config": 112416,
+        "library:restore": 23810417,
+        "library:events": 35958,
+        "front:dispatch": 25073667
+      },
+      "outside_measured_main_seconds": 0.0036438329775364993
+    },
+    {
+      "phase": "warm-1",
+      "crate": "harness_adapters",
+      "type": "lib",
+      "process_seconds": 0.05407866701716557,
+      "stages_nanoseconds": {
+        "front:init": 24042,
+        "library:plan": 12458,
+        "library:prepare": 29583,
+        "library:key": 1031834,
+        "library:locks-config": 108416,
+        "library:restore": 49168834,
+        "library:events": 41916,
+        "front:dispatch": 50420333
+      },
+      "outside_measured_main_seconds": 0.003634292017165572
+    },
+    {
+      "phase": "warm-2",
+      "crate": "unicode_ident",
+      "type": "lib",
+      "process_seconds": 0.007284332998096943,
+      "stages_nanoseconds": {
+        "front:init": 52417,
+        "library:plan": 9458,
+        "library:prepare": 52292,
+        "library:key": 1418791,
+        "library:locks-config": 149875,
+        "library:restore": 1219959,
+        "library:events": 75041,
+        "front:dispatch": 2952250
+      },
+      "outside_measured_main_seconds": 0.004279665998096943
+    },
+    {
+      "phase": "warm-2",
+      "crate": "cfg_if",
+      "type": "lib",
+      "process_seconds": 0.005945916986092925,
+      "stages_nanoseconds": {
+        "front:init": 39833,
+        "library:plan": 8125,
+        "library:prepare": 34542,
+        "library:key": 1198125,
+        "library:locks-config": 121541,
+        "library:restore": 792084,
+        "library:events": 35916,
+        "front:dispatch": 2212917
+      },
+      "outside_measured_main_seconds": 0.003693166986092925
+    },
+    {
+      "phase": "warm-2",
+      "crate": "smallvec",
+      "type": "lib",
+      "process_seconds": 0.006814791995566338,
+      "stages_nanoseconds": {
+        "front:init": 39250,
+        "library:plan": 9583,
+        "library:prepare": 32667,
+        "library:key": 1166041,
+        "library:locks-config": 118417,
+        "library:restore": 1251417,
+        "library:events": 50125,
+        "front:dispatch": 2652375
+      },
+      "outside_measured_main_seconds": 0.004123166995566339
+    },
+    {
+      "phase": "warm-2",
+      "crate": "stable_deref_trait",
+      "type": "lib",
+      "process_seconds": 0.005927874997723848,
+      "stages_nanoseconds": {
+        "front:init": 35875,
+        "library:plan": 8625,
+        "library:prepare": 29708,
+        "library:key": 1115667,
+        "library:locks-config": 112416,
+        "library:restore": 856500,
+        "library:events": 55959,
+        "front:dispatch": 2206083
+      },
+      "outside_measured_main_seconds": 0.0036859169977238476
+    },
+    {
+      "phase": "warm-2",
+      "crate": "pin_project_lite",
+      "type": "lib",
+      "process_seconds": 0.005836374999489635,
+      "stages_nanoseconds": {
+        "front:init": 34791,
+        "library:plan": 10458,
+        "library:prepare": 26958,
+        "library:key": 1064875,
+        "library:locks-config": 116459,
+        "library:restore": 974750,
+        "library:events": 56916,
+        "front:dispatch": 2273250
+      },
+      "outside_measured_main_seconds": 0.0035283339994896354
+    },
+    {
+      "phase": "warm-2",
+      "crate": "futures_core",
+      "type": "lib",
+      "process_seconds": 0.006575250008609146,
+      "stages_nanoseconds": {
+        "front:init": 38667,
+        "library:plan": 10375,
+        "library:prepare": 44917,
+        "library:key": 1412333,
+        "library:locks-config": 117792,
+        "library:restore": 1234250,
+        "library:events": 64000,
+        "front:dispatch": 2912667
+      },
+      "outside_measured_main_seconds": 0.003623916008609146
+    },
+    {
+      "phase": "warm-2",
+      "crate": "itoa",
+      "type": "lib",
+      "process_seconds": 0.00643224996747449,
+      "stages_nanoseconds": {
+        "front:init": 35125,
+        "library:plan": 9208,
+        "library:prepare": 39792,
+        "library:key": 1213541,
+        "library:locks-config": 120959,
+        "library:restore": 1009875,
+        "library:events": 57458,
+        "front:dispatch": 2481375
+      },
+      "outside_measured_main_seconds": 0.003915749967474491
+    },
+    {
+      "phase": "warm-2",
+      "crate": "proc_macro2",
+      "type": "lib",
+      "process_seconds": 0.005912374996114522,
+      "stages_nanoseconds": {
+        "front:init": 36625,
+        "library:plan": 7666,
+        "library:prepare": 38000,
+        "library:key": 1186667,
+        "library:locks-config": 91083,
+        "library:restore": 682542,
+        "library:events": 50042,
+        "front:dispatch": 2082458
+      },
+      "outside_measured_main_seconds": 0.0037932919961145223
+    },
+    {
+      "phase": "warm-2",
+      "crate": "libc",
+      "type": "lib",
+      "process_seconds": 0.01157741597853601,
+      "stages_nanoseconds": {
+        "front:init": 40334,
+        "library:plan": 9459,
+        "library:prepare": 37208,
+        "library:key": 1170167,
+        "library:locks-config": 115708,
+        "library:restore": 6249625,
+        "library:events": 41875,
+        "front:dispatch": 7651375
+      },
+      "outside_measured_main_seconds": 0.00388570697853601
+    },
+    {
+      "phase": "warm-2",
+      "crate": "bytes",
+      "type": "lib",
+      "process_seconds": 0.00985012500314042,
+      "stages_nanoseconds": {
+        "front:init": 38166,
+        "library:plan": 10333,
+        "library:prepare": 43500,
+        "library:key": 1819333,
+        "library:locks-config": 155542,
+        "library:restore": 3313125,
+        "library:events": 77917,
+        "front:dispatch": 5447667
+      },
+      "outside_measured_main_seconds": 0.00436429200314042
+    },
+    {
+      "phase": "warm-2",
+      "crate": "memchr",
+      "type": "lib",
+      "process_seconds": 0.00962391699431464,
+      "stages_nanoseconds": {
+        "front:init": 37125,
+        "library:plan": 8209,
+        "library:prepare": 29750,
+        "library:key": 1804541,
+        "library:locks-config": 153417,
+        "library:restore": 3700375,
+        "library:events": 40375,
+        "front:dispatch": 5764084
+      },
+      "outside_measured_main_seconds": 0.003822707994314641
+    },
+    {
+      "phase": "warm-2",
+      "crate": "proc_macro2",
+      "type": "lib",
+      "process_seconds": 0.006325291004031897,
+      "stages_nanoseconds": {
+        "front:init": 44042,
+        "library:plan": 7458,
+        "library:prepare": 39792,
+        "library:key": 1261958,
+        "library:locks-config": 90792,
+        "library:restore": 663542,
+        "library:events": 61541,
+        "front:dispatch": 2148417
+      },
+      "outside_measured_main_seconds": 0.004132832004031897
+    },
+    {
+      "phase": "warm-2",
+      "crate": "futures_sink",
+      "type": "lib",
+      "process_seconds": 0.09718095802236348,
+      "stages_nanoseconds": {
+        "front:init": 4582750,
+        "library:plan": 11292,
+        "library:prepare": 1677625,
+        "library:key": 9834667,
+        "library:locks-config": 22834125,
+        "library:restore": 43368375,
+        "library:events": 44958,
+        "front:dispatch": 77808625
+      },
+      "outside_measured_main_seconds": 0.014789583022363481
+    },
+    {
+      "phase": "warm-2",
+      "crate": "proc_macro2",
+      "type": "lib",
+      "process_seconds": 0.09813633299199864,
+      "stages_nanoseconds": {
+        "front:init": 3677333,
+        "library:plan": 8000,
+        "library:prepare": 386459,
+        "library:key": 9981750,
+        "library:locks-config": 22632208,
+        "library:restore": 43879042,
+        "library:events": 48166,
+        "front:dispatch": 76967875
+      },
+      "outside_measured_main_seconds": 0.017491124991998647
+    },
+    {
+      "phase": "warm-2",
+      "crate": "quote",
+      "type": "lib",
+      "process_seconds": 0.008558208006434143,
+      "stages_nanoseconds": {
+        "front:init": 41041,
+        "library:plan": 13916,
+        "library:prepare": 36334,
+        "library:key": 1378000,
+        "library:locks-config": 123666,
+        "library:restore": 2716542,
+        "library:events": 53750,
+        "front:dispatch": 4349959
+      },
+      "outside_measured_main_seconds": 0.004167208006434143
+    },
+    {
+      "phase": "warm-2",
+      "crate": "scopeguard",
+      "type": "lib",
+      "process_seconds": 0.0069500410463660955,
+      "stages_nanoseconds": {
+        "front:init": 65333,
+        "library:plan": 8708,
+        "library:prepare": 37417,
+        "library:key": 1232042,
+        "library:locks-config": 179750,
+        "library:restore": 1125166,
+        "library:events": 59375,
+        "front:dispatch": 2674875
+      },
+      "outside_measured_main_seconds": 0.0042098330463660955
+    },
+    {
+      "phase": "warm-2",
+      "crate": "parking_lot_core",
+      "type": "lib",
+      "process_seconds": 0.009829417045693845,
+      "stages_nanoseconds": {
+        "front:init": 43542,
+        "library:plan": 9542,
+        "library:prepare": 39083,
+        "library:key": 1064167,
+        "library:locks-config": 142458,
+        "library:restore": 4773083,
+        "library:events": 32542,
+        "front:dispatch": 6091708
+      },
+      "outside_measured_main_seconds": 0.0036941670456938445
+    },
+    {
+      "phase": "warm-2",
+      "crate": "lock_api",
+      "type": "lib",
+      "process_seconds": 0.008195083995815367,
+      "stages_nanoseconds": {
+        "front:init": 55250,
+        "library:plan": 8958,
+        "library:prepare": 54583,
+        "library:key": 1443542,
+        "library:locks-config": 131333,
+        "library:restore": 1982959,
+        "library:events": 62875,
+        "front:dispatch": 3713167
+      },
+      "outside_measured_main_seconds": 0.004426666995815367
+    },
+    {
+      "phase": "warm-2",
+      "crate": "errno",
+      "type": "lib",
+      "process_seconds": 0.008244041993748397,
+      "stages_nanoseconds": {
+        "front:init": 43083,
+        "library:plan": 10000,
+        "library:prepare": 44959,
+        "library:key": 1353375,
+        "library:locks-config": 114083,
+        "library:restore": 2563250,
+        "library:events": 53292,
+        "front:dispatch": 4167333
+      },
+      "outside_measured_main_seconds": 0.004033625993748397
+    },
+    {
+      "phase": "warm-2",
+      "crate": "syn",
+      "type": "lib",
+      "process_seconds": 0.019665458996314555,
+      "stages_nanoseconds": {
+        "front:init": 40792,
+        "library:plan": 10917,
+        "library:prepare": 46833,
+        "library:key": 1394542,
+        "library:locks-config": 115667,
+        "library:restore": 13118208,
+        "library:events": 41750,
+        "front:dispatch": 14771667
+      },
+      "outside_measured_main_seconds": 0.004852999996314555
+    },
+    {
+      "phase": "warm-2",
+      "crate": "syn",
+      "type": "lib",
+      "process_seconds": 0.019841291999910027,
+      "stages_nanoseconds": {
+        "front:init": 38625,
+        "library:plan": 9667,
+        "library:prepare": 32917,
+        "library:key": 1246458,
+        "library:locks-config": 120250,
+        "library:restore": 13973000,
+        "library:events": 51833,
+        "front:dispatch": 15464333
+      },
+      "outside_measured_main_seconds": 0.004338333999910026
+    },
+    {
+      "phase": "warm-2",
+      "crate": "find_msvc_tools",
+      "type": "lib",
+      "process_seconds": 0.007271625043358654,
+      "stages_nanoseconds": {
+        "front:init": 47500,
+        "library:plan": 10708,
+        "library:prepare": 39167,
+        "library:key": 1336666,
+        "library:locks-config": 131625,
+        "library:restore": 1260709,
+        "library:events": 53250,
+        "front:dispatch": 2859416
+      },
+      "outside_measured_main_seconds": 0.004364709043358654
+    },
+    {
+      "phase": "warm-2",
+      "crate": "synstructure",
+      "type": "lib",
+      "process_seconds": 0.013331292022485286,
+      "stages_nanoseconds": {
+        "front:init": 44292,
+        "library:plan": 9625,
+        "library:prepare": 38166,
+        "library:key": 1362000,
+        "library:locks-config": 123834,
+        "library:restore": 6877541,
+        "library:events": 54000,
+        "front:dispatch": 8495791
+      },
+      "outside_measured_main_seconds": 0.004791209022485286
+    },
+    {
+      "phase": "warm-2",
+      "crate": "shlex",
+      "type": "lib",
+      "process_seconds": 0.006668458052445203,
+      "stages_nanoseconds": {
+        "front:init": 50000,
+        "library:plan": 9791,
+        "library:prepare": 39292,
+        "library:key": 1241208,
+        "library:locks-config": 142417,
+        "library:restore": 1151000,
+        "library:events": 33125,
+        "front:dispatch": 2641458
+      },
+      "outside_measured_main_seconds": 0.003977000052445203
+    },
+    {
+      "phase": "warm-2",
+      "crate": "cc",
+      "type": "lib",
+      "process_seconds": 0.009718249959405512,
+      "stages_nanoseconds": {
+        "front:init": 54041,
+        "library:plan": 10208,
+        "library:prepare": 42750,
+        "library:key": 1452792,
+        "library:locks-config": 166958,
+        "library:restore": 3910167,
+        "library:events": 54458,
+        "front:dispatch": 5669000
+      },
+      "outside_measured_main_seconds": 0.003995208959405512
+    },
+    {
+      "phase": "warm-2",
+      "crate": "zerofrom",
+      "type": "lib",
+      "process_seconds": 0.009756250015925616,
+      "stages_nanoseconds": {
+        "front:init": 42667,
+        "library:plan": 11542,
+        "library:prepare": 37750,
+        "library:key": 1228125,
+        "library:locks-config": 124208,
+        "library:restore": 3629709,
+        "library:events": 43416,
+        "front:dispatch": 5101333
+      },
+      "outside_measured_main_seconds": 0.004612250015925616
+    },
+    {
+      "phase": "warm-2",
+      "crate": "signal_hook_registry",
+      "type": "lib",
+      "process_seconds": 0.00853704201290384,
+      "stages_nanoseconds": {
+        "front:init": 38625,
+        "library:plan": 8667,
+        "library:prepare": 31083,
+        "library:key": 1307334,
+        "library:locks-config": 156791,
+        "library:restore": 3004084,
+        "library:events": 48666,
+        "front:dispatch": 4584667
+      },
+      "outside_measured_main_seconds": 0.003913750012903839
+    },
+    {
+      "phase": "warm-2",
+      "crate": "parking_lot",
+      "type": "lib",
+      "process_seconds": 0.011371750035323203,
+      "stages_nanoseconds": {
+        "front:init": 48250,
+        "library:plan": 10083,
+        "library:prepare": 37417,
+        "library:key": 1373875,
+        "library:locks-config": 118000,
+        "library:restore": 5137833,
+        "library:events": 59250,
+        "front:dispatch": 6766709
+      },
+      "outside_measured_main_seconds": 0.004556791035323203
+    },
+    {
+      "phase": "warm-2",
+      "crate": "serde_core",
+      "type": "lib",
+      "process_seconds": 0.01459933299338445,
+      "stages_nanoseconds": {
+        "front:init": 39042,
+        "library:plan": 9667,
+        "library:prepare": 37916,
+        "library:key": 1396667,
+        "library:locks-config": 129708,
+        "library:restore": 8634709,
+        "library:events": 48083,
+        "front:dispatch": 10284958
+      },
+      "outside_measured_main_seconds": 0.004275332993384451
+    },
+    {
+      "phase": "warm-2",
+      "crate": "futures_channel",
+      "type": "lib",
+      "process_seconds": 0.008452208014205098,
+      "stages_nanoseconds": {
+        "front:init": 56042,
+        "library:plan": 9584,
+        "library:prepare": 38375,
+        "library:key": 1282541,
+        "library:locks-config": 163250,
+        "library:restore": 2526792,
+        "library:events": 28000,
+        "front:dispatch": 4080625
+      },
+      "outside_measured_main_seconds": 0.004315541014205098
+    },
+    {
+      "phase": "warm-2",
+      "crate": "yoke",
+      "type": "lib",
+      "process_seconds": 0.012037166045047343,
+      "stages_nanoseconds": {
+        "front:init": 38917,
+        "library:plan": 12708,
+        "library:prepare": 32750,
+        "library:key": 1181167,
+        "library:locks-config": 117167,
+        "library:restore": 6549250,
+        "library:events": 29666,
+        "front:dispatch": 7964750
+      },
+      "outside_measured_main_seconds": 0.004033499045047342
+    },
+    {
+      "phase": "warm-2",
+      "crate": "mio",
+      "type": "lib",
+      "process_seconds": 0.011161791975609958,
+      "stages_nanoseconds": {
+        "front:init": 50417,
+        "library:plan": 9583,
+        "library:prepare": 40500,
+        "library:key": 1562125,
+        "library:locks-config": 128125,
+        "library:restore": 4856209,
+        "library:events": 73000,
+        "front:dispatch": 6703541
+      },
+      "outside_measured_main_seconds": 0.004407833975609958
+    },
+    {
+      "phase": "warm-2",
+      "crate": "socket2",
+      "type": "lib",
+      "process_seconds": 0.009137624991126359,
+      "stages_nanoseconds": {
+        "front:init": 47833,
+        "library:plan": 9333,
+        "library:prepare": 41458,
+        "library:key": 1436709,
+        "library:locks-config": 115666,
+        "library:restore": 3409625,
+        "library:events": 43209,
+        "front:dispatch": 5085833
+      },
+      "outside_measured_main_seconds": 0.004003958991126358
+    },
+    {
+      "phase": "warm-2",
+      "crate": "core_foundation_sys",
+      "type": "lib",
+      "process_seconds": 0.008837832952849567,
+      "stages_nanoseconds": {
+        "front:init": 50709,
+        "library:plan": 9541,
+        "library:prepare": 49375,
+        "library:key": 1032167,
+        "library:locks-config": 129542,
+        "library:restore": 3237416,
+        "library:events": 50750,
+        "front:dispatch": 4535416
+      },
+      "outside_measured_main_seconds": 0.004251707952849567
+    },
+    {
+      "phase": "warm-2",
+      "crate": "zerovec",
+      "type": "lib",
+      "process_seconds": 0.016073125007096678,
+      "stages_nanoseconds": {
+        "front:init": 49333,
+        "library:plan": 10875,
+        "library:prepare": 44208,
+        "library:key": 1281042,
+        "library:locks-config": 168375,
+        "library:restore": 10052458,
+        "library:events": 37958,
+        "front:dispatch": 11622334
+      },
+      "outside_measured_main_seconds": 0.004401458007096678
+    },
+    {
+      "phase": "warm-2",
+      "crate": "writeable",
+      "type": "lib",
+      "process_seconds": 0.00727733300300315,
+      "stages_nanoseconds": {
+        "front:init": 42125,
+        "library:plan": 12000,
+        "library:prepare": 38000,
+        "library:key": 1339750,
+        "library:locks-config": 118875,
+        "library:restore": 1672500,
+        "library:events": 56959,
+        "front:dispatch": 3265167
+      },
+      "outside_measured_main_seconds": 0.00397004100300315
+    },
+    {
+      "phase": "warm-2",
+      "crate": "litemap",
+      "type": "lib",
+      "process_seconds": 0.006810624967329204,
+      "stages_nanoseconds": {
+        "front:init": 40292,
+        "library:plan": 11750,
+        "library:prepare": 44708,
+        "library:key": 1366709,
+        "library:locks-config": 127166,
+        "library:restore": 1626209,
+        "library:events": 60833,
+        "front:dispatch": 3265666
+      },
+      "outside_measured_main_seconds": 0.003504666967329204
+    },
+    {
+      "phase": "warm-2",
+      "crate": "tinystr",
+      "type": "lib",
+      "process_seconds": 0.016088999982457608,
+      "stages_nanoseconds": {
+        "front:init": 39000,
+        "library:plan": 11459,
+        "library:prepare": 31958,
+        "library:key": 1196917,
+        "library:locks-config": 116125,
+        "library:restore": 10212875,
+        "library:events": 56625,
+        "front:dispatch": 11655417
+      },
+      "outside_measured_main_seconds": 0.004394582982457608
+    },
+    {
+      "phase": "warm-2",
+      "crate": "potential_utf",
+      "type": "lib",
+      "process_seconds": 0.011876416974700987,
+      "stages_nanoseconds": {
+        "front:init": 42708,
+        "library:plan": 11583,
+        "library:prepare": 32834,
+        "library:key": 1137083,
+        "library:locks-config": 112417,
+        "library:restore": 6623458,
+        "library:events": 56750,
+        "front:dispatch": 8000792
+      },
+      "outside_measured_main_seconds": 0.003832916974700987
+    },
+    {
+      "phase": "warm-2",
+      "crate": "zerotrie",
+      "type": "lib",
+      "process_seconds": 0.01361241698032245,
+      "stages_nanoseconds": {
+        "front:init": 62833,
+        "library:plan": 11750,
+        "library:prepare": 44125,
+        "library:key": 1504833,
+        "library:locks-config": 231333,
+        "library:restore": 7361334,
+        "library:events": 57250,
+        "front:dispatch": 9239209
+      },
+      "outside_measured_main_seconds": 0.0043103749803224504
+    },
+    {
+      "phase": "warm-2",
+      "crate": "tokio",
+      "type": "lib",
+      "process_seconds": 0.030409666011109948,
+      "stages_nanoseconds": {
+        "front:init": 40833,
+        "library:plan": 11291,
+        "library:prepare": 32459,
+        "library:key": 1240458,
+        "library:locks-config": 117708,
+        "library:restore": 24889167,
+        "library:events": 45292,
+        "front:dispatch": 26366459
+      },
+      "outside_measured_main_seconds": 0.004002374011109949
+    },
+    {
+      "phase": "warm-2",
+      "crate": "icu_locale_core",
+      "type": "lib",
+      "process_seconds": 0.014059624983929098,
+      "stages_nanoseconds": {
+        "front:init": 38667,
+        "library:plan": 14292,
+        "library:prepare": 35375,
+        "library:key": 1565208,
+        "library:locks-config": 120250,
+        "library:restore": 7612084,
+        "library:events": 44375,
+        "front:dispatch": 9423416
+      },
+      "outside_measured_main_seconds": 0.004597541983929098
+    },
+    {
+      "phase": "warm-2",
+      "crate": "slab",
+      "type": "lib",
+      "process_seconds": 0.00718016701284796,
+      "stages_nanoseconds": {
+        "front:init": 45709,
+        "library:plan": 8917,
+        "library:prepare": 44958,
+        "library:key": 1288042,
+        "library:locks-config": 117625,
+        "library:restore": 1529708,
+        "library:events": 66500,
+        "front:dispatch": 3084375
+      },
+      "outside_measured_main_seconds": 0.00405008301284796
+    },
+    {
+      "phase": "warm-2",
+      "crate": "futures_io",
+      "type": "lib",
+      "process_seconds": 0.007202833017800003,
+      "stages_nanoseconds": {
+        "front:init": 57959,
+        "library:plan": 9375,
+        "library:prepare": 38375,
+        "library:key": 1396500,
+        "library:locks-config": 119041,
+        "library:restore": 1241292,
+        "library:events": 75875,
+        "front:dispatch": 2905208
+      },
+      "outside_measured_main_seconds": 0.004239666017800003
+    },
+    {
+      "phase": "warm-2",
+      "crate": "utf8_iter",
+      "type": "lib",
+      "process_seconds": 0.006427082989830524,
+      "stages_nanoseconds": {
+        "front:init": 43084,
+        "library:plan": 8625,
+        "library:prepare": 33583,
+        "library:key": 1178584,
+        "library:locks-config": 114583,
+        "library:restore": 1084083,
+        "library:events": 53417,
+        "front:dispatch": 2502125
+      },
+      "outside_measured_main_seconds": 0.0038818739898305236
+    },
+    {
+      "phase": "warm-2",
+      "crate": "futures_task",
+      "type": "lib",
+      "process_seconds": 0.0068960420321673155,
+      "stages_nanoseconds": {
+        "front:init": 44125,
+        "library:plan": 9667,
+        "library:prepare": 39333,
+        "library:key": 1479459,
+        "library:locks-config": 128416,
+        "library:restore": 1381917,
+        "library:events": 46583,
+        "front:dispatch": 3111125
+      },
+      "outside_measured_main_seconds": 0.0037407920321673154
+    },
+    {
+      "phase": "warm-2",
+      "crate": "icu_collections",
+      "type": "lib",
+      "process_seconds": 0.015464624972082675,
+      "stages_nanoseconds": {
+        "front:init": 40375,
+        "library:plan": 12459,
+        "library:prepare": 33750,
+        "library:key": 1312541,
+        "library:locks-config": 124125,
+        "library:restore": 9486000,
+        "library:events": 56959,
+        "front:dispatch": 11056333
+      },
+      "outside_measured_main_seconds": 0.004367916972082674
+    },
+    {
+      "phase": "warm-2",
+      "crate": "futures_util",
+      "type": "lib",
+      "process_seconds": 0.026148916978854686,
+      "stages_nanoseconds": {
+        "front:init": 42750,
+        "library:plan": 12000,
+        "library:prepare": 35292,
+        "library:key": 1241625,
+        "library:locks-config": 138208,
+        "library:restore": 20637250,
+        "library:events": 64917,
+        "front:dispatch": 22158625
+      },
+      "outside_measured_main_seconds": 0.003947541978854687
+    },
+    {
+      "phase": "warm-2",
+      "crate": "icu_provider",
+      "type": "lib",
+      "process_seconds": 0.01803604100132361,
+      "stages_nanoseconds": {
+        "front:init": 45167,
+        "library:plan": 12625,
+        "library:prepare": 38375,
+        "library:key": 1188375,
+        "library:locks-config": 136167,
+        "library:restore": 12634708,
+        "library:events": 48625,
+        "front:dispatch": 14087666
+      },
+      "outside_measured_main_seconds": 0.0039032080013236114
+    },
+    {
+      "phase": "warm-2",
+      "crate": "http",
+      "type": "lib",
+      "process_seconds": 0.010822666983585805,
+      "stages_nanoseconds": {
+        "front:init": 40541,
+        "library:plan": 9500,
+        "library:prepare": 34750,
+        "library:key": 1350250,
+        "library:locks-config": 125583,
+        "library:restore": 5362250,
+        "library:events": 46500,
+        "front:dispatch": 6958042
+      },
+      "outside_measured_main_seconds": 0.0038240839835858046
+    },
+    {
+      "phase": "warm-2",
+      "crate": "zeroize",
+      "type": "lib",
+      "process_seconds": 0.006884415983222425,
+      "stages_nanoseconds": {
+        "front:init": 36667,
+        "library:plan": 10250,
+        "library:prepare": 30750,
+        "library:key": 1140000,
+        "library:locks-config": 112459,
+        "library:restore": 1775125,
+        "library:events": 29333,
+        "front:dispatch": 3122000
+      },
+      "outside_measured_main_seconds": 0.003725748983222425
+    },
+    {
+      "phase": "warm-2",
+      "crate": "once_cell",
+      "type": "lib",
+      "process_seconds": 0.0069304160424508154,
+      "stages_nanoseconds": {
+        "front:init": 38041,
+        "library:plan": 9750,
+        "library:prepare": 32917,
+        "library:key": 1266625,
+        "library:locks-config": 111625,
+        "library:restore": 1379583,
+        "library:events": 65334,
+        "front:dispatch": 2892167
+      },
+      "outside_measured_main_seconds": 0.004000208042450815
+    },
+    {
+      "phase": "warm-2",
+      "crate": "percent_encoding",
+      "type": "lib",
+      "process_seconds": 0.006257166969589889,
+      "stages_nanoseconds": {
+        "front:init": 42584,
+        "library:plan": 8500,
+        "library:prepare": 33667,
+        "library:key": 1176750,
+        "library:locks-config": 120500,
+        "library:restore": 1098917,
+        "library:events": 56791,
+        "front:dispatch": 2521375
+      },
+      "outside_measured_main_seconds": 0.003693207969589889
+    },
+    {
+      "phase": "warm-2",
+      "crate": "version_check",
+      "type": "lib",
+      "process_seconds": 0.006603958026971668,
+      "stages_nanoseconds": {
+        "front:init": 37667,
+        "library:plan": 8541,
+        "library:prepare": 32709,
+        "library:key": 1128333,
+        "library:locks-config": 111042,
+        "library:restore": 1333708,
+        "library:events": 29667,
+        "front:dispatch": 2667750
+      },
+      "outside_measured_main_seconds": 0.003898541026971668
+    },
+    {
+      "phase": "warm-2",
+      "crate": "bitflags",
+      "type": "lib",
+      "process_seconds": 0.006884792004711926,
+      "stages_nanoseconds": {
+        "front:init": 50208,
+        "library:plan": 9750,
+        "library:prepare": 33791,
+        "library:key": 1275542,
+        "library:locks-config": 116458,
+        "library:restore": 1555709,
+        "library:events": 55041,
+        "front:dispatch": 3075917
+      },
+      "outside_measured_main_seconds": 0.003758667004711926
+    },
+    {
+      "phase": "warm-2",
+      "crate": "rustls_pki_types",
+      "type": "lib",
+      "process_seconds": 0.009439916000701487,
+      "stages_nanoseconds": {
+        "front:init": 41208,
+        "library:plan": 9750,
+        "library:prepare": 41500,
+        "library:key": 1357167,
+        "library:locks-config": 139583,
+        "library:restore": 3509084,
+        "library:events": 67125,
+        "front:dispatch": 5154500
+      },
+      "outside_measured_main_seconds": 0.004244208000701487
+    },
+    {
+      "phase": "warm-2",
+      "crate": "http_body",
+      "type": "lib",
+      "process_seconds": 0.00968729198211804,
+      "stages_nanoseconds": {
+        "front:init": 41584,
+        "library:plan": 9666,
+        "library:prepare": 33584,
+        "library:key": 1176750,
+        "library:locks-config": 112416,
+        "library:restore": 3827709,
+        "library:events": 37916,
+        "front:dispatch": 5226333
+      },
+      "outside_measured_main_seconds": 0.00441937498211804
+    },
+    {
+      "phase": "warm-2",
+      "crate": "serde",
+      "type": "lib",
+      "process_seconds": 0.015746208955533803,
+      "stages_nanoseconds": {
+        "front:init": 42625,
+        "library:plan": 9583,
+        "library:prepare": 32875,
+        "library:key": 1151333,
+        "library:locks-config": 123875,
+        "library:restore": 9828625,
+        "library:events": 48125,
+        "front:dispatch": 11223375
+      },
+      "outside_measured_main_seconds": 0.0044802089555338025
+    },
+    {
+      "phase": "warm-2",
+      "crate": "icu_normalizer_data",
+      "type": "lib",
+      "process_seconds": 0.007367458019871265,
+      "stages_nanoseconds": {
+        "front:init": 27542,
+        "library:plan": 8333,
+        "library:prepare": 30250,
+        "library:key": 1086917,
+        "library:locks-config": 119416,
+        "library:restore": 2076875,
+        "library:events": 61042,
+        "front:dispatch": 3406542
+      },
+      "outside_measured_main_seconds": 0.003933374019871264
+    },
+    {
+      "phase": "warm-2",
+      "crate": "icu_properties_data",
+      "type": "lib",
+      "process_seconds": 0.013132875028531998,
+      "stages_nanoseconds": {
+        "front:init": 33250,
+        "library:plan": 10083,
+        "library:prepare": 35625,
+        "library:key": 1248875,
+        "library:locks-config": 114708,
+        "library:restore": 7951334,
+        "library:events": 54125,
+        "front:dispatch": 9444333
+      },
+      "outside_measured_main_seconds": 0.003655292028531999
+    },
+    {
+      "phase": "warm-2",
+      "crate": "getrandom",
+      "type": "lib",
+      "process_seconds": 0.008349083014763892,
+      "stages_nanoseconds": {
+        "front:init": 38917,
+        "library:plan": 8667,
+        "library:prepare": 34291,
+        "library:key": 1199042,
+        "library:locks-config": 123667,
+        "library:restore": 2719500,
+        "library:events": 55916,
+        "front:dispatch": 4167166
+      },
+      "outside_measured_main_seconds": 0.0041430000147638915
+    },
+    {
+      "phase": "warm-2",
+      "crate": "untrusted",
+      "type": "lib",
+      "process_seconds": 0.007132125028874725,
+      "stages_nanoseconds": {
+        "front:init": 63958,
+        "library:plan": 10500,
+        "library:prepare": 37917,
+        "library:key": 1534458,
+        "library:locks-config": 126500,
+        "library:restore": 1232834,
+        "library:events": 81333,
+        "front:dispatch": 3054750
+      },
+      "outside_measured_main_seconds": 0.0040134170288747256
+    },
+    {
+      "phase": "warm-2",
+      "crate": "icu_properties",
+      "type": "lib",
+      "process_seconds": 0.023811249993741512,
+      "stages_nanoseconds": {
+        "front:init": 39834,
+        "library:plan": 14333,
+        "library:prepare": 40083,
+        "library:key": 1060917,
+        "library:locks-config": 105875,
+        "library:restore": 18376833,
+        "library:events": 47750,
+        "front:dispatch": 19674333
+      },
+      "outside_measured_main_seconds": 0.004097082993741511
+    },
+    {
+      "phase": "warm-2",
+      "crate": "icu_normalizer",
+      "type": "lib",
+      "process_seconds": 0.01924670801963657,
+      "stages_nanoseconds": {
+        "front:init": 47583,
+        "library:plan": 12416,
+        "library:prepare": 42625,
+        "library:key": 1398875,
+        "library:locks-config": 129709,
+        "library:restore": 13331833,
+        "library:events": 50625,
+        "front:dispatch": 14993500
+      },
+      "outside_measured_main_seconds": 0.004205625019636571
+    },
+    {
+      "phase": "warm-2",
+      "crate": "tower_service",
+      "type": "lib",
+      "process_seconds": 0.007001958030741662,
+      "stages_nanoseconds": {
+        "front:init": 40333,
+        "library:plan": 10792,
+        "library:prepare": 37375,
+        "library:key": 1196875,
+        "library:locks-config": 118833,
+        "library:restore": 1065167,
+        "library:events": 32417,
+        "front:dispatch": 2491584
+      },
+      "outside_measured_main_seconds": 0.004470041030741662
+    },
+    {
+      "phase": "warm-2",
+      "crate": "typenum",
+      "type": "lib",
+      "process_seconds": 0.011258999991696328,
+      "stages_nanoseconds": {
+        "front:init": 38166,
+        "library:plan": 8416,
+        "library:prepare": 31125,
+        "library:key": 1425209,
+        "library:locks-config": 119666,
+        "library:restore": 5419500,
+        "library:events": 69667,
+        "front:dispatch": 7103250
+      },
+      "outside_measured_main_seconds": 0.004117583991696328
+    },
+    {
+      "phase": "warm-2",
+      "crate": "autocfg",
+      "type": "lib",
+      "process_seconds": 0.00719808298163116,
+      "stages_nanoseconds": {
+        "front:init": 48666,
+        "library:plan": 10083,
+        "library:prepare": 38750,
+        "library:key": 1399459,
+        "library:locks-config": 125000,
+        "library:restore": 1566333,
+        "library:events": 72333,
+        "front:dispatch": 3247167
+      },
+      "outside_measured_main_seconds": 0.0039022499816311596
+    },
+    {
+      "phase": "warm-2",
+      "crate": "try_lock",
+      "type": "lib",
+      "process_seconds": 0.006616792001295835,
+      "stages_nanoseconds": {
+        "front:init": 45958,
+        "library:plan": 9250,
+        "library:prepare": 38833,
+        "library:key": 1216417,
+        "library:locks-config": 120208,
+        "library:restore": 1022833,
+        "library:events": 61917,
+        "front:dispatch": 2496750
+      },
+      "outside_measured_main_seconds": 0.004074084001295835
+    },
+    {
+      "phase": "warm-2",
+      "crate": "want",
+      "type": "lib",
+      "process_seconds": 0.0077328329789452255,
+      "stages_nanoseconds": {
+        "front:init": 49125,
+        "library:plan": 10250,
+        "library:prepare": 36458,
+        "library:key": 1579500,
+        "library:locks-config": 145292,
+        "library:restore": 1523583,
+        "library:events": 64625,
+        "front:dispatch": 3390292
+      },
+      "outside_measured_main_seconds": 0.004293415978945225
+    },
+    {
+      "phase": "warm-2",
+      "crate": "generic_array",
+      "type": "lib",
+      "process_seconds": 0.011123083007987589,
+      "stages_nanoseconds": {
+        "front:init": 30666,
+        "library:plan": 10042,
+        "library:prepare": 32583,
+        "library:key": 1106334,
+        "library:locks-config": 113125,
+        "library:restore": 5186333,
+        "library:events": 27458,
+        "front:dispatch": 6501959
+      },
+      "outside_measured_main_seconds": 0.004590458007987588
+    },
+    {
+      "phase": "warm-2",
+      "crate": "httparse",
+      "type": "lib",
+      "process_seconds": 0.007633749977685511,
+      "stages_nanoseconds": {
+        "front:init": 47041,
+        "library:plan": 9250,
+        "library:prepare": 33125,
+        "library:key": 1153667,
+        "library:locks-config": 119792,
+        "library:restore": 2032500,
+        "library:events": 36291,
+        "front:dispatch": 3412917
+      },
+      "outside_measured_main_seconds": 0.004173791977685511
+    },
+    {
+      "phase": "warm-2",
+      "crate": "idna_adapter",
+      "type": "lib",
+      "process_seconds": 0.021375874988734722,
+      "stages_nanoseconds": {
+        "front:init": 40500,
+        "library:plan": 9750,
+        "library:prepare": 33208,
+        "library:key": 1309792,
+        "library:locks-config": 116375,
+        "library:restore": 15299750,
+        "library:events": 43458,
+        "front:dispatch": 16842291
+      },
+      "outside_measured_main_seconds": 0.004493083988734721
+    },
+    {
+      "phase": "warm-2",
+      "crate": "form_urlencoded",
+      "type": "lib",
+      "process_seconds": 0.006693166971672326,
+      "stages_nanoseconds": {
+        "front:init": 36000,
+        "library:plan": 10083,
+        "library:prepare": 42709,
+        "library:key": 1327166,
+        "library:locks-config": 111917,
+        "library:restore": 1457583,
+        "library:events": 53125,
+        "front:dispatch": 3027958
+      },
+      "outside_measured_main_seconds": 0.0036292089716723265
+    },
+    {
+      "phase": "warm-2",
+      "crate": "tracing_core",
+      "type": "lib",
+      "process_seconds": 0.007909042004030198,
+      "stages_nanoseconds": {
+        "front:init": 35916,
+        "library:plan": 9375,
+        "library:prepare": 32209,
+        "library:key": 1068625,
+        "library:locks-config": 113750,
+        "library:restore": 2871333,
+        "library:events": 44208,
+        "front:dispatch": 4166042
+      },
+      "outside_measured_main_seconds": 0.0037070840040301974
+    },
+    {
+      "phase": "warm-2",
+      "crate": "core_foundation",
+      "type": "lib",
+      "process_seconds": 0.010495540976990014,
+      "stages_nanoseconds": {
+        "front:init": 44291,
+        "library:plan": 9166,
+        "library:prepare": 33292,
+        "library:key": 1359625,
+        "library:locks-config": 114250,
+        "library:restore": 4710125,
+        "library:events": 50250,
+        "front:dispatch": 6305292
+      },
+      "outside_measured_main_seconds": 0.0041459579769900145
+    },
+    {
+      "phase": "warm-2",
+      "crate": "subtle",
+      "type": "lib",
+      "process_seconds": 0.006668958987575024,
+      "stages_nanoseconds": {
+        "front:init": 33833,
+        "library:plan": 9625,
+        "library:prepare": 31458,
+        "library:key": 1203292,
+        "library:locks-config": 135750,
+        "library:restore": 1129500,
+        "library:events": 58166,
+        "front:dispatch": 2591750
+      },
+      "outside_measured_main_seconds": 0.0040433759875750245
+    },
+    {
+      "phase": "warm-2",
+      "crate": "atomic_waker",
+      "type": "lib",
+      "process_seconds": 0.006750624976120889,
+      "stages_nanoseconds": {
+        "front:init": 45125,
+        "library:plan": 8959,
+        "library:prepare": 36250,
+        "library:key": 1343083,
+        "library:locks-config": 122083,
+        "library:restore": 1146834,
+        "library:events": 42458,
+        "front:dispatch": 2732917
+      },
+      "outside_measured_main_seconds": 0.0039725829761208895
+    },
+    {
+      "phase": "warm-2",
+      "crate": "tracing",
+      "type": "lib",
+      "process_seconds": 0.01283412502380088,
+      "stages_nanoseconds": {
+        "front:init": 39083,
+        "library:plan": 9375,
+        "library:prepare": 32875,
+        "library:key": 1132375,
+        "library:locks-config": 137167,
+        "library:restore": 7522500,
+        "library:events": 63125,
+        "front:dispatch": 8932083
+      },
+      "outside_measured_main_seconds": 0.0038629590238008805
+    },
+    {
+      "phase": "warm-2",
+      "crate": "hyper",
+      "type": "lib",
+      "process_seconds": 0.01747387502109632,
+      "stages_nanoseconds": {
+        "front:init": 46833,
+        "library:plan": 18000,
+        "library:prepare": 33208,
+        "library:key": 1220459,
+        "library:locks-config": 119375,
+        "library:restore": 11406791,
+        "library:events": 38834,
+        "front:dispatch": 12864500
+      },
+      "outside_measured_main_seconds": 0.004562542021096318
+    },
+    {
+      "phase": "warm-2",
+      "crate": "system_configuration",
+      "type": "lib",
+      "process_seconds": 0.01137316704262048,
+      "stages_nanoseconds": {
+        "front:init": 46833,
+        "library:plan": 10000,
+        "library:prepare": 34708,
+        "library:key": 1336792,
+        "library:locks-config": 118083,
+        "library:restore": 5479708,
+        "library:events": 57875,
+        "front:dispatch": 7065500
+      },
+      "outside_measured_main_seconds": 0.00426083404262048
+    },
+    {
+      "phase": "warm-2",
+      "crate": "idna",
+      "type": "lib",
+      "process_seconds": 0.020723542023915797,
+      "stages_nanoseconds": {
+        "front:init": 39417,
+        "library:plan": 10042,
+        "library:prepare": 35292,
+        "library:key": 1118250,
+        "library:locks-config": 118708,
+        "library:restore": 15336750,
+        "library:events": 66792,
+        "front:dispatch": 16717208
+      },
+      "outside_measured_main_seconds": 0.003966917023915797
+    },
+    {
+      "phase": "warm-2",
+      "crate": "zmij",
+      "type": "lib",
+      "process_seconds": 0.006627375027164817,
+      "stages_nanoseconds": {
+        "front:init": 41958,
+        "library:plan": 9500,
+        "library:prepare": 36875,
+        "library:key": 1324500,
+        "library:locks-config": 116750,
+        "library:restore": 1322458,
+        "library:events": 65417,
+        "front:dispatch": 2909667
+      },
+      "outside_measured_main_seconds": 0.003675750027164817
+    },
+    {
+      "phase": "warm-2",
+      "crate": "sync_wrapper",
+      "type": "lib",
+      "process_seconds": 0.006802332994993776,
+      "stages_nanoseconds": {
+        "front:init": 45083,
+        "library:plan": 10042,
+        "library:prepare": 43417,
+        "library:key": 1359833,
+        "library:locks-config": 130833,
+        "library:restore": 1287834,
+        "library:events": 87916,
+        "front:dispatch": 2953542
+      },
+      "outside_measured_main_seconds": 0.003803707994993776
+    },
+    {
+      "phase": "warm-2",
+      "crate": "unicode_width",
+      "type": "lib",
+      "process_seconds": 0.008020791981834918,
+      "stages_nanoseconds": {
+        "front:init": 40417,
+        "library:plan": 9083,
+        "library:prepare": 33833,
+        "library:key": 1222500,
+        "library:locks-config": 123167,
+        "library:restore": 3188375,
+        "library:events": 57250,
+        "front:dispatch": 4664417
+      },
+      "outside_measured_main_seconds": 0.0033159579818349185
+    },
+    {
+      "phase": "warm-2",
+      "crate": "tower_layer",
+      "type": "lib",
+      "process_seconds": 0.007066459045745432,
+      "stages_nanoseconds": {
+        "front:init": 45875,
+        "library:plan": 9500,
+        "library:prepare": 43958,
+        "library:key": 1295875,
+        "library:locks-config": 120042,
+        "library:restore": 1277750,
+        "library:events": 67208,
+        "front:dispatch": 2842708
+      },
+      "outside_measured_main_seconds": 0.004177876045745432
+    },
+    {
+      "phase": "warm-2",
+      "crate": "base64",
+      "type": "lib",
+      "process_seconds": 0.008059750020038337,
+      "stages_nanoseconds": {
+        "front:init": 49208,
+        "library:plan": 9125,
+        "library:prepare": 38791,
+        "library:key": 1465500,
+        "library:locks-config": 145959,
+        "library:restore": 2305666,
+        "library:events": 76709,
+        "front:dispatch": 4071833
+      },
+      "outside_measured_main_seconds": 0.003938709020038337
+    },
+    {
+      "phase": "warm-2",
+      "crate": "equivalent",
+      "type": "lib",
+      "process_seconds": 0.006856083986349404,
+      "stages_nanoseconds": {
+        "front:init": 40541,
+        "library:plan": 9791,
+        "library:prepare": 47084,
+        "library:key": 1175875,
+        "library:locks-config": 128291,
+        "library:restore": 1065625,
+        "library:events": 78292,
+        "front:dispatch": 2536125
+      },
+      "outside_measured_main_seconds": 0.004279417986349404
+    },
+    {
+      "phase": "warm-2",
+      "crate": "hashbrown",
+      "type": "lib",
+      "process_seconds": 0.010035582992713898,
+      "stages_nanoseconds": {
+        "front:init": 42458,
+        "library:plan": 11000,
+        "library:prepare": 42875,
+        "library:key": 1430792,
+        "library:locks-config": 141292,
+        "library:restore": 3913000,
+        "library:events": 67083,
+        "front:dispatch": 5636750
+      },
+      "outside_measured_main_seconds": 0.004356374992713899
+    },
+    {
+      "phase": "warm-2",
+      "crate": "ryu",
+      "type": "lib",
+      "process_seconds": 0.007058791001327336,
+      "stages_nanoseconds": {
+        "front:init": 47500,
+        "library:plan": 8459,
+        "library:prepare": 46458,
+        "library:key": 1415292,
+        "library:locks-config": 136791,
+        "library:restore": 1662209,
+        "library:events": 56333,
+        "front:dispatch": 3354166
+      },
+      "outside_measured_main_seconds": 0.003657125001327336
+    },
+    {
+      "phase": "warm-2",
+      "crate": "ipnet",
+      "type": "lib",
+      "process_seconds": 0.007259375008288771,
+      "stages_nanoseconds": {
+        "front:init": 48667,
+        "library:plan": 8416,
+        "library:prepare": 34875,
+        "library:key": 1281834,
+        "library:locks-config": 147625,
+        "library:restore": 1953166,
+        "library:events": 67292,
+        "front:dispatch": 3520000
+      },
+      "outside_measured_main_seconds": 0.0036907080082887707
+    },
+    {
+      "phase": "warm-2",
+      "crate": "indexmap",
+      "type": "lib",
+      "process_seconds": 0.01260533300228417,
+      "stages_nanoseconds": {
+        "front:init": 39708,
+        "library:plan": 10292,
+        "library:prepare": 41958,
+        "library:key": 1955459,
+        "library:locks-config": 162416,
+        "library:restore": 6229167,
+        "library:events": 53833,
+        "front:dispatch": 8481209
+      },
+      "outside_measured_main_seconds": 0.00408441600228417
+    },
+    {
+      "phase": "warm-2",
+      "crate": "hyper_util",
+      "type": "lib",
+      "process_seconds": 0.01836616703076288,
+      "stages_nanoseconds": {
+        "front:init": 41334,
+        "library:plan": 15459,
+        "library:prepare": 34166,
+        "library:key": 1408459,
+        "library:locks-config": 117791,
+        "library:restore": 12743875,
+        "library:events": 45625,
+        "front:dispatch": 14395708
+      },
+      "outside_measured_main_seconds": 0.00392912503076288
+    },
+    {
+      "phase": "warm-2",
+      "crate": "num_traits",
+      "type": "lib",
+      "process_seconds": 0.009564584004692733,
+      "stages_nanoseconds": {
+        "front:init": 53625,
+        "library:plan": 9541,
+        "library:prepare": 40917,
+        "library:key": 1285208,
+        "library:locks-config": 105375,
+        "library:restore": 3591292,
+        "library:events": 64792,
+        "front:dispatch": 5125250
+      },
+      "outside_measured_main_seconds": 0.004385709004692733
+    },
+    {
+      "phase": "warm-2",
+      "crate": "tower",
+      "type": "lib",
+      "process_seconds": 0.01441545900888741,
+      "stages_nanoseconds": {
+        "front:init": 42292,
+        "library:plan": 10125,
+        "library:prepare": 37500,
+        "library:key": 1320958,
+        "library:locks-config": 129833,
+        "library:restore": 9137417,
+        "library:events": 61625,
+        "front:dispatch": 10726791
+      },
+      "outside_measured_main_seconds": 0.0036463760088874097
+    },
+    {
+      "phase": "warm-2",
+      "crate": "getopts",
+      "type": "lib",
+      "process_seconds": 0.008754790993407369,
+      "stages_nanoseconds": {
+        "front:init": 57834,
+        "library:plan": 9375,
+        "library:prepare": 40667,
+        "library:key": 1621750,
+        "library:locks-config": 146833,
+        "library:restore": 2823167,
+        "library:events": 48542,
+        "front:dispatch": 4718083
+      },
+      "outside_measured_main_seconds": 0.0039788739934073685
+    },
+    {
+      "phase": "warm-2",
+      "crate": "serde_json",
+      "type": "lib",
+      "process_seconds": 0.015102999983355403,
+      "stages_nanoseconds": {
+        "front:init": 40750,
+        "library:plan": 9708,
+        "library:prepare": 32333,
+        "library:key": 1197292,
+        "library:locks-config": 113417,
+        "library:restore": 9166625,
+        "library:events": 47041,
+        "front:dispatch": 10596083
+      },
+      "outside_measured_main_seconds": 0.004466166983355403
+    },
+    {
+      "phase": "warm-2",
+      "crate": "url",
+      "type": "lib",
+      "process_seconds": 0.012589749996550381,
+      "stages_nanoseconds": {
+        "front:init": 43833,
+        "library:plan": 10250,
+        "library:prepare": 35875,
+        "library:key": 1348083,
+        "library:locks-config": 159000,
+        "library:restore": 6953417,
+        "library:events": 58000,
+        "front:dispatch": 8596083
+      },
+      "outside_measured_main_seconds": 0.003949833996550382
+    },
+    {
+      "phase": "warm-2",
+      "crate": "getrandom",
+      "type": "lib",
+      "process_seconds": 0.008564333023969084,
+      "stages_nanoseconds": {
+        "front:init": 48250,
+        "library:plan": 10583,
+        "library:prepare": 34584,
+        "library:key": 1319666,
+        "library:locks-config": 128625,
+        "library:restore": 2978584,
+        "library:events": 56250,
+        "front:dispatch": 4554792
+      },
+      "outside_measured_main_seconds": 0.003961291023969084
+    },
+    {
+      "phase": "warm-2",
+      "crate": "crypto_common",
+      "type": "lib",
+      "process_seconds": 0.009533458040095866,
+      "stages_nanoseconds": {
+        "front:init": 40333,
+        "library:plan": 9042,
+        "library:prepare": 32042,
+        "library:key": 1168833,
+        "library:locks-config": 115292,
+        "library:restore": 4304166,
+        "library:events": 41417,
+        "front:dispatch": 5715917
+      },
+      "outside_measured_main_seconds": 0.0037772080400958656
+    },
+    {
+      "phase": "warm-2",
+      "crate": "block_buffer",
+      "type": "lib",
+      "process_seconds": 0.00949312502052635,
+      "stages_nanoseconds": {
+        "front:init": 39792,
+        "library:plan": 9125,
+        "library:prepare": 34833,
+        "library:key": 1290083,
+        "library:locks-config": 123334,
+        "library:restore": 3644458,
+        "library:events": 54625,
+        "front:dispatch": 5185625
+      },
+      "outside_measured_main_seconds": 0.004267708020526349
+    },
+    {
+      "phase": "warm-2",
+      "crate": "webpki_roots",
+      "type": "lib",
+      "process_seconds": 0.008589041011873633,
+      "stages_nanoseconds": {
+        "front:init": 43292,
+        "library:plan": 9584,
+        "library:prepare": 37083,
+        "library:key": 1249375,
+        "library:locks-config": 127167,
+        "library:restore": 2906416,
+        "library:events": 50292,
+        "front:dispatch": 4411875
+      },
+      "outside_measured_main_seconds": 0.004133874011873632
+    },
+    {
+      "phase": "warm-2",
+      "crate": "iana_time_zone",
+      "type": "lib",
+      "process_seconds": 0.007253916002810001,
+      "stages_nanoseconds": {
+        "front:init": 41208,
+        "library:plan": 8333,
+        "library:prepare": 37625,
+        "library:key": 1244125,
+        "library:locks-config": 122792,
+        "library:restore": 1648083,
+        "library:events": 61375,
+        "front:dispatch": 3150334
+      },
+      "outside_measured_main_seconds": 0.004062374002810001
+    },
+    {
+      "phase": "warm-2",
+      "crate": "unicase",
+      "type": "lib",
+      "process_seconds": 0.006621541979257017,
+      "stages_nanoseconds": {
+        "front:init": 40291,
+        "library:plan": 8917,
+        "library:prepare": 35417,
+        "library:key": 1386166,
+        "library:locks-config": 134084,
+        "library:restore": 1388625,
+        "library:events": 66875,
+        "front:dispatch": 3045625
+      },
+      "outside_measured_main_seconds": 0.003535625979257017
+    },
+    {
+      "phase": "warm-2",
+      "crate": "pulldown_cmark_escape",
+      "type": "lib",
+      "process_seconds": 0.007143584021832794,
+      "stages_nanoseconds": {
+        "front:init": 44833,
+        "library:plan": 8209,
+        "library:prepare": 32458,
+        "library:key": 1223708,
+        "library:locks-config": 133000,
+        "library:restore": 1250709,
+        "library:events": 49250,
+        "front:dispatch": 2723584
+      },
+      "outside_measured_main_seconds": 0.0043751670218327935
+    },
+    {
+      "phase": "warm-2",
+      "crate": "zlib_rs",
+      "type": "lib",
+      "process_seconds": 0.009170499979518354,
+      "stages_nanoseconds": {
+        "front:init": 41917,
+        "library:plan": 8917,
+        "library:prepare": 33500,
+        "library:key": 1164875,
+        "library:locks-config": 114041,
+        "library:restore": 3736542,
+        "library:events": 37792,
+        "front:dispatch": 5124333
+      },
+      "outside_measured_main_seconds": 0.004004249979518354
+    },
+    {
+      "phase": "warm-2",
+      "crate": "flate2",
+      "type": "lib",
+      "process_seconds": 0.009703458985313773,
+      "stages_nanoseconds": {
+        "front:init": 59625,
+        "library:plan": 8709,
+        "library:prepare": 44000,
+        "library:key": 1379750,
+        "library:locks-config": 145541,
+        "library:restore": 4120084,
+        "library:events": 52291,
+        "front:dispatch": 5780083
+      },
+      "outside_measured_main_seconds": 0.0038637509853137733
+    },
+    {
+      "phase": "warm-2",
+      "crate": "pulldown_cmark",
+      "type": "lib",
+      "process_seconds": 0.011966499965637922,
+      "stages_nanoseconds": {
+        "front:init": 29333,
+        "library:plan": 10958,
+        "library:prepare": 32667,
+        "library:key": 1221416,
+        "library:locks-config": 122167,
+        "library:restore": 6633542,
+        "library:events": 69166,
+        "front:dispatch": 8121208
+      },
+      "outside_measured_main_seconds": 0.0038159589656379216
+    },
+    {
+      "phase": "warm-2",
+      "crate": "chrono",
+      "type": "lib",
+      "process_seconds": 0.016268417006358504,
+      "stages_nanoseconds": {
+        "front:init": 46083,
+        "library:plan": 10584,
+        "library:prepare": 47583,
+        "library:key": 1539292,
+        "library:locks-config": 131750,
+        "library:restore": 9841833,
+        "library:events": 74125,
+        "front:dispatch": 11677458
+      },
+      "outside_measured_main_seconds": 0.004544876006358504
+    },
+    {
+      "phase": "warm-2",
+      "crate": "digest",
+      "type": "lib",
+      "process_seconds": 0.010031750018242747,
+      "stages_nanoseconds": {
+        "front:init": 45875,
+        "library:plan": 9083,
+        "library:prepare": 35125,
+        "library:key": 1201208,
+        "library:locks-config": 122625,
+        "library:restore": 4612875,
+        "library:events": 31375,
+        "front:dispatch": 6039500
+      },
+      "outside_measured_main_seconds": 0.003946375018242747
+    },
+    {
+      "phase": "warm-2",
+      "crate": "uuid",
+      "type": "lib",
+      "process_seconds": 0.013449791993480176,
+      "stages_nanoseconds": {
+        "front:init": 50500,
+        "library:plan": 10125,
+        "library:prepare": 35625,
+        "library:key": 1425416,
+        "library:locks-config": 124584,
+        "library:restore": 7893625,
+        "library:events": 50208,
+        "front:dispatch": 9573042
+      },
+      "outside_measured_main_seconds": 0.003826249993480175
+    },
+    {
+      "phase": "warm-2",
+      "crate": "crc32fast",
+      "type": "lib",
+      "process_seconds": 0.0070618329918943346,
+      "stages_nanoseconds": {
+        "front:init": 38875,
+        "library:plan": 9542,
+        "library:prepare": 32542,
+        "library:key": 1263625,
+        "library:locks-config": 145250,
+        "library:restore": 1497208,
+        "library:events": 49583,
+        "front:dispatch": 3026459
+      },
+      "outside_measured_main_seconds": 0.003996498991894335
+    },
+    {
+      "phase": "warm-2",
+      "crate": "tower_http",
+      "type": "lib",
+      "process_seconds": 0.019111500005237758,
+      "stages_nanoseconds": {
+        "front:init": 40458,
+        "library:plan": 10667,
+        "library:prepare": 34542,
+        "library:key": 1350333,
+        "library:locks-config": 123208,
+        "library:restore": 12609417,
+        "library:events": 44583,
+        "front:dispatch": 14202417
+      },
+      "outside_measured_main_seconds": 0.004868625005237758
+    },
+    {
+      "phase": "warm-2",
+      "crate": "serde_urlencoded",
+      "type": "lib",
+      "process_seconds": 0.014077291009016335,
+      "stages_nanoseconds": {
+        "front:init": 39333,
+        "library:plan": 10292,
+        "library:prepare": 33666,
+        "library:key": 1420667,
+        "library:locks-config": 125583,
+        "library:restore": 8019750,
+        "library:events": 41000,
+        "front:dispatch": 9682000
+      },
+      "outside_measured_main_seconds": 0.004355958009016335
+    },
+    {
+      "phase": "warm-2",
+      "crate": "http_body_util",
+      "type": "lib",
+      "process_seconds": 0.009869333007372916,
+      "stages_nanoseconds": {
+        "front:init": 38167,
+        "library:plan": 9916,
+        "library:prepare": 32500,
+        "library:key": 1198125,
+        "library:locks-config": 117834,
+        "library:restore": 4222416,
+        "library:events": 40250,
+        "front:dispatch": 5647541
+      },
+      "outside_measured_main_seconds": 0.0041836250073729155
+    },
+    {
+      "phase": "warm-2",
+      "crate": "futures_executor",
+      "type": "lib",
+      "process_seconds": 0.013289916038047522,
+      "stages_nanoseconds": {
+        "front:init": 45292,
+        "library:plan": 8542,
+        "library:prepare": 46542,
+        "library:key": 1331458,
+        "library:locks-config": 148250,
+        "library:restore": 7938542,
+        "library:events": 45625,
+        "front:dispatch": 9563458
+      },
+      "outside_measured_main_seconds": 0.003681166038047523
+    },
+    {
+      "phase": "warm-2",
+      "crate": "tokio_util",
+      "type": "lib",
+      "process_seconds": 0.014525665959808975,
+      "stages_nanoseconds": {
+        "front:init": 40417,
+        "library:plan": 11000,
+        "library:prepare": 36208,
+        "library:key": 1296459,
+        "library:locks-config": 117625,
+        "library:restore": 8621083,
+        "library:events": 56250,
+        "front:dispatch": 10170333
+      },
+      "outside_measured_main_seconds": 0.004314915959808976
+    },
+    {
+      "phase": "warm-2",
+      "crate": "cpufeatures",
+      "type": "lib",
+      "process_seconds": 0.007897375035099685,
+      "stages_nanoseconds": {
+        "front:init": 47584,
+        "library:plan": 9083,
+        "library:prepare": 37834,
+        "library:key": 1230750,
+        "library:locks-config": 105541,
+        "library:restore": 2554834,
+        "library:events": 56458,
+        "front:dispatch": 4023208
+      },
+      "outside_measured_main_seconds": 0.003826583035099685
+    },
+    {
+      "phase": "warm-2",
+      "crate": "log",
+      "type": "lib",
+      "process_seconds": 0.008024333976209164,
+      "stages_nanoseconds": {
+        "front:init": 47083,
+        "library:plan": 9375,
+        "library:prepare": 41834,
+        "library:key": 1503666,
+        "library:locks-config": 134834,
+        "library:restore": 1652583,
+        "library:events": 70208,
+        "front:dispatch": 3442875
+      },
+      "outside_measured_main_seconds": 0.004534375976209164
+    },
+    {
+      "phase": "warm-2",
+      "crate": "typed_path",
+      "type": "lib",
+      "process_seconds": 0.011796124977990985,
+      "stages_nanoseconds": {
+        "front:init": 35125,
+        "library:plan": 8250,
+        "library:prepare": 39917,
+        "library:key": 1152625,
+        "library:locks-config": 103625,
+        "library:restore": 6121166,
+        "library:events": 53709,
+        "front:dispatch": 7505167
+      },
+      "outside_measured_main_seconds": 0.004255832977990985
+    },
+    {
+      "phase": "warm-2",
+      "crate": "unsafe_libyaml",
+      "type": "lib",
+      "process_seconds": 0.008525874989572912,
+      "stages_nanoseconds": {
+        "front:init": 43500,
+        "library:plan": 8709,
+        "library:prepare": 36125,
+        "library:key": 1323583,
+        "library:locks-config": 120083,
+        "library:restore": 2652917,
+        "library:events": 54875,
+        "front:dispatch": 4222250
+      },
+      "outside_measured_main_seconds": 0.004260124989572913
+    },
+    {
+      "phase": "warm-2",
+      "crate": "thiserror",
+      "type": "lib",
+      "process_seconds": 0.008751750050578266,
+      "stages_nanoseconds": {
+        "front:init": 38125,
+        "library:plan": 9917,
+        "library:prepare": 32375,
+        "library:key": 1145333,
+        "library:locks-config": 114167,
+        "library:restore": 3494916,
+        "library:events": 41459,
+        "front:dispatch": 4865250
+      },
+      "outside_measured_main_seconds": 0.0038483750505782666
+    },
+    {
+      "phase": "warm-2",
+      "crate": "zip",
+      "type": "lib",
+      "process_seconds": 0.017245333001483232,
+      "stages_nanoseconds": {
+        "front:init": 43042,
+        "library:plan": 10000,
+        "library:prepare": 33833,
+        "library:key": 1332917,
+        "library:locks-config": 123167,
+        "library:restore": 11693666,
+        "library:events": 66625,
+        "front:dispatch": 13290125
+      },
+      "outside_measured_main_seconds": 0.003912166001483232
+    },
+    {
+      "phase": "warm-2",
+      "crate": "serde_yaml_ng",
+      "type": "lib",
+      "process_seconds": 0.014207291998900473,
+      "stages_nanoseconds": {
+        "front:init": 40875,
+        "library:plan": 9917,
+        "library:prepare": 35125,
+        "library:key": 1312958,
+        "library:locks-config": 124542,
+        "library:restore": 8783208,
+        "library:events": 43709,
+        "front:dispatch": 10340917
+      },
+      "outside_measured_main_seconds": 0.0038254999989004723
+    },
+    {
+      "phase": "warm-2",
+      "crate": "sha2",
+      "type": "lib",
+      "process_seconds": 0.010350083000957966,
+      "stages_nanoseconds": {
+        "front:init": 40333,
+        "library:plan": 9292,
+        "library:prepare": 34708,
+        "library:key": 1163417,
+        "library:locks-config": 123416,
+        "library:restore": 4823000,
+        "library:events": 50667,
+        "front:dispatch": 6232250
+      },
+      "outside_measured_main_seconds": 0.004077500000957966
+    },
+    {
+      "phase": "warm-2",
+      "crate": "futures",
+      "type": "lib",
+      "process_seconds": 0.01372554199770093,
+      "stages_nanoseconds": {
+        "front:init": 44291,
+        "library:plan": 10291,
+        "library:prepare": 40834,
+        "library:key": 1249583,
+        "library:locks-config": 114875,
+        "library:restore": 8037292,
+        "library:events": 62208,
+        "front:dispatch": 9544667
+      },
+      "outside_measured_main_seconds": 0.00413658399770093
+    },
+    {
+      "phase": "warm-2",
+      "crate": "anyhow",
+      "type": "lib",
+      "process_seconds": 0.0073610839899629354,
+      "stages_nanoseconds": {
+        "front:init": 37958,
+        "library:plan": 8583,
+        "library:prepare": 33000,
+        "library:key": 1171875,
+        "library:locks-config": 112125,
+        "library:restore": 2098167,
+        "library:events": 49083,
+        "front:dispatch": 3498083
+      },
+      "outside_measured_main_seconds": 0.0038250429899629353
+    },
+    {
+      "phase": "warm-2",
+      "crate": "harness_proto",
+      "type": "lib",
+      "process_seconds": 0.03432695800438523,
+      "stages_nanoseconds": {
+        "front:init": 35334,
+        "library:plan": 9084,
+        "library:prepare": 34875,
+        "library:key": 1231875,
+        "library:locks-config": 126458,
+        "library:restore": 28549208,
+        "library:events": 70334,
+        "front:dispatch": 30052916
+      },
+      "outside_measured_main_seconds": 0.0042387080043852325
+    },
+    {
+      "phase": "warm-2",
+      "crate": "deser_hjson",
+      "type": "lib",
+      "process_seconds": 0.01215054199565202,
+      "stages_nanoseconds": {
+        "front:init": 40125,
+        "library:plan": 8125,
+        "library:prepare": 39708,
+        "library:key": 1312917,
+        "library:locks-config": 107083,
+        "library:restore": 6768417,
+        "library:events": 57375,
+        "front:dispatch": 8319542
+      },
+      "outside_measured_main_seconds": 0.0037908749956520205
+    },
+    {
+      "phase": "warm-2",
+      "crate": "semver",
+      "type": "lib",
+      "process_seconds": 0.00725395797053352,
+      "stages_nanoseconds": {
+        "front:init": 41208,
+        "library:plan": 8500,
+        "library:prepare": 31542,
+        "library:key": 1128541,
+        "library:locks-config": 117667,
+        "library:restore": 1810792,
+        "library:events": 68541,
+        "front:dispatch": 3190834
+      },
+      "outside_measured_main_seconds": 0.00402191597053352
+    },
+    {
+      "phase": "warm-2",
+      "crate": "ring",
+      "type": "lib",
+      "process_seconds": 0.018035875051282346,
+      "stages_nanoseconds": {
+        "front:init": 36416,
+        "library:plan": 27500,
+        "library:prepare": 43959,
+        "library:key": 1373791,
+        "library:locks-config": 115709,
+        "library:restore": 12074500,
+        "library:events": 57625,
+        "front:dispatch": 13720792
+      },
+      "outside_measured_main_seconds": 0.004278667051282346
+    },
+    {
+      "phase": "warm-2",
+      "crate": "webpki",
+      "type": "lib",
+      "process_seconds": 0.013743542018346488,
+      "stages_nanoseconds": {
+        "front:init": 41542,
+        "library:plan": 10750,
+        "library:prepare": 33166,
+        "library:key": 1114417,
+        "library:locks-config": 118333,
+        "library:restore": 8332209,
+        "library:events": 51708,
+        "front:dispatch": 9690333
+      },
+      "outside_measured_main_seconds": 0.004011667018346489
+    },
+    {
+      "phase": "warm-2",
+      "crate": "rustls",
+      "type": "lib",
+      "process_seconds": 0.018566290964372456,
+      "stages_nanoseconds": {
+        "front:init": 38417,
+        "library:plan": 11708,
+        "library:prepare": 34709,
+        "library:key": 1086416,
+        "library:locks-config": 120000,
+        "library:restore": 13285459,
+        "library:events": 56000,
+        "front:dispatch": 14625833
+      },
+      "outside_measured_main_seconds": 0.003902040964372456
+    },
+    {
+      "phase": "warm-2",
+      "crate": "tokio_rustls",
+      "type": "lib",
+      "process_seconds": 0.012830999970901757,
+      "stages_nanoseconds": {
+        "front:init": 45875,
+        "library:plan": 10542,
+        "library:prepare": 33708,
+        "library:key": 1176042,
+        "library:locks-config": 116042,
+        "library:restore": 7591291,
+        "library:events": 57250,
+        "front:dispatch": 9014208
+      },
+      "outside_measured_main_seconds": 0.0037709169709017575
+    },
+    {
+      "phase": "warm-2",
+      "crate": "hyper_rustls",
+      "type": "lib",
+      "process_seconds": 0.016741667001042515,
+      "stages_nanoseconds": {
+        "front:init": 47083,
+        "library:plan": 12375,
+        "library:prepare": 36458,
+        "library:key": 1141708,
+        "library:locks-config": 120292,
+        "library:restore": 11257167,
+        "library:events": 70583,
+        "front:dispatch": 12667334
+      },
+      "outside_measured_main_seconds": 0.004027250001042515
+    },
+    {
+      "phase": "warm-2",
+      "crate": "reqwest",
+      "type": "lib",
+      "process_seconds": 0.028136582986917347,
+      "stages_nanoseconds": {
+        "front:init": 44167,
+        "library:plan": 19125,
+        "library:prepare": 36292,
+        "library:key": 1159125,
+        "library:locks-config": 120208,
+        "library:restore": 22631125,
+        "library:events": 58083,
+        "front:dispatch": 24053333
+      },
+      "outside_measured_main_seconds": 0.004039082986917346
+    },
+    {
+      "phase": "warm-2",
+      "crate": "harness_adapters",
+      "type": "lib",
+      "process_seconds": 0.05248395795933902,
+      "stages_nanoseconds": {
+        "front:init": 28667,
+        "library:plan": 13292,
+        "library:prepare": 35500,
+        "library:key": 1105375,
+        "library:locks-config": 120458,
+        "library:restore": 47083084,
+        "library:events": 57750,
+        "front:dispatch": 48444666
+      },
+      "outside_measured_main_seconds": 0.004010624959339022
+    }
+  ]
+}

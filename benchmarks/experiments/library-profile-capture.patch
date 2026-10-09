@@ -1,0 +1,11 @@
+--- a/tests/rust_diagnostic.py
++++ b/tests/rust_diagnostic.py
+@@ -60,7 +60,7 @@
+     shim.chmod(0o700)
+     env = {k: v for k, v in os.environ.items() if not k.startswith(('R2_', 'KACHE_', 'NANOCOMPILE_'))
+            and k not in ('RUSTC_WRAPPER', 'RUSTC_WORKSPACE_WRAPPER')}
+-    env.update(NANOCOMPILE_DIR=str(root / 'cache'), NANOCOMPILE_TRACE='1',
++    env.update(NANOCOMPILE_PROFILE_LIBRARY='1', NANOCOMPILE_DIR=str(root / 'cache'), NANOCOMPILE_TRACE='1',
+                NANOCOMPILE_PROC_MACROS=args.proc_macros, CARGO_INCREMENTAL='0',
+                CARGO_TARGET_DIR=str(target), RUSTC_WRAPPER=str(shim))
+     if args.proc_macro_producers:

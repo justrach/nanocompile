@@ -1,0 +1,75 @@
+diff --git a/src/compiler.zig b/src/compiler.zig
+index aab3d65..8038805 100644
+--- a/src/compiler.zig
++++ b/src/compiler.zig
+@@ -641,15 +641,26 @@ fn executeProducer(ctx: *cache.Context, plan: Plan, argv: []const []const u8) !u
+     return 0;
+ }
+ 
++fn libraryPhase(ctx: *cache.Context, previous: *i96, phase: []const u8) void {
++    if (!eq(ctx.env.get("NANOCOMPILE_PROFILE_LIBRARY") orelse "", "1")) return;
++    const now = std.Io.Clock.awake.now(ctx.io).nanoseconds;
++    std.debug.print("nanocompile: profile library {s} {d} ns\n", .{ phase, now - previous.* });
++    previous.* = now;
++}
++
+ pub fn execute(ctx: *cache.Context, kind: Kind, argv: []const []const u8) !u8 {
++    var checkpoint = std.Io.Clock.awake.now(ctx.io).nanoseconds;
+     if (ctx.env.get("NANOCOMPILE_DISABLE")) |v| if (eq(v, "1")) return bypass(ctx, argv, "bypass: disabled");
+     const plan = (if (kind == .rust) rustPlan(ctx, argv) else zigPlan(ctx, argv)) catch |err|
+         return bypass(ctx, argv, try std.fmt.allocPrint(ctx.a, "bypass: {s}", .{@errorName(err)}));
+     if (plan.producer) return executeProducer(ctx, plan, argv);
++    libraryPhase(ctx, &checkpoint, "plan");
+     ctx.prepare() catch return bypass(ctx, argv, "bypass: cache unavailable");
+     const maintenance = cache.Lock.acquire(ctx, "maintenance", false) catch return bypass(ctx, argv, "bypass: cache lock unavailable");
+     defer maintenance.release();
++    libraryPhase(ctx, &checkpoint, "prepare");
+     const key = keyFor(ctx, kind, argv) catch |err| return bypass(ctx, argv, try std.fmt.allocPrint(ctx.a, "bypass: compiler identity unavailable ({s})", .{@errorName(err)}));
++    libraryPhase(ctx, &checkpoint, "key");
+     const flight = cache.Lock.acquire(ctx, key, true) catch return bypass(ctx, argv, "bypass: key lock unavailable");
+     defer flight.release();
+     // Different argument sets can still write the same output. Serialize those
+@@ -669,9 +680,12 @@ pub fn execute(ctx: *cache.Context, kind: Kind, argv: []const []const u8) !u8 {
+         const current = ctx.digest(config.path) catch return bypass(ctx, argv, "bypass: cannot read extra input declaration");
+         if (!eq(config.hash, current)) return bypass(ctx, argv, "bypass: extra input declaration changed");
+     }
++    libraryPhase(ctx, &checkpoint, "locks-config");
+     if (cache.restore(ctx, key, plan.outputs) catch false) {
++        libraryPhase(ctx, &checkpoint, "restore");
+         ctx.trace("hit");
+         ctx.event("hit");
++        libraryPhase(ctx, &checkpoint, "events");
+         return 0;
+     }
+     var before: std.ArrayList(cache.Dependency) = .empty;
+diff --git a/src/main.zig b/src/main.zig
+index 23cea01..52c32c5 100644
+--- a/src/main.zig
++++ b/src/main.zig
+@@ -34,16 +34,26 @@ const help =
+ ;
+ 
+ pub fn main(init: std.process.Init) void {
++    var checkpoint = std.Io.Clock.awake.now(init.io).nanoseconds;
+     const a = init.arena.allocator();
+     const args = init.minimal.args.toSlice(a) catch std.process.exit(1);
+     var ctx = cache.Context.init(a, init.io, init.environ_map) catch |err| {
+         std.debug.print("nanocompile: {s}\n", .{@errorName(err)});
+         std.process.exit(1);
+     };
++    if (std.mem.eql(u8, ctx.env.get("NANOCOMPILE_PROFILE_LIBRARY") orelse "", "1")) {
++        const now = std.Io.Clock.awake.now(ctx.io).nanoseconds;
++        std.debug.print("nanocompile: profile front init {d} ns\n", .{now - checkpoint});
++        checkpoint = now;
++    }
+     const code = dispatch(&ctx, args) catch |err| blk: {
+         std.debug.print("nanocompile: {s}\n", .{@errorName(err)});
+         break :blk @as(u8, 1);
+     };
++    if (std.mem.eql(u8, ctx.env.get("NANOCOMPILE_PROFILE_LIBRARY") orelse "", "1")) {
++        const now = std.Io.Clock.awake.now(ctx.io).nanoseconds;
++        std.debug.print("nanocompile: profile front dispatch {d} ns\n", .{now - checkpoint});
++    }
+     std.process.exit(code);
+ }
+ 

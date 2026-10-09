@@ -1,0 +1,1274 @@
+{
+  "method": "Same Zig executable and 64 KiB streaming reader; choose Zig Context.digest or pinned upstream C implementation. Prime both and rotate complete process runs. Internal timer includes open/stat/read/hash/close/result allocation. No mapping, memo shortcut or extra hashing threads. This is a file digest microbenchmark, not a project build comparison.",
+  "zig_version": "0.17.0",
+  "upstream_tag": "1.8.7",
+  "upstream_commit": "f3149ec5bb5449af877ba20377a11008ff499fa2",
+  "upstream_source_sha256": {
+    "blake3.c": "b118ddf7cf9e6e5ef3fded72dcb1acf9dfdc4ea923cbe4605900ad6ee9afe1af",
+    "blake3_dispatch.c": "134f21550138c0af6312925c988aeee35df287e4119e8ad1d206fccdb2238fe3",
+    "blake3_portable.c": "2bc25b0dad67b4329d0b49cfa075ab2b0d04e424addbddc4e9c389c52a192524",
+    "blake3_neon.c": "67e88d017a82df1b76d5f841e7b7215135a007486ac14c5be1407e1bca5201b0",
+    "blake3.h": "81bbb11ad1909341565dce4914cc0e5c29718eca27e6950b28f9226a91aaf8c5",
+    "blake3_impl.h": "d388dca3574602c8849805ea3c8c0a12d082ac0e428756f305e111942f099af4"
+  },
+  "binary_sha256": "3b6252c0936f92239a636668b69346a6a0f7e9908824243a2247581f246ba157",
+  "script_sha256": "a792475027dfb5fcb2784827e9d6a26809c2d038703e0cd7c54c47fae50613e2",
+  "zig_probe_sha256": "08a0c9f77bcd21027a2011159e7c5189ec72822a4015a68fcc3f43d1ad5c968e",
+  "cache_source_sha256": "b002556b2074333b52885b7771f6ee43abffd96e7d9597d0e47f663b0ca0b340",
+  "vectors_sha256": "dcb91ea8accc77e6d6e632af7cdc1a99a9f3ae78cf648da595c7d064db32f624",
+  "official_unkeyed_vectors_verified": 35,
+  "runs_per_implementation_per_file": 25,
+  "files": [
+    {
+      "path": "/private/tmp/nanocompile-library-phase-profile-state/cache/blobs/09/09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+      "bytes": 32551120,
+      "input_sha256": "7f12e283c88ee0e8176701e72bad2159b2cfcaf9c165b57e14dc0f778bfb2883",
+      "blake3": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+      "input_content_and_state_unchanged": true,
+      "samples": [
+        {
+          "implementation": "zig",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17838666,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.021304375026375055
+        },
+        {
+          "implementation": "upstream",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 15709458,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.019061458006035537
+        },
+        {
+          "implementation": "upstream",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 15723833,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.019157833012286574
+        },
+        {
+          "implementation": "zig",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17810375,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.02122479199897498
+        },
+        {
+          "implementation": "zig",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17819083,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.021303540968801826
+        },
+        {
+          "implementation": "upstream",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 15639666,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.019107291009277105
+        },
+        {
+          "implementation": "upstream",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 15654167,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.019054916978348047
+        },
+        {
+          "implementation": "zig",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17797583,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.021374250005465
+        },
+        {
+          "implementation": "zig",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17747709,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.021483541000634432
+        },
+        {
+          "implementation": "upstream",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 15617666,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.01918883400503546
+        },
+        {
+          "implementation": "upstream",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 15619083,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.01933416596148163
+        },
+        {
+          "implementation": "zig",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17741084,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.02119166700867936
+        },
+        {
+          "implementation": "zig",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17763541,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.0211901250295341
+        },
+        {
+          "implementation": "upstream",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 15568125,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.019129832973703742
+        },
+        {
+          "implementation": "upstream",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 15618166,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.01902233302826062
+        },
+        {
+          "implementation": "zig",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 18052084,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.021571208024397492
+        },
+        {
+          "implementation": "zig",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17737917,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.021539957961067557
+        },
+        {
+          "implementation": "upstream",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 15725625,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.019281458982732147
+        },
+        {
+          "implementation": "upstream",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 16014084,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.019614959019236267
+        },
+        {
+          "implementation": "zig",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 18316083,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.02242704195668921
+        },
+        {
+          "implementation": "zig",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 18946833,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.022649666003417224
+        },
+        {
+          "implementation": "upstream",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 16267708,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.020085417025256902
+        },
+        {
+          "implementation": "upstream",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 16153834,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.01988600002368912
+        },
+        {
+          "implementation": "zig",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17900417,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.02156608400400728
+        },
+        {
+          "implementation": "zig",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17784417,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.021306624985300004
+        },
+        {
+          "implementation": "upstream",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 15652458,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.01934187504230067
+        },
+        {
+          "implementation": "upstream",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 15605625,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.019180792034603655
+        },
+        {
+          "implementation": "zig",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17755916,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.021453958994243294
+        },
+        {
+          "implementation": "zig",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17805583,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.02144974999828264
+        },
+        {
+          "implementation": "upstream",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 15606584,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.019061999977566302
+        },
+        {
+          "implementation": "upstream",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 15586125,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.01915925001958385
+        },
+        {
+          "implementation": "zig",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17698708,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.021281749999616295
+        },
+        {
+          "implementation": "zig",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17761125,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.021247166965622455
+        },
+        {
+          "implementation": "upstream",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 15589125,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.019195624976418912
+        },
+        {
+          "implementation": "upstream",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 15760292,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.019330915994942188
+        },
+        {
+          "implementation": "zig",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 19488666,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.023273915983736515
+        },
+        {
+          "implementation": "zig",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 19824958,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.023824249976314604
+        },
+        {
+          "implementation": "upstream",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 16768500,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.020756583020556718
+        },
+        {
+          "implementation": "upstream",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17038791,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.020967625023331493
+        },
+        {
+          "implementation": "zig",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 19125625,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.022757917002309114
+        },
+        {
+          "implementation": "zig",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 19019875,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.02306700003100559
+        },
+        {
+          "implementation": "upstream",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 16982250,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.020909166953060776
+        },
+        {
+          "implementation": "upstream",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17569334,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.021368624991737306
+        },
+        {
+          "implementation": "zig",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 19576958,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.02351820800686255
+        },
+        {
+          "implementation": "zig",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 19587583,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.02345099998638034
+        },
+        {
+          "implementation": "upstream",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17718292,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.02165712497662753
+        },
+        {
+          "implementation": "upstream",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17361042,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.02134779200423509
+        },
+        {
+          "implementation": "zig",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 18717167,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.02249645796837285
+        },
+        {
+          "implementation": "zig",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 18581708,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.022506499954033643
+        },
+        {
+          "implementation": "upstream",
+          "hash": "09d750be1c9634636af54039161101828294dfc66925651c610932077343799d",
+          "nanoseconds": 17676167,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.021667958004400134
+        }
+      ],
+      "median_hash_ms": {
+        "zig": 17.838666,
+        "upstream": 15.723833
+      },
+      "median_process_seconds": {
+        "zig": 0.021539957961067557,
+        "upstream": 0.019330915994942188
+      }
+    },
+    {
+      "path": "/private/tmp/nanocompile-library-phase-profile-state/cache/blobs/2b/2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+      "bytes": 13162816,
+      "input_sha256": "e6ee9cf088d11a33e430e7d7a1b4ad51728444d254c1a48a180b86f0891bd065",
+      "blake3": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+      "input_content_and_state_unchanged": true,
+      "samples": [
+        {
+          "implementation": "zig",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7196541,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.01088937500026077
+        },
+        {
+          "implementation": "upstream",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 6704500,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.010186666972003877
+        },
+        {
+          "implementation": "upstream",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 6731000,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.010422917024698108
+        },
+        {
+          "implementation": "zig",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 8129958,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.011885082989465445
+        },
+        {
+          "implementation": "zig",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7881625,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.01174362498568371
+        },
+        {
+          "implementation": "upstream",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 6890042,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.010694541037082672
+        },
+        {
+          "implementation": "upstream",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 6364000,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.009948791994247586
+        },
+        {
+          "implementation": "zig",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7325500,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.011199583008419722
+        },
+        {
+          "implementation": "zig",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7683875,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.011193374986760318
+        },
+        {
+          "implementation": "upstream",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 6347959,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.00985458301147446
+        },
+        {
+          "implementation": "upstream",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 6347041,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.009714082989376038
+        },
+        {
+          "implementation": "zig",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7200750,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.01037241704761982
+        },
+        {
+          "implementation": "zig",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7297958,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.010612334008328617
+        },
+        {
+          "implementation": "upstream",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 6485916,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.009963874996174127
+        },
+        {
+          "implementation": "upstream",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 6344667,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.009898249991238117
+        },
+        {
+          "implementation": "zig",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7186417,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.010490959044545889
+        },
+        {
+          "implementation": "zig",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7196625,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.010603583010379225
+        },
+        {
+          "implementation": "upstream",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 6410084,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.009642958990298212
+        },
+        {
+          "implementation": "upstream",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 6345375,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.00976654200349003
+        },
+        {
+          "implementation": "zig",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7200583,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.01050979201681912
+        },
+        {
+          "implementation": "zig",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7206458,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.010460291989147663
+        },
+        {
+          "implementation": "upstream",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 6342792,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.009768500050995499
+        },
+        {
+          "implementation": "upstream",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 6321917,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.0099437499884516
+        },
+        {
+          "implementation": "zig",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7166750,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.01048304105643183
+        },
+        {
+          "implementation": "zig",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7207959,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.010604583017993718
+        },
+        {
+          "implementation": "upstream",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 6315250,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.009879374993033707
+        },
+        {
+          "implementation": "upstream",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 6313750,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.009660375013481826
+        },
+        {
+          "implementation": "zig",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7184917,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.010611959034577012
+        },
+        {
+          "implementation": "zig",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7182750,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.010622542002238333
+        },
+        {
+          "implementation": "upstream",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 6337667,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.00971291703172028
+        },
+        {
+          "implementation": "upstream",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 6318584,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.009621708013582975
+        },
+        {
+          "implementation": "zig",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7190209,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.010601249989122152
+        },
+        {
+          "implementation": "zig",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7179833,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.010558833018876612
+        },
+        {
+          "implementation": "upstream",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 6322459,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.009624083992093801
+        },
+        {
+          "implementation": "upstream",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 6313583,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.009631916997022927
+        },
+        {
+          "implementation": "zig",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7176917,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.01055274996906519
+        },
+        {
+          "implementation": "zig",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7182667,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.010374000004958361
+        },
+        {
+          "implementation": "upstream",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 6338834,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.009717457985971123
+        },
+        {
+          "implementation": "upstream",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 6305834,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.009648000006563962
+        },
+        {
+          "implementation": "zig",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7168833,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.01050133298849687
+        },
+        {
+          "implementation": "zig",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7214250,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.010532166983466595
+        },
+        {
+          "implementation": "upstream",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 6343292,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.009651416970882565
+        },
+        {
+          "implementation": "upstream",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 6316334,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.009668125014286488
+        },
+        {
+          "implementation": "zig",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7156625,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.010514832974877208
+        },
+        {
+          "implementation": "zig",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7177959,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.010497917013708502
+        },
+        {
+          "implementation": "upstream",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 6311167,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.009562333987560123
+        },
+        {
+          "implementation": "upstream",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 6321625,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.009667917038314044
+        },
+        {
+          "implementation": "zig",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7189583,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.01066879095742479
+        },
+        {
+          "implementation": "zig",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 7153833,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.01073816599091515
+        },
+        {
+          "implementation": "upstream",
+          "hash": "2b5787db18889bba6cecb8ba6d8dd858fa6478312159f4a265f5fdf107b775dc",
+          "nanoseconds": 6338917,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.009717584005557
+        }
+      ],
+      "median_hash_ms": {
+        "zig": 7.190209,
+        "upstream": 6.338917
+      },
+      "median_process_seconds": {
+        "zig": 0.010601249989122152,
+        "upstream": 0.009717457985971123
+      }
+    },
+    {
+      "path": "/private/tmp/nanocompile-library-phase-profile-state/cache/blobs/3c/3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+      "bytes": 10280952,
+      "input_sha256": "2982a61fffc4b1ecd427fa75d7401c534390fe5f6eee93a6b3191d457dc0eee4",
+      "blake3": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+      "input_content_and_state_unchanged": true,
+      "samples": [
+        {
+          "implementation": "zig",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5641583,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.009156082989647985
+        },
+        {
+          "implementation": "upstream",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 4955000,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.008670792041812092
+        },
+        {
+          "implementation": "upstream",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 4944541,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.008222292002756149
+        },
+        {
+          "implementation": "zig",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5833625,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.009324375016149133
+        },
+        {
+          "implementation": "zig",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5895541,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.009861833008471876
+        },
+        {
+          "implementation": "upstream",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5456084,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.00901312503265217
+        },
+        {
+          "implementation": "upstream",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5171917,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.00891512498492375
+        },
+        {
+          "implementation": "zig",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 6248458,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.009855791984591633
+        },
+        {
+          "implementation": "zig",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5711208,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.009807416994590312
+        },
+        {
+          "implementation": "upstream",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5194042,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.008869250013958663
+        },
+        {
+          "implementation": "upstream",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5020750,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.008511750027537346
+        },
+        {
+          "implementation": "zig",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5987500,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.00941624998813495
+        },
+        {
+          "implementation": "zig",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5632334,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.009003957966342568
+        },
+        {
+          "implementation": "upstream",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 4963166,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.008342041983269155
+        },
+        {
+          "implementation": "upstream",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 4966792,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.008270249993074685
+        },
+        {
+          "implementation": "zig",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5611292,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.008929624978918582
+        },
+        {
+          "implementation": "zig",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5608250,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.008981083985418081
+        },
+        {
+          "implementation": "upstream",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 4969208,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.00843683397397399
+        },
+        {
+          "implementation": "upstream",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 4956042,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.008337125007528812
+        },
+        {
+          "implementation": "zig",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5628541,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.008968750014901161
+        },
+        {
+          "implementation": "zig",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5612583,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.008851000049617141
+        },
+        {
+          "implementation": "upstream",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 4942083,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.008301958034280688
+        },
+        {
+          "implementation": "upstream",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 4948208,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.008092375006526709
+        },
+        {
+          "implementation": "zig",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5608667,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.00893629202619195
+        },
+        {
+          "implementation": "zig",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5615167,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.00882145797368139
+        },
+        {
+          "implementation": "upstream",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 4941125,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.008168915985152125
+        },
+        {
+          "implementation": "upstream",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 4938791,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.008208250044845045
+        },
+        {
+          "implementation": "zig",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5602750,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.008854874991811812
+        },
+        {
+          "implementation": "zig",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5616625,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.008963958011008799
+        },
+        {
+          "implementation": "upstream",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 4946000,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.00831608398584649
+        },
+        {
+          "implementation": "upstream",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 4944458,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.008246666984632611
+        },
+        {
+          "implementation": "zig",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5605083,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.00890616700053215
+        },
+        {
+          "implementation": "zig",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5624459,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.008871750032994896
+        },
+        {
+          "implementation": "upstream",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 4941583,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.008253208012320101
+        },
+        {
+          "implementation": "upstream",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 4942584,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.00823941599810496
+        },
+        {
+          "implementation": "zig",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5615583,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.008947167021688074
+        },
+        {
+          "implementation": "zig",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5598833,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.00888937502168119
+        },
+        {
+          "implementation": "upstream",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 4957958,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.008105791988782585
+        },
+        {
+          "implementation": "upstream",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 4945875,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.00833400001283735
+        },
+        {
+          "implementation": "zig",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5594334,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.009183333022519946
+        },
+        {
+          "implementation": "zig",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5635958,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.009049625019542873
+        },
+        {
+          "implementation": "upstream",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 4958958,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.008343624998815358
+        },
+        {
+          "implementation": "upstream",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 4950750,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.008251207997091115
+        },
+        {
+          "implementation": "zig",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5610542,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.008988874964416027
+        },
+        {
+          "implementation": "zig",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5591208,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.008960125036537647
+        },
+        {
+          "implementation": "upstream",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 4937708,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.008215667039621621
+        },
+        {
+          "implementation": "upstream",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 4940042,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.008269709011074156
+        },
+        {
+          "implementation": "zig",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5600250,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.008790958032477647
+        },
+        {
+          "implementation": "zig",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 5628083,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.008848167024552822
+        },
+        {
+          "implementation": "upstream",
+          "hash": "3c27ad7fd371810613baf4143e44ca162947ff281a3c03af8a15e69c8ba31bff",
+          "nanoseconds": 4955083,
+          "upstream_version": "1.8.7",
+          "upstream_simd_degree": 4,
+          "process_seconds": 0.008292166981846094
+        }
+      ],
+      "median_hash_ms": {
+        "zig": 5.615583,
+        "upstream": 4.95075
+      },
+      "median_process_seconds": {
+        "zig": 0.008963958011008799,
+        "upstream": 0.008292166981846094
+      }
+    }
+  ]
+}

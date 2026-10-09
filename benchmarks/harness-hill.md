@@ -1117,3 +1117,21 @@ Candidate unit tests pass, together with
 and [executable restore/invalidation/failure](native-four-executable-regression.json)
 checks. The accepted production source and measured executable were restored;
 this experiment adds no new project speedup or cold-build claim.
+
+## Ordinary hit and streaming digest investigation
+
+The [ordinary library phase capture](../docs/library-phase-profile.md) records
+272 warm hits. Restore work takes 4.246 ms median, compilation keys 1.241 ms,
+and the complete dispatch inside main 5.740 ms. Complete subprocess observation
+takes 9.793 ms median; its outside-main portion includes launch, runtime,
+exit and Python observation costs. Separate launch controls prevent treating
+that entire interval as Nano initialization or predicted daemon savings.
+
+The final adapter crate spends about 47–49 ms restoring. A prior separate
+restore capture attributes its largest stages to full input and output hashing.
+A [pinned upstream BLAKE3 streaming probe](../docs/blake3-stream-investigation.md)
+reduces digest medians by about 12% on three real cached blobs. Both modes use
+the same 64 KiB reader and no extra threads, pass all 35 official unkeyed
+vectors, and agree on every real digest. This is an isolated candidate signal,
+not a project gain. Production retains the accepted Zig digest; platform and
+real-project validation remain required before considering a backend change.
