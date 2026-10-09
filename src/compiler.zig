@@ -352,7 +352,10 @@ fn keyFor(ctx: *cache.Context, kind: Kind, argv: []const []const u8) ![]const u8
     cache.field(&hash, "nanocompile-v5");
     cache.field(&hash, @tagName(kind));
     cache.field(&hash, ctx.cwd);
-    const host = try std.zig.system.resolveTargetQuery(ctx.io, .{});
+    const host = std.zig.system.resolveTargetQuery(ctx.io, .{}) catch |err| {
+        ctx.trace(try std.fmt.allocPrint(ctx.a, "host detection failed ({s})", .{@errorName(err)}));
+        return err;
+    };
     cache.field(&hash, @tagName(host.cpu.arch));
     cache.field(&hash, host.cpu.model.name);
     cache.field(&hash, std.mem.asBytes(&host.cpu.features.ints));

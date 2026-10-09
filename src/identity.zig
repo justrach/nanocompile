@@ -47,7 +47,10 @@ fn add(ctx: *cache.Context, stamps: *std.ArrayList(Stamp), path: []const u8) !vo
 
 fn tree(ctx: *cache.Context, stamps: *std.ArrayList(Stamp), root: []const u8) !void {
     try add(ctx, stamps, root);
-    var dir = try Dir.cwd().openDir(ctx.io, root, .{ .iterate = true });
+    var dir = Dir.cwd().openDir(ctx.io, root, .{ .iterate = true }) catch |err| {
+        ctx.trace(try std.fmt.allocPrint(ctx.a, "toolchain resource unavailable: {s} ({s})", .{ root, @errorName(err) }));
+        return err;
+    };
     defer dir.close(ctx.io);
     var walker = try dir.walk(ctx.a);
     defer walker.deinit();
@@ -99,7 +102,10 @@ fn rustResources(ctx: *cache.Context, stamps: *std.ArrayList(Stamp), root: []con
 }
 
 pub fn fingerprint(ctx: *cache.Context, is_zig: bool, executable: []const u8) ![]const u8 {
-    const real = try resolveExecutable(ctx, executable);
+    const real = resolveExecutable(ctx, executable) catch |err| {
+        ctx.trace(try std.fmt.allocPrint(ctx.a, "cannot resolve compiler: {s} ({s})", .{ executable, @errorName(err) }));
+        return err;
+    };
     {
         const file = try Dir.cwd().openFile(ctx.io, real, .{});
         defer file.close(ctx.io);
@@ -184,7 +190,10 @@ pub fn fingerprint(ctx: *cache.Context, is_zig: bool, executable: []const u8) ![
         const sysroot = std.mem.trim(u8, result.stdout, "\r\n");
         if (!std.fs.path.isAbsolute(sysroot)) return error.InvalidSysroot;
         try add(ctx, &stamps, try std.fs.path.join(ctx.a, &.{ sysroot, "bin", "rustc" }));
-        try rustResources(ctx, &stamps, try std.fs.path.join(ctx.a, &.{ sysroot, "lib" }));
+        rustResources(ctx, &stamps, try std.fs.path.join(ctx.a, &.{ sysroot, "lib" })) catch |err| {
+            ctx.trace(try std.fmt.allocPrint(ctx.a, "Rust resources unavailable: {s} ({s})", .{ sysroot, @errorName(err) }));
+            return err;
+        };
     }
     h = cache.Hash.init(.{});
     cache.field(&h, version.stdout);
@@ -197,7 +206,13 @@ pub fn fingerprint(ctx: *cache.Context, is_zig: bool, executable: []const u8) ![
     }.less);
     for (stamps.items) |s| {
         cache.field(&h, s.path);
-        if (s.exists and s.kind == .file) cache.field(&h, try ctx.digest(s.path));
+        if (s.exists and s.kind == .file) {
+            const digest = ctx.digest(s.path) catch |err| {
+                ctx.trace(try std.fmt.allocPrint(ctx.a, "toolchain file unavailable: {s} ({s})", .{ s.path, @errorName(err) }));
+                return err;
+            };
+            cache.field(&h, digest);
+        }
     }
     // A compiler update concurrent with fingerprinting is not a valid identity.
     for (stamps.items) |s| if (!equal(s, try stamp(ctx, s.path))) return error.ToolchainChanged;

@@ -21,7 +21,7 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           repository: justrach/harness
-          ref: 32b41cb0bff55e3c9cbfab3012acec2b179ad199
+          ref: 20c4019201e4b1eee5e04cfbb8dc7bda941b11b9
           path: workload
       - name: Install verified Zig and Rust
         run: |
