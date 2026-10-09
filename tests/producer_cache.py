@@ -14,6 +14,7 @@ def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument('binary', type=Path)
     p.add_argument('--output', type=Path)
+    p.add_argument('--cargo-flags', action='store_true', help='exercise Cargo prefer-dynamic and strip=symbols')
     args = p.parse_args()
     binary = args.binary.resolve()
     if sys.platform != 'darwin':
@@ -52,6 +53,8 @@ def main():
                 '--crate-type', 'proc-macro', '--emit=dep-info,link', '--out-dir', 'out',
                 '-C', 'opt-level=3', '-L', 'native=native', '--extern', 'proc_macro',
                 '--error-format=json', '--json=artifacts']
+        if args.cargo_flags:
+            rust += ['-C', 'prefer-dynamic', '-C', 'strip=symbols']
         dylib = root / 'out' / 'libcache_macro.dylib'
         dep_info = root / 'out' / 'cache_macro.d'
         def hashes():
@@ -123,7 +126,7 @@ def main():
         assert b'hit: proc-macro producer' not in failed.stderr
         if args.output:
             args.output.parent.mkdir(parents=True, exist_ok=True)
-            args.output.write_text(json.dumps({'platform': sys.platform,
+            args.output.write_text(json.dumps({'platform': sys.platform, 'cargo_flags': args.cargo_flags,
                 'binary_sha256': hashlib.sha256(binary.read_bytes()).hexdigest(),
                 'probe_sha256': hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
                 'direct_cold_warm_artifacts_equal': True, 'diagnostics_replayed': True,

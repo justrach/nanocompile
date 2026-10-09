@@ -114,7 +114,7 @@ fn rustPlan(ctx: *cache.Context, argv: []const []const u8) !Plan {
             const split = std.mem.indexOfScalar(u8, v, '=') orelse v.len;
             const key = v[0..split];
             if (eq(key, "debuginfo")) debug_info = v[@min(split + 1, v.len)..];
-            for ([_][]const u8{ "lto", "linker-plugin-lto", "prefer-dynamic", "strip", "relocation-model" }) |unsupported| {
+            for ([_][]const u8{ "lto", "linker-plugin-lto", "relocation-model" }) |unsupported| {
                 if (eq(key, unsupported)) producer_unsafe_codegen = true;
             }
             if (eq(key, "extra-filename")) {

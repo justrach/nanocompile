@@ -204,8 +204,10 @@ The compiler wrapper now has an opt-in producer path for Apple's default driver,
 native host builds, zero debug information and supported ordinary codegen flags.
 It uses a distinct producer key containing the ordinary Rust key, selected
 native-tool fingerprint, installed Rust file-state signature and full observer executable digest. Existing library
-keys are unchanged. Cross targets, custom linker flags, LTO, dynamic preference,
-strip/relocation overrides and unusual escaped output paths still pass through.
+keys are unchanged. Cargo `prefer-dynamic` and `strip=symbols` are covered by
+real direct/cold/restored artifact equality and macro execution tests. Cross
+targets, custom linker flags, LTO, relocation overrides and unusual escaped
+output paths still pass through.
 Linux integration remains unfinished.
 
 On a miss it snapshots known source/extern/native inputs, compiles into the
@@ -306,3 +308,8 @@ The first [Harness comparison](../benchmarks/harness-hill.md#experimental-apple-
 passes all library and macro dylib artifact checks but adds no producer hits: all
 ten Cargo macro invocations use unsupported `prefer-dynamic` and `strip=symbols`
 flags and therefore run directly. It verifies fallback, not producer restore on Harness.
+
+The subsequent [Cargo flag iteration](../benchmarks/harness-hill.md#cargo-macro-flag-coverage)
+supports those two flags, stores all ten Harness producers, and records 142 hits
+per warm build with matching library and macro dylib hashes. Default behavior
+and the remaining platform/debug/linker gates are unchanged.

@@ -473,3 +473,30 @@ actual Cargo flags is the next coverage step.
 Reproduce with `tests/project_comparison.py --proc-macros reported
 --proc-macro-producers`, retaining the same isolated-state and runs/jobs options
 shown above.
+
+## Cargo macro flag coverage
+
+The next iteration admits Apple's native, zero-debug producers with Cargo's
+`prefer-dynamic` and `strip=symbols` flags. The real macro fixture verifies
+direct/cold/restored bytes, executable macro behavior, source and native-input
+invalidation, corruption repair and default/debug fallback with these flags.
+[Fixture results](producer-cache-cargo-flags-macos.json) record the measured binary.
+
+[Harness results](harness-hill-producer-cargo-flags.json) use the same twelve-build
+comparison protocol, Rust 1.97.1, four jobs, reported-input consumer policy and
+local checkout as the preceding run. All ten producers were stored. Every warm
+build recorded 142 hits, up from 132. All 135 library and ten macro dylib hashes
+matched direct Cargo and each wrapper's cold artifacts. Tracked source files
+remained unchanged.
+
+| Implementation | Warm median | Cold build |
+| --- | ---: | ---: |
+| Direct Cargo | 22.857 s | 25.343 s prime |
+| nanocompile | 4.231 s | 40.536 s |
+| kache daemon | 2.009 s | 26.822 s |
+
+The observed nanocompile median is 11.0% below the previous 4.752 s run.
+This is a comparison across separate runs, not a randomized producer-on/off
+experiment. It establishes real producer coverage and successful restore on
+this workload; kache remains roughly twice as fast for warm builds. Linux
+producer integration and broader debug/link configurations remain unfinished.

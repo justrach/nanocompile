@@ -157,8 +157,9 @@ Mac producer caching is available with `NANOCOMPILE_PROC_MACRO_PRODUCERS=1`.
 It currently supports Apple's default tools, native builds with debug information
 disabled, and a restricted set of codegen flags. Linux, cross targets and broader
 linker/debug configurations still run directly. The [requirements and limits](docs/proc-macro-producers.md)
-describe the tested restore/invalidation path. The first [Harness comparison](benchmarks/harness-hill.md#experimental-apple-proc-macro-producers)
-passes artifact equality but adds no producer hits or demonstrated speedup. This flag does not opt macro consumers into reported-input mode.
+describe the tested restore/invalidation path. The latest [Harness comparison](benchmarks/harness-hill.md#cargo-macro-flag-coverage)
+restores all ten macro producers and records 142 total hits: **4.23 s** warm
+versus **22.86 s** direct and **2.01 s** kache. This flag does not opt macro consumers into reported-input mode.
 
 ```sh
 NANOCOMPILE_PROC_MACRO_PRODUCERS=1 RUSTC_WRAPPER="$nano_wrapper" cargo build --release

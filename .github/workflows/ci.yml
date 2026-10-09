@@ -25,6 +25,7 @@ jobs:
           python3 tests/link_observer.py zig-out/bin/nanocompile
           python3 tests/native_identity.py zig-out/bin/nanocompile --output bench-results/native-identity.json
           python3 tests/producer_cache.py zig-out/bin/nanocompile --output bench-results/producer-cache.json
+          python3 tests/producer_cache.py zig-out/bin/nanocompile --cargo-flags --output bench-results/producer-cache-cargo-flags.json
           zig build-exe -O ReleaseFast -lc --dep link_dependencies -Mroot=tools/link_report.zig -Mlink_dependencies=src/link_dependencies.zig -femit-bin="$RUNNER_TEMP/link-report"
           python3 tests/producer_link_probe.py --state "$RUNNER_TEMP/producer, link probe" --output bench-results/producer-link-probe.json --decoder "$RUNNER_TEMP/link-report" --observer zig-out/bin/nanocompile
           python3 tests/producer_placement.py --output bench-results/producer-placement.json --observer zig-out/bin/nanocompile
