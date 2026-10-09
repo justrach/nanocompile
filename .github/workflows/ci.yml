@@ -1,0 +1,33 @@
+name: Compile and benchmark
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  runtime:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, macos-15]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - name: Install verified Zig 0.17.0
+        run: python3 tools/install_zig.py "$RUNNER_TEMP/zig"
+      - name: Rust toolchain
+        run: rustup toolchain install 1.97.1 --profile minimal && rustup default 1.97.1
+      - name: Build and real compiler tests
+        run: |
+          zig build -Doptimize=ReleaseFast
+          zig build test
+          zig build integration -Doptimize=ReleaseFast
+      - name: Benchmark complete compiler invocations
+        run: python3 tests/benchmark.py zig-out/bin/nanocompile --runs 9 --output bench-results/runner.json
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: benchmark-${{ matrix.os }}
+          path: bench-results/

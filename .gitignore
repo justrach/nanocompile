@@ -1,0 +1,9 @@
+.zig-cache/
+zig-out/
+codedb.snapshot
+bench-results/
+__pycache__/
+.env
+.env.*
+*credentials*.json
+*r2-config*.json

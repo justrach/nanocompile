@@ -1,0 +1,11 @@
+nanocompile
+An original Zig implementation of a local Rust and Zig compiler cache.
+
+Architectural inspiration: kunobi-ninja/kache
+https://github.com/kunobi-ninja/kache
+Reference commit: 943dd2b0bbbf28958623eba689e7ad71bf8888e5
+Adapted concepts: content-addressed artifact deduplication, copy-on-write
+materialization, conservative compiler eligibility, and single-flight locking.
+No Rust implementation source was copied.
+
+Licensed under the Apache License, Version 2.0.

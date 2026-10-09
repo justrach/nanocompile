@@ -1,0 +1,208 @@
+//! Toolchains are fingerprinted by content once. Their identity is memoized
+//! behind inode/size/mtime/ctime checks and directory membership checks.
+//! Source dependencies and stored outputs never use this metadata shortcut.
+const std = @import("std");
+const cache = @import("cache.zig");
+const Dir = std.Io.Dir;
+const Stamp = struct {
+    path: []const u8,
+    exists: bool,
+    inode: u64 = 0,
+    size: u64 = 0,
+    mtime: i96 = 0,
+    ctime: i96 = 0,
+    kind: std.Io.File.Kind = .unknown,
+};
+const Memo = struct { schema: u32 = 3, hash: []const u8, stamps: []const Stamp };
+
+fn stamp(ctx: *cache.Context, path: []const u8) !Stamp {
+    const st = Dir.cwd().statFile(ctx.io, path, .{}) catch |err| switch (err) {
+        error.FileNotFound => return .{ .path = path, .exists = false },
+        else => return err,
+    };
+    return .{ .path = path, .exists = true, .inode = @intCast(st.inode), .size = st.size, .mtime = st.mtime.nanoseconds, .ctime = st.ctime.nanoseconds, .kind = st.kind };
+}
+
+fn equal(a: Stamp, b: Stamp) bool {
+    return a.exists == b.exists and a.inode == b.inode and a.size == b.size and a.mtime == b.mtime and a.ctime == b.ctime and a.kind == b.kind;
+}
+
+fn resolveExecutable(ctx: *cache.Context, arg: []const u8) ![]const u8 {
+    if (std.mem.indexOfScalar(u8, arg, '/') != null)
+        return Dir.cwd().realPathFileAlloc(ctx.io, arg, ctx.a);
+    var paths = std.mem.splitScalar(u8, ctx.env.get("PATH") orelse "", ':');
+    while (paths.next()) |dir| {
+        const candidate = try std.fs.path.join(ctx.a, &.{ if (dir.len == 0) "." else dir, arg });
+        const real = Dir.cwd().realPathFileAlloc(ctx.io, candidate, ctx.a) catch continue;
+        const st = try Dir.cwd().statFile(ctx.io, real, .{});
+        if (st.kind == .file and st.permissions.toMode() & 0o111 != 0) return real;
+    }
+    return error.CompilerNotFound;
+}
+
+fn add(ctx: *cache.Context, stamps: *std.ArrayList(Stamp), path: []const u8) !void {
+    for (stamps.items) |s| if (std.mem.eql(u8, s.path, path)) return;
+    try stamps.append(ctx.a, try stamp(ctx, path));
+}
+
+fn tree(ctx: *cache.Context, stamps: *std.ArrayList(Stamp), root: []const u8) !void {
+    try add(ctx, stamps, root);
+    var dir = try Dir.cwd().openDir(ctx.io, root, .{ .iterate = true });
+    defer dir.close(ctx.io);
+    var walker = try dir.walk(ctx.a);
+    defer walker.deinit();
+    while (try walker.next(ctx.io)) |entry| {
+        if (entry.kind != .file and entry.kind != .directory and entry.kind != .sym_link) continue;
+        try add(ctx, stamps, try std.fs.path.join(ctx.a, &.{ root, entry.path }));
+        if (entry.kind == .sym_link) {
+            const path = try std.fs.path.join(ctx.a, &.{ root, entry.path });
+            const current = try stamp(ctx, path);
+            // Do not silently omit inputs inside linked resource directories.
+            if (current.kind == .directory) return error.LinkedToolchainDirectory;
+        }
+    }
+}
+
+fn readMemo(ctx: *cache.Context, path: []const u8, minimum_stamps: usize) ?[]const u8 {
+    const bytes = ctx.read(path) catch return null;
+    const payload = cache.unseal(ctx, bytes) catch return null;
+    const parsed = std.json.parseFromSlice(Memo, ctx.a, payload, .{ .allocate = .alloc_always }) catch return null;
+    const memo = parsed.value;
+    if (memo.schema != 3 or !cache.validHash(memo.hash) or memo.stamps.len < minimum_stamps) return null;
+    for (memo.stamps) |s| {
+        const current = stamp(ctx, s.path) catch return null;
+        if (!equal(current, s)) return null;
+    }
+    return memo.hash;
+}
+
+fn rustResources(ctx: *cache.Context, stamps: *std.ArrayList(Stamp), root: []const u8) !void {
+    try add(ctx, stamps, root);
+    var dir = try Dir.cwd().openDir(ctx.io, root, .{ .iterate = true });
+    defer dir.close(ctx.io);
+    var iterator = dir.iterate();
+    while (try iterator.next(ctx.io)) |entry| {
+        const path = try std.fs.path.join(ctx.a, &.{ root, entry.name });
+        if (entry.kind == .file or entry.kind == .sym_link) try add(ctx, stamps, path);
+    }
+    const rustlib = try std.fs.path.join(ctx.a, &.{ root, "rustlib" });
+    try add(ctx, stamps, rustlib);
+    var targets = try Dir.cwd().openDir(ctx.io, rustlib, .{ .iterate = true });
+    defer targets.close(ctx.io);
+    iterator = targets.iterate();
+    while (try iterator.next(ctx.io)) |entry| {
+        // src is used by build-std, which requires unsupported unstable flags.
+        // etc contains debugger helpers, not ordinary rustc compilation inputs.
+        if (entry.kind != .directory or std.mem.eql(u8, entry.name, "src") or std.mem.eql(u8, entry.name, "etc")) continue;
+        try tree(ctx, stamps, try std.fs.path.join(ctx.a, &.{ rustlib, entry.name }));
+    }
+}
+
+pub fn fingerprint(ctx: *cache.Context, is_zig: bool, executable: []const u8) ![]const u8 {
+    const real = try resolveExecutable(ctx, executable);
+    {
+        const file = try Dir.cwd().openFile(ctx.io, real, .{});
+        defer file.close(ctx.io);
+        var buffer: [4]u8 = undefined;
+        var reader = file.reader(ctx.io, &.{});
+        try reader.interface.readSliceAll(&buffer);
+        const native_binary = std.mem.eql(u8, &buffer, "\x7fELF") or std.mem.eql(u8, &buffer, "\xcf\xfa\xed\xfe") or std.mem.eql(u8, &buffer, "\xce\xfa\xed\xfe") or std.mem.eql(u8, &buffer, "\xca\xfe\xba\xbe");
+        if (!native_binary) return error.UnsupportedCompilerScript;
+    }
+    var selectors: std.ArrayList(Stamp) = .empty;
+    try add(ctx, &selectors, real);
+    // rustup's selection observes ancestor override files and global settings.
+    // Missing override files are recorded too: adding one invalidates the memo.
+    if (!is_zig) {
+        const rustup = ctx.env.get("RUSTUP_HOME") orelse try std.fs.path.join(ctx.a, &.{ ctx.env.get("HOME") orelse "", ".rustup" });
+        try add(ctx, &selectors, try std.fs.path.join(ctx.a, &.{ rustup, "settings.toml" }));
+        try add(ctx, &selectors, try std.fs.path.join(ctx.a, &.{ rustup, "toolchains" }));
+        var dir: ?[]const u8 = ctx.cwd;
+        while (dir) |d| {
+            try add(ctx, &selectors, try std.fs.path.join(ctx.a, &.{ d, "rust-toolchain" }));
+            try add(ctx, &selectors, try std.fs.path.join(ctx.a, &.{ d, "rust-toolchain.toml" }));
+            dir = std.fs.path.dirname(d);
+        }
+    }
+    var h = cache.Hash.init(.{});
+    cache.field(&h, "toolchain-memo-v4");
+    cache.field(&h, real);
+    cache.field(&h, if (is_zig) "zig" else "rust");
+    // Compilation keys include the entire environment. This memo includes
+    // only toolchain-selection variables, so Cargo's per-crate package values
+    // do not force another full toolchain content hash for every dependency.
+    const keys = try ctx.a.dupe([]const u8, ctx.env.keys());
+    std.mem.sort([]const u8, keys, {}, struct {
+        fn less(_: void, a: []const u8, b: []const u8) bool {
+            return std.mem.order(u8, a, b) == .lt;
+        }
+    }.less);
+    for (keys) |key| {
+        const selector = std.mem.startsWith(u8, key, "RUSTUP_") or std.mem.startsWith(u8, key, "ZIG_") or std.mem.startsWith(u8, key, "DYLD_") or std.mem.startsWith(u8, key, "LD_") or std.mem.eql(u8, key, "HOME") or std.mem.eql(u8, key, "PATH") or std.mem.eql(u8, key, "SDKROOT");
+        if (!selector) continue;
+        cache.field(&h, key);
+        cache.field(&h, ctx.env.get(key).?);
+    }
+    for (selectors.items) |s| cache.field(&h, s.path);
+    const key = try cache.finish(ctx.a, &h);
+    try Dir.cwd().createDirPath(ctx.io, try ctx.path(&.{"toolchains"}));
+    const lock_name = try std.fmt.allocPrint(ctx.a, "toolchain-{s}", .{key});
+    const path = try ctx.path(&.{ "toolchains", key });
+    {
+        const shared = try cache.Lock.acquire(ctx, lock_name, false);
+        defer shared.release();
+        if (readMemo(ctx, path, selectors.items.len)) |hash| return hash;
+    }
+    const lock = try cache.Lock.acquire(ctx, lock_name, true);
+    defer lock.release();
+    if (readMemo(ctx, path, selectors.items.len)) |hash| return hash;
+    const version = try std.process.run(ctx.a, ctx.io, .{ .argv = &.{ executable, if (is_zig) "version" else "-vV" }, .environ_map = ctx.env });
+    switch (version.term) {
+        .exited => |code| if (code != 0) return error.CompilerIdentityFailed,
+        else => return error.CompilerIdentityFailed,
+    }
+    var stamps: std.ArrayList(Stamp) = .empty;
+    try stamps.appendSlice(ctx.a, selectors.items);
+    if (is_zig) {
+        const result = try std.process.run(ctx.a, ctx.io, .{ .argv = &.{ executable, "env" }, .environ_map = ctx.env });
+        // Zig 0.17's `zig env` uses ZON; deserialize its public lib_dir field.
+        const Env = struct { lib_dir: []const u8 };
+        var diagnostics: std.zon.parse.Diagnostics = undefined;
+        const parsed = try std.zon.parse.fromSlice(Env, .{ .gpa = ctx.a, .arena = ctx.a, .source = try ctx.a.dupeSentinel(u8, result.stdout, 0), .diagnostics = &diagnostics, .ignore_unknown_fields = true });
+        try add(ctx, &stamps, parsed.lib_dir);
+        // Eligible Zig invocations contain no C/C++ source, @cImport, libc
+        // linking, or custom SDK options. Fingerprint their Zig resources,
+        // rather than statting 19,000 unrelated platform headers on every hit.
+        for ([_][]const u8{ "std", "compiler", "compiler_rt" }) |sub|
+            try tree(ctx, &stamps, try std.fs.path.join(ctx.a, &.{ parsed.lib_dir, sub }));
+        for ([_][]const u8{ "compiler_rt.zig", "ubsan_rt.zig" }) |sub|
+            try add(ctx, &stamps, try std.fs.path.join(ctx.a, &.{ parsed.lib_dir, sub }));
+        // Zig supplies Darwin's implicit libSystem link stubs itself.
+        try tree(ctx, &stamps, try std.fs.path.join(ctx.a, &.{ parsed.lib_dir, "libc", "darwin" }));
+    } else {
+        const result = try std.process.run(ctx.a, ctx.io, .{ .argv = &.{ executable, "--print", "sysroot" }, .environ_map = ctx.env });
+        const sysroot = std.mem.trim(u8, result.stdout, "\r\n");
+        if (!std.fs.path.isAbsolute(sysroot)) return error.InvalidSysroot;
+        try add(ctx, &stamps, try std.fs.path.join(ctx.a, &.{ sysroot, "bin", "rustc" }));
+        try rustResources(ctx, &stamps, try std.fs.path.join(ctx.a, &.{ sysroot, "lib" }));
+    }
+    h = cache.Hash.init(.{});
+    cache.field(&h, version.stdout);
+    cache.field(&h, version.stderr);
+    // Stable sorting makes the content identity independent of enumeration order.
+    std.mem.sort(Stamp, stamps.items, {}, struct {
+        fn less(_: void, a: Stamp, b: Stamp) bool {
+            return std.mem.order(u8, a.path, b.path) == .lt;
+        }
+    }.less);
+    for (stamps.items) |s| {
+        cache.field(&h, s.path);
+        if (s.exists and s.kind == .file) cache.field(&h, try ctx.digest(s.path));
+    }
+    // A compiler update concurrent with fingerprinting is not a valid identity.
+    for (stamps.items) |s| if (!equal(s, try stamp(ctx, s.path))) return error.ToolchainChanged;
+    const hash = try cache.finish(ctx.a, &h);
+    const bytes = try std.json.Stringify.valueAlloc(ctx.a, Memo{ .hash = hash, .stamps = stamps.items }, .{});
+    try ctx.atomic(path, try cache.seal(ctx, bytes));
+    return hash;
+}
