@@ -1,0 +1,17 @@
+{
+  "scope": "Small debug fixture only; motivates replay-disabled baseline, not permission to ignore arbitrary artifact differences.",
+  "compiler_version": "Apple clang version 21.0.0 (clang-2100.3.34.2)\nTarget: arm64-apple-darwin27.0.0\nThread model: posix\nInstalledDir: /Library/Developer/CommandLineTools/usr/bin\n",
+  "compiler_sha256": "1590ac950a3d627817d09ade5cb60b2115f17a72182a3141e010b4bcc482a0c9",
+  "script_sha256": "7ec8ec8567a9e1f2d9764727128bc481780fbdabfa347b43d2d753207bb4f234",
+  "object_sha256": {
+    "normal": "5028c295476d4c371abff0b49a429921923585f40b772e4b59dd0b7d73b7a1b7",
+    "scanner": "358c831407026b9b3d9916a3cec2d70e1e9bda9453c354bf72d65e4f415a8806"
+  },
+  "debug_stripped_object_sha256": {
+    "normal": "30be3bf7a3af538f544aac0cfc5b83141e76e48da21163bc085de0aa449d4a38",
+    "scanner": "30be3bf7a3af538f544aac0cfc5b83141e76e48da21163bc085de0aa449d4a38"
+  },
+  "normal_has_compile_dir_scanner_omits_it": true,
+  "unmodified_objects_differ": true,
+  "debug_stripped_objects_equal": true
+}

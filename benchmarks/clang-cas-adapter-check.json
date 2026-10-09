@@ -1,0 +1,74 @@
+{
+  "scope": "Experimental Zig adapter fixtures; no production support or Cargo speedup claim.",
+  "adapter_sha256": {
+    "baseline": "a117690cf9b74a0482094c0cf65c7d39a1ce75f24db93c53f9bd024ee8c6be96",
+    "candidate": "28eee1b6ccd1661e671b49a6a2e2b361c667ca00c10b6f9917e00c0cd5509b64"
+  },
+  "compiler": "/Library/Developer/CommandLineTools/usr/bin/clang",
+  "compiler_sha256": "1590ac950a3d627817d09ade5cb60b2115f17a72182a3141e010b4bcc482a0c9",
+  "compiler_version": "Apple clang version 21.0.0 (clang-2100.3.34.2)\nTarget: arm64-apple-darwin27.0.0\nThread model: posix\nInstalledDir: /Library/Developer/CommandLineTools/usr/bin\n",
+  "script_sha256": "ee137ec94ac27b3b41f8f21c07c5d4a16f4d1989753fae4b099e9e162bbad5c9",
+  "cache_flags": [
+    "-fdepscan=inline",
+    "-Xclang",
+    "-fcas-path",
+    "-Xclang",
+    "<private CAS>",
+    "-Xclang",
+    "-fcache-compile-job",
+    "-Rcompile-job-cache"
+  ],
+  "checks": [
+    {
+      "source_kind": ".c",
+      "cold_miss": true,
+      "warm_hit": true,
+      "replay_disabled_cold_warm_object_bytes_equal": true
+    },
+    {
+      "source_kind": ".S",
+      "cold_miss": true,
+      "warm_hit": true,
+      "replay_disabled_cold_warm_object_bytes_equal": true
+    },
+    {
+      "preserved_mtime_same_size_header_change_causes_miss": true,
+      "changed_object_matches_replay_disabled_compile": true
+    },
+    {
+      "already_dirty_unflushed_mmap_header_change_detected": true,
+      "checked_metadata_unchanged_on_second_write": true,
+      "changed_object_matches_replay_disabled_compile": true
+    },
+    {
+      "version_probe_and_preprocessing_passthrough": true
+    },
+    {
+      "stdin_compile_passthrough_preserves_input_and_object_bytes": true
+    },
+    {
+      "failed_compilation_returns_failure_without_object": true
+    }
+  ],
+  "provenance": {
+    "core_revision": "cadc880",
+    "zig_version": "0.17.0",
+    "source_sha256": {
+      "benchmarks/experiments/clang_cas_adapter.zig": "a328f8164ddaae0ac2cd7c0bb1b7452f55466fa0f4095eecc8c01d54460b01a4",
+      "benchmarks/experiments/clang_cas_pair.py": "969f3a55d27f2f4a12839b24030466b985201084c3428b43305279cb9ccfea6e",
+      "benchmarks/experiments/clang_cas_adapter_check.py": "ee137ec94ac27b3b41f8f21c07c5d4a16f4d1989753fae4b099e9e162bbad5c9",
+      "benchmarks/experiments/clang_cas_debug_difference.py": "7ec8ec8567a9e1f2d9764727128bc481780fbdabfa347b43d2d753207bb4f234",
+      "src/cache.zig": "b002556b2074333b52885b7771f6ee43abffd96e7d9597d0e47f663b0ca0b340",
+      "src/compiler.zig": "0bd5bb7678afd7b7609be08d0ea10aae1e5537967adcbfe8e6e5b51db4449209"
+    },
+    "config_source": {
+      "baseline": "pub const enabled = false;\npub const clang = \"/Library/Developer/CommandLineTools/usr/bin/clang\";\npub const sdk = \"/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk\";\n",
+      "candidate": "pub const enabled = true;\npub const clang = \"/Library/Developer/CommandLineTools/usr/bin/clang\";\npub const sdk = \"/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk\";\n"
+    },
+    "config_sha256": {
+      "baseline": "02adfd50b25b7acecbab9c9a2b8fee0f82477c57f577c09e19894e4201c0b06a",
+      "candidate": "510ef449605c16a5fa21376462df439fb7af555c26114a789a64ea2f17c1b325"
+    },
+    "compiler_sha256": "1590ac950a3d627817d09ade5cb60b2115f17a72182a3141e010b4bcc482a0c9"
+  }
+}

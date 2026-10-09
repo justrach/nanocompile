@@ -86,3 +86,9 @@ without running its JavaScript. The public JSON retains all unit intervals,
 concurrency observations, binary/helper checksums, artifact hashes and tracked
 source hashes. Private logs/HTML remain in the state directory; compiler
 argument lists and environment values are excluded from public reports.
+
+The subsequent [native adapter experiment](cargo-clang-cas-experiment.md)
+implements the Zig adapter and measures compiler replay with scanning enabled
+in both controls. Its 27 pairs show a substantial local gain with matching
+unmodified Rust/native artifacts. It remains experimental and does not replace
+the default-Nano/kache comparison.

@@ -1234,3 +1234,17 @@ restore C and preprocessed assembly with exact object bytes and invalidate a
 preserved-mtime header change. Production is unchanged; these checks motivate
 an explicit Cargo native compiler adapter while retaining live build-script
 execution and compiler-owned dependency discovery.
+
+## Experimental Cargo native replay
+
+The [Zig Clang adapter experiment](../docs/cargo-clang-cas-experiment.md) keeps
+build scripts live and enables Apple's compiler-owned native replay. A
+27-pair comparison uses inline scanning in both modes and disables replay in
+the baseline, avoiding the scanner's debug representation difference from
+normal Clang. Medians improve **2.807630 → 1.808241 s**, with 27 of 27 wins;
+mean paired savings are 994.15 ms with 10.57 ms standard error. Every candidate
+warm build has 24 actual native hits alongside 167 Rust hits. All 193 unmodified
+Rust/native artifacts match the first prime, and tracked sources remain unchanged.
+Fixtures detect preserved-mtime and already-dirty mmap header changes. This
+remains experimental: production and the accepted kache comparison are unchanged.
+The candidate prime reuses the shared cache and is not a cold-build measurement.
