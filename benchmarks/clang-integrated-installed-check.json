@@ -1,0 +1,49 @@
+{
+  "base_revision": "95777860a686b6e377c41f87aedacd5e346bb2fd",
+  "installed_binary_sha256": "f03c9570446371873565886f4e6ba980629547f99284437240c13a2003200be1",
+  "candidate_binary_sha256": "ed364bd735707bcce38b0889b9892907330e504023d8ab37a541b87d5fc57d87",
+  "clang_source_sha256": "ffea1d639210a8b40f07840275e2a4538479ad5047a78c3b4daaef59a161dcaf",
+  "clang_source_equals_candidate": true,
+  "zig_version": "0.17.0",
+  "checks": {
+    "unit_tests": "zig build test exited 0",
+    "real_rust_zig": "Rust 1.97.1 tests/integration.py passed restoration, invalidation, corruption, isolation, failures, environment, escaped paths, single-flight and bypass",
+    "native_regression": {
+      "binary_sha256": "f03c9570446371873565886f4e6ba980629547f99284437240c13a2003200be1",
+      "script_sha256": "1aae27cb9abc732f4a06a82dd31b7543a2a4bb74e0b2981fda9e73585cdc8c64",
+      "checks": [
+        "C debug objects match replay-disabled compiler and exact warm replay",
+        "preprocessed assembly exact replay",
+        "same-size preserved-mtime header invalidation",
+        "already-dirty unflushed mmap header invalidation",
+        "compiler and SDK selection queried on both eligible lookups",
+        "normal streaming mode caches without reporting unobserved hits",
+        "private CAS permissions and clear forces native miss",
+        "version, stdin and disabled commands bypass cache",
+        "opaque compiler override passes through with original arguments",
+        "compiler failure preserved without an output"
+      ],
+      "compiler_version": "Apple clang version 21.0.0 (clang-2100.3.34.2)\nTarget: arm64-apple-darwin27.0.0\nThread model: posix\nInstalledDir: /Library/Developer/CommandLineTools/usr/bin\n",
+      "local_cas_capable": true,
+      "capability_probe_stderr": "remark: compile job cache hit for 'llvmcas://572e0f0a70b1125f5afc3d26b9a4262ed1743d251f71889d1805917ded6768bd' => 'llvmcas://c909062301ca11e75e8246fab61ed96ec54a225fad2db065c27acd044566ae6f' [-Rcompile-job-cache-hit]\n",
+      "dirty_mmap_metadata_unchanged": true
+    },
+    "live_selection_regression": {
+      "binary_sha256": "f03c9570446371873565886f4e6ba980629547f99284437240c13a2003200be1",
+      "script_sha256": "45a2da03e2b4ee2ed0164facc173aea4e2220cef9c3cb5b85757a2e2d02dd8ef",
+      "checks": [
+        "both live selectors cross a two-way start barrier on cold and warm calls",
+        "failed SDK lookup falls back to unchanged original compiler arguments and bytes",
+        "failed tool lookup preserves failure without a compiler output"
+      ]
+    }
+  },
+  "confirmation": {
+    "candidate_wins": 26,
+    "median_seconds_saved": 0.10208779101958498,
+    "mean_seconds_saved": 0.1189171203338817,
+    "stdev_seconds_saved": 0.09891614911194078,
+    "standard_error_seconds_saved": 0.019036421772326725
+  },
+  "production_adopted": true
+}

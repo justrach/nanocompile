@@ -189,7 +189,7 @@ pub fn execute(ctx: *cache.Context, args: []const []const u8) !u8 {
     const private = std.Io.Dir.cwd().openDir(ctx.io, root, .{}) catch return run(ctx, original.items);
     defer private.close(ctx.io);
     private.setPermissions(ctx.io, .fromMode(0o700)) catch return run(ctx, original.items);
-    try argv.appendSlice(ctx.a, &.{ "-fdepscan=inline", "-Xclang", "-fcas-path", "-Xclang", root, "-Xclang", "-fcache-compile-job" });
+    try argv.appendSlice(ctx.a, &.{ "-fintegrated-cc1", "-fdepscan=inline", "-Xclang", "-fcas-path", "-Xclang", root, "-Xclang", "-fcache-compile-job" });
     const remarks = enabled(ctx, "NANOCOMPILE_CLANG_REMARKS");
     if (remarks) try argv.append(ctx.a, "-Rcompile-job-cache");
     try argv.appendSlice(ctx.a, args);

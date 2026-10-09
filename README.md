@@ -214,8 +214,10 @@ compiler mode. `clear` removes the managed CAS under the maintenance lock;
 remains local. `stats` reports native invocations/failures; hit/miss observations
 require `NANOCOMPILE_CLANG_REMARKS=1`, which adds remarks and uses bounded capture.
 Default mode streams the compiler's inherited descriptors normally.
+Eligible native-CAS jobs run Clang's cc1 frontend in-process to reduce replay
+overhead; caller execution flags can override this default.
 
-The [latest nine-sample comparison](benchmarks/harness-clang-selection-nine-samples.json)
+The [latest nine-sample comparison before integrated cc1](benchmarks/harness-clang-selection-nine-samples.json)
 measures warm medians of **2.005 s Nano versus 22.64 s direct and 1.962 s kache**
 on Harness, with 167 Rust and 24 native warm hits. It uses explicit reported-macro
 and Apple macro/executable-producer policies. Kache's median leads by 43 ms in
@@ -227,6 +229,10 @@ remain public.
 Two independent [27-pair lookup comparisons](docs/clang-selection-overlap-experiment.md)
 confirm the adopted live-query overlap gains **5.6% and 5.1%**, winning 51/54
 pairs with 193 exact artifacts. Compiler and SDK selection remain live.
+Two further [27-pair integrated-cc1 comparisons](docs/clang-integrated-cc1-experiment.md)
+confirm **5.1% and 5.6%** median improvements, winning 51/54 pairs with
+193 exact artifacts. These measure the native adapter change against its
+predecessor; a fresh three-way comparison is needed to update the kache ranking.
 Nano cold is 37.29 s versus kache's 26.51 s. The native cache does not establish
 a cold-build improvement. All warm modes match their own cold Rust/native
 artifacts; scanner debug changes and kache remapping prevent treating every

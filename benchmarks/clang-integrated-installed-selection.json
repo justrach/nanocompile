@@ -1,0 +1,9 @@
+{
+  "binary_sha256": "f03c9570446371873565886f4e6ba980629547f99284437240c13a2003200be1",
+  "script_sha256": "45a2da03e2b4ee2ed0164facc173aea4e2220cef9c3cb5b85757a2e2d02dd8ef",
+  "checks": [
+    "both live selectors cross a two-way start barrier on cold and warm calls",
+    "failed SDK lookup falls back to unchanged original compiler arguments and bytes",
+    "failed tool lookup preserves failure without a compiler output"
+  ]
+}

@@ -1365,3 +1365,20 @@ standard error 10.276 ms. All 193 artifacts match and tracked sources stay
 unchanged. Production stays unchanged pending a separate confirmation batch.
 [Candidate protocol and limits](../docs/clang-integrated-cc1-experiment.md);
 [all paired builds](harness-clang-integrated-paired.json).
+
+## Integrated cc1 confirmation: adopted
+
+A separate 27-pair batch reduces medians 2.024719 to 1.911030 s (5.62%),
+winning 26/27 pairs. Mean paired saving is 118.917 ms with descriptive
+standard error 19.036 ms. Both batches together win 51/54 pairs. All 112
+builds, including four primes, match their respective batch primes across
+193 artifacts; each of 108 warm
+builds has 167 Rust and 24 native hits, with unchanged tracked sources.
+Eligible native-CAS commands now request in-process cc1 before caller
+arguments; caller policy can override it. Live selection and validation
+remain intact. Installed unit, real Rust/Zig, native replay/invalidation,
+and live selector barrier/failure checks pass.
+[Full confirmation](harness-clang-integrated-confirm.json);
+[protocol and adoption](../docs/clang-integrated-cc1-experiment.md).
+The earlier nine-sample kache comparison predates this change and is retained
+as historical evidence pending a new complete comparison.

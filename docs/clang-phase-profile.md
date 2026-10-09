@@ -59,5 +59,6 @@ Artifacts and reproduction sources:
 - [Driver execution-mode probe](../benchmarks/clang-phase-driver-execution.json)
 
 Use the diagnostic binary only as `--clang-wrapper` with `--native-clang`
-in the capture runner. Production retains the accepted executable until
-a separate paired benchmark and confirmation justify a change.
+in the capture runner. A separate [paired benchmark and confirmation](clang-integrated-cc1-experiment.md)
+subsequently justify adopting integrated cc1 execution; phase instrumentation
+remains isolated and is not part of production.

@@ -1,11 +1,21 @@
 # Integrated Clang cc1 experiment
 
-The first 27-pair batch is promising: median warm-build time falls from
+The first 27-pair batch reduces median warm-build time from
 **1.988609 to 1.886351 seconds (5.14%)**, with the candidate winning
 **25/27 pairs**. Mean paired saving is **87.862 ms**, paired median saving
 **97.462 ms**, and descriptive standard error **10.276 ms**. The two losing
-pairs and all slower samples remain in the dataset. Production remains
-unchanged until a separate confirmation batch.
+pairs and all slower samples remain in the dataset.
+
+A fresh 27-pair confirmation reduces median time from **2.024719 to
+1.911030 seconds (5.62%)**, winning **26/27 pairs**. Mean paired saving is
+**118.917 ms**, paired median saving **102.088 ms**, with descriptive
+standard error **19.036 ms**. All 56 confirmation builds match their first prime across
+193 artifacts, with unchanged tracked sources and 167 Rust/24 native warm
+hits. Across the two batches the candidate wins **51/54 pairs**. The
+confirmation uses a separate target/cache state, the same binaries and
+protocol, and no phase instrumentation. This supports adopting the flag
+for eligible native-CAS commands. Caller policy, live selection and input
+validation remain intact.
 
 All 56 builds, including both primes and 54 warm runs, match **193 exact
 artifacts**: Rust/producer artifacts plus 24 native objects and two archives.
@@ -58,6 +68,12 @@ python3 benchmarks/experiments/clang_integrated_pair.py \
 [Paired runner](../benchmarks/experiments/clang_integrated_pair.py),
 [source/binary provenance and native checks](../benchmarks/clang-integrated-check.json),
 and [raw paired builds](../benchmarks/harness-clang-integrated-paired.json)
-retain the evidence. This is a local candidate evaluation; production stays
-unchanged pending a separate confirmation batch. It does not update the
+retain the evidence. [Full confirmation data](../benchmarks/harness-clang-integrated-confirm.json)
+records the separate batch. This is a local paired evaluation. It does not update the
 last three-way kache comparison or establish a cross-machine advantage.
+
+Installed source matches the tested candidate exactly.
+[Installed build/check provenance](../benchmarks/clang-integrated-installed-check.json),
+[native replay/invalidation checks](../benchmarks/clang-integrated-installed-regression.json),
+and [live-selection overlap/failure checks](../benchmarks/clang-integrated-installed-selection.json)
+record the adopted executable. Unit tests and real Rust/Zig integration also pass.
