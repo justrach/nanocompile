@@ -1,0 +1,19 @@
+{
+  "source_date_epoch": "1791423832",
+  "features": [
+    "v2"
+  ],
+  "method": "Two empty-target real mimalloc builds at identical paths, separated wall times; native object/archive and Rust library hashes must match.",
+  "samples": [
+    {
+      "release/deps/liblibmimalloc_sys-23da0c4122ae8b9d.rlib": "e63f9150b053a8939fee2ed341ed25145ea89cf86c9fa516dafbdb4301c4622c",
+      "release/build/libmimalloc-sys-140f7a8e91773255/out/3c53f5be03a7bbf8-static.o": "2fed546547c446e4fd0de4daaef4c8412ec4a543f23c626e584489b9591f5846",
+      "release/build/libmimalloc-sys-140f7a8e91773255/out/libmimalloc.a": "8ca5e7ed015fe3e1b19e8707726431b4d9a2787645f34a4547d97bcc193eacca"
+    },
+    {
+      "release/deps/liblibmimalloc_sys-23da0c4122ae8b9d.rlib": "e63f9150b053a8939fee2ed341ed25145ea89cf86c9fa516dafbdb4301c4622c",
+      "release/build/libmimalloc-sys-140f7a8e91773255/out/3c53f5be03a7bbf8-static.o": "2fed546547c446e4fd0de4daaef4c8412ec4a543f23c626e584489b9591f5846",
+      "release/build/libmimalloc-sys-140f7a8e91773255/out/libmimalloc.a": "8ca5e7ed015fe3e1b19e8707726431b4d9a2787645f34a4547d97bcc193eacca"
+    }
+  ]
+}

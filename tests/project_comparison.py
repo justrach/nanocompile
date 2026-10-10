@@ -41,6 +41,7 @@ def main():
     p.add_argument("--package", default="harness-adapters")
     p.add_argument("--bin", help="build this package binary instead of its library; validate the final executable too")
     p.add_argument("--probe-help", action="store_true", help="verify the selected binary's --help outside build timing")
+    p.add_argument("--source-date-epoch", type=int, help="explicit reproducible build timestamp shared by every implementation")
     p.add_argument("--state", required=True, help="new, dedicated benchmark directory")
     p.add_argument("--output", required=True)
     p.add_argument("--runs", type=int, default=3)
@@ -65,6 +66,8 @@ def main():
     args = p.parse_args()
     if args.probe_help and not args.bin:
         p.error('--probe-help requires --bin')
+    if args.source_date_epoch is not None and args.source_date_epoch < 0:
+        p.error('--source-date-epoch must be nonnegative')
     if (args.compiler_stream and args.no_compiler_stream) or (args.pipelined_companions and args.no_pipelined_companions):
         p.error('choose either enable or disable for each compiler control')
     if args.native_clang and args.portable_cc:
@@ -82,6 +85,8 @@ def main():
     # other wrapper overrides and user kache configuration are excluded.
     env = {k: v for k, v in os.environ.items() if not k.startswith(("R2_", "KACHE_", "NANOCOMPILE_"))
            and k not in ("RUSTC_WRAPPER", "RUSTC_WORKSPACE_WRAPPER")}
+    if args.source_date_epoch is not None:
+        env['SOURCE_DATE_EPOCH'] = str(args.source_date_epoch)
     env.update(CARGO_TARGET_DIR=str(target), CARGO_INCREMENTAL="0", NANOCOMPILE_DIR=str(cache),
                KACHE_CACHE_DIR=str(kcache), KACHE_CONFIG=str(config), KACHE_HOST_CONFIG="",
                NANOCOMPILE_PROC_MACROS=args.proc_macros, KACHE_SOCKET_PATH=str(state / "daemon.sock"), KACHE_DAEMON_IDLE_TIMEOUT="600")
@@ -120,6 +125,9 @@ def main():
               "build_script_contract_sha256": sha(args.build_script_contract) if args.build_script_contract else None, "kache_build_script_cache": not args.kache_no_build_scripts, "kache_daemon": not args.standalone, "native_clang": args.native_clang, "native_artifacts": args.native_artifacts, "portable_cc":args.portable_cc, "nanocompile_proc_macros": args.proc_macros, "nanocompile_proc_macro_producers": args.proc_macro_producers, "nanocompile_executable_producers": args.executable_producers, "command": command,
               "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat(), "builds": [],
               "method": "offline clean release package builds; same target path; prime direct build then empty caches; rotate three-way warm measurement order unless cold-only; validate each wrapper against its own cold artifact hashes (kache remaps paths)"}
+    result['source_date_epoch'] = env.get('SOURCE_DATE_EPOCH')
+    result['binary_target'] = args.bin
+    result['cli_help_probe'] = args.probe_help
     tracked = subprocess.check_output(['git', 'ls-files', '-z'], cwd=project).decode().split('\0')
     result['tracked_rust_and_manifest_hashes'] = {
         name: sha(project / name) for name in tracked
