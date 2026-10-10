@@ -230,13 +230,17 @@ overhead; caller execution flags can override this default.
 
 The [earlier nine-sample comparison](docs/direct-rmeta-nine-samples.md)
 measures warm medians of **2.007 s Nano versus 23.42 s direct and 2.269 s kache**
-on Harness, with 167 Rust and 24 native warm hits. It uses explicit reported-macro
+on the Harness adapters library, with 167 Rust and 24 native warm hits. It uses explicit reported-macro
 and Apple macro/executable-producer policies. Nano is faster in all nine
 corresponding rounds, with a mean same-round lead of 273 ms and descriptive
 standard error 61 ms. This is a local session result, not a general cross-machine
 advantage or proof that direct metadata decoding improves warm hits.
 The [previous nine-round comparison](docs/selected-decoder-nine-samples.md) and
 sessions favoring kache remain public.
+The [full application capture](docs/full-harness-benchmark.md) exposes a larger
+coverage gap: Nano took 89.0 s warm versus kache's 7.0 s in one diagnostic round.
+Thin-LTO executable and additional build-script work remain uncached by Nano;
+the adapters result does not establish a full-application lead.
 Two independent [27-pair lookup comparisons](docs/clang-selection-overlap-experiment.md)
 confirm the adopted live-query overlap gains **5.6% and 5.1%**, winning 51/54
 pairs with 193 exact artifacts. Compiler and SDK selection remain live.
