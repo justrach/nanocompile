@@ -37,6 +37,8 @@ def main():
     p.add_argument("--output", required=True)
     p.add_argument("--runs", type=int, default=3)
     p.add_argument("--jobs", type=int, default=4)
+    p.add_argument("--cold-runs", type=int, default=1, help="alternating fresh-cache comparisons; restart private daemon before each pair")
+    p.add_argument("--cold-only", action="store_true", help="skip warm builds")
     p.add_argument("--native-clang", action="store_true", help="opt Nano into Apple Clang native CAS; validate each mode against its own cold artifacts")
     p.add_argument("--portable-cc", action="store_true", help="opt Nano into portable compile-only C/C++ caching")
     p.add_argument("--standalone", action="store_true", help="disable kache's daemon for this comparison")
@@ -46,7 +48,7 @@ def main():
     args = p.parse_args()
     if args.native_clang and args.portable_cc:
         p.error("choose one native adapter")
-    if args.runs < 1 or args.jobs < 1:
+    if args.runs < 1 or args.jobs < 1 or args.cold_runs < 1:
         p.error("runs and jobs must be positive")
     binary, kache = str(Path(args.binary).resolve()), str(Path(args.kache).resolve())
     project, state = Path(args.project).resolve(), Path(args.state).resolve()
@@ -69,13 +71,13 @@ def main():
                "-p", args.package, "-j", str(args.jobs), "--message-format=json-render-diagnostics"]
     result = {"script_sha256": sha(Path(__file__)), "project": str(project), "commit": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=project, text=True).strip(),
               "dirty": bool(subprocess.check_output(["git", "status", "--porcelain"], cwd=project)),
-              "platform": platform.platform(), "jobs": args.jobs, "runs": args.runs,
+              "platform": platform.platform(), "jobs": args.jobs, "runs": args.runs, "cold_runs": args.cold_runs, "cold_only": args.cold_only,
               "rustc": subprocess.check_output(["rustc", "--version", "--verbose"], cwd=project, text=True),
               "nanocompile_sha256": sha(Path(binary)), "kache_sha256": sha(Path(kache)),
               "kache_version": subprocess.check_output([kache, "--version"], text=True).strip(),
               "kache_daemon": not args.standalone, "native_clang": args.native_clang, "portable_cc":args.portable_cc, "nanocompile_proc_macros": args.proc_macros, "nanocompile_proc_macro_producers": args.proc_macro_producers, "nanocompile_executable_producers": args.executable_producers, "command": command,
               "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat(), "builds": [],
-              "method": "offline clean release package builds; same target path; prime direct build then empty caches; rotate three-way warm measurement order; validate each wrapper against its own cold artifact hashes (kache remaps paths)"}
+              "method": "offline clean release package builds; same target path; prime direct build then empty caches; rotate three-way warm measurement order unless cold-only; validate each wrapper against its own cold artifact hashes (kache remaps paths)"}
     tracked = subprocess.check_output(['git', 'ls-files', '-z'], cwd=project).decode().split('\0')
     result['tracked_rust_and_manifest_hashes'] = {
         name: sha(project / name) for name in tracked
@@ -184,28 +186,60 @@ def main():
     try:
         with (state / "fetch.log").open("w") as log:
             subprocess.run(["cargo", "fetch", "--locked"], cwd=project, env=env, stdout=log, stderr=log, check=True)
-        if not args.standalone:
-            daemon_log = (state / "daemon.log").open("w")
-            daemon = subprocess.Popen([kache, "daemon", "run"], cwd=project, env=env, stdout=daemon_log, stderr=daemon_log)
-            deadline = time.monotonic() + 15
-            while not (state / "daemon.sock").exists():
-                if daemon.poll() is not None or time.monotonic() > deadline:
-                    raise RuntimeError("Isolated kache daemon failed to start; see daemon.log")
-                time.sleep(0.1)
-            # Confirm the private daemon is reachable before any measurements.
-            status = subprocess.run([kache, "--json", "daemon", "status"], cwd=project, env=env, capture_output=True, text=True, check=True)
-            result["daemon_status"] = status.stdout
         build("direct", "prime")
-        build("nanocompile", "cold")
-        build("kache", "cold")
+        for iteration in range(args.cold_runs):
+            if daemon is not None:
+                daemon.send_signal(signal.SIGINT)
+                try:
+                    daemon.wait(timeout=10)
+                except subprocess.TimeoutExpired:
+                    daemon.kill()
+                    daemon.wait()
+                daemon_log.close()
+                daemon = None
+            socket = state / "daemon.sock"
+            # No daemon keeps fingerprints or SQLite handles across cold pairs.
+            if socket.exists():
+                socket.unlink()
+            shutil.rmtree(cache, ignore_errors=True)
+            shutil.rmtree(kcache, ignore_errors=True)
+            if not args.standalone:
+                daemon_log = (state / f"daemon-{iteration}.log").open("w")
+                daemon = subprocess.Popen([kache, "daemon", "run"], cwd=project, env=env, stdout=daemon_log, stderr=daemon_log)
+                deadline = time.monotonic() + 15
+                while not socket.exists():
+                    if daemon.poll() is not None or time.monotonic() > deadline:
+                        raise RuntimeError("Isolated kache daemon failed to start")
+                    time.sleep(0.1)
+                status = subprocess.run([kache, "--json", "daemon", "status"], cwd=project, env=env, capture_output=True, text=True, check=True)
+                result.setdefault("daemon_statuses", []).append(status.stdout)
+            for implementation in (("nanocompile", "kache") if iteration % 2 == 0 else ("kache", "nanocompile")):
+                build(implementation, "cold")
+                row = result["builds"][-1]
+                if implementation == "nanocompile":
+                    if row["events"].get("hit", 0) or not row["events"].get("miss", 0):
+                        raise RuntimeError("Nano cold cache was not empty")
+                    if args.native_clang and (row["events"].get("clang_native_hit", 0) or not row["events"].get("clang_native_miss", 0)):
+                        raise RuntimeError("Nano native cold cache was not empty")
+                elif row["events"].get("local_hit", 0) or row["events"].get("remote_hit", 0):
+                    raise RuntimeError("kache cold cache was not empty")
         schedule = ["direct", "nanocompile", "kache"]
-        for iteration in range(args.runs):
-            offset = iteration % len(schedule)
-            for implementation in schedule[offset:] + schedule[:offset]:
-                build(implementation, "warm")
-        for implementation in schedule:
-            samples = [r["seconds"] for r in result["builds"] if r["implementation"] == implementation and r["phase"] == "warm"]
-            result.setdefault("summary", {})[implementation] = {"samples_seconds": samples, "median_seconds": statistics.median(samples)}
+        if not args.cold_only:
+            for iteration in range(args.runs):
+                offset = iteration % len(schedule)
+                for implementation in schedule[offset:] + schedule[:offset]:
+                    build(implementation, "warm")
+            for implementation in schedule:
+                samples = [r["seconds"] for r in result["builds"] if r["implementation"] == implementation and r["phase"] == "warm"]
+                result.setdefault("summary", {})[implementation] = {"samples_seconds": samples, "median_seconds": statistics.median(samples)}
+        result["cold_summary"] = {}
+        for implementation in ("nanocompile", "kache"):
+            samples = [r["seconds"] for r in result["builds"] if r["implementation"] == implementation and r["phase"] == "cold"]
+            result["cold_summary"][implementation] = {"samples_seconds": samples, "median_seconds": statistics.median(samples)}
+        deltas = [k - n for k, n in zip(result["cold_summary"]["kache"]["samples_seconds"], result["cold_summary"]["nanocompile"]["samples_seconds"])]
+        result["cold_paired_seconds_saved"] = deltas
+        result["cold_paired_summary"] = {"nanocompile_wins": sum(d > 0 for d in deltas), "mean_seconds_saved": statistics.mean(deltas), "median_seconds_saved": statistics.median(deltas), "stdev_seconds_saved": statistics.stdev(deltas) if len(deltas)>1 else None, "standard_error_seconds_saved": statistics.stdev(deltas)/len(deltas)**.5 if len(deltas)>1 else None}
+        result["method"] += "; cold pairs alternate wrapper order, clear both compiler caches, and restart the private kache daemon outside timing; Cargo target removed every build; OS filesystem cache is not flushed"
         stats = subprocess.run([kache, "--json", "stats"], cwd=project, env=env, capture_output=True, text=True, check=True)
         result["kache_stats"] = json.loads(stats.stdout)
         result['tracked_sources_unchanged'] = all((project / name).is_file() and sha(project / name) == digest
@@ -213,7 +247,7 @@ def main():
         save()
         if not result['tracked_sources_unchanged']:
             raise RuntimeError('Tracked Rust sources changed during the comparison; results are not comparable')
-        print(json.dumps(result["summary"], indent=2), flush=True)
+        print(json.dumps(result.get("summary", result["cold_summary"]), indent=2), flush=True)
     finally:
         if daemon is not None:
             if daemon.poll() is None:

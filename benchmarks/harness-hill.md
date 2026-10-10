@@ -1,5 +1,7 @@
 # Harness hill climb against kache
 
+The [latest cold-build work](harness-cold.md) profiles current Harness misses, rejects two cache-core candidates, and verifies a 38% reduction from four to eight Cargo jobs with byte-identical artifacts. At equal eight-job concurrency kache still leads, 17.16 s versus Nano 18.82 s.
+
 The opening table records early coverage iterations; later sections track
 producer caching and controlled optimization experiments. Kache still leads
 in the latest three-way run. Each row below is a separate comparison with

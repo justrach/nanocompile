@@ -1,5 +1,7 @@
 # Measured optimization trail
 
+Start with the [current cold Harness profile and repeated kache comparisons](harness-cold.md): eight-job Nano median 18.82 s versus kache 17.16 s; controlled four-to-eight-job Nano tuning reduces median time by 38%. Rejected runtime candidates and all raw samples are retained.
+
 The [Xcode comparison](xcode.md) covers Apple Clang compatibility and Xcode's native compilation cache separately from the Rust/Harness comparison.
 
 For a real Cargo workload, start with the [Harness comparison against kache](kache-harness.md): direct 22.77 s, nanocompile 22.95 s, kache with its daemon 2.01 s. The individual compiler fixtures below measure warm-hit latency and do not predict project-level performance.

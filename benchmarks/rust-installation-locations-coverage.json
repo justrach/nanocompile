@@ -1,0 +1,9 @@
+{
+  "method": "Post-experiment sealed toolchain memo coverage audit; counts from last candidate cold pair cache, before any deletion or rebuild.",
+  "candidate_sha256": "4c603aa8fc5caddc2bbb2faa8c3bf923deaa4730c7c395759c69e2e9a203e0cb",
+  "candidate_source": "46c1a6fa7bb67ae3e2a43e9f57893b438e3ae589",
+  "cache": "/tmp/nanocompile-cold-20261010/locations-pair-confirm/cache",
+  "schema_6_selection_memos": 147,
+  "memos_with_retained_locations": 0,
+  "interpretation": "Installation location shortcut was inactive under Cargo. A/B timing differences are not proof of eliminated query overhead. Candidate reverted."
+}

@@ -1,0 +1,5222 @@
+{
+  "method": "isolated diagnostic compiler phase capture; elapsed spans across concurrent Cargo jobs overlap and cannot be summed into predicted wall savings; observer/native adapter fixed; complete artifacts verified cold/warm",
+  "records": [
+    {
+      "label": "graph",
+      "crate": "unicode_ident",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libunicode_ident-b2ea577c2d17a23b.rmeta",
+        "sysroot_ns": 14400500,
+        "root_ns": 142584,
+        "discovery_ns": 28364333
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "cfg_if",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libcfg_if-5f159fa1e1d6f550.rmeta",
+        "sysroot_ns": 13631000,
+        "root_ns": 49750,
+        "discovery_ns": 623500
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "smallvec",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libsmallvec-5eb572d20004b00a.rmeta",
+        "sysroot_ns": 14147292,
+        "root_ns": 102583,
+        "discovery_ns": 14744292
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "stable_deref_trait",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libstable_deref_trait-e2fbc26ba98d968e.rmeta",
+        "sysroot_ns": 13101625,
+        "root_ns": 59292,
+        "discovery_ns": 567375
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "pin_project_lite",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libpin_project_lite-5a225b22ab734508.rmeta",
+        "sysroot_ns": 13794000,
+        "root_ns": 85875,
+        "discovery_ns": 721958
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "futures_core",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libfutures_core-4336bb07ed063f25.rmeta",
+        "sysroot_ns": 14032291,
+        "root_ns": 85917,
+        "discovery_ns": 229427542
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "libc",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/liblibc-ed4b6486ad6ca64c.rmeta",
+        "sysroot_ns": 13935792,
+        "root_ns": 2003000,
+        "discovery_ns": 5066792
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "bytes",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libbytes-57b7e8cd0b5c6b02.rmeta",
+        "sysroot_ns": 14739666,
+        "root_ns": 197500,
+        "discovery_ns": 2546709
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "proc_macro2",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libproc_macro2-ed2afefe3f7bd927.rmeta",
+        "sysroot_ns": 14645750,
+        "root_ns": 117250,
+        "discovery_ns": 31105792
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "itoa",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libitoa-b3aec5c269e3997a.rmeta",
+        "sysroot_ns": 12818333,
+        "root_ns": 79083,
+        "discovery_ns": 863125
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "quote",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libquote-df8f46198e30c35b.rmeta",
+        "sysroot_ns": 13659250,
+        "root_ns": 14677875,
+        "discovery_ns": 2062917
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "memchr",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libmemchr-63e6f72d89f13a83.rmeta",
+        "sysroot_ns": 14801167,
+        "root_ns": 209583,
+        "discovery_ns": 2602083
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "scopeguard",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libscopeguard-39c9ebcb63780a34.rmeta",
+        "sysroot_ns": 13858375,
+        "root_ns": 69084,
+        "discovery_ns": 722791
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "syn",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libsyn-804e1da7bee6720d.rmeta",
+        "sysroot_ns": 14244708,
+        "root_ns": 15589250,
+        "discovery_ns": 10506083
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "syn",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libsyn-bd9e1d5bf0bba7fc.rmeta",
+        "sysroot_ns": 13369667,
+        "root_ns": 14709958,
+        "discovery_ns": 10998500
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "futures_sink",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libfutures_sink-54cf49c90f74ee69.rmeta",
+        "sysroot_ns": 14746833,
+        "root_ns": 98209,
+        "discovery_ns": 1164875
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "parking_lot_core",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libparking_lot_core-0890bc3df38b4cbf.rmeta",
+        "sysroot_ns": 15642166,
+        "root_ns": 85167,
+        "discovery_ns": 1567417
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "lock_api",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/liblock_api-2c149588f587c28b.rmeta",
+        "sysroot_ns": 14460250,
+        "root_ns": 149084,
+        "discovery_ns": 1222500
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "errno",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/liberrno-f74f1f0bed37f2f1.rmeta",
+        "sysroot_ns": 14710542,
+        "root_ns": 150042,
+        "discovery_ns": 1152083
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "find_msvc_tools",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libfind_msvc_tools-cd4948411b364b84.rmeta",
+        "sysroot_ns": 14361417,
+        "root_ns": 87000,
+        "discovery_ns": 1291333
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "shlex",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libshlex-f787f6a9140b8950.rmeta",
+        "sysroot_ns": 14092583,
+        "root_ns": 89625,
+        "discovery_ns": 1291709
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "serde_core",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libserde_core-06480abe3dbf146e.rmeta",
+        "sysroot_ns": 14752375,
+        "root_ns": 697000,
+        "discovery_ns": 7891833
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "cc",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libcc-987898de1db8b53e.rmeta",
+        "sysroot_ns": 15309583,
+        "root_ns": 155083,
+        "discovery_ns": 3147875
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "signal_hook_registry",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libsignal_hook_registry-40110f67458a193d.rmeta",
+        "sysroot_ns": 14941625,
+        "root_ns": 116542,
+        "discovery_ns": 1722791
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "parking_lot",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libparking_lot-7bd943447494526a.rmeta",
+        "sysroot_ns": 13437333,
+        "root_ns": 89875,
+        "discovery_ns": 3763083
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "futures_channel",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libfutures_channel-5698ca5666dda318.rmeta",
+        "sysroot_ns": 14923666,
+        "root_ns": 111042,
+        "discovery_ns": 2465583
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "zerovec_derive",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libproc_macro2-ed2afefe3f7bd927.rlib",
+        "sysroot_ns": 14291417,
+        "root_ns": 14603875,
+        "discovery_ns": 1418917
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "zerovec_derive",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libquote-df8f46198e30c35b.rlib",
+        "sysroot_ns": 14609875,
+        "root_ns": 14011667,
+        "discovery_ns": 1878875
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "zerovec_derive",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libsyn-804e1da7bee6720d.rlib",
+        "sysroot_ns": 14758625,
+        "root_ns": 15928958,
+        "discovery_ns": 2006709
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "displaydoc",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libproc_macro2-ed2afefe3f7bd927.rlib",
+        "sysroot_ns": 13477250,
+        "root_ns": 14900041,
+        "discovery_ns": 1223959
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "displaydoc",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libquote-df8f46198e30c35b.rlib",
+        "sysroot_ns": 13833667,
+        "root_ns": 14306250,
+        "discovery_ns": 1280875
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "displaydoc",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libsyn-804e1da7bee6720d.rlib",
+        "sysroot_ns": 13502000,
+        "root_ns": 13458250,
+        "discovery_ns": 1666833
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "synstructure",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libsynstructure-8160d14f41635618.rmeta",
+        "sysroot_ns": 13993666,
+        "root_ns": 14329959,
+        "discovery_ns": 3976666
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "tokio_macros",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libproc_macro2-ed2afefe3f7bd927.rlib",
+        "sysroot_ns": 14390625,
+        "root_ns": 14508833,
+        "discovery_ns": 1277250
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "tokio_macros",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libquote-df8f46198e30c35b.rlib",
+        "sysroot_ns": 14648708,
+        "root_ns": 14192459,
+        "discovery_ns": 1872875
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "tokio_macros",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libsyn-804e1da7bee6720d.rlib",
+        "sysroot_ns": 14800333,
+        "root_ns": 15928958,
+        "discovery_ns": 1816959
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "zerofrom_derive",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libproc_macro2-ed2afefe3f7bd927.rlib",
+        "sysroot_ns": 13945333,
+        "root_ns": 13931625,
+        "discovery_ns": 1399958
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "zerofrom_derive",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libquote-df8f46198e30c35b.rlib",
+        "sysroot_ns": 12336167,
+        "root_ns": 14234791,
+        "discovery_ns": 1390084
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "zerofrom_derive",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libsyn-bd9e1d5bf0bba7fc.rlib",
+        "sysroot_ns": 13336333,
+        "root_ns": 13678542,
+        "discovery_ns": 1607708
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "zerofrom_derive",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libsynstructure-8160d14f41635618.rlib",
+        "sysroot_ns": 14819458,
+        "root_ns": 15051417,
+        "discovery_ns": 4800833
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "yoke_derive",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libproc_macro2-ed2afefe3f7bd927.rlib",
+        "sysroot_ns": 14934500,
+        "root_ns": 14282041,
+        "discovery_ns": 1456584
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "yoke_derive",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libquote-df8f46198e30c35b.rlib",
+        "sysroot_ns": 14775708,
+        "root_ns": 15324417,
+        "discovery_ns": 1586542
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "yoke_derive",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libsyn-bd9e1d5bf0bba7fc.rlib",
+        "sysroot_ns": 14388875,
+        "root_ns": 14115125,
+        "discovery_ns": 2033958
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "yoke_derive",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libsynstructure-8160d14f41635618.rlib",
+        "sysroot_ns": 13742208,
+        "root_ns": 14608000,
+        "discovery_ns": 4880167
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "socket2",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libsocket2-b52b59a8cd7a7dab.rmeta",
+        "sysroot_ns": 14174417,
+        "root_ns": 120667,
+        "discovery_ns": 1770958
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "mio",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libmio-50763cf482836d12.rmeta",
+        "sysroot_ns": 16792541,
+        "root_ns": 125584,
+        "discovery_ns": 1856708
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "core_foundation_sys",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libcore_foundation_sys-998a3b102ff90cbb.rmeta",
+        "sysroot_ns": 14178583,
+        "root_ns": 611375,
+        "discovery_ns": 2550167
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "litemap",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/liblitemap-ee6de1cf61e24e76.rmeta",
+        "sysroot_ns": 13305292,
+        "root_ns": 88250,
+        "discovery_ns": 1025542
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "writeable",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libwriteable-123a71ece0d6eda7.rmeta",
+        "sysroot_ns": 14691708,
+        "root_ns": 102542,
+        "discovery_ns": 1276500
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "tokio",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libtokio-06724a61f6594382.rmeta",
+        "sysroot_ns": 13877625,
+        "root_ns": 1127250,
+        "discovery_ns": 36942791
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "zerofrom",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libzerofrom-cdc90b53d293ea01.rmeta",
+        "sysroot_ns": 15170625,
+        "root_ns": 696083,
+        "discovery_ns": 18422542
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "futures_macro",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libproc_macro2-ed2afefe3f7bd927.rlib",
+        "sysroot_ns": 12088542,
+        "root_ns": 14248500,
+        "discovery_ns": 1154083
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "futures_macro",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libquote-df8f46198e30c35b.rlib",
+        "sysroot_ns": 12923375,
+        "root_ns": 14361833,
+        "discovery_ns": 1638000
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "futures_macro",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libsyn-804e1da7bee6720d.rlib",
+        "sysroot_ns": 13454459,
+        "root_ns": 13621083,
+        "discovery_ns": 1697500
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "build_script_build",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libcc-987898de1db8b53e.rlib",
+        "sysroot_ns": 14381250,
+        "root_ns": 14400292,
+        "discovery_ns": 1571000
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "yoke",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libyoke-492c07f9f29f9bba.rmeta",
+        "sysroot_ns": 12974250,
+        "root_ns": 82709,
+        "discovery_ns": 16704416
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "utf8_iter",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libutf8_iter-e497333a7e2605ab.rmeta",
+        "sysroot_ns": 16721458,
+        "root_ns": 79833,
+        "discovery_ns": 857834
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "futures_task",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libfutures_task-a03edfdddc9ac4b3.rmeta",
+        "sysroot_ns": 13712042,
+        "root_ns": 76708,
+        "discovery_ns": 1339125
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "zerovec",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libzerovec-1cf4ec3eb0269ebe.rmeta",
+        "sysroot_ns": 14560417,
+        "root_ns": 213458,
+        "discovery_ns": 20067000
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "zerotrie",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libzerotrie-06d305be356bf959.rmeta",
+        "sysroot_ns": 14250375,
+        "root_ns": 146125,
+        "discovery_ns": 19651250
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "futures_io",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libfutures_io-b150f06adfe854fc.rmeta",
+        "sysroot_ns": 14643792,
+        "root_ns": 117458,
+        "discovery_ns": 1475250
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "slab",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libslab-2c9e831d99ce87f4.rmeta",
+        "sysroot_ns": 13713208,
+        "root_ns": 75042,
+        "discovery_ns": 1685292
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "futures_util",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libfutures_util-8a928e3dc8248b9b.rmeta",
+        "sysroot_ns": 13966500,
+        "root_ns": 729000,
+        "discovery_ns": 27923625
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "tinystr",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libtinystr-4bd014e0468f81eb.rmeta",
+        "sysroot_ns": 14074500,
+        "root_ns": 110000,
+        "discovery_ns": 5868417
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "icu_locale_core",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libicu_locale_core-9ae80006160d66a9.rmeta",
+        "sysroot_ns": 14020000,
+        "root_ns": 282583,
+        "discovery_ns": 8830167
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "potential_utf",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libpotential_utf-a3fb9babee306001.rmeta",
+        "sysroot_ns": 14213750,
+        "root_ns": 86916,
+        "discovery_ns": 5794750
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "icu_collections",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libicu_collections-aea04bb7b26458cd.rmeta",
+        "sysroot_ns": 14225291,
+        "root_ns": 190250,
+        "discovery_ns": 6300750
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "icu_provider",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libicu_provider-bb70cf542f0e6c82.rmeta",
+        "sysroot_ns": 14404333,
+        "root_ns": 117209,
+        "discovery_ns": 6199708
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "serde_derive",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libproc_macro2-ed2afefe3f7bd927.rlib",
+        "sysroot_ns": 14521292,
+        "root_ns": 14077500,
+        "discovery_ns": 1223708
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "serde_derive",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libquote-df8f46198e30c35b.rlib",
+        "sysroot_ns": 13365208,
+        "root_ns": 13876292,
+        "discovery_ns": 1387917
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "serde_derive",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libsyn-804e1da7bee6720d.rlib",
+        "sysroot_ns": 13360250,
+        "root_ns": 13443167,
+        "discovery_ns": 1800916
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "http",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libhttp-d6837422dc416ee8.rmeta",
+        "sysroot_ns": 14761292,
+        "root_ns": 251208,
+        "discovery_ns": 3541417
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "zeroize",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libzeroize-0e5ce9bacb5f4308.rmeta",
+        "sysroot_ns": 14234334,
+        "root_ns": 124166,
+        "discovery_ns": 1898000
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "bitflags",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libbitflags-5f5c2f24ffc5fe1c.rmeta",
+        "sysroot_ns": 14239667,
+        "root_ns": 111625,
+        "discovery_ns": 1055000
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "percent_encoding",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libpercent_encoding-37ef885d7fa18f4c.rmeta",
+        "sysroot_ns": 16827208,
+        "root_ns": 177625,
+        "discovery_ns": 1542125
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "once_cell",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libonce_cell-0a0976b59482d558.rmeta",
+        "sysroot_ns": 13781583,
+        "root_ns": 113417,
+        "discovery_ns": 1368500
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "version_check",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libversion_check-195aca2b08b2218c.rmeta",
+        "sysroot_ns": 12734583,
+        "root_ns": 78250,
+        "discovery_ns": 1571917
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "rustls_pki_types",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/librustls_pki_types-f23c208479f6a60b.rmeta",
+        "sysroot_ns": 13607500,
+        "root_ns": 123375,
+        "discovery_ns": 1810542
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "serde",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libserde-94f41745341d2f90.rmeta",
+        "sysroot_ns": 14163041,
+        "root_ns": 165834,
+        "discovery_ns": 16595625
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "build_script_build",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libversion_check-195aca2b08b2218c.rlib",
+        "sysroot_ns": 13820667,
+        "root_ns": 14119792,
+        "discovery_ns": 1033458
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "http_body",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libhttp_body-44b29b31cdf434dc.rmeta",
+        "sysroot_ns": 14019209,
+        "root_ns": 61625,
+        "discovery_ns": 1517875
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "icu_properties_data",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libicu_properties_data-6fc1f7ed269514f2.rmeta",
+        "sysroot_ns": 14266167,
+        "root_ns": 250042,
+        "discovery_ns": 2954958
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "icu_normalizer_data",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libicu_normalizer_data-cab81a9dc4d2c20b.rmeta",
+        "sysroot_ns": 13166833,
+        "root_ns": 110542,
+        "discovery_ns": 1198916
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "getrandom",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libgetrandom-cf274c4f0437ecb5.rmeta",
+        "sysroot_ns": 14099250,
+        "root_ns": 69041,
+        "discovery_ns": 839667
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "untrusted",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libuntrusted-90d4cc07113aa537.rmeta",
+        "sysroot_ns": 14218959,
+        "root_ns": 68250,
+        "discovery_ns": 635750
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "icu_normalizer",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libicu_normalizer-c8e4f7cf0d77a185.rmeta",
+        "sysroot_ns": 13657917,
+        "root_ns": 137291,
+        "discovery_ns": 11797375
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "icu_properties",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libicu_properties-c26e3ef68abf2a2b.rmeta",
+        "sysroot_ns": 13378000,
+        "root_ns": 341250,
+        "discovery_ns": 11105125
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "typenum",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libtypenum-311a1d1e88cb8a0b.rmeta",
+        "sysroot_ns": 14207666,
+        "root_ns": 347584,
+        "discovery_ns": 9693791
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "autocfg",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libautocfg-3cd7061a28c1130a.rmeta",
+        "sysroot_ns": 13802875,
+        "root_ns": 66584,
+        "discovery_ns": 1664208
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "tower_service",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libtower_service-c2837f075e4b025e.rmeta",
+        "sysroot_ns": 13292833,
+        "root_ns": 57583,
+        "discovery_ns": 1041375
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "try_lock",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libtry_lock-017303daf5514a8d.rmeta",
+        "sysroot_ns": 13569500,
+        "root_ns": 53083,
+        "discovery_ns": 636333
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "build_script_build",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libautocfg-3cd7061a28c1130a.rlib",
+        "sysroot_ns": 13895667,
+        "root_ns": 13693416,
+        "discovery_ns": 1119959
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "want",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libwant-377d46cac2edf5bd.rmeta",
+        "sysroot_ns": 13984625,
+        "root_ns": 72541,
+        "discovery_ns": 1252292
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "idna_adapter",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libidna_adapter-ffed8268c988923a.rmeta",
+        "sysroot_ns": 14104666,
+        "root_ns": 76000,
+        "discovery_ns": 12947334
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "generic_array",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libgeneric_array-1e4468a4eed99301.rmeta",
+        "sysroot_ns": 13202958,
+        "root_ns": 189083,
+        "discovery_ns": 1973792
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "httparse",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libhttparse-8bba6c4c427bbb43.rmeta",
+        "sysroot_ns": 14585792,
+        "root_ns": 175417,
+        "discovery_ns": 2097291
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "ring",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libring-3421073a26f6c3c3.rmeta",
+        "sysroot_ns": 14186750,
+        "root_ns": 277333,
+        "discovery_ns": 4387667
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "tracing_core",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libtracing_core-0d931d4f85cfae0d.rmeta",
+        "sysroot_ns": 13917875,
+        "root_ns": 136958,
+        "discovery_ns": 2271667
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "form_urlencoded",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libform_urlencoded-f90ca2d83bb633a2.rmeta",
+        "sysroot_ns": 14405458,
+        "root_ns": 102417,
+        "discovery_ns": 1297000
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "core_foundation",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libcore_foundation-6693f0b15e66eb94.rmeta",
+        "sysroot_ns": 13534167,
+        "root_ns": 154708,
+        "discovery_ns": 2206542
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "tracing_attributes",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libproc_macro2-ed2afefe3f7bd927.rlib",
+        "sysroot_ns": 13804458,
+        "root_ns": 13717667,
+        "discovery_ns": 1284958
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "tracing_attributes",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libquote-df8f46198e30c35b.rlib",
+        "sysroot_ns": 13852458,
+        "root_ns": 14660750,
+        "discovery_ns": 1691667
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "tracing_attributes",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libsyn-bd9e1d5bf0bba7fc.rlib",
+        "sysroot_ns": 14299875,
+        "root_ns": 14286875,
+        "discovery_ns": 1674917
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "subtle",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libsubtle-df8ffb87e30f0ef2.rmeta",
+        "sysroot_ns": 13693875,
+        "root_ns": 82375,
+        "discovery_ns": 991625
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "atomic_waker",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libatomic_waker-53a408e11b95220b.rmeta",
+        "sysroot_ns": 13994291,
+        "root_ns": 59667,
+        "discovery_ns": 786167
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "hyper",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libhyper-8b524d55650868f5.rmeta",
+        "sysroot_ns": 13962167,
+        "root_ns": 256375,
+        "discovery_ns": 7870500
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "tracing",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libtracing-40b61a21a0211c75.rmeta",
+        "sysroot_ns": 13319125,
+        "root_ns": 137042,
+        "discovery_ns": 16120750
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "webpki",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libwebpki-203672f5d5edc792.rmeta",
+        "sysroot_ns": 14813417,
+        "root_ns": 151000,
+        "discovery_ns": 4990833
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "system_configuration",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libsystem_configuration-9a8b0ed3f3fb2afb.rmeta",
+        "sysroot_ns": 14693375,
+        "root_ns": 114625,
+        "discovery_ns": 18924833
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "zmij",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libzmij-62d5c0e5646342aa.rmeta",
+        "sysroot_ns": 14360459,
+        "root_ns": 87750,
+        "discovery_ns": 1008125
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "idna",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libidna-9c92d3faa1db705a.rmeta",
+        "sysroot_ns": 14285542,
+        "root_ns": 107833,
+        "discovery_ns": 17160958
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "sync_wrapper",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libsync_wrapper-120698048ed05f3b.rmeta",
+        "sysroot_ns": 14975875,
+        "root_ns": 95833,
+        "discovery_ns": 1384000
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "rustls",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/librustls-cfdcb75ad1842407.rmeta",
+        "sysroot_ns": 13563458,
+        "root_ns": 559500,
+        "discovery_ns": 12196958
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "ryu",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libryu-44d2c0bacf4342dd.rmeta",
+        "sysroot_ns": 14697709,
+        "root_ns": 87750,
+        "discovery_ns": 1022541
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "ipnet",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libipnet-cb345e56877caa8e.rmeta",
+        "sysroot_ns": 13488750,
+        "root_ns": 148792,
+        "discovery_ns": 1834583
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "tower_layer",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libtower_layer-3d04bc78c5694443.rmeta",
+        "sysroot_ns": 14158875,
+        "root_ns": 83084,
+        "discovery_ns": 1604583
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "base64",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libbase64-e44112297735895b.rmeta",
+        "sysroot_ns": 14552792,
+        "root_ns": 129750,
+        "discovery_ns": 1767958
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "hashbrown",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libhashbrown-6e09da29f783b3e3.rmeta",
+        "sysroot_ns": 14492959,
+        "root_ns": 243208,
+        "discovery_ns": 2676250
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "unicode_width",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libunicode_width-224867fa6d65e533.rmeta",
+        "sysroot_ns": 14132708,
+        "root_ns": 150542,
+        "discovery_ns": 1861708
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "equivalent",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libequivalent-d649a3871765edb4.rmeta",
+        "sysroot_ns": 13649292,
+        "root_ns": 102875,
+        "discovery_ns": 956000
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "getopts",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libgetopts-b7ecbdf71764dde0.rmeta",
+        "sysroot_ns": 14843000,
+        "root_ns": 112125,
+        "discovery_ns": 2004167
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "hyper_util",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libhyper_util-d69e16cd0d4c8c3b.rmeta",
+        "sysroot_ns": 14178833,
+        "root_ns": 276625,
+        "discovery_ns": 13681667
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "indexmap",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libindexmap-b5a3f0384098519a.rmeta",
+        "sysroot_ns": 14539334,
+        "root_ns": 277083,
+        "discovery_ns": 3905583
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "tower",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libtower-8f103d794ac0f725.rmeta",
+        "sysroot_ns": 14867459,
+        "root_ns": 199958,
+        "discovery_ns": 11812958
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "url",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/liburl-0988456d1577aad0.rmeta",
+        "sysroot_ns": 14235458,
+        "root_ns": 132667,
+        "discovery_ns": 16854916
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "num_traits",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libnum_traits-097f929d1f6d9c8b.rmeta",
+        "sysroot_ns": 14302084,
+        "root_ns": 249875,
+        "discovery_ns": 2917541
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "serde_json",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libserde_json-66015f7e12ee7e56.rmeta",
+        "sysroot_ns": 13278250,
+        "root_ns": 239708,
+        "discovery_ns": 4546958
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "getrandom",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libgetrandom-76234583db67fa91.rmeta",
+        "sysroot_ns": 13626542,
+        "root_ns": 85542,
+        "discovery_ns": 1129458
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "crypto_common",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libcrypto_common-dd6842b96b2b2277.rmeta",
+        "sysroot_ns": 12931834,
+        "root_ns": 100000,
+        "discovery_ns": 1481583
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "block_buffer",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libblock_buffer-7e2c560011e022fb.rmeta",
+        "sysroot_ns": 13772750,
+        "root_ns": 73208,
+        "discovery_ns": 2867125
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "webpki_roots",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libwebpki_roots-8b35853d9077e52b.rmeta",
+        "sysroot_ns": 14145125,
+        "root_ns": 103333,
+        "discovery_ns": 1914000
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "iana_time_zone",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libiana_time_zone-64c659366bddd179.rmeta",
+        "sysroot_ns": 14073250,
+        "root_ns": 74959,
+        "discovery_ns": 1284541
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "pulldown_cmark_escape",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libpulldown_cmark_escape-52020fba0f7b69a7.rmeta",
+        "sysroot_ns": 14253917,
+        "root_ns": 67625,
+        "discovery_ns": 1287583
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "zlib_rs",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libzlib_rs-e895157a4c799032.rmeta",
+        "sysroot_ns": 14788250,
+        "root_ns": 177209,
+        "discovery_ns": 2546208
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "unicase",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libunicase-bd8b1a170d387fd3.rmeta",
+        "sysroot_ns": 13717459,
+        "root_ns": 84208,
+        "discovery_ns": 1089917
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "pulldown_cmark",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libpulldown_cmark-e5a0da118bc14167.rmeta",
+        "sysroot_ns": 14490667,
+        "root_ns": 260792,
+        "discovery_ns": 4913166
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "chrono",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libchrono-0542171e04b7d30b.rmeta",
+        "sysroot_ns": 13560250,
+        "root_ns": 351916,
+        "discovery_ns": 10921334
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "digest",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libdigest-8988ee47af6e172c.rmeta",
+        "sysroot_ns": 14788000,
+        "root_ns": 87792,
+        "discovery_ns": 4234000
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "flate2",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libflate2-90155988e2458bc7.rmeta",
+        "sysroot_ns": 14325291,
+        "root_ns": 166667,
+        "discovery_ns": 2600083
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "uuid",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libuuid-16ef9df633a9adb3.rmeta",
+        "sysroot_ns": 14375208,
+        "root_ns": 134375,
+        "discovery_ns": 4304875
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "tower_http",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libtower_http-1f06dbe502c653bb.rmeta",
+        "sysroot_ns": 14706000,
+        "root_ns": 141333,
+        "discovery_ns": 31001792
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "tokio_rustls",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libtokio_rustls-49c0c4710ffb5edc.rmeta",
+        "sysroot_ns": 13805000,
+        "root_ns": 90083,
+        "discovery_ns": 10158625
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "crc32fast",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libcrc32fast-380d052a77cd660f.rmeta",
+        "sysroot_ns": 14216417,
+        "root_ns": 111583,
+        "discovery_ns": 1387667
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "serde_urlencoded",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libserde_urlencoded-1581fa851d89bf2d.rmeta",
+        "sysroot_ns": 14321042,
+        "root_ns": 114291,
+        "discovery_ns": 7084625
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "hyper_rustls",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libhyper_rustls-4a7d1c86c6bed221.rmeta",
+        "sysroot_ns": 14533250,
+        "root_ns": 104000,
+        "discovery_ns": 22545708
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "http_body_util",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libhttp_body_util-dd67076514bfd02e.rmeta",
+        "sysroot_ns": 14121917,
+        "root_ns": 194667,
+        "discovery_ns": 2610458
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "tokio_util",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libtokio_util-8e3131c77978314b.rmeta",
+        "sysroot_ns": 13980625,
+        "root_ns": 184083,
+        "discovery_ns": 7459750
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "futures_executor",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libfutures_executor-d9f7b8f09db2cdc0.rmeta",
+        "sysroot_ns": 13898833,
+        "root_ns": 72333,
+        "discovery_ns": 4333167
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "thiserror_impl",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libproc_macro2-ed2afefe3f7bd927.rlib",
+        "sysroot_ns": 14501459,
+        "root_ns": 13827708,
+        "discovery_ns": 1400708
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "thiserror_impl",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libquote-df8f46198e30c35b.rlib",
+        "sysroot_ns": 13702250,
+        "root_ns": 14139875,
+        "discovery_ns": 1712041
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "thiserror_impl",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libsyn-804e1da7bee6720d.rlib",
+        "sysroot_ns": 13970083,
+        "root_ns": 13891625,
+        "discovery_ns": 1814209
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "cpufeatures",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libcpufeatures-48ac0232e69c8964.rmeta",
+        "sysroot_ns": 13782208,
+        "root_ns": 68708,
+        "discovery_ns": 793375
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "unsafe_libyaml",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libunsafe_libyaml-82db630b6f0e6423.rmeta",
+        "sysroot_ns": 13982667,
+        "root_ns": 147458,
+        "discovery_ns": 1679958
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "log",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/liblog-f6d71a11c25911d5.rmeta",
+        "sysroot_ns": 14879792,
+        "root_ns": 108833,
+        "discovery_ns": 1291792
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "typed_path",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libtyped_path-7ad93d6b37362ed2.rmeta",
+        "sysroot_ns": 14168041,
+        "root_ns": 299417,
+        "discovery_ns": 4435583
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "reqwest",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libreqwest-fe6e4c1ab3fe0d6d.rmeta",
+        "sysroot_ns": 14222833,
+        "root_ns": 242625,
+        "discovery_ns": 42535792
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "thiserror",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libthiserror-66640b89fdd1c8f0.rmeta",
+        "sysroot_ns": 14513791,
+        "root_ns": 108209,
+        "discovery_ns": 15802708
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "serde_yaml_ng",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libserde_yaml_ng-0567742b0b1dc1d1.rmeta",
+        "sysroot_ns": 13539166,
+        "root_ns": 326167,
+        "discovery_ns": 10158542
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "sha2",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libsha2-1601e36a0b1ba348.rmeta",
+        "sysroot_ns": 14764458,
+        "root_ns": 14615625,
+        "discovery_ns": 4470208
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "zip",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libzip-ec8df72f736c34a9.rmeta",
+        "sysroot_ns": 14747500,
+        "root_ns": 230417,
+        "discovery_ns": 5598666
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "harness_proto",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libharness_proto-a9623e7cfcc2e9d0.rmeta",
+        "sysroot_ns": 14601417,
+        "root_ns": 881417,
+        "discovery_ns": 20863125
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "futures",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libfutures-9a024f57b7c25c9b.rmeta",
+        "sysroot_ns": 14751042,
+        "root_ns": 78167,
+        "discovery_ns": 3887583
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "anyhow",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libanyhow-3d654b9144e6a33e.rmeta",
+        "sysroot_ns": 14794166,
+        "root_ns": 147042,
+        "discovery_ns": 2015792
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "deser_hjson",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libdeser_hjson-ba20530e097cc3cb.rmeta",
+        "sysroot_ns": 14323458,
+        "root_ns": 117125,
+        "discovery_ns": 6823500
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "async_trait",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libproc_macro2-ed2afefe3f7bd927.rlib",
+        "sysroot_ns": 14539458,
+        "root_ns": 14483375,
+        "discovery_ns": 1457167
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "async_trait",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libquote-df8f46198e30c35b.rlib",
+        "sysroot_ns": 14230333,
+        "root_ns": 14572459,
+        "discovery_ns": 1645666
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "async_trait",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libsyn-804e1da7bee6720d.rlib",
+        "sysroot_ns": 14680084,
+        "root_ns": 14234583,
+        "discovery_ns": 1948667
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "semver",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libsemver-0cde153d1b3df50b.rmeta",
+        "sysroot_ns": 14141084,
+        "root_ns": 96583,
+        "discovery_ns": 1541667
+      }
+    },
+    {
+      "label": "graph",
+      "crate": "harness_adapters",
+      "data": {
+        "artifact": "/private/tmp/nanocompile-cold-20261010/profile-capture/target/release/deps/libharness_adapters-17d251dcff5f9858.rmeta",
+        "sysroot_ns": 14904166,
+        "root_ns": 14628584,
+        "discovery_ns": 98353958
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "build_script_build",
+      "data": {
+        "key": "318bd4adaa9baa19a83e2d11ab99f5f918968c31dbcb460429b0f53fda2aa99c",
+        "mode": "producer",
+        "pre_ns": 878705791,
+        "compiler_ns": 160453500,
+        "post_ns": 45132459
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "build_script_build",
+      "data": {
+        "key": "1d01832bcb05d7b0370b888862ed46307302d5f7bce417f0dace0a4306c8e63c",
+        "mode": "producer",
+        "pre_ns": 877916834,
+        "compiler_ns": 132214666,
+        "post_ns": 49089875
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "build_script_build",
+      "data": {
+        "key": "96c76d71997f3a429907166759d1b36b9e4a16fae62b19c9f23a517ac1f27930",
+        "mode": "producer",
+        "pre_ns": 876575125,
+        "compiler_ns": 117163791,
+        "post_ns": 55119584
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "unicode_ident",
+      "data": {
+        "key": "2dd38a7771bfa5a695b77c645c42e484444dfcef2e13f5aa7e82c24c0ea7ab8b",
+        "mode": "ordinary",
+        "pre_ns": 873768375,
+        "compiler_ns": 37917792,
+        "post_ns": 46541750
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "cfg_if",
+      "data": {
+        "key": "891dde502081f4ae666b27a81f4c33bdf5c9e652fea8f2a3ae7098fb6b28c334",
+        "mode": "ordinary",
+        "pre_ns": 48277500,
+        "compiler_ns": 21028083,
+        "post_ns": 16345250
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "smallvec",
+      "data": {
+        "key": "15401839cfa7fd6cbf289f79ec3694a00326c552e384a0f97b88d6e5292d3dd4",
+        "mode": "ordinary",
+        "pre_ns": 35882209,
+        "compiler_ns": 82752583,
+        "post_ns": 31256625
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "stable_deref_trait",
+      "data": {
+        "key": "8c08e1ce992554100e28f29d1e476438387bc952fb75b1779a5eac56ebf9a836",
+        "mode": "ordinary",
+        "pre_ns": 38564416,
+        "compiler_ns": 19223667,
+        "post_ns": 15509458
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "pin_project_lite",
+      "data": {
+        "key": "c2f2e0f79f539252a65bb63dba014be553f89f1891d3acf9932ecdf326303fbe",
+        "mode": "ordinary",
+        "pre_ns": 37086916,
+        "compiler_ns": 26174584,
+        "post_ns": 16701208
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "futures_core",
+      "data": {
+        "key": "2d0a5b222bd64b2135f0397d244573b3401faa64492d1a5478445c1fb752baf2",
+        "mode": "ordinary",
+        "pre_ns": 38472792,
+        "compiler_ns": 44147208,
+        "post_ns": 246078125
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "libc",
+      "data": {
+        "key": "28c689dbca5bd84e7fa11435d49820da3cf16e3afa0dc2224b968761ffbf4431",
+        "mode": "ordinary",
+        "pre_ns": 1527708,
+        "compiler_ns": 224075417,
+        "post_ns": 29550666
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "bytes",
+      "data": {
+        "key": "96e5ff91a95856e705fefbb7082fad4f197ebaa879ebbfe0b9e0d04ce4d61131",
+        "mode": "ordinary",
+        "pre_ns": 38818833,
+        "compiler_ns": 296968792,
+        "post_ns": 22647416
+      }
+    },
+    {
+      "label": "miss",
+      "crate": null,
+      "data": {
+        "key": "bb4e3d2361e34d361fb9bf123cf66a17111791bee961e4a0c629df70ba405a4b",
+        "mode": "ordinary",
+        "pre_ns": 1535166,
+        "compiler_ns": 19426834,
+        "post_ns": 1909708
+      }
+    },
+    {
+      "label": "miss",
+      "crate": null,
+      "data": {
+        "key": "4a9a6aad52f5bc7a47c06a630ade6d5b802e4a421d4419d51d40325d360240d0",
+        "mode": "ordinary",
+        "pre_ns": 1310000,
+        "compiler_ns": 20111250,
+        "post_ns": 1271416
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "proc_macro2",
+      "data": {
+        "key": "b16b0b50f9193e891e73716e88715ac1de8af34ddb7cc7f9106687ba14d1b583",
+        "mode": "ordinary",
+        "pre_ns": 1886333,
+        "compiler_ns": 251773625,
+        "post_ns": 50420542
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "itoa",
+      "data": {
+        "key": "5dd2a6e1c01a9c7b06090cf6684eb486c10359b345144a06011a58b03047fe8b",
+        "mode": "ordinary",
+        "pre_ns": 41729625,
+        "compiler_ns": 73944500,
+        "post_ns": 16181125
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "build_script_build",
+      "data": {
+        "key": "2f4d11f9b80e687f2fe42b925e5c9e040e31652792671b6b590787a336f2603a",
+        "mode": "producer",
+        "pre_ns": 66996542,
+        "compiler_ns": 110256250,
+        "post_ns": 51655791
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "quote",
+      "data": {
+        "key": "6aa595659a4035bb87e7e260a1beb3ba05959e17bced006794db815329565134",
+        "mode": "ordinary",
+        "pre_ns": 2010792,
+        "compiler_ns": 98739667,
+        "post_ns": 33979541
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "memchr",
+      "data": {
+        "key": "ad69759e8fb6f097edf2edb8ee20b1eb7ae144332f75fcc12b9f051320ed36be",
+        "mode": "ordinary",
+        "pre_ns": 44656083,
+        "compiler_ns": 281073250,
+        "post_ns": 22835500
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "scopeguard",
+      "data": {
+        "key": "431644e9ab5bfbdc47b32e885d10c450ce254044021db1d034a2305fea4bd055",
+        "mode": "ordinary",
+        "pre_ns": 42283625,
+        "compiler_ns": 30880375,
+        "post_ns": 16804167
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "syn",
+      "data": {
+        "key": "4188a06b3095503b77cae606ec9a649a2f4c3a880161b6084dc112992761fe69",
+        "mode": "ordinary",
+        "pre_ns": 42160750,
+        "compiler_ns": 1920675709,
+        "post_ns": 58058583
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "syn",
+      "data": {
+        "key": "318c1e78d32d3481871cccae61a97cfcc98159c66e20591fdbb75d03b0455fef",
+        "mode": "ordinary",
+        "pre_ns": 38357791,
+        "compiler_ns": 2069149875,
+        "post_ns": 58601959
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "futures_sink",
+      "data": {
+        "key": "3ee94a12d470a2fdf3140201884fe01c888aeb040e0ad33b44a7bd836b0925ae",
+        "mode": "ordinary",
+        "pre_ns": 39618625,
+        "compiler_ns": 34386041,
+        "post_ns": 17803209
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "build_script_build",
+      "data": {
+        "key": "11a4edcbf42b1fdc9f563c9df27faf33815cce8af6ea4d4311edfa7392defe44",
+        "mode": "producer",
+        "pre_ns": 63253375,
+        "compiler_ns": 127802750,
+        "post_ns": 51963542
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "parking_lot_core",
+      "data": {
+        "key": "cbf0cd8e7b052844208501565ab7d42f25cda31db990f903567c67a43ad49216",
+        "mode": "ordinary",
+        "pre_ns": 3772542,
+        "compiler_ns": 121770667,
+        "post_ns": 23550416
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "lock_api",
+      "data": {
+        "key": "a7b6b56bb996b11adaf63d38ec6845a25dd0c32e097b7358a3c2c2af3cb467d7",
+        "mode": "ordinary",
+        "pre_ns": 40043167,
+        "compiler_ns": 87740666,
+        "post_ns": 18932959
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "errno",
+      "data": {
+        "key": "e7552a8d977aa12a22056547b2ffa274d5c73913921440a31348746636c23a1b",
+        "mode": "ordinary",
+        "pre_ns": 41314750,
+        "compiler_ns": 46175917,
+        "post_ns": 19419792
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "find_msvc_tools",
+      "data": {
+        "key": "ff074affa6ef9d438667ccd8353b87cf88c723373ca1a3e4c71146dc2eb7df0c",
+        "mode": "ordinary",
+        "pre_ns": 39530208,
+        "compiler_ns": 86221250,
+        "post_ns": 18283042
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "shlex",
+      "data": {
+        "key": "811e2054ac25722e8758e87b0c26be2921d50e455687b2a3cea628b1b39f4b83",
+        "mode": "ordinary",
+        "pre_ns": 38613125,
+        "compiler_ns": 62352417,
+        "post_ns": 17450166
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "serde_core",
+      "data": {
+        "key": "69dd200ba8a51f546676335969590e6690195aef383daaf6578ae64b73528333",
+        "mode": "ordinary",
+        "pre_ns": 1641250,
+        "compiler_ns": 977198000,
+        "post_ns": 34222125
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "cc",
+      "data": {
+        "key": "7e750a999a188163bf1c0df376a320ff6986d78cb01f642197429efa306cca15",
+        "mode": "ordinary",
+        "pre_ns": 39688458,
+        "compiler_ns": 568690417,
+        "post_ns": 23895625
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "signal_hook_registry",
+      "data": {
+        "key": "d51da05ee0086f111b35ec08956bd9af776f21f79553d71e09942ea36437de0b",
+        "mode": "ordinary",
+        "pre_ns": 41527708,
+        "compiler_ns": 143254875,
+        "post_ns": 21404750
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "parking_lot",
+      "data": {
+        "key": "9b37c0bf58c386e00dff2402f1a7583a1d6a9bb9b55674ae04abb028001673de",
+        "mode": "ordinary",
+        "pre_ns": 39834083,
+        "compiler_ns": 287888000,
+        "post_ns": 21143417
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "futures_channel",
+      "data": {
+        "key": "20a0dfbb203f4a4fffee1b28b50be4afbb34fe79c210eefb8ccc152de7464d2d",
+        "mode": "ordinary",
+        "pre_ns": 40611834,
+        "compiler_ns": 94296958,
+        "post_ns": 21895167
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "zerovec_derive",
+      "data": {
+        "key": "4404df254201b53a6d9adb534e68273a3b73d17eb55d07f68b8b519d6bf80a04",
+        "mode": "producer",
+        "pre_ns": 75202209,
+        "compiler_ns": 437679791,
+        "post_ns": 158814000
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "displaydoc",
+      "data": {
+        "key": "3cb575004affbc42adc050da356fe60f07e5af3f582d20657cd3d2058c74eb63",
+        "mode": "producer",
+        "pre_ns": 71877125,
+        "compiler_ns": 290610625,
+        "post_ns": 162827208
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "synstructure",
+      "data": {
+        "key": "ec1b519dbdbb0f86fe4c578613639a902ae63ca22684d36cc982101bfeb08554",
+        "mode": "ordinary",
+        "pre_ns": 39574667,
+        "compiler_ns": 231522292,
+        "post_ns": 39426916
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "tokio_macros",
+      "data": {
+        "key": "7fcac8f1828f65d3f64673de1729aca2848720dbcdb7caebdbb3da463993f907",
+        "mode": "producer",
+        "pre_ns": 63377291,
+        "compiler_ns": 275089250,
+        "post_ns": 162159417
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "zerofrom_derive",
+      "data": {
+        "key": "64fdcc831d9d6c9908a64e509a3b6f96a3e015015ea093a900f0ef8a76bffed5",
+        "mode": "producer",
+        "pre_ns": 73648750,
+        "compiler_ns": 502214333,
+        "post_ns": 195967084
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "yoke_derive",
+      "data": {
+        "key": "7e677eab84eaf0e6db6cbe767cb4613b4c3db5dc058a0b9b54f28e9ffe24d3aa",
+        "mode": "producer",
+        "pre_ns": 68723000,
+        "compiler_ns": 439885541,
+        "post_ns": 195278834
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "socket2",
+      "data": {
+        "key": "70854744be3bce08e48796788645446313abe792eba0ef235dcc9b90f075c0c6",
+        "mode": "ordinary",
+        "pre_ns": 44515250,
+        "compiler_ns": 219325958,
+        "post_ns": 20993250
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "mio",
+      "data": {
+        "key": "c4f424cec7373039d06f2f41ab681180808227a4f0b408966077fcfa0fa5924f",
+        "mode": "ordinary",
+        "pre_ns": 43489958,
+        "compiler_ns": 272296292,
+        "post_ns": 25485667
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "core_foundation_sys",
+      "data": {
+        "key": "2926b7893117df0cf5cda51ec7d6cb339d0da4c14ce17482e2337cead37920f1",
+        "mode": "ordinary",
+        "pre_ns": 42892833,
+        "compiler_ns": 79848542,
+        "post_ns": 22725125
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "litemap",
+      "data": {
+        "key": "a50434a95c163fcdeafe49dff48c7a0508ce8b0c0bff0f38eb44d58c0cc1b18e",
+        "mode": "ordinary",
+        "pre_ns": 38849291,
+        "compiler_ns": 75408000,
+        "post_ns": 16945334
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "writeable",
+      "data": {
+        "key": "bdece2edfe13f72aad6cd950a6e6936862cd6129182a15a726afa2ad31a63284",
+        "mode": "ordinary",
+        "pre_ns": 37236833,
+        "compiler_ns": 97736708,
+        "post_ns": 18897917
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "tokio",
+      "data": {
+        "key": "8d6becb4ce4ac7df2ec36e4d9babe7cdeeb8719df12f77fe17dac4e08f56d053",
+        "mode": "ordinary",
+        "pre_ns": 40878167,
+        "compiler_ns": 3919160500,
+        "post_ns": 92000750
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "zerofrom",
+      "data": {
+        "key": "cffd5a19f43b4dfec4071815a62fc596a1e90422c91c05a991de0b851d3f3b57",
+        "mode": "ordinary",
+        "pre_ns": 41954459,
+        "compiler_ns": 306918500,
+        "post_ns": 37912708
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "futures_macro",
+      "data": {
+        "key": "1598e7d1ed6cad925fc5f355e3c8763c3832cf63df615cb0c99e074bafa96f56",
+        "mode": "producer",
+        "pre_ns": 69036417,
+        "compiler_ns": 300674125,
+        "post_ns": 150487875
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "build_script_build",
+      "data": {
+        "key": "5dcfe3f7cd7b711af39a0ba3af5c8d7a3d927f7b3240d81e53e132bf176e1db8",
+        "mode": "producer",
+        "pre_ns": 60382792,
+        "compiler_ns": 190894750,
+        "post_ns": 90465833
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "yoke",
+      "data": {
+        "key": "7ef296245c92bf52edece0db0220379407b55bc2f330de9adee48bfddafc3f44",
+        "mode": "ordinary",
+        "pre_ns": 41092208,
+        "compiler_ns": 347093667,
+        "post_ns": 34102917
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "build_script_build",
+      "data": {
+        "key": "cf16ebd1272946626bdee5da37615adc51d28048f0cb972bad28054ab5af0acd",
+        "mode": "producer",
+        "pre_ns": 57993250,
+        "compiler_ns": 91067500,
+        "post_ns": 46968833
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "build_script_build",
+      "data": {
+        "key": "f696d3e5350635761fdb7cd8c0e90eb9ba22ab1b0f722cf5da858f2f5a186fe5",
+        "mode": "producer",
+        "pre_ns": 58326792,
+        "compiler_ns": 123883958,
+        "post_ns": 47781583
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "utf8_iter",
+      "data": {
+        "key": "dc1e1cfeaa5a52356fd2a0691f6dd52e077a673859087b23abb1a5fb81f716b3",
+        "mode": "ordinary",
+        "pre_ns": 35698417,
+        "compiler_ns": 47328500,
+        "post_ns": 19804791
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "futures_task",
+      "data": {
+        "key": "d5443b4b92acbafb52c2c94d9e8170b40a7f6b4d3366a6538bd60b85208f4589",
+        "mode": "ordinary",
+        "pre_ns": 38253208,
+        "compiler_ns": 52616792,
+        "post_ns": 18575000
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "zerovec",
+      "data": {
+        "key": "ba4399a5d68cd2a30a840bbd48c453268989f68c64a6c933e6f142172fc43ada",
+        "mode": "ordinary",
+        "pre_ns": 39168084,
+        "compiler_ns": 532840166,
+        "post_ns": 42236375
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "zerotrie",
+      "data": {
+        "key": "b6032e0933aae569b3951659459ad64c7da23fe42d2f6b85dbaf88246e1c2ff8",
+        "mode": "ordinary",
+        "pre_ns": 38198709,
+        "compiler_ns": 405109041,
+        "post_ns": 39962292
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "futures_io",
+      "data": {
+        "key": "85e745dd6fa5d889fc8685d283d7d16199c3b2ae18e04c13ce80c63aff7eddb7",
+        "mode": "ordinary",
+        "pre_ns": 35445750,
+        "compiler_ns": 53022542,
+        "post_ns": 18649792
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "build_script_build",
+      "data": {
+        "key": "854af1dd05f3162df26d7a0af4f587b11e439f8af5f2511d417c31741469214f",
+        "mode": "producer",
+        "pre_ns": 60097250,
+        "compiler_ns": 92358750,
+        "post_ns": 48681500
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "slab",
+      "data": {
+        "key": "a8e1bfa1a17079efabf4d1bf0a59c752e3c6269453bf9f735ffe64268373744c",
+        "mode": "ordinary",
+        "pre_ns": 39199167,
+        "compiler_ns": 68748875,
+        "post_ns": 17906417
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "futures_util",
+      "data": {
+        "key": "1f3c57e7828b7b655ab1257c78097ed66e1066209701bfb4591db99a739a62e2",
+        "mode": "ordinary",
+        "pre_ns": 42827958,
+        "compiler_ns": 1416282084,
+        "post_ns": 65961875
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "tinystr",
+      "data": {
+        "key": "e90241ccf1be6edb31dbc7b08813060b702f6db591cdc8c050f6e6fcecfeebe7",
+        "mode": "ordinary",
+        "pre_ns": 39814291,
+        "compiler_ns": 69939125,
+        "post_ns": 25026084
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "icu_locale_core",
+      "data": {
+        "key": "bb25bb5e670879e5a9497b4fa0a3947900db91134f8450b8c105bbce2fa250c3",
+        "mode": "ordinary",
+        "pre_ns": 43083333,
+        "compiler_ns": 821196417,
+        "post_ns": 34485292
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "potential_utf",
+      "data": {
+        "key": "3d59c765eefaafef3138ef0d554ff3cc02ee36e956c6e8679b0a76b65d4ff749",
+        "mode": "ordinary",
+        "pre_ns": 35998833,
+        "compiler_ns": 51045708,
+        "post_ns": 23257584
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "icu_collections",
+      "data": {
+        "key": "cdc1a415fe1c4005995bc05c42c035224d5b1c356cceff494938cefa8171e5fb",
+        "mode": "ordinary",
+        "pre_ns": 39828417,
+        "compiler_ns": 239679708,
+        "post_ns": 27404917
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "icu_provider",
+      "data": {
+        "key": "fdd7149aefd968c3dd52b4f8a4e882e660807272f08206b5043c0e5b39b59e6a",
+        "mode": "ordinary",
+        "pre_ns": 41565042,
+        "compiler_ns": 179602167,
+        "post_ns": 28124333
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "serde_derive",
+      "data": {
+        "key": "c4bc4e7fd62d71289e90bd920cc7ebb24935fefee18095ad2ade405fa25af738",
+        "mode": "producer",
+        "pre_ns": 65579792,
+        "compiler_ns": 1184824041,
+        "post_ns": 156844084
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "http",
+      "data": {
+        "key": "7a55fa32083170b65b9772a1fbcc303b2847c4b83cbc2bc8dc6cb125564eb0a8",
+        "mode": "ordinary",
+        "pre_ns": 36140291,
+        "compiler_ns": 592246459,
+        "post_ns": 24866500
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "zeroize",
+      "data": {
+        "key": "1aee2582e61934944c1933060f9877be69a7de4f330c264094e283afd83a561c",
+        "mode": "ordinary",
+        "pre_ns": 37813666,
+        "compiler_ns": 58327792,
+        "post_ns": 19181208
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "bitflags",
+      "data": {
+        "key": "ee0aae356276c68b7c53564ed477c7f57b1dd5454c6adf0a254ab60bbe10f08b",
+        "mode": "ordinary",
+        "pre_ns": 37969042,
+        "compiler_ns": 107718000,
+        "post_ns": 18216333
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "percent_encoding",
+      "data": {
+        "key": "935e9841e3cf246e2ad51d146a50639df8b43a7d3423571f674910e8a7fe7471",
+        "mode": "ordinary",
+        "pre_ns": 38654333,
+        "compiler_ns": 83049417,
+        "post_ns": 22231250
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "once_cell",
+      "data": {
+        "key": "d429b084be5fbafeab0581570cb7de5bddbb5ee2db20a802d1d8e38639e91319",
+        "mode": "ordinary",
+        "pre_ns": 37980334,
+        "compiler_ns": 81866500,
+        "post_ns": 17670458
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "version_check",
+      "data": {
+        "key": "aae5024608ec9063ab175c7ef01e919d639af3209c68d3884f082ccb0870011a",
+        "mode": "ordinary",
+        "pre_ns": 36634750,
+        "compiler_ns": 107052000,
+        "post_ns": 16637958
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "rustls_pki_types",
+      "data": {
+        "key": "1eda5efe60c862fdb9beb25e8328c9a2fcfaa9afa70b86ae875c2fd0e5daaea1",
+        "mode": "ordinary",
+        "pre_ns": 37801000,
+        "compiler_ns": 266283250,
+        "post_ns": 19371167
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "serde",
+      "data": {
+        "key": "d9c54270f11665a22e6dbe44f0ea0814a5e8fcb330044b3572aa2b450899bc73",
+        "mode": "ordinary",
+        "pre_ns": 6703666,
+        "compiler_ns": 552135084,
+        "post_ns": 39886083
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "build_script_build",
+      "data": {
+        "key": "46a6b1d609209813fee7f0b3ac9bbbd874a2f241426953d7bb316e24d58d71a9",
+        "mode": "producer",
+        "pre_ns": 58218167,
+        "compiler_ns": 90118708,
+        "post_ns": 76114625
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "http_body",
+      "data": {
+        "key": "f32e6abaa64aecb1f0acccfe6f001db758f9f17d89cbb7844162cae8f12b3642",
+        "mode": "ordinary",
+        "pre_ns": 39311834,
+        "compiler_ns": 45617041,
+        "post_ns": 25138125
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "icu_properties_data",
+      "data": {
+        "key": "921802063d0ccbd73fee6473eebbe838a794751f5dcf5e52191b83d5bfbe5952",
+        "mode": "ordinary",
+        "pre_ns": 1596416,
+        "compiler_ns": 50018292,
+        "post_ns": 26771333
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "icu_normalizer_data",
+      "data": {
+        "key": "8748a332f45695068711bddb39b823b6b4520773ba17f6f84f4ab63e96a6d81b",
+        "mode": "ordinary",
+        "pre_ns": 1890375,
+        "compiler_ns": 23428459,
+        "post_ns": 17163916
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "getrandom",
+      "data": {
+        "key": "298674ac67ebf32181d451ad998cc677af1cbf7e620c418080c41c1ebb82b142",
+        "mode": "ordinary",
+        "pre_ns": 39001917,
+        "compiler_ns": 59448500,
+        "post_ns": 19099583
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "untrusted",
+      "data": {
+        "key": "2b6b6770aa6d7f82a23e3b4971458ca41ffb14247633ab594724e5522af0b236",
+        "mode": "ordinary",
+        "pre_ns": 34825334,
+        "compiler_ns": 39898083,
+        "post_ns": 16757292
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "build_script_build",
+      "data": {
+        "key": "5e7e35d24812914a48db69075a8bc0a768e0163f34219bfae51ae725bd471ab9",
+        "mode": "producer",
+        "pre_ns": 62456708,
+        "compiler_ns": 146381625,
+        "post_ns": 46017958
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "build_script_build",
+      "data": {
+        "key": "2acf4deaadbcdf33ea5a00b5cbd1359ee516d79c8b9a854ecc991f9b8e1a159e",
+        "mode": "producer",
+        "pre_ns": 58630625,
+        "compiler_ns": 110713500,
+        "post_ns": 51797667
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "icu_normalizer",
+      "data": {
+        "key": "4f12612f1fda6a193bffb4dc93e57c7211b341fc280f15eb8731439d0279fb9f",
+        "mode": "ordinary",
+        "pre_ns": 44575541,
+        "compiler_ns": 359432792,
+        "post_ns": 31687042
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "icu_properties",
+      "data": {
+        "key": "7aacc637aab353e87b7b58e447f98bdcaa19026a49cff2bd00da20e0b42fb4be",
+        "mode": "ordinary",
+        "pre_ns": 46232000,
+        "compiler_ns": 551674833,
+        "post_ns": 40418083
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "typenum",
+      "data": {
+        "key": "a602a503fb2d925406690ad96d40c3375643913400a898a8770daaca9f486efe",
+        "mode": "ordinary",
+        "pre_ns": 35832917,
+        "compiler_ns": 275474250,
+        "post_ns": 31823375
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "build_script_build",
+      "data": {
+        "key": "65b5bc1a61ca55607c424c64fda9e7f152fdeda3e562f91a63e2c4a21e43caa3",
+        "mode": "producer",
+        "pre_ns": 60730875,
+        "compiler_ns": 117464208,
+        "post_ns": 46633042
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "autocfg",
+      "data": {
+        "key": "af0d0399e0dd30b3510b78d21b44350d7e8d1d7be45b633fd1f5a726ad80d998",
+        "mode": "ordinary",
+        "pre_ns": 39624375,
+        "compiler_ns": 150115667,
+        "post_ns": 18299792
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "tower_service",
+      "data": {
+        "key": "7803849f735d5e664724567793ca7da5759c6fe9dd45278033ca011cd74088c8",
+        "mode": "ordinary",
+        "pre_ns": 40172416,
+        "compiler_ns": 24109625,
+        "post_ns": 15900792
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "try_lock",
+      "data": {
+        "key": "8fe1d5a7055ce736ba4411d9b98859fe568e52292e2095a7272f536501110552",
+        "mode": "ordinary",
+        "pre_ns": 40086875,
+        "compiler_ns": 28431625,
+        "post_ns": 17249958
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "build_script_build",
+      "data": {
+        "key": "431fbd0b8e7c2e627315080bd58bcc3d439e20cde83db41c3bb906c1bb211872",
+        "mode": "producer",
+        "pre_ns": 60970750,
+        "compiler_ns": 94560459,
+        "post_ns": 51549166
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "build_script_build",
+      "data": {
+        "key": "977e9f7a8b82302dca298abd926dcf5c41abc63df4dd10ca72f65eabc3796bc8",
+        "mode": "producer",
+        "pre_ns": 57425500,
+        "compiler_ns": 94826791,
+        "post_ns": 79830542
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "want",
+      "data": {
+        "key": "3970b1e77a54a6ae290b910880a5f7666b01dd41decce62e2404017cfe5a674f",
+        "mode": "ordinary",
+        "pre_ns": 36845917,
+        "compiler_ns": 59060291,
+        "post_ns": 17166917
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "idna_adapter",
+      "data": {
+        "key": "a03467533452d7d761887a3dead6e3b17d6815f25eee3258c6542e40947e0f19",
+        "mode": "ordinary",
+        "pre_ns": 40032125,
+        "compiler_ns": 37378709,
+        "post_ns": 31389500
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "generic_array",
+      "data": {
+        "key": "542df5974ddd545db3d64942bcec45b5825aadeec524debfe50664c699363097",
+        "mode": "ordinary",
+        "pre_ns": 3596000,
+        "compiler_ns": 244122125,
+        "post_ns": 20518875
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "httparse",
+      "data": {
+        "key": "86e7881707216d4df2abc0c9ccfedffaf8a32ecf4e40199dcc36145d6e2e6c66",
+        "mode": "ordinary",
+        "pre_ns": 1809958,
+        "compiler_ns": 152057792,
+        "post_ns": 20406833
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "ring",
+      "data": {
+        "key": "8df151076aa33820bdd60d7e3614ec46b24d569028d61fff458a9bbe0dc2ffab",
+        "mode": "ordinary",
+        "pre_ns": 6243500,
+        "compiler_ns": 1109053708,
+        "post_ns": 35715584
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "tracing_core",
+      "data": {
+        "key": "2b1e489f8e7bcdbdaaef50b28a99c13b151a77b52524e1c716d91f90ebb88dd4",
+        "mode": "ordinary",
+        "pre_ns": 37700917,
+        "compiler_ns": 298159333,
+        "post_ns": 20526250
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "form_urlencoded",
+      "data": {
+        "key": "366d18644bd91dc571b2eb5a5fedc420a237a42b2aba1f9e0518eee3099cded3",
+        "mode": "ordinary",
+        "pre_ns": 33388167,
+        "compiler_ns": 71237500,
+        "post_ns": 17719333
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "core_foundation",
+      "data": {
+        "key": "c9fdb7c3ee34600f0066a1043d616da30b380d9c4156e869bf53ee6af493b094",
+        "mode": "ordinary",
+        "pre_ns": 38292500,
+        "compiler_ns": 161099500,
+        "post_ns": 22055916
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "tracing_attributes",
+      "data": {
+        "key": "f564076e01e06831af3ca6a087f332e360842ca5b57c91734869bfc334a33200",
+        "mode": "producer",
+        "pre_ns": 67043917,
+        "compiler_ns": 519226166,
+        "post_ns": 155074625
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "build_script_build",
+      "data": {
+        "key": "1cc02c7933c45ebfd13b59189736e90d3896fcca0fcc415ede2aa3a6c6b84087",
+        "mode": "producer",
+        "pre_ns": 55649083,
+        "compiler_ns": 94107500,
+        "post_ns": 46791459
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "subtle",
+      "data": {
+        "key": "bdbf211a97e542098b4d0370d6973203096990a1bda800a704ffa7cdc2a8b2a1",
+        "mode": "ordinary",
+        "pre_ns": 38192375,
+        "compiler_ns": 48798292,
+        "post_ns": 16627250
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "build_script_build",
+      "data": {
+        "key": "2e8a7a1049b69ae1747678cd2129f74682691dd601ef66b048aa6ffd7886519d",
+        "mode": "producer",
+        "pre_ns": 62540750,
+        "compiler_ns": 105738333,
+        "post_ns": 47041584
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "atomic_waker",
+      "data": {
+        "key": "4c62baebd2f1c9afb442a1f5dfb562c3e00ccf98a5685568fcda92de88e30877",
+        "mode": "ordinary",
+        "pre_ns": 38096750,
+        "compiler_ns": 37393083,
+        "post_ns": 16823000
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "hyper",
+      "data": {
+        "key": "bb92d883d3914fa0bb11b4efaa30b5439339459286097c1fa28fff512e34ebad",
+        "mode": "ordinary",
+        "pre_ns": 49190958,
+        "compiler_ns": 893684209,
+        "post_ns": 38404833
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "tracing",
+      "data": {
+        "key": "4e031566f2e73536c3f726fe9436e3d0de9d8f01d93fd1936e1b022a7c58b4b3",
+        "mode": "ordinary",
+        "pre_ns": 41513667,
+        "compiler_ns": 401436875,
+        "post_ns": 35309750
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "webpki",
+      "data": {
+        "key": "f8a6c3f22cabd1d1cdb519c9a069badd9474f4c0dd23cbc136fe179e6f8b9ab5",
+        "mode": "ordinary",
+        "pre_ns": 40965875,
+        "compiler_ns": 662588833,
+        "post_ns": 29558459
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "system_configuration",
+      "data": {
+        "key": "21176a574dc9de7af44a5f7f469291e9bab4ba8b832bf7c20e15e06ebadd9a77",
+        "mode": "ordinary",
+        "pre_ns": 35802542,
+        "compiler_ns": 139597500,
+        "post_ns": 37180167
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "zmij",
+      "data": {
+        "key": "c86d2d81e58ff5ccabf9d2a55acdc4584e5540a655c1aef47edf9f639759382e",
+        "mode": "ordinary",
+        "pre_ns": 1858375,
+        "compiler_ns": 137526000,
+        "post_ns": 17855042
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "idna",
+      "data": {
+        "key": "05a2fe9140a3edc5d5b67040bc8596eb7e24280ca780ee43608f1d18d61d1022",
+        "mode": "ordinary",
+        "pre_ns": 37653500,
+        "compiler_ns": 585610583,
+        "post_ns": 35100250
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "sync_wrapper",
+      "data": {
+        "key": "40b20c6100ca317b9bdd7e67843f00ccca11b3c7577dc35faa5e1c8028b2e5c2",
+        "mode": "ordinary",
+        "pre_ns": 39797083,
+        "compiler_ns": 31957125,
+        "post_ns": 18579000
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "build_script_build",
+      "data": {
+        "key": "c74f908a4513ee6225d82cac8ce91523e6a9135f5b2803af00c5e4558a404649",
+        "mode": "producer",
+        "pre_ns": 64517041,
+        "compiler_ns": 118422000,
+        "post_ns": 51100334
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "rustls",
+      "data": {
+        "key": "a8d97dad3ad88863bb32935d01c02d5f87245909d986fa382059faf561962587",
+        "mode": "ordinary",
+        "pre_ns": 6789750,
+        "compiler_ns": 4543460208,
+        "post_ns": 49548292
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "ryu",
+      "data": {
+        "key": "244473aec2ff20b2a3720afaa18d1fc1de08a7c21aa35384cf92d849672bc1f2",
+        "mode": "ordinary",
+        "pre_ns": 43000458,
+        "compiler_ns": 94618667,
+        "post_ns": 18722875
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "ipnet",
+      "data": {
+        "key": "d35f6517b08974ccbece00de6d8767b0d4dc39fbc77d8e99f11803ab6ed93b3e",
+        "mode": "ordinary",
+        "pre_ns": 38590167,
+        "compiler_ns": 337405750,
+        "post_ns": 18509417
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "build_script_build",
+      "data": {
+        "key": "d870e2e54e5c2a091a4555fc65ed69cb273f1f279cc2724f843a02bfb60e3181",
+        "mode": "producer",
+        "pre_ns": 63582125,
+        "compiler_ns": 92807125,
+        "post_ns": 48826333
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "tower_layer",
+      "data": {
+        "key": "4bc28e288e0477cdbd99d220e5cb75b8d3f409b908ac2b17d2e4c9849d668faa",
+        "mode": "ordinary",
+        "pre_ns": 37598667,
+        "compiler_ns": 79664625,
+        "post_ns": 18376916
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "base64",
+      "data": {
+        "key": "c3892b3b9d67e52269affc9a5add3281d63d2109cb79c84049e97a02c2eccefc",
+        "mode": "ordinary",
+        "pre_ns": 39977291,
+        "compiler_ns": 173799500,
+        "post_ns": 19883209
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "hashbrown",
+      "data": {
+        "key": "bfb19c4d7a371cd01b3e35b21873daa57daa2a344279a2fe2ae2cd91b9412b57",
+        "mode": "ordinary",
+        "pre_ns": 36781042,
+        "compiler_ns": 288955500,
+        "post_ns": 23435958
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "unicode_width",
+      "data": {
+        "key": "40d8bb4fcc5a660dcac1b5b552513f1054264dd51cf250f42959002f8e22ff65",
+        "mode": "ordinary",
+        "pre_ns": 39689500,
+        "compiler_ns": 105243792,
+        "post_ns": 22266375
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "equivalent",
+      "data": {
+        "key": "78f573270892953068166e4ffaf3abc8fc35ff4915139059bc27840af5c15c19",
+        "mode": "ordinary",
+        "pre_ns": 41027583,
+        "compiler_ns": 23882792,
+        "post_ns": 17191375
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "getopts",
+      "data": {
+        "key": "cecc1f7124c04abc339d00f985003263585b7f23eb512aab077eba277205ca8b",
+        "mode": "ordinary",
+        "pre_ns": 40279958,
+        "compiler_ns": 321945042,
+        "post_ns": 19997000
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "hyper_util",
+      "data": {
+        "key": "380582b52be7dedfe1bb99f4fcaac927992ee3376341da62161e27895a64075b",
+        "mode": "ordinary",
+        "pre_ns": 56624166,
+        "compiler_ns": 918876875,
+        "post_ns": 50724750
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "indexmap",
+      "data": {
+        "key": "f427d4ca0880951edddcdff4d6bb8259563002c3032237d77c03d4a57237b408",
+        "mode": "ordinary",
+        "pre_ns": 40337042,
+        "compiler_ns": 353174041,
+        "post_ns": 26136417
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "tower",
+      "data": {
+        "key": "4673516b0e574116b66096d59c0dcb91e02fff473c8b41ba0cf655b80182fe5c",
+        "mode": "ordinary",
+        "pre_ns": 50963584,
+        "compiler_ns": 226670333,
+        "post_ns": 48585833
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "url",
+      "data": {
+        "key": "5ca4308e972b36c0e0d5f430af9a819e54c99458c994deb80f840570421a255d",
+        "mode": "ordinary",
+        "pre_ns": 39127042,
+        "compiler_ns": 694167333,
+        "post_ns": 35218250
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "num_traits",
+      "data": {
+        "key": "02913901571c4bab235c2c8837fafb72ee374748eaf6e80c54fd0c5266baa820",
+        "mode": "ordinary",
+        "pre_ns": 1856250,
+        "compiler_ns": 288427708,
+        "post_ns": 22844542
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "serde_json",
+      "data": {
+        "key": "9263d2983a1f4488a13d51ee38c75882af5de85a9b28f6c4858eee6e0cf4c397",
+        "mode": "ordinary",
+        "pre_ns": 6379291,
+        "compiler_ns": 806179792,
+        "post_ns": 28717500
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "getrandom",
+      "data": {
+        "key": "57552f0e5d6523f6d4f0b22a14ad75b12ecd359fc3a70838b20c091b013f6a6b",
+        "mode": "ordinary",
+        "pre_ns": 3392166,
+        "compiler_ns": 44747084,
+        "post_ns": 19287333
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "crypto_common",
+      "data": {
+        "key": "a60bbf3916c05e1acfff89ea3c88570db29452d0da5952cea7b881c026197c9e",
+        "mode": "ordinary",
+        "pre_ns": 42697042,
+        "compiler_ns": 36859125,
+        "post_ns": 18741333
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "block_buffer",
+      "data": {
+        "key": "12bcd973c9eeb9f0405d433868790ddf3209158395abaef49beb2f8cfc0177bd",
+        "mode": "ordinary",
+        "pre_ns": 36601709,
+        "compiler_ns": 46370916,
+        "post_ns": 19475459
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "webpki_roots",
+      "data": {
+        "key": "8e7c37b5913a7e30ba88355075518b6d31d69f924161fca1679eac2565e4caa2",
+        "mode": "ordinary",
+        "pre_ns": 39320833,
+        "compiler_ns": 35838167,
+        "post_ns": 19085958
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "iana_time_zone",
+      "data": {
+        "key": "aa4fc27885dfaf1d6e7b9ff3c804652e8afec3f5760cdcf80bdf58813685d6f4",
+        "mode": "ordinary",
+        "pre_ns": 38663625,
+        "compiler_ns": 50212917,
+        "post_ns": 17846416
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "pulldown_cmark_escape",
+      "data": {
+        "key": "70aeae4fab14b8ae4c9ff7d547be92fc0086cf6f04dd9d8d53a1f0dcda30590f",
+        "mode": "ordinary",
+        "pre_ns": 39155917,
+        "compiler_ns": 38206417,
+        "post_ns": 17485291
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "build_script_build",
+      "data": {
+        "key": "a7725a0ec1ee4911adf2e90bf1bae28455ce21bb5c67fb694ab67bb9e7c90834",
+        "mode": "producer",
+        "pre_ns": 58265792,
+        "compiler_ns": 135816208,
+        "post_ns": 46652125
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "zlib_rs",
+      "data": {
+        "key": "a7ca83cf03806f3a287183b4d842063be19b92deb92acc07c615065fc1d00c41",
+        "mode": "ordinary",
+        "pre_ns": 35932625,
+        "compiler_ns": 1761168000,
+        "post_ns": 24008292
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "build_script_build",
+      "data": {
+        "key": "a66efac6df1fc39b5cad489536ea2b256b9ab472b245dbfa55925f436b99e162",
+        "mode": "producer",
+        "pre_ns": 58762334,
+        "compiler_ns": 131799500,
+        "post_ns": 51400375
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "unicase",
+      "data": {
+        "key": "e6e13768f4365159caed393bc6b57f85e657e8c30b92c27413e4fe092c5cd7eb",
+        "mode": "ordinary",
+        "pre_ns": 37631958,
+        "compiler_ns": 81114000,
+        "post_ns": 17233667
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "pulldown_cmark",
+      "data": {
+        "key": "ce21cdd7d3938f9408799d661fc455aea0f01f99b6f3889897a873c9a0feec97",
+        "mode": "ordinary",
+        "pre_ns": 3195417,
+        "compiler_ns": 1222697791,
+        "post_ns": 27693917
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "chrono",
+      "data": {
+        "key": "2a584089dd51cf7d77f1a7fe608ac7876b9e71701724b1b5e821bc4f1dbcadbb",
+        "mode": "ordinary",
+        "pre_ns": 40975542,
+        "compiler_ns": 1153947375,
+        "post_ns": 36356500
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "digest",
+      "data": {
+        "key": "561d1990bc679ce6d9b247c1673974ad09c56ba32e96eb7b95186db5885f7fbf",
+        "mode": "ordinary",
+        "pre_ns": 35360125,
+        "compiler_ns": 79725417,
+        "post_ns": 21752750
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "flate2",
+      "data": {
+        "key": "c9ed8e42da0bc6f47fb899509a3582cc496dfd60477cb02bb457f89e403889e8",
+        "mode": "ordinary",
+        "pre_ns": 39838208,
+        "compiler_ns": 198105958,
+        "post_ns": 22142334
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "uuid",
+      "data": {
+        "key": "94412f40573a5ca75572b94720e3c44a6710649b30b0d86d544c3a292e042bde",
+        "mode": "ordinary",
+        "pre_ns": 40034667,
+        "compiler_ns": 200397583,
+        "post_ns": 26684292
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "tower_http",
+      "data": {
+        "key": "9c4736b46a74682beb8b7ee2b33e59e1dbbc3f6f2a0b202ccedc95d8c260e4f0",
+        "mode": "ordinary",
+        "pre_ns": 46617125,
+        "compiler_ns": 238833417,
+        "post_ns": 57362208
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "tokio_rustls",
+      "data": {
+        "key": "a46565ebf09eab4cd8d9d36840dc0b898fba18d271bb7237af46340d3fce56a0",
+        "mode": "ordinary",
+        "pre_ns": 45907375,
+        "compiler_ns": 109618417,
+        "post_ns": 37486792
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "crc32fast",
+      "data": {
+        "key": "29f3c425156720812b26138225595db741ed778b0e3272644c6932d4b2a3811b",
+        "mode": "ordinary",
+        "pre_ns": 1744541,
+        "compiler_ns": 75192792,
+        "post_ns": 18218417
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "serde_urlencoded",
+      "data": {
+        "key": "ec55d34f32152952dffb7b36c85e46a20b4acfee8eeb1ee12ec6843c110a2bb4",
+        "mode": "ordinary",
+        "pre_ns": 39349875,
+        "compiler_ns": 97308042,
+        "post_ns": 24812541
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "hyper_rustls",
+      "data": {
+        "key": "f14741cad04061a8186aadff41a862cf3f95ec206740475f0e6cd22010d8d87b",
+        "mode": "ordinary",
+        "pre_ns": 49982750,
+        "compiler_ns": 184718042,
+        "post_ns": 54225708
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "http_body_util",
+      "data": {
+        "key": "88b24a89888292ecb7c360751b19956e452f26b40ab6d95b2c3593150bd5fa2e",
+        "mode": "ordinary",
+        "pre_ns": 42010750,
+        "compiler_ns": 114013167,
+        "post_ns": 22620416
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "tokio_util",
+      "data": {
+        "key": "f9df3a4d4c92a0a8e84160ab607e1cdd51c53edad70cf8782d6dedfb09c141ba",
+        "mode": "ordinary",
+        "pre_ns": 42561833,
+        "compiler_ns": 262726208,
+        "post_ns": 32859000
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "futures_executor",
+      "data": {
+        "key": "deab6356a7960b9f0b68fb630199da9d073ed2ea7e3c02fe38b42944394c22a9",
+        "mode": "ordinary",
+        "pre_ns": 43520500,
+        "compiler_ns": 128521834,
+        "post_ns": 24656250
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "thiserror_impl",
+      "data": {
+        "key": "8c4427b2f25925d611e508c4b657aeedaa77e778f35e353d1c6f397c6713cf7f",
+        "mode": "producer",
+        "pre_ns": 66305833,
+        "compiler_ns": 509001500,
+        "post_ns": 155539250
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "cpufeatures",
+      "data": {
+        "key": "c7933408a806e474fe1d848aeb44de09a034a63fca21f2e3e04a6adc1ca2b093",
+        "mode": "ordinary",
+        "pre_ns": 39413625,
+        "compiler_ns": 32202709,
+        "post_ns": 18071250
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "unsafe_libyaml",
+      "data": {
+        "key": "f06b347b74560a4d8addee2c001b45ba8b5162894a23416dfefabecd0fc2086f",
+        "mode": "ordinary",
+        "pre_ns": 38010583,
+        "compiler_ns": 693168417,
+        "post_ns": 20134291
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "log",
+      "data": {
+        "key": "00d1ac0b6d55054891be037e31f2de9385d5e4cd01b20a7db30598539ba89970",
+        "mode": "ordinary",
+        "pre_ns": 38026334,
+        "compiler_ns": 67142375,
+        "post_ns": 18878291
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "typed_path",
+      "data": {
+        "key": "c6fbeca764f4892bcda07a9bc771fb7a08ba20a3d20503035f75b26a34c144b5",
+        "mode": "ordinary",
+        "pre_ns": 33431250,
+        "compiler_ns": 809524291,
+        "post_ns": 27747667
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "reqwest",
+      "data": {
+        "key": "8196e6848c86b24858c22e31ef203948051871cf2e1c6a04b4056fa7be264217",
+        "mode": "ordinary",
+        "pre_ns": 64922209,
+        "compiler_ns": 2853063625,
+        "post_ns": 89187000
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "thiserror",
+      "data": {
+        "key": "8ecefc2bcf0a6506889a6be3c9048effafc813ac3f3c7e9fc4fdf7eee46fe2d2",
+        "mode": "ordinary",
+        "pre_ns": 3352792,
+        "compiler_ns": 305900750,
+        "post_ns": 33931750
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "serde_yaml_ng",
+      "data": {
+        "key": "96f6a6b62a204499531bb2132a927035855173d832585f608bbb7a7bf5b55c04",
+        "mode": "ordinary",
+        "pre_ns": 41629125,
+        "compiler_ns": 1092273542,
+        "post_ns": 33273667
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "sha2",
+      "data": {
+        "key": "a7708391b077c6631d04b342d07a4ed2a71aed81bb6838768bcc60179560834e",
+        "mode": "ordinary",
+        "pre_ns": 39340167,
+        "compiler_ns": 277244167,
+        "post_ns": 36675000
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "zip",
+      "data": {
+        "key": "775c5f9cc0dd57031a0fd229005cca8944932166f3776bf99704c1bbb1900294",
+        "mode": "ordinary",
+        "pre_ns": 39162458,
+        "compiler_ns": 760100834,
+        "post_ns": 31200958
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "harness_proto",
+      "data": {
+        "key": "410692e648b0d5f46e72b6856d0caa105dfe10cb0e3169d8454175c3016d7206",
+        "mode": "ordinary",
+        "pre_ns": 43700292,
+        "compiler_ns": 2263183166,
+        "post_ns": 55611209
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "futures",
+      "data": {
+        "key": "ac1fa7cb44e1ab2b8e0ae0e9f70a6151e67909cd40025923a6c3e15f193f69cc",
+        "mode": "ordinary",
+        "pre_ns": 44768792,
+        "compiler_ns": 23958542,
+        "post_ns": 25491708
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "anyhow",
+      "data": {
+        "key": "a275a6e9f1a949dd3489d5592c3a99699046e2e6020b7fd70d33df9fd37588bd",
+        "mode": "ordinary",
+        "pre_ns": 2195416,
+        "compiler_ns": 193168667,
+        "post_ns": 20246417
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "deser_hjson",
+      "data": {
+        "key": "f8f06962cf9a3c1b4f41326adb7a4fec2490b1bba11b45565fa1ce0aaf655232",
+        "mode": "ordinary",
+        "pre_ns": 39433792,
+        "compiler_ns": 254594792,
+        "post_ns": 24486416
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "async_trait",
+      "data": {
+        "key": "e402d9b573e8bd4dc1d9a427f524b283254b9a16690841a871c4bebef3f1fd4c",
+        "mode": "producer",
+        "pre_ns": 65881917,
+        "compiler_ns": 404783917,
+        "post_ns": 160170875
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "semver",
+      "data": {
+        "key": "7ddc20dcac8e1a20d9bfbf1372f182cd6e49b49112601c3f031168d2dabb4133",
+        "mode": "ordinary",
+        "pre_ns": 40019209,
+        "compiler_ns": 179721000,
+        "post_ns": 18212166
+      }
+    },
+    {
+      "label": "miss",
+      "crate": "harness_adapters",
+      "data": {
+        "key": "d76e2840c98a077390b7b2a3ca6dd58a08405a7edd95a694401e88c92af79022",
+        "mode": "ordinary",
+        "pre_ns": 25302959,
+        "compiler_ns": 9020789166,
+        "post_ns": 179732500
+      }
+    },
+    {
+      "label": "save",
+      "crate": "build_script_build",
+      "data": {
+        "key": "318bd4adaa9baa19a83e2d11ab99f5f918968c31dbcb460429b0f53fda2aa99c",
+        "validation_ns": 194625,
+        "graph_ns": 4209,
+        "store_ns": 1978750
+      }
+    },
+    {
+      "label": "save",
+      "crate": "build_script_build",
+      "data": {
+        "key": "1d01832bcb05d7b0370b888862ed46307302d5f7bce417f0dace0a4306c8e63c",
+        "validation_ns": 193291,
+        "graph_ns": 2000,
+        "store_ns": 1900167
+      }
+    },
+    {
+      "label": "save",
+      "crate": "build_script_build",
+      "data": {
+        "key": "96c76d71997f3a429907166759d1b36b9e4a16fae62b19c9f23a517ac1f27930",
+        "validation_ns": 223875,
+        "graph_ns": 12042,
+        "store_ns": 2539375
+      }
+    },
+    {
+      "label": "save",
+      "crate": "unicode_ident",
+      "data": {
+        "key": "2dd38a7771bfa5a695b77c645c42e484444dfcef2e13f5aa7e82c24c0ea7ab8b",
+        "validation_ns": 391083,
+        "graph_ns": 44440000,
+        "store_ns": 1411917
+      }
+    },
+    {
+      "label": "save",
+      "crate": "cfg_if",
+      "data": {
+        "key": "891dde502081f4ae666b27a81f4c33bdf5c9e652fea8f2a3ae7098fb6b28c334",
+        "validation_ns": 202125,
+        "graph_ns": 14496125,
+        "store_ns": 1398458
+      }
+    },
+    {
+      "label": "save",
+      "crate": "smallvec",
+      "data": {
+        "key": "15401839cfa7fd6cbf289f79ec3694a00326c552e384a0f97b88d6e5292d3dd4",
+        "validation_ns": 369000,
+        "graph_ns": 29135750,
+        "store_ns": 1557584
+      }
+    },
+    {
+      "label": "save",
+      "crate": "stable_deref_trait",
+      "data": {
+        "key": "8c08e1ce992554100e28f29d1e476438387bc952fb75b1779a5eac56ebf9a836",
+        "validation_ns": 157708,
+        "graph_ns": 13857875,
+        "store_ns": 1296750
+      }
+    },
+    {
+      "label": "save",
+      "crate": "pin_project_lite",
+      "data": {
+        "key": "c2f2e0f79f539252a65bb63dba014be553f89f1891d3acf9932ecdf326303fbe",
+        "validation_ns": 316334,
+        "graph_ns": 14769041,
+        "store_ns": 1408375
+      }
+    },
+    {
+      "label": "save",
+      "crate": "futures_core",
+      "data": {
+        "key": "2d0a5b222bd64b2135f0397d244573b3401faa64492d1a5478445c1fb752baf2",
+        "validation_ns": 664375,
+        "graph_ns": 243697500,
+        "store_ns": 1484500
+      }
+    },
+    {
+      "label": "save",
+      "crate": "libc",
+      "data": {
+        "key": "28c689dbca5bd84e7fa11435d49820da3cf16e3afa0dc2224b968761ffbf4431",
+        "validation_ns": 3571000,
+        "graph_ns": 21156042,
+        "store_ns": 4501291
+      }
+    },
+    {
+      "label": "save",
+      "crate": "bytes",
+      "data": {
+        "key": "96e5ff91a95856e705fefbb7082fad4f197ebaa879ebbfe0b9e0d04ce4d61131",
+        "validation_ns": 2045292,
+        "graph_ns": 17649083,
+        "store_ns": 2724792
+      }
+    },
+    {
+      "label": "save",
+      "crate": null,
+      "data": {
+        "key": "bb4e3d2361e34d361fb9bf123cf66a17111791bee961e4a0c629df70ba405a4b",
+        "validation_ns": 187791,
+        "graph_ns": 42,
+        "store_ns": 1438792
+      }
+    },
+    {
+      "label": "save",
+      "crate": null,
+      "data": {
+        "key": "4a9a6aad52f5bc7a47c06a630ade6d5b802e4a421d4419d51d40325d360240d0",
+        "validation_ns": 125875,
+        "graph_ns": 0,
+        "store_ns": 939375
+      }
+    },
+    {
+      "label": "save",
+      "crate": "proc_macro2",
+      "data": {
+        "key": "b16b0b50f9193e891e73716e88715ac1de8af34ddb7cc7f9106687ba14d1b583",
+        "validation_ns": 1419916,
+        "graph_ns": 46013042,
+        "store_ns": 2745417
+      }
+    },
+    {
+      "label": "save",
+      "crate": "itoa",
+      "data": {
+        "key": "5dd2a6e1c01a9c7b06090cf6684eb486c10359b345144a06011a58b03047fe8b",
+        "validation_ns": 245958,
+        "graph_ns": 13908833,
+        "store_ns": 1685459
+      }
+    },
+    {
+      "label": "save",
+      "crate": "build_script_build",
+      "data": {
+        "key": "2f4d11f9b80e687f2fe42b925e5c9e040e31652792671b6b590787a336f2603a",
+        "validation_ns": 186834,
+        "graph_ns": 4541,
+        "store_ns": 2377417
+      }
+    },
+    {
+      "label": "save",
+      "crate": "quote",
+      "data": {
+        "key": "6aa595659a4035bb87e7e260a1beb3ba05959e17bced006794db815329565134",
+        "validation_ns": 1146875,
+        "graph_ns": 30603625,
+        "store_ns": 1974500
+      }
+    },
+    {
+      "label": "save",
+      "crate": "memchr",
+      "data": {
+        "key": "ad69759e8fb6f097edf2edb8ee20b1eb7ae144332f75fcc12b9f051320ed36be",
+        "validation_ns": 1921541,
+        "graph_ns": 17771750,
+        "store_ns": 2856917
+      }
+    },
+    {
+      "label": "save",
+      "crate": "scopeguard",
+      "data": {
+        "key": "431644e9ab5bfbdc47b32e885d10c450ce254044021db1d034a2305fea4bd055",
+        "validation_ns": 230250,
+        "graph_ns": 14881167,
+        "store_ns": 1405583
+      }
+    },
+    {
+      "label": "save",
+      "crate": "syn",
+      "data": {
+        "key": "4188a06b3095503b77cae606ec9a649a2f4c3a880161b6084dc112992761fe69",
+        "validation_ns": 6715625,
+        "graph_ns": 40573709,
+        "store_ns": 10494833
+      }
+    },
+    {
+      "label": "save",
+      "crate": "syn",
+      "data": {
+        "key": "318c1e78d32d3481871cccae61a97cfcc98159c66e20591fdbb75d03b0455fef",
+        "validation_ns": 7963792,
+        "graph_ns": 39281541,
+        "store_ns": 11131959
+      }
+    },
+    {
+      "label": "save",
+      "crate": "futures_sink",
+      "data": {
+        "key": "3ee94a12d470a2fdf3140201884fe01c888aeb040e0ad33b44a7bd836b0925ae",
+        "validation_ns": 177542,
+        "graph_ns": 16152708,
+        "store_ns": 1248292
+      }
+    },
+    {
+      "label": "save",
+      "crate": "build_script_build",
+      "data": {
+        "key": "11a4edcbf42b1fdc9f563c9df27faf33815cce8af6ea4d4311edfa7392defe44",
+        "validation_ns": 206542,
+        "graph_ns": 4500,
+        "store_ns": 2181750
+      }
+    },
+    {
+      "label": "save",
+      "crate": "parking_lot_core",
+      "data": {
+        "key": "cbf0cd8e7b052844208501565ab7d42f25cda31db990f903567c67a43ad49216",
+        "validation_ns": 3233375,
+        "graph_ns": 17478417,
+        "store_ns": 1964583
+      }
+    },
+    {
+      "label": "save",
+      "crate": "lock_api",
+      "data": {
+        "key": "a7b6b56bb996b11adaf63d38ec6845a25dd0c32e097b7358a3c2c2af3cb467d7",
+        "validation_ns": 798417,
+        "graph_ns": 15981125,
+        "store_ns": 1909166
+      }
+    },
+    {
+      "label": "save",
+      "crate": "errno",
+      "data": {
+        "key": "e7552a8d977aa12a22056547b2ffa274d5c73913921440a31348746636c23a1b",
+        "validation_ns": 1790791,
+        "graph_ns": 16159334,
+        "store_ns": 1220833
+      }
+    },
+    {
+      "label": "save",
+      "crate": "find_msvc_tools",
+      "data": {
+        "key": "ff074affa6ef9d438667ccd8353b87cf88c723373ca1a3e4c71146dc2eb7df0c",
+        "validation_ns": 414458,
+        "graph_ns": 15926958,
+        "store_ns": 1678167
+      }
+    },
+    {
+      "label": "save",
+      "crate": "shlex",
+      "data": {
+        "key": "811e2054ac25722e8758e87b0c26be2921d50e455687b2a3cea628b1b39f4b83",
+        "validation_ns": 297375,
+        "graph_ns": 15683834,
+        "store_ns": 1256791
+      }
+    },
+    {
+      "label": "save",
+      "crate": "serde_core",
+      "data": {
+        "key": "69dd200ba8a51f546676335969590e6690195aef383daaf6578ae64b73528333",
+        "validation_ns": 1941541,
+        "graph_ns": 23503334,
+        "store_ns": 8501833
+      }
+    },
+    {
+      "label": "save",
+      "crate": "cc",
+      "data": {
+        "key": "7e750a999a188163bf1c0df376a320ff6986d78cb01f642197429efa306cca15",
+        "validation_ns": 1582792,
+        "graph_ns": 18796958,
+        "store_ns": 3273584
+      }
+    },
+    {
+      "label": "save",
+      "crate": "signal_hook_registry",
+      "data": {
+        "key": "d51da05ee0086f111b35ec08956bd9af776f21f79553d71e09942ea36437de0b",
+        "validation_ns": 2101792,
+        "graph_ns": 17013625,
+        "store_ns": 1965625
+      }
+    },
+    {
+      "label": "save",
+      "crate": "parking_lot",
+      "data": {
+        "key": "9b37c0bf58c386e00dff2402f1a7583a1d6a9bb9b55674ae04abb028001673de",
+        "validation_ns": 1628833,
+        "graph_ns": 17479292,
+        "store_ns": 1799333
+      }
+    },
+    {
+      "label": "save",
+      "crate": "futures_channel",
+      "data": {
+        "key": "20a0dfbb203f4a4fffee1b28b50be4afbb34fe79c210eefb8ccc152de7464d2d",
+        "validation_ns": 1485167,
+        "graph_ns": 17748583,
+        "store_ns": 2298167
+      }
+    },
+    {
+      "label": "save",
+      "crate": "zerovec_derive",
+      "data": {
+        "key": "4404df254201b53a6d9adb534e68273a3b73d17eb55d07f68b8b519d6bf80a04",
+        "validation_ns": 7538625,
+        "graph_ns": 94223042,
+        "store_ns": 3646541
+      }
+    },
+    {
+      "label": "save",
+      "crate": "displaydoc",
+      "data": {
+        "key": "3cb575004affbc42adc050da356fe60f07e5af3f582d20657cd3d2058c74eb63",
+        "validation_ns": 7691875,
+        "graph_ns": 88220208,
+        "store_ns": 3973125
+      }
+    },
+    {
+      "label": "save",
+      "crate": "synstructure",
+      "data": {
+        "key": "ec1b519dbdbb0f86fe4c578613639a902ae63ca22684d36cc982101bfeb08554",
+        "validation_ns": 4134292,
+        "graph_ns": 32569542,
+        "store_ns": 2465041
+      }
+    },
+    {
+      "label": "save",
+      "crate": "tokio_macros",
+      "data": {
+        "key": "7fcac8f1828f65d3f64673de1729aca2848720dbcdb7caebdbb3da463993f907",
+        "validation_ns": 7437709,
+        "graph_ns": 94020333,
+        "store_ns": 3652208
+      }
+    },
+    {
+      "label": "save",
+      "crate": "zerofrom_derive",
+      "data": {
+        "key": "64fdcc831d9d6c9908a64e509a3b6f96a3e015015ea093a900f0ef8a76bffed5",
+        "validation_ns": 8733583,
+        "graph_ns": 121446167,
+        "store_ns": 4674208
+      }
+    },
+    {
+      "label": "save",
+      "crate": "yoke_derive",
+      "data": {
+        "key": "7e677eab84eaf0e6db6cbe767cb4613b4c3db5dc058a0b9b54f28e9ffe24d3aa",
+        "validation_ns": 8638875,
+        "graph_ns": 126987584,
+        "store_ns": 3347416
+      }
+    },
+    {
+      "label": "save",
+      "crate": "socket2",
+      "data": {
+        "key": "70854744be3bce08e48796788645446313abe792eba0ef235dcc9b90f075c0c6",
+        "validation_ns": 2476209,
+        "graph_ns": 16261833,
+        "store_ns": 1951250
+      }
+    },
+    {
+      "label": "save",
+      "crate": "mio",
+      "data": {
+        "key": "c4f424cec7373039d06f2f41ab681180808227a4f0b408966077fcfa0fa5924f",
+        "validation_ns": 4334958,
+        "graph_ns": 18933708,
+        "store_ns": 1964709
+      }
+    },
+    {
+      "label": "save",
+      "crate": "core_foundation_sys",
+      "data": {
+        "key": "2926b7893117df0cf5cda51ec7d6cb339d0da4c14ce17482e2337cead37920f1",
+        "validation_ns": 2852542,
+        "graph_ns": 17482041,
+        "store_ns": 2139792
+      }
+    },
+    {
+      "label": "save",
+      "crate": "litemap",
+      "data": {
+        "key": "a50434a95c163fcdeafe49dff48c7a0508ce8b0c0bff0f38eb44d58c0cc1b18e",
+        "validation_ns": 479875,
+        "graph_ns": 14563000,
+        "store_ns": 1670458
+      }
+    },
+    {
+      "label": "save",
+      "crate": "writeable",
+      "data": {
+        "key": "bdece2edfe13f72aad6cd950a6e6936862cd6129182a15a726afa2ad31a63284",
+        "validation_ns": 749000,
+        "graph_ns": 16251375,
+        "store_ns": 1663042
+      }
+    },
+    {
+      "label": "save",
+      "crate": "tokio",
+      "data": {
+        "key": "8d6becb4ce4ac7df2ec36e4d9babe7cdeeb8719df12f77fe17dac4e08f56d053",
+        "validation_ns": 23813333,
+        "graph_ns": 52112750,
+        "store_ns": 15799459
+      }
+    },
+    {
+      "label": "save",
+      "crate": "zerofrom",
+      "data": {
+        "key": "cffd5a19f43b4dfec4071815a62fc596a1e90422c91c05a991de0b851d3f3b57",
+        "validation_ns": 1831500,
+        "graph_ns": 34439958,
+        "store_ns": 1422792
+      }
+    },
+    {
+      "label": "save",
+      "crate": "futures_macro",
+      "data": {
+        "key": "1598e7d1ed6cad925fc5f355e3c8763c3832cf63df615cb0c99e074bafa96f56",
+        "validation_ns": 7161750,
+        "graph_ns": 85744625,
+        "store_ns": 3067708
+      }
+    },
+    {
+      "label": "save",
+      "crate": "build_script_build",
+      "data": {
+        "key": "5dcfe3f7cd7b711af39a0ba3af5c8d7a3d927f7b3240d81e53e132bf176e1db8",
+        "validation_ns": 1846917,
+        "graph_ns": 30561833,
+        "store_ns": 3649792
+      }
+    },
+    {
+      "label": "save",
+      "crate": "yoke",
+      "data": {
+        "key": "7ef296245c92bf52edece0db0220379407b55bc2f330de9adee48bfddafc3f44",
+        "validation_ns": 2357042,
+        "graph_ns": 29916750,
+        "store_ns": 1579833
+      }
+    },
+    {
+      "label": "save",
+      "crate": "build_script_build",
+      "data": {
+        "key": "cf16ebd1272946626bdee5da37615adc51d28048f0cb972bad28054ab5af0acd",
+        "validation_ns": 137292,
+        "graph_ns": 3666,
+        "store_ns": 2085792
+      }
+    },
+    {
+      "label": "save",
+      "crate": "build_script_build",
+      "data": {
+        "key": "f696d3e5350635761fdb7cd8c0e90eb9ba22ab1b0f722cf5da858f2f5a186fe5",
+        "validation_ns": 201875,
+        "graph_ns": 4584,
+        "store_ns": 2183000
+      }
+    },
+    {
+      "label": "save",
+      "crate": "utf8_iter",
+      "data": {
+        "key": "dc1e1cfeaa5a52356fd2a0691f6dd52e077a673859087b23abb1a5fb81f716b3",
+        "validation_ns": 316791,
+        "graph_ns": 17833167,
+        "store_ns": 1394208
+      }
+    },
+    {
+      "label": "save",
+      "crate": "futures_task",
+      "data": {
+        "key": "d5443b4b92acbafb52c2c94d9e8170b40a7f6b4d3366a6538bd60b85208f4589",
+        "validation_ns": 637750,
+        "graph_ns": 15439250,
+        "store_ns": 2224791
+      }
+    },
+    {
+      "label": "save",
+      "crate": "zerovec",
+      "data": {
+        "key": "ba4399a5d68cd2a30a840bbd48c453268989f68c64a6c933e6f142172fc43ada",
+        "validation_ns": 3842708,
+        "graph_ns": 35074458,
+        "store_ns": 3107000
+      }
+    },
+    {
+      "label": "save",
+      "crate": "zerotrie",
+      "data": {
+        "key": "b6032e0933aae569b3951659459ad64c7da23fe42d2f6b85dbaf88246e1c2ff8",
+        "validation_ns": 2911958,
+        "graph_ns": 34323542,
+        "store_ns": 2364041
+      }
+    },
+    {
+      "label": "save",
+      "crate": "futures_io",
+      "data": {
+        "key": "85e745dd6fa5d889fc8685d283d7d16199c3b2ae18e04c13ce80c63aff7eddb7",
+        "validation_ns": 219042,
+        "graph_ns": 16509125,
+        "store_ns": 1655500
+      }
+    },
+    {
+      "label": "save",
+      "crate": "build_script_build",
+      "data": {
+        "key": "854af1dd05f3162df26d7a0af4f587b11e439f8af5f2511d417c31741469214f",
+        "validation_ns": 252209,
+        "graph_ns": 5125,
+        "store_ns": 1881125
+      }
+    },
+    {
+      "label": "save",
+      "crate": "slab",
+      "data": {
+        "key": "a8e1bfa1a17079efabf4d1bf0a59c752e3c6269453bf9f735ffe64268373744c",
+        "validation_ns": 320459,
+        "graph_ns": 15673041,
+        "store_ns": 1615375
+      }
+    },
+    {
+      "label": "save",
+      "crate": "futures_util",
+      "data": {
+        "key": "1f3c57e7828b7b655ab1257c78097ed66e1066209701bfb4591db99a739a62e2",
+        "validation_ns": 12873583,
+        "graph_ns": 42802333,
+        "store_ns": 10036625
+      }
+    },
+    {
+      "label": "save",
+      "crate": "tinystr",
+      "data": {
+        "key": "e90241ccf1be6edb31dbc7b08813060b702f6db591cdc8c050f6e6fcecfeebe7",
+        "validation_ns": 2782542,
+        "graph_ns": 20250500,
+        "store_ns": 1745500
+      }
+    },
+    {
+      "label": "save",
+      "crate": "icu_locale_core",
+      "data": {
+        "key": "bb25bb5e670879e5a9497b4fa0a3947900db91134f8450b8c105bbce2fa250c3",
+        "validation_ns": 6275542,
+        "graph_ns": 23410541,
+        "store_ns": 4548542
+      }
+    },
+    {
+      "label": "save",
+      "crate": "potential_utf",
+      "data": {
+        "key": "3d59c765eefaafef3138ef0d554ff3cc02ee36e956c6e8679b0a76b65d4ff749",
+        "validation_ns": 1264917,
+        "graph_ns": 20417208,
+        "store_ns": 1329333
+      }
+    },
+    {
+      "label": "save",
+      "crate": "icu_collections",
+      "data": {
+        "key": "cdc1a415fe1c4005995bc05c42c035224d5b1c356cceff494938cefa8171e5fb",
+        "validation_ns": 3959250,
+        "graph_ns": 20964292,
+        "store_ns": 2193000
+      }
+    },
+    {
+      "label": "save",
+      "crate": "icu_provider",
+      "data": {
+        "key": "fdd7149aefd968c3dd52b4f8a4e882e660807272f08206b5043c0e5b39b59e6a",
+        "validation_ns": 5269000,
+        "graph_ns": 20911791,
+        "store_ns": 1682209
+      }
+    },
+    {
+      "label": "save",
+      "crate": "serde_derive",
+      "data": {
+        "key": "c4bc4e7fd62d71289e90bd920cc7ebb24935fefee18095ad2ade405fa25af738",
+        "validation_ns": 8188541,
+        "graph_ns": 87533084,
+        "store_ns": 3547166
+      }
+    },
+    {
+      "label": "save",
+      "crate": "http",
+      "data": {
+        "key": "7a55fa32083170b65b9772a1fbcc303b2847c4b83cbc2bc8dc6cb125564eb0a8",
+        "validation_ns": 2400708,
+        "graph_ns": 18697292,
+        "store_ns": 3487208
+      }
+    },
+    {
+      "label": "save",
+      "crate": "zeroize",
+      "data": {
+        "key": "1aee2582e61934944c1933060f9877be69a7de4f330c264094e283afd83a561c",
+        "validation_ns": 376500,
+        "graph_ns": 16411625,
+        "store_ns": 2110083
+      }
+    },
+    {
+      "label": "save",
+      "crate": "bitflags",
+      "data": {
+        "key": "ee0aae356276c68b7c53564ed477c7f57b1dd5454c6adf0a254ab60bbe10f08b",
+        "validation_ns": 632291,
+        "graph_ns": 15567875,
+        "store_ns": 1785625
+      }
+    },
+    {
+      "label": "save",
+      "crate": "percent_encoding",
+      "data": {
+        "key": "935e9841e3cf246e2ad51d146a50639df8b43a7d3423571f674910e8a7fe7471",
+        "validation_ns": 374375,
+        "graph_ns": 18798250,
+        "store_ns": 1379750
+      }
+    },
+    {
+      "label": "save",
+      "crate": "once_cell",
+      "data": {
+        "key": "d429b084be5fbafeab0581570cb7de5bddbb5ee2db20a802d1d8e38639e91319",
+        "validation_ns": 410834,
+        "graph_ns": 15433750,
+        "store_ns": 1564500
+      }
+    },
+    {
+      "label": "save",
+      "crate": "version_check",
+      "data": {
+        "key": "aae5024608ec9063ab175c7ef01e919d639af3209c68d3884f082ccb0870011a",
+        "validation_ns": 352416,
+        "graph_ns": 14576292,
+        "store_ns": 1497333
+      }
+    },
+    {
+      "label": "save",
+      "crate": "rustls_pki_types",
+      "data": {
+        "key": "1eda5efe60c862fdb9beb25e8328c9a2fcfaa9afa70b86ae875c2fd0e5daaea1",
+        "validation_ns": 1547750,
+        "graph_ns": 15705625,
+        "store_ns": 1876667
+      }
+    },
+    {
+      "label": "save",
+      "crate": "serde",
+      "data": {
+        "key": "d9c54270f11665a22e6dbe44f0ea0814a5e8fcb330044b3572aa2b450899bc73",
+        "validation_ns": 6055209,
+        "graph_ns": 31087666,
+        "store_ns": 2561084
+      }
+    },
+    {
+      "label": "save",
+      "crate": "build_script_build",
+      "data": {
+        "key": "46a6b1d609209813fee7f0b3ac9bbbd874a2f241426953d7bb316e24d58d71a9",
+        "validation_ns": 404292,
+        "graph_ns": 29142125,
+        "store_ns": 2127083
+      }
+    },
+    {
+      "label": "save",
+      "crate": "http_body",
+      "data": {
+        "key": "f32e6abaa64aecb1f0acccfe6f001db758f9f17d89cbb7844162cae8f12b3642",
+        "validation_ns": 2120958,
+        "graph_ns": 15828084,
+        "store_ns": 6904916
+      }
+    },
+    {
+      "label": "save",
+      "crate": "icu_properties_data",
+      "data": {
+        "key": "921802063d0ccbd73fee6473eebbe838a794751f5dcf5e52191b83d5bfbe5952",
+        "validation_ns": 5129834,
+        "graph_ns": 17606541,
+        "store_ns": 3808917
+      }
+    },
+    {
+      "label": "save",
+      "crate": "icu_normalizer_data",
+      "data": {
+        "key": "8748a332f45695068711bddb39b823b6b4520773ba17f6f84f4ab63e96a6d81b",
+        "validation_ns": 760583,
+        "graph_ns": 14607875,
+        "store_ns": 1610250
+      }
+    },
+    {
+      "label": "save",
+      "crate": "getrandom",
+      "data": {
+        "key": "298674ac67ebf32181d451ad998cc677af1cbf7e620c418080c41c1ebb82b142",
+        "validation_ns": 2154709,
+        "graph_ns": 15173416,
+        "store_ns": 1531042
+      }
+    },
+    {
+      "label": "save",
+      "crate": "untrusted",
+      "data": {
+        "key": "2b6b6770aa6d7f82a23e3b4971458ca41ffb14247633ab594724e5522af0b236",
+        "validation_ns": 348750,
+        "graph_ns": 15049375,
+        "store_ns": 1141416
+      }
+    },
+    {
+      "label": "save",
+      "crate": "build_script_build",
+      "data": {
+        "key": "5e7e35d24812914a48db69075a8bc0a768e0163f34219bfae51ae725bd471ab9",
+        "validation_ns": 184834,
+        "graph_ns": 4666,
+        "store_ns": 1885667
+      }
+    },
+    {
+      "label": "save",
+      "crate": "build_script_build",
+      "data": {
+        "key": "2acf4deaadbcdf33ea5a00b5cbd1359ee516d79c8b9a854ecc991f9b8e1a159e",
+        "validation_ns": 318166,
+        "graph_ns": 4084,
+        "store_ns": 2545875
+      }
+    },
+    {
+      "label": "save",
+      "crate": "icu_normalizer",
+      "data": {
+        "key": "4f12612f1fda6a193bffb4dc93e57c7211b341fc280f15eb8731439d0279fb9f",
+        "validation_ns": 2919292,
+        "graph_ns": 25879750,
+        "store_ns": 2582042
+      }
+    },
+    {
+      "label": "save",
+      "crate": "icu_properties",
+      "data": {
+        "key": "7aacc637aab353e87b7b58e447f98bdcaa19026a49cff2bd00da20e0b42fb4be",
+        "validation_ns": 7296292,
+        "graph_ns": 25038833,
+        "store_ns": 7881958
+      }
+    },
+    {
+      "label": "save",
+      "crate": "typenum",
+      "data": {
+        "key": "a602a503fb2d925406690ad96d40c3375643913400a898a8770daaca9f486efe",
+        "validation_ns": 2247375,
+        "graph_ns": 24442917,
+        "store_ns": 4905167
+      }
+    },
+    {
+      "label": "save",
+      "crate": "build_script_build",
+      "data": {
+        "key": "65b5bc1a61ca55607c424c64fda9e7f152fdeda3e562f91a63e2c4a21e43caa3",
+        "validation_ns": 263500,
+        "graph_ns": 4292,
+        "store_ns": 2410083
+      }
+    },
+    {
+      "label": "save",
+      "crate": "autocfg",
+      "data": {
+        "key": "af0d0399e0dd30b3510b78d21b44350d7e8d1d7be45b633fd1f5a726ad80d998",
+        "validation_ns": 336916,
+        "graph_ns": 15758709,
+        "store_ns": 1971708
+      }
+    },
+    {
+      "label": "save",
+      "crate": "tower_service",
+      "data": {
+        "key": "7803849f735d5e664724567793ca7da5759c6fe9dd45278033ca011cd74088c8",
+        "validation_ns": 146791,
+        "graph_ns": 14518834,
+        "store_ns": 1048833
+      }
+    },
+    {
+      "label": "save",
+      "crate": "try_lock",
+      "data": {
+        "key": "8fe1d5a7055ce736ba4411d9b98859fe568e52292e2095a7272f536501110552",
+        "validation_ns": 212917,
+        "graph_ns": 14403042,
+        "store_ns": 1224875
+      }
+    },
+    {
+      "label": "save",
+      "crate": "build_script_build",
+      "data": {
+        "key": "431fbd0b8e7c2e627315080bd58bcc3d439e20cde83db41c3bb906c1bb211872",
+        "validation_ns": 169000,
+        "graph_ns": 5000,
+        "store_ns": 3094084
+      }
+    },
+    {
+      "label": "save",
+      "crate": "build_script_build",
+      "data": {
+        "key": "977e9f7a8b82302dca298abd926dcf5c41abc63df4dd10ca72f65eabc3796bc8",
+        "validation_ns": 603000,
+        "graph_ns": 28888959,
+        "store_ns": 2555916
+      }
+    },
+    {
+      "label": "save",
+      "crate": "want",
+      "data": {
+        "key": "3970b1e77a54a6ae290b910880a5f7666b01dd41decce62e2404017cfe5a674f",
+        "validation_ns": 213750,
+        "graph_ns": 15467083,
+        "store_ns": 1270708
+      }
+    },
+    {
+      "label": "save",
+      "crate": "idna_adapter",
+      "data": {
+        "key": "a03467533452d7d761887a3dead6e3b17d6815f25eee3258c6542e40947e0f19",
+        "validation_ns": 2472584,
+        "graph_ns": 27397000,
+        "store_ns": 1321041
+      }
+    },
+    {
+      "label": "save",
+      "crate": "generic_array",
+      "data": {
+        "key": "542df5974ddd545db3d64942bcec45b5825aadeec524debfe50664c699363097",
+        "validation_ns": 2358041,
+        "graph_ns": 15503459,
+        "store_ns": 2440458
+      }
+    },
+    {
+      "label": "save",
+      "crate": "httparse",
+      "data": {
+        "key": "86e7881707216d4df2abc0c9ccfedffaf8a32ecf4e40199dcc36145d6e2e6c66",
+        "validation_ns": 770750,
+        "graph_ns": 17054042,
+        "store_ns": 2283250
+      }
+    },
+    {
+      "label": "save",
+      "crate": "ring",
+      "data": {
+        "key": "8df151076aa33820bdd60d7e3614ec46b24d569028d61fff458a9bbe0dc2ffab",
+        "validation_ns": 11590750,
+        "graph_ns": 18995500,
+        "store_ns": 4861166
+      }
+    },
+    {
+      "label": "save",
+      "crate": "tracing_core",
+      "data": {
+        "key": "2b1e489f8e7bcdbdaaef50b28a99c13b151a77b52524e1c716d91f90ebb88dd4",
+        "validation_ns": 1250625,
+        "graph_ns": 16488792,
+        "store_ns": 2541417
+      }
+    },
+    {
+      "label": "save",
+      "crate": "form_urlencoded",
+      "data": {
+        "key": "366d18644bd91dc571b2eb5a5fedc420a237a42b2aba1f9e0518eee3099cded3",
+        "validation_ns": 278000,
+        "graph_ns": 15954000,
+        "store_ns": 1227916
+      }
+    },
+    {
+      "label": "save",
+      "crate": "core_foundation",
+      "data": {
+        "key": "c9fdb7c3ee34600f0066a1043d616da30b380d9c4156e869bf53ee6af493b094",
+        "validation_ns": 3439916,
+        "graph_ns": 16049084,
+        "store_ns": 2363208
+      }
+    },
+    {
+      "label": "save",
+      "crate": "tracing_attributes",
+      "data": {
+        "key": "f564076e01e06831af3ca6a087f332e360842ca5b57c91734869bfc334a33200",
+        "validation_ns": 7601667,
+        "graph_ns": 89824958,
+        "store_ns": 3239750
+      }
+    },
+    {
+      "label": "save",
+      "crate": "build_script_build",
+      "data": {
+        "key": "1cc02c7933c45ebfd13b59189736e90d3896fcca0fcc415ede2aa3a6c6b84087",
+        "validation_ns": 228375,
+        "graph_ns": 4500,
+        "store_ns": 1912792
+      }
+    },
+    {
+      "label": "save",
+      "crate": "subtle",
+      "data": {
+        "key": "bdbf211a97e542098b4d0370d6973203096990a1bda800a704ffa7cdc2a8b2a1",
+        "validation_ns": 215042,
+        "graph_ns": 14915708,
+        "store_ns": 1258375
+      }
+    },
+    {
+      "label": "save",
+      "crate": "build_script_build",
+      "data": {
+        "key": "2e8a7a1049b69ae1747678cd2129f74682691dd601ef66b048aa6ffd7886519d",
+        "validation_ns": 239416,
+        "graph_ns": 4542,
+        "store_ns": 2252875
+      }
+    },
+    {
+      "label": "save",
+      "crate": "atomic_waker",
+      "data": {
+        "key": "4c62baebd2f1c9afb442a1f5dfb562c3e00ccf98a5685568fcda92de88e30877",
+        "validation_ns": 198959,
+        "graph_ns": 15010541,
+        "store_ns": 1359667
+      }
+    },
+    {
+      "label": "save",
+      "crate": "hyper",
+      "data": {
+        "key": "bb92d883d3914fa0bb11b4efaa30b5439339459286097c1fa28fff512e34ebad",
+        "validation_ns": 12477375,
+        "graph_ns": 22261917,
+        "store_ns": 3401666
+      }
+    },
+    {
+      "label": "save",
+      "crate": "tracing",
+      "data": {
+        "key": "4e031566f2e73536c3f726fe9436e3d0de9d8f01d93fd1936e1b022a7c58b4b3",
+        "validation_ns": 3125625,
+        "graph_ns": 29766667,
+        "store_ns": 2205500
+      }
+    },
+    {
+      "label": "save",
+      "crate": "webpki",
+      "data": {
+        "key": "f8a6c3f22cabd1d1cdb519c9a069badd9474f4c0dd23cbc136fe179e6f8b9ab5",
+        "validation_ns": 6453792,
+        "graph_ns": 20150792,
+        "store_ns": 2606833
+      }
+    },
+    {
+      "label": "save",
+      "crate": "system_configuration",
+      "data": {
+        "key": "21176a574dc9de7af44a5f7f469291e9bab4ba8b832bf7c20e15e06ebadd9a77",
+        "validation_ns": 1193875,
+        "graph_ns": 33903542,
+        "store_ns": 1836542
+      }
+    },
+    {
+      "label": "save",
+      "crate": "zmij",
+      "data": {
+        "key": "c86d2d81e58ff5ccabf9d2a55acdc4584e5540a655c1aef47edf9f639759382e",
+        "validation_ns": 388042,
+        "graph_ns": 15612708,
+        "store_ns": 1613584
+      }
+    },
+    {
+      "label": "save",
+      "crate": "idna",
+      "data": {
+        "key": "05a2fe9140a3edc5d5b67040bc8596eb7e24280ca780ee43608f1d18d61d1022",
+        "validation_ns": 889292,
+        "graph_ns": 31838583,
+        "store_ns": 2061042
+      }
+    },
+    {
+      "label": "save",
+      "crate": "sync_wrapper",
+      "data": {
+        "key": "40b20c6100ca317b9bdd7e67843f00ccca11b3c7577dc35faa5e1c8028b2e5c2",
+        "validation_ns": 325250,
+        "graph_ns": 16609541,
+        "store_ns": 1350667
+      }
+    },
+    {
+      "label": "save",
+      "crate": "build_script_build",
+      "data": {
+        "key": "c74f908a4513ee6225d82cac8ce91523e6a9135f5b2803af00c5e4558a404649",
+        "validation_ns": 194041,
+        "graph_ns": 4542,
+        "store_ns": 2532500
+      }
+    },
+    {
+      "label": "save",
+      "crate": "rustls",
+      "data": {
+        "key": "a8d97dad3ad88863bb32935d01c02d5f87245909d986fa382059faf561962587",
+        "validation_ns": 12344667,
+        "graph_ns": 26531458,
+        "store_ns": 10428125
+      }
+    },
+    {
+      "label": "save",
+      "crate": "ryu",
+      "data": {
+        "key": "244473aec2ff20b2a3720afaa18d1fc1de08a7c21aa35384cf92d849672bc1f2",
+        "validation_ns": 1038500,
+        "graph_ns": 15977167,
+        "store_ns": 1444125
+      }
+    },
+    {
+      "label": "save",
+      "crate": "ipnet",
+      "data": {
+        "key": "d35f6517b08974ccbece00de6d8767b0d4dc39fbc77d8e99f11803ab6ed93b3e",
+        "validation_ns": 580208,
+        "graph_ns": 15631250,
+        "store_ns": 2055542
+      }
+    },
+    {
+      "label": "save",
+      "crate": "build_script_build",
+      "data": {
+        "key": "d870e2e54e5c2a091a4555fc65ed69cb273f1f279cc2724f843a02bfb60e3181",
+        "validation_ns": 231875,
+        "graph_ns": 5875,
+        "store_ns": 2458417
+      }
+    },
+    {
+      "label": "save",
+      "crate": "tower_layer",
+      "data": {
+        "key": "4bc28e288e0477cdbd99d220e5cb75b8d3f409b908ac2b17d2e4c9849d668faa",
+        "validation_ns": 363125,
+        "graph_ns": 16143875,
+        "store_ns": 1590000
+      }
+    },
+    {
+      "label": "save",
+      "crate": "base64",
+      "data": {
+        "key": "c3892b3b9d67e52269affc9a5add3281d63d2109cb79c84049e97a02c2eccefc",
+        "validation_ns": 1353959,
+        "graph_ns": 16591958,
+        "store_ns": 1651333
+      }
+    },
+    {
+      "label": "save",
+      "crate": "hashbrown",
+      "data": {
+        "key": "bfb19c4d7a371cd01b3e35b21873daa57daa2a344279a2fe2ae2cd91b9412b57",
+        "validation_ns": 2550875,
+        "graph_ns": 17561583,
+        "store_ns": 3045292
+      }
+    },
+    {
+      "label": "save",
+      "crate": "unicode_width",
+      "data": {
+        "key": "40d8bb4fcc5a660dcac1b5b552513f1054264dd51cf250f42959002f8e22ff65",
+        "validation_ns": 3166458,
+        "graph_ns": 16294084,
+        "store_ns": 2488708
+      }
+    },
+    {
+      "label": "save",
+      "crate": "equivalent",
+      "data": {
+        "key": "78f573270892953068166e4ffaf3abc8fc35ff4915139059bc27840af5c15c19",
+        "validation_ns": 147459,
+        "graph_ns": 14937125,
+        "store_ns": 1830791
+      }
+    },
+    {
+      "label": "save",
+      "crate": "getopts",
+      "data": {
+        "key": "cecc1f7124c04abc339d00f985003263585b7f23eb512aab077eba277205ca8b",
+        "validation_ns": 868500,
+        "graph_ns": 17145125,
+        "store_ns": 1731625
+      }
+    },
+    {
+      "label": "save",
+      "crate": "hyper_util",
+      "data": {
+        "key": "380582b52be7dedfe1bb99f4fcaac927992ee3376341da62161e27895a64075b",
+        "validation_ns": 18105459,
+        "graph_ns": 28358541,
+        "store_ns": 3997334
+      }
+    },
+    {
+      "label": "save",
+      "crate": "indexmap",
+      "data": {
+        "key": "f427d4ca0880951edddcdff4d6bb8259563002c3032237d77c03d4a57237b408",
+        "validation_ns": 3093417,
+        "graph_ns": 18879166,
+        "store_ns": 3871209
+      }
+    },
+    {
+      "label": "save",
+      "crate": "tower",
+      "data": {
+        "key": "4673516b0e574116b66096d59c0dcb91e02fff473c8b41ba0cf655b80182fe5c",
+        "validation_ns": 13336625,
+        "graph_ns": 27147291,
+        "store_ns": 2869792
+      }
+    },
+    {
+      "label": "save",
+      "crate": "url",
+      "data": {
+        "key": "5ca4308e972b36c0e0d5f430af9a819e54c99458c994deb80f840570421a255d",
+        "validation_ns": 1264583,
+        "graph_ns": 31463917,
+        "store_ns": 2275792
+      }
+    },
+    {
+      "label": "save",
+      "crate": "num_traits",
+      "data": {
+        "key": "02913901571c4bab235c2c8837fafb72ee374748eaf6e80c54fd0c5266baa820",
+        "validation_ns": 1422458,
+        "graph_ns": 17615667,
+        "store_ns": 3528583
+      }
+    },
+    {
+      "label": "save",
+      "crate": "serde_json",
+      "data": {
+        "key": "9263d2983a1f4488a13d51ee38c75882af5de85a9b28f6c4858eee6e0cf4c397",
+        "validation_ns": 6264042,
+        "graph_ns": 18299792,
+        "store_ns": 3897958
+      }
+    },
+    {
+      "label": "save",
+      "crate": "getrandom",
+      "data": {
+        "key": "57552f0e5d6523f6d4f0b22a14ad75b12ecd359fc3a70838b20c091b013f6a6b",
+        "validation_ns": 2193542,
+        "graph_ns": 15057250,
+        "store_ns": 1810416
+      }
+    },
+    {
+      "label": "save",
+      "crate": "crypto_common",
+      "data": {
+        "key": "a60bbf3916c05e1acfff89ea3c88570db29452d0da5952cea7b881c026197c9e",
+        "validation_ns": 2592458,
+        "graph_ns": 14687833,
+        "store_ns": 1241750
+      }
+    },
+    {
+      "label": "save",
+      "crate": "block_buffer",
+      "data": {
+        "key": "12bcd973c9eeb9f0405d433868790ddf3209158395abaef49beb2f8cfc0177bd",
+        "validation_ns": 974750,
+        "graph_ns": 16894333,
+        "store_ns": 1311667
+      }
+    },
+    {
+      "label": "save",
+      "crate": "webpki_roots",
+      "data": {
+        "key": "8e7c37b5913a7e30ba88355075518b6d31d69f924161fca1679eac2565e4caa2",
+        "validation_ns": 1268333,
+        "graph_ns": 16301917,
+        "store_ns": 1280167
+      }
+    },
+    {
+      "label": "save",
+      "crate": "iana_time_zone",
+      "data": {
+        "key": "aa4fc27885dfaf1d6e7b9ff3c804652e8afec3f5760cdcf80bdf58813685d6f4",
+        "validation_ns": 798417,
+        "graph_ns": 15616333,
+        "store_ns": 1210250
+      }
+    },
+    {
+      "label": "save",
+      "crate": "pulldown_cmark_escape",
+      "data": {
+        "key": "70aeae4fab14b8ae4c9ff7d547be92fc0086cf6f04dd9d8d53a1f0dcda30590f",
+        "validation_ns": 202500,
+        "graph_ns": 15749958,
+        "store_ns": 1248917
+      }
+    },
+    {
+      "label": "save",
+      "crate": "build_script_build",
+      "data": {
+        "key": "a7725a0ec1ee4911adf2e90bf1bae28455ce21bb5c67fb694ab67bb9e7c90834",
+        "validation_ns": 252958,
+        "graph_ns": 3583,
+        "store_ns": 1973959
+      }
+    },
+    {
+      "label": "save",
+      "crate": "zlib_rs",
+      "data": {
+        "key": "a7ca83cf03806f3a287183b4d842063be19b92deb92acc07c615065fc1d00c41",
+        "validation_ns": 3299417,
+        "graph_ns": 17698375,
+        "store_ns": 2752250
+      }
+    },
+    {
+      "label": "save",
+      "crate": "build_script_build",
+      "data": {
+        "key": "a66efac6df1fc39b5cad489536ea2b256b9ab472b245dbfa55925f436b99e162",
+        "validation_ns": 218875,
+        "graph_ns": 5708,
+        "store_ns": 1957208
+      }
+    },
+    {
+      "label": "save",
+      "crate": "unicase",
+      "data": {
+        "key": "e6e13768f4365159caed393bc6b57f85e657e8c30b92c27413e4fe092c5cd7eb",
+        "validation_ns": 531584,
+        "graph_ns": 15114958,
+        "store_ns": 1370167
+      }
+    },
+    {
+      "label": "save",
+      "crate": "pulldown_cmark",
+      "data": {
+        "key": "ce21cdd7d3938f9408799d661fc455aea0f01f99b6f3889897a873c9a0feec97",
+        "validation_ns": 3083167,
+        "graph_ns": 19917625,
+        "store_ns": 4425500
+      }
+    },
+    {
+      "label": "save",
+      "crate": "chrono",
+      "data": {
+        "key": "2a584089dd51cf7d77f1a7fe608ac7876b9e71701724b1b5e821bc4f1dbcadbb",
+        "validation_ns": 6275875,
+        "graph_ns": 25064083,
+        "store_ns": 4778750
+      }
+    },
+    {
+      "label": "save",
+      "crate": "digest",
+      "data": {
+        "key": "561d1990bc679ce6d9b247c1673974ad09c56ba32e96eb7b95186db5885f7fbf",
+        "validation_ns": 732125,
+        "graph_ns": 19376584,
+        "store_ns": 1361875
+      }
+    },
+    {
+      "label": "save",
+      "crate": "flate2",
+      "data": {
+        "key": "c9ed8e42da0bc6f47fb899509a3582cc496dfd60477cb02bb457f89e403889e8",
+        "validation_ns": 2345167,
+        "graph_ns": 17281500,
+        "store_ns": 2212667
+      }
+    },
+    {
+      "label": "save",
+      "crate": "uuid",
+      "data": {
+        "key": "94412f40573a5ca75572b94720e3c44a6710649b30b0d86d544c3a292e042bde",
+        "validation_ns": 4991084,
+        "graph_ns": 19063375,
+        "store_ns": 2355458
+      }
+    },
+    {
+      "label": "save",
+      "crate": "tower_http",
+      "data": {
+        "key": "9c4736b46a74682beb8b7ee2b33e59e1dbbc3f6f2a0b202ccedc95d8c260e4f0",
+        "validation_ns": 8737583,
+        "graph_ns": 46065458,
+        "store_ns": 2292084
+      }
+    },
+    {
+      "label": "save",
+      "crate": "tokio_rustls",
+      "data": {
+        "key": "a46565ebf09eab4cd8d9d36840dc0b898fba18d271bb7237af46340d3fce56a0",
+        "validation_ns": 11211916,
+        "graph_ns": 24313792,
+        "store_ns": 1688625
+      }
+    },
+    {
+      "label": "save",
+      "crate": "crc32fast",
+      "data": {
+        "key": "29f3c425156720812b26138225595db741ed778b0e3272644c6932d4b2a3811b",
+        "validation_ns": 671875,
+        "graph_ns": 15873292,
+        "store_ns": 1394916
+      }
+    },
+    {
+      "label": "save",
+      "crate": "serde_urlencoded",
+      "data": {
+        "key": "ec55d34f32152952dffb7b36c85e46a20b4acfee8eeb1ee12ec6843c110a2bb4",
+        "validation_ns": 1429833,
+        "graph_ns": 21734500,
+        "store_ns": 1417417
+      }
+    },
+    {
+      "label": "save",
+      "crate": "hyper_rustls",
+      "data": {
+        "key": "f14741cad04061a8186aadff41a862cf3f95ec206740475f0e6cd22010d8d87b",
+        "validation_ns": 14561583,
+        "graph_ns": 37411000,
+        "store_ns": 1887375
+      }
+    },
+    {
+      "label": "save",
+      "crate": "http_body_util",
+      "data": {
+        "key": "88b24a89888292ecb7c360751b19956e452f26b40ab6d95b2c3593150bd5fa2e",
+        "validation_ns": 3336791,
+        "graph_ns": 17132167,
+        "store_ns": 1910458
+      }
+    },
+    {
+      "label": "save",
+      "crate": "tokio_util",
+      "data": {
+        "key": "f9df3a4d4c92a0a8e84160ab607e1cdd51c53edad70cf8782d6dedfb09c141ba",
+        "validation_ns": 8585792,
+        "graph_ns": 21865500,
+        "store_ns": 2141167
+      }
+    },
+    {
+      "label": "save",
+      "crate": "futures_executor",
+      "data": {
+        "key": "deab6356a7960b9f0b68fb630199da9d073ed2ea7e3c02fe38b42944394c22a9",
+        "validation_ns": 4584292,
+        "graph_ns": 18580416,
+        "store_ns": 1258750
+      }
+    },
+    {
+      "label": "save",
+      "crate": "thiserror_impl",
+      "data": {
+        "key": "8c4427b2f25925d611e508c4b657aeedaa77e778f35e353d1c6f397c6713cf7f",
+        "validation_ns": 7241167,
+        "graph_ns": 89658958,
+        "store_ns": 3248542
+      }
+    },
+    {
+      "label": "save",
+      "crate": "cpufeatures",
+      "data": {
+        "key": "c7933408a806e474fe1d848aeb44de09a034a63fca21f2e3e04a6adc1ca2b093",
+        "validation_ns": 1847917,
+        "graph_ns": 14784125,
+        "store_ns": 1223625
+      }
+    },
+    {
+      "label": "save",
+      "crate": "unsafe_libyaml",
+      "data": {
+        "key": "f06b347b74560a4d8addee2c001b45ba8b5162894a23416dfefabecd0fc2086f",
+        "validation_ns": 1744667,
+        "graph_ns": 15992042,
+        "store_ns": 2175000
+      }
+    },
+    {
+      "label": "save",
+      "crate": "log",
+      "data": {
+        "key": "00d1ac0b6d55054891be037e31f2de9385d5e4cd01b20a7db30598539ba89970",
+        "validation_ns": 595041,
+        "graph_ns": 16520959,
+        "store_ns": 1443916
+      }
+    },
+    {
+      "label": "save",
+      "crate": "typed_path",
+      "data": {
+        "key": "c6fbeca764f4892bcda07a9bc771fb7a08ba20a3d20503035f75b26a34c144b5",
+        "validation_ns": 4472083,
+        "graph_ns": 19053959,
+        "store_ns": 3982958
+      }
+    },
+    {
+      "label": "save",
+      "crate": "reqwest",
+      "data": {
+        "key": "8196e6848c86b24858c22e31ef203948051871cf2e1c6a04b4056fa7be264217",
+        "validation_ns": 25422583,
+        "graph_ns": 57281625,
+        "store_ns": 6232167
+      }
+    },
+    {
+      "label": "save",
+      "crate": "thiserror",
+      "data": {
+        "key": "8ecefc2bcf0a6506889a6be3c9048effafc813ac3f3c7e9fc4fdf7eee46fe2d2",
+        "validation_ns": 1821583,
+        "graph_ns": 30580917,
+        "store_ns": 1315042
+      }
+    },
+    {
+      "label": "save",
+      "crate": "serde_yaml_ng",
+      "data": {
+        "key": "96f6a6b62a204499531bb2132a927035855173d832585f608bbb7a7bf5b55c04",
+        "validation_ns": 4440875,
+        "graph_ns": 24305208,
+        "store_ns": 4240125
+      }
+    },
+    {
+      "label": "save",
+      "crate": "sha2",
+      "data": {
+        "key": "a7708391b077c6631d04b342d07a4ed2a71aed81bb6838768bcc60179560834e",
+        "validation_ns": 843625,
+        "graph_ns": 34104667,
+        "store_ns": 1439833
+      }
+    },
+    {
+      "label": "save",
+      "crate": "zip",
+      "data": {
+        "key": "775c5f9cc0dd57031a0fd229005cca8944932166f3776bf99704c1bbb1900294",
+        "validation_ns": 6261333,
+        "graph_ns": 20862042,
+        "store_ns": 3781458
+      }
+    },
+    {
+      "label": "save",
+      "crate": "harness_proto",
+      "data": {
+        "key": "410692e648b0d5f46e72b6856d0caa105dfe10cb0e3169d8454175c3016d7206",
+        "validation_ns": 6222708,
+        "graph_ns": 36551125,
+        "store_ns": 12555667
+      }
+    },
+    {
+      "label": "save",
+      "crate": "futures",
+      "data": {
+        "key": "ac1fa7cb44e1ab2b8e0ae0e9f70a6151e67909cd40025923a6c3e15f193f69cc",
+        "validation_ns": 4964834,
+        "graph_ns": 18979625,
+        "store_ns": 1292916
+      }
+    },
+    {
+      "label": "save",
+      "crate": "anyhow",
+      "data": {
+        "key": "a275a6e9f1a949dd3489d5592c3a99699046e2e6020b7fd70d33df9fd37588bd",
+        "validation_ns": 925667,
+        "graph_ns": 17106250,
+        "store_ns": 1976958
+      }
+    },
+    {
+      "label": "save",
+      "crate": "deser_hjson",
+      "data": {
+        "key": "f8f06962cf9a3c1b4f41326adb7a4fec2490b1bba11b45565fa1ce0aaf655232",
+        "validation_ns": 1197958,
+        "graph_ns": 21472792,
+        "store_ns": 1546583
+      }
+    },
+    {
+      "label": "save",
+      "crate": "async_trait",
+      "data": {
+        "key": "e402d9b573e8bd4dc1d9a427f524b283254b9a16690841a871c4bebef3f1fd4c",
+        "validation_ns": 7679292,
+        "graph_ns": 92459083,
+        "store_ns": 4058125
+      }
+    },
+    {
+      "label": "save",
+      "crate": "semver",
+      "data": {
+        "key": "7ddc20dcac8e1a20d9bfbf1372f182cd6e49b49112601c3f031168d2dabb4133",
+        "validation_ns": 613875,
+        "graph_ns": 15925416,
+        "store_ns": 1410375
+      }
+    },
+    {
+      "label": "save",
+      "crate": "harness_adapters",
+      "data": {
+        "key": "d76e2840c98a077390b7b2a3ca6dd58a08405a7edd95a694401e88c92af79022",
+        "validation_ns": 26619666,
+        "graph_ns": 128125792,
+        "store_ns": 24708083
+      }
+    }
+  ],
+  "totals": {
+    "miss": {
+      "records": 167,
+      "pre_ns": 9892815959,
+      "compiler_ns": 67627520961,
+      "post_ns": 6858737585
+    },
+    "save": {
+      "records": 167,
+      "validation_ns": 531262794,
+      "graph_ns": 4257687418,
+      "store_ns": 471321747
+    },
+    "graph": {
+      "records": 169,
+      "sysroot_ns": 2393781623,
+      "root_ns": 613093545,
+      "discovery_ns": 1216172119
+    }
+  }
+}

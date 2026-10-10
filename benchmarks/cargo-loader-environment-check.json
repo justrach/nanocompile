@@ -1,0 +1,31 @@
+{
+  "method": "Minimal real Cargo release build; native wrapper records only compiler argument and loader variable names, then directly execs the compiler. No environment values recorded. Capture uses a native executable to preserve the loader environment.",
+  "script_sha256": "49c6cc6caca51b115cd2f1f56082308aa9a1f92dcf91727d1cc240e360425511",
+  "rust_toolchain": "1.97.1",
+  "calls": [
+    {
+      "compiler": "/Users/rachpradhan/.rustup/toolchains/1.97.1-aarch64-apple-darwin/bin/rustc",
+      "loader_environment_names": [
+        "DYLD_FALLBACK_LIBRARY_PATH"
+      ]
+    },
+    {
+      "compiler": "/Users/rachpradhan/.rustup/toolchains/1.97.1-aarch64-apple-darwin/bin/rustc",
+      "loader_environment_names": [
+        "DYLD_FALLBACK_LIBRARY_PATH"
+      ]
+    },
+    {
+      "compiler": "/Users/rachpradhan/.rustup/toolchains/1.97.1-aarch64-apple-darwin/bin/rustc",
+      "loader_environment_names": [
+        "DYLD_FALLBACK_LIBRARY_PATH"
+      ]
+    },
+    {
+      "compiler": "/Users/rachpradhan/.rustup/toolchains/1.97.1-aarch64-apple-darwin/bin/rustc",
+      "loader_environment_names": [
+        "DYLD_FALLBACK_LIBRARY_PATH"
+      ]
+    }
+  ]
+}
