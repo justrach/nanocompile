@@ -1,0 +1,330 @@
+{
+  "script_sha256": "747ccf48ba9f3395db706e5472038dca31a25361486ea359372832900dc026a4",
+  "binary_sha256": {
+    "baseline": "cf48b6c7e766fe0e858b64613d0f645cdcc02952a38817bdf6255f961315c838",
+    "candidate": "2033ef1a90203e091ffe6112299cfc6f20930f21a5b5f20c6626de476d10c812"
+  },
+  "tree": "/Library/Developer/CommandLineTools/SDKs/MacOSX27.0.sdk/usr/include",
+  "runs": 7,
+  "observations": [
+    {
+      "pair": 0,
+      "implementation": "baseline",
+      "phase": "cold",
+      "wall_seconds": 1.2110123750171624,
+      "fingerprint_seconds": 0.881435792,
+      "hash": "af877041caa1aa05d47fc56829b252cf705ee9909bef78b1dc3718a6076e3cae",
+      "stamps": 3665,
+      "links": 21,
+      "independent_file_memos": 3470
+    },
+    {
+      "pair": 0,
+      "implementation": "baseline",
+      "phase": "warm",
+      "wall_seconds": 0.012966875045094639,
+      "fingerprint_seconds": 0.008359458,
+      "hash": "af877041caa1aa05d47fc56829b252cf705ee9909bef78b1dc3718a6076e3cae",
+      "stamps": 3665,
+      "links": 21,
+      "independent_file_memos": 3470
+    },
+    {
+      "pair": 0,
+      "implementation": "candidate",
+      "phase": "cold",
+      "wall_seconds": 0.4071844580466859,
+      "fingerprint_seconds": 0.123333416,
+      "hash": "af877041caa1aa05d47fc56829b252cf705ee9909bef78b1dc3718a6076e3cae",
+      "stamps": 3665,
+      "links": 21,
+      "independent_file_memos": 0
+    },
+    {
+      "pair": 0,
+      "implementation": "candidate",
+      "phase": "warm",
+      "wall_seconds": 0.012399292027112097,
+      "fingerprint_seconds": 0.008122875,
+      "hash": "af877041caa1aa05d47fc56829b252cf705ee9909bef78b1dc3718a6076e3cae",
+      "stamps": 3665,
+      "links": 21,
+      "independent_file_memos": 0
+    },
+    {
+      "pair": 1,
+      "implementation": "candidate",
+      "phase": "cold",
+      "wall_seconds": 0.10132066602818668,
+      "fingerprint_seconds": 0.097233583,
+      "hash": "af877041caa1aa05d47fc56829b252cf705ee9909bef78b1dc3718a6076e3cae",
+      "stamps": 3665,
+      "links": 21,
+      "independent_file_memos": 0
+    },
+    {
+      "pair": 1,
+      "implementation": "candidate",
+      "phase": "warm",
+      "wall_seconds": 0.012829000013880432,
+      "fingerprint_seconds": 0.008604375,
+      "hash": "af877041caa1aa05d47fc56829b252cf705ee9909bef78b1dc3718a6076e3cae",
+      "stamps": 3665,
+      "links": 21,
+      "independent_file_memos": 0
+    },
+    {
+      "pair": 1,
+      "implementation": "baseline",
+      "phase": "cold",
+      "wall_seconds": 0.8258212090004236,
+      "fingerprint_seconds": 0.8214825,
+      "hash": "af877041caa1aa05d47fc56829b252cf705ee9909bef78b1dc3718a6076e3cae",
+      "stamps": 3665,
+      "links": 21,
+      "independent_file_memos": 3470
+    },
+    {
+      "pair": 1,
+      "implementation": "baseline",
+      "phase": "warm",
+      "wall_seconds": 0.012314542022068053,
+      "fingerprint_seconds": 0.008166917,
+      "hash": "af877041caa1aa05d47fc56829b252cf705ee9909bef78b1dc3718a6076e3cae",
+      "stamps": 3665,
+      "links": 21,
+      "independent_file_memos": 3470
+    },
+    {
+      "pair": 2,
+      "implementation": "baseline",
+      "phase": "cold",
+      "wall_seconds": 0.8812020830227993,
+      "fingerprint_seconds": 0.876440792,
+      "hash": "af877041caa1aa05d47fc56829b252cf705ee9909bef78b1dc3718a6076e3cae",
+      "stamps": 3665,
+      "links": 21,
+      "independent_file_memos": 3470
+    },
+    {
+      "pair": 2,
+      "implementation": "baseline",
+      "phase": "warm",
+      "wall_seconds": 0.012748166976962239,
+      "fingerprint_seconds": 0.008244042,
+      "hash": "af877041caa1aa05d47fc56829b252cf705ee9909bef78b1dc3718a6076e3cae",
+      "stamps": 3665,
+      "links": 21,
+      "independent_file_memos": 3470
+    },
+    {
+      "pair": 2,
+      "implementation": "candidate",
+      "phase": "cold",
+      "wall_seconds": 0.10471499996492639,
+      "fingerprint_seconds": 0.100527416,
+      "hash": "af877041caa1aa05d47fc56829b252cf705ee9909bef78b1dc3718a6076e3cae",
+      "stamps": 3665,
+      "links": 21,
+      "independent_file_memos": 0
+    },
+    {
+      "pair": 2,
+      "implementation": "candidate",
+      "phase": "warm",
+      "wall_seconds": 0.012401917017996311,
+      "fingerprint_seconds": 0.008353125,
+      "hash": "af877041caa1aa05d47fc56829b252cf705ee9909bef78b1dc3718a6076e3cae",
+      "stamps": 3665,
+      "links": 21,
+      "independent_file_memos": 0
+    },
+    {
+      "pair": 3,
+      "implementation": "candidate",
+      "phase": "cold",
+      "wall_seconds": 0.10014137497637421,
+      "fingerprint_seconds": 0.0957715,
+      "hash": "af877041caa1aa05d47fc56829b252cf705ee9909bef78b1dc3718a6076e3cae",
+      "stamps": 3665,
+      "links": 21,
+      "independent_file_memos": 0
+    },
+    {
+      "pair": 3,
+      "implementation": "candidate",
+      "phase": "warm",
+      "wall_seconds": 0.011808124952949584,
+      "fingerprint_seconds": 0.007925916,
+      "hash": "af877041caa1aa05d47fc56829b252cf705ee9909bef78b1dc3718a6076e3cae",
+      "stamps": 3665,
+      "links": 21,
+      "independent_file_memos": 0
+    },
+    {
+      "pair": 3,
+      "implementation": "baseline",
+      "phase": "cold",
+      "wall_seconds": 0.8387492079637013,
+      "fingerprint_seconds": 0.83457,
+      "hash": "af877041caa1aa05d47fc56829b252cf705ee9909bef78b1dc3718a6076e3cae",
+      "stamps": 3665,
+      "links": 21,
+      "independent_file_memos": 3470
+    },
+    {
+      "pair": 3,
+      "implementation": "baseline",
+      "phase": "warm",
+      "wall_seconds": 0.012417207995895296,
+      "fingerprint_seconds": 0.008044,
+      "hash": "af877041caa1aa05d47fc56829b252cf705ee9909bef78b1dc3718a6076e3cae",
+      "stamps": 3665,
+      "links": 21,
+      "independent_file_memos": 3470
+    },
+    {
+      "pair": 4,
+      "implementation": "baseline",
+      "phase": "cold",
+      "wall_seconds": 0.8732021250179969,
+      "fingerprint_seconds": 0.86893275,
+      "hash": "af877041caa1aa05d47fc56829b252cf705ee9909bef78b1dc3718a6076e3cae",
+      "stamps": 3665,
+      "links": 21,
+      "independent_file_memos": 3470
+    },
+    {
+      "pair": 4,
+      "implementation": "baseline",
+      "phase": "warm",
+      "wall_seconds": 0.013219459040556103,
+      "fingerprint_seconds": 0.008703167,
+      "hash": "af877041caa1aa05d47fc56829b252cf705ee9909bef78b1dc3718a6076e3cae",
+      "stamps": 3665,
+      "links": 21,
+      "independent_file_memos": 3470
+    },
+    {
+      "pair": 4,
+      "implementation": "candidate",
+      "phase": "cold",
+      "wall_seconds": 0.10505816602380946,
+      "fingerprint_seconds": 0.100740792,
+      "hash": "af877041caa1aa05d47fc56829b252cf705ee9909bef78b1dc3718a6076e3cae",
+      "stamps": 3665,
+      "links": 21,
+      "independent_file_memos": 0
+    },
+    {
+      "pair": 4,
+      "implementation": "candidate",
+      "phase": "warm",
+      "wall_seconds": 0.011873208975885063,
+      "fingerprint_seconds": 0.007982417,
+      "hash": "af877041caa1aa05d47fc56829b252cf705ee9909bef78b1dc3718a6076e3cae",
+      "stamps": 3665,
+      "links": 21,
+      "independent_file_memos": 0
+    },
+    {
+      "pair": 5,
+      "implementation": "candidate",
+      "phase": "cold",
+      "wall_seconds": 0.09605270897736773,
+      "fingerprint_seconds": 0.092138292,
+      "hash": "af877041caa1aa05d47fc56829b252cf705ee9909bef78b1dc3718a6076e3cae",
+      "stamps": 3665,
+      "links": 21,
+      "independent_file_memos": 0
+    },
+    {
+      "pair": 5,
+      "implementation": "candidate",
+      "phase": "warm",
+      "wall_seconds": 0.011950374988373369,
+      "fingerprint_seconds": 0.008062,
+      "hash": "af877041caa1aa05d47fc56829b252cf705ee9909bef78b1dc3718a6076e3cae",
+      "stamps": 3665,
+      "links": 21,
+      "independent_file_memos": 0
+    },
+    {
+      "pair": 5,
+      "implementation": "baseline",
+      "phase": "cold",
+      "wall_seconds": 0.8422076670103706,
+      "fingerprint_seconds": 0.837879,
+      "hash": "af877041caa1aa05d47fc56829b252cf705ee9909bef78b1dc3718a6076e3cae",
+      "stamps": 3665,
+      "links": 21,
+      "independent_file_memos": 3470
+    },
+    {
+      "pair": 5,
+      "implementation": "baseline",
+      "phase": "warm",
+      "wall_seconds": 0.012357458006590605,
+      "fingerprint_seconds": 0.008055,
+      "hash": "af877041caa1aa05d47fc56829b252cf705ee9909bef78b1dc3718a6076e3cae",
+      "stamps": 3665,
+      "links": 21,
+      "independent_file_memos": 3470
+    },
+    {
+      "pair": 6,
+      "implementation": "baseline",
+      "phase": "cold",
+      "wall_seconds": 0.8439360840129666,
+      "fingerprint_seconds": 0.839801167,
+      "hash": "af877041caa1aa05d47fc56829b252cf705ee9909bef78b1dc3718a6076e3cae",
+      "stamps": 3665,
+      "links": 21,
+      "independent_file_memos": 3470
+    },
+    {
+      "pair": 6,
+      "implementation": "baseline",
+      "phase": "warm",
+      "wall_seconds": 0.012423333013430238,
+      "fingerprint_seconds": 0.008074667,
+      "hash": "af877041caa1aa05d47fc56829b252cf705ee9909bef78b1dc3718a6076e3cae",
+      "stamps": 3665,
+      "links": 21,
+      "independent_file_memos": 3470
+    },
+    {
+      "pair": 6,
+      "implementation": "candidate",
+      "phase": "cold",
+      "wall_seconds": 0.10441224998794496,
+      "fingerprint_seconds": 0.100572375,
+      "hash": "af877041caa1aa05d47fc56829b252cf705ee9909bef78b1dc3718a6076e3cae",
+      "stamps": 3665,
+      "links": 21,
+      "independent_file_memos": 0
+    },
+    {
+      "pair": 6,
+      "implementation": "candidate",
+      "phase": "warm",
+      "wall_seconds": 0.012290042010135949,
+      "fingerprint_seconds": 0.008114458,
+      "hash": "af877041caa1aa05d47fc56829b252cf705ee9909bef78b1dc3718a6076e3cae",
+      "stamps": 3665,
+      "links": 21,
+      "independent_file_memos": 0
+    }
+  ],
+  "method": "alternate cold order with empty private compiler cache; immediately revalidate whole-tree memo; OS caches unflushed; fingerprints byte-equal",
+  "medians": {
+    "cold": {
+      "baseline": 0.839801167,
+      "candidate": 0.100527416
+    },
+    "warm": {
+      "baseline": 0.008166917,
+      "candidate": 0.008114458
+    }
+  }
+}

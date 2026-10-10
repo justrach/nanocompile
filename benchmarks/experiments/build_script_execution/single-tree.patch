@@ -1,0 +1,207 @@
+diff --git a/src/identity.zig b/src/identity.zig
+index 2d87f16..0abc133 100644
+--- a/src/identity.zig
++++ b/src/identity.zig
+@@ -445,3 +445,86 @@ test "parallel installed stamp validation rejects edits and missing files" {
+     try tmp.dir.deleteFile(io, "resource");
+     try std.testing.expect(!validStamps(&ctx, stamps, true));
+ }
++
++// Trusted installed directories use content fingerprints plus complete stamps.
++// Mutable project trees must never use this memo.
++const InstalledLink = struct { path: []const u8, resolved: []const u8, inode: u64, mtime: i96, ctime: i96 };
++fn installedLink(ctx: *cache.Context, path: []const u8) !InstalledLink {
++    const st = try Dir.cwd().statFile(ctx.io, path, .{ .follow_symlinks = false });
++    if (st.kind != .sym_link) return error.LinkChanged;
++    return .{ .path = path, .resolved = try Dir.cwd().realPathFileAlloc(ctx.io, path, ctx.a), .inode = @intCast(st.inode), .mtime = st.mtime.nanoseconds, .ctime = st.ctime.nanoseconds };
++}
++fn validLinks(ctx: *cache.Context, links: []const InstalledLink) bool {
++    for (links) |expected| {
++        const current = installedLink(ctx, expected.path) catch return false;
++        if (current.inode != expected.inode or current.mtime != expected.mtime or current.ctime != expected.ctime or !std.mem.eql(u8, current.resolved, expected.resolved)) return false;
++    }
++    return true;
++}
++fn installedGraph(ctx: *cache.Context, stamps: *std.ArrayList(Stamp), links: *std.ArrayList(InstalledLink), seen: *std.StringHashMap(void), path: []const u8) !void {
++    if (seen.contains(path)) return;
++    if (seen.count() >= 100000) return error.TooManyInstalledInputs;
++    try seen.put(path, {});
++    const st = try Dir.cwd().statFile(ctx.io, path, .{ .follow_symlinks = false });
++    if (st.kind == .sym_link) {
++        const link = try installedLink(ctx, path);
++        try links.append(ctx.a, link);
++        return installedGraph(ctx, stamps, links, seen, link.resolved);
++    }
++    if (st.kind != .file and st.kind != .directory) return error.UnsupportedInstalledInput;
++    try stamps.append(ctx.a, try stamp(ctx, path));
++    if (st.kind == .directory) {
++        var dir = try Dir.cwd().openDir(ctx.io, path, .{ .iterate = true });
++        defer dir.close(ctx.io);
++        var it = dir.iterate();
++        while (try it.next(ctx.io)) |entry| try installedGraph(ctx, stamps, links, seen, try std.fs.path.join(ctx.a, &.{ path, entry.name }));
++    }
++}
++pub fn installedTreeDigest(ctx: *cache.Context, root: []const u8) ![]const u8 {
++    const TreeMemo = struct { schema: u32 = 2, hash: []const u8, stamps: []const Stamp, links: []const InstalledLink };
++    const canonical = try Dir.cwd().realPathFileAlloc(ctx.io, root, ctx.a);
++    var h = cache.Hash.init(.{});
++    cache.field(&h, "installed-script-tree-v2");
++    cache.field(&h, canonical);
++    const key = try cache.finish(ctx.a, &h);
++    const path = try ctx.path(&.{ "script-tools", key });
++    const lock = try cache.Lock.acquire(ctx, try std.fmt.allocPrint(ctx.a, "script-tool-{s}", .{key}), true);
++    defer lock.release();
++    if (ctx.read(path)) |bytes| memo: {
++        const payload = cache.unseal(ctx, bytes) catch break :memo;
++        const parsed = std.json.parseFromSlice(TreeMemo, ctx.a, payload, .{ .allocate = .alloc_always }) catch break :memo;
++        if (parsed.value.schema == 2 and cache.validHash(parsed.value.hash) and parsed.value.stamps.len > 0 and validLinks(ctx, parsed.value.links) and validStamps(ctx, parsed.value.stamps, false)) return parsed.value.hash;
++    } else |_| {}
++    var stamps: std.ArrayList(Stamp) = .empty;
++    var links: std.ArrayList(InstalledLink) = .empty;
++    var seen = std.StringHashMap(void).init(ctx.a);
++    defer seen.deinit();
++    try installedGraph(ctx, &stamps, &links, &seen, canonical);
++    std.mem.sort(Stamp, stamps.items, {}, struct {
++        fn less(_: void, a: Stamp, b: Stamp) bool {
++            return std.mem.order(u8, a.path, b.path) == .lt;
++        }
++    }.less);
++    std.mem.sort(InstalledLink, links.items, {}, struct {
++        fn less(_: void, a: InstalledLink, b: InstalledLink) bool {
++            return std.mem.order(u8, a.path, b.path) == .lt;
++        }
++    }.less);
++    h = cache.Hash.init(.{});
++    for (links.items) |link| {
++        cache.field(&h, link.path);
++        cache.field(&h, link.resolved);
++    }
++    for (stamps.items) |st| {
++        cache.field(&h, st.path);
++        cache.field(&h, @tagName(st.kind));
++        // The whole-tree record already preserves every trusted-installation
++        // stamp. Hash every initial byte directly; thousands of independent
++        // file locks and persistent records add no validation to this record.
++        if (st.kind == .file) cache.field(&h, try ctx.digest(st.path));
++    }
++    if (!validLinks(ctx, links.items) or !validStamps(ctx, stamps.items, false)) return error.ToolchainChanged;
++    const digest = try cache.finish(ctx.a, &h);
++    try ctx.atomic(path, try cache.seal(ctx, try std.json.Stringify.valueAlloc(ctx.a, TreeMemo{ .hash = digest, .stamps = stamps.items, .links = links.items }, .{})));
++    return digest;
++}
+diff --git a/src/main.zig b/src/main.zig
+index 46711c7..9a56211 100644
+--- a/src/main.zig
++++ b/src/main.zig
+@@ -54,6 +54,7 @@ pub fn main(init: std.process.Init) void {
+ }
+ 
+ fn dispatch(ctx: *cache.Context, args: []const [:0]const u8) !u8 {
++    if (try @import("build_script.zig").launch(ctx, args)) |code| return code;
+     if (args.len != 0 and std.mem.eql(u8, std.fs.path.basename(args[0]), "nanocompile-internal-linker")) {
+         if (!std.fs.path.isAbsolute(args[0])) return error.InvalidLinkObserver;
+         const config = try std.fs.path.join(ctx.a, &.{ std.fs.path.dirname(args[0]) orelse return error.InvalidLinkObserver, "observer.json" });
+@@ -72,6 +73,17 @@ fn dispatch(ctx: *cache.Context, args: []const [:0]const u8) !u8 {
+         try ctx.out("\n");
+         return 0;
+     }
++    if (std.mem.eql(u8, command, "internal-installed-tree")) {
++        if (args.len != 3) return error.InvalidInstalledTree;
++        try ctx.prepare();
++        const maintenance = try cache.Lock.acquire(ctx, "maintenance", false);
++        defer maintenance.release();
++        const start = std.Io.Clock.awake.now(ctx.io).nanoseconds;
++        const hash = try @import("identity.zig").installedTreeDigest(ctx, args[2]);
++        const elapsed = std.Io.Clock.awake.now(ctx.io).nanoseconds - start;
++        try ctx.out(try std.fmt.allocPrint(ctx.a, "{{\"hash\":\"{s}\",\"elapsed_ns\":{d}}}\n", .{ hash, elapsed }));
++        return 0;
++    }
+     if (std.mem.eql(u8, command, "internal-native-identity")) {
+         if (args.len != 3) return error.InvalidNativeIdentity;
+         try ctx.prepare();
+@@ -148,6 +160,16 @@ fn dispatch(ctx: *cache.Context, args: []const [:0]const u8) !u8 {
+         try argv.append(ctx.a, command);
+     }
+     for (args[2..]) |arg| try argv.append(ctx.a, arg);
++    if (kind == .rust and @import("build_script.zig").wantsInstall(ctx, argv.items)) {
++        try ctx.prepare();
++        const maintenance = try cache.Lock.acquire(ctx, "maintenance", false);
++        defer maintenance.release();
++        const lock = try cache.Lock.acquire(ctx, try @import("build_script.zig").installLockName(ctx, argv.items), true);
++        defer lock.release();
++        const code = try compiler.execute(ctx, kind, argv.items);
++        if (code == 0) @import("build_script.zig").install(ctx, argv.items) catch |err| ctx.trace(@errorName(err));
++        return code;
++    }
+     return compiler.execute(ctx, kind, argv.items);
+ }
+ 
+diff --git a/tests/harness_source_edits.py b/tests/harness_source_edits.py
+index da5d2a5..a99fd9f 100644
+--- a/tests/harness_source_edits.py
++++ b/tests/harness_source_edits.py
+@@ -43,6 +43,7 @@ def main():
+     p.add_argument("--proc-macros", choices=("tracked", "reported"), default="tracked", help="nanocompile proc-macro input policy; reported requires declaring unreported file reads")
+     p.add_argument("--proc-macro-producers", action="store_true", help="enable the experimental macOS producer cache; verify macro dylib artifacts too")
+     p.add_argument("--executable-producers", action="store_true", help="enable experimental macOS executable compilation caching")
++    p.add_argument("--build-script-contract", type=Path)
+     args = p.parse_args()
+     if args.runs < 1 or args.jobs < 1:
+         p.error("runs and jobs must be positive")
+@@ -88,6 +89,8 @@ def main():
+     env.update(CARGO_TARGET_DIR=str(target), CARGO_INCREMENTAL="0", NANOCOMPILE_DIR=str(cache),
+                KACHE_CACHE_DIR=str(kcache), KACHE_CONFIG=str(config), KACHE_HOST_CONFIG="",
+                NANOCOMPILE_PROC_MACROS=args.proc_macros, KACHE_SOCKET_PATH=str(state / "daemon.sock"), KACHE_DAEMON_IDLE_TIMEOUT="600")
++    if args.build_script_contract:
++        env["NANOCOMPILE_BUILD_SCRIPTS_FILE"] = str(args.build_script_contract.resolve())
+     if args.proc_macro_producers:
+         env["NANOCOMPILE_PROC_MACRO_PRODUCERS"] = "1"
+     if args.executable_producers:
+@@ -100,7 +103,7 @@ def main():
+               "rustc": subprocess.check_output(["rustc", "--version", "--verbose"], cwd=project, text=True),
+               "nanocompile_sha256": sha(Path(binary)), "kache_sha256": sha(Path(kache)),
+               "kache_version": subprocess.check_output([kache, "--version"], text=True).strip(),
+-              "kache_daemon": not args.standalone, "native_clang": args.native_clang, "nanocompile_proc_macros": args.proc_macros, "nanocompile_proc_macro_producers": args.proc_macro_producers, "nanocompile_executable_producers": args.executable_producers, "command": command,
++              "build_script_contract_sha256": sha(args.build_script_contract) if args.build_script_contract else None, "kache_daemon": not args.standalone, "native_clang": args.native_clang, "nanocompile_proc_macros": args.proc_macros, "nanocompile_proc_macro_producers": args.proc_macro_producers, "nanocompile_executable_producers": args.executable_producers, "command": command,
+               "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat(), "builds": [],
+               "method": f"disposable tracked/untracked dirty-source snapshot; one cold + leaf/shared/revert sequence; clean target before every build; retained cache timed edits; empty-cache artifact equality reference after each wrapper edit; linked behavior probe; fixed paths and {args.jobs} jobs; no human source edits"}
+     tracked = subprocess.check_output(['git', 'ls-files', '-z'], cwd=project).decode().split('\0')
+diff --git a/tests/project_comparison.py b/tests/project_comparison.py
+index b75c60b..8ccc9b3 100644
+--- a/tests/project_comparison.py
++++ b/tests/project_comparison.py
+@@ -49,6 +49,7 @@ def main():
+     p.add_argument("--proc-macros", choices=("tracked", "reported"), default="tracked", help="nanocompile proc-macro input policy; reported requires declaring unreported file reads")
+     p.add_argument("--proc-macro-producers", action="store_true", help="enable the experimental macOS producer cache; verify macro dylib artifacts too")
+     p.add_argument("--executable-producers", action="store_true", help="enable experimental macOS executable compilation caching")
++    p.add_argument("--build-script-contract", type=Path, help="opt Nano into explicit whole build-script execution contracts")
+     p.add_argument("--kache-no-build-scripts", action="store_true", help="diagnostic ablation: disable only kache build-script execution caching")
+     p.add_argument("--trace-builds", action="store_true", help="private full compiler logs and Cargo timings; diagnostic overhead, not a benchmark")
+     args = p.parse_args()
+@@ -70,6 +71,8 @@ def main():
+     env.update(CARGO_TARGET_DIR=str(target), CARGO_INCREMENTAL="0", NANOCOMPILE_DIR=str(cache),
+                KACHE_CACHE_DIR=str(kcache), KACHE_CONFIG=str(config), KACHE_HOST_CONFIG="",
+                NANOCOMPILE_PROC_MACROS=args.proc_macros, KACHE_SOCKET_PATH=str(state / "daemon.sock"), KACHE_DAEMON_IDLE_TIMEOUT="600")
++    if args.build_script_contract:
++        env["NANOCOMPILE_BUILD_SCRIPTS_FILE"] = str(args.build_script_contract.resolve())
+     if args.kache_no_build_scripts:
+         env["KACHE_BUILD_SCRIPT_CACHE"] = "0"
+     if capture:
+@@ -88,7 +91,7 @@ def main():
+               "rustc": subprocess.check_output(["rustc", "--version", "--verbose"], cwd=project, text=True),
+               "nanocompile_sha256": sha(Path(binary)), "kache_sha256": sha(Path(kache)),
+               "kache_version": subprocess.check_output([kache, "--version"], text=True).strip(),
+-              "kache_build_script_cache": not args.kache_no_build_scripts, "kache_daemon": not args.standalone, "native_clang": args.native_clang, "portable_cc":args.portable_cc, "nanocompile_proc_macros": args.proc_macros, "nanocompile_proc_macro_producers": args.proc_macro_producers, "nanocompile_executable_producers": args.executable_producers, "command": command,
++              "build_script_contract_sha256": sha(args.build_script_contract) if args.build_script_contract else None, "kache_build_script_cache": not args.kache_no_build_scripts, "kache_daemon": not args.standalone, "native_clang": args.native_clang, "portable_cc":args.portable_cc, "nanocompile_proc_macros": args.proc_macros, "nanocompile_proc_macro_producers": args.proc_macro_producers, "nanocompile_executable_producers": args.executable_producers, "command": command,
+               "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat(), "builds": [],
+               "method": "offline clean release package builds; same target path; prime direct build then empty caches; rotate three-way warm measurement order unless cold-only; validate each wrapper against its own cold artifact hashes (kache remaps paths)"}
+     tracked = subprocess.check_output(['git', 'ls-files', '-z'], cwd=project).decode().split('\0')
+@@ -193,7 +196,7 @@ def main():
+         if any(row.get(check) is False for check in ("matches_own_cold_native_artifacts", "matches_own_cold_artifacts", "matches_direct_artifacts", "matches_own_cold_macro_dylibs", "matches_direct_macro_dylibs", "matches_own_cold_build_script_executables", "matches_direct_build_script_executables")):
+             raise RuntimeError(f"Artifact validation failed; see {log_path}")
+         if phase == "warm" and implementation == "nanocompile" and args.native_clang:
+-            if row['events'].get('clang_native_hit', 0) < 20 or row['events'].get('hit', 0) < 165:
++            if (row['events'].get('clang_native_hit', 0) < 20 and not row['events'].get('build_script_hit',0)) or row['events'].get('hit', 0) < 165:
+                 raise RuntimeError('Nano native or Rust cache did not serve expected warm hits')
+         if phase == "warm" and implementation == "kache" and not row["events"].get("local_hit", 0):
+             raise RuntimeError("kache recorded no local hits; comparison is invalid")

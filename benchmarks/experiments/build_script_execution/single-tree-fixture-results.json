@@ -1,0 +1,18 @@
+{
+  "binary_sha256": "2033ef1a90203e091ffe6112299cfc6f20930f21a5b5f20c6626de476d10c812",
+  "script_sha256": "2bf443782db2f05498b9da1a92dcceadf2a73fb96d9c49f3216287d0541457bd",
+  "checks": [
+    "real Cargo cold execution and warm restored executable agree",
+    "same-size preserved-mtime mutable source edit and revert",
+    "linked installed target content, link retarget and directory membership invalidate",
+    "environment changes invalidate execution",
+    "restored stdout and stderr match executed streams",
+    "non-null stdin bypass preserves incoming bytes",
+    "failed executions never cached and preserve exit code",
+    "nested outputs execute each time rather than partially restoring",
+    "corrupt receipt reruns rather than accepting incomplete evidence",
+    "corrupt output blobs rerun and produce correct output",
+    "jobserver descriptors preserved on cache miss, disabled and missing-contract fallback",
+    "disabled installed shim executes the real script"
+  ]
+}
