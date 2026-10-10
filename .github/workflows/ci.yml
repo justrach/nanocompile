@@ -43,6 +43,7 @@ jobs:
           python3 tests/r2_transport.py
           zig build -Doptimize=ReleaseFast
           zig build test
+          python3 tests/build_script_cache.py zig-out/bin/nanocompile --output bench-results/build-script-cache.json
           python3 benchmarks/experiments/rust_physical_memo_check.py zig-out/bin/nanocompile --output bench-results/rust-physical-memo.json
           python3 tests/zig_preserved_mtime.py zig-out/bin/nanocompile --output bench-results/zig-preserved-mtime.json
           python3 benchmarks/experiments/selected_decoder_scope_check.py zig-out/bin/nanocompile --other-toolchain 1.98.1 --output bench-results/decoder-scope.json

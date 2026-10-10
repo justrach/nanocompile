@@ -1,0 +1,2638 @@
+{
+  "diagnostic": true,
+  "method": "one primed entry, same script/environment/cache/output paths; alternating frozen shim binaries; excludes binary copying, output deletion and artifact checks; complete own-prime artifacts and stdout/normalized-stderr hashes match; wrapper diagnostic lines excluded from stderr equality; not a whole-build speed benchmark",
+  "runner_sha256": "7c61f260071a9e4ee4ea69df7bfcd831e2df44be2cdd6be8efccef6ee5725d65",
+  "baseline_sha256": "f17e581769935d7714c173fe19b2c91183df2ffac7eba15e3c04fc4c8ce8fd2b",
+  "candidate_sha256": "05842b2914263a67b166ac6834b243a1be7d3d89d88d41baaf93f664d4326f75",
+  "real_sha256": "78502c962be6f6ccac4c458f0726ab1f3fb37d2c81115c5b785da8b1eeaad5ab",
+  "cargo_log_sha256": "66140155dd95156cf90de2c6410bfd0ca185f01683c691970849147f02e5c0ee",
+  "contract_sha256": "12e5bb45bbed24074d0ad4f3c58bdab13169ab6e4ff1dcc4cc4cd0bd703a0824",
+  "runs": 10,
+  "samples": [
+    {
+      "pair": 0,
+      "implementation": "baseline",
+      "elapsed_ns": 108919959,
+      "phases_ns": {
+        "input_snapshot": 19657666,
+        "material.base": 862792,
+        "material.rust": 1418917,
+        "material.tools": 712875,
+        "material.apple_helpers": 6095167,
+        "material.installed": 104666,
+        "material.apple_selection": 18266708,
+        "material.sdk_stamps": 11788750,
+        "material.total": 39280541,
+        "restore.validation_materialization": 13933833,
+        "restore.publication": 188500,
+        "restore.total": 14251417
+      },
+      "artifacts": {
+        "c322a0bcc369f531-armv8-mont-ios64.o": {
+          "sha256": "55ef33aa45fb64b94423f4aa70bada04c1c9e91ed5762f43de0bc17fa2b4cfab",
+          "mode": 420
+        },
+        "c322a0bcc369f531-sha512-armv8-ios64.o": {
+          "sha256": "8994565ba79b1b4b6fadb8b8b3e0e281bbe481cccfb103281d842b6e2fece7d2",
+          "mode": 420
+        },
+        "c322a0bcc369f531-chacha-armv8-ios64.o": {
+          "sha256": "027c496be03a8e92ddd56a9e4d738ae7a279971776a83041b39af8871b24245c",
+          "mode": 420
+        },
+        "aaa1ba3e455ee2e1-limbs.o": {
+          "sha256": "44a313e961ee8b114347e2bcfacab4a4bd972692bf1ac9793b85067df88cf830",
+          "mode": 420
+        },
+        "a0330e891e733f4e-ecp_nistz.o": {
+          "sha256": "d8f3343d55b9a90ebe8193b3c67aa8912c45acc4e692b2730c0cf82da45bc61e",
+          "mode": 420
+        },
+        "a4019cc0736b0423-constant_time_test.o": {
+          "sha256": "bb96b434fe7d8d75d41a9ab250e1f1713910439b9c100f91f1792520da285470",
+          "mode": 420
+        },
+        "c322a0bcc369f531-sha256-armv8-ios64.o": {
+          "sha256": "f5d9e3a5e8e40ede31494f5b595cd54f9620ed73609c201150f5e76dbbaa13a9",
+          "mode": 420
+        },
+        "c322a0bcc369f531-ghashv8-armx-ios64.o": {
+          "sha256": "a0fbd615ab766c4ae501c5eaf9152f1205b1f7948754a9490e9c2f1092197a67",
+          "mode": 420
+        },
+        "libring_core_0_17_14__test.a": {
+          "sha256": "6484820a15821b1561007c09956f0ed401ad63b83b9f6d2d7c16e0cf3cc4a2ae",
+          "mode": 420
+        },
+        "0bbbd18bda93c05b-aes_nohw.o": {
+          "sha256": "02a6b7490bbaa5a95cfa1028debc8b5f9d6aba47255fa6f226143d06663e650c",
+          "mode": 420
+        },
+        "c322a0bcc369f531-aesv8-armx-ios64.o": {
+          "sha256": "db84dc11f5e7c7208d45a35413a178f4bfdd224291c7d3146bd5caf73d9e1148",
+          "mode": 420
+        },
+        "d5a9841f3dc6e253-poly1305.o": {
+          "sha256": "283d46698c316caac63550178dfcd482ad8583cac67d6a92ba131ce28b3d0d8d",
+          "mode": 420
+        },
+        "a4019cc0736b0423-mem.o": {
+          "sha256": "2bcb96399af0b70eec7776de72f8d47af014654daf0f640e2df9e52a0d11a034",
+          "mode": 420
+        },
+        "a0330e891e733f4e-p256.o": {
+          "sha256": "3e0be8e5213cc9c2b75e413200174de7148dc96236a909f46fc315d00eba53cd",
+          "mode": 420
+        },
+        "c322a0bcc369f531-chacha20_poly1305_armv8-ios64.o": {
+          "sha256": "f503566b5cc669798a52d310d5bc85a771e64e7eb7dece04927dc91b60194f8b",
+          "mode": 420
+        },
+        "25ac62e5b3c53843-curve25519.o": {
+          "sha256": "e758ef1842bd8e59e1d959aed4b4d61497043b0033351fb1761238de3454127e",
+          "mode": 420
+        },
+        "a0330e891e733f4e-gfp_p384.o": {
+          "sha256": "9fda3e4da98103d17daba480ec0c1af48e5469e90b8001591fd5750322853094",
+          "mode": 420
+        },
+        "00c879ee3285a50d-montgomery_inv.o": {
+          "sha256": "9de15e2519481409a67c6a65241f9daebbf3ad5c4a08e91f43a1577f85bf7c41",
+          "mode": 420
+        },
+        "c322a0bcc369f531-ghash-neon-armv8-ios64.o": {
+          "sha256": "4693fe6f6c5e008710351516d6c8de8e7c9a4a8731ca12b53af8c27a5245e4ef",
+          "mode": 420
+        },
+        "libring_core_0_17_14_.a": {
+          "sha256": "91cae0b76410832da2c64718f36197af7322108c80dfc3eca81845b81500b292",
+          "mode": 420
+        },
+        "a0330e891e733f4e-gfp_p256.o": {
+          "sha256": "3e0be8e5213cc9c2b75e413200174de7148dc96236a909f46fc315d00eba53cd",
+          "mode": 420
+        },
+        "c322a0bcc369f531-vpaes-armv8-ios64.o": {
+          "sha256": "173082fec66e3a84e0b904b3e7582326a7dcd7fc3c1e57303d25d53f9edf8b72",
+          "mode": 420
+        },
+        "00c879ee3285a50d-montgomery.o": {
+          "sha256": "25098c34217d8793b01a2908e6dfcd21e92c721e134e52137f3b3affd4c90782",
+          "mode": 420
+        },
+        "c322a0bcc369f531-aesv8-gcm-armv8-ios64.o": {
+          "sha256": "5d5d5912581a03bcb8a4a98ee08d058c34e1796428e0f21bb074f92423403ed1",
+          "mode": 420
+        },
+        "a0330e891e733f4e-p256-nistz.o": {
+          "sha256": "9688f01179b34e3169a84cc72decb4886f6bc077976af4a3cce0a072cd403e5e",
+          "mode": 420
+        },
+        "c322a0bcc369f531-p256-armv8-asm-ios64.o": {
+          "sha256": "1cd97ebb0f192ad46abe5c4750158a5a1c6eb19e85c1ae182c0568cc698b0717",
+          "mode": 420
+        }
+      },
+      "streams": {
+        "stdout": "18de88e9ae0f1e1221e4f5f7a3b9307bdcd5627071a97025e65842d3287e3552",
+        "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "pair": 0,
+      "implementation": "candidate",
+      "elapsed_ns": 75225708,
+      "phases_ns": {
+        "input_snapshot": 19382625,
+        "material.base": 884166,
+        "material.rust": 1436500,
+        "material.tools": 680708,
+        "material.apple_helpers": 6601250,
+        "material.installed": 111083,
+        "material.apple_selection": 18398500,
+        "material.sdk_stamps": 11808792,
+        "material.total": 39947542,
+        "restore.validation_materialization": 7396917,
+        "restore.input_epoch": 2274875,
+        "restore.publication": 2462042,
+        "restore.total": 10013375
+      },
+      "artifacts": {
+        "c322a0bcc369f531-armv8-mont-ios64.o": {
+          "sha256": "55ef33aa45fb64b94423f4aa70bada04c1c9e91ed5762f43de0bc17fa2b4cfab",
+          "mode": 420
+        },
+        "c322a0bcc369f531-sha512-armv8-ios64.o": {
+          "sha256": "8994565ba79b1b4b6fadb8b8b3e0e281bbe481cccfb103281d842b6e2fece7d2",
+          "mode": 420
+        },
+        "c322a0bcc369f531-chacha-armv8-ios64.o": {
+          "sha256": "027c496be03a8e92ddd56a9e4d738ae7a279971776a83041b39af8871b24245c",
+          "mode": 420
+        },
+        "aaa1ba3e455ee2e1-limbs.o": {
+          "sha256": "44a313e961ee8b114347e2bcfacab4a4bd972692bf1ac9793b85067df88cf830",
+          "mode": 420
+        },
+        "a0330e891e733f4e-ecp_nistz.o": {
+          "sha256": "d8f3343d55b9a90ebe8193b3c67aa8912c45acc4e692b2730c0cf82da45bc61e",
+          "mode": 420
+        },
+        "a4019cc0736b0423-constant_time_test.o": {
+          "sha256": "bb96b434fe7d8d75d41a9ab250e1f1713910439b9c100f91f1792520da285470",
+          "mode": 420
+        },
+        "c322a0bcc369f531-sha256-armv8-ios64.o": {
+          "sha256": "f5d9e3a5e8e40ede31494f5b595cd54f9620ed73609c201150f5e76dbbaa13a9",
+          "mode": 420
+        },
+        "c322a0bcc369f531-ghashv8-armx-ios64.o": {
+          "sha256": "a0fbd615ab766c4ae501c5eaf9152f1205b1f7948754a9490e9c2f1092197a67",
+          "mode": 420
+        },
+        "libring_core_0_17_14__test.a": {
+          "sha256": "6484820a15821b1561007c09956f0ed401ad63b83b9f6d2d7c16e0cf3cc4a2ae",
+          "mode": 420
+        },
+        "0bbbd18bda93c05b-aes_nohw.o": {
+          "sha256": "02a6b7490bbaa5a95cfa1028debc8b5f9d6aba47255fa6f226143d06663e650c",
+          "mode": 420
+        },
+        "c322a0bcc369f531-aesv8-armx-ios64.o": {
+          "sha256": "db84dc11f5e7c7208d45a35413a178f4bfdd224291c7d3146bd5caf73d9e1148",
+          "mode": 420
+        },
+        "d5a9841f3dc6e253-poly1305.o": {
+          "sha256": "283d46698c316caac63550178dfcd482ad8583cac67d6a92ba131ce28b3d0d8d",
+          "mode": 420
+        },
+        "a4019cc0736b0423-mem.o": {
+          "sha256": "2bcb96399af0b70eec7776de72f8d47af014654daf0f640e2df9e52a0d11a034",
+          "mode": 420
+        },
+        "a0330e891e733f4e-p256.o": {
+          "sha256": "3e0be8e5213cc9c2b75e413200174de7148dc96236a909f46fc315d00eba53cd",
+          "mode": 420
+        },
+        "c322a0bcc369f531-chacha20_poly1305_armv8-ios64.o": {
+          "sha256": "f503566b5cc669798a52d310d5bc85a771e64e7eb7dece04927dc91b60194f8b",
+          "mode": 420
+        },
+        "25ac62e5b3c53843-curve25519.o": {
+          "sha256": "e758ef1842bd8e59e1d959aed4b4d61497043b0033351fb1761238de3454127e",
+          "mode": 420
+        },
+        "a0330e891e733f4e-gfp_p384.o": {
+          "sha256": "9fda3e4da98103d17daba480ec0c1af48e5469e90b8001591fd5750322853094",
+          "mode": 420
+        },
+        "00c879ee3285a50d-montgomery_inv.o": {
+          "sha256": "9de15e2519481409a67c6a65241f9daebbf3ad5c4a08e91f43a1577f85bf7c41",
+          "mode": 420
+        },
+        "c322a0bcc369f531-ghash-neon-armv8-ios64.o": {
+          "sha256": "4693fe6f6c5e008710351516d6c8de8e7c9a4a8731ca12b53af8c27a5245e4ef",
+          "mode": 420
+        },
+        "libring_core_0_17_14_.a": {
+          "sha256": "91cae0b76410832da2c64718f36197af7322108c80dfc3eca81845b81500b292",
+          "mode": 420
+        },
+        "a0330e891e733f4e-gfp_p256.o": {
+          "sha256": "3e0be8e5213cc9c2b75e413200174de7148dc96236a909f46fc315d00eba53cd",
+          "mode": 420
+        },
+        "c322a0bcc369f531-vpaes-armv8-ios64.o": {
+          "sha256": "173082fec66e3a84e0b904b3e7582326a7dcd7fc3c1e57303d25d53f9edf8b72",
+          "mode": 420
+        },
+        "00c879ee3285a50d-montgomery.o": {
+          "sha256": "25098c34217d8793b01a2908e6dfcd21e92c721e134e52137f3b3affd4c90782",
+          "mode": 420
+        },
+        "c322a0bcc369f531-aesv8-gcm-armv8-ios64.o": {
+          "sha256": "5d5d5912581a03bcb8a4a98ee08d058c34e1796428e0f21bb074f92423403ed1",
+          "mode": 420
+        },
+        "a0330e891e733f4e-p256-nistz.o": {
+          "sha256": "9688f01179b34e3169a84cc72decb4886f6bc077976af4a3cce0a072cd403e5e",
+          "mode": 420
+        },
+        "c322a0bcc369f531-p256-armv8-asm-ios64.o": {
+          "sha256": "1cd97ebb0f192ad46abe5c4750158a5a1c6eb19e85c1ae182c0568cc698b0717",
+          "mode": 420
+        }
+      },
+      "streams": {
+        "stdout": "18de88e9ae0f1e1221e4f5f7a3b9307bdcd5627071a97025e65842d3287e3552",
+        "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "pair": 1,
+      "implementation": "candidate",
+      "elapsed_ns": 113169167,
+      "phases_ns": {
+        "input_snapshot": 19387458,
+        "material.base": 946917,
+        "material.rust": 1491542,
+        "material.tools": 697834,
+        "material.apple_helpers": 7215875,
+        "material.installed": 135042,
+        "material.apple_selection": 20208458,
+        "material.sdk_stamps": 12335458,
+        "material.total": 43067000,
+        "restore.validation_materialization": 8052125,
+        "restore.input_epoch": 2854541,
+        "restore.publication": 3183000,
+        "restore.total": 11374833
+      },
+      "artifacts": {
+        "c322a0bcc369f531-armv8-mont-ios64.o": {
+          "sha256": "55ef33aa45fb64b94423f4aa70bada04c1c9e91ed5762f43de0bc17fa2b4cfab",
+          "mode": 420
+        },
+        "c322a0bcc369f531-sha512-armv8-ios64.o": {
+          "sha256": "8994565ba79b1b4b6fadb8b8b3e0e281bbe481cccfb103281d842b6e2fece7d2",
+          "mode": 420
+        },
+        "c322a0bcc369f531-chacha-armv8-ios64.o": {
+          "sha256": "027c496be03a8e92ddd56a9e4d738ae7a279971776a83041b39af8871b24245c",
+          "mode": 420
+        },
+        "aaa1ba3e455ee2e1-limbs.o": {
+          "sha256": "44a313e961ee8b114347e2bcfacab4a4bd972692bf1ac9793b85067df88cf830",
+          "mode": 420
+        },
+        "a0330e891e733f4e-ecp_nistz.o": {
+          "sha256": "d8f3343d55b9a90ebe8193b3c67aa8912c45acc4e692b2730c0cf82da45bc61e",
+          "mode": 420
+        },
+        "a4019cc0736b0423-constant_time_test.o": {
+          "sha256": "bb96b434fe7d8d75d41a9ab250e1f1713910439b9c100f91f1792520da285470",
+          "mode": 420
+        },
+        "c322a0bcc369f531-sha256-armv8-ios64.o": {
+          "sha256": "f5d9e3a5e8e40ede31494f5b595cd54f9620ed73609c201150f5e76dbbaa13a9",
+          "mode": 420
+        },
+        "c322a0bcc369f531-ghashv8-armx-ios64.o": {
+          "sha256": "a0fbd615ab766c4ae501c5eaf9152f1205b1f7948754a9490e9c2f1092197a67",
+          "mode": 420
+        },
+        "libring_core_0_17_14__test.a": {
+          "sha256": "6484820a15821b1561007c09956f0ed401ad63b83b9f6d2d7c16e0cf3cc4a2ae",
+          "mode": 420
+        },
+        "0bbbd18bda93c05b-aes_nohw.o": {
+          "sha256": "02a6b7490bbaa5a95cfa1028debc8b5f9d6aba47255fa6f226143d06663e650c",
+          "mode": 420
+        },
+        "c322a0bcc369f531-aesv8-armx-ios64.o": {
+          "sha256": "db84dc11f5e7c7208d45a35413a178f4bfdd224291c7d3146bd5caf73d9e1148",
+          "mode": 420
+        },
+        "d5a9841f3dc6e253-poly1305.o": {
+          "sha256": "283d46698c316caac63550178dfcd482ad8583cac67d6a92ba131ce28b3d0d8d",
+          "mode": 420
+        },
+        "a4019cc0736b0423-mem.o": {
+          "sha256": "2bcb96399af0b70eec7776de72f8d47af014654daf0f640e2df9e52a0d11a034",
+          "mode": 420
+        },
+        "a0330e891e733f4e-p256.o": {
+          "sha256": "3e0be8e5213cc9c2b75e413200174de7148dc96236a909f46fc315d00eba53cd",
+          "mode": 420
+        },
+        "c322a0bcc369f531-chacha20_poly1305_armv8-ios64.o": {
+          "sha256": "f503566b5cc669798a52d310d5bc85a771e64e7eb7dece04927dc91b60194f8b",
+          "mode": 420
+        },
+        "25ac62e5b3c53843-curve25519.o": {
+          "sha256": "e758ef1842bd8e59e1d959aed4b4d61497043b0033351fb1761238de3454127e",
+          "mode": 420
+        },
+        "a0330e891e733f4e-gfp_p384.o": {
+          "sha256": "9fda3e4da98103d17daba480ec0c1af48e5469e90b8001591fd5750322853094",
+          "mode": 420
+        },
+        "00c879ee3285a50d-montgomery_inv.o": {
+          "sha256": "9de15e2519481409a67c6a65241f9daebbf3ad5c4a08e91f43a1577f85bf7c41",
+          "mode": 420
+        },
+        "c322a0bcc369f531-ghash-neon-armv8-ios64.o": {
+          "sha256": "4693fe6f6c5e008710351516d6c8de8e7c9a4a8731ca12b53af8c27a5245e4ef",
+          "mode": 420
+        },
+        "libring_core_0_17_14_.a": {
+          "sha256": "91cae0b76410832da2c64718f36197af7322108c80dfc3eca81845b81500b292",
+          "mode": 420
+        },
+        "a0330e891e733f4e-gfp_p256.o": {
+          "sha256": "3e0be8e5213cc9c2b75e413200174de7148dc96236a909f46fc315d00eba53cd",
+          "mode": 420
+        },
+        "c322a0bcc369f531-vpaes-armv8-ios64.o": {
+          "sha256": "173082fec66e3a84e0b904b3e7582326a7dcd7fc3c1e57303d25d53f9edf8b72",
+          "mode": 420
+        },
+        "00c879ee3285a50d-montgomery.o": {
+          "sha256": "25098c34217d8793b01a2908e6dfcd21e92c721e134e52137f3b3affd4c90782",
+          "mode": 420
+        },
+        "c322a0bcc369f531-aesv8-gcm-armv8-ios64.o": {
+          "sha256": "5d5d5912581a03bcb8a4a98ee08d058c34e1796428e0f21bb074f92423403ed1",
+          "mode": 420
+        },
+        "a0330e891e733f4e-p256-nistz.o": {
+          "sha256": "9688f01179b34e3169a84cc72decb4886f6bc077976af4a3cce0a072cd403e5e",
+          "mode": 420
+        },
+        "c322a0bcc369f531-p256-armv8-asm-ios64.o": {
+          "sha256": "1cd97ebb0f192ad46abe5c4750158a5a1c6eb19e85c1ae182c0568cc698b0717",
+          "mode": 420
+        }
+      },
+      "streams": {
+        "stdout": "18de88e9ae0f1e1221e4f5f7a3b9307bdcd5627071a97025e65842d3287e3552",
+        "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "pair": 1,
+      "implementation": "baseline",
+      "elapsed_ns": 81736292,
+      "phases_ns": {
+        "input_snapshot": 20699750,
+        "material.base": 856125,
+        "material.rust": 1387875,
+        "material.tools": 646708,
+        "material.apple_helpers": 6289125,
+        "material.installed": 105458,
+        "material.apple_selection": 19181292,
+        "material.sdk_stamps": 13330625,
+        "material.total": 41820833,
+        "restore.validation_materialization": 13245792,
+        "restore.publication": 151125,
+        "restore.total": 13528584
+      },
+      "artifacts": {
+        "c322a0bcc369f531-armv8-mont-ios64.o": {
+          "sha256": "55ef33aa45fb64b94423f4aa70bada04c1c9e91ed5762f43de0bc17fa2b4cfab",
+          "mode": 420
+        },
+        "c322a0bcc369f531-sha512-armv8-ios64.o": {
+          "sha256": "8994565ba79b1b4b6fadb8b8b3e0e281bbe481cccfb103281d842b6e2fece7d2",
+          "mode": 420
+        },
+        "c322a0bcc369f531-chacha-armv8-ios64.o": {
+          "sha256": "027c496be03a8e92ddd56a9e4d738ae7a279971776a83041b39af8871b24245c",
+          "mode": 420
+        },
+        "aaa1ba3e455ee2e1-limbs.o": {
+          "sha256": "44a313e961ee8b114347e2bcfacab4a4bd972692bf1ac9793b85067df88cf830",
+          "mode": 420
+        },
+        "a0330e891e733f4e-ecp_nistz.o": {
+          "sha256": "d8f3343d55b9a90ebe8193b3c67aa8912c45acc4e692b2730c0cf82da45bc61e",
+          "mode": 420
+        },
+        "a4019cc0736b0423-constant_time_test.o": {
+          "sha256": "bb96b434fe7d8d75d41a9ab250e1f1713910439b9c100f91f1792520da285470",
+          "mode": 420
+        },
+        "c322a0bcc369f531-sha256-armv8-ios64.o": {
+          "sha256": "f5d9e3a5e8e40ede31494f5b595cd54f9620ed73609c201150f5e76dbbaa13a9",
+          "mode": 420
+        },
+        "c322a0bcc369f531-ghashv8-armx-ios64.o": {
+          "sha256": "a0fbd615ab766c4ae501c5eaf9152f1205b1f7948754a9490e9c2f1092197a67",
+          "mode": 420
+        },
+        "libring_core_0_17_14__test.a": {
+          "sha256": "6484820a15821b1561007c09956f0ed401ad63b83b9f6d2d7c16e0cf3cc4a2ae",
+          "mode": 420
+        },
+        "0bbbd18bda93c05b-aes_nohw.o": {
+          "sha256": "02a6b7490bbaa5a95cfa1028debc8b5f9d6aba47255fa6f226143d06663e650c",
+          "mode": 420
+        },
+        "c322a0bcc369f531-aesv8-armx-ios64.o": {
+          "sha256": "db84dc11f5e7c7208d45a35413a178f4bfdd224291c7d3146bd5caf73d9e1148",
+          "mode": 420
+        },
+        "d5a9841f3dc6e253-poly1305.o": {
+          "sha256": "283d46698c316caac63550178dfcd482ad8583cac67d6a92ba131ce28b3d0d8d",
+          "mode": 420
+        },
+        "a4019cc0736b0423-mem.o": {
+          "sha256": "2bcb96399af0b70eec7776de72f8d47af014654daf0f640e2df9e52a0d11a034",
+          "mode": 420
+        },
+        "a0330e891e733f4e-p256.o": {
+          "sha256": "3e0be8e5213cc9c2b75e413200174de7148dc96236a909f46fc315d00eba53cd",
+          "mode": 420
+        },
+        "c322a0bcc369f531-chacha20_poly1305_armv8-ios64.o": {
+          "sha256": "f503566b5cc669798a52d310d5bc85a771e64e7eb7dece04927dc91b60194f8b",
+          "mode": 420
+        },
+        "25ac62e5b3c53843-curve25519.o": {
+          "sha256": "e758ef1842bd8e59e1d959aed4b4d61497043b0033351fb1761238de3454127e",
+          "mode": 420
+        },
+        "a0330e891e733f4e-gfp_p384.o": {
+          "sha256": "9fda3e4da98103d17daba480ec0c1af48e5469e90b8001591fd5750322853094",
+          "mode": 420
+        },
+        "00c879ee3285a50d-montgomery_inv.o": {
+          "sha256": "9de15e2519481409a67c6a65241f9daebbf3ad5c4a08e91f43a1577f85bf7c41",
+          "mode": 420
+        },
+        "c322a0bcc369f531-ghash-neon-armv8-ios64.o": {
+          "sha256": "4693fe6f6c5e008710351516d6c8de8e7c9a4a8731ca12b53af8c27a5245e4ef",
+          "mode": 420
+        },
+        "libring_core_0_17_14_.a": {
+          "sha256": "91cae0b76410832da2c64718f36197af7322108c80dfc3eca81845b81500b292",
+          "mode": 420
+        },
+        "a0330e891e733f4e-gfp_p256.o": {
+          "sha256": "3e0be8e5213cc9c2b75e413200174de7148dc96236a909f46fc315d00eba53cd",
+          "mode": 420
+        },
+        "c322a0bcc369f531-vpaes-armv8-ios64.o": {
+          "sha256": "173082fec66e3a84e0b904b3e7582326a7dcd7fc3c1e57303d25d53f9edf8b72",
+          "mode": 420
+        },
+        "00c879ee3285a50d-montgomery.o": {
+          "sha256": "25098c34217d8793b01a2908e6dfcd21e92c721e134e52137f3b3affd4c90782",
+          "mode": 420
+        },
+        "c322a0bcc369f531-aesv8-gcm-armv8-ios64.o": {
+          "sha256": "5d5d5912581a03bcb8a4a98ee08d058c34e1796428e0f21bb074f92423403ed1",
+          "mode": 420
+        },
+        "a0330e891e733f4e-p256-nistz.o": {
+          "sha256": "9688f01179b34e3169a84cc72decb4886f6bc077976af4a3cce0a072cd403e5e",
+          "mode": 420
+        },
+        "c322a0bcc369f531-p256-armv8-asm-ios64.o": {
+          "sha256": "1cd97ebb0f192ad46abe5c4750158a5a1c6eb19e85c1ae182c0568cc698b0717",
+          "mode": 420
+        }
+      },
+      "streams": {
+        "stdout": "18de88e9ae0f1e1221e4f5f7a3b9307bdcd5627071a97025e65842d3287e3552",
+        "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "pair": 2,
+      "implementation": "baseline",
+      "elapsed_ns": 86054958,
+      "phases_ns": {
+        "input_snapshot": 20222125,
+        "material.base": 875333,
+        "material.rust": 1661208,
+        "material.tools": 956791,
+        "material.apple_helpers": 6262834,
+        "material.installed": 122291,
+        "material.apple_selection": 18459875,
+        "material.sdk_stamps": 14268083,
+        "material.total": 42642167,
+        "restore.validation_materialization": 16727083,
+        "restore.publication": 170167,
+        "restore.total": 17038833
+      },
+      "artifacts": {
+        "c322a0bcc369f531-armv8-mont-ios64.o": {
+          "sha256": "55ef33aa45fb64b94423f4aa70bada04c1c9e91ed5762f43de0bc17fa2b4cfab",
+          "mode": 420
+        },
+        "c322a0bcc369f531-sha512-armv8-ios64.o": {
+          "sha256": "8994565ba79b1b4b6fadb8b8b3e0e281bbe481cccfb103281d842b6e2fece7d2",
+          "mode": 420
+        },
+        "c322a0bcc369f531-chacha-armv8-ios64.o": {
+          "sha256": "027c496be03a8e92ddd56a9e4d738ae7a279971776a83041b39af8871b24245c",
+          "mode": 420
+        },
+        "aaa1ba3e455ee2e1-limbs.o": {
+          "sha256": "44a313e961ee8b114347e2bcfacab4a4bd972692bf1ac9793b85067df88cf830",
+          "mode": 420
+        },
+        "a0330e891e733f4e-ecp_nistz.o": {
+          "sha256": "d8f3343d55b9a90ebe8193b3c67aa8912c45acc4e692b2730c0cf82da45bc61e",
+          "mode": 420
+        },
+        "a4019cc0736b0423-constant_time_test.o": {
+          "sha256": "bb96b434fe7d8d75d41a9ab250e1f1713910439b9c100f91f1792520da285470",
+          "mode": 420
+        },
+        "c322a0bcc369f531-sha256-armv8-ios64.o": {
+          "sha256": "f5d9e3a5e8e40ede31494f5b595cd54f9620ed73609c201150f5e76dbbaa13a9",
+          "mode": 420
+        },
+        "c322a0bcc369f531-ghashv8-armx-ios64.o": {
+          "sha256": "a0fbd615ab766c4ae501c5eaf9152f1205b1f7948754a9490e9c2f1092197a67",
+          "mode": 420
+        },
+        "libring_core_0_17_14__test.a": {
+          "sha256": "6484820a15821b1561007c09956f0ed401ad63b83b9f6d2d7c16e0cf3cc4a2ae",
+          "mode": 420
+        },
+        "0bbbd18bda93c05b-aes_nohw.o": {
+          "sha256": "02a6b7490bbaa5a95cfa1028debc8b5f9d6aba47255fa6f226143d06663e650c",
+          "mode": 420
+        },
+        "c322a0bcc369f531-aesv8-armx-ios64.o": {
+          "sha256": "db84dc11f5e7c7208d45a35413a178f4bfdd224291c7d3146bd5caf73d9e1148",
+          "mode": 420
+        },
+        "d5a9841f3dc6e253-poly1305.o": {
+          "sha256": "283d46698c316caac63550178dfcd482ad8583cac67d6a92ba131ce28b3d0d8d",
+          "mode": 420
+        },
+        "a4019cc0736b0423-mem.o": {
+          "sha256": "2bcb96399af0b70eec7776de72f8d47af014654daf0f640e2df9e52a0d11a034",
+          "mode": 420
+        },
+        "a0330e891e733f4e-p256.o": {
+          "sha256": "3e0be8e5213cc9c2b75e413200174de7148dc96236a909f46fc315d00eba53cd",
+          "mode": 420
+        },
+        "c322a0bcc369f531-chacha20_poly1305_armv8-ios64.o": {
+          "sha256": "f503566b5cc669798a52d310d5bc85a771e64e7eb7dece04927dc91b60194f8b",
+          "mode": 420
+        },
+        "25ac62e5b3c53843-curve25519.o": {
+          "sha256": "e758ef1842bd8e59e1d959aed4b4d61497043b0033351fb1761238de3454127e",
+          "mode": 420
+        },
+        "a0330e891e733f4e-gfp_p384.o": {
+          "sha256": "9fda3e4da98103d17daba480ec0c1af48e5469e90b8001591fd5750322853094",
+          "mode": 420
+        },
+        "00c879ee3285a50d-montgomery_inv.o": {
+          "sha256": "9de15e2519481409a67c6a65241f9daebbf3ad5c4a08e91f43a1577f85bf7c41",
+          "mode": 420
+        },
+        "c322a0bcc369f531-ghash-neon-armv8-ios64.o": {
+          "sha256": "4693fe6f6c5e008710351516d6c8de8e7c9a4a8731ca12b53af8c27a5245e4ef",
+          "mode": 420
+        },
+        "libring_core_0_17_14_.a": {
+          "sha256": "91cae0b76410832da2c64718f36197af7322108c80dfc3eca81845b81500b292",
+          "mode": 420
+        },
+        "a0330e891e733f4e-gfp_p256.o": {
+          "sha256": "3e0be8e5213cc9c2b75e413200174de7148dc96236a909f46fc315d00eba53cd",
+          "mode": 420
+        },
+        "c322a0bcc369f531-vpaes-armv8-ios64.o": {
+          "sha256": "173082fec66e3a84e0b904b3e7582326a7dcd7fc3c1e57303d25d53f9edf8b72",
+          "mode": 420
+        },
+        "00c879ee3285a50d-montgomery.o": {
+          "sha256": "25098c34217d8793b01a2908e6dfcd21e92c721e134e52137f3b3affd4c90782",
+          "mode": 420
+        },
+        "c322a0bcc369f531-aesv8-gcm-armv8-ios64.o": {
+          "sha256": "5d5d5912581a03bcb8a4a98ee08d058c34e1796428e0f21bb074f92423403ed1",
+          "mode": 420
+        },
+        "a0330e891e733f4e-p256-nistz.o": {
+          "sha256": "9688f01179b34e3169a84cc72decb4886f6bc077976af4a3cce0a072cd403e5e",
+          "mode": 420
+        },
+        "c322a0bcc369f531-p256-armv8-asm-ios64.o": {
+          "sha256": "1cd97ebb0f192ad46abe5c4750158a5a1c6eb19e85c1ae182c0568cc698b0717",
+          "mode": 420
+        }
+      },
+      "streams": {
+        "stdout": "18de88e9ae0f1e1221e4f5f7a3b9307bdcd5627071a97025e65842d3287e3552",
+        "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "pair": 2,
+      "implementation": "candidate",
+      "elapsed_ns": 77818334,
+      "phases_ns": {
+        "input_snapshot": 20544959,
+        "material.base": 894750,
+        "material.rust": 1692792,
+        "material.tools": 972791,
+        "material.apple_helpers": 6589042,
+        "material.installed": 104750,
+        "material.apple_selection": 18285375,
+        "material.sdk_stamps": 12061542,
+        "material.total": 40636958,
+        "restore.validation_materialization": 7595208,
+        "restore.input_epoch": 2226709,
+        "restore.publication": 2410833,
+        "restore.total": 10118833
+      },
+      "artifacts": {
+        "c322a0bcc369f531-armv8-mont-ios64.o": {
+          "sha256": "55ef33aa45fb64b94423f4aa70bada04c1c9e91ed5762f43de0bc17fa2b4cfab",
+          "mode": 420
+        },
+        "c322a0bcc369f531-sha512-armv8-ios64.o": {
+          "sha256": "8994565ba79b1b4b6fadb8b8b3e0e281bbe481cccfb103281d842b6e2fece7d2",
+          "mode": 420
+        },
+        "c322a0bcc369f531-chacha-armv8-ios64.o": {
+          "sha256": "027c496be03a8e92ddd56a9e4d738ae7a279971776a83041b39af8871b24245c",
+          "mode": 420
+        },
+        "aaa1ba3e455ee2e1-limbs.o": {
+          "sha256": "44a313e961ee8b114347e2bcfacab4a4bd972692bf1ac9793b85067df88cf830",
+          "mode": 420
+        },
+        "a0330e891e733f4e-ecp_nistz.o": {
+          "sha256": "d8f3343d55b9a90ebe8193b3c67aa8912c45acc4e692b2730c0cf82da45bc61e",
+          "mode": 420
+        },
+        "a4019cc0736b0423-constant_time_test.o": {
+          "sha256": "bb96b434fe7d8d75d41a9ab250e1f1713910439b9c100f91f1792520da285470",
+          "mode": 420
+        },
+        "c322a0bcc369f531-sha256-armv8-ios64.o": {
+          "sha256": "f5d9e3a5e8e40ede31494f5b595cd54f9620ed73609c201150f5e76dbbaa13a9",
+          "mode": 420
+        },
+        "c322a0bcc369f531-ghashv8-armx-ios64.o": {
+          "sha256": "a0fbd615ab766c4ae501c5eaf9152f1205b1f7948754a9490e9c2f1092197a67",
+          "mode": 420
+        },
+        "libring_core_0_17_14__test.a": {
+          "sha256": "6484820a15821b1561007c09956f0ed401ad63b83b9f6d2d7c16e0cf3cc4a2ae",
+          "mode": 420
+        },
+        "0bbbd18bda93c05b-aes_nohw.o": {
+          "sha256": "02a6b7490bbaa5a95cfa1028debc8b5f9d6aba47255fa6f226143d06663e650c",
+          "mode": 420
+        },
+        "c322a0bcc369f531-aesv8-armx-ios64.o": {
+          "sha256": "db84dc11f5e7c7208d45a35413a178f4bfdd224291c7d3146bd5caf73d9e1148",
+          "mode": 420
+        },
+        "d5a9841f3dc6e253-poly1305.o": {
+          "sha256": "283d46698c316caac63550178dfcd482ad8583cac67d6a92ba131ce28b3d0d8d",
+          "mode": 420
+        },
+        "a4019cc0736b0423-mem.o": {
+          "sha256": "2bcb96399af0b70eec7776de72f8d47af014654daf0f640e2df9e52a0d11a034",
+          "mode": 420
+        },
+        "a0330e891e733f4e-p256.o": {
+          "sha256": "3e0be8e5213cc9c2b75e413200174de7148dc96236a909f46fc315d00eba53cd",
+          "mode": 420
+        },
+        "c322a0bcc369f531-chacha20_poly1305_armv8-ios64.o": {
+          "sha256": "f503566b5cc669798a52d310d5bc85a771e64e7eb7dece04927dc91b60194f8b",
+          "mode": 420
+        },
+        "25ac62e5b3c53843-curve25519.o": {
+          "sha256": "e758ef1842bd8e59e1d959aed4b4d61497043b0033351fb1761238de3454127e",
+          "mode": 420
+        },
+        "a0330e891e733f4e-gfp_p384.o": {
+          "sha256": "9fda3e4da98103d17daba480ec0c1af48e5469e90b8001591fd5750322853094",
+          "mode": 420
+        },
+        "00c879ee3285a50d-montgomery_inv.o": {
+          "sha256": "9de15e2519481409a67c6a65241f9daebbf3ad5c4a08e91f43a1577f85bf7c41",
+          "mode": 420
+        },
+        "c322a0bcc369f531-ghash-neon-armv8-ios64.o": {
+          "sha256": "4693fe6f6c5e008710351516d6c8de8e7c9a4a8731ca12b53af8c27a5245e4ef",
+          "mode": 420
+        },
+        "libring_core_0_17_14_.a": {
+          "sha256": "91cae0b76410832da2c64718f36197af7322108c80dfc3eca81845b81500b292",
+          "mode": 420
+        },
+        "a0330e891e733f4e-gfp_p256.o": {
+          "sha256": "3e0be8e5213cc9c2b75e413200174de7148dc96236a909f46fc315d00eba53cd",
+          "mode": 420
+        },
+        "c322a0bcc369f531-vpaes-armv8-ios64.o": {
+          "sha256": "173082fec66e3a84e0b904b3e7582326a7dcd7fc3c1e57303d25d53f9edf8b72",
+          "mode": 420
+        },
+        "00c879ee3285a50d-montgomery.o": {
+          "sha256": "25098c34217d8793b01a2908e6dfcd21e92c721e134e52137f3b3affd4c90782",
+          "mode": 420
+        },
+        "c322a0bcc369f531-aesv8-gcm-armv8-ios64.o": {
+          "sha256": "5d5d5912581a03bcb8a4a98ee08d058c34e1796428e0f21bb074f92423403ed1",
+          "mode": 420
+        },
+        "a0330e891e733f4e-p256-nistz.o": {
+          "sha256": "9688f01179b34e3169a84cc72decb4886f6bc077976af4a3cce0a072cd403e5e",
+          "mode": 420
+        },
+        "c322a0bcc369f531-p256-armv8-asm-ios64.o": {
+          "sha256": "1cd97ebb0f192ad46abe5c4750158a5a1c6eb19e85c1ae182c0568cc698b0717",
+          "mode": 420
+        }
+      },
+      "streams": {
+        "stdout": "18de88e9ae0f1e1221e4f5f7a3b9307bdcd5627071a97025e65842d3287e3552",
+        "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "pair": 3,
+      "implementation": "candidate",
+      "elapsed_ns": 78857375,
+      "phases_ns": {
+        "input_snapshot": 19532875,
+        "material.base": 867416,
+        "material.rust": 1407209,
+        "material.tools": 665625,
+        "material.apple_helpers": 6352333,
+        "material.installed": 105875,
+        "material.apple_selection": 18357791,
+        "material.sdk_stamps": 13456250,
+        "material.total": 41241875,
+        "restore.validation_materialization": 9081583,
+        "restore.input_epoch": 2994416,
+        "restore.publication": 3269875,
+        "restore.total": 12446583
+      },
+      "artifacts": {
+        "c322a0bcc369f531-armv8-mont-ios64.o": {
+          "sha256": "55ef33aa45fb64b94423f4aa70bada04c1c9e91ed5762f43de0bc17fa2b4cfab",
+          "mode": 420
+        },
+        "c322a0bcc369f531-sha512-armv8-ios64.o": {
+          "sha256": "8994565ba79b1b4b6fadb8b8b3e0e281bbe481cccfb103281d842b6e2fece7d2",
+          "mode": 420
+        },
+        "c322a0bcc369f531-chacha-armv8-ios64.o": {
+          "sha256": "027c496be03a8e92ddd56a9e4d738ae7a279971776a83041b39af8871b24245c",
+          "mode": 420
+        },
+        "aaa1ba3e455ee2e1-limbs.o": {
+          "sha256": "44a313e961ee8b114347e2bcfacab4a4bd972692bf1ac9793b85067df88cf830",
+          "mode": 420
+        },
+        "a0330e891e733f4e-ecp_nistz.o": {
+          "sha256": "d8f3343d55b9a90ebe8193b3c67aa8912c45acc4e692b2730c0cf82da45bc61e",
+          "mode": 420
+        },
+        "a4019cc0736b0423-constant_time_test.o": {
+          "sha256": "bb96b434fe7d8d75d41a9ab250e1f1713910439b9c100f91f1792520da285470",
+          "mode": 420
+        },
+        "c322a0bcc369f531-sha256-armv8-ios64.o": {
+          "sha256": "f5d9e3a5e8e40ede31494f5b595cd54f9620ed73609c201150f5e76dbbaa13a9",
+          "mode": 420
+        },
+        "c322a0bcc369f531-ghashv8-armx-ios64.o": {
+          "sha256": "a0fbd615ab766c4ae501c5eaf9152f1205b1f7948754a9490e9c2f1092197a67",
+          "mode": 420
+        },
+        "libring_core_0_17_14__test.a": {
+          "sha256": "6484820a15821b1561007c09956f0ed401ad63b83b9f6d2d7c16e0cf3cc4a2ae",
+          "mode": 420
+        },
+        "0bbbd18bda93c05b-aes_nohw.o": {
+          "sha256": "02a6b7490bbaa5a95cfa1028debc8b5f9d6aba47255fa6f226143d06663e650c",
+          "mode": 420
+        },
+        "c322a0bcc369f531-aesv8-armx-ios64.o": {
+          "sha256": "db84dc11f5e7c7208d45a35413a178f4bfdd224291c7d3146bd5caf73d9e1148",
+          "mode": 420
+        },
+        "d5a9841f3dc6e253-poly1305.o": {
+          "sha256": "283d46698c316caac63550178dfcd482ad8583cac67d6a92ba131ce28b3d0d8d",
+          "mode": 420
+        },
+        "a4019cc0736b0423-mem.o": {
+          "sha256": "2bcb96399af0b70eec7776de72f8d47af014654daf0f640e2df9e52a0d11a034",
+          "mode": 420
+        },
+        "a0330e891e733f4e-p256.o": {
+          "sha256": "3e0be8e5213cc9c2b75e413200174de7148dc96236a909f46fc315d00eba53cd",
+          "mode": 420
+        },
+        "c322a0bcc369f531-chacha20_poly1305_armv8-ios64.o": {
+          "sha256": "f503566b5cc669798a52d310d5bc85a771e64e7eb7dece04927dc91b60194f8b",
+          "mode": 420
+        },
+        "25ac62e5b3c53843-curve25519.o": {
+          "sha256": "e758ef1842bd8e59e1d959aed4b4d61497043b0033351fb1761238de3454127e",
+          "mode": 420
+        },
+        "a0330e891e733f4e-gfp_p384.o": {
+          "sha256": "9fda3e4da98103d17daba480ec0c1af48e5469e90b8001591fd5750322853094",
+          "mode": 420
+        },
+        "00c879ee3285a50d-montgomery_inv.o": {
+          "sha256": "9de15e2519481409a67c6a65241f9daebbf3ad5c4a08e91f43a1577f85bf7c41",
+          "mode": 420
+        },
+        "c322a0bcc369f531-ghash-neon-armv8-ios64.o": {
+          "sha256": "4693fe6f6c5e008710351516d6c8de8e7c9a4a8731ca12b53af8c27a5245e4ef",
+          "mode": 420
+        },
+        "libring_core_0_17_14_.a": {
+          "sha256": "91cae0b76410832da2c64718f36197af7322108c80dfc3eca81845b81500b292",
+          "mode": 420
+        },
+        "a0330e891e733f4e-gfp_p256.o": {
+          "sha256": "3e0be8e5213cc9c2b75e413200174de7148dc96236a909f46fc315d00eba53cd",
+          "mode": 420
+        },
+        "c322a0bcc369f531-vpaes-armv8-ios64.o": {
+          "sha256": "173082fec66e3a84e0b904b3e7582326a7dcd7fc3c1e57303d25d53f9edf8b72",
+          "mode": 420
+        },
+        "00c879ee3285a50d-montgomery.o": {
+          "sha256": "25098c34217d8793b01a2908e6dfcd21e92c721e134e52137f3b3affd4c90782",
+          "mode": 420
+        },
+        "c322a0bcc369f531-aesv8-gcm-armv8-ios64.o": {
+          "sha256": "5d5d5912581a03bcb8a4a98ee08d058c34e1796428e0f21bb074f92423403ed1",
+          "mode": 420
+        },
+        "a0330e891e733f4e-p256-nistz.o": {
+          "sha256": "9688f01179b34e3169a84cc72decb4886f6bc077976af4a3cce0a072cd403e5e",
+          "mode": 420
+        },
+        "c322a0bcc369f531-p256-armv8-asm-ios64.o": {
+          "sha256": "1cd97ebb0f192ad46abe5c4750158a5a1c6eb19e85c1ae182c0568cc698b0717",
+          "mode": 420
+        }
+      },
+      "streams": {
+        "stdout": "18de88e9ae0f1e1221e4f5f7a3b9307bdcd5627071a97025e65842d3287e3552",
+        "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "pair": 3,
+      "implementation": "baseline",
+      "elapsed_ns": 82629875,
+      "phases_ns": {
+        "input_snapshot": 19724625,
+        "material.base": 938667,
+        "material.rust": 1472666,
+        "material.tools": 675042,
+        "material.apple_helpers": 6921667,
+        "material.installed": 107125,
+        "material.apple_selection": 18907458,
+        "material.sdk_stamps": 11981792,
+        "material.total": 41041209,
+        "restore.validation_materialization": 16087375,
+        "restore.publication": 168167,
+        "restore.total": 16378083
+      },
+      "artifacts": {
+        "c322a0bcc369f531-armv8-mont-ios64.o": {
+          "sha256": "55ef33aa45fb64b94423f4aa70bada04c1c9e91ed5762f43de0bc17fa2b4cfab",
+          "mode": 420
+        },
+        "c322a0bcc369f531-sha512-armv8-ios64.o": {
+          "sha256": "8994565ba79b1b4b6fadb8b8b3e0e281bbe481cccfb103281d842b6e2fece7d2",
+          "mode": 420
+        },
+        "c322a0bcc369f531-chacha-armv8-ios64.o": {
+          "sha256": "027c496be03a8e92ddd56a9e4d738ae7a279971776a83041b39af8871b24245c",
+          "mode": 420
+        },
+        "aaa1ba3e455ee2e1-limbs.o": {
+          "sha256": "44a313e961ee8b114347e2bcfacab4a4bd972692bf1ac9793b85067df88cf830",
+          "mode": 420
+        },
+        "a0330e891e733f4e-ecp_nistz.o": {
+          "sha256": "d8f3343d55b9a90ebe8193b3c67aa8912c45acc4e692b2730c0cf82da45bc61e",
+          "mode": 420
+        },
+        "a4019cc0736b0423-constant_time_test.o": {
+          "sha256": "bb96b434fe7d8d75d41a9ab250e1f1713910439b9c100f91f1792520da285470",
+          "mode": 420
+        },
+        "c322a0bcc369f531-sha256-armv8-ios64.o": {
+          "sha256": "f5d9e3a5e8e40ede31494f5b595cd54f9620ed73609c201150f5e76dbbaa13a9",
+          "mode": 420
+        },
+        "c322a0bcc369f531-ghashv8-armx-ios64.o": {
+          "sha256": "a0fbd615ab766c4ae501c5eaf9152f1205b1f7948754a9490e9c2f1092197a67",
+          "mode": 420
+        },
+        "libring_core_0_17_14__test.a": {
+          "sha256": "6484820a15821b1561007c09956f0ed401ad63b83b9f6d2d7c16e0cf3cc4a2ae",
+          "mode": 420
+        },
+        "0bbbd18bda93c05b-aes_nohw.o": {
+          "sha256": "02a6b7490bbaa5a95cfa1028debc8b5f9d6aba47255fa6f226143d06663e650c",
+          "mode": 420
+        },
+        "c322a0bcc369f531-aesv8-armx-ios64.o": {
+          "sha256": "db84dc11f5e7c7208d45a35413a178f4bfdd224291c7d3146bd5caf73d9e1148",
+          "mode": 420
+        },
+        "d5a9841f3dc6e253-poly1305.o": {
+          "sha256": "283d46698c316caac63550178dfcd482ad8583cac67d6a92ba131ce28b3d0d8d",
+          "mode": 420
+        },
+        "a4019cc0736b0423-mem.o": {
+          "sha256": "2bcb96399af0b70eec7776de72f8d47af014654daf0f640e2df9e52a0d11a034",
+          "mode": 420
+        },
+        "a0330e891e733f4e-p256.o": {
+          "sha256": "3e0be8e5213cc9c2b75e413200174de7148dc96236a909f46fc315d00eba53cd",
+          "mode": 420
+        },
+        "c322a0bcc369f531-chacha20_poly1305_armv8-ios64.o": {
+          "sha256": "f503566b5cc669798a52d310d5bc85a771e64e7eb7dece04927dc91b60194f8b",
+          "mode": 420
+        },
+        "25ac62e5b3c53843-curve25519.o": {
+          "sha256": "e758ef1842bd8e59e1d959aed4b4d61497043b0033351fb1761238de3454127e",
+          "mode": 420
+        },
+        "a0330e891e733f4e-gfp_p384.o": {
+          "sha256": "9fda3e4da98103d17daba480ec0c1af48e5469e90b8001591fd5750322853094",
+          "mode": 420
+        },
+        "00c879ee3285a50d-montgomery_inv.o": {
+          "sha256": "9de15e2519481409a67c6a65241f9daebbf3ad5c4a08e91f43a1577f85bf7c41",
+          "mode": 420
+        },
+        "c322a0bcc369f531-ghash-neon-armv8-ios64.o": {
+          "sha256": "4693fe6f6c5e008710351516d6c8de8e7c9a4a8731ca12b53af8c27a5245e4ef",
+          "mode": 420
+        },
+        "libring_core_0_17_14_.a": {
+          "sha256": "91cae0b76410832da2c64718f36197af7322108c80dfc3eca81845b81500b292",
+          "mode": 420
+        },
+        "a0330e891e733f4e-gfp_p256.o": {
+          "sha256": "3e0be8e5213cc9c2b75e413200174de7148dc96236a909f46fc315d00eba53cd",
+          "mode": 420
+        },
+        "c322a0bcc369f531-vpaes-armv8-ios64.o": {
+          "sha256": "173082fec66e3a84e0b904b3e7582326a7dcd7fc3c1e57303d25d53f9edf8b72",
+          "mode": 420
+        },
+        "00c879ee3285a50d-montgomery.o": {
+          "sha256": "25098c34217d8793b01a2908e6dfcd21e92c721e134e52137f3b3affd4c90782",
+          "mode": 420
+        },
+        "c322a0bcc369f531-aesv8-gcm-armv8-ios64.o": {
+          "sha256": "5d5d5912581a03bcb8a4a98ee08d058c34e1796428e0f21bb074f92423403ed1",
+          "mode": 420
+        },
+        "a0330e891e733f4e-p256-nistz.o": {
+          "sha256": "9688f01179b34e3169a84cc72decb4886f6bc077976af4a3cce0a072cd403e5e",
+          "mode": 420
+        },
+        "c322a0bcc369f531-p256-armv8-asm-ios64.o": {
+          "sha256": "1cd97ebb0f192ad46abe5c4750158a5a1c6eb19e85c1ae182c0568cc698b0717",
+          "mode": 420
+        }
+      },
+      "streams": {
+        "stdout": "18de88e9ae0f1e1221e4f5f7a3b9307bdcd5627071a97025e65842d3287e3552",
+        "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "pair": 4,
+      "implementation": "baseline",
+      "elapsed_ns": 79195209,
+      "phases_ns": {
+        "input_snapshot": 18808000,
+        "material.base": 848000,
+        "material.rust": 1424084,
+        "material.tools": 689083,
+        "material.apple_helpers": 6350666,
+        "material.installed": 106750,
+        "material.apple_selection": 18241292,
+        "material.sdk_stamps": 11709125,
+        "material.total": 39396083,
+        "restore.validation_materialization": 14082833,
+        "restore.publication": 162500,
+        "restore.total": 14368958
+      },
+      "artifacts": {
+        "c322a0bcc369f531-armv8-mont-ios64.o": {
+          "sha256": "55ef33aa45fb64b94423f4aa70bada04c1c9e91ed5762f43de0bc17fa2b4cfab",
+          "mode": 420
+        },
+        "c322a0bcc369f531-sha512-armv8-ios64.o": {
+          "sha256": "8994565ba79b1b4b6fadb8b8b3e0e281bbe481cccfb103281d842b6e2fece7d2",
+          "mode": 420
+        },
+        "c322a0bcc369f531-chacha-armv8-ios64.o": {
+          "sha256": "027c496be03a8e92ddd56a9e4d738ae7a279971776a83041b39af8871b24245c",
+          "mode": 420
+        },
+        "aaa1ba3e455ee2e1-limbs.o": {
+          "sha256": "44a313e961ee8b114347e2bcfacab4a4bd972692bf1ac9793b85067df88cf830",
+          "mode": 420
+        },
+        "a0330e891e733f4e-ecp_nistz.o": {
+          "sha256": "d8f3343d55b9a90ebe8193b3c67aa8912c45acc4e692b2730c0cf82da45bc61e",
+          "mode": 420
+        },
+        "a4019cc0736b0423-constant_time_test.o": {
+          "sha256": "bb96b434fe7d8d75d41a9ab250e1f1713910439b9c100f91f1792520da285470",
+          "mode": 420
+        },
+        "c322a0bcc369f531-sha256-armv8-ios64.o": {
+          "sha256": "f5d9e3a5e8e40ede31494f5b595cd54f9620ed73609c201150f5e76dbbaa13a9",
+          "mode": 420
+        },
+        "c322a0bcc369f531-ghashv8-armx-ios64.o": {
+          "sha256": "a0fbd615ab766c4ae501c5eaf9152f1205b1f7948754a9490e9c2f1092197a67",
+          "mode": 420
+        },
+        "libring_core_0_17_14__test.a": {
+          "sha256": "6484820a15821b1561007c09956f0ed401ad63b83b9f6d2d7c16e0cf3cc4a2ae",
+          "mode": 420
+        },
+        "0bbbd18bda93c05b-aes_nohw.o": {
+          "sha256": "02a6b7490bbaa5a95cfa1028debc8b5f9d6aba47255fa6f226143d06663e650c",
+          "mode": 420
+        },
+        "c322a0bcc369f531-aesv8-armx-ios64.o": {
+          "sha256": "db84dc11f5e7c7208d45a35413a178f4bfdd224291c7d3146bd5caf73d9e1148",
+          "mode": 420
+        },
+        "d5a9841f3dc6e253-poly1305.o": {
+          "sha256": "283d46698c316caac63550178dfcd482ad8583cac67d6a92ba131ce28b3d0d8d",
+          "mode": 420
+        },
+        "a4019cc0736b0423-mem.o": {
+          "sha256": "2bcb96399af0b70eec7776de72f8d47af014654daf0f640e2df9e52a0d11a034",
+          "mode": 420
+        },
+        "a0330e891e733f4e-p256.o": {
+          "sha256": "3e0be8e5213cc9c2b75e413200174de7148dc96236a909f46fc315d00eba53cd",
+          "mode": 420
+        },
+        "c322a0bcc369f531-chacha20_poly1305_armv8-ios64.o": {
+          "sha256": "f503566b5cc669798a52d310d5bc85a771e64e7eb7dece04927dc91b60194f8b",
+          "mode": 420
+        },
+        "25ac62e5b3c53843-curve25519.o": {
+          "sha256": "e758ef1842bd8e59e1d959aed4b4d61497043b0033351fb1761238de3454127e",
+          "mode": 420
+        },
+        "a0330e891e733f4e-gfp_p384.o": {
+          "sha256": "9fda3e4da98103d17daba480ec0c1af48e5469e90b8001591fd5750322853094",
+          "mode": 420
+        },
+        "00c879ee3285a50d-montgomery_inv.o": {
+          "sha256": "9de15e2519481409a67c6a65241f9daebbf3ad5c4a08e91f43a1577f85bf7c41",
+          "mode": 420
+        },
+        "c322a0bcc369f531-ghash-neon-armv8-ios64.o": {
+          "sha256": "4693fe6f6c5e008710351516d6c8de8e7c9a4a8731ca12b53af8c27a5245e4ef",
+          "mode": 420
+        },
+        "libring_core_0_17_14_.a": {
+          "sha256": "91cae0b76410832da2c64718f36197af7322108c80dfc3eca81845b81500b292",
+          "mode": 420
+        },
+        "a0330e891e733f4e-gfp_p256.o": {
+          "sha256": "3e0be8e5213cc9c2b75e413200174de7148dc96236a909f46fc315d00eba53cd",
+          "mode": 420
+        },
+        "c322a0bcc369f531-vpaes-armv8-ios64.o": {
+          "sha256": "173082fec66e3a84e0b904b3e7582326a7dcd7fc3c1e57303d25d53f9edf8b72",
+          "mode": 420
+        },
+        "00c879ee3285a50d-montgomery.o": {
+          "sha256": "25098c34217d8793b01a2908e6dfcd21e92c721e134e52137f3b3affd4c90782",
+          "mode": 420
+        },
+        "c322a0bcc369f531-aesv8-gcm-armv8-ios64.o": {
+          "sha256": "5d5d5912581a03bcb8a4a98ee08d058c34e1796428e0f21bb074f92423403ed1",
+          "mode": 420
+        },
+        "a0330e891e733f4e-p256-nistz.o": {
+          "sha256": "9688f01179b34e3169a84cc72decb4886f6bc077976af4a3cce0a072cd403e5e",
+          "mode": 420
+        },
+        "c322a0bcc369f531-p256-armv8-asm-ios64.o": {
+          "sha256": "1cd97ebb0f192ad46abe5c4750158a5a1c6eb19e85c1ae182c0568cc698b0717",
+          "mode": 420
+        }
+      },
+      "streams": {
+        "stdout": "18de88e9ae0f1e1221e4f5f7a3b9307bdcd5627071a97025e65842d3287e3552",
+        "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "pair": 4,
+      "implementation": "candidate",
+      "elapsed_ns": 78461875,
+      "phases_ns": {
+        "input_snapshot": 20338916,
+        "material.base": 858833,
+        "material.rust": 1473208,
+        "material.tools": 716208,
+        "material.apple_helpers": 6448333,
+        "material.installed": 105250,
+        "material.apple_selection": 18886208,
+        "material.sdk_stamps": 11876292,
+        "material.total": 40402042,
+        "restore.validation_materialization": 7871833,
+        "restore.input_epoch": 2970917,
+        "restore.publication": 3191625,
+        "restore.total": 11197291
+      },
+      "artifacts": {
+        "c322a0bcc369f531-armv8-mont-ios64.o": {
+          "sha256": "55ef33aa45fb64b94423f4aa70bada04c1c9e91ed5762f43de0bc17fa2b4cfab",
+          "mode": 420
+        },
+        "c322a0bcc369f531-sha512-armv8-ios64.o": {
+          "sha256": "8994565ba79b1b4b6fadb8b8b3e0e281bbe481cccfb103281d842b6e2fece7d2",
+          "mode": 420
+        },
+        "c322a0bcc369f531-chacha-armv8-ios64.o": {
+          "sha256": "027c496be03a8e92ddd56a9e4d738ae7a279971776a83041b39af8871b24245c",
+          "mode": 420
+        },
+        "aaa1ba3e455ee2e1-limbs.o": {
+          "sha256": "44a313e961ee8b114347e2bcfacab4a4bd972692bf1ac9793b85067df88cf830",
+          "mode": 420
+        },
+        "a0330e891e733f4e-ecp_nistz.o": {
+          "sha256": "d8f3343d55b9a90ebe8193b3c67aa8912c45acc4e692b2730c0cf82da45bc61e",
+          "mode": 420
+        },
+        "a4019cc0736b0423-constant_time_test.o": {
+          "sha256": "bb96b434fe7d8d75d41a9ab250e1f1713910439b9c100f91f1792520da285470",
+          "mode": 420
+        },
+        "c322a0bcc369f531-sha256-armv8-ios64.o": {
+          "sha256": "f5d9e3a5e8e40ede31494f5b595cd54f9620ed73609c201150f5e76dbbaa13a9",
+          "mode": 420
+        },
+        "c322a0bcc369f531-ghashv8-armx-ios64.o": {
+          "sha256": "a0fbd615ab766c4ae501c5eaf9152f1205b1f7948754a9490e9c2f1092197a67",
+          "mode": 420
+        },
+        "libring_core_0_17_14__test.a": {
+          "sha256": "6484820a15821b1561007c09956f0ed401ad63b83b9f6d2d7c16e0cf3cc4a2ae",
+          "mode": 420
+        },
+        "0bbbd18bda93c05b-aes_nohw.o": {
+          "sha256": "02a6b7490bbaa5a95cfa1028debc8b5f9d6aba47255fa6f226143d06663e650c",
+          "mode": 420
+        },
+        "c322a0bcc369f531-aesv8-armx-ios64.o": {
+          "sha256": "db84dc11f5e7c7208d45a35413a178f4bfdd224291c7d3146bd5caf73d9e1148",
+          "mode": 420
+        },
+        "d5a9841f3dc6e253-poly1305.o": {
+          "sha256": "283d46698c316caac63550178dfcd482ad8583cac67d6a92ba131ce28b3d0d8d",
+          "mode": 420
+        },
+        "a4019cc0736b0423-mem.o": {
+          "sha256": "2bcb96399af0b70eec7776de72f8d47af014654daf0f640e2df9e52a0d11a034",
+          "mode": 420
+        },
+        "a0330e891e733f4e-p256.o": {
+          "sha256": "3e0be8e5213cc9c2b75e413200174de7148dc96236a909f46fc315d00eba53cd",
+          "mode": 420
+        },
+        "c322a0bcc369f531-chacha20_poly1305_armv8-ios64.o": {
+          "sha256": "f503566b5cc669798a52d310d5bc85a771e64e7eb7dece04927dc91b60194f8b",
+          "mode": 420
+        },
+        "25ac62e5b3c53843-curve25519.o": {
+          "sha256": "e758ef1842bd8e59e1d959aed4b4d61497043b0033351fb1761238de3454127e",
+          "mode": 420
+        },
+        "a0330e891e733f4e-gfp_p384.o": {
+          "sha256": "9fda3e4da98103d17daba480ec0c1af48e5469e90b8001591fd5750322853094",
+          "mode": 420
+        },
+        "00c879ee3285a50d-montgomery_inv.o": {
+          "sha256": "9de15e2519481409a67c6a65241f9daebbf3ad5c4a08e91f43a1577f85bf7c41",
+          "mode": 420
+        },
+        "c322a0bcc369f531-ghash-neon-armv8-ios64.o": {
+          "sha256": "4693fe6f6c5e008710351516d6c8de8e7c9a4a8731ca12b53af8c27a5245e4ef",
+          "mode": 420
+        },
+        "libring_core_0_17_14_.a": {
+          "sha256": "91cae0b76410832da2c64718f36197af7322108c80dfc3eca81845b81500b292",
+          "mode": 420
+        },
+        "a0330e891e733f4e-gfp_p256.o": {
+          "sha256": "3e0be8e5213cc9c2b75e413200174de7148dc96236a909f46fc315d00eba53cd",
+          "mode": 420
+        },
+        "c322a0bcc369f531-vpaes-armv8-ios64.o": {
+          "sha256": "173082fec66e3a84e0b904b3e7582326a7dcd7fc3c1e57303d25d53f9edf8b72",
+          "mode": 420
+        },
+        "00c879ee3285a50d-montgomery.o": {
+          "sha256": "25098c34217d8793b01a2908e6dfcd21e92c721e134e52137f3b3affd4c90782",
+          "mode": 420
+        },
+        "c322a0bcc369f531-aesv8-gcm-armv8-ios64.o": {
+          "sha256": "5d5d5912581a03bcb8a4a98ee08d058c34e1796428e0f21bb074f92423403ed1",
+          "mode": 420
+        },
+        "a0330e891e733f4e-p256-nistz.o": {
+          "sha256": "9688f01179b34e3169a84cc72decb4886f6bc077976af4a3cce0a072cd403e5e",
+          "mode": 420
+        },
+        "c322a0bcc369f531-p256-armv8-asm-ios64.o": {
+          "sha256": "1cd97ebb0f192ad46abe5c4750158a5a1c6eb19e85c1ae182c0568cc698b0717",
+          "mode": 420
+        }
+      },
+      "streams": {
+        "stdout": "18de88e9ae0f1e1221e4f5f7a3b9307bdcd5627071a97025e65842d3287e3552",
+        "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "pair": 5,
+      "implementation": "candidate",
+      "elapsed_ns": 76655292,
+      "phases_ns": {
+        "input_snapshot": 19142083,
+        "material.base": 970875,
+        "material.rust": 1553583,
+        "material.tools": 767959,
+        "material.apple_helpers": 6643000,
+        "material.installed": 113084,
+        "material.apple_selection": 19307333,
+        "material.sdk_stamps": 11613042,
+        "material.total": 41008125,
+        "restore.validation_materialization": 7659375,
+        "restore.input_epoch": 2207375,
+        "restore.publication": 2370917,
+        "restore.total": 10164000
+      },
+      "artifacts": {
+        "c322a0bcc369f531-armv8-mont-ios64.o": {
+          "sha256": "55ef33aa45fb64b94423f4aa70bada04c1c9e91ed5762f43de0bc17fa2b4cfab",
+          "mode": 420
+        },
+        "c322a0bcc369f531-sha512-armv8-ios64.o": {
+          "sha256": "8994565ba79b1b4b6fadb8b8b3e0e281bbe481cccfb103281d842b6e2fece7d2",
+          "mode": 420
+        },
+        "c322a0bcc369f531-chacha-armv8-ios64.o": {
+          "sha256": "027c496be03a8e92ddd56a9e4d738ae7a279971776a83041b39af8871b24245c",
+          "mode": 420
+        },
+        "aaa1ba3e455ee2e1-limbs.o": {
+          "sha256": "44a313e961ee8b114347e2bcfacab4a4bd972692bf1ac9793b85067df88cf830",
+          "mode": 420
+        },
+        "a0330e891e733f4e-ecp_nistz.o": {
+          "sha256": "d8f3343d55b9a90ebe8193b3c67aa8912c45acc4e692b2730c0cf82da45bc61e",
+          "mode": 420
+        },
+        "a4019cc0736b0423-constant_time_test.o": {
+          "sha256": "bb96b434fe7d8d75d41a9ab250e1f1713910439b9c100f91f1792520da285470",
+          "mode": 420
+        },
+        "c322a0bcc369f531-sha256-armv8-ios64.o": {
+          "sha256": "f5d9e3a5e8e40ede31494f5b595cd54f9620ed73609c201150f5e76dbbaa13a9",
+          "mode": 420
+        },
+        "c322a0bcc369f531-ghashv8-armx-ios64.o": {
+          "sha256": "a0fbd615ab766c4ae501c5eaf9152f1205b1f7948754a9490e9c2f1092197a67",
+          "mode": 420
+        },
+        "libring_core_0_17_14__test.a": {
+          "sha256": "6484820a15821b1561007c09956f0ed401ad63b83b9f6d2d7c16e0cf3cc4a2ae",
+          "mode": 420
+        },
+        "0bbbd18bda93c05b-aes_nohw.o": {
+          "sha256": "02a6b7490bbaa5a95cfa1028debc8b5f9d6aba47255fa6f226143d06663e650c",
+          "mode": 420
+        },
+        "c322a0bcc369f531-aesv8-armx-ios64.o": {
+          "sha256": "db84dc11f5e7c7208d45a35413a178f4bfdd224291c7d3146bd5caf73d9e1148",
+          "mode": 420
+        },
+        "d5a9841f3dc6e253-poly1305.o": {
+          "sha256": "283d46698c316caac63550178dfcd482ad8583cac67d6a92ba131ce28b3d0d8d",
+          "mode": 420
+        },
+        "a4019cc0736b0423-mem.o": {
+          "sha256": "2bcb96399af0b70eec7776de72f8d47af014654daf0f640e2df9e52a0d11a034",
+          "mode": 420
+        },
+        "a0330e891e733f4e-p256.o": {
+          "sha256": "3e0be8e5213cc9c2b75e413200174de7148dc96236a909f46fc315d00eba53cd",
+          "mode": 420
+        },
+        "c322a0bcc369f531-chacha20_poly1305_armv8-ios64.o": {
+          "sha256": "f503566b5cc669798a52d310d5bc85a771e64e7eb7dece04927dc91b60194f8b",
+          "mode": 420
+        },
+        "25ac62e5b3c53843-curve25519.o": {
+          "sha256": "e758ef1842bd8e59e1d959aed4b4d61497043b0033351fb1761238de3454127e",
+          "mode": 420
+        },
+        "a0330e891e733f4e-gfp_p384.o": {
+          "sha256": "9fda3e4da98103d17daba480ec0c1af48e5469e90b8001591fd5750322853094",
+          "mode": 420
+        },
+        "00c879ee3285a50d-montgomery_inv.o": {
+          "sha256": "9de15e2519481409a67c6a65241f9daebbf3ad5c4a08e91f43a1577f85bf7c41",
+          "mode": 420
+        },
+        "c322a0bcc369f531-ghash-neon-armv8-ios64.o": {
+          "sha256": "4693fe6f6c5e008710351516d6c8de8e7c9a4a8731ca12b53af8c27a5245e4ef",
+          "mode": 420
+        },
+        "libring_core_0_17_14_.a": {
+          "sha256": "91cae0b76410832da2c64718f36197af7322108c80dfc3eca81845b81500b292",
+          "mode": 420
+        },
+        "a0330e891e733f4e-gfp_p256.o": {
+          "sha256": "3e0be8e5213cc9c2b75e413200174de7148dc96236a909f46fc315d00eba53cd",
+          "mode": 420
+        },
+        "c322a0bcc369f531-vpaes-armv8-ios64.o": {
+          "sha256": "173082fec66e3a84e0b904b3e7582326a7dcd7fc3c1e57303d25d53f9edf8b72",
+          "mode": 420
+        },
+        "00c879ee3285a50d-montgomery.o": {
+          "sha256": "25098c34217d8793b01a2908e6dfcd21e92c721e134e52137f3b3affd4c90782",
+          "mode": 420
+        },
+        "c322a0bcc369f531-aesv8-gcm-armv8-ios64.o": {
+          "sha256": "5d5d5912581a03bcb8a4a98ee08d058c34e1796428e0f21bb074f92423403ed1",
+          "mode": 420
+        },
+        "a0330e891e733f4e-p256-nistz.o": {
+          "sha256": "9688f01179b34e3169a84cc72decb4886f6bc077976af4a3cce0a072cd403e5e",
+          "mode": 420
+        },
+        "c322a0bcc369f531-p256-armv8-asm-ios64.o": {
+          "sha256": "1cd97ebb0f192ad46abe5c4750158a5a1c6eb19e85c1ae182c0568cc698b0717",
+          "mode": 420
+        }
+      },
+      "streams": {
+        "stdout": "18de88e9ae0f1e1221e4f5f7a3b9307bdcd5627071a97025e65842d3287e3552",
+        "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "pair": 5,
+      "implementation": "baseline",
+      "elapsed_ns": 84054000,
+      "phases_ns": {
+        "input_snapshot": 19434250,
+        "material.base": 793916,
+        "material.rust": 1334166,
+        "material.tools": 643084,
+        "material.apple_helpers": 6643042,
+        "material.installed": 108958,
+        "material.apple_selection": 17988708,
+        "material.sdk_stamps": 12840542,
+        "material.total": 40383750,
+        "restore.validation_materialization": 17709750,
+        "restore.publication": 245500,
+        "restore.total": 18122875
+      },
+      "artifacts": {
+        "c322a0bcc369f531-armv8-mont-ios64.o": {
+          "sha256": "55ef33aa45fb64b94423f4aa70bada04c1c9e91ed5762f43de0bc17fa2b4cfab",
+          "mode": 420
+        },
+        "c322a0bcc369f531-sha512-armv8-ios64.o": {
+          "sha256": "8994565ba79b1b4b6fadb8b8b3e0e281bbe481cccfb103281d842b6e2fece7d2",
+          "mode": 420
+        },
+        "c322a0bcc369f531-chacha-armv8-ios64.o": {
+          "sha256": "027c496be03a8e92ddd56a9e4d738ae7a279971776a83041b39af8871b24245c",
+          "mode": 420
+        },
+        "aaa1ba3e455ee2e1-limbs.o": {
+          "sha256": "44a313e961ee8b114347e2bcfacab4a4bd972692bf1ac9793b85067df88cf830",
+          "mode": 420
+        },
+        "a0330e891e733f4e-ecp_nistz.o": {
+          "sha256": "d8f3343d55b9a90ebe8193b3c67aa8912c45acc4e692b2730c0cf82da45bc61e",
+          "mode": 420
+        },
+        "a4019cc0736b0423-constant_time_test.o": {
+          "sha256": "bb96b434fe7d8d75d41a9ab250e1f1713910439b9c100f91f1792520da285470",
+          "mode": 420
+        },
+        "c322a0bcc369f531-sha256-armv8-ios64.o": {
+          "sha256": "f5d9e3a5e8e40ede31494f5b595cd54f9620ed73609c201150f5e76dbbaa13a9",
+          "mode": 420
+        },
+        "c322a0bcc369f531-ghashv8-armx-ios64.o": {
+          "sha256": "a0fbd615ab766c4ae501c5eaf9152f1205b1f7948754a9490e9c2f1092197a67",
+          "mode": 420
+        },
+        "libring_core_0_17_14__test.a": {
+          "sha256": "6484820a15821b1561007c09956f0ed401ad63b83b9f6d2d7c16e0cf3cc4a2ae",
+          "mode": 420
+        },
+        "0bbbd18bda93c05b-aes_nohw.o": {
+          "sha256": "02a6b7490bbaa5a95cfa1028debc8b5f9d6aba47255fa6f226143d06663e650c",
+          "mode": 420
+        },
+        "c322a0bcc369f531-aesv8-armx-ios64.o": {
+          "sha256": "db84dc11f5e7c7208d45a35413a178f4bfdd224291c7d3146bd5caf73d9e1148",
+          "mode": 420
+        },
+        "d5a9841f3dc6e253-poly1305.o": {
+          "sha256": "283d46698c316caac63550178dfcd482ad8583cac67d6a92ba131ce28b3d0d8d",
+          "mode": 420
+        },
+        "a4019cc0736b0423-mem.o": {
+          "sha256": "2bcb96399af0b70eec7776de72f8d47af014654daf0f640e2df9e52a0d11a034",
+          "mode": 420
+        },
+        "a0330e891e733f4e-p256.o": {
+          "sha256": "3e0be8e5213cc9c2b75e413200174de7148dc96236a909f46fc315d00eba53cd",
+          "mode": 420
+        },
+        "c322a0bcc369f531-chacha20_poly1305_armv8-ios64.o": {
+          "sha256": "f503566b5cc669798a52d310d5bc85a771e64e7eb7dece04927dc91b60194f8b",
+          "mode": 420
+        },
+        "25ac62e5b3c53843-curve25519.o": {
+          "sha256": "e758ef1842bd8e59e1d959aed4b4d61497043b0033351fb1761238de3454127e",
+          "mode": 420
+        },
+        "a0330e891e733f4e-gfp_p384.o": {
+          "sha256": "9fda3e4da98103d17daba480ec0c1af48e5469e90b8001591fd5750322853094",
+          "mode": 420
+        },
+        "00c879ee3285a50d-montgomery_inv.o": {
+          "sha256": "9de15e2519481409a67c6a65241f9daebbf3ad5c4a08e91f43a1577f85bf7c41",
+          "mode": 420
+        },
+        "c322a0bcc369f531-ghash-neon-armv8-ios64.o": {
+          "sha256": "4693fe6f6c5e008710351516d6c8de8e7c9a4a8731ca12b53af8c27a5245e4ef",
+          "mode": 420
+        },
+        "libring_core_0_17_14_.a": {
+          "sha256": "91cae0b76410832da2c64718f36197af7322108c80dfc3eca81845b81500b292",
+          "mode": 420
+        },
+        "a0330e891e733f4e-gfp_p256.o": {
+          "sha256": "3e0be8e5213cc9c2b75e413200174de7148dc96236a909f46fc315d00eba53cd",
+          "mode": 420
+        },
+        "c322a0bcc369f531-vpaes-armv8-ios64.o": {
+          "sha256": "173082fec66e3a84e0b904b3e7582326a7dcd7fc3c1e57303d25d53f9edf8b72",
+          "mode": 420
+        },
+        "00c879ee3285a50d-montgomery.o": {
+          "sha256": "25098c34217d8793b01a2908e6dfcd21e92c721e134e52137f3b3affd4c90782",
+          "mode": 420
+        },
+        "c322a0bcc369f531-aesv8-gcm-armv8-ios64.o": {
+          "sha256": "5d5d5912581a03bcb8a4a98ee08d058c34e1796428e0f21bb074f92423403ed1",
+          "mode": 420
+        },
+        "a0330e891e733f4e-p256-nistz.o": {
+          "sha256": "9688f01179b34e3169a84cc72decb4886f6bc077976af4a3cce0a072cd403e5e",
+          "mode": 420
+        },
+        "c322a0bcc369f531-p256-armv8-asm-ios64.o": {
+          "sha256": "1cd97ebb0f192ad46abe5c4750158a5a1c6eb19e85c1ae182c0568cc698b0717",
+          "mode": 420
+        }
+      },
+      "streams": {
+        "stdout": "18de88e9ae0f1e1221e4f5f7a3b9307bdcd5627071a97025e65842d3287e3552",
+        "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "pair": 6,
+      "implementation": "baseline",
+      "elapsed_ns": 90863042,
+      "phases_ns": {
+        "input_snapshot": 22156791,
+        "material.base": 887167,
+        "material.rust": 1502833,
+        "material.tools": 685084,
+        "material.apple_helpers": 7331542,
+        "material.installed": 120583,
+        "material.apple_selection": 21048250,
+        "material.sdk_stamps": 13615959,
+        "material.total": 45227625,
+        "restore.validation_materialization": 16626584,
+        "restore.publication": 233958,
+        "restore.total": 17009708
+      },
+      "artifacts": {
+        "c322a0bcc369f531-armv8-mont-ios64.o": {
+          "sha256": "55ef33aa45fb64b94423f4aa70bada04c1c9e91ed5762f43de0bc17fa2b4cfab",
+          "mode": 420
+        },
+        "c322a0bcc369f531-sha512-armv8-ios64.o": {
+          "sha256": "8994565ba79b1b4b6fadb8b8b3e0e281bbe481cccfb103281d842b6e2fece7d2",
+          "mode": 420
+        },
+        "c322a0bcc369f531-chacha-armv8-ios64.o": {
+          "sha256": "027c496be03a8e92ddd56a9e4d738ae7a279971776a83041b39af8871b24245c",
+          "mode": 420
+        },
+        "aaa1ba3e455ee2e1-limbs.o": {
+          "sha256": "44a313e961ee8b114347e2bcfacab4a4bd972692bf1ac9793b85067df88cf830",
+          "mode": 420
+        },
+        "a0330e891e733f4e-ecp_nistz.o": {
+          "sha256": "d8f3343d55b9a90ebe8193b3c67aa8912c45acc4e692b2730c0cf82da45bc61e",
+          "mode": 420
+        },
+        "a4019cc0736b0423-constant_time_test.o": {
+          "sha256": "bb96b434fe7d8d75d41a9ab250e1f1713910439b9c100f91f1792520da285470",
+          "mode": 420
+        },
+        "c322a0bcc369f531-sha256-armv8-ios64.o": {
+          "sha256": "f5d9e3a5e8e40ede31494f5b595cd54f9620ed73609c201150f5e76dbbaa13a9",
+          "mode": 420
+        },
+        "c322a0bcc369f531-ghashv8-armx-ios64.o": {
+          "sha256": "a0fbd615ab766c4ae501c5eaf9152f1205b1f7948754a9490e9c2f1092197a67",
+          "mode": 420
+        },
+        "libring_core_0_17_14__test.a": {
+          "sha256": "6484820a15821b1561007c09956f0ed401ad63b83b9f6d2d7c16e0cf3cc4a2ae",
+          "mode": 420
+        },
+        "0bbbd18bda93c05b-aes_nohw.o": {
+          "sha256": "02a6b7490bbaa5a95cfa1028debc8b5f9d6aba47255fa6f226143d06663e650c",
+          "mode": 420
+        },
+        "c322a0bcc369f531-aesv8-armx-ios64.o": {
+          "sha256": "db84dc11f5e7c7208d45a35413a178f4bfdd224291c7d3146bd5caf73d9e1148",
+          "mode": 420
+        },
+        "d5a9841f3dc6e253-poly1305.o": {
+          "sha256": "283d46698c316caac63550178dfcd482ad8583cac67d6a92ba131ce28b3d0d8d",
+          "mode": 420
+        },
+        "a4019cc0736b0423-mem.o": {
+          "sha256": "2bcb96399af0b70eec7776de72f8d47af014654daf0f640e2df9e52a0d11a034",
+          "mode": 420
+        },
+        "a0330e891e733f4e-p256.o": {
+          "sha256": "3e0be8e5213cc9c2b75e413200174de7148dc96236a909f46fc315d00eba53cd",
+          "mode": 420
+        },
+        "c322a0bcc369f531-chacha20_poly1305_armv8-ios64.o": {
+          "sha256": "f503566b5cc669798a52d310d5bc85a771e64e7eb7dece04927dc91b60194f8b",
+          "mode": 420
+        },
+        "25ac62e5b3c53843-curve25519.o": {
+          "sha256": "e758ef1842bd8e59e1d959aed4b4d61497043b0033351fb1761238de3454127e",
+          "mode": 420
+        },
+        "a0330e891e733f4e-gfp_p384.o": {
+          "sha256": "9fda3e4da98103d17daba480ec0c1af48e5469e90b8001591fd5750322853094",
+          "mode": 420
+        },
+        "00c879ee3285a50d-montgomery_inv.o": {
+          "sha256": "9de15e2519481409a67c6a65241f9daebbf3ad5c4a08e91f43a1577f85bf7c41",
+          "mode": 420
+        },
+        "c322a0bcc369f531-ghash-neon-armv8-ios64.o": {
+          "sha256": "4693fe6f6c5e008710351516d6c8de8e7c9a4a8731ca12b53af8c27a5245e4ef",
+          "mode": 420
+        },
+        "libring_core_0_17_14_.a": {
+          "sha256": "91cae0b76410832da2c64718f36197af7322108c80dfc3eca81845b81500b292",
+          "mode": 420
+        },
+        "a0330e891e733f4e-gfp_p256.o": {
+          "sha256": "3e0be8e5213cc9c2b75e413200174de7148dc96236a909f46fc315d00eba53cd",
+          "mode": 420
+        },
+        "c322a0bcc369f531-vpaes-armv8-ios64.o": {
+          "sha256": "173082fec66e3a84e0b904b3e7582326a7dcd7fc3c1e57303d25d53f9edf8b72",
+          "mode": 420
+        },
+        "00c879ee3285a50d-montgomery.o": {
+          "sha256": "25098c34217d8793b01a2908e6dfcd21e92c721e134e52137f3b3affd4c90782",
+          "mode": 420
+        },
+        "c322a0bcc369f531-aesv8-gcm-armv8-ios64.o": {
+          "sha256": "5d5d5912581a03bcb8a4a98ee08d058c34e1796428e0f21bb074f92423403ed1",
+          "mode": 420
+        },
+        "a0330e891e733f4e-p256-nistz.o": {
+          "sha256": "9688f01179b34e3169a84cc72decb4886f6bc077976af4a3cce0a072cd403e5e",
+          "mode": 420
+        },
+        "c322a0bcc369f531-p256-armv8-asm-ios64.o": {
+          "sha256": "1cd97ebb0f192ad46abe5c4750158a5a1c6eb19e85c1ae182c0568cc698b0717",
+          "mode": 420
+        }
+      },
+      "streams": {
+        "stdout": "18de88e9ae0f1e1221e4f5f7a3b9307bdcd5627071a97025e65842d3287e3552",
+        "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "pair": 6,
+      "implementation": "candidate",
+      "elapsed_ns": 108132750,
+      "phases_ns": {
+        "input_snapshot": 17828875,
+        "material.base": 769250,
+        "material.rust": 1399291,
+        "material.tools": 791250,
+        "material.apple_helpers": 7123667,
+        "material.installed": 110750,
+        "material.apple_selection": 17751625,
+        "material.sdk_stamps": 12086209,
+        "material.total": 40073458,
+        "restore.validation_materialization": 8321750,
+        "restore.input_epoch": 2572750,
+        "restore.publication": 2732625,
+        "restore.total": 11197917
+      },
+      "artifacts": {
+        "c322a0bcc369f531-armv8-mont-ios64.o": {
+          "sha256": "55ef33aa45fb64b94423f4aa70bada04c1c9e91ed5762f43de0bc17fa2b4cfab",
+          "mode": 420
+        },
+        "c322a0bcc369f531-sha512-armv8-ios64.o": {
+          "sha256": "8994565ba79b1b4b6fadb8b8b3e0e281bbe481cccfb103281d842b6e2fece7d2",
+          "mode": 420
+        },
+        "c322a0bcc369f531-chacha-armv8-ios64.o": {
+          "sha256": "027c496be03a8e92ddd56a9e4d738ae7a279971776a83041b39af8871b24245c",
+          "mode": 420
+        },
+        "aaa1ba3e455ee2e1-limbs.o": {
+          "sha256": "44a313e961ee8b114347e2bcfacab4a4bd972692bf1ac9793b85067df88cf830",
+          "mode": 420
+        },
+        "a0330e891e733f4e-ecp_nistz.o": {
+          "sha256": "d8f3343d55b9a90ebe8193b3c67aa8912c45acc4e692b2730c0cf82da45bc61e",
+          "mode": 420
+        },
+        "a4019cc0736b0423-constant_time_test.o": {
+          "sha256": "bb96b434fe7d8d75d41a9ab250e1f1713910439b9c100f91f1792520da285470",
+          "mode": 420
+        },
+        "c322a0bcc369f531-sha256-armv8-ios64.o": {
+          "sha256": "f5d9e3a5e8e40ede31494f5b595cd54f9620ed73609c201150f5e76dbbaa13a9",
+          "mode": 420
+        },
+        "c322a0bcc369f531-ghashv8-armx-ios64.o": {
+          "sha256": "a0fbd615ab766c4ae501c5eaf9152f1205b1f7948754a9490e9c2f1092197a67",
+          "mode": 420
+        },
+        "libring_core_0_17_14__test.a": {
+          "sha256": "6484820a15821b1561007c09956f0ed401ad63b83b9f6d2d7c16e0cf3cc4a2ae",
+          "mode": 420
+        },
+        "0bbbd18bda93c05b-aes_nohw.o": {
+          "sha256": "02a6b7490bbaa5a95cfa1028debc8b5f9d6aba47255fa6f226143d06663e650c",
+          "mode": 420
+        },
+        "c322a0bcc369f531-aesv8-armx-ios64.o": {
+          "sha256": "db84dc11f5e7c7208d45a35413a178f4bfdd224291c7d3146bd5caf73d9e1148",
+          "mode": 420
+        },
+        "d5a9841f3dc6e253-poly1305.o": {
+          "sha256": "283d46698c316caac63550178dfcd482ad8583cac67d6a92ba131ce28b3d0d8d",
+          "mode": 420
+        },
+        "a4019cc0736b0423-mem.o": {
+          "sha256": "2bcb96399af0b70eec7776de72f8d47af014654daf0f640e2df9e52a0d11a034",
+          "mode": 420
+        },
+        "a0330e891e733f4e-p256.o": {
+          "sha256": "3e0be8e5213cc9c2b75e413200174de7148dc96236a909f46fc315d00eba53cd",
+          "mode": 420
+        },
+        "c322a0bcc369f531-chacha20_poly1305_armv8-ios64.o": {
+          "sha256": "f503566b5cc669798a52d310d5bc85a771e64e7eb7dece04927dc91b60194f8b",
+          "mode": 420
+        },
+        "25ac62e5b3c53843-curve25519.o": {
+          "sha256": "e758ef1842bd8e59e1d959aed4b4d61497043b0033351fb1761238de3454127e",
+          "mode": 420
+        },
+        "a0330e891e733f4e-gfp_p384.o": {
+          "sha256": "9fda3e4da98103d17daba480ec0c1af48e5469e90b8001591fd5750322853094",
+          "mode": 420
+        },
+        "00c879ee3285a50d-montgomery_inv.o": {
+          "sha256": "9de15e2519481409a67c6a65241f9daebbf3ad5c4a08e91f43a1577f85bf7c41",
+          "mode": 420
+        },
+        "c322a0bcc369f531-ghash-neon-armv8-ios64.o": {
+          "sha256": "4693fe6f6c5e008710351516d6c8de8e7c9a4a8731ca12b53af8c27a5245e4ef",
+          "mode": 420
+        },
+        "libring_core_0_17_14_.a": {
+          "sha256": "91cae0b76410832da2c64718f36197af7322108c80dfc3eca81845b81500b292",
+          "mode": 420
+        },
+        "a0330e891e733f4e-gfp_p256.o": {
+          "sha256": "3e0be8e5213cc9c2b75e413200174de7148dc96236a909f46fc315d00eba53cd",
+          "mode": 420
+        },
+        "c322a0bcc369f531-vpaes-armv8-ios64.o": {
+          "sha256": "173082fec66e3a84e0b904b3e7582326a7dcd7fc3c1e57303d25d53f9edf8b72",
+          "mode": 420
+        },
+        "00c879ee3285a50d-montgomery.o": {
+          "sha256": "25098c34217d8793b01a2908e6dfcd21e92c721e134e52137f3b3affd4c90782",
+          "mode": 420
+        },
+        "c322a0bcc369f531-aesv8-gcm-armv8-ios64.o": {
+          "sha256": "5d5d5912581a03bcb8a4a98ee08d058c34e1796428e0f21bb074f92423403ed1",
+          "mode": 420
+        },
+        "a0330e891e733f4e-p256-nistz.o": {
+          "sha256": "9688f01179b34e3169a84cc72decb4886f6bc077976af4a3cce0a072cd403e5e",
+          "mode": 420
+        },
+        "c322a0bcc369f531-p256-armv8-asm-ios64.o": {
+          "sha256": "1cd97ebb0f192ad46abe5c4750158a5a1c6eb19e85c1ae182c0568cc698b0717",
+          "mode": 420
+        }
+      },
+      "streams": {
+        "stdout": "18de88e9ae0f1e1221e4f5f7a3b9307bdcd5627071a97025e65842d3287e3552",
+        "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "pair": 7,
+      "implementation": "candidate",
+      "elapsed_ns": 83717541,
+      "phases_ns": {
+        "input_snapshot": 17392542,
+        "material.base": 771250,
+        "material.rust": 1301125,
+        "material.tools": 594041,
+        "material.apple_helpers": 6812959,
+        "material.installed": 117125,
+        "material.apple_selection": 19030708,
+        "material.sdk_stamps": 13861750,
+        "material.total": 42519292,
+        "restore.validation_materialization": 9050542,
+        "restore.input_epoch": 3561542,
+        "restore.publication": 3849625,
+        "restore.total": 17546667
+      },
+      "artifacts": {
+        "c322a0bcc369f531-armv8-mont-ios64.o": {
+          "sha256": "55ef33aa45fb64b94423f4aa70bada04c1c9e91ed5762f43de0bc17fa2b4cfab",
+          "mode": 420
+        },
+        "c322a0bcc369f531-sha512-armv8-ios64.o": {
+          "sha256": "8994565ba79b1b4b6fadb8b8b3e0e281bbe481cccfb103281d842b6e2fece7d2",
+          "mode": 420
+        },
+        "c322a0bcc369f531-chacha-armv8-ios64.o": {
+          "sha256": "027c496be03a8e92ddd56a9e4d738ae7a279971776a83041b39af8871b24245c",
+          "mode": 420
+        },
+        "aaa1ba3e455ee2e1-limbs.o": {
+          "sha256": "44a313e961ee8b114347e2bcfacab4a4bd972692bf1ac9793b85067df88cf830",
+          "mode": 420
+        },
+        "a0330e891e733f4e-ecp_nistz.o": {
+          "sha256": "d8f3343d55b9a90ebe8193b3c67aa8912c45acc4e692b2730c0cf82da45bc61e",
+          "mode": 420
+        },
+        "a4019cc0736b0423-constant_time_test.o": {
+          "sha256": "bb96b434fe7d8d75d41a9ab250e1f1713910439b9c100f91f1792520da285470",
+          "mode": 420
+        },
+        "c322a0bcc369f531-sha256-armv8-ios64.o": {
+          "sha256": "f5d9e3a5e8e40ede31494f5b595cd54f9620ed73609c201150f5e76dbbaa13a9",
+          "mode": 420
+        },
+        "c322a0bcc369f531-ghashv8-armx-ios64.o": {
+          "sha256": "a0fbd615ab766c4ae501c5eaf9152f1205b1f7948754a9490e9c2f1092197a67",
+          "mode": 420
+        },
+        "libring_core_0_17_14__test.a": {
+          "sha256": "6484820a15821b1561007c09956f0ed401ad63b83b9f6d2d7c16e0cf3cc4a2ae",
+          "mode": 420
+        },
+        "0bbbd18bda93c05b-aes_nohw.o": {
+          "sha256": "02a6b7490bbaa5a95cfa1028debc8b5f9d6aba47255fa6f226143d06663e650c",
+          "mode": 420
+        },
+        "c322a0bcc369f531-aesv8-armx-ios64.o": {
+          "sha256": "db84dc11f5e7c7208d45a35413a178f4bfdd224291c7d3146bd5caf73d9e1148",
+          "mode": 420
+        },
+        "d5a9841f3dc6e253-poly1305.o": {
+          "sha256": "283d46698c316caac63550178dfcd482ad8583cac67d6a92ba131ce28b3d0d8d",
+          "mode": 420
+        },
+        "a4019cc0736b0423-mem.o": {
+          "sha256": "2bcb96399af0b70eec7776de72f8d47af014654daf0f640e2df9e52a0d11a034",
+          "mode": 420
+        },
+        "a0330e891e733f4e-p256.o": {
+          "sha256": "3e0be8e5213cc9c2b75e413200174de7148dc96236a909f46fc315d00eba53cd",
+          "mode": 420
+        },
+        "c322a0bcc369f531-chacha20_poly1305_armv8-ios64.o": {
+          "sha256": "f503566b5cc669798a52d310d5bc85a771e64e7eb7dece04927dc91b60194f8b",
+          "mode": 420
+        },
+        "25ac62e5b3c53843-curve25519.o": {
+          "sha256": "e758ef1842bd8e59e1d959aed4b4d61497043b0033351fb1761238de3454127e",
+          "mode": 420
+        },
+        "a0330e891e733f4e-gfp_p384.o": {
+          "sha256": "9fda3e4da98103d17daba480ec0c1af48e5469e90b8001591fd5750322853094",
+          "mode": 420
+        },
+        "00c879ee3285a50d-montgomery_inv.o": {
+          "sha256": "9de15e2519481409a67c6a65241f9daebbf3ad5c4a08e91f43a1577f85bf7c41",
+          "mode": 420
+        },
+        "c322a0bcc369f531-ghash-neon-armv8-ios64.o": {
+          "sha256": "4693fe6f6c5e008710351516d6c8de8e7c9a4a8731ca12b53af8c27a5245e4ef",
+          "mode": 420
+        },
+        "libring_core_0_17_14_.a": {
+          "sha256": "91cae0b76410832da2c64718f36197af7322108c80dfc3eca81845b81500b292",
+          "mode": 420
+        },
+        "a0330e891e733f4e-gfp_p256.o": {
+          "sha256": "3e0be8e5213cc9c2b75e413200174de7148dc96236a909f46fc315d00eba53cd",
+          "mode": 420
+        },
+        "c322a0bcc369f531-vpaes-armv8-ios64.o": {
+          "sha256": "173082fec66e3a84e0b904b3e7582326a7dcd7fc3c1e57303d25d53f9edf8b72",
+          "mode": 420
+        },
+        "00c879ee3285a50d-montgomery.o": {
+          "sha256": "25098c34217d8793b01a2908e6dfcd21e92c721e134e52137f3b3affd4c90782",
+          "mode": 420
+        },
+        "c322a0bcc369f531-aesv8-gcm-armv8-ios64.o": {
+          "sha256": "5d5d5912581a03bcb8a4a98ee08d058c34e1796428e0f21bb074f92423403ed1",
+          "mode": 420
+        },
+        "a0330e891e733f4e-p256-nistz.o": {
+          "sha256": "9688f01179b34e3169a84cc72decb4886f6bc077976af4a3cce0a072cd403e5e",
+          "mode": 420
+        },
+        "c322a0bcc369f531-p256-armv8-asm-ios64.o": {
+          "sha256": "1cd97ebb0f192ad46abe5c4750158a5a1c6eb19e85c1ae182c0568cc698b0717",
+          "mode": 420
+        }
+      },
+      "streams": {
+        "stdout": "18de88e9ae0f1e1221e4f5f7a3b9307bdcd5627071a97025e65842d3287e3552",
+        "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "pair": 7,
+      "implementation": "baseline",
+      "elapsed_ns": 82594167,
+      "phases_ns": {
+        "input_snapshot": 20756208,
+        "material.base": 864750,
+        "material.rust": 1537750,
+        "material.tools": 850917,
+        "material.apple_helpers": 6749667,
+        "material.installed": 104458,
+        "material.apple_selection": 18952000,
+        "material.sdk_stamps": 11817875,
+        "material.total": 40904750,
+        "restore.validation_materialization": 14356333,
+        "restore.publication": 163208,
+        "restore.total": 14663125
+      },
+      "artifacts": {
+        "c322a0bcc369f531-armv8-mont-ios64.o": {
+          "sha256": "55ef33aa45fb64b94423f4aa70bada04c1c9e91ed5762f43de0bc17fa2b4cfab",
+          "mode": 420
+        },
+        "c322a0bcc369f531-sha512-armv8-ios64.o": {
+          "sha256": "8994565ba79b1b4b6fadb8b8b3e0e281bbe481cccfb103281d842b6e2fece7d2",
+          "mode": 420
+        },
+        "c322a0bcc369f531-chacha-armv8-ios64.o": {
+          "sha256": "027c496be03a8e92ddd56a9e4d738ae7a279971776a83041b39af8871b24245c",
+          "mode": 420
+        },
+        "aaa1ba3e455ee2e1-limbs.o": {
+          "sha256": "44a313e961ee8b114347e2bcfacab4a4bd972692bf1ac9793b85067df88cf830",
+          "mode": 420
+        },
+        "a0330e891e733f4e-ecp_nistz.o": {
+          "sha256": "d8f3343d55b9a90ebe8193b3c67aa8912c45acc4e692b2730c0cf82da45bc61e",
+          "mode": 420
+        },
+        "a4019cc0736b0423-constant_time_test.o": {
+          "sha256": "bb96b434fe7d8d75d41a9ab250e1f1713910439b9c100f91f1792520da285470",
+          "mode": 420
+        },
+        "c322a0bcc369f531-sha256-armv8-ios64.o": {
+          "sha256": "f5d9e3a5e8e40ede31494f5b595cd54f9620ed73609c201150f5e76dbbaa13a9",
+          "mode": 420
+        },
+        "c322a0bcc369f531-ghashv8-armx-ios64.o": {
+          "sha256": "a0fbd615ab766c4ae501c5eaf9152f1205b1f7948754a9490e9c2f1092197a67",
+          "mode": 420
+        },
+        "libring_core_0_17_14__test.a": {
+          "sha256": "6484820a15821b1561007c09956f0ed401ad63b83b9f6d2d7c16e0cf3cc4a2ae",
+          "mode": 420
+        },
+        "0bbbd18bda93c05b-aes_nohw.o": {
+          "sha256": "02a6b7490bbaa5a95cfa1028debc8b5f9d6aba47255fa6f226143d06663e650c",
+          "mode": 420
+        },
+        "c322a0bcc369f531-aesv8-armx-ios64.o": {
+          "sha256": "db84dc11f5e7c7208d45a35413a178f4bfdd224291c7d3146bd5caf73d9e1148",
+          "mode": 420
+        },
+        "d5a9841f3dc6e253-poly1305.o": {
+          "sha256": "283d46698c316caac63550178dfcd482ad8583cac67d6a92ba131ce28b3d0d8d",
+          "mode": 420
+        },
+        "a4019cc0736b0423-mem.o": {
+          "sha256": "2bcb96399af0b70eec7776de72f8d47af014654daf0f640e2df9e52a0d11a034",
+          "mode": 420
+        },
+        "a0330e891e733f4e-p256.o": {
+          "sha256": "3e0be8e5213cc9c2b75e413200174de7148dc96236a909f46fc315d00eba53cd",
+          "mode": 420
+        },
+        "c322a0bcc369f531-chacha20_poly1305_armv8-ios64.o": {
+          "sha256": "f503566b5cc669798a52d310d5bc85a771e64e7eb7dece04927dc91b60194f8b",
+          "mode": 420
+        },
+        "25ac62e5b3c53843-curve25519.o": {
+          "sha256": "e758ef1842bd8e59e1d959aed4b4d61497043b0033351fb1761238de3454127e",
+          "mode": 420
+        },
+        "a0330e891e733f4e-gfp_p384.o": {
+          "sha256": "9fda3e4da98103d17daba480ec0c1af48e5469e90b8001591fd5750322853094",
+          "mode": 420
+        },
+        "00c879ee3285a50d-montgomery_inv.o": {
+          "sha256": "9de15e2519481409a67c6a65241f9daebbf3ad5c4a08e91f43a1577f85bf7c41",
+          "mode": 420
+        },
+        "c322a0bcc369f531-ghash-neon-armv8-ios64.o": {
+          "sha256": "4693fe6f6c5e008710351516d6c8de8e7c9a4a8731ca12b53af8c27a5245e4ef",
+          "mode": 420
+        },
+        "libring_core_0_17_14_.a": {
+          "sha256": "91cae0b76410832da2c64718f36197af7322108c80dfc3eca81845b81500b292",
+          "mode": 420
+        },
+        "a0330e891e733f4e-gfp_p256.o": {
+          "sha256": "3e0be8e5213cc9c2b75e413200174de7148dc96236a909f46fc315d00eba53cd",
+          "mode": 420
+        },
+        "c322a0bcc369f531-vpaes-armv8-ios64.o": {
+          "sha256": "173082fec66e3a84e0b904b3e7582326a7dcd7fc3c1e57303d25d53f9edf8b72",
+          "mode": 420
+        },
+        "00c879ee3285a50d-montgomery.o": {
+          "sha256": "25098c34217d8793b01a2908e6dfcd21e92c721e134e52137f3b3affd4c90782",
+          "mode": 420
+        },
+        "c322a0bcc369f531-aesv8-gcm-armv8-ios64.o": {
+          "sha256": "5d5d5912581a03bcb8a4a98ee08d058c34e1796428e0f21bb074f92423403ed1",
+          "mode": 420
+        },
+        "a0330e891e733f4e-p256-nistz.o": {
+          "sha256": "9688f01179b34e3169a84cc72decb4886f6bc077976af4a3cce0a072cd403e5e",
+          "mode": 420
+        },
+        "c322a0bcc369f531-p256-armv8-asm-ios64.o": {
+          "sha256": "1cd97ebb0f192ad46abe5c4750158a5a1c6eb19e85c1ae182c0568cc698b0717",
+          "mode": 420
+        }
+      },
+      "streams": {
+        "stdout": "18de88e9ae0f1e1221e4f5f7a3b9307bdcd5627071a97025e65842d3287e3552",
+        "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "pair": 8,
+      "implementation": "baseline",
+      "elapsed_ns": 82995709,
+      "phases_ns": {
+        "input_snapshot": 19740667,
+        "material.base": 871667,
+        "material.rust": 1572250,
+        "material.tools": 760166,
+        "material.apple_helpers": 6469208,
+        "material.installed": 105708,
+        "material.apple_selection": 19381125,
+        "material.sdk_stamps": 12366333,
+        "material.total": 41563459,
+        "restore.validation_materialization": 14808125,
+        "restore.publication": 169375,
+        "restore.total": 15123916
+      },
+      "artifacts": {
+        "c322a0bcc369f531-armv8-mont-ios64.o": {
+          "sha256": "55ef33aa45fb64b94423f4aa70bada04c1c9e91ed5762f43de0bc17fa2b4cfab",
+          "mode": 420
+        },
+        "c322a0bcc369f531-sha512-armv8-ios64.o": {
+          "sha256": "8994565ba79b1b4b6fadb8b8b3e0e281bbe481cccfb103281d842b6e2fece7d2",
+          "mode": 420
+        },
+        "c322a0bcc369f531-chacha-armv8-ios64.o": {
+          "sha256": "027c496be03a8e92ddd56a9e4d738ae7a279971776a83041b39af8871b24245c",
+          "mode": 420
+        },
+        "aaa1ba3e455ee2e1-limbs.o": {
+          "sha256": "44a313e961ee8b114347e2bcfacab4a4bd972692bf1ac9793b85067df88cf830",
+          "mode": 420
+        },
+        "a0330e891e733f4e-ecp_nistz.o": {
+          "sha256": "d8f3343d55b9a90ebe8193b3c67aa8912c45acc4e692b2730c0cf82da45bc61e",
+          "mode": 420
+        },
+        "a4019cc0736b0423-constant_time_test.o": {
+          "sha256": "bb96b434fe7d8d75d41a9ab250e1f1713910439b9c100f91f1792520da285470",
+          "mode": 420
+        },
+        "c322a0bcc369f531-sha256-armv8-ios64.o": {
+          "sha256": "f5d9e3a5e8e40ede31494f5b595cd54f9620ed73609c201150f5e76dbbaa13a9",
+          "mode": 420
+        },
+        "c322a0bcc369f531-ghashv8-armx-ios64.o": {
+          "sha256": "a0fbd615ab766c4ae501c5eaf9152f1205b1f7948754a9490e9c2f1092197a67",
+          "mode": 420
+        },
+        "libring_core_0_17_14__test.a": {
+          "sha256": "6484820a15821b1561007c09956f0ed401ad63b83b9f6d2d7c16e0cf3cc4a2ae",
+          "mode": 420
+        },
+        "0bbbd18bda93c05b-aes_nohw.o": {
+          "sha256": "02a6b7490bbaa5a95cfa1028debc8b5f9d6aba47255fa6f226143d06663e650c",
+          "mode": 420
+        },
+        "c322a0bcc369f531-aesv8-armx-ios64.o": {
+          "sha256": "db84dc11f5e7c7208d45a35413a178f4bfdd224291c7d3146bd5caf73d9e1148",
+          "mode": 420
+        },
+        "d5a9841f3dc6e253-poly1305.o": {
+          "sha256": "283d46698c316caac63550178dfcd482ad8583cac67d6a92ba131ce28b3d0d8d",
+          "mode": 420
+        },
+        "a4019cc0736b0423-mem.o": {
+          "sha256": "2bcb96399af0b70eec7776de72f8d47af014654daf0f640e2df9e52a0d11a034",
+          "mode": 420
+        },
+        "a0330e891e733f4e-p256.o": {
+          "sha256": "3e0be8e5213cc9c2b75e413200174de7148dc96236a909f46fc315d00eba53cd",
+          "mode": 420
+        },
+        "c322a0bcc369f531-chacha20_poly1305_armv8-ios64.o": {
+          "sha256": "f503566b5cc669798a52d310d5bc85a771e64e7eb7dece04927dc91b60194f8b",
+          "mode": 420
+        },
+        "25ac62e5b3c53843-curve25519.o": {
+          "sha256": "e758ef1842bd8e59e1d959aed4b4d61497043b0033351fb1761238de3454127e",
+          "mode": 420
+        },
+        "a0330e891e733f4e-gfp_p384.o": {
+          "sha256": "9fda3e4da98103d17daba480ec0c1af48e5469e90b8001591fd5750322853094",
+          "mode": 420
+        },
+        "00c879ee3285a50d-montgomery_inv.o": {
+          "sha256": "9de15e2519481409a67c6a65241f9daebbf3ad5c4a08e91f43a1577f85bf7c41",
+          "mode": 420
+        },
+        "c322a0bcc369f531-ghash-neon-armv8-ios64.o": {
+          "sha256": "4693fe6f6c5e008710351516d6c8de8e7c9a4a8731ca12b53af8c27a5245e4ef",
+          "mode": 420
+        },
+        "libring_core_0_17_14_.a": {
+          "sha256": "91cae0b76410832da2c64718f36197af7322108c80dfc3eca81845b81500b292",
+          "mode": 420
+        },
+        "a0330e891e733f4e-gfp_p256.o": {
+          "sha256": "3e0be8e5213cc9c2b75e413200174de7148dc96236a909f46fc315d00eba53cd",
+          "mode": 420
+        },
+        "c322a0bcc369f531-vpaes-armv8-ios64.o": {
+          "sha256": "173082fec66e3a84e0b904b3e7582326a7dcd7fc3c1e57303d25d53f9edf8b72",
+          "mode": 420
+        },
+        "00c879ee3285a50d-montgomery.o": {
+          "sha256": "25098c34217d8793b01a2908e6dfcd21e92c721e134e52137f3b3affd4c90782",
+          "mode": 420
+        },
+        "c322a0bcc369f531-aesv8-gcm-armv8-ios64.o": {
+          "sha256": "5d5d5912581a03bcb8a4a98ee08d058c34e1796428e0f21bb074f92423403ed1",
+          "mode": 420
+        },
+        "a0330e891e733f4e-p256-nistz.o": {
+          "sha256": "9688f01179b34e3169a84cc72decb4886f6bc077976af4a3cce0a072cd403e5e",
+          "mode": 420
+        },
+        "c322a0bcc369f531-p256-armv8-asm-ios64.o": {
+          "sha256": "1cd97ebb0f192ad46abe5c4750158a5a1c6eb19e85c1ae182c0568cc698b0717",
+          "mode": 420
+        }
+      },
+      "streams": {
+        "stdout": "18de88e9ae0f1e1221e4f5f7a3b9307bdcd5627071a97025e65842d3287e3552",
+        "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "pair": 8,
+      "implementation": "candidate",
+      "elapsed_ns": 77333792,
+      "phases_ns": {
+        "input_snapshot": 19300333,
+        "material.base": 870584,
+        "material.rust": 1436875,
+        "material.tools": 678584,
+        "material.apple_helpers": 6445833,
+        "material.installed": 109417,
+        "material.apple_selection": 18818375,
+        "material.sdk_stamps": 12052792,
+        "material.total": 40443917,
+        "restore.validation_materialization": 8542375,
+        "restore.input_epoch": 2645583,
+        "restore.publication": 2849875,
+        "restore.total": 11531375
+      },
+      "artifacts": {
+        "c322a0bcc369f531-armv8-mont-ios64.o": {
+          "sha256": "55ef33aa45fb64b94423f4aa70bada04c1c9e91ed5762f43de0bc17fa2b4cfab",
+          "mode": 420
+        },
+        "c322a0bcc369f531-sha512-armv8-ios64.o": {
+          "sha256": "8994565ba79b1b4b6fadb8b8b3e0e281bbe481cccfb103281d842b6e2fece7d2",
+          "mode": 420
+        },
+        "c322a0bcc369f531-chacha-armv8-ios64.o": {
+          "sha256": "027c496be03a8e92ddd56a9e4d738ae7a279971776a83041b39af8871b24245c",
+          "mode": 420
+        },
+        "aaa1ba3e455ee2e1-limbs.o": {
+          "sha256": "44a313e961ee8b114347e2bcfacab4a4bd972692bf1ac9793b85067df88cf830",
+          "mode": 420
+        },
+        "a0330e891e733f4e-ecp_nistz.o": {
+          "sha256": "d8f3343d55b9a90ebe8193b3c67aa8912c45acc4e692b2730c0cf82da45bc61e",
+          "mode": 420
+        },
+        "a4019cc0736b0423-constant_time_test.o": {
+          "sha256": "bb96b434fe7d8d75d41a9ab250e1f1713910439b9c100f91f1792520da285470",
+          "mode": 420
+        },
+        "c322a0bcc369f531-sha256-armv8-ios64.o": {
+          "sha256": "f5d9e3a5e8e40ede31494f5b595cd54f9620ed73609c201150f5e76dbbaa13a9",
+          "mode": 420
+        },
+        "c322a0bcc369f531-ghashv8-armx-ios64.o": {
+          "sha256": "a0fbd615ab766c4ae501c5eaf9152f1205b1f7948754a9490e9c2f1092197a67",
+          "mode": 420
+        },
+        "libring_core_0_17_14__test.a": {
+          "sha256": "6484820a15821b1561007c09956f0ed401ad63b83b9f6d2d7c16e0cf3cc4a2ae",
+          "mode": 420
+        },
+        "0bbbd18bda93c05b-aes_nohw.o": {
+          "sha256": "02a6b7490bbaa5a95cfa1028debc8b5f9d6aba47255fa6f226143d06663e650c",
+          "mode": 420
+        },
+        "c322a0bcc369f531-aesv8-armx-ios64.o": {
+          "sha256": "db84dc11f5e7c7208d45a35413a178f4bfdd224291c7d3146bd5caf73d9e1148",
+          "mode": 420
+        },
+        "d5a9841f3dc6e253-poly1305.o": {
+          "sha256": "283d46698c316caac63550178dfcd482ad8583cac67d6a92ba131ce28b3d0d8d",
+          "mode": 420
+        },
+        "a4019cc0736b0423-mem.o": {
+          "sha256": "2bcb96399af0b70eec7776de72f8d47af014654daf0f640e2df9e52a0d11a034",
+          "mode": 420
+        },
+        "a0330e891e733f4e-p256.o": {
+          "sha256": "3e0be8e5213cc9c2b75e413200174de7148dc96236a909f46fc315d00eba53cd",
+          "mode": 420
+        },
+        "c322a0bcc369f531-chacha20_poly1305_armv8-ios64.o": {
+          "sha256": "f503566b5cc669798a52d310d5bc85a771e64e7eb7dece04927dc91b60194f8b",
+          "mode": 420
+        },
+        "25ac62e5b3c53843-curve25519.o": {
+          "sha256": "e758ef1842bd8e59e1d959aed4b4d61497043b0033351fb1761238de3454127e",
+          "mode": 420
+        },
+        "a0330e891e733f4e-gfp_p384.o": {
+          "sha256": "9fda3e4da98103d17daba480ec0c1af48e5469e90b8001591fd5750322853094",
+          "mode": 420
+        },
+        "00c879ee3285a50d-montgomery_inv.o": {
+          "sha256": "9de15e2519481409a67c6a65241f9daebbf3ad5c4a08e91f43a1577f85bf7c41",
+          "mode": 420
+        },
+        "c322a0bcc369f531-ghash-neon-armv8-ios64.o": {
+          "sha256": "4693fe6f6c5e008710351516d6c8de8e7c9a4a8731ca12b53af8c27a5245e4ef",
+          "mode": 420
+        },
+        "libring_core_0_17_14_.a": {
+          "sha256": "91cae0b76410832da2c64718f36197af7322108c80dfc3eca81845b81500b292",
+          "mode": 420
+        },
+        "a0330e891e733f4e-gfp_p256.o": {
+          "sha256": "3e0be8e5213cc9c2b75e413200174de7148dc96236a909f46fc315d00eba53cd",
+          "mode": 420
+        },
+        "c322a0bcc369f531-vpaes-armv8-ios64.o": {
+          "sha256": "173082fec66e3a84e0b904b3e7582326a7dcd7fc3c1e57303d25d53f9edf8b72",
+          "mode": 420
+        },
+        "00c879ee3285a50d-montgomery.o": {
+          "sha256": "25098c34217d8793b01a2908e6dfcd21e92c721e134e52137f3b3affd4c90782",
+          "mode": 420
+        },
+        "c322a0bcc369f531-aesv8-gcm-armv8-ios64.o": {
+          "sha256": "5d5d5912581a03bcb8a4a98ee08d058c34e1796428e0f21bb074f92423403ed1",
+          "mode": 420
+        },
+        "a0330e891e733f4e-p256-nistz.o": {
+          "sha256": "9688f01179b34e3169a84cc72decb4886f6bc077976af4a3cce0a072cd403e5e",
+          "mode": 420
+        },
+        "c322a0bcc369f531-p256-armv8-asm-ios64.o": {
+          "sha256": "1cd97ebb0f192ad46abe5c4750158a5a1c6eb19e85c1ae182c0568cc698b0717",
+          "mode": 420
+        }
+      },
+      "streams": {
+        "stdout": "18de88e9ae0f1e1221e4f5f7a3b9307bdcd5627071a97025e65842d3287e3552",
+        "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "pair": 9,
+      "implementation": "candidate",
+      "elapsed_ns": 79643708,
+      "phases_ns": {
+        "input_snapshot": 20137916,
+        "material.base": 868250,
+        "material.rust": 1485250,
+        "material.tools": 700833,
+        "material.apple_helpers": 7084417,
+        "material.installed": 114333,
+        "material.apple_selection": 19299917,
+        "material.sdk_stamps": 12710959,
+        "material.total": 42296000,
+        "restore.validation_materialization": 7801458,
+        "restore.input_epoch": 2492417,
+        "restore.publication": 2720375,
+        "restore.total": 10657459
+      },
+      "artifacts": {
+        "c322a0bcc369f531-armv8-mont-ios64.o": {
+          "sha256": "55ef33aa45fb64b94423f4aa70bada04c1c9e91ed5762f43de0bc17fa2b4cfab",
+          "mode": 420
+        },
+        "c322a0bcc369f531-sha512-armv8-ios64.o": {
+          "sha256": "8994565ba79b1b4b6fadb8b8b3e0e281bbe481cccfb103281d842b6e2fece7d2",
+          "mode": 420
+        },
+        "c322a0bcc369f531-chacha-armv8-ios64.o": {
+          "sha256": "027c496be03a8e92ddd56a9e4d738ae7a279971776a83041b39af8871b24245c",
+          "mode": 420
+        },
+        "aaa1ba3e455ee2e1-limbs.o": {
+          "sha256": "44a313e961ee8b114347e2bcfacab4a4bd972692bf1ac9793b85067df88cf830",
+          "mode": 420
+        },
+        "a0330e891e733f4e-ecp_nistz.o": {
+          "sha256": "d8f3343d55b9a90ebe8193b3c67aa8912c45acc4e692b2730c0cf82da45bc61e",
+          "mode": 420
+        },
+        "a4019cc0736b0423-constant_time_test.o": {
+          "sha256": "bb96b434fe7d8d75d41a9ab250e1f1713910439b9c100f91f1792520da285470",
+          "mode": 420
+        },
+        "c322a0bcc369f531-sha256-armv8-ios64.o": {
+          "sha256": "f5d9e3a5e8e40ede31494f5b595cd54f9620ed73609c201150f5e76dbbaa13a9",
+          "mode": 420
+        },
+        "c322a0bcc369f531-ghashv8-armx-ios64.o": {
+          "sha256": "a0fbd615ab766c4ae501c5eaf9152f1205b1f7948754a9490e9c2f1092197a67",
+          "mode": 420
+        },
+        "libring_core_0_17_14__test.a": {
+          "sha256": "6484820a15821b1561007c09956f0ed401ad63b83b9f6d2d7c16e0cf3cc4a2ae",
+          "mode": 420
+        },
+        "0bbbd18bda93c05b-aes_nohw.o": {
+          "sha256": "02a6b7490bbaa5a95cfa1028debc8b5f9d6aba47255fa6f226143d06663e650c",
+          "mode": 420
+        },
+        "c322a0bcc369f531-aesv8-armx-ios64.o": {
+          "sha256": "db84dc11f5e7c7208d45a35413a178f4bfdd224291c7d3146bd5caf73d9e1148",
+          "mode": 420
+        },
+        "d5a9841f3dc6e253-poly1305.o": {
+          "sha256": "283d46698c316caac63550178dfcd482ad8583cac67d6a92ba131ce28b3d0d8d",
+          "mode": 420
+        },
+        "a4019cc0736b0423-mem.o": {
+          "sha256": "2bcb96399af0b70eec7776de72f8d47af014654daf0f640e2df9e52a0d11a034",
+          "mode": 420
+        },
+        "a0330e891e733f4e-p256.o": {
+          "sha256": "3e0be8e5213cc9c2b75e413200174de7148dc96236a909f46fc315d00eba53cd",
+          "mode": 420
+        },
+        "c322a0bcc369f531-chacha20_poly1305_armv8-ios64.o": {
+          "sha256": "f503566b5cc669798a52d310d5bc85a771e64e7eb7dece04927dc91b60194f8b",
+          "mode": 420
+        },
+        "25ac62e5b3c53843-curve25519.o": {
+          "sha256": "e758ef1842bd8e59e1d959aed4b4d61497043b0033351fb1761238de3454127e",
+          "mode": 420
+        },
+        "a0330e891e733f4e-gfp_p384.o": {
+          "sha256": "9fda3e4da98103d17daba480ec0c1af48e5469e90b8001591fd5750322853094",
+          "mode": 420
+        },
+        "00c879ee3285a50d-montgomery_inv.o": {
+          "sha256": "9de15e2519481409a67c6a65241f9daebbf3ad5c4a08e91f43a1577f85bf7c41",
+          "mode": 420
+        },
+        "c322a0bcc369f531-ghash-neon-armv8-ios64.o": {
+          "sha256": "4693fe6f6c5e008710351516d6c8de8e7c9a4a8731ca12b53af8c27a5245e4ef",
+          "mode": 420
+        },
+        "libring_core_0_17_14_.a": {
+          "sha256": "91cae0b76410832da2c64718f36197af7322108c80dfc3eca81845b81500b292",
+          "mode": 420
+        },
+        "a0330e891e733f4e-gfp_p256.o": {
+          "sha256": "3e0be8e5213cc9c2b75e413200174de7148dc96236a909f46fc315d00eba53cd",
+          "mode": 420
+        },
+        "c322a0bcc369f531-vpaes-armv8-ios64.o": {
+          "sha256": "173082fec66e3a84e0b904b3e7582326a7dcd7fc3c1e57303d25d53f9edf8b72",
+          "mode": 420
+        },
+        "00c879ee3285a50d-montgomery.o": {
+          "sha256": "25098c34217d8793b01a2908e6dfcd21e92c721e134e52137f3b3affd4c90782",
+          "mode": 420
+        },
+        "c322a0bcc369f531-aesv8-gcm-armv8-ios64.o": {
+          "sha256": "5d5d5912581a03bcb8a4a98ee08d058c34e1796428e0f21bb074f92423403ed1",
+          "mode": 420
+        },
+        "a0330e891e733f4e-p256-nistz.o": {
+          "sha256": "9688f01179b34e3169a84cc72decb4886f6bc077976af4a3cce0a072cd403e5e",
+          "mode": 420
+        },
+        "c322a0bcc369f531-p256-armv8-asm-ios64.o": {
+          "sha256": "1cd97ebb0f192ad46abe5c4750158a5a1c6eb19e85c1ae182c0568cc698b0717",
+          "mode": 420
+        }
+      },
+      "streams": {
+        "stdout": "18de88e9ae0f1e1221e4f5f7a3b9307bdcd5627071a97025e65842d3287e3552",
+        "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "pair": 9,
+      "implementation": "baseline",
+      "elapsed_ns": 81807292,
+      "phases_ns": {
+        "input_snapshot": 19440708,
+        "material.base": 866084,
+        "material.rust": 1628625,
+        "material.tools": 754500,
+        "material.apple_helpers": 6384208,
+        "material.installed": 110958,
+        "material.apple_selection": 17610333,
+        "material.sdk_stamps": 12382709,
+        "material.total": 39764375,
+        "restore.validation_materialization": 16281917,
+        "restore.publication": 192792,
+        "restore.total": 16611083
+      },
+      "artifacts": {
+        "c322a0bcc369f531-armv8-mont-ios64.o": {
+          "sha256": "55ef33aa45fb64b94423f4aa70bada04c1c9e91ed5762f43de0bc17fa2b4cfab",
+          "mode": 420
+        },
+        "c322a0bcc369f531-sha512-armv8-ios64.o": {
+          "sha256": "8994565ba79b1b4b6fadb8b8b3e0e281bbe481cccfb103281d842b6e2fece7d2",
+          "mode": 420
+        },
+        "c322a0bcc369f531-chacha-armv8-ios64.o": {
+          "sha256": "027c496be03a8e92ddd56a9e4d738ae7a279971776a83041b39af8871b24245c",
+          "mode": 420
+        },
+        "aaa1ba3e455ee2e1-limbs.o": {
+          "sha256": "44a313e961ee8b114347e2bcfacab4a4bd972692bf1ac9793b85067df88cf830",
+          "mode": 420
+        },
+        "a0330e891e733f4e-ecp_nistz.o": {
+          "sha256": "d8f3343d55b9a90ebe8193b3c67aa8912c45acc4e692b2730c0cf82da45bc61e",
+          "mode": 420
+        },
+        "a4019cc0736b0423-constant_time_test.o": {
+          "sha256": "bb96b434fe7d8d75d41a9ab250e1f1713910439b9c100f91f1792520da285470",
+          "mode": 420
+        },
+        "c322a0bcc369f531-sha256-armv8-ios64.o": {
+          "sha256": "f5d9e3a5e8e40ede31494f5b595cd54f9620ed73609c201150f5e76dbbaa13a9",
+          "mode": 420
+        },
+        "c322a0bcc369f531-ghashv8-armx-ios64.o": {
+          "sha256": "a0fbd615ab766c4ae501c5eaf9152f1205b1f7948754a9490e9c2f1092197a67",
+          "mode": 420
+        },
+        "libring_core_0_17_14__test.a": {
+          "sha256": "6484820a15821b1561007c09956f0ed401ad63b83b9f6d2d7c16e0cf3cc4a2ae",
+          "mode": 420
+        },
+        "0bbbd18bda93c05b-aes_nohw.o": {
+          "sha256": "02a6b7490bbaa5a95cfa1028debc8b5f9d6aba47255fa6f226143d06663e650c",
+          "mode": 420
+        },
+        "c322a0bcc369f531-aesv8-armx-ios64.o": {
+          "sha256": "db84dc11f5e7c7208d45a35413a178f4bfdd224291c7d3146bd5caf73d9e1148",
+          "mode": 420
+        },
+        "d5a9841f3dc6e253-poly1305.o": {
+          "sha256": "283d46698c316caac63550178dfcd482ad8583cac67d6a92ba131ce28b3d0d8d",
+          "mode": 420
+        },
+        "a4019cc0736b0423-mem.o": {
+          "sha256": "2bcb96399af0b70eec7776de72f8d47af014654daf0f640e2df9e52a0d11a034",
+          "mode": 420
+        },
+        "a0330e891e733f4e-p256.o": {
+          "sha256": "3e0be8e5213cc9c2b75e413200174de7148dc96236a909f46fc315d00eba53cd",
+          "mode": 420
+        },
+        "c322a0bcc369f531-chacha20_poly1305_armv8-ios64.o": {
+          "sha256": "f503566b5cc669798a52d310d5bc85a771e64e7eb7dece04927dc91b60194f8b",
+          "mode": 420
+        },
+        "25ac62e5b3c53843-curve25519.o": {
+          "sha256": "e758ef1842bd8e59e1d959aed4b4d61497043b0033351fb1761238de3454127e",
+          "mode": 420
+        },
+        "a0330e891e733f4e-gfp_p384.o": {
+          "sha256": "9fda3e4da98103d17daba480ec0c1af48e5469e90b8001591fd5750322853094",
+          "mode": 420
+        },
+        "00c879ee3285a50d-montgomery_inv.o": {
+          "sha256": "9de15e2519481409a67c6a65241f9daebbf3ad5c4a08e91f43a1577f85bf7c41",
+          "mode": 420
+        },
+        "c322a0bcc369f531-ghash-neon-armv8-ios64.o": {
+          "sha256": "4693fe6f6c5e008710351516d6c8de8e7c9a4a8731ca12b53af8c27a5245e4ef",
+          "mode": 420
+        },
+        "libring_core_0_17_14_.a": {
+          "sha256": "91cae0b76410832da2c64718f36197af7322108c80dfc3eca81845b81500b292",
+          "mode": 420
+        },
+        "a0330e891e733f4e-gfp_p256.o": {
+          "sha256": "3e0be8e5213cc9c2b75e413200174de7148dc96236a909f46fc315d00eba53cd",
+          "mode": 420
+        },
+        "c322a0bcc369f531-vpaes-armv8-ios64.o": {
+          "sha256": "173082fec66e3a84e0b904b3e7582326a7dcd7fc3c1e57303d25d53f9edf8b72",
+          "mode": 420
+        },
+        "00c879ee3285a50d-montgomery.o": {
+          "sha256": "25098c34217d8793b01a2908e6dfcd21e92c721e134e52137f3b3affd4c90782",
+          "mode": 420
+        },
+        "c322a0bcc369f531-aesv8-gcm-armv8-ios64.o": {
+          "sha256": "5d5d5912581a03bcb8a4a98ee08d058c34e1796428e0f21bb074f92423403ed1",
+          "mode": 420
+        },
+        "a0330e891e733f4e-p256-nistz.o": {
+          "sha256": "9688f01179b34e3169a84cc72decb4886f6bc077976af4a3cce0a072cd403e5e",
+          "mode": 420
+        },
+        "c322a0bcc369f531-p256-armv8-asm-ios64.o": {
+          "sha256": "1cd97ebb0f192ad46abe5c4750158a5a1c6eb19e85c1ae182c0568cc698b0717",
+          "mode": 420
+        }
+      },
+      "streams": {
+        "stdout": "18de88e9ae0f1e1221e4f5f7a3b9307bdcd5627071a97025e65842d3287e3552",
+        "stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  ],
+  "median_seconds": {
+    "baseline": 0.082812792,
+    "candidate": 0.078659625
+  },
+  "median_phase_ns": {
+    "baseline": {
+      "input_snapshot": 19732646.0,
+      "material.apple_helpers": 6426708.0,
+      "material.apple_selection": 18683666.5,
+      "material.base": 865417.0,
+      "material.installed": 106937.5,
+      "material.rust": 1487749.5,
+      "material.sdk_stamps": 12374521.0,
+      "material.tools": 700979.0,
+      "material.total": 40972979.5,
+      "restore.publication": 169771.0,
+      "restore.total": 15750999.5,
+      "restore.validation_materialization": 15447750.0
+    },
+    "candidate": {
+      "input_snapshot": 19385041.5,
+      "material.apple_helpers": 6622125.0,
+      "material.apple_selection": 18852291.5,
+      "material.base": 869417.0,
+      "material.installed": 110916.5,
+      "material.rust": 1455041.5,
+      "material.sdk_stamps": 12073875.5,
+      "material.tools": 699333.5,
+      "material.total": 40822541.5,
+      "restore.input_epoch": 2609166.5,
+      "restore.publication": 2791250.0,
+      "restore.total": 11197604.0,
+      "restore.validation_materialization": 7961979.0
+    }
+  }
+}

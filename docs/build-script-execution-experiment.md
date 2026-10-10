@@ -1,6 +1,6 @@
 # Cargo build-script execution cache: first verified restore trial
 
-This is an opt-in, uncommitted runtime prototype, not an accepted production improvement. It now restores ring's flat native output bundle and streams, removing all 24 native requests in warm Harness builds. The three warm pairs favor Nano, but the median difference is small and the three cold pairs favor kache.
+This document retains the earlier uncommitted prototype trials. The validated opt-in implementation is now described in [build-script-cache.md](build-script-cache.md); each historical timing below still refers to its own frozen prototype, not the final accepted binary. It now restores ring's flat native output bundle and streams, removing all 24 native requests in warm Harness builds. The three warm pairs favor Nano, but the median difference is small and the three cold pairs favor kache.
 
 | Phase | Nano median | kache median | Nano pair wins |
 | --- | ---: | ---: | ---: |

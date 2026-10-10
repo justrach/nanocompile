@@ -54,6 +54,7 @@ pub fn main(init: std.process.Init) void {
 }
 
 fn dispatch(ctx: *cache.Context, args: []const [:0]const u8) !u8 {
+    if (try @import("build_script.zig").launch(ctx, args)) |code| return code;
     if (args.len != 0 and std.mem.eql(u8, std.fs.path.basename(args[0]), "nanocompile-internal-linker")) {
         if (!std.fs.path.isAbsolute(args[0])) return error.InvalidLinkObserver;
         const config = try std.fs.path.join(ctx.a, &.{ std.fs.path.dirname(args[0]) orelse return error.InvalidLinkObserver, "observer.json" });
@@ -70,6 +71,28 @@ fn dispatch(ctx: *cache.Context, args: []const [:0]const u8) !u8 {
         const records = try @import("producer_dependencies.zig").collect(ctx, parsed.value, try ctx.read(args[3]), try std.fmt.parseInt(i96, args[4], 10));
         try ctx.out(try std.json.Stringify.valueAlloc(ctx.a, records, .{ .emit_null_optional_fields = false }));
         try ctx.out("\n");
+        return 0;
+    }
+    if (std.mem.eql(u8, command, "internal-rust-identity")) {
+        if (args.len != 3) return error.InvalidRustIdentity;
+        try ctx.prepare();
+        const maintenance = try cache.Lock.acquire(ctx, "maintenance", false);
+        defer maintenance.release();
+        const start = std.Io.Clock.awake.now(ctx.io).nanoseconds;
+        const hash = try @import("identity.zig").fingerprint(ctx, false, args[2]);
+        const elapsed = std.Io.Clock.awake.now(ctx.io).nanoseconds - start;
+        try ctx.out(try std.fmt.allocPrint(ctx.a, "{{\"hash\":\"{s}\",\"elapsed_ns\":{d}}}\n", .{ hash, elapsed }));
+        return 0;
+    }
+    if (std.mem.eql(u8, command, "internal-installed-tree")) {
+        if (args.len != 3) return error.InvalidInstalledTree;
+        try ctx.prepare();
+        const maintenance = try cache.Lock.acquire(ctx, "maintenance", false);
+        defer maintenance.release();
+        const start = std.Io.Clock.awake.now(ctx.io).nanoseconds;
+        const hash = try @import("identity.zig").installedTreeDigest(ctx, args[2]);
+        const elapsed = std.Io.Clock.awake.now(ctx.io).nanoseconds - start;
+        try ctx.out(try std.fmt.allocPrint(ctx.a, "{{\"hash\":\"{s}\",\"elapsed_ns\":{d}}}\n", .{ hash, elapsed }));
         return 0;
     }
     if (std.mem.eql(u8, command, "internal-native-identity")) {
@@ -148,10 +171,21 @@ fn dispatch(ctx: *cache.Context, args: []const [:0]const u8) !u8 {
         try argv.append(ctx.a, command);
     }
     for (args[2..]) |arg| try argv.append(ctx.a, arg);
+    if (kind == .rust and @import("build_script.zig").wantsInstall(ctx, argv.items)) {
+        try ctx.prepare();
+        const maintenance = try cache.Lock.acquire(ctx, "maintenance", false);
+        defer maintenance.release();
+        const lock = try cache.Lock.acquire(ctx, try @import("build_script.zig").installLockName(ctx, argv.items), true);
+        defer lock.release();
+        const code = try compiler.execute(ctx, kind, argv.items);
+        if (code == 0) @import("build_script.zig").install(ctx, argv.items) catch |err| ctx.trace(@errorName(err));
+        return code;
+    }
     return compiler.execute(ctx, kind, argv.items);
 }
 
 test {
+    _ = @import("build_script.zig");
     _ = @import("rust_loader.zig");
     _ = @import("clang.zig");
     _ = cache;

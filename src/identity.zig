@@ -489,3 +489,86 @@ test "parallel installed stamp validation rejects edits and missing files" {
     try tmp.dir.deleteFile(io, "resource");
     try std.testing.expect(!validStamps(&ctx, stamps, true));
 }
+
+// Trusted installed directories use content fingerprints plus complete stamps.
+// Mutable project trees must never use this memo.
+const InstalledLink = struct { path: []const u8, resolved: []const u8, inode: u64, mtime: i96, ctime: i96 };
+fn installedLink(ctx: *cache.Context, path: []const u8) !InstalledLink {
+    const st = try Dir.cwd().statFile(ctx.io, path, .{ .follow_symlinks = false });
+    if (st.kind != .sym_link) return error.LinkChanged;
+    return .{ .path = path, .resolved = try Dir.cwd().realPathFileAlloc(ctx.io, path, ctx.a), .inode = @intCast(st.inode), .mtime = st.mtime.nanoseconds, .ctime = st.ctime.nanoseconds };
+}
+fn validLinks(ctx: *cache.Context, links: []const InstalledLink) bool {
+    for (links) |expected| {
+        const current = installedLink(ctx, expected.path) catch return false;
+        if (current.inode != expected.inode or current.mtime != expected.mtime or current.ctime != expected.ctime or !std.mem.eql(u8, current.resolved, expected.resolved)) return false;
+    }
+    return true;
+}
+fn installedGraph(ctx: *cache.Context, stamps: *std.ArrayList(Stamp), links: *std.ArrayList(InstalledLink), seen: *std.StringHashMap(void), path: []const u8) !void {
+    if (seen.contains(path)) return;
+    if (seen.count() >= 100000) return error.TooManyInstalledInputs;
+    try seen.put(path, {});
+    const st = try Dir.cwd().statFile(ctx.io, path, .{ .follow_symlinks = false });
+    if (st.kind == .sym_link) {
+        const link = try installedLink(ctx, path);
+        try links.append(ctx.a, link);
+        return installedGraph(ctx, stamps, links, seen, link.resolved);
+    }
+    if (st.kind != .file and st.kind != .directory) return error.UnsupportedInstalledInput;
+    try stamps.append(ctx.a, try stamp(ctx, path));
+    if (st.kind == .directory) {
+        var dir = try Dir.cwd().openDir(ctx.io, path, .{ .iterate = true });
+        defer dir.close(ctx.io);
+        var it = dir.iterate();
+        while (try it.next(ctx.io)) |entry| try installedGraph(ctx, stamps, links, seen, try std.fs.path.join(ctx.a, &.{ path, entry.name }));
+    }
+}
+pub fn installedTreeDigest(ctx: *cache.Context, root: []const u8) ![]const u8 {
+    const TreeMemo = struct { schema: u32 = 2, hash: []const u8, stamps: []const Stamp, links: []const InstalledLink };
+    const canonical = try Dir.cwd().realPathFileAlloc(ctx.io, root, ctx.a);
+    var h = cache.Hash.init(.{});
+    cache.field(&h, "installed-script-tree-v2");
+    cache.field(&h, canonical);
+    const key = try cache.finish(ctx.a, &h);
+    const path = try ctx.path(&.{ "script-tools", key });
+    const lock = try cache.Lock.acquire(ctx, try std.fmt.allocPrint(ctx.a, "script-tool-{s}", .{key}), true);
+    defer lock.release();
+    if (ctx.read(path)) |bytes| memo: {
+        const payload = cache.unseal(ctx, bytes) catch break :memo;
+        const parsed = std.json.parseFromSlice(TreeMemo, ctx.a, payload, .{ .allocate = .alloc_always }) catch break :memo;
+        if (parsed.value.schema == 2 and cache.validHash(parsed.value.hash) and parsed.value.stamps.len > 0 and validLinks(ctx, parsed.value.links) and validStamps(ctx, parsed.value.stamps, false)) return parsed.value.hash;
+    } else |_| {}
+    var stamps: std.ArrayList(Stamp) = .empty;
+    var links: std.ArrayList(InstalledLink) = .empty;
+    var seen = std.StringHashMap(void).init(ctx.a);
+    defer seen.deinit();
+    try installedGraph(ctx, &stamps, &links, &seen, canonical);
+    std.mem.sort(Stamp, stamps.items, {}, struct {
+        fn less(_: void, a: Stamp, b: Stamp) bool {
+            return std.mem.order(u8, a.path, b.path) == .lt;
+        }
+    }.less);
+    std.mem.sort(InstalledLink, links.items, {}, struct {
+        fn less(_: void, a: InstalledLink, b: InstalledLink) bool {
+            return std.mem.order(u8, a.path, b.path) == .lt;
+        }
+    }.less);
+    h = cache.Hash.init(.{});
+    for (links.items) |link| {
+        cache.field(&h, link.path);
+        cache.field(&h, link.resolved);
+    }
+    for (stamps.items) |st| {
+        cache.field(&h, st.path);
+        cache.field(&h, @tagName(st.kind));
+        // The whole-tree record already preserves every trusted-installation
+        // stamp. Hash every initial byte directly; thousands of independent
+        // file locks and persistent records add no validation to this record.
+        if (st.kind == .file) cache.field(&h, try ctx.digest(st.path));
+    }
+    if (!validLinks(ctx, links.items) or !validStamps(ctx, stamps.items, false)) return error.ToolchainChanged;
+    const digest = try cache.finish(ctx.a, &h);
+    try ctx.atomic(path, try cache.seal(ctx, try std.json.Stringify.valueAlloc(ctx.a, TreeMemo{ .hash = digest, .stamps = stamps.items, .links = links.items }, .{})));
+    return digest;
+}

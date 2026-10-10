@@ -44,12 +44,15 @@ def main():
     p.add_argument("--cold-runs", type=int, default=1, help="alternating fresh-cache comparisons; restart private daemon before each pair")
     p.add_argument("--cold-only", action="store_true", help="skip warm builds")
     p.add_argument("--native-clang", action="store_true", help="opt Nano into Apple Clang native CAS; validate each mode against its own cold artifacts")
+    p.add_argument("--native-artifacts", action="store_true", help="validate native outputs without changing the native compiler")
     p.add_argument("--portable-cc", action="store_true", help="opt Nano into portable compile-only C/C++ caching")
     p.add_argument("--standalone", action="store_true", help="disable kache's daemon for this comparison")
     p.add_argument("--proc-macros", choices=("tracked", "reported"), default="tracked", help="nanocompile proc-macro input policy; reported requires declaring unreported file reads")
     p.add_argument("--proc-macro-producers", action="store_true", help="enable the experimental macOS producer cache; verify macro dylib artifacts too")
     p.add_argument("--executable-producers", action="store_true", help="enable experimental macOS executable compilation caching")
+    p.add_argument("--build-script-contract", type=Path, help="opt Nano into explicit whole build-script execution contracts")
     p.add_argument("--kache-no-build-scripts", action="store_true", help="diagnostic ablation: disable only kache build-script execution caching")
+    p.add_argument("--script-profile", action="store_true", help="diagnostic build-script phase timings; requires execution contract")
     p.add_argument("--trace-builds", action="store_true", help="private full compiler logs and Cargo timings; diagnostic overhead, not a benchmark")
     args = p.parse_args()
     if args.native_clang and args.portable_cc:
@@ -70,6 +73,11 @@ def main():
     env.update(CARGO_TARGET_DIR=str(target), CARGO_INCREMENTAL="0", NANOCOMPILE_DIR=str(cache),
                KACHE_CACHE_DIR=str(kcache), KACHE_CONFIG=str(config), KACHE_HOST_CONFIG="",
                NANOCOMPILE_PROC_MACROS=args.proc_macros, KACHE_SOCKET_PATH=str(state / "daemon.sock"), KACHE_DAEMON_IDLE_TIMEOUT="600")
+    if args.build_script_contract:
+        env["NANOCOMPILE_BUILD_SCRIPTS_FILE"] = str(args.build_script_contract.resolve())
+    if args.script_profile:
+        env["NANOCOMPILE_SCRIPT_PROFILE"] = "1"
+        env["NANOCOMPILE_TRACE"] = "1"
     if args.kache_no_build_scripts:
         env["KACHE_BUILD_SCRIPT_CACHE"] = "0"
     if capture:
@@ -82,13 +90,13 @@ def main():
                "-p", args.package, "-j", str(args.jobs), "--message-format=json-render-diagnostics"]
     if capture:
         command += ["--timings", "-vv"]
-    result = {"diagnostic_trace": bool(capture), "script_sha256": sha(Path(__file__)), "project": str(project), "commit": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=project, text=True).strip(),
+    result = {"diagnostic_trace": bool(capture) or args.script_profile, "script_profile": args.script_profile, "script_sha256": sha(Path(__file__)), "project": str(project), "commit": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=project, text=True).strip(),
               "dirty": bool(subprocess.check_output(["git", "status", "--porcelain"], cwd=project)),
               "platform": platform.platform(), "jobs": args.jobs, "runs": args.runs, "cold_runs": args.cold_runs, "cold_only": args.cold_only,
               "rustc": subprocess.check_output(["rustc", "--version", "--verbose"], cwd=project, text=True),
               "nanocompile_sha256": sha(Path(binary)), "kache_sha256": sha(Path(kache)),
               "kache_version": subprocess.check_output([kache, "--version"], text=True).strip(),
-              "kache_build_script_cache": not args.kache_no_build_scripts, "kache_daemon": not args.standalone, "native_clang": args.native_clang, "portable_cc":args.portable_cc, "nanocompile_proc_macros": args.proc_macros, "nanocompile_proc_macro_producers": args.proc_macro_producers, "nanocompile_executable_producers": args.executable_producers, "command": command,
+              "build_script_contract_sha256": sha(args.build_script_contract) if args.build_script_contract else None, "kache_build_script_cache": not args.kache_no_build_scripts, "kache_daemon": not args.standalone, "native_clang": args.native_clang, "native_artifacts": args.native_artifacts, "portable_cc":args.portable_cc, "nanocompile_proc_macros": args.proc_macros, "nanocompile_proc_macro_producers": args.proc_macro_producers, "nanocompile_executable_producers": args.executable_producers, "command": command,
               "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat(), "builds": [],
               "method": "offline clean release package builds; same target path; prime direct build then empty caches; rotate three-way warm measurement order unless cold-only; validate each wrapper against its own cold artifact hashes (kache remaps paths)"}
     tracked = subprocess.check_output(['git', 'ls-files', '-z'], cwd=project).decode().split('\0')
@@ -165,7 +173,7 @@ def main():
         macros = {str(path.relative_to(target)): sha(path) for path in sorted((target / "release/deps").glob("*.dylib"))}
         executables = {str(path.relative_to(target)): sha(path) for path in sorted((target / "release/build").glob("*/build-script-build")) if path.is_file()}
         native = {str(path.relative_to(target)): sha(path) for path in sorted(target.rglob('*'))
-                  if path.is_file() and path.suffix in ('.o', '.a')} if (args.native_clang or args.portable_cc) else {}
+                  if path.is_file() and path.suffix in ('.o', '.a')} if (args.native_clang or args.portable_cc or args.native_artifacts) else {}
         row = {"native_objects_and_archives": native, "implementation": implementation, "phase": phase, "seconds": seconds,
                "exit_code": proc.returncode, "events": dict(after - before), "rlibs": len(artifacts), "artifacts": artifacts,
                "peak_sampled_process_tree_rss_bytes": peak, "macro_dylibs": macros, "build_script_executables": executables}
@@ -181,7 +189,7 @@ def main():
             row["matches_own_cold_artifacts"] = references[implementation] == artifacts
             row["matches_own_cold_macro_dylibs"] = macro_references[implementation] == macros
             row["matches_own_cold_build_script_executables"] = executable_references[implementation] == executables
-        if implementation == "nanocompile" and not (args.native_clang or args.portable_cc):
+        if implementation == "nanocompile" and not (args.native_clang or args.portable_cc or args.native_artifacts):
             row["matches_direct_artifacts"] = artifacts == references.get("direct")
             row["matches_direct_macro_dylibs"] = macros == macro_references.get("direct")
             row["matches_direct_build_script_executables"] = executables == executable_references.get("direct")
@@ -193,8 +201,10 @@ def main():
         if any(row.get(check) is False for check in ("matches_own_cold_native_artifacts", "matches_own_cold_artifacts", "matches_direct_artifacts", "matches_own_cold_macro_dylibs", "matches_direct_macro_dylibs", "matches_own_cold_build_script_executables", "matches_direct_build_script_executables")):
             raise RuntimeError(f"Artifact validation failed; see {log_path}")
         if phase == "warm" and implementation == "nanocompile" and args.native_clang:
-            if row['events'].get('clang_native_hit', 0) < 20 or row['events'].get('hit', 0) < 165:
+            if (row['events'].get('clang_native_hit', 0) < 20 and not row['events'].get('build_script_hit',0)) or row['events'].get('hit', 0) < 165:
                 raise RuntimeError('Nano native or Rust cache did not serve expected warm hits')
+        if phase == "warm" and implementation == "nanocompile" and args.build_script_contract and not row["events"].get("build_script_hit", 0):
+            raise RuntimeError("Selected execution cache did not serve a warm script hit")
         if phase == "warm" and implementation == "kache" and not row["events"].get("local_hit", 0):
             raise RuntimeError("kache recorded no local hits; comparison is invalid")
 

@@ -27,6 +27,7 @@ This implementation targets repeated compilation of unchanged inputs. It is an e
 
 | Your build | Start here |
 | --- | --- |
+| Declared Cargo build scripts | Opt into [execution reuse](docs/build-script-cache.md) with a complete deterministic input contract. |
 | Cargo libraries | Set `RUSTC_WRAPPER` to nanocompile; release builds and non-incremental checks are supported. |
 | Pure Zig | Wrap a supported `zig build-exe`, `build-obj` or static `build-lib` invocation. |
 | Xcode | Use `nanocompile xcodebuild` to manage Apple's native Swift/Clang compilation cache. |
@@ -36,7 +37,7 @@ Measured performance and its limits are published with raw samples: [Rust versus
 
 The [real Wootin raw Zig benchmark](benchmarks/zig-wootin.md) covers cold compilation, restores and source edits, with a measured 9–11% reduction in restore latency and a preserved-timestamp correctness fix.
 
-The [verified physical Rust identity optimization](docs/rust-physical-memo.md) reduces cold Harness adapters build time by 7.8–9.6% across six alternating production A/B pairs. Kache still leads the equal-settings cold and warm comparison.
+The [verified physical Rust identity optimization](docs/rust-physical-memo.md) reduces cold Harness adapters build time by 7.8–9.6% across six alternating production A/B pairs. The earlier default configuration comparison favors kache. The [opt-in execution cache](docs/build-script-cache.md) now has repeated warm Harness leads; cold results remain variable.
 
 The [latest cold Harness trial](benchmarks/harness-cold.md) cuts Nano build time by 38% using eight Cargo jobs on the test Mac, while kache still wins at equal concurrency. Both attempted cache-core optimizations were rejected after timing and coverage checks.
 

@@ -539,15 +539,29 @@ pub fn restoreVariants(ctx: *Context, key: []const u8, allowed_outputs: []const 
     return false;
 }
 
-pub fn restore(ctx: *Context, key: []const u8, allowed_outputs: []const []const u8) !bool {
-    const bytes = ctx.read(try ctx.path(&.{ "entries", key })) catch return false;
-    const entry = parseEntry(ctx, bytes) catch return false;
-    if (entry.artifact != null or entry.schema != entry_schema or entry.outputs.len != allowed_outputs.len) return false;
+pub const RestoredStreams = struct { stdout: []const u8, stderr: []const u8 };
+
+// Validate against original destinations, then materialize into caller-owned staging paths.
+pub fn restoreStaged(ctx: *Context, key: []const u8, allowed_outputs: []const []const u8, destinations: []const []const u8) !?RestoredStreams {
+    return restoreWithSnapshot(ctx, key, allowed_outputs, destinations, null);
+}
+
+/// Caller must have freshly content-hashed every dependency, then revalidate
+/// its invocation-local state before publishing these staging destinations.
+pub fn restoreSnapshotStaged(ctx: *Context, key: []const u8, allowed_outputs: []const []const u8, destinations: []const []const u8, dependencies: []const Dependency) !?RestoredStreams {
+    return restoreWithSnapshot(ctx, key, allowed_outputs, destinations, dependencies);
+}
+
+fn restoreWithSnapshot(ctx: *Context, key: []const u8, allowed_outputs: []const []const u8, destinations: []const []const u8, snapshot: ?[]const Dependency) !?RestoredStreams {
+    if (destinations.len != allowed_outputs.len) return error.InvalidDestinations;
+    const bytes = ctx.read(try ctx.path(&.{ "entries", key })) catch return null;
+    const entry = parseEntry(ctx, bytes) catch return null;
+    if (entry.artifact != null or entry.schema != entry_schema or entry.outputs.len != allowed_outputs.len) return null;
     // One crate graph can record many prefixes in the same Cargo directory,
     // and explicit externs can also appear in the transitive graph. Reuse the
     // enumeration and content hashes only within this restore. No metadata
     // shortcut survives a compiler invocation or a before/after input check.
-    for (entry.outputs, allowed_outputs) |output, allowed| if (!std.mem.eql(u8, output.path, allowed)) return false;
+    for (entry.outputs, allowed_outputs) |output, allowed| if (!std.mem.eql(u8, output.path, allowed)) return null;
     var output_check: OutputCheck = .{ .entry = &entry };
     var output_group: std.Io.Group = .init;
     defer output_group.cancel(ctx.io);
@@ -555,69 +569,78 @@ pub fn restore(ctx: *Context, key: []const u8, allowed_outputs: []const []const 
         if (entry.dependencies.len < 32) break :blk false;
         var size: u64 = 0;
         for (entry.outputs) |output| {
-            const st = Dir.cwd().statFile(ctx.io, try blobPath(ctx, output.hash), .{}) catch return false;
+            const st = Dir.cwd().statFile(ctx.io, try blobPath(ctx, output.hash), .{}) catch return null;
             size +|= st.size;
         }
         if (size < 1024 * 1024) break :blk false;
         output_group.concurrent(ctx.io, OutputCheck.run, .{ &output_check, ctx }) catch break :blk false;
         break :blk true;
     };
-    var library_names: std.StringHashMapUnmanaged([]const []const u8) = .empty;
-    defer library_names.deinit(ctx.a);
-    var file_hashes: std.StringHashMapUnmanaged([]const u8) = .empty;
-    defer file_hashes.deinit(ctx.a);
-    if (!try parallelFileHashes(ctx, entry.dependencies, &file_hashes)) return false;
-    for (entry.dependencies) |dep| {
-        if (dep.symlink_target != null) {
-            if (!(symlinkValid(ctx, dep) catch false)) return false;
-            continue;
-        }
-        if (dep.missing != null) {
-            if (!(missingValid(ctx, dep) catch false)) {
-                ctx.trace("miss: negative lookup changed or unavailable");
-                return false;
+    if (snapshot) |dependencies| {
+        if (!std.mem.eql(u8, try std.json.Stringify.valueAlloc(ctx.a, dependencies, .{}), try std.json.Stringify.valueAlloc(ctx.a, entry.dependencies, .{}))) return null;
+    } else {
+        var library_names: std.StringHashMapUnmanaged([]const []const u8) = .empty;
+        defer library_names.deinit(ctx.a);
+        var file_hashes: std.StringHashMapUnmanaged([]const u8) = .empty;
+        defer file_hashes.deinit(ctx.a);
+        if (!try parallelFileHashes(ctx, entry.dependencies, &file_hashes)) return null;
+        for (entry.dependencies) |dep| {
+            if (dep.symlink_target != null) {
+                if (!(symlinkValid(ctx, dep) catch false)) return null;
+                continue;
             }
-            continue;
-        }
-        const hash = if (dep.library_prefix) |prefix| blk: {
-            const slot = try library_names.getOrPut(ctx.a, dep.path);
-            if (!slot.found_existing) slot.value_ptr.* = ctx.libraryNames(dep.path, allowed_outputs) catch return false;
-            break :blk try prefixDigest(ctx.a, slot.value_ptr.*, prefix);
-        } else if (dep.all_members)
-            ctx.nativeDirectoryDigest(dep.path) catch return false
-        else if (dep.directory)
-            ctx.directoryDigest(dep.path, dep.libraries, allowed_outputs) catch return false
-        else blk: {
-            const slot = try file_hashes.getOrPut(ctx.a, dep.path);
-            if (!slot.found_existing) slot.value_ptr.* = ctx.digest(dep.path) catch return false;
-            break :blk slot.value_ptr.*;
-        };
-        if (!std.mem.eql(u8, hash, dep.hash)) {
-            ctx.trace("miss: dependency content changed");
-            return false;
+            if (dep.missing != null) {
+                if (!(missingValid(ctx, dep) catch false)) {
+                    ctx.trace("miss: negative lookup changed or unavailable");
+                    return null;
+                }
+                continue;
+            }
+            const hash = if (dep.library_prefix) |prefix| blk: {
+                const slot = try library_names.getOrPut(ctx.a, dep.path);
+                if (!slot.found_existing) slot.value_ptr.* = ctx.libraryNames(dep.path, allowed_outputs) catch return null;
+                break :blk try prefixDigest(ctx.a, slot.value_ptr.*, prefix);
+            } else if (dep.all_members)
+                ctx.nativeDirectoryDigest(dep.path) catch return null
+            else if (dep.directory)
+                ctx.directoryDigest(dep.path, dep.libraries, allowed_outputs) catch return null
+            else blk: {
+                const slot = try file_hashes.getOrPut(ctx.a, dep.path);
+                if (!slot.found_existing) slot.value_ptr.* = ctx.digest(dep.path) catch return null;
+                break :blk slot.value_ptr.*;
+            };
+            if (!std.mem.eql(u8, hash, dep.hash)) {
+                ctx.trace("miss: dependency content changed");
+                return null;
+            }
         }
     }
     // Validate every blob and destination before writing any output.
     if (overlap) {
         try output_group.await(ctx.io);
-        if (!output_check.valid) return false;
+        if (!output_check.valid) return null;
     } else {
         for (entry.outputs) |output| {
-            const hash = ctx.digest(try blobPath(ctx, output.hash)) catch return false;
-            if (!std.mem.eql(u8, hash, output.hash)) return false;
+            const hash = ctx.digest(try blobPath(ctx, output.hash)) catch return null;
+            if (!std.mem.eql(u8, hash, output.hash)) return null;
         }
     }
-    const stdout = ctx.read(try blobPath(ctx, entry.stdout)) catch return false;
-    const stderr = ctx.read(try blobPath(ctx, entry.stderr)) catch return false;
+    const stdout = ctx.read(try blobPath(ctx, entry.stdout)) catch return null;
+    const stderr = ctx.read(try blobPath(ctx, entry.stderr)) catch return null;
     var h = Hash.init(.{});
     h.update(stdout);
-    if (!std.mem.eql(u8, try finish(ctx.a, &h), entry.stdout)) return false;
+    if (!std.mem.eql(u8, try finish(ctx.a, &h), entry.stdout)) return null;
     h = Hash.init(.{});
     h.update(stderr);
-    if (!std.mem.eql(u8, try finish(ctx.a, &h), entry.stderr)) return false;
-    for (entry.outputs) |output| try materialize(ctx, try blobPath(ctx, output.hash), output.path, output.mode);
-    try ctx.out(stdout);
-    try std.Io.File.stderr().writeStreamingAll(ctx.io, stderr);
+    if (!std.mem.eql(u8, try finish(ctx.a, &h), entry.stderr)) return null;
+    for (entry.outputs, destinations) |output, destination| try materialize(ctx, try blobPath(ctx, output.hash), destination, output.mode);
+    return .{ .stdout = stdout, .stderr = stderr };
+}
+
+pub fn restore(ctx: *Context, key: []const u8, allowed_outputs: []const []const u8) !bool {
+    const streams = (try restoreStaged(ctx, key, allowed_outputs, allowed_outputs)) orelse return false;
+    try ctx.out(streams.stdout);
+    try std.Io.File.stderr().writeStreamingAll(ctx.io, streams.stderr);
     return true;
 }
 
@@ -640,6 +663,10 @@ pub fn stats(ctx: *Context) !void {
     var cc_miss: usize = 0;
     var cc_bypass: usize = 0;
     var cc_failed: usize = 0;
+    var script_hit: usize = 0;
+    var script_miss: usize = 0;
+    var script_bypass: usize = 0;
+    var script_failed: usize = 0;
     var it = std.mem.tokenizeScalar(u8, events, '\n');
     while (it.next()) |event| {
         if (std.mem.eql(u8, event, "hit")) hit += 1;
@@ -656,6 +683,10 @@ pub fn stats(ctx: *Context) !void {
         if (std.mem.eql(u8, event, "cc_miss")) cc_miss += 1;
         if (std.mem.eql(u8, event, "cc_bypass")) cc_bypass += 1;
         if (std.mem.eql(u8, event, "cc_failed")) cc_failed += 1;
+        if (std.mem.eql(u8, event, "build_script_hit")) script_hit += 1;
+        if (std.mem.eql(u8, event, "build_script_miss")) script_miss += 1;
+        if (std.mem.eql(u8, event, "build_script_bypass")) script_bypass += 1;
+        if (std.mem.eql(u8, event, "build_script_failed")) script_failed += 1;
     }
     var blobs: usize = 0;
     var size: u64 = 0;
@@ -671,13 +702,14 @@ pub fn stats(ctx: *Context) !void {
     try ctx.out(try std.fmt.allocPrint(ctx.a, "native Xcode invocations: {d}\nnative Xcode failures: {d}\n", .{ xcode_runs, xcode_failed }));
     try ctx.out(try std.fmt.allocPrint(ctx.a, "native Clang invocations: {d}\nnative Clang failures: {d}\nobserved Clang hits: {d}\nobserved Clang misses: {d}\nClang hit/miss observations require NANOCOMPILE_CLANG_REMARKS=1\n", .{ clang_run, clang_failed, clang_hit, clang_miss }));
     try ctx.out(try std.fmt.allocPrint(ctx.a, "portable C/C++ hits: {d}\nportable C/C++ misses: {d}\nportable C/C++ bypasses: {d}\nportable C/C++ failures: {d}\n", .{ cc_hit, cc_miss, cc_bypass, cc_failed }));
+    try ctx.out(try std.fmt.allocPrint(ctx.a, "build-script hits: {d}\nbuild-script misses: {d}\nbuild-script bypasses: {d}\nbuild-script failures: {d}\n", .{ script_hit, script_miss, script_bypass, script_failed }));
 }
 
 pub fn clear(ctx: *Context) !void {
     try ctx.prepare();
     const lock = try Lock.acquire(ctx, "maintenance", true);
     defer lock.release();
-    for ([_][]const u8{ "entries", "blobs", "xcode", "native-clang", "metadata", "metadata-queries", "producer-jobs" }) |sub| {
+    for ([_][]const u8{ "entries", "blobs", "xcode", "native-clang", "metadata", "metadata-queries", "producer-jobs", "build-script-receipts", "script-tools" }) |sub| {
         try Dir.cwd().deleteTree(ctx.io, try ctx.path(&.{sub}));
         try Dir.cwd().createDirPath(ctx.io, try ctx.path(&.{sub}));
     }
