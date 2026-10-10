@@ -1,0 +1,28 @@
+--- a/src/cache.zig
++++ b/src/cache.zig
+@@ -487,6 +487,7 @@
+ 
+ const DigestJob = struct {
+     path: []const u8,
++    size: u64,
+     hash: [64]u8 = undefined,
+     valid: bool = false,
+ };
+@@ -517,11 +518,16 @@
+         if (slot.found_existing) continue;
+         const st = Dir.cwd().statFile(ctx.io, dep.path, .{}) catch return false;
+         size +|= st.size;
+-        try jobs.append(ctx.a, .{ .path = dep.path });
++        try jobs.append(ctx.a, .{ .path = dep.path, .size = st.size });
+     }
+     // Small restores retain their serial path. Large graphs use at most four
+     // workers, leaving the same full hashes and per-restore lifetime intact.
+     if (jobs.items.len < 32 or size < 8 * 1024 * 1024) return true;
++    std.mem.sort(DigestJob, jobs.items, {}, struct {
++        fn less(_: void, lhs: DigestJob, rhs: DigestJob) bool {
++            return lhs.size > rhs.size;
++        }
++    }.less);
+     var next: std.atomic.Value(usize) = .init(0);
+     var group: std.Io.Group = .init;
+     defer group.cancel(ctx.io);

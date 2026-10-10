@@ -10,3 +10,14 @@ Use the frozen diagnostic runtime SHA-256 `afca7d75dde84cd87592987a553c765f50ca4
 For each variation require fresh-cache/cached output bytes and modes, source edits and reverts, dependency/native archive edits, output tampering, failed compiler propagation and concurrent restoration checks. Run the actual full-Harness source-edit runner before broad adoption. Repeat alternating untraced cold and warm comparisons against both the frozen Nano baseline and kache with identical flags, toolchain, source snapshot, job count and declared native inputs. Record rejected candidates and sample uncertainty.
 
 The current repeated untraced result is Nano 183.695712s / kache 187.511773s cold, with two of three pair wins, and Nano 7.170868s / kache 5.767633s warm, with zero of three pair wins. The objective of consistently beating kache remains open. Logging and profiling are diagnostic features, not demonstrated speed improvements.
+
+
+## Largest-input-first scheduling: rejected
+
+The [15-pair actual final-request comparison](../benchmarks/harness-largest-input-first-paired.json) changes only the ordering of large input-hash jobs. Baseline median is 0.412590s, candidate 0.411822s; mean paired savings are 0.460ms with 0.893ms standard error, and nine of 15 pairs favor the candidate. This does not establish a useful gain. Production retains its original ordering.
+
+All 34 executions completed with own-cold artifact/mode equality, codesign and CLI checks, stable source hashes and 136 verified compiler/CLI streams. The candidate also passed actual Rust/Zig restore/invalidation/corruption/failure/concurrency integration. The early direct prime overlapped integration validation; cold/direct timings are retained but are not used as comparative evidence. Profiling and CLI checks are included in the isolated hit timing; no whole-build speedup is claimed.
+
+The sealed producer manifest contains 8,921 dependency records and 1,593 unique regular input paths totaling 2,222,946,636 bytes at observation time, with zero missing inputs. The largest file is 135,607,184 bytes. Preserve this measured graph for throughput experiments. Earlier eight-worker and fixed-buffer experiments on the smaller workload did not justify adoption; a new bounded worker comparison on this much larger graph still requires matched full-build confirmation because additional workers can compete with other Cargo jobs. Do not retry unchanged allocation or file-order candidates without new evidence.
+
+The [candidate patch](../benchmarks/experiments/largest-input-first.patch) and [isolated pair runner](../benchmarks/experiments/harness_producer_hash_pair.py) are retained for reproduction. The executed source snapshot and original full request remain private at `/tmp/nano-largest-input-first-20261011`.
