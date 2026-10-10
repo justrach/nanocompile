@@ -1,0 +1,11 @@
+--- a/src/cache.zig
++++ b/src/cache.zig
+@@ -525,7 +525,7 @@
+     var next: std.atomic.Value(usize) = .init(0);
+     var group: std.Io.Group = .init;
+     defer group.cancel(ctx.io);
+-    const workers = @min(@as(usize, 4), std.Thread.getCpuCount() catch 1);
++    const workers = @min(@as(usize, 8), std.Thread.getCpuCount() catch 1);
+     for (1..@max(workers, 1)) |_| group.concurrent(ctx.io, digestWorker, .{ ctx, jobs.items, &next }) catch break;
+     digestWorker(ctx, jobs.items, &next);
+     try group.await(ctx.io);
