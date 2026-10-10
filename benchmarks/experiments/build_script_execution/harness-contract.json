@@ -1,0 +1,1 @@
+{"packages": [{"package": "ring", "inputs": [".", "/usr/local/include"], "apple_native": true}]}
