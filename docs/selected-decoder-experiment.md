@@ -134,6 +134,13 @@ selected-resource scope checks all pass on the rebuilt binary.
 The scope fixture also passes without a baseline binary, matching the new
 CI invocation. CI installs Rust 1.97.1 and 1.98.1, retaining 1.97.1 as default,
 and runs active-selector/compiler-switch tests on Linux and macOS. The
-previous schema-4 accepted version's green CI remains separate; the new
-source still needs its own hosted result.
+previous schema-4 accepted version's green CI remains separate. The new
+source now also passes both hosted jobs; [CI evidence](../benchmarks/selected-decoder-ci-validation.json)
+retains the active compiler-switch results.
 [Local CI-mode fixture check](../benchmarks/selected-decoder-ci-mode-check.json).
+
+The installed [nine-round kache/direct comparison](selected-decoder-nine-samples.md)
+now measures warm medians 2.048817 s Nano, 2.082112 s kache and 24.026856 s
+direct. Nano is faster in 9/9 corresponding rounds in this local session.
+Cold remains 29.059060 s Nano versus 28.082190 s kache; this does not
+establish cold superiority over kache.

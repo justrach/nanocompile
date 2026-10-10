@@ -1548,3 +1548,21 @@ batches compare Nano versions and do not establish a new kache comparison.
 [Method and gates](../docs/selected-decoder-experiment.md);
 [independent cold pairs](harness-selected-decoder-cold-confirm.json);
 [warm comparison](harness-selected-decoder-warm-paired.json).
+
+## Installed selected-resource version: nine-round comparison
+
+Warm medians are **2.048817 s Nano, 2.082112 s kache and 24.026856 s direct**.
+Nano is faster in 9/9 corresponding rounds. Same-round mean lead is 64.909 ms
+with descriptive SE 19.686 ms, supporting a small local lead rather than
+cross-machine superiority. Cold remains **29.059060 s Nano versus 28.082190 s
+kache**, with direct prime 25.949447 s. Every warm build matches its own cold
+Rust/producer/native artifacts, and tracked sources remain unchanged. Nano
+retains 167 Rust/24 native hits and kache retains 187 local hits. All samples
+remain. The adopted source `3fdc906` passes Linux and macOS CI, including
+active compiler-switch selection tests. A combined sysroot-print/root-reader
+command is rejected after the actual compiler treats metadata as source;
+the production commands remain separate.
+[Method and limits](../docs/selected-decoder-nine-samples.md);
+[raw comparison](harness-selected-decoder-nine-samples.json);
+[all-sample analysis](harness-selected-decoder-nine-analysis.json);
+[hosted CI evidence](selected-decoder-ci-validation.json).

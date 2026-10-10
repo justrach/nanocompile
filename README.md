@@ -217,14 +217,13 @@ Default mode streams the compiler's inherited descriptors normally.
 Eligible native-CAS jobs run Clang's cc1 frontend in-process to reduce replay
 overhead; caller execution flags can override this default.
 
-The [schema-4 nine-sample comparison](docs/decoder-nine-samples.md)
-measures warm medians of **2.039 s Nano versus 24.13 s direct and 2.115 s kache**
+The [latest nine-sample comparison](docs/selected-decoder-nine-samples.md)
+measures warm medians of **2.049 s Nano versus 24.03 s direct and 2.082 s kache**
 on Harness, with 167 Rust and 24 native warm hits. It uses explicit reported-macro
-and Apple macro/executable-producer policies. Nano is faster in 7/9
-corresponding rounds, but the mean same-round gap is only 44 ms with
-descriptive standard error 36 ms. This variable local session does not
-establish a robust or general warm advantage. Previous comparisons,
-including a nine-sample run favoring kache, remain public.
+and Apple macro/executable-producer policies. Nano is faster in all nine
+corresponding rounds, with a mean same-round lead of 65 ms and descriptive
+standard error 20 ms. This is a small local lead, not a general cross-machine
+advantage. Previous comparisons, including a session favoring kache, remain public.
 Two independent [27-pair lookup comparisons](docs/clang-selection-overlap-experiment.md)
 confirm the adopted live-query overlap gains **5.6% and 5.1%**, winning 51/54
 pairs with 193 exact artifacts. Compiler and SDK selection remain live.
@@ -232,7 +231,7 @@ Two further [27-pair integrated-cc1 comparisons](docs/clang-integrated-cc1-exper
 confirm **5.1% and 5.6%** median improvements, winning 51/54 pairs with
 193 exact artifacts. These measure the native adapter change against its
 predecessor; the complete comparison above separately measures the installed version.
-Before the selected-resource update, Nano cold is 31.72 s versus kache's 28.09 s in that session. Kache still leads cold;
+Nano cold is 29.06 s versus kache's 28.08 s in the latest session. Kache still leads cold;
 the controlled decoder comparisons below establish Nano's improvement over its predecessor. All warm modes match their own cold Rust/native
 artifacts; scanner debug changes and kache remapping prevent treating every
 mode as byte-identical to default direct builds.

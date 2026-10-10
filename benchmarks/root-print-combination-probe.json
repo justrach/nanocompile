@@ -1,0 +1,46 @@
+{
+  "compiler": "rustc 1.97.1 (8bab26f4f 2026-07-14)\nbinary: rustc\ncommit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452\ncommit-date: 2026-07-14\nhost: aarch64-apple-darwin\nrelease: 1.97.1\nLLVM version: 22.1.6\n",
+  "artifact_sha256": "86d4d89aba4d49f6302707ef39c31c74adc0a8dfca7fa2ad1a22d9c2d20501f9",
+  "commands": {
+    "sysroot": {
+      "argv": [
+        "rustc",
+        "--print",
+        "sysroot",
+        "--print",
+        "target-libdir"
+      ],
+      "exit_code": 0,
+      "stdout_sha256": "54bbf05ba31af4d16f7b2d97b2e9d59a1af39a5451616aa4e97273f48002f360",
+      "stdout_prefix": "/Users/rachpradhan/.rustup/toolchains/1.97.1-aarch64-apple-darwin\n/Users/rachpradhan/.rustup/toolchains/1.97.1-aarch64-apple-darwin/lib/rustlib/aarch64-apple-darwin/lib\n",
+      "stderr_prefix": ""
+    },
+    "root": {
+      "argv": [
+        "rustc",
+        "-Zls=root",
+        "/tmp/nanocompile-selected-decoder-nine-way/target/release/deps/libharness_adapters-17d251dcff5f9858.rmeta"
+      ],
+      "exit_code": 0,
+      "stdout_sha256": "d797e4ac3f25904a21037b62b859f5826d7aa184de539230fac32806314bef64",
+      "stdout_prefix": "Crate info:\nname harness_adapters-17d251dcff5f9858\nhash 19fdb7a086a458f0859440d8e4f12d81 stable_crate_id StableCrateId(15423940182653337493)\nproc_macro false\ntriple aarch64-apple-d",
+      "stderr_prefix": ""
+    },
+    "combined": {
+      "argv": [
+        "rustc",
+        "--print",
+        "sysroot",
+        "--print",
+        "target-libdir",
+        "-Zls=root",
+        "/tmp/nanocompile-selected-decoder-nine-way/target/release/deps/libharness_adapters-17d251dcff5f9858.rmeta"
+      ],
+      "exit_code": 1,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_prefix": "",
+      "stderr_prefix": "error: couldn't read `/tmp/nanocompile-selected-decoder-nine-way/target/release/deps/libharness_adapters-17d251dcff5f9858.rmeta`: stream did not contain valid UTF-8\n --> /tmp/nanocompile-selected-deco"
+    }
+  },
+  "result": "Rejected: combining live sysroot prints and root metadata decoding causes this compiler to treat the binary artifact as source. Separate commands retained."
+}
