@@ -42,7 +42,7 @@ pub const Job = struct {
         for (key) |c| if (!std.ascii.isHex(c)) return error.InvalidJobAlias;
         const parent = try ctx.path(&.{"producer-aliases"});
         try Dir.cwd().createDirPath(ctx.io, parent);
-        const dir = try Dir.cwd().openDir(ctx.io, parent, .{});
+        const dir = try Dir.cwd().openDir(ctx.io, parent, .{ .iterate = true });
         defer dir.close(ctx.io);
         try dir.setPermissions(ctx.io, .fromMode(0o700));
         const alias = try std.fs.path.join(ctx.a, &.{ parent, key });
