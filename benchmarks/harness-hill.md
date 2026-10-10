@@ -1471,3 +1471,19 @@ previous Nano version, not kache.
 [cold confirmation](harness-decoder-cold-confirm.json);
 [warm pairs](harness-decoder-warm-paired.json);
 [correctness gates](decoder-adoption-checks.json).
+
+## Adopted decoder: fresh complete comparison
+
+Nine rotating rounds measure warm medians **2.038725 s Nano, 2.115331 s
+kache and 24.127392 s direct**. Nano is faster in 7/9 corresponding rounds.
+The same-round mean gap is 43.983 ms with descriptive SE 35.969 ms; this
+variable batch does not establish a robust or general warm advantage.
+Cold is **31.715342 s Nano versus 28.085303 s kache**; direct prime is
+25.111636 s. All 27 warm builds match their own cold Rust/producer/native
+artifacts and tracked sources remain unchanged. Nano retains 167 Rust and
+24 native hits; kache retains 187 local hits. All samples are retained.
+This measures installed source `bb55f97`; local adoption gates and Linux CI
+pass, while macOS CI is queued at publication.
+[Method and limits](../docs/decoder-nine-samples.md);
+[raw comparison](harness-decoder-nine-samples.json);
+[all-sample analysis](harness-decoder-nine-analysis.json).
