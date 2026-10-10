@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "status": "read-only investigation; current mixed-output guard retained",
+  "crate": "tree_sitter_highlight",
+  "crate_version": "0.26.11",
+  "observed_warm_request_seconds": 0.737232,
+  "record_sha256": "ea6e5d4ebfd9945ad0468abab7a3fcacf27e47a127e97a93a36d51c24af89195",
+  "source_sha256": "1686cfbefd289946d0eedd3ea73a7b35f0837daaa1bedc00e44e535d2be4c741",
+  "crate_types": [
+    "lib",
+    "staticlib"
+  ],
+  "emit": [
+    "dep-info",
+    "link"
+  ],
+  "optimization": "3",
+  "outputs_required": [
+    "tree_sitter_highlight-c33eb801a7edfe5f.d",
+    "libtree_sitter_highlight-c33eb801a7edfe5f.rlib",
+    "libtree_sitter_highlight-c33eb801a7edfe5f.a"
+  ],
+  "flags": "native default target, zero debug; actual command has no linker-plugin-lto flag",
+  "instruction": "Do not relax repeated crate-type parsing until output planning accounts for every file. Prove implicit standard-library, Rust dependency and transitive native archive inputs, default archiver/backend identity and search membership. The existing executable linker observer does not establish static archive input completeness by itself. Keep unsupported combinations, native selections and targets passthrough. Require both flag orders, direct/cold/hit complete files and modes, semantic Rust/native edits, linked rlib and C ABI archive runtime probes, source/header changes, corrupt or missing companion blobs and complete failure propagation; then actual crate and full-Harness timing.",
+  "claim": "Observed uncached interval overlaps other work and is not a projected full-build saving"
+}
