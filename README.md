@@ -37,7 +37,7 @@ Measured performance and its limits are published with raw samples: [Rust versus
 
 The [real Wootin raw Zig benchmark](benchmarks/zig-wootin.md) covers cold compilation, restores and source edits, with a measured 9–11% reduction in restore latency and a preserved-timestamp correctness fix.
 
-The [verified physical Rust identity optimization](docs/rust-physical-memo.md) reduces cold Harness adapters build time by 7.8–9.6% across six alternating production A/B pairs. The earlier default configuration comparison favors kache. The [opt-in execution cache](docs/build-script-cache.md) now has repeated warm Harness leads; cold results remain variable.
+The [verified physical Rust identity optimization](docs/rust-physical-memo.md) reduces cold Harness adapters build time by 7.8–9.6% across six alternating production A/B pairs. The earlier default configuration comparison favors kache. The [opt-in execution cache](docs/build-script-cache.md) now has repeated warm Harness leads; cold results remain variable. The [accepted production comparison and streaming experiment](docs/harness-streaming-experiment.md) records all samples: 24.8% lower warm median, but a 1.1% higher cold median in the latest session.
 
 The [latest cold Harness trial](benchmarks/harness-cold.md) cuts Nano build time by 38% using eight Cargo jobs on the test Mac, while kache still wins at equal concurrency. Both attempted cache-core optimizations were rejected after timing and coverage checks.
 
