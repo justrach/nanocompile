@@ -1,10 +1,9 @@
 {
-  "binary_sha256": "b29b3cef66f688842e5b8b2395b1f6a34cff957a502c71ec30bbd578cae1f478",
-  "script_sha256": "e4185e75c874b38a834ffcf1932ab307b670fb74e927db3790af7a0f41a03810",
+  "binary_sha256": "1eb3ecdb58b66a0876b34400c83bbbdf7c53fcb8561dce26c3b40543521c1d87",
+  "script_sha256": "86a8ba965a576ae4070a07105a90dea583aba024514903624a7be6b011516b6f",
   "checks": [
     "real Cargo cold execution and warm restored executable agree",
     "declared tool bytes with preserved mtime invalidate and revert safely",
-    "live xcrun-selected system-only archiver participates in cold and warm identities",
     "same-size preserved-mtime mutable source edit and revert",
     "linked installed target content, link retarget and directory membership invalidate",
     "environment changes invalidate execution",
@@ -19,6 +18,7 @@
     "jobserver descriptors preserved on cache miss, disabled and missing-contract fallback",
     "disabled installed shim executes the real script",
     "cache-store permission failure preserves successful execution and correct output",
-    "stats count script decisions; clear removes receipts/resources and forces a correct fresh miss then hit"
+    "stats count script decisions; clear removes receipts/resources and forces a correct fresh miss then hit",
+    "live xcrun-selected system-only archiver participates in identities on this installation"
   ]
 }

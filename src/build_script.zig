@@ -208,10 +208,21 @@ extern "c" fn fcntl(c_int, c_int, ...) c_int;
 fn nullStdin(ctx: *cache.Context) bool {
     const null_file = Dir.cwd().openFile(ctx.io, "/dev/null", .{}) catch return false;
     defer null_file.close(ctx.io);
-    var input: std.c.Stat = undefined;
-    var expected: std.c.Stat = undefined;
-    if (std.c.fstat(0, &input) != 0 or std.c.fstat(null_file.handle, &expected) != 0) return false;
-    return input.dev == expected.dev and input.ino == expected.ino and input.rdev == expected.rdev and input.mode == expected.mode;
+    if (@import("builtin").os.tag == .linux) {
+        const linux = std.os.linux;
+        var input: linux.Statx = undefined;
+        var expected: linux.Statx = undefined;
+        if (linux.statx(0, "", linux.AT.EMPTY_PATH, linux.STATX.BASIC_STATS, &input) != 0 or
+            linux.statx(null_file.handle, "", linux.AT.EMPTY_PATH, linux.STATX.BASIC_STATS, &expected) != 0) return false;
+        if (!input.mask.TYPE or !input.mask.MODE or !input.mask.INO or !expected.mask.TYPE or !expected.mask.MODE or !expected.mask.INO) return false;
+        return input.dev_major == expected.dev_major and input.dev_minor == expected.dev_minor and input.ino == expected.ino and
+            input.rdev_major == expected.rdev_major and input.rdev_minor == expected.rdev_minor and input.mode == expected.mode;
+    } else if (@import("builtin").os.tag == .macos) {
+        var input: std.c.Stat = undefined;
+        var expected: std.c.Stat = undefined;
+        if (std.c.fstat(0, &input) != 0 or std.c.fstat(null_file.handle, &expected) != 0) return false;
+        return input.dev == expected.dev and input.ino == expected.ino and input.rdev == expected.rdev and input.mode == expected.mode;
+    } else return false;
 }
 fn jobserver(ctx: *cache.Context) ![]const std.Io.File {
     var inherited: std.ArrayList(std.Io.File) = .empty;

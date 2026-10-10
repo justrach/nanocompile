@@ -57,7 +57,7 @@ fn main(){
 ''')
         tool=root/'declared-tool';tool.write_text('#!/bin/sh\nexit 0\n');tool.chmod(0o700)
         config = root / 'contract.json'
-        config.write_text(json.dumps(dict(schema=1, packages=[dict(package='script-fixture', inputs=[str(project)], installed_inputs=[str(installed)],tools=[str(tool)],apple_tools=['ar'] if sys.platform=='darwin' else [])])))
+        config.write_text(json.dumps(dict(schema=1, packages=[dict(package='script-fixture', inputs=[str(project)], installed_inputs=[str(installed)],tools=[str(tool)],apple_tools=[])])))
         env = {k:v for k,v in os.environ.items() if not k.startswith(('NANOCOMPILE_', 'R2_', 'KACHE_')) and k not in ('RUSTC_WRAPPER','RUSTC_WORKSPACE_WRAPPER')}
         env.update(RUSTUP_TOOLCHAIN='1.97.1', RUSTC_WRAPPER=str(binary), CARGO_TARGET_DIR=str(target),
                    NANOCOMPILE_DIR=str(cache), NANOCOMPILE_BUILD_SCRIPTS_FILE=str(config),
@@ -67,7 +67,7 @@ fn main(){
         def cargo(expected, decision):
             shutil.rmtree(target, ignore_errors=True)
             before=len(events())
-            q=subprocess.run(['cargo','build','--release','--offline'],cwd=project,env=env,capture_output=True)
+            q=subprocess.run(['cargo','build','--release','--offline'],cwd=project,env=env,stdin=subprocess.DEVNULL,capture_output=True)
             assert q.returncode==0,q.stderr.decode(errors='replace')
             assert decision in events()[before:],(decision,events()[before:],q.stderr.decode(errors='replace'))
             actual=subprocess.check_output([str(target/'release/script-fixture')]).decode().strip()
@@ -82,7 +82,6 @@ fn main(){
         tool.write_text('#!/bin/sh\nexit 0\n');os.utime(tool,ns=(mtime,mtime))
         assert cargo(53,'build_script_hit')==first
         checks.append('declared tool bytes with preserved mtime invalidate and revert safely')
-        if sys.platform=='darwin':checks.append('live xcrun-selected system-only archiver participates in cold and warm identities')
 
         mtime=(project/'input').stat().st_mtime_ns
         (project/'input').write_text('43');os.utime(project/'input',ns=(mtime,mtime))
@@ -219,6 +218,19 @@ fn main(){
         launch_script('build_script_miss')
         launch_script('build_script_hit')
         checks.append('stats count script decisions; clear removes receipts/resources and forces a correct fresh miss then hit')
+        if sys.platform=='darwin':
+            spec=json.loads(config.read_text());spec['packages'][0]['apple_tools']=['ar']
+            config.write_text(json.dumps(spec))
+            before=len(events())
+            launch_script(None)
+            fresh=events()[before:]
+            if 'build_script_miss' in fresh:
+                launch_script('build_script_hit')
+                checks.append('live xcrun-selected system-only archiver participates in identities on this installation')
+            else:
+                assert 'build_script_bypass' in fresh,fresh
+                launch_script('build_script_bypass')
+                checks.append('unsupported xcrun-selected archiver consistently executes rather than restoring')
 
     report=dict(binary_sha256=hashlib.sha256(binary.read_bytes()).hexdigest(),script_sha256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),checks=checks)
     args.output.parent.mkdir(parents=True,exist_ok=True)
