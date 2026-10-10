@@ -57,6 +57,18 @@ def main():
         assert digest(root / "out/libfixture.rlib") != expected["libfixture.rlib"]
         run(rust)
         assert events()[-1] == "hit"
+        # Real source reverts must restore the historical artifact, including
+        # preserved-mtime source edits; both variants remain fully validated.
+        child.write_text('pub const VALUE: u32 = 42;\n')
+        os.utime(child, ns=(old_time, old_time))
+        shutil.rmtree(root / "out")
+        run(rust)
+        assert events()[-1] == "hit" and "variant_hit" in events()
+        assert digest(root / "out/libfixture.rlib") == expected["libfixture.rlib"]
+        child.write_text('pub const VALUE: u32 = 43;\n')
+        os.utime(child, ns=(old_time, old_time))
+        run(rust)
+        assert events()[-1] == "hit"
         # Adding a competing module path changes rustc's resolution even when
         # every previously recorded source file remains byte-for-byte equal.
         (root / "child").mkdir()
@@ -66,19 +78,23 @@ def main():
         shutil.rmtree(root / "child")
         run(rust)
         # Corruption forces recompilation and repairs the content-addressed blob.
-        entry = json.loads(next((root / "cache/entries").iterdir()).read_text().split("\n", 1)[1])
-        artifact = entry["outputs"][0]["hash"]
-        (root / "cache/blobs" / artifact[:2] / artifact).write_bytes(b"corrupt")
+        entries = [json.loads(path.read_text().split("\n", 1)[1]) for path in (root / "cache/entries").iterdir()]
+        for entry in entries:
+            for output in entry["outputs"]:
+                artifact = output["hash"]
+                (root / "cache/blobs" / artifact[:2] / artifact).write_bytes(b"corrupt")
         run(rust)
         assert events()[-1] == "miss"
         run(rust)
         assert events()[-1] == "hit"
         # Valid JSON with corrupted dependency metadata also forces a miss.
-        manifest = next((root / "cache/entries").iterdir())
-        seal, payload = manifest.read_text().split("\n", 1)
-        corrupt = json.loads(payload)
-        corrupt["dependencies"] = []
-        manifest.write_text(seal + "\n" + json.dumps(corrupt))
+        # Corrupt every candidate: a valid historical duplicate is allowed to
+        # recover a corrupt primary, but no unsealed candidate may be trusted.
+        for manifest in (root / "cache/entries").iterdir():
+            seal, payload = manifest.read_text().split("\n", 1)
+            corrupt = json.loads(payload)
+            corrupt["dependencies"] = []
+            manifest.write_text(seal + "\n" + json.dumps(corrupt))
         run(rust)
         assert events()[-1] == "miss"
         # Failed compiles retain their status and never create successful entries.
@@ -300,7 +316,9 @@ pub fn value() -> u32 { Queue.link(41) }
         assert events()[-1] == "miss"
         competing.unlink()
         run(native_consumer)
-        assert events()[-1] == "miss"
+        # Removing the competing archive restores a fully validated historical
+        # directory state; its artifact is now eligible again.
+        assert events()[-1] == "hit"
         (root / "external-native.a").write_bytes(b"!<arch>\ntarget_1")
         alias = root / "native/libalias.a"
         alias.symlink_to(root / "external-native.a")

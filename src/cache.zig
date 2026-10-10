@@ -355,6 +355,25 @@ fn putBytes(ctx: *Context, bytes: []const u8) ![]const u8 {
 }
 
 pub fn store(ctx: *Context, key: []const u8, dependencies: []const Dependency, output_paths: []const []const u8, stdout: []const u8, stderr: []const u8) !void {
+    return storeEntry(ctx, key, dependencies, output_paths, stdout, stderr, false);
+}
+
+/// Caller holds the command key and maintenance locks. Keep three previous
+/// sealed manifests as ordinary flat entries, so GC and snapshots retain their
+/// blob references without a second index or weaker validation contract.
+pub fn storeVariants(ctx: *Context, key: []const u8, dependencies: []const Dependency, output_paths: []const []const u8, stdout: []const u8, stderr: []const u8) !void {
+    return storeEntry(ctx, key, dependencies, output_paths, stdout, stderr, true);
+}
+
+fn variantKey(ctx: *Context, key: []const u8, slot: usize) ![]const u8 {
+    var hash = Hash.init(.{});
+    field(&hash, "nanocompile-command-variant-slot-v1");
+    field(&hash, key);
+    field(&hash, try std.fmt.allocPrint(ctx.a, "{d}", .{slot}));
+    return finish(ctx.a, &hash);
+}
+
+fn storeEntry(ctx: *Context, key: []const u8, dependencies: []const Dependency, output_paths: []const []const u8, stdout: []const u8, stderr: []const u8, variants: bool) !void {
     for (dependencies) |dep| if (dep.missing != null and !try missingValid(ctx, dep)) return error.InvalidMissingDependency;
     for (dependencies) |dep| if (dep.symlink_target != null and !try symlinkValid(ctx, dep)) return error.InvalidSymlinkDependency;
     var outputs: std.ArrayList(Output) = .empty;
@@ -370,7 +389,25 @@ pub fn store(ctx: *Context, key: []const u8, dependencies: []const Dependency, o
         .stderr = try putBytes(ctx, stderr),
     };
     const bytes = try std.json.Stringify.valueAlloc(ctx.a, entry, .{ .emit_null_optional_fields = false });
-    try ctx.atomic(try ctx.path(&.{ "entries", key }), try seal(ctx, bytes));
+    const sealed = try seal(ctx, bytes);
+    const primary = try ctx.path(&.{ "entries", key });
+    if (variants) history: {
+        const old = ctx.read(primary) catch break :history;
+        if (std.mem.eql(u8, old, sealed)) break :history;
+        const previous = parseEntry(ctx, old) catch break :history;
+        if (previous.schema != entry_schema or previous.artifact != null) break :history;
+        var slot: usize = 2;
+        while (slot > 0) : (slot -= 1) {
+            const destination = try ctx.path(&.{ "entries", try variantKey(ctx, key, slot) });
+            const prior = ctx.read(try ctx.path(&.{ "entries", try variantKey(ctx, key, slot - 1) })) catch {
+                Dir.cwd().deleteFile(ctx.io, destination) catch {};
+                continue;
+            };
+            try ctx.atomic(destination, prior);
+        }
+        try ctx.atomic(try ctx.path(&.{ "entries", try variantKey(ctx, key, 0) }), old);
+    }
+    try ctx.atomic(primary, sealed);
 }
 
 /// Opaque task artifacts share sealed entries, CAS blobs, GC and R2 transport.
@@ -485,6 +522,19 @@ const OutputCheck = struct {
         check.valid = true;
     }
 };
+
+/// Ordinary primary hits retain their existing path. Only a miss probes the
+/// bounded historical manifests; every candidate performs complete validation.
+pub fn restoreVariants(ctx: *Context, key: []const u8, allowed_outputs: []const []const u8) !bool {
+    if (restore(ctx, key, allowed_outputs) catch false) return true;
+    for (0..3) |slot| {
+        if (restore(ctx, try variantKey(ctx, key, slot), allowed_outputs) catch false) {
+            ctx.event("variant_hit");
+            return true;
+        }
+    }
+    return false;
+}
 
 pub fn restore(ctx: *Context, key: []const u8, allowed_outputs: []const []const u8) !bool {
     const bytes = ctx.read(try ctx.path(&.{ "entries", key })) catch return false;
@@ -878,4 +928,40 @@ test "large restore hashes every unique file and refuses changes before writes" 
     try tmp.dir.deleteFile(io, "input-0");
     try std.testing.expect(!try restore(&ctx, key, &.{output}));
     try std.testing.expectEqualStrings("untouched", try ctx.read(output));
+}
+
+test "bounded source variants restore reverts and validate historical blobs" {
+    var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer arena.deinit();
+    const a = arena.allocator();
+    const io = std.testing.io;
+    var tmp = std.testing.tmpDir(.{});
+    defer tmp.cleanup();
+    const cwd = try Dir.cwd().realPathFileAlloc(io, try std.fs.path.join(a, &.{ ".zig-cache", "tmp", &tmp.sub_path }), a);
+    var env = std.process.Environ.Map.init(a);
+    var ctx: Context = .{ .a = a, .io = io, .env = &env, .root = try std.fs.path.join(a, &.{ cwd, "cache" }), .cwd = cwd };
+    try ctx.prepare();
+    const input = try std.fs.path.join(a, &.{ cwd, "input" });
+    const output = try std.fs.path.join(a, &.{ cwd, "output" });
+    const key = "123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0";
+    for (0..5) |i| {
+        const value = try std.fmt.allocPrint(a, "value-{d}", .{i});
+        try tmp.dir.writeFile(io, .{ .sub_path = "input", .data = value });
+        try tmp.dir.writeFile(io, .{ .sub_path = "output", .data = value });
+        try storeVariants(&ctx, key, &.{.{ .path = input, .hash = try ctx.digest(input) }}, &.{output}, "", "");
+    }
+    // The fifth store evicts value-0, retaining values 1..4.
+    try tmp.dir.writeFile(io, .{ .sub_path = "input", .data = "value-0" });
+    try tmp.dir.writeFile(io, .{ .sub_path = "output", .data = "untouched" });
+    try std.testing.expect(!try restoreVariants(&ctx, key, &.{output}));
+    try std.testing.expectEqualStrings("untouched", try ctx.read(output));
+    try tmp.dir.writeFile(io, .{ .sub_path = "input", .data = "value-1" });
+    try std.testing.expect(try restoreVariants(&ctx, key, &.{output}));
+    try std.testing.expectEqualStrings("value-1", try ctx.read(output));
+    const blob = try ctx.digest(output);
+    try ctx.atomic(try blobPath(&ctx, blob), "corrupt");
+    try tmp.dir.writeFile(io, .{ .sub_path = "output", .data = "untouched" });
+    try std.testing.expect(!try restoreVariants(&ctx, key, &.{output}));
+    try std.testing.expectEqualStrings("untouched", try ctx.read(output));
+    try std.testing.expect(!try restoreVariants(&ctx, key, &.{input}));
 }

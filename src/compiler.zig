@@ -564,7 +564,7 @@ fn executeProducer(ctx: *cache.Context, plan: Plan, argv: []const []const u8) !u
         if (!eq(config.hash, ctx.digest(config.path) catch return bypass(ctx, argv, "bypass: cannot read producer declaration")))
             return bypass(ctx, argv, "bypass: producer input declaration changed");
     }
-    if (cache.restore(ctx, key, plan.outputs) catch false) {
+    if (cache.restoreVariants(ctx, key, plan.outputs) catch false) {
         ctx.trace(if (plan.producer_dylib) "hit: proc-macro producer" else "hit: executable producer");
         ctx.event("hit");
         return 0;
@@ -669,7 +669,7 @@ pub fn execute(ctx: *cache.Context, kind: Kind, argv: []const []const u8) !u8 {
         const current = ctx.digest(config.path) catch return bypass(ctx, argv, "bypass: cannot read extra input declaration");
         if (!eq(config.hash, current)) return bypass(ctx, argv, "bypass: extra input declaration changed");
     }
-    if (cache.restore(ctx, key, plan.outputs) catch false) {
+    if (cache.restoreVariants(ctx, key, plan.outputs) catch false) {
         ctx.trace("hit");
         ctx.event("hit");
         return 0;
@@ -764,7 +764,7 @@ fn save(ctx: *cache.Context, key: []const u8, plan: Plan, argv: []const []const 
         };
         try records.appendSlice(ctx.a, linker);
     }
-    try cache.store(ctx, key, records.items, plan.outputs, result.stdout, result.stderr);
+    try cache.storeVariants(ctx, key, records.items, plan.outputs, result.stdout, result.stderr);
 }
 
 test "dep-info handles escaped paths and continuations" {

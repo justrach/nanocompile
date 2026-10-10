@@ -55,14 +55,14 @@ def main():
     subprocess.run(['git','clone','--shared','--quiet',str(original_project),str(project)],check=True)
     names = subprocess.check_output(['git','ls-files','--cached','--others','--exclude-standard','-z'],cwd=original_project).decode().split('\0')
     for name in names:
-        if not name or Path(name).name.startswith('.env'): continue
+        if not name or Path(name).name.startswith('.env') or any(part in ('.worktrees','.git','target','node_modules') for part in Path(name).parts): continue
         src, dst = original_project/name, project/name
         if src.is_file() or src.is_symlink():
             dst.parent.mkdir(parents=True,exist_ok=True)
             if dst.is_symlink(): dst.unlink()
             shutil.copy2(src,dst,follow_symlinks=False)
         elif src.is_dir():
-            shutil.copytree(src,dst,dirs_exist_ok=True,ignore=shutil.ignore_patterns('.git','target','node_modules','.env*'))
+            shutil.copytree(src,dst,dirs_exist_ok=True,ignore=shutil.ignore_patterns('.git','.worktrees','target','node_modules','.env*'))
         elif dst.is_file(): dst.unlink()
     leaf, shared = project/'crates/harness/src/lib.rs', project/'crates/proto/src/lib.rs'
     assert leaf.is_file() and shared.is_file() and not leaf.is_symlink() and not shared.is_symlink()
