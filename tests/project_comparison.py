@@ -69,11 +69,17 @@ def main():
     p.add_argument("--compiler-stream", action="store_true", help="experimental immediate Rust compiler stream forwarding")
     p.add_argument("--script-profile", action="store_true", help="diagnostic build-script phase timings; requires execution contract")
     p.add_argument("--trace-builds", action="store_true", help="private full compiler logs and Cargo timings; diagnostic overhead, not a benchmark")
+    p.add_argument("--compiler-profile", action="store_true", help="diagnostic producer/restore phase timings; requires --trace-builds")
+    p.add_argument("--nano-only", action="store_true", help="diagnostic direct prime then Nano cold/warm capture; requires --trace-builds")
     p.add_argument('--pipelined-companions', action='store_true', help='experimental guarded metadata-first archive membership')
     p.add_argument('--no-compiler-stream', action='store_true', help='disable default Rust stream forwarding')
     p.add_argument('--no-pipelined-companions', action='store_true', help='disable default guarded companion membership')
     p.add_argument("--min-free-gib", type=float, help="free-space gate before each build; default 32 for full binaries, 8 for libraries")
     args = p.parse_args()
+    if args.nano_only and not args.trace_builds:
+        p.error("--nano-only requires --trace-builds")
+    if args.compiler_profile and not args.trace_builds:
+        p.error("--compiler-profile requires --trace-builds")
     if args.min_free_gib is None:
         args.min_free_gib = 32 if args.bin else 8
     if not 0 < args.min_free_gib < float("inf"):
@@ -94,7 +100,7 @@ def main():
     project, state = Path(args.project).resolve(), Path(args.state).resolve()
     require_space(state, args.min_free_gib)
     state.mkdir(parents=True, mode=0o700, exist_ok=False)
-    capture = Capture(state, {"nanocompile": binary, "kache": kache}) if args.trace_builds else None
+    capture = Capture(state, {"nanocompile": binary} if args.nano_only else {"nanocompile": binary, "kache": kache}) if args.trace_builds else None
     config = state / "kache.toml"
     config.write_text("[cache]\nrecord_sessions=true\n")
     target, cache, kcache = state / "target", state / "nano-cache", state / "kache-cache"
@@ -126,6 +132,8 @@ def main():
         env["NANOCOMPILE_TRACE"] = "1"
     if args.kache_no_build_scripts:
         env["KACHE_BUILD_SCRIPT_CACHE"] = "0"
+    if args.compiler_profile:
+        env["NANOCOMPILE_COMPILER_PROFILE"] = "1"
     if capture:
         env["NANOCOMPILE_TRACE"] = "1"
     if args.proc_macro_producers:
@@ -149,10 +157,14 @@ def main():
               "rustc": subprocess.check_output(["rustc", "--version", "--verbose"], cwd=project, text=True),
               "nanocompile_sha256": sha(Path(binary)), "kache_sha256": sha(Path(kache)),
               "kache_version": subprocess.check_output([kache, "--version"], text=True).strip(),
-              "build_script_contract_sha256": sha(args.build_script_contract) if args.build_script_contract else None, "kache_build_script_cache": not args.kache_no_build_scripts, "kache_daemon": not args.standalone, "native_clang": args.native_clang, "native_artifacts": args.native_artifacts, "portable_cc":args.portable_cc, "nanocompile_proc_macros": args.proc_macros, "nanocompile_proc_macro_producers": args.proc_macro_producers, "nanocompile_executable_producers": args.executable_producers, "command": command,
+              "build_script_contract_sha256": sha(args.build_script_contract) if args.build_script_contract else None, "kache_build_script_cache": None if args.nano_only else not args.kache_no_build_scripts, "kache_daemon": not args.standalone and not args.nano_only, "native_clang": args.native_clang, "native_artifacts": args.native_artifacts, "portable_cc":args.portable_cc, "nanocompile_proc_macros": args.proc_macros, "nanocompile_proc_macro_producers": args.proc_macro_producers, "nanocompile_executable_producers": args.executable_producers, "command": command,
               "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat(), "builds": [],
               "method": "offline clean release package builds; same target path; prime direct build then empty caches; rotate three-way warm measurement order unless cold-only; validate each wrapper against its own cold artifact hashes (kache remaps paths)"}
     result['source_date_epoch'] = env.get('SOURCE_DATE_EPOCH')
+    result['nano_only'] = args.nano_only
+    if args.nano_only:
+        result['method'] = 'offline clean release builds; direct prime then Nano cold/warm diagnostic capture; own-cold artifact/mode checks and source verification; no kache execution or speed comparison'
+    result['compiler_profile'] = args.compiler_profile
     result['staticlib_companions'] = args.staticlib_companions
     result['rlib_frameworks'] = args.rlib_frameworks
     result['bindgen_tools_file_sha256'] = bindgen_tools_hash
@@ -325,7 +337,7 @@ def main():
                 socket.unlink()
             shutil.rmtree(cache, ignore_errors=True)
             shutil.rmtree(kcache, ignore_errors=True)
-            if not args.standalone:
+            if not args.standalone and not args.nano_only:
                 daemon_log = (state / f"daemon-{iteration}.log").open("w")
                 daemon = subprocess.Popen([kache, "daemon", "run"], cwd=project, env=env, stdout=daemon_log, stderr=daemon_log)
                 deadline = time.monotonic() + 15
@@ -335,7 +347,8 @@ def main():
                     time.sleep(0.1)
                 status = subprocess.run([kache, "--json", "daemon", "status"], cwd=project, env=env, capture_output=True, text=True, check=True)
                 result.setdefault("daemon_statuses", []).append(status.stdout)
-            for implementation in (("nanocompile", "kache") if iteration % 2 == 0 else ("kache", "nanocompile")):
+            cold_order = ("nanocompile",) if args.nano_only else (("nanocompile", "kache") if iteration % 2 == 0 else ("kache", "nanocompile"))
+            for implementation in cold_order:
                 build(implementation, "cold")
                 row = result["builds"][-1]
                 if implementation == "nanocompile":
@@ -345,7 +358,7 @@ def main():
                         raise RuntimeError("Nano native cold cache was not empty")
                 elif row["events"].get("local_hit", 0) or row["events"].get("remote_hit", 0):
                     raise RuntimeError("kache cold cache was not empty")
-        schedule = ["direct", "nanocompile", "kache"]
+        schedule = ["nanocompile"] if args.nano_only else ["direct", "nanocompile", "kache"]
         if not args.cold_only:
             for iteration in range(args.runs):
                 offset = iteration % len(schedule)
@@ -355,15 +368,16 @@ def main():
                 samples = [r["seconds"] for r in result["builds"] if r["implementation"] == implementation and r["phase"] == "warm"]
                 result.setdefault("summary", {})[implementation] = {"samples_seconds": samples, "median_seconds": statistics.median(samples)}
         result["cold_summary"] = {}
-        for implementation in ("nanocompile", "kache"):
+        for implementation in (("nanocompile",) if args.nano_only else ("nanocompile", "kache")):
             samples = [r["seconds"] for r in result["builds"] if r["implementation"] == implementation and r["phase"] == "cold"]
             result["cold_summary"][implementation] = {"samples_seconds": samples, "median_seconds": statistics.median(samples)}
-        deltas = [k - n for k, n in zip(result["cold_summary"]["kache"]["samples_seconds"], result["cold_summary"]["nanocompile"]["samples_seconds"])]
-        result["cold_paired_seconds_saved"] = deltas
-        result["cold_paired_summary"] = {"nanocompile_wins": sum(d > 0 for d in deltas), "mean_seconds_saved": statistics.mean(deltas), "median_seconds_saved": statistics.median(deltas), "stdev_seconds_saved": statistics.stdev(deltas) if len(deltas)>1 else None, "standard_error_seconds_saved": statistics.stdev(deltas)/len(deltas)**.5 if len(deltas)>1 else None}
-        result["method"] += "; cold pairs alternate wrapper order, clear both compiler caches, and restart the private kache daemon outside timing; Cargo target removed every build; OS filesystem cache is not flushed"
-        stats = subprocess.run([kache, "--json", "stats"], cwd=project, env=env, capture_output=True, text=True, check=True)
-        result["kache_stats"] = json.loads(stats.stdout)
+        if not args.nano_only:
+            deltas = [k - n for k, n in zip(result["cold_summary"]["kache"]["samples_seconds"], result["cold_summary"]["nanocompile"]["samples_seconds"])]
+            result["cold_paired_seconds_saved"] = deltas
+            result["cold_paired_summary"] = {"nanocompile_wins": sum(d > 0 for d in deltas), "mean_seconds_saved": statistics.mean(deltas), "median_seconds_saved": statistics.median(deltas), "stdev_seconds_saved": statistics.stdev(deltas) if len(deltas)>1 else None, "standard_error_seconds_saved": statistics.stdev(deltas)/len(deltas)**.5 if len(deltas)>1 else None}
+            result["method"] += "; cold pairs alternate wrapper order, clear both compiler caches, and restart the private kache daemon outside timing; Cargo target removed every build; OS filesystem cache is not flushed"
+            stats = subprocess.run([kache, "--json", "stats"], cwd=project, env=env, capture_output=True, text=True, check=True)
+            result["kache_stats"] = json.loads(stats.stdout)
         result['tracked_sources_unchanged'] = all((project / name).is_file() and sha(project / name) == digest
                                                   for name, digest in result['tracked_rust_and_manifest_hashes'].items())
         save()
@@ -386,7 +400,7 @@ def main():
                 except subprocess.TimeoutExpired:
                     daemon.kill()
                     daemon.wait()
-        elif args.standalone:
+        elif args.standalone and not args.nano_only:
             # stats may opportunistically start a daemon even in standalone mode.
             subprocess.run([kache, "daemon", "stop"], cwd=project, env=env, capture_output=True)
         if daemon_log is not None:

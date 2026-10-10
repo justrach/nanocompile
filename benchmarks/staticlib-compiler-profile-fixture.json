@@ -1,0 +1,1060 @@
+{
+  "completed": true,
+  "compiler_profile": true,
+  "binary_sha256": "afca7d75dde84cd87592987a553c765f50ca43a2ca2655beb072915c5b648811",
+  "runner_sha256": "c2eb460d3911d64ac801003acacc14b2752f3ad24d64af8dae414c8be9e3b4ae",
+  "samples": [
+    {
+      "label": "direct",
+      "exit_code": 0,
+      "seconds": 0.06603745801839978,
+      "files": {
+        "libcompanion.rlib": {
+          "sha256": "2d8b0bd7f88a9bfad77106a5e9c42425a1e6d4123f5ccaf5b1bb0cb29cad4c6c",
+          "mode": "0o644"
+        },
+        "libcompanion.a": {
+          "sha256": "710a6649ae29ff6e1f3d18c4c49cd5669718855e1ccc3d6ac56ad92ae1061eaa",
+          "mode": "0o644"
+        },
+        "companion.d": {
+          "sha256": "0ed38478d3e4fb9109f24559af620939493d8f40491a0b2b4ebda5e5c1c3dc69",
+          "mode": "0o644"
+        }
+      },
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "normalized_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "cold",
+      "exit_code": 0,
+      "seconds": 1.0295207499875687,
+      "files": {
+        "libcompanion.rlib": {
+          "sha256": "2d8b0bd7f88a9bfad77106a5e9c42425a1e6d4123f5ccaf5b1bb0cb29cad4c6c",
+          "mode": "0o644"
+        },
+        "libcompanion.a": {
+          "sha256": "710a6649ae29ff6e1f3d18c4c49cd5669718855e1ccc3d6ac56ad92ae1061eaa",
+          "mode": "0o644"
+        },
+        "companion.d": {
+          "sha256": "0ed38478d3e4fb9109f24559af620939493d8f40491a0b2b4ebda5e5c1c3dc69",
+          "mode": "0o644"
+        }
+      },
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "9d0e6f96b7973f1c181967e23392f8d6c239a5eb8efc31e7b3d62624059ce108",
+      "normalized_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "hit",
+      "exit_code": 0,
+      "seconds": 0.0339409580337815,
+      "files": {
+        "libcompanion.rlib": {
+          "sha256": "2d8b0bd7f88a9bfad77106a5e9c42425a1e6d4123f5ccaf5b1bb0cb29cad4c6c",
+          "mode": "0o644"
+        },
+        "libcompanion.a": {
+          "sha256": "710a6649ae29ff6e1f3d18c4c49cd5669718855e1ccc3d6ac56ad92ae1061eaa",
+          "mode": "0o644"
+        },
+        "companion.d": {
+          "sha256": "0ed38478d3e4fb9109f24559af620939493d8f40491a0b2b4ebda5e5c1c3dc69",
+          "mode": "0o644"
+        }
+      },
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "72cad35b4a61b98a9beb76a8eda6a56d4e090af21a73fbf05681523966f67ade",
+      "normalized_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "order-direct-0",
+      "exit_code": 0,
+      "seconds": 0.07595016702543944,
+      "files": {
+        "libcompanion.rlib": {
+          "sha256": "b6d37295dafa4b3ce506ff549bbb95f4797ff5f02d19cbaa91d8204ad14c888f",
+          "mode": "0o644"
+        },
+        "libcompanion.a": {
+          "sha256": "710a6649ae29ff6e1f3d18c4c49cd5669718855e1ccc3d6ac56ad92ae1061eaa",
+          "mode": "0o644"
+        },
+        "companion.d": {
+          "sha256": "dacb6d6cb3cc406c072e6a093a8d568096680b5110e892676fe187e2a46a2eff",
+          "mode": "0o644"
+        }
+      },
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "normalized_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "order-cold-0",
+      "exit_code": 0,
+      "seconds": 0.12034237501211464,
+      "files": {
+        "libcompanion.rlib": {
+          "sha256": "b6d37295dafa4b3ce506ff549bbb95f4797ff5f02d19cbaa91d8204ad14c888f",
+          "mode": "0o644"
+        },
+        "libcompanion.a": {
+          "sha256": "710a6649ae29ff6e1f3d18c4c49cd5669718855e1ccc3d6ac56ad92ae1061eaa",
+          "mode": "0o644"
+        },
+        "companion.d": {
+          "sha256": "dacb6d6cb3cc406c072e6a093a8d568096680b5110e892676fe187e2a46a2eff",
+          "mode": "0o644"
+        }
+      },
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "c1e913432db2f24d780d62b53be718471c0c6fb08935110818f8660d061c854d",
+      "normalized_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "order-hit-0",
+      "exit_code": 0,
+      "seconds": 0.02889029198559001,
+      "files": {
+        "libcompanion.rlib": {
+          "sha256": "b6d37295dafa4b3ce506ff549bbb95f4797ff5f02d19cbaa91d8204ad14c888f",
+          "mode": "0o644"
+        },
+        "libcompanion.a": {
+          "sha256": "710a6649ae29ff6e1f3d18c4c49cd5669718855e1ccc3d6ac56ad92ae1061eaa",
+          "mode": "0o644"
+        },
+        "companion.d": {
+          "sha256": "dacb6d6cb3cc406c072e6a093a8d568096680b5110e892676fe187e2a46a2eff",
+          "mode": "0o644"
+        }
+      },
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e97697fcbd31da2ee0c9a43b2373a22ccde0f2d76c622746e486b70451cd88d2",
+      "normalized_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "order-direct-1",
+      "exit_code": 0,
+      "seconds": 0.0776879169861786,
+      "files": {
+        "libcompanion.rlib": {
+          "sha256": "2d8b0bd7f88a9bfad77106a5e9c42425a1e6d4123f5ccaf5b1bb0cb29cad4c6c",
+          "mode": "0o644"
+        },
+        "libcompanion.a": {
+          "sha256": "710a6649ae29ff6e1f3d18c4c49cd5669718855e1ccc3d6ac56ad92ae1061eaa",
+          "mode": "0o644"
+        },
+        "companion.d": {
+          "sha256": "0ed38478d3e4fb9109f24559af620939493d8f40491a0b2b4ebda5e5c1c3dc69",
+          "mode": "0o644"
+        }
+      },
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "normalized_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "order-cold-1",
+      "exit_code": 0,
+      "seconds": 0.1147817910532467,
+      "files": {
+        "libcompanion.rlib": {
+          "sha256": "2d8b0bd7f88a9bfad77106a5e9c42425a1e6d4123f5ccaf5b1bb0cb29cad4c6c",
+          "mode": "0o644"
+        },
+        "libcompanion.a": {
+          "sha256": "710a6649ae29ff6e1f3d18c4c49cd5669718855e1ccc3d6ac56ad92ae1061eaa",
+          "mode": "0o644"
+        },
+        "companion.d": {
+          "sha256": "0ed38478d3e4fb9109f24559af620939493d8f40491a0b2b4ebda5e5c1c3dc69",
+          "mode": "0o644"
+        }
+      },
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "aa51f7ff7b01f4a913773c5c6bb16ffad42aa034d2bdd2afe27355cae42d81cb",
+      "normalized_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "order-hit-1",
+      "exit_code": 0,
+      "seconds": 0.028816792008001357,
+      "files": {
+        "libcompanion.rlib": {
+          "sha256": "2d8b0bd7f88a9bfad77106a5e9c42425a1e6d4123f5ccaf5b1bb0cb29cad4c6c",
+          "mode": "0o644"
+        },
+        "libcompanion.a": {
+          "sha256": "710a6649ae29ff6e1f3d18c4c49cd5669718855e1ccc3d6ac56ad92ae1061eaa",
+          "mode": "0o644"
+        },
+        "companion.d": {
+          "sha256": "0ed38478d3e4fb9109f24559af620939493d8f40491a0b2b4ebda5e5c1c3dc69",
+          "mode": "0o644"
+        }
+      },
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "aa3b756df57af7493f290100a8f47107c69dde68ccdc5c7760c2a850c3b4052b",
+      "normalized_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "order-direct-2",
+      "exit_code": 0,
+      "seconds": 0.06831612501991913,
+      "files": {
+        "libcompanion.rlib": {
+          "sha256": "b6d37295dafa4b3ce506ff549bbb95f4797ff5f02d19cbaa91d8204ad14c888f",
+          "mode": "0o644"
+        },
+        "libcompanion.a": {
+          "sha256": "710a6649ae29ff6e1f3d18c4c49cd5669718855e1ccc3d6ac56ad92ae1061eaa",
+          "mode": "0o644"
+        },
+        "companion.d": {
+          "sha256": "dacb6d6cb3cc406c072e6a093a8d568096680b5110e892676fe187e2a46a2eff",
+          "mode": "0o644"
+        }
+      },
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "normalized_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "order-cold-2",
+      "exit_code": 0,
+      "seconds": 0.11524124996503815,
+      "files": {
+        "libcompanion.rlib": {
+          "sha256": "b6d37295dafa4b3ce506ff549bbb95f4797ff5f02d19cbaa91d8204ad14c888f",
+          "mode": "0o644"
+        },
+        "libcompanion.a": {
+          "sha256": "710a6649ae29ff6e1f3d18c4c49cd5669718855e1ccc3d6ac56ad92ae1061eaa",
+          "mode": "0o644"
+        },
+        "companion.d": {
+          "sha256": "dacb6d6cb3cc406c072e6a093a8d568096680b5110e892676fe187e2a46a2eff",
+          "mode": "0o644"
+        }
+      },
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "1cc06a277709471963507d49bcd2bed1e46acbb1bde0a1df3df19fffd7217545",
+      "normalized_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "order-hit-2",
+      "exit_code": 0,
+      "seconds": 0.028670083032920957,
+      "files": {
+        "libcompanion.rlib": {
+          "sha256": "b6d37295dafa4b3ce506ff549bbb95f4797ff5f02d19cbaa91d8204ad14c888f",
+          "mode": "0o644"
+        },
+        "libcompanion.a": {
+          "sha256": "710a6649ae29ff6e1f3d18c4c49cd5669718855e1ccc3d6ac56ad92ae1061eaa",
+          "mode": "0o644"
+        },
+        "companion.d": {
+          "sha256": "dacb6d6cb3cc406c072e6a093a8d568096680b5110e892676fe187e2a46a2eff",
+          "mode": "0o644"
+        }
+      },
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "b5135bf9588f84a42c40dc50b0cacf64b873f87752541e022658f312ecebae0d",
+      "normalized_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "order-direct-3",
+      "exit_code": 0,
+      "seconds": 0.07528208300936967,
+      "files": {
+        "libcompanion.rlib": {
+          "sha256": "2d8b0bd7f88a9bfad77106a5e9c42425a1e6d4123f5ccaf5b1bb0cb29cad4c6c",
+          "mode": "0o644"
+        },
+        "libcompanion.a": {
+          "sha256": "710a6649ae29ff6e1f3d18c4c49cd5669718855e1ccc3d6ac56ad92ae1061eaa",
+          "mode": "0o644"
+        },
+        "companion.d": {
+          "sha256": "0ed38478d3e4fb9109f24559af620939493d8f40491a0b2b4ebda5e5c1c3dc69",
+          "mode": "0o644"
+        }
+      },
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "normalized_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "order-cold-3",
+      "exit_code": 0,
+      "seconds": 0.11576891597360373,
+      "files": {
+        "libcompanion.rlib": {
+          "sha256": "2d8b0bd7f88a9bfad77106a5e9c42425a1e6d4123f5ccaf5b1bb0cb29cad4c6c",
+          "mode": "0o644"
+        },
+        "libcompanion.a": {
+          "sha256": "710a6649ae29ff6e1f3d18c4c49cd5669718855e1ccc3d6ac56ad92ae1061eaa",
+          "mode": "0o644"
+        },
+        "companion.d": {
+          "sha256": "0ed38478d3e4fb9109f24559af620939493d8f40491a0b2b4ebda5e5c1c3dc69",
+          "mode": "0o644"
+        }
+      },
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "c4c59fa4f6b1289dee37831c05970c5a1c37af2c3aa987748ebfb7a94ed6fba7",
+      "normalized_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "order-hit-3",
+      "exit_code": 0,
+      "seconds": 0.02832329203374684,
+      "files": {
+        "libcompanion.rlib": {
+          "sha256": "2d8b0bd7f88a9bfad77106a5e9c42425a1e6d4123f5ccaf5b1bb0cb29cad4c6c",
+          "mode": "0o644"
+        },
+        "libcompanion.a": {
+          "sha256": "710a6649ae29ff6e1f3d18c4c49cd5669718855e1ccc3d6ac56ad92ae1061eaa",
+          "mode": "0o644"
+        },
+        "companion.d": {
+          "sha256": "0ed38478d3e4fb9109f24559af620939493d8f40491a0b2b4ebda5e5c1c3dc69",
+          "mode": "0o644"
+        }
+      },
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "f4dc8acbdb7d4e514267e2d997528e2073b6858715ea34bb5fd3f07cee412d39",
+      "normalized_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "dependency-edit",
+      "exit_code": 0,
+      "seconds": 0.13168629200663418,
+      "files": {
+        "libcompanion.rlib": {
+          "sha256": "2ec1a87154913ab62ee9e766ef685b4bbd854463c235ed596ce5bd5a0af9fdbf",
+          "mode": "0o644"
+        },
+        "libcompanion.a": {
+          "sha256": "858fc58c174337ef5ac0059f1437ead190fc788ebefd0364cc72bedc792db54f",
+          "mode": "0o644"
+        },
+        "companion.d": {
+          "sha256": "0ed38478d3e4fb9109f24559af620939493d8f40491a0b2b4ebda5e5c1c3dc69",
+          "mode": "0o644"
+        }
+      },
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "0d794a07cc2300557e7e99b8a079b6b28008a634ecb14dc9f9109930414f3530",
+      "normalized_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "dependency-direct",
+      "exit_code": 0,
+      "seconds": 0.07290520798414946,
+      "files": {
+        "libcompanion.rlib": {
+          "sha256": "2ec1a87154913ab62ee9e766ef685b4bbd854463c235ed596ce5bd5a0af9fdbf",
+          "mode": "0o644"
+        },
+        "libcompanion.a": {
+          "sha256": "858fc58c174337ef5ac0059f1437ead190fc788ebefd0364cc72bedc792db54f",
+          "mode": "0o644"
+        },
+        "companion.d": {
+          "sha256": "0ed38478d3e4fb9109f24559af620939493d8f40491a0b2b4ebda5e5c1c3dc69",
+          "mode": "0o644"
+        }
+      },
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "normalized_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "dependency-hit",
+      "exit_code": 0,
+      "seconds": 0.030327709042467177,
+      "files": {
+        "libcompanion.rlib": {
+          "sha256": "2ec1a87154913ab62ee9e766ef685b4bbd854463c235ed596ce5bd5a0af9fdbf",
+          "mode": "0o644"
+        },
+        "libcompanion.a": {
+          "sha256": "858fc58c174337ef5ac0059f1437ead190fc788ebefd0364cc72bedc792db54f",
+          "mode": "0o644"
+        },
+        "companion.d": {
+          "sha256": "0ed38478d3e4fb9109f24559af620939493d8f40491a0b2b4ebda5e5c1c3dc69",
+          "mode": "0o644"
+        }
+      },
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "9becc1db4fbb42487de773184d60825e0297020d31969f4a8682dea7b19c7858",
+      "normalized_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "dependency-revert",
+      "exit_code": 0,
+      "seconds": 0.029641625005751848,
+      "files": {
+        "libcompanion.rlib": {
+          "sha256": "2d8b0bd7f88a9bfad77106a5e9c42425a1e6d4123f5ccaf5b1bb0cb29cad4c6c",
+          "mode": "0o644"
+        },
+        "libcompanion.a": {
+          "sha256": "710a6649ae29ff6e1f3d18c4c49cd5669718855e1ccc3d6ac56ad92ae1061eaa",
+          "mode": "0o644"
+        },
+        "companion.d": {
+          "sha256": "0ed38478d3e4fb9109f24559af620939493d8f40491a0b2b4ebda5e5c1c3dc69",
+          "mode": "0o644"
+        }
+      },
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "783eb674c9b886928cd7334c5c0a332313f027e9737b35fff5176381d4ba17c5",
+      "normalized_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "archive-repair",
+      "exit_code": 0,
+      "seconds": 0.10419591603567824,
+      "files": {
+        "libcompanion.rlib": {
+          "sha256": "2d8b0bd7f88a9bfad77106a5e9c42425a1e6d4123f5ccaf5b1bb0cb29cad4c6c",
+          "mode": "0o644"
+        },
+        "libcompanion.a": {
+          "sha256": "710a6649ae29ff6e1f3d18c4c49cd5669718855e1ccc3d6ac56ad92ae1061eaa",
+          "mode": "0o644"
+        },
+        "companion.d": {
+          "sha256": "0ed38478d3e4fb9109f24559af620939493d8f40491a0b2b4ebda5e5c1c3dc69",
+          "mode": "0o644"
+        }
+      },
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "c49966ab05ba7a2a72852ff991464eaf211221fd732c9877e23d2078d7d72d84",
+      "normalized_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "repaired-hit",
+      "exit_code": 0,
+      "seconds": 0.031674458004999906,
+      "files": {
+        "libcompanion.rlib": {
+          "sha256": "2d8b0bd7f88a9bfad77106a5e9c42425a1e6d4123f5ccaf5b1bb0cb29cad4c6c",
+          "mode": "0o644"
+        },
+        "libcompanion.a": {
+          "sha256": "710a6649ae29ff6e1f3d18c4c49cd5669718855e1ccc3d6ac56ad92ae1061eaa",
+          "mode": "0o644"
+        },
+        "companion.d": {
+          "sha256": "0ed38478d3e4fb9109f24559af620939493d8f40491a0b2b4ebda5e5c1c3dc69",
+          "mode": "0o644"
+        }
+      },
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "c035ae8c6a9188fbded7ba2084be9fcf47d254166137ff24d122b2282dbe4c07",
+      "normalized_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "default-refusal",
+      "exit_code": 0,
+      "seconds": 0.0715667920303531,
+      "files": {
+        "libcompanion.rlib": {
+          "sha256": "2d8b0bd7f88a9bfad77106a5e9c42425a1e6d4123f5ccaf5b1bb0cb29cad4c6c",
+          "mode": "0o644"
+        },
+        "libcompanion.a": {
+          "sha256": "710a6649ae29ff6e1f3d18c4c49cd5669718855e1ccc3d6ac56ad92ae1061eaa",
+          "mode": "0o644"
+        },
+        "companion.d": {
+          "sha256": "0ed38478d3e4fb9109f24559af620939493d8f40491a0b2b4ebda5e5c1c3dc69",
+          "mode": "0o644"
+        }
+      },
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "425461224285564435a339c917dab3be128493dc9face51cd2398546cf81b5c5",
+      "normalized_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "debug-direct",
+      "exit_code": 0,
+      "seconds": 0.07111616700422019,
+      "files": {
+        "libcompanion.rlib": {
+          "sha256": "e0580e83f7aa526f19288fb6fceb2d42e8e097e52c4325e1336b3213578e693b",
+          "mode": "0o644"
+        },
+        "libcompanion.a": {
+          "sha256": "d5fc7a01a2d8ebd31ee4b91d665f856dead270f4872e660053631c3e941471a1",
+          "mode": "0o644"
+        },
+        "companion.d": {
+          "sha256": "0ed38478d3e4fb9109f24559af620939493d8f40491a0b2b4ebda5e5c1c3dc69",
+          "mode": "0o644"
+        }
+      },
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "normalized_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "debug-refusal",
+      "exit_code": 0,
+      "seconds": 0.07363970798905939,
+      "files": {
+        "libcompanion.rlib": {
+          "sha256": "e0580e83f7aa526f19288fb6fceb2d42e8e097e52c4325e1336b3213578e693b",
+          "mode": "0o644"
+        },
+        "libcompanion.a": {
+          "sha256": "d5fc7a01a2d8ebd31ee4b91d665f856dead270f4872e660053631c3e941471a1",
+          "mode": "0o644"
+        },
+        "companion.d": {
+          "sha256": "0ed38478d3e4fb9109f24559af620939493d8f40491a0b2b4ebda5e5c1c3dc69",
+          "mode": "0o644"
+        }
+      },
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "d5e28a4d2730718af2bb26e68f17a72efb3a9798b42b9146dd47f3c1279c730a",
+      "normalized_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "target-direct",
+      "exit_code": 0,
+      "seconds": 0.06761866703163832,
+      "files": {
+        "libcompanion.rlib": {
+          "sha256": "2d8b0bd7f88a9bfad77106a5e9c42425a1e6d4123f5ccaf5b1bb0cb29cad4c6c",
+          "mode": "0o644"
+        },
+        "libcompanion.a": {
+          "sha256": "710a6649ae29ff6e1f3d18c4c49cd5669718855e1ccc3d6ac56ad92ae1061eaa",
+          "mode": "0o644"
+        },
+        "companion.d": {
+          "sha256": "0ed38478d3e4fb9109f24559af620939493d8f40491a0b2b4ebda5e5c1c3dc69",
+          "mode": "0o644"
+        }
+      },
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "normalized_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "target-refusal",
+      "exit_code": 0,
+      "seconds": 0.06991650001145899,
+      "files": {
+        "libcompanion.rlib": {
+          "sha256": "2d8b0bd7f88a9bfad77106a5e9c42425a1e6d4123f5ccaf5b1bb0cb29cad4c6c",
+          "mode": "0o644"
+        },
+        "libcompanion.a": {
+          "sha256": "710a6649ae29ff6e1f3d18c4c49cd5669718855e1ccc3d6ac56ad92ae1061eaa",
+          "mode": "0o644"
+        },
+        "companion.d": {
+          "sha256": "0ed38478d3e4fb9109f24559af620939493d8f40491a0b2b4ebda5e5c1c3dc69",
+          "mode": "0o644"
+        }
+      },
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "31105f9fac5a5ad835870ac727b2c9b99e0ee070afcf0d0f5e15b2f95063ab78",
+      "normalized_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "dynamic-direct",
+      "exit_code": 0,
+      "seconds": 0.06953104096464813,
+      "files": {
+        "libcompanion.rlib": {
+          "sha256": "2d8b0bd7f88a9bfad77106a5e9c42425a1e6d4123f5ccaf5b1bb0cb29cad4c6c",
+          "mode": "0o644"
+        },
+        "libcompanion.a": {
+          "sha256": "710a6649ae29ff6e1f3d18c4c49cd5669718855e1ccc3d6ac56ad92ae1061eaa",
+          "mode": "0o644"
+        },
+        "companion.d": {
+          "sha256": "0ed38478d3e4fb9109f24559af620939493d8f40491a0b2b4ebda5e5c1c3dc69",
+          "mode": "0o644"
+        }
+      },
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "normalized_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "dynamic-refusal",
+      "exit_code": 0,
+      "seconds": 0.07016320899128914,
+      "files": {
+        "libcompanion.rlib": {
+          "sha256": "2d8b0bd7f88a9bfad77106a5e9c42425a1e6d4123f5ccaf5b1bb0cb29cad4c6c",
+          "mode": "0o644"
+        },
+        "libcompanion.a": {
+          "sha256": "710a6649ae29ff6e1f3d18c4c49cd5669718855e1ccc3d6ac56ad92ae1061eaa",
+          "mode": "0o644"
+        },
+        "companion.d": {
+          "sha256": "0ed38478d3e4fb9109f24559af620939493d8f40491a0b2b4ebda5e5c1c3dc69",
+          "mode": "0o644"
+        }
+      },
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "f00798d512db32e51fd59dcfd6270df9fe66ee870277f7631b40fe75c7f4ff37",
+      "normalized_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "lto-direct",
+      "exit_code": 0,
+      "seconds": 0.06692716595716774,
+      "files": {
+        "libcompanion.rlib": {
+          "sha256": "769ce148888a2b5ad866b2b675f7d9756c1960914918e7b3ea1e89cfdc58483d",
+          "mode": "0o644"
+        },
+        "libcompanion.a": {
+          "sha256": "8fde945fba08f83148a9a457150748d5ad5a2e74e7ce1074a572f5794332e2ed",
+          "mode": "0o644"
+        },
+        "companion.d": {
+          "sha256": "0ed38478d3e4fb9109f24559af620939493d8f40491a0b2b4ebda5e5c1c3dc69",
+          "mode": "0o644"
+        }
+      },
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "normalized_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "lto-refusal",
+      "exit_code": 0,
+      "seconds": 0.06834508397150785,
+      "files": {
+        "libcompanion.rlib": {
+          "sha256": "769ce148888a2b5ad866b2b675f7d9756c1960914918e7b3ea1e89cfdc58483d",
+          "mode": "0o644"
+        },
+        "libcompanion.a": {
+          "sha256": "8fde945fba08f83148a9a457150748d5ad5a2e74e7ce1074a572f5794332e2ed",
+          "mode": "0o644"
+        },
+        "companion.d": {
+          "sha256": "0ed38478d3e4fb9109f24559af620939493d8f40491a0b2b4ebda5e5c1c3dc69",
+          "mode": "0o644"
+        }
+      },
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "c98e519a0946f531fc5ce26f25fd477fa297c0e3c2941fa820f2c63ad6ca8410",
+      "normalized_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "proxy-refusal",
+      "exit_code": 0,
+      "seconds": 0.31907354202121496,
+      "files": {
+        "libcompanion.rlib": {
+          "sha256": "2d8b0bd7f88a9bfad77106a5e9c42425a1e6d4123f5ccaf5b1bb0cb29cad4c6c",
+          "mode": "0o644"
+        },
+        "libcompanion.a": {
+          "sha256": "710a6649ae29ff6e1f3d18c4c49cd5669718855e1ccc3d6ac56ad92ae1061eaa",
+          "mode": "0o644"
+        },
+        "companion.d": {
+          "sha256": "0ed38478d3e4fb9109f24559af620939493d8f40491a0b2b4ebda5e5c1c3dc69",
+          "mode": "0o644"
+        }
+      },
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "c18be67c5bd7e92e5095b715f309e7974b1d2b649d751aa816c282af470d8995",
+      "normalized_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "failed-direct",
+      "exit_code": 1,
+      "seconds": 0.016903250012546778,
+      "files": {},
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "9cb08cc9f17044bdd8e8466179e97e1e9fc66d37ffec7b22f1a39aff74dd1692",
+      "normalized_stderr_sha256": "a528ed90d6fb174827f280a52dfe7a1abddc7bc8e7a670dbefb1d23287918b15"
+    },
+    {
+      "label": "failed-wrapper",
+      "exit_code": 1,
+      "seconds": 0.021084416948724538,
+      "files": {},
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "ac6ee628f1b36a0d215b6f1ac0be4042ae496213e6bb83e364e5e6ccc09350ff",
+      "normalized_stderr_sha256": "a528ed90d6fb174827f280a52dfe7a1abddc7bc8e7a670dbefb1d23287918b15"
+    },
+    {
+      "label": "after-failure",
+      "exit_code": 0,
+      "seconds": 0.028679958952125162,
+      "files": {
+        "libcompanion.rlib": {
+          "sha256": "2d8b0bd7f88a9bfad77106a5e9c42425a1e6d4123f5ccaf5b1bb0cb29cad4c6c",
+          "mode": "0o644"
+        },
+        "libcompanion.a": {
+          "sha256": "710a6649ae29ff6e1f3d18c4c49cd5669718855e1ccc3d6ac56ad92ae1061eaa",
+          "mode": "0o644"
+        },
+        "companion.d": {
+          "sha256": "0ed38478d3e4fb9109f24559af620939493d8f40491a0b2b4ebda5e5c1c3dc69",
+          "mode": "0o644"
+        }
+      },
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "5dc4f8a311661194126831541c61bf2d1c049ebf365681fc8bf34e0b509ea51b",
+      "normalized_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "native-direct",
+      "exit_code": 0,
+      "seconds": 0.07829574996139854,
+      "files": {
+        "libcompanion.rlib": {
+          "sha256": "64d990c1b2d949c82303376be0415804672cb8fdbb1e84646b2019f1ea3fa3b3",
+          "mode": "0o644"
+        },
+        "libcompanion.a": {
+          "sha256": "e466ce6cd7fec394133b6cefa472d55f2509fad01443416a7db1daed877692ea",
+          "mode": "0o644"
+        },
+        "companion.d": {
+          "sha256": "0ed38478d3e4fb9109f24559af620939493d8f40491a0b2b4ebda5e5c1c3dc69",
+          "mode": "0o644"
+        }
+      },
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "normalized_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "native-cold",
+      "exit_code": 0,
+      "seconds": 0.13527891604462638,
+      "files": {
+        "libcompanion.rlib": {
+          "sha256": "64d990c1b2d949c82303376be0415804672cb8fdbb1e84646b2019f1ea3fa3b3",
+          "mode": "0o644"
+        },
+        "libcompanion.a": {
+          "sha256": "e466ce6cd7fec394133b6cefa472d55f2509fad01443416a7db1daed877692ea",
+          "mode": "0o644"
+        },
+        "companion.d": {
+          "sha256": "0ed38478d3e4fb9109f24559af620939493d8f40491a0b2b4ebda5e5c1c3dc69",
+          "mode": "0o644"
+        }
+      },
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "df42bdf8d9cc13841838bcb762a2286e7af4bf867cf57e780515e253a4abec8a",
+      "normalized_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "native-hit",
+      "exit_code": 0,
+      "seconds": 0.03132008301327005,
+      "files": {
+        "libcompanion.rlib": {
+          "sha256": "64d990c1b2d949c82303376be0415804672cb8fdbb1e84646b2019f1ea3fa3b3",
+          "mode": "0o644"
+        },
+        "libcompanion.a": {
+          "sha256": "e466ce6cd7fec394133b6cefa472d55f2509fad01443416a7db1daed877692ea",
+          "mode": "0o644"
+        },
+        "companion.d": {
+          "sha256": "0ed38478d3e4fb9109f24559af620939493d8f40491a0b2b4ebda5e5c1c3dc69",
+          "mode": "0o644"
+        }
+      },
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "6a4a5039b249469533e80822e3ae96d889550eaf779cfd75bf65198763a3df48",
+      "normalized_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "native-object-edit",
+      "exit_code": 0,
+      "seconds": 0.11396833299659193,
+      "files": {
+        "libcompanion.rlib": {
+          "sha256": "64d990c1b2d949c82303376be0415804672cb8fdbb1e84646b2019f1ea3fa3b3",
+          "mode": "0o644"
+        },
+        "libcompanion.a": {
+          "sha256": "5986275aadced1947b3f203eb2956cc145d6d570e79c454419ca343f63b09585",
+          "mode": "0o644"
+        },
+        "companion.d": {
+          "sha256": "0ed38478d3e4fb9109f24559af620939493d8f40491a0b2b4ebda5e5c1c3dc69",
+          "mode": "0o644"
+        }
+      },
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "df24574ed581c0e36003648038947ab5a8cc44156a29774817b4eee5ec71a318",
+      "normalized_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "native-edited-direct",
+      "exit_code": 0,
+      "seconds": 0.069153374992311,
+      "files": {
+        "libcompanion.rlib": {
+          "sha256": "64d990c1b2d949c82303376be0415804672cb8fdbb1e84646b2019f1ea3fa3b3",
+          "mode": "0o644"
+        },
+        "libcompanion.a": {
+          "sha256": "5986275aadced1947b3f203eb2956cc145d6d570e79c454419ca343f63b09585",
+          "mode": "0o644"
+        },
+        "companion.d": {
+          "sha256": "0ed38478d3e4fb9109f24559af620939493d8f40491a0b2b4ebda5e5c1c3dc69",
+          "mode": "0o644"
+        }
+      },
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "normalized_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "native-edited-hit",
+      "exit_code": 0,
+      "seconds": 0.030530625022947788,
+      "files": {
+        "libcompanion.rlib": {
+          "sha256": "64d990c1b2d949c82303376be0415804672cb8fdbb1e84646b2019f1ea3fa3b3",
+          "mode": "0o644"
+        },
+        "libcompanion.a": {
+          "sha256": "5986275aadced1947b3f203eb2956cc145d6d570e79c454419ca343f63b09585",
+          "mode": "0o644"
+        },
+        "companion.d": {
+          "sha256": "0ed38478d3e4fb9109f24559af620939493d8f40491a0b2b4ebda5e5c1c3dc69",
+          "mode": "0o644"
+        }
+      },
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "df42daac115a995132868ca6884697aab93622471b86a33eb38d344959140f7b",
+      "normalized_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "native-object-revert",
+      "exit_code": 0,
+      "seconds": 0.029556291992776096,
+      "files": {
+        "libcompanion.rlib": {
+          "sha256": "64d990c1b2d949c82303376be0415804672cb8fdbb1e84646b2019f1ea3fa3b3",
+          "mode": "0o644"
+        },
+        "libcompanion.a": {
+          "sha256": "e466ce6cd7fec394133b6cefa472d55f2509fad01443416a7db1daed877692ea",
+          "mode": "0o644"
+        },
+        "companion.d": {
+          "sha256": "0ed38478d3e4fb9109f24559af620939493d8f40491a0b2b4ebda5e5c1c3dc69",
+          "mode": "0o644"
+        }
+      },
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "b5c7f340a36e1d4b98af16e2be1aae895b65c0ee4b586c3c85591d1bc3b5ada9",
+      "normalized_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "unbundled-direct",
+      "exit_code": 0,
+      "seconds": 0.06682649999856949,
+      "files": {
+        "libcompanion.rlib": {
+          "sha256": "b20c5f37b6d11449460d3203377b306e44446281b487362a78049c9e6e2ca096",
+          "mode": "0o644"
+        },
+        "libcompanion.a": {
+          "sha256": "4d85377b668de4c60fcc595f1fef22395d440766b76b8b88d8b361b4b046daae",
+          "mode": "0o644"
+        },
+        "companion.d": {
+          "sha256": "0ed38478d3e4fb9109f24559af620939493d8f40491a0b2b4ebda5e5c1c3dc69",
+          "mode": "0o644"
+        }
+      },
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "normalized_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "unbundled-cold",
+      "exit_code": 0,
+      "seconds": 0.12802708300296217,
+      "files": {
+        "libcompanion.rlib": {
+          "sha256": "b20c5f37b6d11449460d3203377b306e44446281b487362a78049c9e6e2ca096",
+          "mode": "0o644"
+        },
+        "libcompanion.a": {
+          "sha256": "4d85377b668de4c60fcc595f1fef22395d440766b76b8b88d8b361b4b046daae",
+          "mode": "0o644"
+        },
+        "companion.d": {
+          "sha256": "0ed38478d3e4fb9109f24559af620939493d8f40491a0b2b4ebda5e5c1c3dc69",
+          "mode": "0o644"
+        }
+      },
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "6025e73f8570751896c0af1053cf24caf6437ef25ecbd81a9deb6d0a76c75b8b",
+      "normalized_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "unbundled-hit",
+      "exit_code": 0,
+      "seconds": 0.029891874990426004,
+      "files": {
+        "libcompanion.rlib": {
+          "sha256": "b20c5f37b6d11449460d3203377b306e44446281b487362a78049c9e6e2ca096",
+          "mode": "0o644"
+        },
+        "libcompanion.a": {
+          "sha256": "4d85377b668de4c60fcc595f1fef22395d440766b76b8b88d8b361b4b046daae",
+          "mode": "0o644"
+        },
+        "companion.d": {
+          "sha256": "0ed38478d3e4fb9109f24559af620939493d8f40491a0b2b4ebda5e5c1c3dc69",
+          "mode": "0o644"
+        }
+      },
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "95b638f46011c16475bfe80d99f2ed8c46571a1d279dc6ddd92e920ee6d329d0",
+      "normalized_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "unbundled-external-edit",
+      "exit_code": 0,
+      "seconds": 0.02965675003360957,
+      "files": {
+        "libcompanion.rlib": {
+          "sha256": "b20c5f37b6d11449460d3203377b306e44446281b487362a78049c9e6e2ca096",
+          "mode": "0o644"
+        },
+        "libcompanion.a": {
+          "sha256": "4d85377b668de4c60fcc595f1fef22395d440766b76b8b88d8b361b4b046daae",
+          "mode": "0o644"
+        },
+        "companion.d": {
+          "sha256": "0ed38478d3e4fb9109f24559af620939493d8f40491a0b2b4ebda5e5c1c3dc69",
+          "mode": "0o644"
+        }
+      },
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "306b9ef7c9c42ffb6e45b6799c4986af58e0dae12df1898bd09cf970575c7527",
+      "normalized_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "unbundled-edited-direct",
+      "exit_code": 0,
+      "seconds": 0.07237500004703179,
+      "files": {
+        "libcompanion.rlib": {
+          "sha256": "b20c5f37b6d11449460d3203377b306e44446281b487362a78049c9e6e2ca096",
+          "mode": "0o644"
+        },
+        "libcompanion.a": {
+          "sha256": "4d85377b668de4c60fcc595f1fef22395d440766b76b8b88d8b361b4b046daae",
+          "mode": "0o644"
+        },
+        "companion.d": {
+          "sha256": "0ed38478d3e4fb9109f24559af620939493d8f40491a0b2b4ebda5e5c1c3dc69",
+          "mode": "0o644"
+        }
+      },
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "normalized_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "own-hidden-native-direct",
+      "exit_code": 0,
+      "seconds": 0.05160537495976314,
+      "files": {
+        "libcompanion.rlib": {
+          "sha256": "27173cb22cf6b5a46ae9c050a460e703f91e1b4db66a8fcb383ca058cb780d16",
+          "mode": "0o644"
+        },
+        "libcompanion.a": {
+          "sha256": "4d16c3ad605cc85c112010f3e8011a64ffaa128328a75a881d50881bd3c0d7cf",
+          "mode": "0o644"
+        },
+        "companion.d": {
+          "sha256": "0ed38478d3e4fb9109f24559af620939493d8f40491a0b2b4ebda5e5c1c3dc69",
+          "mode": "0o644"
+        }
+      },
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "normalized_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "own-hidden-native-refusal-0",
+      "exit_code": 0,
+      "seconds": 0.06820974999573082,
+      "files": {
+        "libcompanion.rlib": {
+          "sha256": "27173cb22cf6b5a46ae9c050a460e703f91e1b4db66a8fcb383ca058cb780d16",
+          "mode": "0o644"
+        },
+        "libcompanion.a": {
+          "sha256": "4d16c3ad605cc85c112010f3e8011a64ffaa128328a75a881d50881bd3c0d7cf",
+          "mode": "0o644"
+        },
+        "companion.d": {
+          "sha256": "0ed38478d3e4fb9109f24559af620939493d8f40491a0b2b4ebda5e5c1c3dc69",
+          "mode": "0o644"
+        }
+      },
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "676dd9a10538c827f26f64f851babfef3a08623ce9be62f6a4993c0e7d73d513",
+      "normalized_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "own-hidden-native-refusal-1",
+      "exit_code": 0,
+      "seconds": 0.06433354201726615,
+      "files": {
+        "libcompanion.rlib": {
+          "sha256": "27173cb22cf6b5a46ae9c050a460e703f91e1b4db66a8fcb383ca058cb780d16",
+          "mode": "0o644"
+        },
+        "libcompanion.a": {
+          "sha256": "4d16c3ad605cc85c112010f3e8011a64ffaa128328a75a881d50881bd3c0d7cf",
+          "mode": "0o644"
+        },
+        "companion.d": {
+          "sha256": "0ed38478d3e4fb9109f24559af620939493d8f40491a0b2b4ebda5e5c1c3dc69",
+          "mode": "0o644"
+        }
+      },
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "8d46ebedc0b59643b28ae02ab85031cfb8ec43f5aa0493973e2e3ab7c6bedd16",
+      "normalized_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}

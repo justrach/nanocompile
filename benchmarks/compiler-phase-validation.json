@@ -1,0 +1,72 @@
+{
+  "completed": true,
+  "scope": "serial validation after completed untraced full Harness run; no speed claim",
+  "runtime_sha256": "afca7d75dde84cd87592987a553c765f50ca43a2ca2655beb072915c5b648811",
+  "source_manifest_sha256": "2efdbf623e029663305bc2b07eaddfb3573f57b162d26d01579c7c7ce2f2c140",
+  "benchmark_report_sha256": "c2f52d7741acaa6e491fc646c22dbd6c1e309fb960474c4a5159470389cc2f69",
+  "steps": [
+    {
+      "name": "build",
+      "exit_code": 0,
+      "seconds": 21.118580000009388,
+      "log_bytes": 0,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "unit",
+      "exit_code": 0,
+      "seconds": 2.6262899580178782,
+      "log_bytes": 0,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "compiler-phase-parser",
+      "exit_code": 0,
+      "seconds": 0.06576108396984637,
+      "log_bytes": 101,
+      "log_sha256": "869ea8047d0ae89dddb808470175fa3bdce5d6007a92e195f2d7e7e762e1f49f"
+    },
+    {
+      "name": "whole-build-trace",
+      "exit_code": 0,
+      "seconds": 1.42709058301989,
+      "log_bytes": 88,
+      "log_sha256": "4c55c087c3e13ac35f7990ce8c024a32eb24c29cc69e19f8783a8219c4ef857a"
+    },
+    {
+      "name": "script-phase-parser",
+      "exit_code": 0,
+      "seconds": 0.0624499999685213,
+      "log_bytes": 100,
+      "log_sha256": "d1276a2d9d79b9ed0a61446aa751886a8b573a45c52c4fe838159bc8be061837"
+    },
+    {
+      "name": "profile-staticlib",
+      "exit_code": 0,
+      "seconds": 11.758134790987242,
+      "log_bytes": 1084,
+      "log_sha256": "f9bff443ed3445b93b0c881936ac242b3ae565d38f3dabf290759d3c4f4fff20"
+    },
+    {
+      "name": "profile-executable",
+      "exit_code": 0,
+      "seconds": 3.216921291023027,
+      "log_bytes": 99,
+      "log_sha256": "a8d5cedd186d8481b5437f639da8289b4ae0246aab622f5755bb28897807e9ca"
+    },
+    {
+      "name": "default-executable",
+      "exit_code": 0,
+      "seconds": 2.2588025830336846,
+      "log_bytes": 99,
+      "log_sha256": "a8d5cedd186d8481b5437f639da8289b4ae0246aab622f5755bb28897807e9ca"
+    },
+    {
+      "name": "profile-thin-lto",
+      "exit_code": 0,
+      "seconds": 11.453497499984223,
+      "log_bytes": 99,
+      "log_sha256": "a8d5cedd186d8481b5437f639da8289b4ae0246aab622f5755bb28897807e9ca"
+    }
+  ]
+}

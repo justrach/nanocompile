@@ -20,6 +20,7 @@ def main():
     p.add_argument('--thin-lto', action='store_true', help='exercise opt-in thin-LTO compilation and transitive bitcode changes')
     p.add_argument('--stable-alias-experiment', action='store_true', help='explicit experimental thin-LTO byte validation profile')
     p.add_argument('--state', type=Path, help='new directory to retain probe artifacts for diagnosis')
+    p.add_argument('--profile', action='store_true', help='verify diagnostic compiler phase events on fully checked producer hits')
     p.add_argument('--retain-jobs', action='store_true', help='verify retained private compiler/linker diagnostics')
     args = p.parse_args()
     if args.stable_alias_experiment and not (args.thin_lto and args.retain_jobs):
@@ -39,6 +40,8 @@ def main():
                and k not in ('RUSTC_WRAPPER', 'RUSTC_WORKSPACE_WRAPPER', 'RUSTC_BOOTSTRAP')}
         env.update(RUSTUP_TOOLCHAIN='1.97.1', NANOCOMPILE_DIR=str(root / 'cache'),
                    NANOCOMPILE_TRACE='1', NANOCOMPILE_EXECUTABLE_PRODUCERS='1')
+        if args.profile:
+            env["NANOCOMPILE_COMPILER_PROFILE"] = "1"
         if args.thin_lto:
             env['NANOCOMPILE_THIN_LTO_PRODUCERS'] = '1'
         if args.retain_jobs:
@@ -114,6 +117,15 @@ def main():
         runtime.write_text('second\n')
         warm = run([str(binary), *rust])
         assert b'hit: executable producer' in warm.stderr and hashes() == reference, warm.stderr.decode()
+        if args.profile:
+            for stage in ('producer.apple_selection', 'producer.compiler_identity', 'producer.observer_identity',
+                          'producer.locks_configuration', 'producer.restore', 'producer.total',
+                          'restore.manifest', 'restore.input_validation', 'restore.output_validation_wait',
+                          'restore.stream_validation', 'restore.materialization', 'restore.total'):
+                assert ('nanocompile: compiler-phase '+stage+' ns=').encode() in warm.stderr, warm.stderr.decode()
+        else:
+            assert b'nanocompile: compiler-phase ' not in warm.stderr
+
         assert executable.stat().st_mode & 0o777 == mode
         execute('12 second')
         if args.stable_alias_experiment:
@@ -237,6 +249,7 @@ def main():
                     'source_and_preserved_mtime_native_changes_detected': True,
                     'corrupt_blob_and_manifest_repaired': True, 'failed_compilation_not_cached': True,
                     'debug_and_default_policy_bypass': True,
+                    'compiler_profile': args.profile,
                     'thin_lto': args.thin_lto,
                     'stable_alias_collision_and_same_key_concurrency': args.stable_alias_experiment,
                     'private_producer_jobs_retained': args.retain_jobs,

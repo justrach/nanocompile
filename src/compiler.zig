@@ -573,6 +573,9 @@ fn replacePath(ctx: *cache.Context, bytes: []const u8, old: []const u8, new: []c
 }
 
 fn executeProducer(ctx: *cache.Context, plan: Plan, argv: []const []const u8) !u8 {
+    const total = ctx.profileStart();
+    defer ctx.profileEnd("producer.total", total);
+    var phase = ctx.profileStart();
     const native_identity = @import("native_identity.zig");
     const observer = @import("link_observer.zig");
     ctx.prepare() catch return bypass(ctx, argv, "bypass: cache unavailable");
@@ -580,9 +583,13 @@ fn executeProducer(ctx: *cache.Context, plan: Plan, argv: []const []const u8) !u
     defer maintenance.release();
     const driver = identity.selectedExecutable(ctx, "cc") catch return bypass(ctx, argv, "bypass: producer driver unavailable");
     const selected = native_identity.apple(ctx, driver) catch return bypass(ctx, argv, "bypass: producer driver selection unsupported");
+    ctx.profileEnd("producer.apple_selection", phase);
+    phase = ctx.profileStart();
     const binary = std.process.executablePathAlloc(ctx.io, ctx.a) catch return bypass(ctx, argv, "bypass: producer observer unavailable");
     const base_key = keyFor(ctx, .rust, argv) catch return bypass(ctx, argv, "bypass: producer compiler identity unavailable");
     const compiler_epoch = ctx.compiler_epoch orelse return bypass(ctx, argv, "bypass: producer compiler state unavailable");
+    ctx.profileEnd("producer.compiler_identity", phase);
+    phase = ctx.profileStart();
     const binary_hash = ctx.digest(binary) catch return bypass(ctx, argv, "bypass: producer observer cannot be fingerprinted");
     var h = cache.Hash.init(.{});
     cache.field(&h, "nanocompile-experimental-producer-v1");
@@ -591,6 +598,8 @@ fn executeProducer(ctx: *cache.Context, plan: Plan, argv: []const []const u8) !u
     cache.field(&h, selected.hash);
     cache.field(&h, binary_hash);
     const key = try cache.finish(ctx.a, &h);
+    ctx.profileEnd("producer.observer_identity", phase);
+    phase = ctx.profileStart();
     const flight = cache.Lock.acquire(ctx, key, true) catch return bypass(ctx, argv, "bypass: producer key lock unavailable");
     defer flight.release();
     const destinations = try ctx.a.dupe([]const u8, plan.outputs);
@@ -607,7 +616,11 @@ fn executeProducer(ctx: *cache.Context, plan: Plan, argv: []const []const u8) !u
         if (!eq(config.hash, ctx.digest(config.path) catch return bypass(ctx, argv, "bypass: cannot read producer declaration")))
             return bypass(ctx, argv, "bypass: producer input declaration changed");
     }
-    if (cache.restoreVariants(ctx, key, plan.outputs) catch false) {
+    ctx.profileEnd("producer.locks_configuration", phase);
+    phase = ctx.profileStart();
+    const restored = cache.restoreVariants(ctx, key, plan.outputs) catch false;
+    ctx.profileEnd("producer.restore", phase);
+    if (restored) {
         ctx.trace(if (plan.producer_dylib) "hit: proc-macro producer" else "hit: executable producer");
         ctx.event("hit");
         return 0;
@@ -700,14 +713,21 @@ fn retainProducerResult(ctx: *cache.Context, root: []const u8, command: []const 
 }
 
 pub fn execute(ctx: *cache.Context, kind: Kind, argv: []const []const u8) !u8 {
+    const total = ctx.profileStart();
+    defer ctx.profileEnd("compiler.total", total);
+    var phase = ctx.profileStart();
     if (ctx.env.get("NANOCOMPILE_DISABLE")) |v| if (eq(v, "1")) return bypass(ctx, argv, "bypass: disabled");
     const plan = (if (kind == .rust) rustPlan(ctx, argv) else zigPlan(ctx, argv)) catch |err|
         return bypass(ctx, argv, try std.fmt.allocPrint(ctx.a, "bypass: {s}", .{@errorName(err)}));
+    ctx.profileEnd("compiler.plan", phase);
+    phase = ctx.profileStart();
     if (plan.producer) return executeProducer(ctx, plan, argv);
     ctx.prepare() catch return bypass(ctx, argv, "bypass: cache unavailable");
     const maintenance = cache.Lock.acquire(ctx, "maintenance", false) catch return bypass(ctx, argv, "bypass: cache lock unavailable");
     defer maintenance.release();
     const key = keyFor(ctx, kind, argv) catch |err| return bypass(ctx, argv, try std.fmt.allocPrint(ctx.a, "bypass: compiler identity unavailable ({s})", .{@errorName(err)}));
+    ctx.profileEnd("compiler.prepare_identity", phase);
+    phase = ctx.profileStart();
     // The byte-pinned physical Rust installation fingerprints all rustlib
     // targets, std archives and backend/helper resources. Generic drivers do
     // not establish the archive writer's complete implicit resource closure.
@@ -732,11 +752,16 @@ pub fn execute(ctx: *cache.Context, kind: Kind, argv: []const []const u8) !u8 {
         const current = ctx.digest(config.path) catch return bypass(ctx, argv, "bypass: cannot read extra input declaration");
         if (!eq(config.hash, current)) return bypass(ctx, argv, "bypass: extra input declaration changed");
     }
-    if (cache.restoreVariants(ctx, key, plan.outputs) catch false) {
+    ctx.profileEnd("compiler.locks_configuration", phase);
+    phase = ctx.profileStart();
+    const restored = cache.restoreVariants(ctx, key, plan.outputs) catch false;
+    ctx.profileEnd("compiler.restore", phase);
+    if (restored) {
         ctx.trace("hit");
         ctx.event("hit");
         return 0;
     }
+    phase = ctx.profileStart();
     var before: std.ArrayList(cache.Dependency) = .empty;
     try before.appendSlice(ctx.a, dependencyRecords(ctx, plan.dependencies) catch return bypass(ctx, argv, "bypass: cannot fingerprint inputs"));
     const native = rust_dependencies.nativeSnapshot(ctx, plan.native_dirs) catch |err|
@@ -760,6 +785,8 @@ pub fn execute(ctx: *cache.Context, kind: Kind, argv: []const []const u8) !u8 {
         }
         try command.appendSlice(ctx.a, &.{ "--cache-dir", job.out });
     } else try command.appendSlice(ctx.a, argv);
+    ctx.profileEnd("compiler.input_snapshot_staging", phase);
+    phase = ctx.profileStart();
     const started = std.Io.Clock.real.now(ctx.io).nanoseconds;
     ctx.trace("miss: compiling");
     const streaming = kind == .rust and eq(ctx.env.get("NANOCOMPILE_STREAM_COMPILER") orelse "1", "1");
@@ -768,13 +795,16 @@ pub fn execute(ctx: *cache.Context, kind: Kind, argv: []const []const u8) !u8 {
         try ctx.out(result.stdout);
         try std.Io.File.stderr().writeStreamingAll(ctx.io, result.stderr);
     }
+    ctx.profileEnd("compiler.execution_streams", phase);
     const code = exitCode(result.term);
     if (code != 0) {
         ctx.event("failed");
         return code;
     }
     ctx.event("miss");
+    phase = ctx.profileStart();
     save(ctx, key, plan, argv, before.items, directories, started, result, &.{}) catch |err| ctx.trace(try std.fmt.allocPrint(ctx.a, "uncached: {s}", .{@errorName(err)}));
+    ctx.profileEnd("compiler.postcompile_store", phase);
     return 0;
 }
 

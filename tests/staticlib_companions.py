@@ -15,17 +15,19 @@ def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument('binary', type=Path)
     p.add_argument('--state', type=Path, required=True)
+    p.add_argument('--profile', action='store_true', help='verify ordinary compiler/restore diagnostic stages')
     args = p.parse_args()
     root = args.state.resolve(); root.mkdir(parents=True, mode=0o700, exist_ok=False)
     binary = args.binary.resolve()
     rustc = subprocess.check_output(['rustup','which','--toolchain','1.97.1','rustc'],text=True).strip()
     env = {k:v for k,v in os.environ.items() if not k.startswith(('NANOCOMPILE_','R2_','KACHE_')) and k not in ('RUSTC_WRAPPER','RUSTC_WORKSPACE_WRAPPER')}
     env.update(NANOCOMPILE_DIR=str(root/'cache'), NANOCOMPILE_TRACE='1', NANOCOMPILE_RUST_STATICLIB='1', RUSTUP_TOOLCHAIN='1.97.1')
+    if args.profile:env['NANOCOMPILE_COMPILER_PROFILE']='1'
     deps=root/'deps';deps.mkdir();out=root/'out';out.mkdir()
     dep=root/'dep.rs';source=root/'source.rs'
     source.write_text('extern crate dep; #[unsafe(no_mangle)] pub extern "C" fn nano_probe()->i32 {format!("{}",dep::value()).parse::<i32>().unwrap()}\n')
     dep.write_text('pub fn value()->i32{41}\n')
-    report=dict(completed=False,binary_sha256=hashlib.sha256(binary.read_bytes()).hexdigest(),runner_sha256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),samples=[])
+    report=dict(completed=False,compiler_profile=args.profile,binary_sha256=hashlib.sha256(binary.read_bytes()).hexdigest(),runner_sha256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),samples=[])
     def save():save_report(root/'report.json',report)
     def dependency(extra=()):
         subprocess.run([rustc,str(dep),'--crate-name','dep','--crate-type','rlib','--edition=2024','--emit=dep-info,metadata,link','-C','opt-level=3','--out-dir',str(deps),*extra],env=env,check=True,capture_output=True)
@@ -45,6 +47,11 @@ def main():
         assert (q.returncode==0)==success,q.stderr.decode(errors='replace')
         if success:assert {'companion.d','libcompanion.rlib','libcompanion.a'}<=files.keys(),files
         if decision:assert ('nanocompile: '+decision).encode() in q.stderr,q.stderr.decode(errors='replace')
+        if args.profile and wrapped and decision=='hit':
+            for stage in ('compiler.plan','compiler.prepare_identity','compiler.locks_configuration',
+                          'compiler.restore','compiler.total','restore.input_validation','restore.materialization'):
+                assert ('nanocompile: compiler-phase '+stage+' ns=').encode() in q.stderr,q.stderr.decode(errors='replace')
+        elif not args.profile:assert b'nanocompile: compiler-phase ' not in q.stderr
         print(label,round(row['seconds'],4),flush=True)
         return files
     c=root/'probe.c';c.write_text('#include <stdio.h>\nextern int nano_probe(void);int main(){printf("%d\\n",nano_probe());}\n')

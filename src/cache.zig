@@ -188,6 +188,21 @@ pub const Context = struct {
         try file.replace(self.io);
     }
 
+    /// Diagnostic-only intervals; all content validation and publication order
+    /// remain unchanged. Nested/overlapping stages are not additive.
+    pub fn profileStart(self: *Context) i96 {
+        if (!std.mem.eql(u8, self.env.get("NANOCOMPILE_COMPILER_PROFILE") orelse "", "1") or
+            !std.mem.eql(u8, self.env.get("NANOCOMPILE_TRACE") orelse "", "1")) return 0;
+        return std.Io.Clock.awake.now(self.io).nanoseconds;
+    }
+
+    pub fn profileEnd(self: *Context, name: []const u8, start: i96) void {
+        if (start == 0) return;
+        const elapsed = std.Io.Clock.awake.now(self.io).nanoseconds - start;
+        const line = std.fmt.allocPrint(self.a, "compiler-phase {s} ns={d}", .{ name, elapsed }) catch return;
+        self.trace(line);
+    }
+
     pub fn event(self: *Context, name: []const u8) void {
         const path_ = self.path(&.{"events"}) catch return;
         const z = self.a.dupeSentinel(u8, path_, 0) catch return;
@@ -567,6 +582,9 @@ pub fn restoreSnapshotStaged(ctx: *Context, key: []const u8, allowed_outputs: []
 }
 
 fn restoreWithSnapshot(ctx: *Context, key: []const u8, allowed_outputs: []const []const u8, destinations: []const []const u8, snapshot: ?[]const Dependency) !?RestoredStreams {
+    const total = ctx.profileStart();
+    defer ctx.profileEnd("restore.total", total);
+    var phase = ctx.profileStart();
     if (destinations.len != allowed_outputs.len) return error.InvalidDestinations;
     const bytes = ctx.read(try ctx.path(&.{ "entries", key })) catch return null;
     const entry = parseEntry(ctx, bytes) catch return null;
@@ -576,6 +594,8 @@ fn restoreWithSnapshot(ctx: *Context, key: []const u8, allowed_outputs: []const 
     // enumeration and content hashes only within this restore. No metadata
     // shortcut survives a compiler invocation or a before/after input check.
     for (entry.outputs, allowed_outputs) |output, allowed| if (!std.mem.eql(u8, output.path, allowed)) return null;
+    ctx.profileEnd("restore.manifest", phase);
+    phase = ctx.profileStart();
     var output_check: OutputCheck = .{ .entry = &entry };
     var output_group: std.Io.Group = .init;
     defer output_group.cancel(ctx.io);
@@ -597,7 +617,9 @@ fn restoreWithSnapshot(ctx: *Context, key: []const u8, allowed_outputs: []const 
         defer library_names.deinit(ctx.a);
         var file_hashes: std.StringHashMapUnmanaged([]const u8) = .empty;
         defer file_hashes.deinit(ctx.a);
+        const hash_start = ctx.profileStart();
         if (!try parallelFileHashes(ctx, entry.dependencies, &file_hashes)) return null;
+        ctx.profileEnd("restore.parallel_input_hashes", hash_start);
         for (entry.dependencies) |dep| {
             if (dep.symlink_target != null) {
                 if (!(symlinkValid(ctx, dep) catch false)) return null;
@@ -629,6 +651,8 @@ fn restoreWithSnapshot(ctx: *Context, key: []const u8, allowed_outputs: []const 
             }
         }
     }
+    ctx.profileEnd("restore.input_validation", phase);
+    phase = ctx.profileStart();
     // Validate every blob and destination before writing any output.
     if (overlap) {
         try output_group.await(ctx.io);
@@ -639,6 +663,8 @@ fn restoreWithSnapshot(ctx: *Context, key: []const u8, allowed_outputs: []const 
             if (!std.mem.eql(u8, hash, output.hash)) return null;
         }
     }
+    ctx.profileEnd("restore.output_validation_wait", phase);
+    phase = ctx.profileStart();
     const stdout = ctx.read(try blobPath(ctx, entry.stdout)) catch return null;
     const stderr = ctx.read(try blobPath(ctx, entry.stderr)) catch return null;
     var h = Hash.init(.{});
@@ -647,7 +673,10 @@ fn restoreWithSnapshot(ctx: *Context, key: []const u8, allowed_outputs: []const 
     h = Hash.init(.{});
     h.update(stderr);
     if (!std.mem.eql(u8, try finish(ctx.a, &h), entry.stderr)) return null;
+    ctx.profileEnd("restore.stream_validation", phase);
+    phase = ctx.profileStart();
     for (entry.outputs, destinations) |output, destination| try materialize(ctx, try blobPath(ctx, output.hash), destination, output.mode);
+    ctx.profileEnd("restore.materialization", phase);
     return .{ .stdout = stdout, .stderr = stderr };
 }
 
@@ -843,7 +872,7 @@ test "metadata snapshots cross manifest limit and reject oversized files" {
     defer a.free(lexical);
     const root = try Dir.cwd().realPathFileAlloc(io, lexical, a);
     defer a.free(root);
-    const path = try std.fs.path.join(a, &.{root, "large.rmeta"});
+    const path = try std.fs.path.join(a, &.{ root, "large.rmeta" });
     defer a.free(path);
     const file = try Dir.cwd().createFile(io, path, .{});
     defer file.close(io);
