@@ -17,6 +17,7 @@ def main():
     p.add_argument('--output', type=Path)
     p.add_argument('--thin-lto', action='store_true', help='exercise opt-in thin-LTO compilation and transitive bitcode changes')
     p.add_argument('--state', type=Path, help='new directory to retain probe artifacts for diagnosis')
+    p.add_argument('--retain-jobs', action='store_true', help='verify retained private compiler/linker diagnostics')
     args = p.parse_args()
     binary = args.binary.resolve()
     if sys.platform != 'darwin':
@@ -35,6 +36,8 @@ def main():
                    NANOCOMPILE_TRACE='1', NANOCOMPILE_EXECUTABLE_PRODUCERS='1')
         if args.thin_lto:
             env['NANOCOMPILE_THIN_LTO_PRODUCERS'] = '1'
+        if args.retain_jobs:
+            env['NANOCOMPILE_RETAIN_PRODUCER_JOBS'] = '1'
         cc = shutil.which('cc')
         assert cc
         def run(command, success=True):
@@ -149,6 +152,26 @@ def main():
         src.write_text('invalid Rust\n')
         failed = run([str(binary), *rust], success=False)
         assert b'hit: executable producer' not in failed.stderr
+        if args.retain_jobs:
+            jobs = list((root / 'cache/producer-jobs').iterdir())
+            completed = [j for j in jobs if (j / 'compiler-result.json').exists()]
+            assert completed
+            results = [json.loads((j / 'compiler-result.json').read_text()) for j in completed]
+            assert any(r['exit_code'] == 0 for r in results) and any(r['exit_code'] != 0 for r in results)
+            for job, result in zip(completed, results):
+                assert result['end_ns'] >= result['start_ns'] and (job / 'compiler.stdout').is_file() and (job / 'compiler.stderr').is_file()
+            manifests = list((root / 'cache/producer-jobs').glob('*/owned-inputs.json'))
+            assert manifests and any(json.loads(p.read_text()) for p in manifests)
+            for manifest in manifests:
+                invocation = json.loads((manifest.parent / 'invocation').read_bytes()[65:])
+                child_env = {r['name']: r['value'] for r in invocation['diagnostic_environment']}
+                assert child_env['ZERO_AR_DATE'] == '1' and child_env['SDKROOT']
+                assert not any(k.startswith(('R2_', 'KACHE_', 'AWS_')) for k in child_env)
+                for item in json.loads(manifest.read_text()):
+                    snapshot = Path(item['snapshot'])
+                    assert snapshot.resolve().is_relative_to(manifest.parent.resolve())
+                    assert snapshot.is_file() and not snapshot.is_symlink() and len(item['blake3']) == 64
+                    assert snapshot.stat().st_mode & 0o777 == 0o600
         evidence = {'platform': sys.platform, 'binary_sha256': hashlib.sha256(binary.read_bytes()).hexdigest(),
                     'probe_sha256': hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
                     'direct_cold_warm_artifacts_equal': True, 'diagnostics_replayed': True,
@@ -157,6 +180,7 @@ def main():
                     'corrupt_blob_and_manifest_repaired': True, 'failed_compilation_not_cached': True,
                     'debug_and_default_policy_bypass': True,
                     'thin_lto': args.thin_lto,
+                    'private_producer_jobs_retained': args.retain_jobs,
                     'limits': 'Apple native zero-debug executable compilation only; execution is not cached; no project speed claim'}
         if args.output:
             args.output.parent.mkdir(parents=True, exist_ok=True)

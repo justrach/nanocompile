@@ -12,4 +12,4 @@ Require alternating repeated untraced cold and warm trials against both accepted
 
 ## Follow-up state
 
-The [large metadata reader](large-rust-metadata.md) now passes actual crate storage/restoration and broader correctness checks; a full-project comparison is running. The [thin-LTO trial](thin-lto-producer-investigation.md) fails cold byte reproducibility and has been removed from production. Preserve that failure while resolving the staging/linker cause. SQLite execution reuse remains outstanding.
+The [large metadata reader](large-rust-metadata.md) now passes actual crate storage/restoration and broader correctness checks; the completed full-project comparison still favors kache strongly on warm builds. The [thin-LTO trial](thin-lto-producer-investigation.md) fails cold byte reproducibility and has been removed from production. Preserve that failure while resolving the staging/linker cause. SQLite execution reuse remains outstanding.

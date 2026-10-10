@@ -33,6 +33,10 @@ pub const Job = struct {
     }
 
     pub fn cleanup(self: Job, ctx: *cache.Context) !void {
+        if (std.mem.eql(u8, ctx.env.get("NANOCOMPILE_RETAIN_PRODUCER_JOBS") orelse "", "1")) {
+            ctx.trace("diagnostic: retaining private producer job");
+            return;
+        }
         try Dir.cwd().deleteTree(ctx.io, self.root);
     }
 

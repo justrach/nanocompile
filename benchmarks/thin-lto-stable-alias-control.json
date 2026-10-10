@@ -1,0 +1,44 @@
+{
+  "production_lto_enabled": false,
+  "canonical_observer": [
+    {
+      "name": "direct",
+      "sha256": "fd58fa613c5384465f3bb0b9d07fa1cf52c00a7767911167feb390998aa7d20f",
+      "size": 605440
+    },
+    {
+      "name": "observed-canonical",
+      "sha256": "fd58fa613c5384465f3bb0b9d07fa1cf52c00a7767911167feb390998aa7d20f",
+      "size": 605440
+    },
+    {
+      "name": "direct-repeat",
+      "sha256": "fd58fa613c5384465f3bb0b9d07fa1cf52c00a7767911167feb390998aa7d20f",
+      "size": 605440
+    }
+  ],
+  "stable_alias": [
+    {
+      "index": 0,
+      "sha256": "810a47b47762d829fb61a0bf0104b967985af6ad3915c329b3ea706c9b8cda19",
+      "size": 605440
+    },
+    {
+      "index": 1,
+      "sha256": "810a47b47762d829fb61a0bf0104b967985af6ad3915c329b3ea706c9b8cda19",
+      "size": 605440
+    }
+  ],
+  "conclusion": "In this small native/Rust-bitcode fixture, canonical observer output equals direct, while a stable symlink to two fresh exclusive directories produces equal repeated outputs. Stable-alias output differs from direct. No caching, concurrency, failure-cleanup or full-app support is established by this control.",
+  "retained_owned_linker_inputs": 21,
+  "trial_binary_sha256": "a105a72fe13989e102a331428f9666c792c5c920790a0c3e77f52298e85cf104",
+  "next_requirements": [
+    "exclusive alias acquisition with fallback rather than adopting old aliases",
+    "bound lexical and canonical private ownership",
+    "cleanup on compiler failure and job retention",
+    "concurrent different jobs cannot share output ownership",
+    "full transitive bitcode/native/toolchain invalidation",
+    "byte-identical cold repeats and warm restore plus valid signing/runtime behavior",
+    "full Harness application benchmark before promotion"
+  ]
+}

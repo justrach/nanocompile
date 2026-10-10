@@ -578,7 +578,8 @@ fn executeProducer(ctx: *cache.Context, plan: Plan, argv: []const []const u8) !u
     defer job.cleanup(ctx) catch {};
     const original = plan.linked_output orelse return bypass(ctx, argv, "bypass: producer needs link output");
     const output = try std.fs.path.join(ctx.a, &.{ job.out, std.fs.path.basename(original) });
-    const config: observer.Config = .{ .driver = driver, .format = .darwin, .report = try std.fs.path.join(ctx.a, &.{ job.root, "link.deps" }), .invocation = try std.fs.path.join(ctx.a, &.{ job.root, "invocation" }), .capture_id = job.capture_id, .ownership = .{ .out = job.out, .canonical_out = job.canonical_out, .output = output } };
+    const retain_job = eq(ctx.env.get("NANOCOMPILE_RETAIN_PRODUCER_JOBS") orelse "", "1");
+    const config: observer.Config = .{ .driver = driver, .format = .darwin, .report = try std.fs.path.join(ctx.a, &.{ job.root, "link.deps" }), .invocation = try std.fs.path.join(ctx.a, &.{ job.root, "invocation" }), .capture_id = job.capture_id, .retain_owned_inputs = retain_job, .ownership = .{ .out = job.out, .canonical_out = job.canonical_out, .output = output } };
     const linker = job.installObserver(ctx, binary, try std.json.Stringify.valueAlloc(ctx.a, config, .{})) catch return bypass(ctx, argv, "bypass: producer observer installation unavailable");
     var command: std.ArrayList([]const u8) = .empty;
     var i: usize = 0;
@@ -599,6 +600,10 @@ fn executeProducer(ctx: *cache.Context, plan: Plan, argv: []const []const u8) !u
     const started = std.Io.Clock.real.now(ctx.io).nanoseconds;
     ctx.trace(if (plan.producer_dylib) "miss: compiling proc-macro producer" else "miss: compiling executable producer");
     var result = try std.process.run(ctx.a, ctx.io, .{ .argv = command.items, .environ_map = ctx.env });
+    if (retain_job) {
+        retainProducerResult(ctx, job.root, command.items, started, result) catch |err|
+            ctx.trace(try std.fmt.allocPrint(ctx.a, "diagnostic compiler capture failed: {s}", .{@errorName(err)}));
+    }
     result.stdout = try replacePath(ctx, result.stdout, job.out, plan.out_dir.?);
     result.stderr = try replacePath(ctx, result.stderr, job.out, plan.out_dir.?);
     result.stderr = try replacePath(ctx, result.stderr, linker, "cc");
@@ -640,6 +645,14 @@ fn executeProducer(ctx: *cache.Context, plan: Plan, argv: []const []const u8) !u
     save(ctx, key, plan, argv, before.items, directories, started, result, linked) catch |err|
         ctx.trace(try std.fmt.allocPrint(ctx.a, "uncached producer: {s}", .{@errorName(err)}));
     return 0;
+}
+
+fn retainProducerResult(ctx: *cache.Context, root: []const u8, command: []const []const u8, started: i96, result: std.process.RunResult) !void {
+    const ended = std.Io.Clock.real.now(ctx.io).nanoseconds;
+    try ctx.atomic(try std.fs.path.join(ctx.a, &.{root, "compiler.stdout"}), result.stdout);
+    try ctx.atomic(try std.fs.path.join(ctx.a, &.{root, "compiler.stderr"}), result.stderr);
+    try ctx.atomic(try std.fs.path.join(ctx.a, &.{root, "compiler-result.json"}),
+        try std.json.Stringify.valueAlloc(ctx.a, .{ .schema = 1, .argv = command, .start_ns = started, .end_ns = ended, .exit_code = exitCode(result.term) }, .{}));
 }
 
 pub fn execute(ctx: *cache.Context, kind: Kind, argv: []const []const u8) !u8 {
