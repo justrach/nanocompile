@@ -217,7 +217,7 @@ Default mode streams the compiler's inherited descriptors normally.
 Eligible native-CAS jobs run Clang's cc1 frontend in-process to reduce replay
 overhead; caller execution flags can override this default.
 
-The [latest nine-sample comparison](docs/direct-rmeta-nine-samples.md)
+The [earlier nine-sample comparison](docs/direct-rmeta-nine-samples.md)
 measures warm medians of **2.007 s Nano versus 23.42 s direct and 2.269 s kache**
 on Harness, with 167 Rust and 24 native warm hits. It uses explicit reported-macro
 and Apple macro/executable-producer policies. Nano is faster in all nine
@@ -233,7 +233,7 @@ Two further [27-pair integrated-cc1 comparisons](docs/clang-integrated-cc1-exper
 confirm **5.1% and 5.6%** median improvements, winning 51/54 pairs with
 193 exact artifacts. These measure the native adapter change against its
 predecessor; the complete comparison above separately measures the installed version.
-Nano cold is 27.64 s versus kache's 27.01 s in the latest session. Kache still leads cold;
+Nano cold is 27.64 s versus kache's 27.01 s in that session. Kache still leads cold;
 the controlled decoder comparisons below establish Nano's improvement over its predecessor. All warm modes match their own cold Rust/native
 artifacts; scanner debug changes and kache remapping prevent treating every
 mode as byte-identical to default direct builds.
@@ -319,7 +319,7 @@ GitHub Actions runs real compiler tests and the synthetic benchmark on Linux and
 
 The [direct Rust metadata experiment](docs/direct-rmeta-experiment.md) removes own-artifact query subprocesses for supported Rust 1.97.1 metadata. Two controlled Harness cold batches improve by **3.5% and 5.0%** against the previous Nano implementation, with six of six pair wins and 193 matching artifacts. Two 27-pair warm batches are mixed; no general warm speedup is claimed. Unknown versions and encodings retain the rustc query fallback. See the [next performance experiments](docs/performance-roadmap.md) for native caching, source-edit builds and restore validation.
 
-The next three performance directions now have implementations and checks: [portable C/C++ object caching](docs/portable-cc.md), [overlapping restore validation](docs/restore-validation-overlap.md) and a disposable Harness source-edit comparison runner. Restore overlap improves two 27-pair Harness warm batches by about 2.1%. A separate [experimental declared-task runner](docs/declared-tasks.md) compares the same two-package Node pipeline against real Turbo local caching; this small pipeline does not establish a general scheduler advantage.
+The next three performance directions now have implementations and checks: [portable C/C++ object caching](docs/portable-cc.md), [overlapping restore validation](docs/restore-validation-overlap.md) and a [verified Harness source-edit comparison](docs/harness-source-edits.md). The new edit sequence favors kache: cold 28.709 s Nano versus 27.297 s kache; leaf edits 10.715 versus 10.205 s; shared edits 12.308 versus 11.858 s; reverts 11.981 versus 2.058 s. These are single samples with clean targets, verified against fresh artifact bytes and linked behavior. Restore overlap improves two 27-pair Harness warm batches by about 2.1%. A separate [experimental declared-task runner](docs/declared-tasks.md) compares the same two-package Node pipeline against real Turbo local caching; this small pipeline does not establish a general scheduler advantage.
 
 ## Attribution
 

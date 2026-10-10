@@ -1578,3 +1578,7 @@ A new version-gated Zig decoder replaces ordinary own-artifact rustc root querie
 [Method, checks, limitations and all raw samples](../docs/direct-rmeta-experiment.md); [broader next experiments](../docs/performance-roadmap.md).
 
 The freshly installed version also completes a nine-round rotating comparison: warm medians 2.007020 s Nano, 23.420443 s direct and 2.269442 s kache, with all nine Nano/kache paired rounds favoring Nano. Kache still leads the single cold sample (27.011149 s vs 27.642271 s). This complete comparison is not evidence for a metadata-decoder warm improvement. [All samples and scope](../docs/direct-rmeta-nine-samples.md). Adopted source passes hosted Linux/macOS CI, including the new metadata oracle.
+
+## Real source edits and restore overlap
+
+The [verified real source-edit sequence](../docs/harness-source-edits.md) favors kache on cold, leaf/shared changes and reversions. Nano still roughly halves edited clean-target builds versus direct, but replacing one source manifest per command makes reversions recompile two crates. Every edited wrapper result matches its same-path empty-cache artifact reference and passes a linked behavior probe. All raw losses are retained. Separately, [bounded output/input validation overlap](../docs/restore-validation-overlap.md) improves two 27-pair identical-build Harness batches by about 2.1%; that optimization does not establish a cold or edit-build win.

@@ -7,7 +7,7 @@ CC="/absolute/path/nanocompile cc" CXX="/absolute/path/nanocompile c++" \
   CC_KNOWN_WRAPPER_CUSTOM=nanocompile cargo build --release
 ```
 
-Eligibility requires one C/C++ translation unit, `-c`, explicit `-o`, debug-info zero and a bounded flag set. Dependency side outputs require explicit `-MF`. Unsupported jobs execute the original compiler. Linking, stdin, response files, debug jobs, modules, plugins, profile inputs, actual inline assembly, arbitrary frontend/assembler forwarding, custom GCC specs and Clang default configs bypass. Simple assembler symbol aliases in system headers are permitted. This is initial coverage, not a full replacement for ccache.
+Eligibility requires one C/C++ translation unit, `-c`, explicit `-o`, debug-info zero and a bounded flag set. Dependency side outputs require explicit `-MF`. Unsupported jobs execute the original compiler. Linking, stdin, response files, debug jobs, modules, plugins, profile inputs, complex or file-reading inline assembly, arbitrary frontend/assembler forwarding, custom GCC specs and Clang default configs bypass. Simple assembler symbol aliases in system headers are permitted. This is initial coverage, not a full replacement for ccache.
 
 Every lookup preprocesses live with `-E -MD -MF`, then hashes the complete bytes of every reported source/system/header dependency. Preprocessed output, preprocessing diagnostics, original arguments, cwd, CPU/host and full environment enter the key. Include selection and `__has_include` are therefore re-observed; no header timestamp shortcut survives a lookup. Original compilation runs on a miss, and a second complete observation must match before storage. Object and declared dependency files restore together only after blob validation.
 
