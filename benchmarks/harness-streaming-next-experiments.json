@@ -1,0 +1,61 @@
+{
+  "schema": 1,
+  "status": "experimental; rejected as default",
+  "evidence": "harness-streaming-experiment.json",
+  "binary_sha256": "1692fc5aa29520ea68f7f0c5350adde4682678c28594b14b982c2bd8e61a8353",
+  "cold": {
+    "nano_median_seconds": 15.734519916004501,
+    "kache_median_seconds": 17.141540959011763,
+    "nano_pair_wins": 5,
+    "pairs": 5
+  },
+  "warm": {
+    "nano_median_seconds": 10.172058292024303,
+    "kache_median_seconds": 1.216989167034626,
+    "nano_rust_misses": [
+      26,
+      10,
+      5
+    ]
+  },
+  "observed_correctness": "Repeated artifacts match each tool own cold hashes; real renamed script executables were outside historical collection.",
+  "instructions": [
+    {
+      "rank": 1,
+      "target": "src/rust_dependencies.zig::collect",
+      "hypothesis": "Upstream rlibs appear during downstream compilation and change metadata-only candidate membership, refusing stores.",
+      "next_measurement": "Record exact uncached reasons and before/after selected library candidates; retain all private compiler logs.",
+      "gate": "Reproduce with deterministic metadata-before-rlib fixture. Preserve changed metadata, competing crates, native linkage, proc macros and fallback guards.",
+      "observed_refusal_counts": {
+        "1-nanocompile-cold.log": {
+          "LibraryDirectoryChangedDuringCompilation": 16
+        },
+        "4-nanocompile-warm.log": {
+          "LibraryDirectoryChangedDuringCompilation": 9
+        }
+      }
+    },
+    {
+      "rank": 2,
+      "target": "Cargo extern selection and compiler cache keys",
+      "hypothesis": "Pipelining and mixed hits/misses change rmeta versus rlib argv selection.",
+      "next_measurement": "Compare argv, cache key and metadata graph for cold, warm and mixed source-edit builds.",
+      "gate": "Prove semantic equivalence before any normalization; preserve failures and output bytes."
+    },
+    {
+      "rank": 3,
+      "target": "tests/project_comparison.py and project_pair_comparison.py",
+      "hypothesis": "Installed script shims differ by runtime binary even when real compiled script is unchanged.",
+      "next_measurement": "Hash shim and .nano-real executable separately; retain cross-binary differences.",
+      "gate": "All real script executables, native objects/archives, rlibs and macro dylibs checked against own fresh references."
+    }
+  ],
+  "promotion_gates": [
+    "Byte-exact compiler streams and status; functional integration passes on Linux and macOS.",
+    "All expected warm Rust and script hits in repeated clean-target builds.",
+    "Alternating untraced baseline/candidate pairs with fixed wrapper, environment and target path.",
+    "Repeated separate comparisons against kache, actual source edits and reverts.",
+    "Publish all samples and rejected runs; leave streaming off by default until warm regression resolved."
+  ],
+  "diagnostic_evidence": "harness-streaming-diagnostic.json"
+}

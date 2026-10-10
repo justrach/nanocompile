@@ -700,9 +700,12 @@ pub fn execute(ctx: *cache.Context, kind: Kind, argv: []const []const u8) !u8 {
     } else try command.appendSlice(ctx.a, argv);
     const started = std.Io.Clock.real.now(ctx.io).nanoseconds;
     ctx.trace("miss: compiling");
-    const result = try std.process.run(ctx.a, ctx.io, .{ .argv = command.items, .environ_map = ctx.env });
-    try ctx.out(result.stdout);
-    try std.Io.File.stderr().writeStreamingAll(ctx.io, result.stderr);
+    const streaming = kind == .rust and eq(ctx.env.get("NANOCOMPILE_STREAM_COMPILER") orelse "", "1");
+    const result = if (streaming) try @import("compiler_stream.zig").run(ctx, command.items) else try std.process.run(ctx.a, ctx.io, .{ .argv = command.items, .environ_map = ctx.env });
+    if (!streaming) {
+        try ctx.out(result.stdout);
+        try std.Io.File.stderr().writeStreamingAll(ctx.io, result.stderr);
+    }
     const code = exitCode(result.term);
     if (code != 0) {
         ctx.event("failed");

@@ -1,0 +1,47 @@
+{
+  "diagnostic_only": true,
+  "private_state": "/tmp/nano-stream-diagnostic-20261010",
+  "uncached_reasons": {
+    "1-nanocompile-cold.log": {
+      "LibraryDirectoryChangedDuringCompilation": 16
+    },
+    "4-nanocompile-warm.log": {
+      "LibraryDirectoryChangedDuringCompilation": 9
+    }
+  },
+  "log_manifest": {
+    "0-direct-prime.log": {
+      "bytes": 151985,
+      "sha256": "32f566e2790807c3e258d08673d2f6f28bbf988ae691ebefb30ce76a2606a2e1"
+    },
+    "1-nanocompile-cold.log": {
+      "bytes": 178447,
+      "sha256": "0881b8c296561c989183f91b26426ed38a7d983b910e59a1e3b1c74cf20c3f4c"
+    },
+    "2-kache-cold.log": {
+      "bytes": 151985,
+      "sha256": "61ff7f1d541df24e11339fa121b9bd11ba354dd5640cca3da6567a7b202e2e1b"
+    },
+    "3-direct-warm.log": {
+      "bytes": 151985,
+      "sha256": "5283ae6cb9702e95e34fbca054712846444fa5927b372750140cc0844e043f79"
+    },
+    "4-nanocompile-warm.log": {
+      "bytes": 167622,
+      "sha256": "02a8175d6a2bfab4bebcd5ba453a8ccd7354594c0b947b440b950b5a1420cd03"
+    },
+    "5-kache-warm.log": {
+      "bytes": 151984,
+      "sha256": "808d45c9ff27648907909dfae47b0197b7364608a63a88f47934b3bd3474dec3"
+    },
+    "daemon-0.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "fetch.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "coverage": "Complete Cargo stdout/stderr merged into per-build logs; no per-request native capture frontend; Nano trace enabled. Not a speed benchmark."
+}

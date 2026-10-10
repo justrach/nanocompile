@@ -43,6 +43,9 @@ jobs:
           python3 tests/r2_transport.py
           zig build -Doptimize=ReleaseFast
           zig build test
+          zig build-exe -OReleaseFast -lc --dep compiler_stream -Mroot=tools/compiler_stream_probe.zig -Mcompiler_stream=src/compiler_stream.zig -femit-bin="$RUNNER_TEMP/compiler-stream-probe"
+          python3 tests/compiler_stream.py "$RUNNER_TEMP/compiler-stream-probe"
+          NANOCOMPILE_STREAM_COMPILER=1 python3 tests/integration.py zig-out/bin/nanocompile
           python3 tests/build_script_cache.py zig-out/bin/nanocompile --output bench-results/build-script-cache.json
           python3 benchmarks/experiments/rust_physical_memo_check.py zig-out/bin/nanocompile --output bench-results/rust-physical-memo.json
           python3 tests/zig_preserved_mtime.py zig-out/bin/nanocompile --output bench-results/zig-preserved-mtime.json

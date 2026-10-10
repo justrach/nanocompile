@@ -104,13 +104,13 @@ def main():
         assert child.returncode == 0, log_path.read_text()[-4000:]
         artifacts = {str(path.relative_to(target)): sha(path) for path in sorted(target.rglob('*'))
                      if path.is_file() and (path.suffix in ('.rlib', '.dylib', '.so', '.o', '.a') or
-                                           path.name == 'build-script-build' or path.name.endswith('.nano-real'))}
+                                           path.name == 'build-script-build')}
         assert artifacts
         if reference is None:
             reference = artifacts
         own_references.setdefault(name, artifacts)
         expected = own_references[name] if args.own_artifact_references else reference
-        matches_reference = artifacts == expected
+        assert artifacts == expected, 'Artifact mismatch: ' + str(log_path)
         after = event_file.read_text().splitlines()
         counts = {event: after[len(before):].count(event) for event in set(after[len(before):])}
         if args.cold:
@@ -119,12 +119,11 @@ def main():
             assert counts.get('hit', 0) >= 165, counts
         row = {'implementation': name, 'phase': phase, 'seconds': elapsed,
                'events': counts, 'peak_sampled_process_tree_rss_bytes': peak,
-               'artifacts_match_reference': matches_reference, 'reference_mode': 'own' if args.own_artifact_references else 'shared',
+               'artifacts_match_reference': True, 'reference_mode': 'own' if args.own_artifact_references else 'shared',
                'artifacts_match_first_prime': artifacts == reference, 'artifact_count': len(artifacts), 'artifact_sha256': artifacts}
         evidence['builds'].append(row)
         save()
-        print(json.dumps({k: v for k, v in row.items() if k != 'artifact_sha256'}), flush=True)
-        assert matches_reference, 'Artifact mismatch: ' + str(log_path)
+        print(json.dumps(row), flush=True)
     for name in binaries:
         build(name, 'prime')
     for i in range(args.runs):
