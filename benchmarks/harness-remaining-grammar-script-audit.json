@@ -1,0 +1,216 @@
+{
+  "schema": 1,
+  "scope": "Remaining 19 actual Harness C grammar scripts individually read; no additional contracts enabled in live benchmark.",
+  "entries": [
+    {
+      "package": "tree-sitter-json",
+      "version": "0.24.8",
+      "script_relative_path": "bindings/rust/build.rs",
+      "build_script_sha256": "d70f4698ee2b338c03039b0048004b74f3cb2d431949b4d5e5c90013c7f1806f",
+      "language": "C",
+      "native_target_guard": "aarch64-apple-darwin",
+      "inputs": "complete package including parser, optional scanner, shared headers and queries; default compiler/archiver, SDK and native resource headers",
+      "special_cases": "wasm/MSVC branches excluded by native target; optional file/query existence captured by complete package membership; complete environment keyed",
+      "status": "source individually audited; runtime and full-project gates pending"
+    },
+    {
+      "package": "tree-sitter-cpp",
+      "version": "0.23.4",
+      "script_relative_path": "bindings/rust/build.rs",
+      "build_script_sha256": "6c0b73c24dc3d2c42f3c7d9e9074ec7eda3fefb451b1d811696c04f323741360",
+      "language": "C",
+      "native_target_guard": "aarch64-apple-darwin",
+      "inputs": "complete package including parser, optional scanner, shared headers and queries; default compiler/archiver, SDK and native resource headers",
+      "special_cases": "wasm/MSVC branches excluded by native target; optional file/query existence captured by complete package membership; complete environment keyed",
+      "status": "source individually audited; runtime and full-project gates pending"
+    },
+    {
+      "package": "tree-sitter-html",
+      "version": "0.23.2",
+      "script_relative_path": "bindings/rust/build.rs",
+      "build_script_sha256": "97a7d8809255d20917205096ba95f28a71a7e3f03b0096140da7d3d1253e438a",
+      "language": "C",
+      "native_target_guard": "aarch64-apple-darwin",
+      "inputs": "complete package including parser, optional scanner, shared headers and queries; default compiler/archiver, SDK and native resource headers",
+      "special_cases": "wasm/MSVC branches excluded by native target; optional file/query existence captured by complete package membership; complete environment keyed",
+      "status": "source individually audited; runtime and full-project gates pending"
+    },
+    {
+      "package": "tree-sitter-java",
+      "version": "0.23.5",
+      "script_relative_path": "bindings/rust/build.rs",
+      "build_script_sha256": "f0bb2a9bab500d44db01ae3a0537c648aba9f5a2b6cda39ea22f2897e2a38441",
+      "language": "C",
+      "native_target_guard": "aarch64-apple-darwin",
+      "inputs": "complete package including parser, optional scanner, shared headers and queries; default compiler/archiver, SDK and native resource headers",
+      "special_cases": "wasm/MSVC branches excluded by native target; optional file/query existence captured by complete package membership; complete environment keyed",
+      "status": "source individually audited; runtime and full-project gates pending"
+    },
+    {
+      "package": "tree-sitter-containerfile",
+      "version": "0.9.2",
+      "script_relative_path": "bindings/rust/build.rs",
+      "build_script_sha256": "413bb1926d613ba22b80151a355a7b43460dbbb3baaa901a28a98528e7e9b46c",
+      "language": "C",
+      "native_target_guard": "aarch64-apple-darwin",
+      "inputs": "complete package including parser, optional scanner, shared headers and queries; default compiler/archiver, SDK and native resource headers",
+      "special_cases": "wasm/MSVC branches excluded by native target; optional file/query existence captured by complete package membership; complete environment keyed",
+      "status": "source individually audited; runtime and full-project gates pending"
+    },
+    {
+      "package": "tree-sitter-bash",
+      "version": "0.25.1",
+      "script_relative_path": "bindings/rust/build.rs",
+      "build_script_sha256": "a52f852e17bf2c1248913a251c07ff06a36f0ef16df08172eceedc956f993f55",
+      "language": "C",
+      "native_target_guard": "aarch64-apple-darwin",
+      "inputs": "complete package including parser, optional scanner, shared headers and queries; default compiler/archiver, SDK and native resource headers",
+      "special_cases": "wasm/MSVC branches excluded by native target; optional file/query existence captured by complete package membership; complete environment keyed",
+      "status": "source individually audited; runtime and full-project gates pending"
+    },
+    {
+      "package": "tree-sitter-c",
+      "version": "0.24.2",
+      "script_relative_path": "bindings/rust/build.rs",
+      "build_script_sha256": "111b403dd548b7024678668f4f5af0afd89ba62a549b6c42b46dc50b79082966",
+      "language": "C",
+      "native_target_guard": "aarch64-apple-darwin",
+      "inputs": "complete package including parser, optional scanner, shared headers and queries; default compiler/archiver, SDK and native resource headers",
+      "special_cases": "wasm/MSVC branches excluded by native target; optional file/query existence captured by complete package membership; complete environment keyed",
+      "status": "source individually audited; runtime and full-project gates pending"
+    },
+    {
+      "package": "tree-sitter-nix",
+      "version": "0.3.0",
+      "script_relative_path": "bindings/rust/build.rs",
+      "build_script_sha256": "bbbb5cf8882de8573faa4e7f20270b2f136da4e2e5df1dfe1ea51dfabdd8efeb",
+      "language": "C",
+      "native_target_guard": "aarch64-apple-darwin",
+      "inputs": "complete package including parser, optional scanner, shared headers and queries; default compiler/archiver, SDK and native resource headers",
+      "special_cases": "wasm/MSVC branches excluded by native target; optional file/query existence captured by complete package membership; complete environment keyed",
+      "status": "source individually audited; runtime and full-project gates pending"
+    },
+    {
+      "package": "tree-sitter-go",
+      "version": "0.25.0",
+      "script_relative_path": "bindings/rust/build.rs",
+      "build_script_sha256": "d4b87805dc1aec1dd9206b15899ed521a7c12d9a54eaa5212199f50f03eef28f",
+      "language": "C",
+      "native_target_guard": "aarch64-apple-darwin",
+      "inputs": "complete package including parser, optional scanner, shared headers and queries; default compiler/archiver, SDK and native resource headers",
+      "special_cases": "wasm/MSVC branches excluded by native target; optional file/query existence captured by complete package membership; complete environment keyed",
+      "status": "source individually audited; runtime and full-project gates pending"
+    },
+    {
+      "package": "tree-sitter-md",
+      "version": "0.5.3",
+      "script_relative_path": "bindings/rust/build.rs",
+      "build_script_sha256": "f7e7dd0148e1cb38286bbdc142fa4dbdf3d2c1265a278cb6cab8a13c2b893898",
+      "language": "C",
+      "native_target_guard": "aarch64-apple-darwin",
+      "inputs": "complete package including parser, optional scanner, shared headers and queries; default compiler/archiver, SDK and native resource headers",
+      "special_cases": "wasm/MSVC branches excluded by native target; optional file/query existence captured by complete package membership; complete environment keyed",
+      "status": "source individually audited; runtime and full-project gates pending"
+    },
+    {
+      "package": "tree-sitter-rust",
+      "version": "0.24.2",
+      "script_relative_path": "bindings/rust/build.rs",
+      "build_script_sha256": "410942160f7d7b19c7c57ad2554cdc1bffb648e44d1f84377044aae9eb45e57a",
+      "language": "C",
+      "native_target_guard": "aarch64-apple-darwin",
+      "inputs": "complete package including parser, optional scanner, shared headers and queries; default compiler/archiver, SDK and native resource headers",
+      "special_cases": "wasm/MSVC branches excluded by native target; optional file/query existence captured by complete package membership; complete environment keyed",
+      "status": "source individually audited; runtime and full-project gates pending"
+    },
+    {
+      "package": "tree-sitter-lua",
+      "version": "0.5.0",
+      "script_relative_path": "bindings/rust/build.rs",
+      "build_script_sha256": "e88d605a34304242c6498d8fbaacd32b984979a264ca1d60a8631986747c5e32",
+      "language": "C",
+      "native_target_guard": "aarch64-apple-darwin",
+      "inputs": "complete package including parser, optional scanner, shared headers and queries; default compiler/archiver, SDK and native resource headers",
+      "special_cases": "wasm/MSVC branches excluded by native target; optional file/query existence captured by complete package membership; complete environment keyed",
+      "status": "source individually audited; runtime and full-project gates pending"
+    },
+    {
+      "package": "tree-sitter-toml-ng",
+      "version": "0.7.0",
+      "script_relative_path": "bindings/rust/build.rs",
+      "build_script_sha256": "cd8d5728277f82aae94b0edde29f345587ed85d0c2fbe80c91e95377263072f4",
+      "language": "C",
+      "native_target_guard": "aarch64-apple-darwin",
+      "inputs": "complete package including parser, optional scanner, shared headers and queries; default compiler/archiver, SDK and native resource headers",
+      "special_cases": "wasm/MSVC branches excluded by native target; optional file/query existence captured by complete package membership; complete environment keyed",
+      "status": "source individually audited; runtime and full-project gates pending"
+    },
+    {
+      "package": "tree-sitter-ruby",
+      "version": "0.23.1",
+      "script_relative_path": "bindings/rust/build.rs",
+      "build_script_sha256": "58cfadea70b4b5f4054b87b0610680fd5f16c077a15875b42cc1f9cf58b53c07",
+      "language": "C",
+      "native_target_guard": "aarch64-apple-darwin",
+      "inputs": "complete package including parser, optional scanner, shared headers and queries; default compiler/archiver, SDK and native resource headers",
+      "special_cases": "wasm/MSVC branches excluded by native target; optional file/query existence captured by complete package membership; complete environment keyed",
+      "status": "source individually audited; runtime and full-project gates pending"
+    },
+    {
+      "package": "tree-sitter-python",
+      "version": "0.25.0",
+      "script_relative_path": "bindings/rust/build.rs",
+      "build_script_sha256": "4e069992deffe54f04909739e954f581409c7d167cb5ba1f775717258751568f",
+      "language": "C",
+      "native_target_guard": "aarch64-apple-darwin",
+      "inputs": "complete package including parser, optional scanner, shared headers and queries; default compiler/archiver, SDK and native resource headers",
+      "special_cases": "wasm/MSVC branches excluded by native target; optional file/query existence captured by complete package membership; complete environment keyed",
+      "status": "source individually audited; runtime and full-project gates pending"
+    },
+    {
+      "package": "tree-sitter-css",
+      "version": "0.25.0",
+      "script_relative_path": "bindings/rust/build.rs",
+      "build_script_sha256": "3c3216dd226a3d3d5df69ece83d66ed560b4ca7213b61863e08e8bd970c5e503",
+      "language": "C",
+      "native_target_guard": "aarch64-apple-darwin",
+      "inputs": "complete package including parser, optional scanner, shared headers and queries; default compiler/archiver, SDK and native resource headers",
+      "special_cases": "wasm/MSVC branches excluded by native target; optional file/query existence captured by complete package membership; complete environment keyed",
+      "status": "source individually audited; runtime and full-project gates pending"
+    },
+    {
+      "package": "tree-sitter-make",
+      "version": "1.1.1",
+      "script_relative_path": "bindings/rust/build.rs",
+      "build_script_sha256": "4dce6d1c2d674f92e95dff7e9e135e6b2e4220483c8f90c7870959ebd03f97bd",
+      "language": "C",
+      "native_target_guard": "aarch64-apple-darwin",
+      "inputs": "complete package including parser, optional scanner, shared headers and queries; default compiler/archiver, SDK and native resource headers",
+      "special_cases": "wasm/MSVC branches excluded by native target; optional file/query existence captured by complete package membership; complete environment keyed",
+      "status": "source individually audited; runtime and full-project gates pending"
+    },
+    {
+      "package": "tree-sitter-javascript",
+      "version": "0.25.0",
+      "script_relative_path": "bindings/rust/build.rs",
+      "build_script_sha256": "3b3eb16f02f402ab88518f8366baf27d270bd8024f3d667737958dadd92e17be",
+      "language": "C",
+      "native_target_guard": "aarch64-apple-darwin",
+      "inputs": "complete package including parser, optional scanner, shared headers and queries; default compiler/archiver, SDK and native resource headers",
+      "special_cases": "wasm/MSVC branches excluded by native target; optional file/query existence captured by complete package membership; complete environment keyed",
+      "status": "source individually audited; runtime and full-project gates pending"
+    },
+    {
+      "package": "tree-sitter-yaml",
+      "version": "0.7.2",
+      "script_relative_path": "bindings/rust/build.rs",
+      "build_script_sha256": "328a8873b1c4eb91dfc019abdfb7c14d3c091276d6d5c4d1a8d9ed5435173869",
+      "language": "C",
+      "native_target_guard": "aarch64-apple-darwin",
+      "inputs": "complete package including parser, optional scanner, shared headers and queries; default compiler/archiver, SDK and native resource headers",
+      "special_cases": "wasm/MSVC branches excluded by native target; optional file/query existence captured by complete package membership; complete environment keyed",
+      "status": "source individually audited; runtime and full-project gates pending"
+    }
+  ],
+  "instruction": "Require actual-script output/runtime/edit/header/membership/failure/corruption checks before enabling, followed by full-Harness repeated performance and actual full application edits. Keep live six-grammar contract frozen."
+}

@@ -1,4 +1,4 @@
-"""Replay six audited actual Harness C grammar scripts with runtime ABI edits."""
+"""Replay explicitly audited actual Harness C grammar scripts with runtime ABI edits."""
 import argparse
 import hashlib
 import json
@@ -29,7 +29,7 @@ def main():
                 contract_sha256=sha(args.contract),cargo_log_sha256=sha(args.cargo_log),
                 bindgen_tools_file_sha256=controls_hash,packages={},
                 stderr_normalization='Exclude nanocompile diagnostic lines and nondeterministic Rust main-thread panic IDs; raw streams retained and hashed',
-                audit_sha256=sha(args.audit), scope='Six audited actual retained Harness grammar build-script executables, private package copies; runtime grammar ABI edits; isolated diagnostics, no full-project speed claim')
+                audit_sha256=sha(args.audit), scope='Explicitly audited actual retained Harness grammar build-script executables, private package copies; runtime grammar ABI edits; isolated diagnostics, no full-project speed claim')
     def save():save_report(args.output,report)
     try:
         for audit_entry in json.loads(args.audit.read_bytes())['entries']:

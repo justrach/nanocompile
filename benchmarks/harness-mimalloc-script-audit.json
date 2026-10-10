@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "scope": "Actual libmimalloc-sys 0.1.49 native v2 source audit; no enabled contract or speed claim",
+  "entry": {
+    "package": "libmimalloc-sys",
+    "version": "0.1.49",
+    "script_relative_path": "build.rs",
+    "build_script_sha256": "4917ec3e9a59e216b1b568ce37ea5cb97ba0ba1b9c50789a29d1cd429de9119f",
+    "selected_native_features": {
+      "CARGO_FEATURE_V2": "1"
+    },
+    "native_selectors": {
+      "CARGO_CFG_TARGET_ARCH": "aarch64",
+      "CARGO_CFG_TARGET_ENV": "",
+      "CARGO_CFG_TARGET_FAMILY": "unix",
+      "CARGO_CFG_TARGET_OS": "macos",
+      "CARGO_CFG_TARGET_VENDOR": "apple",
+      "HOST": "aarch64-apple-darwin",
+      "TARGET": "aarch64-apple-darwin",
+      "DEBUG": "false",
+      "OPT_LEVEL": "3"
+    },
+    "refused_features": [
+      "DEBUG",
+      "DEBUG_IN_DEBUG",
+      "OVERRIDE",
+      "SECURE",
+      "WIN_DIRECT_TLS",
+      "LOCAL_DYNAMIC_TLS",
+      "NO_THP"
+    ],
+    "inputs": "complete package C/header tree, default native compiler/archiver and SDK/resources; keep epoch fixed across every implementation",
+    "runtime_probe": "mi_version() from linked native archive; preserved-mtime MI_MALLOC_VERSION header edit must change its returned value; restore and compare fresh outputs",
+    "status": "source individually audited; runtime and full-project gates pending"
+  }
+}
