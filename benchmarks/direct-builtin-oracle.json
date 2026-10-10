@@ -1,0 +1,142 @@
+{
+  "accepted": [
+    {
+      "file": "libaddr2line-3a3056fe7fb9d8c8.rmeta",
+      "sha256": "40ef7117a3f70dbd15e54776fecca46a174b6fc4de292a230255ab9d211a0313",
+      "dependencies": 6
+    },
+    {
+      "file": "libadler2-e301200719ff9954.rmeta",
+      "sha256": "c2416beb502f7be30203cc1e98074015eed40a768725a8d7ae9bf927d56adbf9",
+      "dependencies": 3
+    },
+    {
+      "file": "liballoc-4eb19a7bc969a107.rmeta",
+      "sha256": "49ed63ba4a69032f6e4d44a7b9daee881b44dffe82229b2e36bce1ce3216cc62",
+      "dependencies": 2
+    },
+    {
+      "file": "libcfg_if-76fc71a3e7dd9258.rmeta",
+      "sha256": "7087d70c52a3983ded1ee6fd8694a304216af4aaacf6dc04ff81b9a5af9de229",
+      "dependencies": 3
+    },
+    {
+      "file": "libcompiler_builtins-bdac9431717ff6fa.rmeta",
+      "sha256": "ddbe9d7ff50e88f7254895075830fa6517654641a1c24d71eaa0d023235842f9",
+      "dependencies": 1
+    },
+    {
+      "file": "libcore-df38416008f914c9.rmeta",
+      "sha256": "d176f829bc08a8bc63e1042140cb0428240a9b1b14c8f3ad65d08dfa44e762c6",
+      "dependencies": 0
+    },
+    {
+      "file": "libgetopts-b2846d61568fe921.rmeta",
+      "sha256": "1f0244d9b0457b4ed7e253771b024433a3cde8fde318037d654ace15f36c638a",
+      "dependencies": 20
+    },
+    {
+      "file": "libgimli-a2a8080f78417d10.rmeta",
+      "sha256": "e6587ff9e8fc92b10d1de8daca2f064b70d443efd81068341e7fa66a4f9e9cba",
+      "dependencies": 5
+    },
+    {
+      "file": "libhashbrown-3de76a5eb3c6e1f5.rmeta",
+      "sha256": "b6628aba49d91be44184df5fcedb076de7335e244d8bd18957afe8be1a8b07ac",
+      "dependencies": 5
+    },
+    {
+      "file": "liblibc-293d73a1e0e75853.rmeta",
+      "sha256": "eddcf2acdbe9a705c2b7d3bc474bc1907eaf8a39baacf76c5917bff85f9a47bf",
+      "dependencies": 3
+    },
+    {
+      "file": "libmemchr-152d1ba531042646.rmeta",
+      "sha256": "89cebc53f350c6c7d35a4ee95e0783581c5dd35084edaae4e4af3a7b8d0a85ed",
+      "dependencies": 3
+    },
+    {
+      "file": "libminiz_oxide-8fcacb3898ca8581.rmeta",
+      "sha256": "4d18e3bcf25505e04ce994cc567b674905c1a69b774a9541a7173fd64ffaaaf7",
+      "dependencies": 4
+    },
+    {
+      "file": "libobject-e4e7c834d92d30c0.rmeta",
+      "sha256": "e1fbce8c98810a835d6ed1cea1eb89b65251021895645ef00de54dc7776f33d5",
+      "dependencies": 6
+    },
+    {
+      "file": "libpanic_abort-a215be2211b52cc6.rmeta",
+      "sha256": "c4b3f6b11b7157a49a977e4ab96e0cc6a2db660d093fc38d20fac60592a8d495",
+      "dependencies": 3
+    },
+    {
+      "file": "libpanic_unwind-318bd5df624c647f.rmeta",
+      "sha256": "ebc1d2205e33d42cf0cf66edefad065299c12146c7bc074270414186e62249d3",
+      "dependencies": 6
+    },
+    {
+      "file": "libproc_macro-9a36b256e9e437c3.rmeta",
+      "sha256": "15c3883a664f0a619d0d8f711c9cfcadf7041d6934e77544a2971649f20554dc",
+      "dependencies": 20
+    },
+    {
+      "file": "libprofiler_builtins-4fb22c271feef7d7.rmeta",
+      "sha256": "c865662c059d306849b578d479c5ff8e02fbc99fda89bf84103e547341a40267",
+      "dependencies": 0
+    },
+    {
+      "file": "librustc_demangle-ebd8fec938ab09d3.rmeta",
+      "sha256": "f6cf2bef8e34277ab5d537c7312a260c6d6e151b7f486aeaa8ddfb75652e5963",
+      "dependencies": 3
+    },
+    {
+      "file": "librustc_literal_escaper-097ee699e76b749f.rmeta",
+      "sha256": "399290200047f60960975f2980edcb2d3c729b554dbf5e9ab87b4e6298479253",
+      "dependencies": 3
+    },
+    {
+      "file": "librustc_std_workspace_alloc-41e7c80f3999d6d2.rmeta",
+      "sha256": "e1941f9b928cf376e6b8ba304ac24addca4e63cdd18cde0f1223bccd07a67ea3",
+      "dependencies": 3
+    },
+    {
+      "file": "librustc_std_workspace_core-33392671269ff5ce.rmeta",
+      "sha256": "2503ca76a46d29b3353a6d0015e5ef58f1331f93742ed250411fdb074c6eff5c",
+      "dependencies": 2
+    },
+    {
+      "file": "librustc_std_workspace_std-3186540c39ea3633.rmeta",
+      "sha256": "329a05c969f581fe010a3186d0b9c2e74d1ec8254212ec967ef3730a89971c03",
+      "dependencies": 19
+    },
+    {
+      "file": "libstd-4f24f0876fd27385.rmeta",
+      "sha256": "987c49f29b13ebec919627f71552392fd270965de7a4f617192e308289667d8c",
+      "dependencies": 18
+    },
+    {
+      "file": "libstd_detect-f1f33e12f7edffd1.rmeta",
+      "sha256": "ba51d938071e9056892a504fd0af78b92ac1b101df1fa6b173f5d31fba8ff5a7",
+      "dependencies": 6
+    },
+    {
+      "file": "libsysroot-be92d788bf176424.rmeta",
+      "sha256": "0db8c3a2caf9ec42a0f477580e836b87c5c9d75c23e93265162b759e240c9694",
+      "dependencies": 19
+    },
+    {
+      "file": "libtest-dd45b853bb6801d4.rmeta",
+      "sha256": "34610ec22a7b386ac134b412086e30fdf9dbb3ccf7edeb9619e1a2d36fcff3b0",
+      "dependencies": 21
+    },
+    {
+      "file": "libunwind-14811642c31e6d65.rmeta",
+      "sha256": "3b5e9d88f4d016ce0893c56901c9580ddb8847be1ed1e4ed512f05bd0c2ed0c4",
+      "dependencies": 4
+    }
+  ],
+  "refused": [],
+  "reader_sha256": "626b05f9010ae499bb8d31bb24808917bea702206ec7431b46822a01d50381dd",
+  "method": "every directly decoded installed host rmeta full root and dependency graph compared to real rustc -Zls=root; unsupported formats retain production query fallback"
+}

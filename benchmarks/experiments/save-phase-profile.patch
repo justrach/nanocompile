@@ -1,0 +1,109 @@
+--- a/src/compiler.zig
++++ b/src/compiler.zig
+@@ -1,3 +1,4 @@
++const phase = @import("default_phase.zig");
+ const std = @import("std");
+ const cache = @import("cache.zig");
+ const identity = @import("identity.zig");
+@@ -643,14 +644,18 @@
+ }
+ 
+ pub fn execute(ctx: *cache.Context, kind: Kind, argv: []const []const u8) !u8 {
++    const phase_start = phase.now(ctx);
+     if (ctx.env.get("NANOCOMPILE_DISABLE")) |v| if (eq(v, "1")) return bypass(ctx, argv, "bypass: disabled");
+     const plan = (if (kind == .rust) rustPlan(ctx, argv) else zigPlan(ctx, argv)) catch |err|
+         return bypass(ctx, argv, try std.fmt.allocPrint(ctx.a, "bypass: {s}", .{@errorName(err)}));
+     if (plan.producer) return executeProducer(ctx, plan, argv);
++    const phase_plan = phase.now(ctx);
+     ctx.prepare() catch return bypass(ctx, argv, "bypass: cache unavailable");
+     const maintenance = cache.Lock.acquire(ctx, "maintenance", false) catch return bypass(ctx, argv, "bypass: cache lock unavailable");
+     defer maintenance.release();
++    const phase_prepared = phase.now(ctx);
+     const key = keyFor(ctx, kind, argv) catch |err| return bypass(ctx, argv, try std.fmt.allocPrint(ctx.a, "bypass: compiler identity unavailable ({s})", .{@errorName(err)}));
++    const phase_identity = phase.now(ctx);
+     const flight = cache.Lock.acquire(ctx, key, true) catch return bypass(ctx, argv, "bypass: key lock unavailable");
+     defer flight.release();
+     // Different argument sets can still write the same output. Serialize those
+@@ -670,11 +675,14 @@
+         const current = ctx.digest(config.path) catch return bypass(ctx, argv, "bypass: cannot read extra input declaration");
+         if (!eq(config.hash, current)) return bypass(ctx, argv, "bypass: extra input declaration changed");
+     }
++    const phase_locked = phase.now(ctx);
+     if (cache.restoreVariants(ctx, key, plan.outputs) catch false) {
+         ctx.trace("hit");
+         ctx.event("hit");
++        phase.emit(ctx, "hit", key, .{ .plan_ns = phase_plan - phase_start, .prepare_ns = phase_prepared - phase_plan, .identity_ns = phase_identity - phase_prepared, .locks_ns = phase_locked - phase_identity, .restore_ns = phase.now(ctx) - phase_locked });
+         return 0;
+     }
++    const phase_lookup = phase.now(ctx);
+     var before: std.ArrayList(cache.Dependency) = .empty;
+     try before.appendSlice(ctx.a, dependencyRecords(ctx, plan.dependencies) catch return bypass(ctx, argv, "bypass: cannot fingerprint inputs"));
+     const native = rust_dependencies.nativeSnapshot(ctx, plan.native_dirs) catch |err|
+@@ -698,6 +706,7 @@
+         }
+         try command.appendSlice(ctx.a, &.{ "--cache-dir", job.out });
+     } else try command.appendSlice(ctx.a, argv);
++    const phase_ready = phase.now(ctx);
+     const started = std.Io.Clock.real.now(ctx.io).nanoseconds;
+     ctx.trace("miss: compiling");
+     const streaming = kind == .rust and eq(ctx.env.get("NANOCOMPILE_STREAM_COMPILER") orelse "1", "1");
+@@ -706,6 +715,7 @@
+         try ctx.out(result.stdout);
+         try std.Io.File.stderr().writeStreamingAll(ctx.io, result.stderr);
+     }
++    const phase_compiled = phase.now(ctx);
+     const code = exitCode(result.term);
+     if (code != 0) {
+         ctx.event("failed");
+@@ -713,10 +723,12 @@
+     }
+     ctx.event("miss");
+     save(ctx, key, plan, argv, before.items, directories, started, result, &.{}) catch |err| ctx.trace(try std.fmt.allocPrint(ctx.a, "uncached: {s}", .{@errorName(err)}));
++    phase.emit(ctx, "miss", key, .{ .plan_ns = phase_plan - phase_start, .prepare_ns = phase_prepared - phase_plan, .identity_ns = phase_identity - phase_prepared, .locks_ns = phase_locked - phase_identity, .lookup_ns = phase_lookup - phase_locked, .snapshot_ns = phase_ready - phase_lookup, .compiler_ns = phase_compiled - phase_ready, .save_ns = phase.now(ctx) - phase_compiled });
+     return 0;
+ }
+ 
+ fn save(ctx: *cache.Context, key: []const u8, plan: Plan, argv: []const []const u8, before: []const cache.Dependency, directories: []const rust_dependencies.Directory, started: i96, result: std.process.RunResult, linker: []const cache.Dependency) !void {
++    const save_start = phase.now(ctx);
+     for (before) |dep| if (!dep.directory) {
+         for (plan.outputs) |out| if (eq(dep.path, out)) return error.OverlappingOutput;
+     };
+@@ -733,6 +745,7 @@
+             if (!dep.directory) try validated.put(ctx.a, dep.path, digest);
+         }
+     }
++    const save_before = phase.now(ctx);
+     var paths: std.ArrayList([]const u8) = .empty;
+     for (plan.dependencies) |path| try addUnique(ctx, &paths, path);
+     if (plan.dep_info) |path| {
+@@ -777,6 +790,7 @@
+         if (st.mtime.nanoseconds >= started or st.ctime.nanoseconds >= started) return error.DirectoryChangedDuringCompilation;
+         try records.append(ctx.a, .{ .path = dir, .hash = try ctx.directoryDigest(dir, false, plan.outputs), .directory = true });
+     }
++    const save_sources = phase.now(ctx);
+     if (!plan.producer and plan.dep_info != null and (directories.len != 0 or hidden_native))
+         try rust_dependencies.collect(ctx, argv, plan.outputs, directories, started, &records, true, &validated, hidden_native);
+     if (plan.producer) {
+@@ -785,7 +799,9 @@
+         };
+         try records.appendSlice(ctx.a, linker);
+     }
++    const save_graph = phase.now(ctx);
+     try cache.storeVariants(ctx, key, records.items, plan.outputs, result.stdout, result.stderr);
++    if (!plan.producer) phase.emit(ctx, "save", key, .{ .before_ns = save_before - save_start, .sources_ns = save_sources - save_before, .graph_ns = save_graph - save_sources, .store_ns = phase.now(ctx) - save_graph });
+ }
+ 
+ test "dep-info handles escaped paths and continuations" {
+--- /dev/null
++++ b/src/default_phase.zig
+@@ -0,0 +1,10 @@
++const std = @import("std");
++const cache = @import("cache.zig");
++extern "c" fn getpid() c_int;
++pub fn now(ctx: *cache.Context) i96 { return std.Io.Clock.awake.now(ctx.io).nanoseconds; }
++pub fn emit(ctx: *cache.Context, label: []const u8, key: []const u8, data: anytype) void {
++    const body = std.json.Stringify.valueAlloc(ctx.a, .{ .label = label, .key = key, .crate = ctx.env.get("CARGO_CRATE_NAME"), .data = data }, .{}) catch return;
++    const name = std.fmt.allocPrint(ctx.a, "{d}-{d}.json", .{ getpid(), now(ctx) }) catch return;
++    const file = ctx.path(&.{ "default-phase", name }) catch return;
++    ctx.atomic(file, body) catch {};
++}

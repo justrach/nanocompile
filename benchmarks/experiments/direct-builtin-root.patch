@@ -1,0 +1,36 @@
+diff --git a/src/rust_metadata.zig b/src/rust_metadata.zig
+index 7976a42..b07e8c6 100644
+--- a/src/rust_metadata.zig
++++ b/src/rust_metadata.zig
+@@ -126,10 +126,12 @@ pub const Resolver = struct {
+         } else |_| {}
+         const before = try Dir.cwd().statFile(self.ctx.io, path, .{});
+         try self.validateState(path);
+-        const result = try std.process.run(self.ctx.a, self.ctx.io, .{ .argv = &.{ self.compiler, "-Zls=root", path }, .environ_map = self.query_env, .cwd = .{ .path = self.query_cwd } });
+-        const root = switch (result.term) {
+-            .exited => |code| if (code == 0) parse(result.stdout) catch null else null,
+-            else => null,
++        const root = (if (toolchain_file) try directRoot(self.ctx, path) else null) orelse blk: {
++            const result = try std.process.run(self.ctx.a, self.ctx.io, .{ .argv = &.{ self.compiler, "-Zls=root", path }, .environ_map = self.query_env, .cwd = .{ .path = self.query_cwd } });
++            break :blk switch (result.term) {
++                .exited => |code| if (code == 0) parse(result.stdout) catch null else null,
++                else => null,
++            };
+         };
+         const after = try Dir.cwd().statFile(self.ctx.io, path, .{});
+         if (before.inode != after.inode or before.size != after.size or before.mtime.nanoseconds != after.mtime.nanoseconds or before.ctime.nanoseconds != after.ctime.nanoseconds) return error.InputChangedDuringMetadataQuery;
+@@ -139,6 +141,14 @@ pub const Resolver = struct {
+     }
+ };
+ 
++fn directRoot(ctx: *cache.Context, path: []const u8) !?Root {
++    if (!std.mem.endsWith(u8, path, ".rmeta")) return null;
++    const bytes = ctx.read(path) catch return null;
++    const graph = @import("rmeta_direct.zig").decode(ctx.a, bytes) catch return null;
++    ctx.trace("metadata: direct toolchain root");
++    return .{ .name = graph.root.name, .hash = graph.root.hash, .triple = graph.root.triple, .proc_macro = graph.root.proc_macro };
++}
++
+ test "root classifications require name hash target and ordinary crate" {
+     const header = "Crate info:\nname dep-first\nhash 0123456789abcdef0123456789abcdef stable_crate_id other\nproc_macro false\ntriple aarch64-apple-darwin\n=External Dependencies=\n";
+     const root = try parse(header);

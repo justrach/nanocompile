@@ -1,0 +1,6 @@
+{
+  "base_commit": "5e6acd5552ad601b5db9b7f0434d59fe4091fbb5",
+  "scope": "isolated ordinary compiler overall phases plus successful save before/sources/graph/store phases; producers lack ordinary/save records",
+  "binary_sha256": "9957c82c0c1afb56069247320ecb1877d11bb79bf064d7feb17c2f9b8f170e62",
+  "patch_sha256": "9ea3ad429275195570bedc9d4797c2c913f88c0f9fbffc048dd786d66b110581"
+}

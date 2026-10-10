@@ -1,0 +1,7 @@
+{
+  "direct_toolchain_root_decisions": 19,
+  "events": [
+    "miss"
+  ],
+  "fixture": "explicit crate-name actual cold ordinary rustc call; earlier unnamed fixture bypassed and supplied no activation evidence"
+}
