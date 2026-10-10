@@ -45,3 +45,7 @@ This confirms a cold improvement on this workload, alongside the substantial war
 A separate streaming run with Nano tracing enabled records 16 `LibraryDirectoryChangedDuringCompilation` store refusals in the cold build and nine in its first warm build. That warm build has 25 Rust misses. These errors confirm that directory guards refuse stores during pipelined builds; they do not alone explain every miss or identify which candidate changed. [Log sizes, hashes and refusal counts](../benchmarks/harness-streaming-diagnostic.json) preserve the evidence. Complete per-build Cargo stdout/stderr logs stay in `/tmp/nano-stream-diagnostic-20261010`; this session uses no buffering capture frontend. Logging is diagnostic overhead and its timings are excluded from speed claims.
 
 The updated collector includes ring's real `.nano-real` build-script executable. Its warm hash, launcher hash, all rlibs, macro dylibs and native objects/archives match the streaming runtime's own cold reference in this diagnostic run. Future work must resolve the refusals while keeping input validation intact.
+
+## Follow-up: guarded companions
+
+The [guarded companion variation](pipelined-companions.md) restores full warm coverage in three Harness rounds while retaining cold leads. It remains opt-in during source-edit and hosted validation. The rejected streaming-only evidence above remains historical evidence; enable both flags for the follow-up, rather than assuming streaming alone is fixed.

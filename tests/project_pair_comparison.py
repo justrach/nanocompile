@@ -32,6 +32,7 @@ def main():
     p.add_argument('--cold', action='store_true', help='clear compiler cache before every build')
     p.add_argument('--compiler-stream', action='store_true', help='same streaming flag environment for both binaries')
     p.add_argument('--build-script-contract', type=Path)
+    p.add_argument('--pipelined-companions', action='store_true', help='experimental guarded metadata-first archive membership')
     args = p.parse_args()
     assert args.runs > 0 and args.jobs > 0
     binaries = {name: getattr(args, name).resolve() for name in ('baseline', 'candidate')}
@@ -45,6 +46,8 @@ def main():
                CARGO_TARGET_DIR=str(target), CARGO_INCREMENTAL='0',
                NANOCOMPILE_DIR=str(root / 'cache'), NANOCOMPILE_PROC_MACROS='reported',
                NANOCOMPILE_PROC_MACRO_PRODUCERS='1', NANOCOMPILE_EXECUTABLE_PRODUCERS='1')
+    if args.pipelined_companions:
+        env['NANOCOMPILE_PIPELINED_COMPANIONS'] = '1'
     if args.compiler_stream:
         env['NANOCOMPILE_STREAM_COMPILER'] = '1'
     if args.build_script_contract:
@@ -63,7 +66,7 @@ def main():
         'timestamp': datetime.datetime.now(datetime.timezone.utc).isoformat(),
         'binary_sha256': {name: sha(path) for name, path in binaries.items()},
         'script_sha256': sha(Path(__file__)), 'jobs': args.jobs, 'runs_per_binary': args.runs,
-        'cold': args.cold, 'compiler_stream': args.compiler_stream,
+        'pipelined_companions': args.pipelined_companions, 'cold': args.cold, 'compiler_stream': args.compiler_stream,
         'build_script_contract_sha256': sha(args.build_script_contract) if args.build_script_contract else None,
         'command': command, 'tracked_rust_and_manifest_hashes': source_hashes, 'builds': [],
     }

@@ -234,7 +234,7 @@ pub fn unseal(ctx: *Context, bytes: []const u8) ![]const u8 {
     return bytes[65..];
 }
 
-pub const Dependency = struct { path: []const u8, hash: []const u8, directory: bool = false, libraries: bool = false, library_prefix: ?[]const u8 = null, all_members: bool = false, missing: ?bool = null, symlink_target: ?[]const u8 = null };
+pub const Dependency = struct { path: []const u8, hash: []const u8, directory: bool = false, libraries: bool = false, library_prefix: ?[]const u8 = null, metadata_companion: bool = false, all_members: bool = false, missing: ?bool = null, symlink_target: ?[]const u8 = null };
 
 pub fn symlinkDependency(ctx: *Context, path_: []const u8) !Dependency {
     const path = try std.fs.path.resolve(ctx.a, &.{ ctx.cwd, path_ });
@@ -255,7 +255,7 @@ fn symlinkHash(ctx: *Context, path: []const u8, target: []const u8) ![]const u8 
 fn symlinkValid(ctx: *Context, dep: Dependency) !bool {
     const target = dep.symlink_target orelse return false;
     if (target.len == 0 or dep.missing != null or dep.directory or dep.libraries or dep.all_members or
-        dep.library_prefix != null or !std.fs.path.isAbsolute(dep.path)) return false;
+        dep.library_prefix != null or dep.metadata_companion or !std.fs.path.isAbsolute(dep.path)) return false;
     if (!std.mem.eql(u8, dep.hash, try symlinkHash(ctx, dep.path, target))) return false;
     if ((try Dir.cwd().statFile(ctx.io, dep.path, .{ .follow_symlinks = false })).kind != .sym_link) return false;
     var buffer: [std.fs.max_path_bytes]u8 = undefined;
@@ -286,7 +286,7 @@ fn absent(ctx: *Context, path_: []const u8) !bool {
 }
 
 fn missingValid(ctx: *Context, dep: Dependency) !bool {
-    if (dep.missing != true or dep.symlink_target != null or dep.directory or dep.libraries or dep.all_members or dep.library_prefix != null or !std.fs.path.isAbsolute(dep.path)) return false;
+    if (dep.missing != true or dep.symlink_target != null or dep.directory or dep.libraries or dep.all_members or dep.library_prefix != null or dep.metadata_companion or !std.fs.path.isAbsolute(dep.path)) return false;
     if (!std.mem.eql(u8, dep.hash, try absentHash(ctx, dep.path))) return false;
     return absent(ctx, dep.path);
 }
@@ -599,7 +599,7 @@ fn restoreWithSnapshot(ctx: *Context, key: []const u8, allowed_outputs: []const 
             const hash = if (dep.library_prefix) |prefix| blk: {
                 const slot = try library_names.getOrPut(ctx.a, dep.path);
                 if (!slot.found_existing) slot.value_ptr.* = ctx.libraryNames(dep.path, allowed_outputs) catch return null;
-                break :blk try prefixDigest(ctx.a, slot.value_ptr.*, prefix);
+                break :blk if (dep.metadata_companion) metadataCompanionDigest(ctx.a, slot.value_ptr.*, prefix) catch return null else try prefixDigest(ctx.a, slot.value_ptr.*, prefix);
             } else if (dep.all_members)
                 ctx.nativeDirectoryDigest(dep.path) catch return null
             else if (dep.directory)
@@ -915,6 +915,25 @@ test "negative linker lookups gate storage and restoration before writes" {
 pub fn prefixDigest(a: std.mem.Allocator, names: []const []const u8, prefix: []const u8) ![]const u8 {
     var hash = Hash.init(.{});
     for (names) |name| if (std.mem.startsWith(u8, name, prefix)) field(&hash, name);
+    return finish(a, &hash);
+}
+
+// Only a proven metadata-first same-stem regular archive may be absent or
+// appear without changing the candidate set. The metadata name remains guarded.
+pub fn metadataCompanionDigest(a: std.mem.Allocator, names: []const []const u8, prefix: []const u8) ![]const u8 {
+    if (!std.mem.startsWith(u8, prefix, "lib") or prefix.len <= 3) return error.InvalidMetadataCompanion;
+    for (prefix) |ch| if (!std.ascii.isAlphanumeric(ch) and ch != '_' and ch != '-') return error.InvalidMetadataCompanion;
+    const meta = try std.fmt.allocPrint(a, "{s}.rmeta:file", .{prefix});
+    var present = false;
+    for (names) |name| if (std.mem.eql(u8, name, meta)) {
+        present = true;
+        break;
+    };
+    if (!present) return error.InvalidMetadataCompanion;
+    const archive = try std.fmt.allocPrint(a, "{s}.rlib:file", .{prefix});
+    var hash = Hash.init(.{});
+    field(&hash, "nano-metadata-companion-membership-v1");
+    for (names) |name| if (std.mem.startsWith(u8, name, prefix) and !std.mem.eql(u8, name, archive)) field(&hash, name);
     return finish(a, &hash);
 }
 

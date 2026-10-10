@@ -3,6 +3,7 @@ import argparse
 import hashlib
 import json
 import os
+import shutil
 from pathlib import Path
 import subprocess
 import tempfile
@@ -12,16 +13,19 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('binary', type=Path, nargs='?')
     parser.add_argument('--output', type=Path)
+    parser.add_argument('--pipelined-companions', action='store_true')
     args = parser.parse_args()
     env = {k: v for k, v in os.environ.items()
            if not k.startswith(('R2_', 'KACHE_', 'NANOCOMPILE_'))
            and k not in ('RUSTC_WRAPPER', 'RUSTC_WORKSPACE_WRAPPER', 'RUSTC_BOOTSTRAP')}
     env['RUSTUP_TOOLCHAIN'] = '1.97.1'
+    if args.pipelined_companions:
+        env['NANOCOMPILE_PIPELINED_COMPANIONS'] = '1'
     with tempfile.TemporaryDirectory(prefix='nano-rmeta-priority-') as tmp:
         root = Path(tmp)
         if args.binary:
             env.update(NANOCOMPILE_DIR=str(root / 'cache'), NANOCOMPILE_TRACE='1')
-        for folder in ('deps', 'out', 'alternate'):
+        for folder in ('deps', 'out', 'alternate', 'kind-cache'):
             (root / folder).mkdir()
 
         def run(command, success=True):
@@ -78,6 +82,29 @@ def main():
         # Explicit --extern archive paths retain their full input semantics.
         explicit = library('middle', 'out', ['--extern', 'dep=deps/libdep.rlib'])
         run(explicit, success=False)
+        if args.binary and args.pipelined_companions:
+            archive.unlink()
+            assert compile_top() == reference
+            cached(True)
+            archive.write_bytes(original_archive)
+            cached(True)
+            # Isolate kind-change variants from the bounded history exercised below.
+            regular_cache = env['NANOCOMPILE_DIR']
+            env['NANOCOMPILE_DIR'] = str(root / 'kind-cache')
+            cached(False)
+            cached(True)
+            # Only the regular companion entry is omitted. A differently
+            # typed directory entry still changes the membership guard.
+            alias = root / 'archive-alias'
+            alias.write_bytes(original_archive)
+            archive.unlink()
+            archive.symlink_to(alias)
+            assert compile_top() == reference
+            cached(False)
+            archive.unlink()
+            archive.write_bytes(original_archive)
+            cached(True)
+            env['NANOCOMPILE_DIR'] = regular_cache
         archive.write_bytes(original_archive)
         assert compile_top() == reference
         run(binary)
@@ -119,6 +146,28 @@ def main():
             failed = run([str(args.binary.resolve()), *explicit], success=False)
             assert b'nanocompile: hit' not in failed.stderr
             archive.write_bytes(original_archive)
+        if args.binary and args.pipelined_companions:
+            seed = root / 'archive-seed'
+            seed.write_bytes(original_archive)
+            proxy = root / 'late-rustc'
+            source = Path(__file__).resolve().parents[1] / 'tools/late_archive_compiler.c'
+            subprocess.run(['cc', str(source), '-O2', '-o', str(proxy),
+                            '-DREAL_RUSTC=' + json.dumps(shutil.which('rustc')),
+                            '-DARCHIVE_SEED=' + json.dumps(str(seed)),
+                            '-DARCHIVE_DEST=' + json.dumps(str(archive))], check=True, capture_output=True)
+            archive.unlink()
+            for path in (root / 'out').iterdir():
+                path.unlink()
+            late = [str(args.binary.resolve()), str(proxy), *top[1:]]
+            first_late = run(late)
+            assert archive.read_bytes() == original_archive
+            assert b'uncached:' not in first_late.stderr, first_late.stderr.decode()
+            assert b'nanocompile: hit' not in first_late.stderr
+            for path in (root / 'out').iterdir():
+                path.unlink()
+            second_late = run(late)
+            assert b'nanocompile: hit' in second_late.stderr, second_late.stderr.decode()
+            assert {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in (root / 'out').iterdir()} == reference
         metadata.unlink()
         assert compile_top() == reference
         if args.binary:
@@ -158,7 +207,9 @@ def main():
                             cache_detects_metadata_removal_corruption_and_mismatch=True,
                             full_metadata_bytes_checked_with_same_root_and_preserved_mtime=True,
                             competing_candidate_content_and_membership_checked=True,
-                            explicit_archive_cache_mutation_detected=True)
+                            explicit_archive_cache_mutation_detected=True,
+                            pipelined_companions=args.pipelined_companions,
+                            late_unused_archive_store_and_restore=args.pipelined_companions)
         if args.output:
             args.output.parent.mkdir(parents=True, exist_ok=True)
             args.output.write_text(json.dumps(evidence, indent=2) + '\n')

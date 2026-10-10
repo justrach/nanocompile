@@ -6,6 +6,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
+from project_artifacts import compiled_scripts
 import platform
 import shutil
 import signal
@@ -44,6 +45,9 @@ def main():
     p.add_argument("--proc-macro-producers", action="store_true", help="enable the experimental macOS producer cache; verify macro dylib artifacts too")
     p.add_argument("--executable-producers", action="store_true", help="enable experimental macOS executable compilation caching")
     p.add_argument("--build-script-contract", type=Path)
+    p.add_argument('--compiler-stream', action='store_true')
+    p.add_argument('--pipelined-companions', action='store_true')
+    p.add_argument('--native-artifacts', action='store_true', help='hash native objects/archives without changing the compiler')
     args = p.parse_args()
     if args.runs < 1 or args.jobs < 1:
         p.error("runs and jobs must be positive")
@@ -89,6 +93,10 @@ def main():
     env.update(CARGO_TARGET_DIR=str(target), CARGO_INCREMENTAL="0", NANOCOMPILE_DIR=str(cache),
                KACHE_CACHE_DIR=str(kcache), KACHE_CONFIG=str(config), KACHE_HOST_CONFIG="",
                NANOCOMPILE_PROC_MACROS=args.proc_macros, KACHE_SOCKET_PATH=str(state / "daemon.sock"), KACHE_DAEMON_IDLE_TIMEOUT="600")
+    if args.compiler_stream:
+        env['NANOCOMPILE_STREAM_COMPILER'] = '1'
+    if args.pipelined_companions:
+        env['NANOCOMPILE_PIPELINED_COMPANIONS'] = '1'
     if args.build_script_contract:
         env["NANOCOMPILE_BUILD_SCRIPTS_FILE"] = str(args.build_script_contract.resolve())
     if args.proc_macro_producers:
@@ -97,13 +105,13 @@ def main():
         env["NANOCOMPILE_EXECUTABLE_PRODUCERS"] = "1"
     command = ["cargo", "build", "--release", "--locked", "--offline", "--lib",
                "-p", args.package, "-j", str(args.jobs), "--message-format=json-render-diagnostics"]
-    result = {"probe_functions": [leaf_name, shared_name], "original_project":str(original_project), "source_edits":"exported leaf function and shared dependency function; linked result checked; history-cache timed builds compared to empty-cache builds at identical paths", "script_sha256": sha(Path(__file__)), "project": str(project), "commit": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=project, text=True).strip(),
+    result = {"compiler_stream": args.compiler_stream, "pipelined_companions": args.pipelined_companions, "probe_functions": [leaf_name, shared_name], "original_project":str(original_project), "source_edits":"exported leaf function and shared dependency function; linked result checked; history-cache timed builds compared to empty-cache builds at identical paths", "script_sha256": sha(Path(__file__)), "project": str(project), "commit": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=project, text=True).strip(),
               "dirty": bool(subprocess.check_output(["git", "status", "--porcelain"], cwd=project)),
               "platform": platform.platform(), "jobs": args.jobs, "runs": args.runs,
               "rustc": subprocess.check_output(["rustc", "--version", "--verbose"], cwd=project, text=True),
               "nanocompile_sha256": sha(Path(binary)), "kache_sha256": sha(Path(kache)),
               "kache_version": subprocess.check_output([kache, "--version"], text=True).strip(),
-              "build_script_contract_sha256": sha(args.build_script_contract) if args.build_script_contract else None, "kache_daemon": not args.standalone, "native_clang": args.native_clang, "nanocompile_proc_macros": args.proc_macros, "nanocompile_proc_macro_producers": args.proc_macro_producers, "nanocompile_executable_producers": args.executable_producers, "command": command,
+              "build_script_contract_sha256": sha(args.build_script_contract) if args.build_script_contract else None, "kache_daemon": not args.standalone, "native_clang": args.native_clang, "native_artifacts": args.native_artifacts, "nanocompile_proc_macros": args.proc_macros, "nanocompile_proc_macro_producers": args.proc_macro_producers, "nanocompile_executable_producers": args.executable_producers, "command": command,
               "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat(), "builds": [],
               "method": f"disposable tracked/untracked dirty-source snapshot; one cold + leaf/shared/revert sequence; clean target before every build; retained cache timed edits; empty-cache artifact equality reference after each wrapper edit; linked behavior probe; fixed paths and {args.jobs} jobs; no human source edits"}
     tracked = subprocess.check_output(['git', 'ls-files', '-z'], cwd=project).decode().split('\0')
@@ -132,6 +140,7 @@ def main():
     references = {}
     macro_references = {}
     executable_references = {}
+    compiled_script_references = {}
     native_references = {}
 
     def build(implementation, phase):
@@ -169,16 +178,18 @@ def main():
         artifacts = {str(path.relative_to(target)): sha(path) for path in sorted((target / "release/deps").glob("*.rlib"))}
         macros = {str(path.relative_to(target)): sha(path) for path in sorted((target / "release/deps").glob("*.dylib"))}
         executables = {str(path.relative_to(target)): sha(path) for path in sorted((target / "release/build").glob("*/*")) if path.is_file() and (path.name == "build-script-build" or path.name.endswith(".nano-real"))}
+        compiled_executables = compiled_scripts(target)
         native = {str(path.relative_to(target)): sha(path) for path in sorted(target.rglob('*'))
-                  if path.is_file() and path.suffix in ('.o', '.a')} if args.native_clang else {}
+                  if path.is_file() and path.suffix in ('.o', '.a')} if args.native_clang or args.native_artifacts else {}
         row = {"native_objects_and_archives": native, "implementation": implementation, "phase": phase, "seconds": seconds,
                "exit_code": proc.returncode, "events": dict(after - before), "rlibs": len(artifacts), "artifacts": artifacts,
-               "scenario":scenario, "verification":verifying, "expected_probe":expected, "peak_sampled_process_tree_rss_bytes": peak, "macro_dylibs": macros, "build_script_executables": executables}
+               "scenario":scenario, "verification":verifying, "expected_probe":expected, "peak_sampled_process_tree_rss_bytes": peak, "macro_dylibs": macros, "build_script_executables": executables, "compiled_build_script_executables": compiled_executables}
         reference_key = (scenario, implementation)
         if reference_key not in references:
             references[reference_key] = artifacts
             macro_references[reference_key] = macros
             executable_references[reference_key] = executables
+            compiled_script_references[reference_key] = compiled_executables
             native_references[reference_key] = native
         else:
             row["matches_own_cold_native_artifacts"] = native_references[reference_key] == native
@@ -188,7 +199,7 @@ def main():
         if implementation == "nanocompile" and not args.native_clang:
             row["matches_direct_artifacts"] = artifacts == references.get((scenario,"direct"))
             row["matches_direct_macro_dylibs"] = macros == macro_references.get((scenario,"direct"))
-            row["matches_direct_build_script_executables"] = executables == executable_references.get((scenario,"direct"))
+            row["matches_direct_build_script_executables"] = compiled_executables == compiled_script_references.get((scenario,"direct"))
         assert proc.returncode == 0, log_path.read_text()[-4000:]
         library = next((target/'release/deps').glob('libharness_adapters-*.rlib'))
         probe_output = state/'probe'
@@ -201,7 +212,7 @@ def main():
         row['observed_probe'] = observed
         result["builds"].append(row)
         save()
-        print(json.dumps({k: v for k, v in row.items() if k not in ("artifacts", "macro_dylibs", "build_script_executables", "native_objects_and_archives")}), flush=True)
+        print(json.dumps({k: v for k, v in row.items() if k not in ("artifacts", "macro_dylibs", "build_script_executables", "native_objects_and_archives", "compiled_build_script_executables")}), flush=True)
         if proc.returncode or not artifacts:
             raise RuntimeError(f"Build failed or produced no libraries; see {log_path}")
         if any(row.get(check) is False for check in ("matches_own_cold_native_artifacts", "matches_own_cold_artifacts", "matches_direct_artifacts", "matches_own_cold_macro_dylibs", "matches_direct_macro_dylibs", "matches_own_cold_build_script_executables", "matches_direct_build_script_executables")):

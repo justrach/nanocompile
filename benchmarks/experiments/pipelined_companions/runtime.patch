@@ -1,0 +1,87 @@
+diff --git a/src/cache.zig b/src/cache.zig
+index 81a0f02..49190ab 100644
+--- a/src/cache.zig
++++ b/src/cache.zig
+@@ -234,7 +234,7 @@ pub fn unseal(ctx: *Context, bytes: []const u8) ![]const u8 {
+     return bytes[65..];
+ }
+ 
+-pub const Dependency = struct { path: []const u8, hash: []const u8, directory: bool = false, libraries: bool = false, library_prefix: ?[]const u8 = null, all_members: bool = false, missing: ?bool = null, symlink_target: ?[]const u8 = null };
++pub const Dependency = struct { path: []const u8, hash: []const u8, directory: bool = false, libraries: bool = false, library_prefix: ?[]const u8 = null, metadata_companion: bool = false, all_members: bool = false, missing: ?bool = null, symlink_target: ?[]const u8 = null };
+ 
+ pub fn symlinkDependency(ctx: *Context, path_: []const u8) !Dependency {
+     const path = try std.fs.path.resolve(ctx.a, &.{ ctx.cwd, path_ });
+@@ -255,7 +255,7 @@ fn symlinkHash(ctx: *Context, path: []const u8, target: []const u8) ![]const u8
+ fn symlinkValid(ctx: *Context, dep: Dependency) !bool {
+     const target = dep.symlink_target orelse return false;
+     if (target.len == 0 or dep.missing != null or dep.directory or dep.libraries or dep.all_members or
+-        dep.library_prefix != null or !std.fs.path.isAbsolute(dep.path)) return false;
++        dep.library_prefix != null or dep.metadata_companion or !std.fs.path.isAbsolute(dep.path)) return false;
+     if (!std.mem.eql(u8, dep.hash, try symlinkHash(ctx, dep.path, target))) return false;
+     if ((try Dir.cwd().statFile(ctx.io, dep.path, .{ .follow_symlinks = false })).kind != .sym_link) return false;
+     var buffer: [std.fs.max_path_bytes]u8 = undefined;
+@@ -286,7 +286,7 @@ fn absent(ctx: *Context, path_: []const u8) !bool {
+ }
+ 
+ fn missingValid(ctx: *Context, dep: Dependency) !bool {
+-    if (dep.missing != true or dep.symlink_target != null or dep.directory or dep.libraries or dep.all_members or dep.library_prefix != null or !std.fs.path.isAbsolute(dep.path)) return false;
++    if (dep.missing != true or dep.symlink_target != null or dep.directory or dep.libraries or dep.all_members or dep.library_prefix != null or dep.metadata_companion or !std.fs.path.isAbsolute(dep.path)) return false;
+     if (!std.mem.eql(u8, dep.hash, try absentHash(ctx, dep.path))) return false;
+     return absent(ctx, dep.path);
+ }
+@@ -599,7 +599,7 @@ fn restoreWithSnapshot(ctx: *Context, key: []const u8, allowed_outputs: []const
+             const hash = if (dep.library_prefix) |prefix| blk: {
+                 const slot = try library_names.getOrPut(ctx.a, dep.path);
+                 if (!slot.found_existing) slot.value_ptr.* = ctx.libraryNames(dep.path, allowed_outputs) catch return null;
+-                break :blk try prefixDigest(ctx.a, slot.value_ptr.*, prefix);
++                break :blk if (dep.metadata_companion) metadataCompanionDigest(ctx.a, slot.value_ptr.*, prefix) catch return null else try prefixDigest(ctx.a, slot.value_ptr.*, prefix);
+             } else if (dep.all_members)
+                 ctx.nativeDirectoryDigest(dep.path) catch return null
+             else if (dep.directory)
+@@ -918,6 +918,25 @@ pub fn prefixDigest(a: std.mem.Allocator, names: []const []const u8, prefix: []c
+     return finish(a, &hash);
+ }
+ 
++// Only a proven metadata-first same-stem regular archive may be absent or
++// appear without changing the candidate set. The metadata name remains guarded.
++pub fn metadataCompanionDigest(a: std.mem.Allocator, names: []const []const u8, prefix: []const u8) ![]const u8 {
++    if (!std.mem.startsWith(u8, prefix, "lib") or prefix.len <= 3) return error.InvalidMetadataCompanion;
++    for (prefix) |ch| if (!std.ascii.isAlphanumeric(ch) and ch != '_' and ch != '-') return error.InvalidMetadataCompanion;
++    const meta = try std.fmt.allocPrint(a, "{s}.rmeta:file", .{prefix});
++    var present = false;
++    for (names) |name| if (std.mem.eql(u8, name, meta)) {
++        present = true;
++        break;
++    };
++    if (!present) return error.InvalidMetadataCompanion;
++    const archive = try std.fmt.allocPrint(a, "{s}.rlib:file", .{prefix});
++    var hash = Hash.init(.{});
++    field(&hash, "nano-metadata-companion-membership-v1");
++    for (names) |name| if (std.mem.startsWith(u8, name, prefix) and !std.mem.eql(u8, name, archive)) field(&hash, name);
++    return finish(a, &hash);
++}
++
+ test "large restore hashes every unique file and refuses changes before writes" {
+     var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
+     defer arena.deinit();
+diff --git a/src/rust_dependencies.zig b/src/rust_dependencies.zig
+index 06ba0eb..3c80f26 100644
+--- a/src/rust_dependencies.zig
++++ b/src/rust_dependencies.zig
+@@ -243,10 +243,13 @@ pub fn collect(ctx: *cache.Context, argv: []const []const u8, outputs: []const [
+         const prefix = if (primary_found) full_prefix else "";
+         var found = false;
+         for (before, current.items) |old, dir| {
+-            const old_hash = try cache.prefixDigest(ctx.a, old.names, prefix);
+-            const new_hash = try cache.prefixDigest(ctx.a, dir.names, prefix);
++            const normalize_companion = metadata_only and primary_found and
++                std.mem.eql(u8, ctx.env.get("NANOCOMPILE_PIPELINED_COMPANIONS") orelse "", "1") and
++                try unusedCompanion(&resolver, dir, try std.fmt.allocPrint(ctx.a, "lib{s}.rlib", .{name}), crate, own_root.triple);
++            const old_hash = if (normalize_companion) try cache.metadataCompanionDigest(ctx.a, old.names, prefix) else try cache.prefixDigest(ctx.a, old.names, prefix);
++            const new_hash = if (normalize_companion) try cache.metadataCompanionDigest(ctx.a, dir.names, prefix) else try cache.prefixDigest(ctx.a, dir.names, prefix);
+             if (!std.mem.eql(u8, old_hash, new_hash)) return error.LibraryDirectoryChangedDuringCompilation;
+-            try records.append(ctx.a, .{ .path = dir.path, .hash = new_hash, .directory = true, .libraries = true, .library_prefix = prefix });
++            try records.append(ctx.a, .{ .path = dir.path, .hash = new_hash, .directory = true, .libraries = true, .library_prefix = prefix, .metadata_companion = normalize_companion });
+             for (dir.names) |entry| {
+                 if (!std.mem.startsWith(u8, entry, prefix)) continue;
+                 const filename = entry[0 .. std.mem.lastIndexOfScalar(u8, entry, ':') orelse return error.UnsupportedLibraryName];

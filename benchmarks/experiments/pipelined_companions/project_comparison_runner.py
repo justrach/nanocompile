@@ -12,7 +12,6 @@ import statistics
 import subprocess
 import time
 import sys
-from project_artifacts import compiled_scripts
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
 from build_trace import Capture
@@ -132,7 +131,6 @@ def main():
     references = {}
     macro_references = {}
     executable_references = {}
-    compiled_script_references = {}
     native_references = {}
 
     def build(implementation, phase):
@@ -180,19 +178,17 @@ def main():
         artifacts = {str(path.relative_to(target)): sha(path) for path in sorted((target / "release/deps").glob("*.rlib"))}
         macros = {str(path.relative_to(target)): sha(path) for path in sorted((target / "release/deps").glob("*.dylib"))}
         executables = {str(path.relative_to(target)): sha(path) for path in sorted((target / "release/build").glob("*/*")) if path.is_file() and (path.name == "build-script-build" or path.name.endswith(".nano-real"))}
-        compiled_executables = compiled_scripts(target)
         native = {str(path.relative_to(target)): sha(path) for path in sorted(target.rglob('*'))
                   if path.is_file() and path.suffix in ('.o', '.a')} if (args.native_clang or args.portable_cc or args.native_artifacts) else {}
         row = {"native_objects_and_archives": native, "implementation": implementation, "phase": phase, "seconds": seconds,
                "exit_code": proc.returncode, "events": dict(after - before), "rlibs": len(artifacts), "artifacts": artifacts,
-               "peak_sampled_process_tree_rss_bytes": peak, "macro_dylibs": macros, "build_script_executables": executables, "compiled_build_script_executables": compiled_executables}
+               "peak_sampled_process_tree_rss_bytes": peak, "macro_dylibs": macros, "build_script_executables": executables}
         if capture:
             capture.finish(row, target, origin_ns, event_path, event_offset, log_path)
         if implementation not in references:
             references[implementation] = artifacts
             macro_references[implementation] = macros
             executable_references[implementation] = executables
-            compiled_script_references[implementation] = compiled_executables
             native_references[implementation] = native
         else:
             row["matches_own_cold_native_artifacts"] = native_references[implementation] == native
@@ -202,10 +198,10 @@ def main():
         if implementation == "nanocompile" and not (args.native_clang or args.portable_cc or args.native_artifacts):
             row["matches_direct_artifacts"] = artifacts == references.get("direct")
             row["matches_direct_macro_dylibs"] = macros == macro_references.get("direct")
-            row["matches_direct_build_script_executables"] = compiled_executables == compiled_script_references.get("direct")
+            row["matches_direct_build_script_executables"] = executables == executable_references.get("direct")
         result["builds"].append(row)
         save()
-        print(json.dumps({k: v for k, v in row.items() if k not in ("artifacts", "macro_dylibs", "build_script_executables", "native_objects_and_archives", "compiled_build_script_executables", "trace")}), flush=True)
+        print(json.dumps({k: v for k, v in row.items() if k not in ("artifacts", "macro_dylibs", "build_script_executables", "native_objects_and_archives", "trace")}), flush=True)
         if proc.returncode or not artifacts:
             raise RuntimeError(f"Build failed or produced no libraries; see {log_path}")
         if any(row.get(check) is False for check in ("matches_own_cold_native_artifacts", "matches_own_cold_artifacts", "matches_direct_artifacts", "matches_own_cold_macro_dylibs", "matches_direct_macro_dylibs", "matches_own_cold_build_script_executables", "matches_direct_build_script_executables")):

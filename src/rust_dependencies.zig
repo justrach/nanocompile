@@ -243,10 +243,13 @@ pub fn collect(ctx: *cache.Context, argv: []const []const u8, outputs: []const [
         const prefix = if (primary_found) full_prefix else "";
         var found = false;
         for (before, current.items) |old, dir| {
-            const old_hash = try cache.prefixDigest(ctx.a, old.names, prefix);
-            const new_hash = try cache.prefixDigest(ctx.a, dir.names, prefix);
+            const normalize_companion = metadata_only and primary_found and
+                std.mem.eql(u8, ctx.env.get("NANOCOMPILE_PIPELINED_COMPANIONS") orelse "", "1") and
+                try unusedCompanion(&resolver, dir, try std.fmt.allocPrint(ctx.a, "lib{s}.rlib", .{name}), crate, own_root.triple);
+            const old_hash = if (normalize_companion) try cache.metadataCompanionDigest(ctx.a, old.names, prefix) else try cache.prefixDigest(ctx.a, old.names, prefix);
+            const new_hash = if (normalize_companion) try cache.metadataCompanionDigest(ctx.a, dir.names, prefix) else try cache.prefixDigest(ctx.a, dir.names, prefix);
             if (!std.mem.eql(u8, old_hash, new_hash)) return error.LibraryDirectoryChangedDuringCompilation;
-            try records.append(ctx.a, .{ .path = dir.path, .hash = new_hash, .directory = true, .libraries = true, .library_prefix = prefix });
+            try records.append(ctx.a, .{ .path = dir.path, .hash = new_hash, .directory = true, .libraries = true, .library_prefix = prefix, .metadata_companion = normalize_companion });
             for (dir.names) |entry| {
                 if (!std.mem.startsWith(u8, entry, prefix)) continue;
                 const filename = entry[0 .. std.mem.lastIndexOfScalar(u8, entry, ':') orelse return error.UnsupportedLibraryName];
