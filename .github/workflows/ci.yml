@@ -18,7 +18,10 @@ jobs:
       - name: Install verified Zig 0.17.0
         run: python3 tools/install_zig.py "$RUNNER_TEMP/zig"
       - name: Rust toolchain
-        run: rustup toolchain install 1.97.1 --profile minimal && rustup default 1.97.1
+        run: |
+          rustup toolchain install 1.97.1 --profile minimal
+          rustup toolchain install 1.98.1 --profile minimal
+          rustup default 1.97.1
       - name: Verify proc-macro final linker inputs
         run: |
           zig build -Doptimize=ReleaseFast
@@ -39,7 +42,7 @@ jobs:
           python3 tests/r2_transport.py
           zig build -Doptimize=ReleaseFast
           zig build test
-          python3 benchmarks/experiments/decoder_scope_check.py zig-out/bin/nanocompile --output bench-results/decoder-scope.json
+          python3 benchmarks/experiments/selected_decoder_scope_check.py zig-out/bin/nanocompile --other-toolchain 1.98.1 --output bench-results/decoder-scope.json
           python3 tests/clang_cache.py zig-out/bin/nanocompile --output bench-results/clang-cache.json
           zig build integration -Doptimize=ReleaseFast
       - name: Verify live native selector overlap

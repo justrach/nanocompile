@@ -1526,3 +1526,25 @@ both Linux and macOS CI.
 [cold pairs](harness-selected-decoder-cold-paired.json);
 [warm correctness](harness-selected-decoder-warm-check.json);
 [accepted-version CI evidence](decoder-ci-validation.json).
+
+## Selected-resource decoder adopted after confirmation
+
+Independent confirmation has cold medians **32.316619 s → 29.180211 s**
+(9.71%), winning 3/3 pairs. Combined with the first batch's 5/6 wins,
+the candidate wins 8/9 cold pairs. Every build has 167 Rust misses and 24
+native misses, no hits, matching 193 artifacts and unchanged tracked sources.
+
+The 27-pair warm comparison has medians **2.060624 s → 2.058241 s**,
+with 16/27 candidate wins. Mean paired saving 6.911 ms versus descriptive
+SE 6.802 ms does not establish a reliable warm gain; no convincing regression
+is shown. All 54 restores retain 167 Rust/24 native hits and matching artifacts.
+
+The source is adopted after unit, real Rust/Zig, native identity/metadata/static
+inputs, macro/executable producer and active-selector/compiler-switch checks
+pass on the rebuilt binary. CI now installs two Rust versions for that fixture
+and retains 1.97.1 as default. The previous accepted version's Linux/macOS CI
+is green; the new version's hosted validation remains pending. These paired
+batches compare Nano versions and do not establish a new kache comparison.
+[Method and gates](../docs/selected-decoder-experiment.md);
+[independent cold pairs](harness-selected-decoder-cold-confirm.json);
+[warm comparison](harness-selected-decoder-warm-paired.json).

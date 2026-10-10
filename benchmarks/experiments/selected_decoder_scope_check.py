@@ -24,7 +24,7 @@ def memos(root, schema):
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument('binary', type=Path)
-    p.add_argument('--baseline', type=Path, required=True)
+    p.add_argument('--baseline', type=Path, help='Schema-4 accepted binary for an additional full-fingerprint equality check')
     p.add_argument('--other-toolchain', default='1.98.1')
     p.add_argument('--output', type=Path, required=True)
     args = p.parse_args()
