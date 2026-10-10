@@ -68,7 +68,7 @@ class Capture:
                               record=path.name))
         service = []
         if row['implementation'] == 'kache':
-            allowed = ('crate_name', 'result', 'elapsed_ms', 'compile_time_ms', 'key_ms', 'lookup_ms',
+            allowed = ('crate_name', 'package', 'result', 'elapsed_ms', 'compile_time_ms', 'key_ms', 'lookup_ms',
                        'restore_ms', 'store_ms', 'startup_ms', 'dep_info_ms', 'permit_wait_ms', 'flight_wait_ms')
             for line in events.splitlines():
                 raw = json.loads(line)
@@ -85,11 +85,13 @@ def analyze(report, output):
     output.mkdir(parents=True, exist_ok=True)
     traces, grouped = [], collections.defaultdict(list)
     service_summaries = []
+    build_script_runs = []
     for index, build in enumerate(data['builds']):
         traces.append(dict(name='process_name', ph='M', pid=index, tid=0, args=dict(name=f"{index}: {build['implementation']} {build['phase']}")))
         trace = build.get('trace', {})
         service_events = trace.get('kache_service_events', [])
         if service_events:
+            build_script_runs.extend(dict(build=index, phase=build['phase'], **event) for event in service_events if event.get('crate_name') == 'build_script_run')
             metrics = sorted({key for event in service_events for key, value in event.items() if key.endswith('_ms') and isinstance(value, (int, float))})
             service_summaries.append(dict(build=index, phase=build['phase'], results=dict(collections.Counter(event.get('result', 'unknown') for event in service_events)), stages={key: dict(samples=len(values), median_ms=statistics.median(values), sum_ms=sum(values)) for key in metrics if (values := [e[key] for e in service_events if isinstance(e.get(key), (int, float)) and (key != 'compile_time_ms' or e.get('result') in ('miss', 'passthrough'))])}))
         for kind, rows in [('request', trace.get('requests', [])), ('cargo', trace.get('cargo_units', []))]:
@@ -115,7 +117,7 @@ def analyze(report, output):
         comparison.append(row)
     comparison.sort(key=lambda r: r['nano_minus_kache_seconds'] or 0, reverse=True)
     (output / 'trace.json').write_text(json.dumps({'traceEvents': traces}))
-    analysis = dict(diagnostic=True, comparisons=comparison, kache_service_summaries=service_summaries,
+    analysis = dict(diagnostic=True, comparisons=comparison, kache_service_summaries=service_summaries, kache_build_script_runs=build_script_runs,
                     build_coverage=[dict(implementation=b["implementation"], phase=b["phase"], events=b.get("events", {}), request_kinds=dict(collections.Counter(r["kind"] for r in b.get("trace", {}).get("requests", []))), own_artifact_checks={k: v for k, v in b.items() if k.startswith("matches_own_cold")}) for b in data["builds"]],
                     limitations='compile_time_ms on cache hits can describe the stored original compilation; stage summaries exclude hit/dup compile_time_ms. Per-unit medians are scheduling-sensitive, unpaired diagnostic observations. Request durations overlap. Missing counterparts are unknown, not zero. No optimization or overall speed win is established by this capture.')
     (output / 'analysis.json').write_text(json.dumps(analysis, indent=2) + '\n')
@@ -129,7 +131,7 @@ def analyze(report, output):
     nano_native = [sum(r['kind'] == 'native' for r in b.get('trace', {}).get('requests', [])) for b in data['builds'] if b['phase'] == 'warm' and b['implementation'] == 'nanocompile']
     kache_native = [sum(r['kind'] == 'native' for r in b.get('trace', {}).get('requests', [])) for b in data['builds'] if b['phase'] == 'warm' and b['implementation'] == 'kache']
     if nano_native and kache_native and min(nano_native) > 0 and max(kache_native) == 0:
-        brief += ['', '## Native bundle candidate', '', f'Warm Nano issues {nano_native} native requests per round; kache issues {kache_native}. Inspect build-script intervals, kache bundle evidence and own-cold native artifact checks. Investigate bundle-level reuse only after verifying the exact mechanism. Require C/header/assembly include edits, toolchain/loader changes, environment changes and output tampering to invalidate correctly. Missing native requests alone do not prove the mechanism or a speed win.']
+        brief += ['', '## Build-script execution candidate', '', f'Warm Nano issues {nano_native} native requests per round; kache issues {kache_native}. Inspect per-package build_script_run events, build-script intervals and own-cold native artifact checks. Investigate build-script execution reuse after verifying the exact mechanism and input contract. Native bundle audit fields alone do not prove execution reuse. Require an ablation before estimating whole-build impact. Require C/header/assembly include edits, toolchain/loader changes, environment changes and output tampering to invalidate correctly. Missing native requests alone do not prove the mechanism or a speed win.']
     (output / 'next-experiments.md').write_text('\n'.join(brief)+'\n')
     # Escape all captured names. No raw logs or environment are embedded in the report.
     body = ''.join('<tr>' + ''.join('<td>'+html.escape(str(v))+'</td>' for v in

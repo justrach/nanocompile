@@ -49,6 +49,7 @@ def main():
     p.add_argument("--proc-macros", choices=("tracked", "reported"), default="tracked", help="nanocompile proc-macro input policy; reported requires declaring unreported file reads")
     p.add_argument("--proc-macro-producers", action="store_true", help="enable the experimental macOS producer cache; verify macro dylib artifacts too")
     p.add_argument("--executable-producers", action="store_true", help="enable experimental macOS executable compilation caching")
+    p.add_argument("--kache-no-build-scripts", action="store_true", help="diagnostic ablation: disable only kache build-script execution caching")
     p.add_argument("--trace-builds", action="store_true", help="private full compiler logs and Cargo timings; diagnostic overhead, not a benchmark")
     args = p.parse_args()
     if args.native_clang and args.portable_cc:
@@ -69,6 +70,8 @@ def main():
     env.update(CARGO_TARGET_DIR=str(target), CARGO_INCREMENTAL="0", NANOCOMPILE_DIR=str(cache),
                KACHE_CACHE_DIR=str(kcache), KACHE_CONFIG=str(config), KACHE_HOST_CONFIG="",
                NANOCOMPILE_PROC_MACROS=args.proc_macros, KACHE_SOCKET_PATH=str(state / "daemon.sock"), KACHE_DAEMON_IDLE_TIMEOUT="600")
+    if args.kache_no_build_scripts:
+        env["KACHE_BUILD_SCRIPT_CACHE"] = "0"
     if capture:
         env["NANOCOMPILE_TRACE"] = "1"
     if args.proc_macro_producers:
@@ -85,7 +88,7 @@ def main():
               "rustc": subprocess.check_output(["rustc", "--version", "--verbose"], cwd=project, text=True),
               "nanocompile_sha256": sha(Path(binary)), "kache_sha256": sha(Path(kache)),
               "kache_version": subprocess.check_output([kache, "--version"], text=True).strip(),
-              "kache_daemon": not args.standalone, "native_clang": args.native_clang, "portable_cc":args.portable_cc, "nanocompile_proc_macros": args.proc_macros, "nanocompile_proc_macro_producers": args.proc_macro_producers, "nanocompile_executable_producers": args.executable_producers, "command": command,
+              "kache_build_script_cache": not args.kache_no_build_scripts, "kache_daemon": not args.standalone, "native_clang": args.native_clang, "portable_cc":args.portable_cc, "nanocompile_proc_macros": args.proc_macros, "nanocompile_proc_macro_producers": args.proc_macro_producers, "nanocompile_executable_producers": args.executable_producers, "command": command,
               "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat(), "builds": [],
               "method": "offline clean release package builds; same target path; prime direct build then empty caches; rotate three-way warm measurement order unless cold-only; validate each wrapper against its own cold artifact hashes (kache remaps paths)"}
     tracked = subprocess.check_output(['git', 'ls-files', '-z'], cwd=project).decode().split('\0')

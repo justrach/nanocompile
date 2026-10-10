@@ -1,0 +1,19 @@
+{
+  "binary_sha256": "dca2d069e828a9cfd8146cce6419d2d412dbe400e64faf3c1f8c4cda4d0d60dd",
+  "script_sha256": "347755044fb10feed75140c5a83b4c07924d702dbb4754219625d2116dd1534e",
+  "expected": 43,
+  "observed_after_preserved_mtime_edit": 43,
+  "stale_reproduced": false,
+  "events": [
+    "miss",
+    "miss",
+    "hit",
+    "variant_hit",
+    "hit"
+  ],
+  "checks": [
+    "same-size dependency edit preserves mtime",
+    "fresh compiler executes 43",
+    "wrapped result checked against fresh compiler"
+  ]
+}

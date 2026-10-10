@@ -29,6 +29,6 @@ Inspect the private compiler records and build-script logs for each candidate. U
 
 Require repeated alternating untraced cold and warm pairs, actual source edits and reverts, zero cold hits, expected warm coverage, unchanged source hashes, and matching own-cold artifact bytes. Report rejected variations and uncertainty. Promote only repeatable improvements without correctness regressions.
 
-## Native bundle candidate
+## Build-script execution candidate
 
-Warm Nano issues [24, 24] native requests per round; kache issues [0, 0]. Inspect build-script intervals, kache bundle evidence and own-cold native artifact checks. Investigate bundle-level reuse only after verifying the exact mechanism. Require C/header/assembly include edits, toolchain/loader changes, environment changes and output tampering to invalidate correctly. Missing native requests alone do not prove the mechanism or a speed win.
+Warm Nano issues [24, 24] native requests per round; kache issues [0, 0]. Inspect per-package build_script_run events, build-script intervals and own-cold native artifact checks. Investigate build-script execution reuse after verifying the exact mechanism and input contract. Native bundle audit fields alone do not prove execution reuse. Require an ablation before estimating whole-build impact. Require C/header/assembly include edits, toolchain/loader changes, environment changes and output tampering to invalidate correctly. Missing native requests alone do not prove the mechanism or a speed win.

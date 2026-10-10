@@ -2,6 +2,7 @@
 import argparse
 import collections
 import datetime
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -67,13 +68,16 @@ def main():
     leaf, shared = project/'crates/harness/src/lib.rs', project/'crates/proto/src/lib.rs'
     assert leaf.is_file() and shared.is_file() and not leaf.is_symlink() and not shared.is_symlink()
     originals = {path:path.read_bytes() for path in (leaf,shared)}
+    suffix = hashlib.sha256(str(state).encode()).hexdigest()[:12]
+    leaf_name, shared_name = 'nanocompile_benchmark_probe_' + suffix, 'nanocompile_benchmark_shared_' + suffix
+    assert leaf_name.encode() not in originals[leaf] and shared_name.encode() not in originals[shared]
     scenario, expected, verifying = 'initial', 300, False
     def edit(leaf_value, shared_value):
-        leaf.write_bytes(originals[leaf]+f'\npub fn nanocompile_benchmark_probe() -> u64 {{ harness_proto::nanocompile_benchmark_shared() + {leaf_value} }}\n'.encode())
-        shared.write_bytes(originals[shared]+f'\npub fn nanocompile_benchmark_shared() -> u64 {{ {shared_value} }}\n'.encode())
+        leaf.write_bytes(originals[leaf]+f'\npub fn {leaf_name}() -> u64 {{ harness_proto::{shared_name}() + {leaf_value} }}\n'.encode())
+        shared.write_bytes(originals[shared]+f'\npub fn {shared_name}() -> u64 {{ {shared_value} }}\n'.encode())
     edit(100,200)
     probe = state/'probe.rs'
-    probe.write_text('fn main() { println!("{}", harness_adapters::nanocompile_benchmark_probe()); }\n')
+    probe.write_text('fn main() { println!("{}", harness_adapters::' + leaf_name + '()); }\n')
     config = state / "kache.toml"
     config.write_text("[cache]\nrecord_sessions=true\n")
     target, cache, kcache = state / "target", state / "nano-cache", state / "kache-cache"
@@ -90,7 +94,7 @@ def main():
         env["NANOCOMPILE_EXECUTABLE_PRODUCERS"] = "1"
     command = ["cargo", "build", "--release", "--locked", "--offline", "--lib",
                "-p", args.package, "-j", str(args.jobs), "--message-format=json-render-diagnostics"]
-    result = {"original_project":str(original_project), "source_edits":"exported leaf function and shared dependency function; linked result checked; history-cache timed builds compared to empty-cache builds at identical paths", "script_sha256": sha(Path(__file__)), "project": str(project), "commit": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=project, text=True).strip(),
+    result = {"probe_functions": [leaf_name, shared_name], "original_project":str(original_project), "source_edits":"exported leaf function and shared dependency function; linked result checked; history-cache timed builds compared to empty-cache builds at identical paths", "script_sha256": sha(Path(__file__)), "project": str(project), "commit": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=project, text=True).strip(),
               "dirty": bool(subprocess.check_output(["git", "status", "--porcelain"], cwd=project)),
               "platform": platform.platform(), "jobs": args.jobs, "runs": args.runs,
               "rustc": subprocess.check_output(["rustc", "--version", "--verbose"], cwd=project, text=True),
@@ -98,7 +102,7 @@ def main():
               "kache_version": subprocess.check_output([kache, "--version"], text=True).strip(),
               "kache_daemon": not args.standalone, "native_clang": args.native_clang, "nanocompile_proc_macros": args.proc_macros, "nanocompile_proc_macro_producers": args.proc_macro_producers, "nanocompile_executable_producers": args.executable_producers, "command": command,
               "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat(), "builds": [],
-              "method": "disposable tracked/untracked dirty-source snapshot; one cold + leaf/shared/revert sequence; clean target before every build; retained cache timed edits; empty-cache artifact equality reference after each wrapper edit; linked behavior probe; fixed paths and four jobs; no human source edits"}
+              "method": f"disposable tracked/untracked dirty-source snapshot; one cold + leaf/shared/revert sequence; clean target before every build; retained cache timed edits; empty-cache artifact equality reference after each wrapper edit; linked behavior probe; fixed paths and {args.jobs} jobs; no human source edits"}
     tracked = subprocess.check_output(['git', 'ls-files', '-z'], cwd=project).decode().split('\0')
     result['tracked_rust_and_manifest_hashes'] = {
         name: sha(project / name) for name in tracked

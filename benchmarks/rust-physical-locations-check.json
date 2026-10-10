@@ -1,0 +1,13 @@
+{
+  "binary_sha256": "e7c41ea96db0d3f119bd58fd4b4196d563e3a06ba591c3f00480e2aa35e61f57",
+  "script_sha256": "a06e9af489ab29158c0eb8b522fcca929724aaadaa73371c0c267e68484055cb",
+  "checks": [
+    "canonical Rust 1.97.1 retains compiler-reported sysroot and target-libdir",
+    "validated memo survives a real warm restore with identical output",
+    "native proxy retains live fingerprint and collector queries and identical output",
+    "Rust 1.98.1 declines the location shortcut",
+    "Darwin fallback shadow driver is ignored in live dyld observations",
+    "DYLD_LIBRARY_PATH retains live graph queries"
+  ],
+  "proxy_combined_queries": 2
+}

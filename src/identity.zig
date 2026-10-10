@@ -13,7 +13,7 @@ const Stamp = struct {
     ctime: i96 = 0,
     kind: std.Io.File.Kind = .unknown,
 };
-const Memo = struct { schema: u32 = 5, hash: []const u8, decoder_hash: []const u8, stamps: []const Stamp };
+const Memo = struct { schema: u32 = 8, locations: ?cache.RustLocations = null, hash: []const u8, decoder_hash: []const u8, stamps: []const Stamp };
 
 fn rememberEpoch(ctx: *cache.Context, payload: []const u8) !void {
     var h = cache.Hash.init(.{});
@@ -107,15 +107,16 @@ fn validStamps(ctx: *cache.Context, stamps: []const Stamp, parallel: bool) bool 
     return valid.load(.monotonic);
 }
 
-fn readMemo(ctx: *cache.Context, path: []const u8, minimum_stamps: usize, is_zig: bool) ?[]const u8 {
+fn readMemo(ctx: *cache.Context, path: []const u8, minimum_stamps: usize, is_zig: bool, physical: bool) ?[]const u8 {
     const bytes = ctx.read(path) catch return null;
     const payload = cache.unseal(ctx, bytes) catch return null;
     const parsed = std.json.parseFromSlice(Memo, ctx.a, payload, .{ .allocate = .alloc_always }) catch return null;
     const memo = parsed.value;
-    if (memo.schema != 5 or !cache.validHash(memo.decoder_hash) or !cache.validHash(memo.hash) or memo.stamps.len < minimum_stamps) return null;
+    if (memo.schema != 8 or !cache.validHash(memo.decoder_hash) or !cache.validHash(memo.hash) or memo.stamps.len < minimum_stamps) return null;
     if (!validStamps(ctx, memo.stamps, is_zig)) return null;
     rememberEpoch(ctx, payload) catch return null;
     ctx.compiler_decoder_identity = memo.decoder_hash;
+    ctx.rust_locations = if (physical) memo.locations else null;
     return memo.hash;
 }
 
@@ -203,6 +204,23 @@ fn rustResources(ctx: *cache.Context, stamps: *std.ArrayList(Stamp), root: []con
     }
 }
 
+// Byte-pinned stock installation, not a version-string
+// heuristic. Unrecognized compilers/drivers keep contextual selection memos.
+fn physicalStock(ctx: *cache.Context, real: []const u8) bool {
+    if (@import("builtin").os.tag != .macos or @import("builtin").cpu.arch != .aarch64) return false;
+    if (!std.mem.eql(u8, std.fs.path.basename(real), "rustc")) return false;
+    const bin = std.fs.path.dirname(real) orelse return false;
+    if (!std.mem.eql(u8, std.fs.path.basename(bin), "bin")) return false;
+    const root = std.fs.path.dirname(bin) orelse return false;
+    if (!std.mem.eql(u8, identityDigest(ctx, real) catch return false, "7057a29fe82d8bd41fbf4b9af4a58aebcc9642700d57b6bf0c08b1ca50b2d787")) return false;
+    const driver = std.fs.path.join(ctx.a, &.{ root, "lib", "librustc_driver-e03ed1db822dfa4c.dylib" }) catch return false;
+    if (!std.mem.eql(u8, identityDigest(ctx, driver) catch return false, "4ba56a4c5bdac7453efe3362e59224d279b5a17b5ca7d4917ec4fc86cb000a2f")) return false;
+    return @import("rust_loader.zig").allowsFallback(ctx, real, root) catch false;
+}
+fn identityDigest(ctx: *cache.Context, path: []const u8) ![]const u8 {
+    return installedDigest(ctx, try stamp(ctx, path), "rust-toolchain-file-v1");
+}
+
 pub fn fingerprint(ctx: *cache.Context, is_zig: bool, executable: []const u8) ![]const u8 {
     const real = resolveExecutable(ctx, executable) catch |err| {
         ctx.trace(try std.fmt.allocPrint(ctx.a, "cannot resolve compiler: {s} ({s})", .{ executable, @errorName(err) }));
@@ -217,11 +235,13 @@ pub fn fingerprint(ctx: *cache.Context, is_zig: bool, executable: []const u8) ![
         const native_binary = std.mem.eql(u8, &buffer, "\x7fELF") or std.mem.eql(u8, &buffer, "\xcf\xfa\xed\xfe") or std.mem.eql(u8, &buffer, "\xce\xfa\xed\xfe") or std.mem.eql(u8, &buffer, "\xca\xfe\xba\xbe");
         if (!native_binary) return error.UnsupportedCompilerScript;
     }
+    const physical = !is_zig and std.mem.eql(u8, executable, real) and physicalStock(ctx, real);
+    if (physical) ctx.trace("toolchain: pinned physical installation memo");
     var selectors: std.ArrayList(Stamp) = .empty;
     try add(ctx, &selectors, real);
     // rustup's selection observes ancestor override files and global settings.
     // Missing override files are recorded too: adding one invalidates the memo.
-    if (!is_zig) {
+    if (!is_zig and !physical) {
         const rustup = ctx.env.get("RUSTUP_HOME") orelse try std.fs.path.join(ctx.a, &.{ ctx.env.get("HOME") orelse "", ".rustup" });
         try add(ctx, &selectors, try std.fs.path.join(ctx.a, &.{ rustup, "settings.toml" }));
         try add(ctx, &selectors, try std.fs.path.join(ctx.a, &.{ rustup, "toolchains" }));
@@ -233,7 +253,7 @@ pub fn fingerprint(ctx: *cache.Context, is_zig: bool, executable: []const u8) ![
         }
     }
     var h = cache.Hash.init(.{});
-    cache.field(&h, "toolchain-memo-v4");
+    cache.field(&h, if (physical) "toolchain-memo-v5-pinned-physical-1.97.1" else "toolchain-memo-v4");
     cache.field(&h, real);
     cache.field(&h, if (is_zig) "zig" else "rust");
     // Compilation keys include the entire environment. This memo includes
@@ -246,6 +266,7 @@ pub fn fingerprint(ctx: *cache.Context, is_zig: bool, executable: []const u8) ![
         }
     }.less);
     for (keys) |key| {
+        if (physical and std.mem.eql(u8, key, "DYLD_FALLBACK_LIBRARY_PATH")) continue;
         const selector = std.mem.startsWith(u8, key, "RUSTUP_") or std.mem.startsWith(u8, key, "ZIG_") or std.mem.startsWith(u8, key, "DYLD_") or std.mem.startsWith(u8, key, "LD_") or std.mem.eql(u8, key, "HOME") or std.mem.eql(u8, key, "PATH") or std.mem.eql(u8, key, "SDKROOT");
         if (!selector) continue;
         cache.field(&h, key);
@@ -259,16 +280,17 @@ pub fn fingerprint(ctx: *cache.Context, is_zig: bool, executable: []const u8) ![
     {
         const shared = try cache.Lock.acquire(ctx, lock_name, false);
         defer shared.release();
-        if (readMemo(ctx, path, selectors.items.len, is_zig)) |hash| return hash;
+        if (readMemo(ctx, path, selectors.items.len, is_zig, physical)) |hash| return hash;
     }
     const lock = try cache.Lock.acquire(ctx, lock_name, true);
     defer lock.release();
-    if (readMemo(ctx, path, selectors.items.len, is_zig)) |hash| return hash;
+    if (readMemo(ctx, path, selectors.items.len, is_zig, physical)) |hash| return hash;
     const version = try std.process.run(ctx.a, ctx.io, .{ .argv = &.{ executable, if (is_zig) "version" else "-vV" }, .environ_map = ctx.env });
     switch (version.term) {
         .exited => |code| if (code != 0) return error.CompilerIdentityFailed,
         else => return error.CompilerIdentityFailed,
     }
+    var locations: ?cache.RustLocations = null;
     var stamps: std.ArrayList(Stamp) = .empty;
     try stamps.appendSlice(ctx.a, selectors.items);
     if (is_zig) {
@@ -288,9 +310,27 @@ pub fn fingerprint(ctx: *cache.Context, is_zig: bool, executable: []const u8) ![
         // Zig supplies Darwin's implicit libSystem link stubs itself.
         try tree(ctx, &stamps, try std.fs.path.join(ctx.a, &.{ parsed.lib_dir, "libc", "darwin" }));
     } else {
-        const result = try std.process.run(ctx.a, ctx.io, .{ .argv = &.{ executable, "--print", "sysroot" }, .environ_map = ctx.env });
-        const sysroot = std.mem.trim(u8, result.stdout, "\r\n");
-        if (!std.fs.path.isAbsolute(sysroot)) return error.InvalidSysroot;
+        const result = try std.process.run(ctx.a, ctx.io, .{ .argv = &.{ executable, "--print", "sysroot", "--print", "target-libdir" }, .environ_map = ctx.env });
+        switch (result.term) {
+            .exited => |code| if (code != 0) return error.CompilerIdentityFailed,
+            else => return error.CompilerIdentityFailed,
+        }
+        var lines = std.mem.tokenizeAny(u8, result.stdout, "\r\n");
+        const sysroot = lines.next() orelse return error.InvalidSysroot;
+        const target_libdir = lines.next() orelse return error.InvalidSysroot;
+        if (lines.next() != null or !std.fs.path.isAbsolute(sysroot) or !std.fs.path.isAbsolute(target_libdir)) return error.InvalidSysroot;
+        const installed = try std.fs.path.join(ctx.a, &.{ sysroot, "bin", "rustc" });
+        var loader_override = false;
+        for (ctx.env.keys()) |name| if (std.mem.startsWith(u8, name, "LD_") or std.mem.startsWith(u8, name, "DYLD_")) {
+            loader_override = true;
+        };
+        // Only the direct, canonical stock compiler may reuse these locations.
+        // Proxies, aliases, explicit targets and loader overrides query live.
+        const fallback_verified = @import("rust_loader.zig").allowsFallback(ctx, real, sysroot) catch false;
+        if (physical and (!loader_override or fallback_verified) and std.mem.eql(u8, executable, real) and std.mem.eql(u8, real, installed) and
+            std.mem.startsWith(u8, version.stdout, "rustc 1.97.1 (8bab26f4f 2026-07-14)\n"))
+            locations = .{ .compiler = real, .sysroot = sysroot, .target_libdir = target_libdir, .fallback_verified = fallback_verified };
+        try add(ctx, &stamps, target_libdir);
         try add(ctx, &stamps, try std.fs.path.join(ctx.a, &.{ sysroot, "bin", "rustc" }));
         rustResources(ctx, &stamps, try std.fs.path.join(ctx.a, &.{ sysroot, "lib" })) catch |err| {
             ctx.trace(try std.fmt.allocPrint(ctx.a, "Rust resources unavailable: {s} ({s})", .{ sysroot, @errorName(err) }));
@@ -337,10 +377,11 @@ pub fn fingerprint(ctx: *cache.Context, is_zig: bool, executable: []const u8) ![
     for (stamps.items) |s| if (!equal(s, try stamp(ctx, s.path))) return error.ToolchainChanged;
     const hash = try cache.finish(ctx.a, &h);
     const decoder_hash = try cache.finish(ctx.a, &decoder);
-    const bytes = try std.json.Stringify.valueAlloc(ctx.a, Memo{ .hash = hash, .decoder_hash = decoder_hash, .stamps = stamps.items }, .{});
+    const bytes = try std.json.Stringify.valueAlloc(ctx.a, Memo{ .locations = locations, .hash = hash, .decoder_hash = decoder_hash, .stamps = stamps.items }, .{});
     try ctx.atomic(path, try cache.seal(ctx, bytes));
     try rememberEpoch(ctx, bytes);
     ctx.compiler_decoder_identity = decoder_hash;
+    ctx.rust_locations = locations;
     return hash;
 }
 
