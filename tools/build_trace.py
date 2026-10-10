@@ -206,8 +206,9 @@ def analyze(report, output):
         trace = build.get('trace', {})
         if build['implementation'] == 'nanocompile':
             for request in trace.get('requests', []):
-                reasons = [line[len('nanocompile: bypass: '):] for line in request.get('nano_decisions', [])
-                           if line.startswith('nanocompile: bypass: ')]
+                reasons = [line[len(prefix):] for line in request.get('nano_decisions', [])
+                           for prefix in ('nanocompile: bypass: ', 'nanocompile: uncached: ')
+                           if line.startswith(prefix)]
                 reason = request.get('bypass_reason') or next((r for r in reasons if r.isidentifier()), None)
                 if reason and request['kind'] == 'rust' and request['seconds'] >= .1:
                     uncached_work.append(dict(build=index, phase=build['phase'], name=request['name'],

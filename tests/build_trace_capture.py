@@ -165,10 +165,13 @@ int main(){
     except ValueError:
         pass
     paired[0]['trace']['requests'] = [dict(name='app', kind='rust', seconds=12,
-        start_seconds=0, nano_decisions=['nanocompile: bypass: UnsupportedProducerConfiguration'])]
+        start_seconds=0, nano_decisions=['nanocompile: bypass: UnsupportedProducerConfiguration']),
+        dict(name='large', kind='rust', seconds=2, start_seconds=0,
+             nano_decisions=['nanocompile: uncached: StreamTooLong'])]
     fixture.write_text(json.dumps(dict(builds=paired)))
     support = analyze(fixture, state / 'support')
     assert support['uncached_work'][0]['reason'] == 'UnsupportedProducerConfiguration'
+    assert support['uncached_work'][1]['reason'] == 'StreamTooLong'
     assert 'cold-build savings' in support['uncached_work'][0]['claim']
     paired[0]['cli_help_valid'] = False
     fixture.write_text(json.dumps(dict(builds=paired, completed=False,

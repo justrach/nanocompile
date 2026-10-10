@@ -38,4 +38,22 @@ The first fixed-epoch session stopped when Nano's completed application had mode
 
 A diagnostic rebuild produced mode `0755` and traced the final application compile as `bypass: UnsupportedProducerConfiguration`. This does not reproduce or explain the earlier failure, and no runtime fix is claimed. The runner now saves probe failures, file modes and console hashes before rejecting the sample. Repeated final executable modes must also match.
 
-A new full-app diagnostic session under `/tmp/nano-full-harness-trace-20261011` retains compiler streams, Cargo timings, reference artifact bytes and cache events. It uses one cold pair and one warm round with the fixed epoch. These traced timings are diagnostic observations, not repeated speed evidence. Results remain pending until the session and byte/probe validations finish.
+A new full-app diagnostic session under `/tmp/nano-full-harness-trace-20261011` retains compiler streams, Cargo timings, reference artifact bytes and cache events. It uses one cold pair and one warm round with the fixed epoch. These traced timings are diagnostic observations, not repeated speed evidence. The session is complete; results and limitations follow below.
+
+## Completed full-application diagnostic capture
+
+[The six-build capture](../benchmarks/harness-full-app-trace.json) completes one cold pair and one clean-target warm round. This is diagnostic tracing with overhead, not repeated performance evidence.
+
+| Implementation | Cold/reference seconds | Warm-cache, clean target seconds |
+| --- | ---: | ---: |
+| Direct | 174.202 | 173.414 |
+| Nano | 177.113 | 88.981 |
+| kache | 189.562 | 6.969 |
+
+Every executable passes `--help` with identical help output and mode `0755`. All repeated libraries, macros, scripts, native outputs, final executables and final modes match their implementation's own cold reference. Source hashes remain unchanged. Nano's final bytes also match direct in this session; cross-tool equality with kache is not required. The earlier permission failure does not reproduce and remains unresolved.
+
+All six full-console digests and capture manifests verify. Each build contains 1,237 Cargo timing units. Wrapped compiler records: Nano 1,145 cold and warm, kache 1,226 cold and 1,103 warm. Direct has Cargo logs/timings rather than frontend records. Three independent reference snapshots verify 1,214 direct, 1,215 Nano and 1,214 kache artifact files. Private logs and copied bytes remain under `/tmp/nano-full-harness-trace-20261011`; public data removes raw decisions and record paths, retaining enumerated cache rejection reasons. The exact measured runner snapshot matches the report's script hash.
+
+The full-app warm result is substantially worse for Nano than kache, despite the earlier adapters-only lead. The final Harness request takes 70.388s warm through Nano's `UnsupportedProducerConfiguration` bypass. Its compiler arguments use `-C lto=thin`; current producer guards reject LTO. Kache's matching-name warm service event is a local hit: 109ms elapsed, 44ms key work, 63ms restore, zero compiler runs. Its hit `compile_time_ms=66681` describes the stored cold compilation, not new warm compiler work.
+
+The next priorities are in [the concrete handoff](full-harness-next-variation.md), [generated observations](full-harness-generated-experiments.md) and [structured instructions](../benchmarks/harness-full-app-experiments.json). Observed gaps overlap and do not predict additive savings. Repeat untraced comparisons before claiming improvements; no production runtime change was made in this diagnostic session.
