@@ -304,9 +304,26 @@ def main():
         assert row['cli_help_valid'],cli.stderr.decode(errors='replace')
         library = next((target/'release/deps').glob('libharness_proto-*.rlib'))
         probe_output = state/'probe'
-        checked = subprocess.run(['rustc',str(probe),'--edition=2024','-C','opt-level=3','--extern','harness_proto='+str(library),
-                                  '-Ldependency='+str(target/'release/deps'),'-o',str(probe_output)],
-                                  cwd=project,env=env,capture_output=True,timeout=180)
+        # The actual release archive contains Rust LLVM bitcode. Let the pinned
+        # Rust compiler perform thin LTO rather than handing it to Apple's
+        # potentially older libLTO. These probe flags do not alter Cargo builds.
+        probe_command = ['rustc',str(probe),'--edition=2024','-C','opt-level=3',
+                         '-C','lto=thin','-C','embed-bitcode=yes',
+                         '--extern','harness_proto='+str(library),
+                         '-Ldependency='+str(target/'release/deps'),'-o',str(probe_output)]
+        prefix = state / (str(number)+'-linked-probe')
+        prefix.with_suffix('.command.json').write_text(json.dumps(probe_command,indent=2)+'\n')
+        checked = subprocess.run(probe_command,cwd=project,env=env,capture_output=True,timeout=180)
+        prefix.with_suffix('.stdout').write_bytes(checked.stdout)
+        prefix.with_suffix('.stderr').write_bytes(checked.stderr)
+        row['probe_compiler'] = dict(exit_code=checked.returncode,
+                                    stdout_sha256=hashlib.sha256(checked.stdout).hexdigest(),
+                                    stderr_sha256=hashlib.sha256(checked.stderr).hexdigest(),
+                                    source_sha256=sha(probe), library_sha256=sha(library),
+                                    lto='thin', embed_bitcode=True,
+                                    stdout_path=prefix.with_suffix('.stdout').name,
+                                    stderr_path=prefix.with_suffix('.stderr').name)
+        save()
         assert checked.returncode == 0, checked.stderr.decode(errors='replace')[-4000:]
         observed = subprocess.check_output([str(probe_output)],env=env,text=True,timeout=30).strip()
         row['observed_probe'] = observed

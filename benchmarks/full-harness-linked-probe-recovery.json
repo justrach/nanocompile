@@ -1,0 +1,23 @@
+{
+  "scope": "Linked-probe configuration repair on actual completed direct Harness release artifacts; not a cache speed result",
+  "failed_session_completed": false,
+  "failed_session_report_sha256": "34633b2b7c371660c7473f866e09f2b51590e92f21c6ccccbe2217fa49920cb9",
+  "build_logs": {
+    "verified_build_logs": 1
+  },
+  "direct_build_seconds": 170.7806887080078,
+  "direct_cli_help_valid": true,
+  "original_probe_reproduced_exit_code": 1,
+  "original_probe_stderr_sha256": "a6d8ca33c7624b1f1c37270830adb159afc61b17ecf50994b9352c73bf1616c4",
+  "failure_cause": "Rust LLVM22 embedded bitcode sent to older Apple LLVM21 libLTO by standalone probe without Rust LTO",
+  "fixed_probe": {
+    "compiler_exit_code": 0,
+    "library_before_sha256": "8e8095f263b42bc18b87a44a44b84187f6997081c8e3009ba385d048652ea961",
+    "library_after_sha256": "8e8095f263b42bc18b87a44a44b84187f6997081c8e3009ba385d048652ea961",
+    "compiler_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "probe_exit_code": 0,
+    "observed": "0.2.12"
+  },
+  "runner_sha256": "1bdb056a4d208ad56b1adf870a91d7f1b6233d4a399dec3f75abd7a2b91f895b",
+  "cargo_build_flags_changed": false
+}
