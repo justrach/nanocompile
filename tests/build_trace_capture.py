@@ -134,12 +134,13 @@ int main(){
     paired = [dict(implementation=tool, phase='warm', trace=dict(requests=[],
               cargo_units=[dict(name='ring', mode='run-custom-build', duration=duration)],
               kache_service_events=[])) for tool, duration in [('nanocompile', 1.2), ('kache', .1)]]
-    fixture.write_text(json.dumps(dict(builds=paired, native_artifacts=True, portable_cc=False, script_profile=True, thin_lto_producers=True, rlib_frameworks=True, bindgen_tools={'CLANG_PATH': '/usr/bin/clang'}, bindgen_tools_file_sha256='abc', command=['cargo','build','--release'], runs=2, cold_runs=1)))
+    fixture.write_text(json.dumps(dict(builds=paired, native_artifacts=True, portable_cc=False, script_profile=True, thin_lto_producers=True, rlib_frameworks=True, staticlib_companions=True, bindgen_tools={'CLANG_PATH': '/usr/bin/clang'}, bindgen_tools_file_sha256='abc', command=['cargo','build','--release'], runs=2, cold_runs=1)))
     analyze(fixture, state / 'paired')
     instructions = json.loads((state / 'paired/experiments.json').read_text())
     assert instructions['provenance']['thin_lto_producers'] is True
     assert instructions['provenance']['script_profile'] is True
     assert instructions['provenance']['rlib_frameworks'] is True
+    assert instructions['provenance']['staticlib_companions'] is True
     assert instructions['provenance']['bindgen_tools'] == {'CLANG_PATH': '/usr/bin/clang'}
     assert instructions['provenance']['bindgen_tools_file_sha256'] == 'abc'
     assert instructions['provenance']['native_artifacts'] is True

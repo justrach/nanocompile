@@ -39,6 +39,7 @@ def main():
     p.add_argument("--source-date-epoch", type=int, required=True)
     p.add_argument("--thin-lto-producers", action="store_true")
     p.add_argument("--rlib-frameworks", action="store_true")
+    p.add_argument("--staticlib-companions", action="store_true", help="opt-in pinned native macOS mixed lib/staticlib archive caching")
     p.add_argument("--retain-artifacts", action="store_true")
     p.add_argument("--package", default="harness")
     p.add_argument("--state", required=True, help="new, dedicated benchmark directory")
@@ -127,6 +128,8 @@ def main():
         env.update(selected_bindgen_tools)
     if args.thin_lto_producers:
         env["NANOCOMPILE_THIN_LTO_PRODUCERS"] = "1"
+    if args.staticlib_companions:
+        env["NANOCOMPILE_RUST_STATICLIB"] = "1"
     if args.rlib_frameworks:
         env["NANOCOMPILE_RLIB_FRAMEWORKS"] = "1"
     env.update(CARGO_TARGET_DIR=str(target), CARGO_INCREMENTAL="0", NANOCOMPILE_DIR=str(cache),
@@ -163,6 +166,7 @@ def main():
         if name and (name.endswith(('.rs', '.toml')) or Path(name).name == 'Cargo.lock') and (project / name).is_file()
     }
     result['snapshot_rust_and_manifest_hashes'] = {name:sha(project/name) for name in original_input_hashes}
+    result['staticlib_companions'] = args.staticlib_companions
     result['rlib_frameworks'] = args.rlib_frameworks
     result['bindgen_tools_file_sha256'] = bindgen_tools_hash
     result['bindgen_tools'] = selected_bindgen_tools

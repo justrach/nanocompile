@@ -61,6 +61,7 @@ def main():
     p.add_argument("--proc-macro-producers", action="store_true", help="enable the experimental macOS producer cache; verify macro dylib artifacts too")
     p.add_argument("--thin-lto-producers", action="store_true", help="opt-in stable-alias LTO candidate; preserve own-cold byte gates")
     p.add_argument("--rlib-frameworks", action="store_true", help="opt-in native macOS rlib command-line framework metadata caching")
+    p.add_argument("--staticlib-companions", action="store_true", help="opt-in pinned native macOS mixed lib/staticlib archive caching")
     p.add_argument("--executable-producers", action="store_true", help="enable experimental macOS executable compilation caching")
     p.add_argument("--build-script-contract", type=Path, help="opt Nano into explicit whole build-script execution contracts")
     p.add_argument("--bindgen-tools-file", type=Path, help="explicit libclang, clang and rustfmt paths shared by all implementations")
@@ -133,6 +134,8 @@ def main():
         env["NANOCOMPILE_EXECUTABLE_PRODUCERS"] = "1"
     if args.thin_lto_producers:
         env["NANOCOMPILE_THIN_LTO_PRODUCERS"] = "1"
+    if args.staticlib_companions:
+        env["NANOCOMPILE_RUST_STATICLIB"] = "1"
     if args.rlib_frameworks:
         env["NANOCOMPILE_RLIB_FRAMEWORKS"] = "1"
     target_options = ["--bin", args.bin] if args.bin else ["--lib"]
@@ -150,6 +153,7 @@ def main():
               "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat(), "builds": [],
               "method": "offline clean release package builds; same target path; prime direct build then empty caches; rotate three-way warm measurement order unless cold-only; validate each wrapper against its own cold artifact hashes (kache remaps paths)"}
     result['source_date_epoch'] = env.get('SOURCE_DATE_EPOCH')
+    result['staticlib_companions'] = args.staticlib_companions
     result['rlib_frameworks'] = args.rlib_frameworks
     result['bindgen_tools_file_sha256'] = bindgen_tools_hash
     result['bindgen_tools'] = selected_bindgen_tools

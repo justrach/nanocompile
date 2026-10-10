@@ -16,6 +16,7 @@ const Plan = struct {
     producer: bool = false,
     producer_dylib: bool = false,
     thin_lto: bool = false,
+    static_companion: bool = false,
     linked_output: ?[]const u8 = null,
     out_dir: ?[]const u8 = null,
 };
@@ -66,6 +67,8 @@ fn rustPlan(ctx: *cache.Context, argv: []const []const u8) !Plan {
     var producer_unsafe_codegen = false;
     var thin_lto = false;
     var target: ?[]const u8 = null;
+    var static_companion = false;
+    var prefer_dynamic = false;
     var i: usize = 1;
     while (i < argv.len) : (i += 1) {
         const arg = argv[i];
@@ -74,10 +77,22 @@ fn rustPlan(ctx: *cache.Context, argv: []const []const u8) !Plan {
             continue;
         }
         if (try option(argv, &i, "--crate-type")) |v| {
-            // Every requested type can create an output. Never let the last
-            // flag hide an earlier executable/staticlib from the restore plan.
-            if (crate_type) |previous| if (!eq(previous, v)) return error.UnsupportedCrateType;
-            crate_type = v;
+            var types = std.mem.splitScalar(u8, v, ',');
+            while (types.next()) |requested| {
+                if (crate_type) |previous| {
+                    if (!eq(previous, requested)) {
+                        const previous_lib = eq(previous, "lib") or eq(previous, "rlib");
+                        const requested_lib = eq(requested, "lib") or eq(requested, "rlib");
+                        if (!eq(ctx.env.get("NANOCOMPILE_RUST_STATICLIB") orelse "", "1") or
+                            !((previous_lib and eq(requested, "staticlib")) or
+                                (eq(previous, "staticlib") and requested_lib) or
+                                (static_companion and previous_lib and eq(requested, "staticlib"))))
+                            return error.UnsupportedCrateType;
+                        static_companion = true;
+                        if (requested_lib) crate_type = requested;
+                    }
+                } else crate_type = requested;
+            }
             continue;
         }
         if (try option(argv, &i, "--emit")) |v| {
@@ -134,6 +149,7 @@ fn rustPlan(ctx: *cache.Context, argv: []const []const u8) !Plan {
             const split = std.mem.indexOfScalar(u8, v, '=') orelse v.len;
             const key = v[0..split];
             if (eq(key, "debuginfo")) debug_info = v[@min(split + 1, v.len)..];
+            if (eq(key, "prefer-dynamic")) prefer_dynamic = true;
             if (eq(key, "lto") and eq(v[@min(split + 1, v.len)..], "thin") and
                 eq(ctx.env.get("NANOCOMPILE_THIN_LTO_PRODUCERS") orelse "", "1"))
             {
@@ -181,6 +197,12 @@ fn rustPlan(ctx: *cache.Context, argv: []const []const u8) !Plan {
     const producer_dylib = eq(ct, "proc-macro") and eq(ctx.env.get("NANOCOMPILE_PROC_MACRO_PRODUCERS") orelse "", "1");
     const executable = eq(ct, "bin") and eq(ctx.env.get("NANOCOMPILE_EXECUTABLE_PRODUCERS") orelse "", "1");
     const producer = producer_dylib or executable;
+    // Only the measured native-host, zero-debug, non-LTO archive pair is a
+    // trial. Its full compiler/stdlib resource identity is required below.
+    if (static_companion and (builtin.os.tag != .macos or builtin.cpu.arch != .aarch64 or
+        producer or target != null or !eq(debug_info, "0") or producer_unsafe_codegen or thin_lto or
+        prefer_dynamic or deferred_framework or !eq(emit orelse "", "dep-info,link")))
+        return error.UnsupportedStaticlibConfiguration;
     if (!producer and !eq(ct, "rlib") and !eq(ct, "lib")) return error.UnsupportedCrateType;
     // A plain rlib registers this exact framework name for final linking; it
     // does not resolve or bundle the framework. Producer/final links still
@@ -243,12 +265,14 @@ fn rustPlan(ctx: *cache.Context, argv: []const []const u8) !Plan {
         const path = try absolute(ctx, try std.fs.path.join(ctx.a, &.{ dir, filename }));
         for (outputs.items) |existing| if (eq(existing, path)) return error.DuplicateEmission;
         try outputs.append(ctx.a, path);
+        if (eq(e, "link") and static_companion)
+            try outputs.append(ctx.a, try absolute(ctx, try std.fs.path.join(ctx.a, &.{ dir, try std.fmt.allocPrint(ctx.a, "lib{s}{s}.a", .{ crate, suffix }) })));
         if (eq(e, "dep-info")) dep_info = path;
         if (eq(e, "link")) linked_output = path;
     }
     if (dep_info == null) return error.NoDependencyInfo;
     if (producer and (std.mem.indexOfAny(u8, dir, "\r\n\t\"\\") != null or std.mem.indexOfAny(u8, ctx.root, "\r\n\t\"\\") != null or std.mem.indexOf(u8, dir, "//") != null)) return error.UnsupportedProducerPath;
-    return .{ .source = src, .outputs = outputs.items, .dependencies = inputs.items, .dep_info = dep_info, .library_dirs = search_dirs.items, .native_dirs = native_dirs.items, .configuration = configuration, .producer = producer, .producer_dylib = producer_dylib, .thin_lto = thin_lto, .linked_output = linked_output, .out_dir = dir };
+    return .{ .source = src, .outputs = outputs.items, .dependencies = inputs.items, .dep_info = dep_info, .library_dirs = search_dirs.items, .native_dirs = native_dirs.items, .configuration = configuration, .producer = producer, .producer_dylib = producer_dylib, .thin_lto = thin_lto, .static_companion = static_companion, .linked_output = linked_output, .out_dir = dir };
 }
 
 fn zigPlan(ctx: *cache.Context, argv: []const []const u8) !Plan {
@@ -684,6 +708,11 @@ pub fn execute(ctx: *cache.Context, kind: Kind, argv: []const []const u8) !u8 {
     const maintenance = cache.Lock.acquire(ctx, "maintenance", false) catch return bypass(ctx, argv, "bypass: cache lock unavailable");
     defer maintenance.release();
     const key = keyFor(ctx, kind, argv) catch |err| return bypass(ctx, argv, try std.fmt.allocPrint(ctx.a, "bypass: compiler identity unavailable ({s})", .{@errorName(err)}));
+    // The byte-pinned physical Rust installation fingerprints all rustlib
+    // targets, std archives and backend/helper resources. Generic drivers do
+    // not establish the archive writer's complete implicit resource closure.
+    if (plan.static_companion and ctx.rust_locations == null)
+        return bypass(ctx, argv, "bypass: unsupported staticlib compiler resources");
     const flight = cache.Lock.acquire(ctx, key, true) catch return bypass(ctx, argv, "bypass: key lock unavailable");
     defer flight.release();
     // Different argument sets can still write the same output. Serialize those
@@ -810,8 +839,8 @@ fn save(ctx: *cache.Context, key: []const u8, plan: Plan, argv: []const []const 
         if (st.mtime.nanoseconds >= started or st.ctime.nanoseconds >= started) return error.DirectoryChangedDuringCompilation;
         try records.append(ctx.a, .{ .path = dir, .hash = try ctx.directoryDigest(dir, false, plan.outputs), .directory = true });
     }
-    if (!plan.producer and plan.dep_info != null and (directories.len != 0 or hidden_native))
-        try rust_dependencies.collect(ctx, argv, plan.outputs, directories, started, &records, true, &validated, hidden_native);
+    if (!plan.producer and plan.dep_info != null and (directories.len != 0 or hidden_native or plan.static_companion))
+        try rust_dependencies.collect(ctx, argv, plan.outputs, directories, started, &records, !plan.static_companion, &validated, hidden_native);
     if (plan.producer) {
         for (plan.dependencies) |path| if (std.mem.endsWith(u8, path, ".rlib") or std.mem.endsWith(u8, path, ".rmeta")) {
             try rust_dependencies.collect(ctx, argv, &.{path}, directories, started, &records, false, &validated, false);
