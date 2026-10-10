@@ -64,3 +64,15 @@ Ring's warm run-custom-build interval is 0.150s for Nano and 0.045s for kache ov
 The [nine-build live capture](../benchmarks/harness-live-pipelining-trace.json) records all 187 Cargo units each build. Nano has 179 compiler/probe records per wrapped build, kache has 203 cold and 170 warm. Each wrapped build contains 135 complete observed metadata notifications, retained as timeline instants. All nine manifests pass byte counts, hashes, record ownership and contiguous stream-chunk validation. Every repeated output matches its implementation's own cold reference. Nano's warm Rust/script coverage remains 167/one hits while logging live.
 
 Full logs stay in `/tmp/nano-live-default-trace-20261010`; the sanitized report omits raw decisions, private record references and capture directories. Recreate the private filtered report with `tools/build_trace.py analyze`; the local public preview is `/tmp/nano-live-default-public-analysis-20261010/index.html`. [Structured future instructions](../benchmarks/harness-live-pipelining-experiments.json) and [the brief](live-pipelining-next-experiments.md) rank remaining observed interval gaps. First cold units retain roughly 0.4s diagnostic gaps in this single cold pair; reproduce and instrument startup/identity costs before changing validation. Diagnostic durations overlap and do not establish critical-path savings or replace the separate repeated untraced benchmarks.
+
+## Failure records and reproducible handoff
+
+The comparison runner records each full console's relative path, byte count and SHA-256, even without compiler tracing. Verify those bytes with:
+
+```sh
+python3 tools/build_trace.py verify-logs /tmp/build-capture.json --state /tmp/new-private-build-capture
+```
+
+With `--bin harness --probe-help`, reports include final file permissions and probe outcomes. An execution error is saved before the runner stops; it cannot silently lose the completed build's timing row. Repeated file modes and artifact bytes must match the same implementation's cold reference. The report's `completed` and `failure` fields distinguish a finished session from a stopped one. Historical reports lack these additional fields.
+
+The analyzer lists excluded builds and omits failed compilation, executable-probe and artifact-validation samples from optimization comparisons. Structured experiment instructions retain the reproducible timestamp, binary target, probe policy and session outcome, plus a one-cause implementation instruction and explicit rollback criteria. Inspect the generated observations before implementing a variation; interval gaps are hypotheses, not expected build-time savings.

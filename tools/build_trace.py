@@ -12,6 +12,29 @@ import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 
+def verify_logs(report, state):
+    """Verify recorded consoles, including failed untraced build samples."""
+    data = json.loads(report.read_text())
+    count = 0
+    for build in data['builds']:
+        record = build.get('build_log')
+        if record is None:
+            raise ValueError('Build has no recorded log digest')
+        name = Path(record['path'])
+        if name.is_absolute() or '..' in name.parts:
+            raise ValueError('Build log path escapes state')
+        path = state / name
+        if path.is_symlink() or not path.resolve().is_relative_to(state.resolve()):
+            raise ValueError('Build log is linked or escapes state')
+        with path.open('rb') as stream:
+            digest = hashlib.file_digest(stream, 'sha256').hexdigest()
+        if path.stat().st_size != record['bytes'] or digest != record['sha256']:
+            raise ValueError('Build log differs from recorded bytes: ' + str(name))
+        count += 1
+    if not count:
+        raise ValueError('No completed build logs recorded')
+    return dict(verified_build_logs=count)
+
 def verify_capture(directory):
     """Check a local capture against its manifest; this is integrity, not authentication."""
     check_stream_owners(directory)
@@ -171,7 +194,13 @@ def analyze(report, output):
     traces, grouped = [], collections.defaultdict(list)
     service_summaries = []
     build_script_runs = []
+    excluded_builds = []
     for index, build in enumerate(data['builds']):
+        if (build.get('exit_code', 0) != 0 or build.get('cli_help_valid') is False
+                or any(value is False for key, value in build.items() if key.startswith('matches_'))):
+            excluded_builds.append(dict(build=index, implementation=build['implementation'],
+                                        phase=build['phase'], reason='Failed build, executable probe or artifact validation'))
+            continue
         traces.append(dict(name='process_name', ph='M', pid=index, tid=0, args=dict(name=f"{index}: {build['implementation']} {build['phase']}")))
         trace = build.get('trace', {})
         service_events = trace.get('kache_service_events', [])
@@ -216,6 +245,8 @@ def analyze(report, output):
             observation={k: row[k] for k in ('phase', 'kind', 'mode', 'name', 'nanocompile', 'kache', 'nano_minus_kache_seconds')},
             hypothesis='Execution reuse may remove repeated work' if row['mode'] == 'run-custom-build' else 'Identity, coordination or restore work may explain the interval gap',
             next_measurement='Inspect matching private records and instrument Nano stages; run one controlled ablation before changing behavior',
+            implementation_instruction='Add phase measurements around the suspected work, then change only that cause behind a reversible control. Preserve fallback execution and compare the control on/off with identical inputs.',
+            rollback='Keep the accepted binary frozen; reject the candidate on a correctness failure or a cold/warm regression that repeats in the confirmation session.',
             acceptance=['repeated alternating untraced A/B against frozen production and kache',
                         'real input edits and reverts invalidate correctly',
                         'loader, toolchain and environment changes invalidate correctly',
@@ -227,14 +258,16 @@ def analyze(report, output):
                   'diagnostic_trace', 'compiler_stream', 'pipelined_companions', 'native_clang', 'native_artifacts', 'portable_cc',
                   'command', 'runs', 'cold_runs', 'cold_only', 'dirty', 'method', 'nanocompile_proc_macros',
                   'nanocompile_proc_macro_producers', 'nanocompile_executable_producers',
-                  'build_script_contract_sha256', 'kache_build_script_cache') if key in data}
+                  'build_script_contract_sha256', 'kache_build_script_cache', 'source_date_epoch',
+                  'binary_target', 'cli_help_probe', 'completed', 'failure') if key in data}
     provenance['analyzer_sha256'] = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
     provenance['report_sha256'] = hashlib.sha256(report.read_bytes()).hexdigest()
     (output / 'experiments.json').write_text(json.dumps(dict(schema=1, provenance=provenance,
         instruction='Reproduce this configuration before changing one cause; freeze the baseline binary and keep diagnostic and untraced benchmark results separate',
-        candidate_limit=12, complete_comparisons='analysis.json', experiments=experiments), indent=2)+'\n')
+        candidate_limit=12, excluded_builds=excluded_builds,
+        complete_comparisons='analysis.json', experiments=experiments), indent=2)+'\n')
     (output / 'trace.json').write_text(json.dumps({'traceEvents': traces}))
-    analysis = dict(diagnostic=True, comparisons=comparison, kache_service_summaries=service_summaries, kache_build_script_runs=build_script_runs,
+    analysis = dict(diagnostic=True, excluded_builds=excluded_builds, comparisons=comparison, kache_service_summaries=service_summaries, kache_build_script_runs=build_script_runs,
                     build_coverage=[dict(implementation=b["implementation"], phase=b["phase"], events=b.get("events", {}), capture_coverage=b.get('trace', {}).get('capture_coverage'), request_kinds=dict(collections.Counter(r["kind"] for r in b.get("trace", {}).get("requests", []))), own_artifact_checks={k: v for k, v in b.items() if k.startswith("matches_own_cold")}) for b in data["builds"]],
                     limitations='compile_time_ms on cache hits can describe the stored original compilation; stage summaries exclude hit/dup compile_time_ms. Per-unit medians are scheduling-sensitive, unpaired diagnostic observations. Request durations overlap. Missing counterparts are unknown, not zero. No optimization or overall speed win is established by this capture.')
     (output / 'analysis.json').write_text(json.dumps(analysis, indent=2) + '\n')
@@ -268,12 +301,17 @@ def main():
     report.add_argument('--output', required=True, type=Path)
     verify = sub.add_parser('verify-capture', help='check private captured file sets, sizes and hashes')
     verify.add_argument('directory', type=Path)
+    logs = sub.add_parser('verify-logs', help='check recorded whole-build console hashes, including failures')
+    logs.add_argument('report', type=Path)
+    logs.add_argument('--state', required=True, type=Path)
     args = parser.parse_args()
     if args.action == 'capture':
         forwarded = args.arguments[1:] if args.arguments[:1] == ['--'] else args.arguments
         subprocess.run([sys.executable, str(ROOT / 'tests/project_comparison.py'), *forwarded, '--trace-builds'], check=True)
     elif args.action == 'analyze':
         analyze(args.report, args.output)
+    elif args.action == 'verify-logs':
+        print(json.dumps(verify_logs(args.report, args.state)))
     else:
         print(json.dumps(verify_capture(args.directory)))
 

@@ -15,6 +15,7 @@ import time
 import sys
 from project_artifacts import compiled_scripts
 from reference_artifacts import retain
+from executable_probe import probe_help
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
 from build_trace import Capture
@@ -160,6 +161,7 @@ def main():
     compiled_script_references = {}
     native_references = {}
     final_references = {}
+    mode_references = {}
 
     def build(implementation, phase):
         shutil.rmtree(target, ignore_errors=True)
@@ -214,14 +216,16 @@ def main():
         row = {"native_objects_and_archives": native, "implementation": implementation, "phase": phase, "seconds": seconds,
                "exit_code": proc.returncode, "events": dict(after - before), "rlibs": len(artifacts), "artifacts": artifacts,
                "peak_sampled_process_tree_rss_bytes": peak, "macro_dylibs": macros, "build_script_executables": executables, "compiled_build_script_executables": compiled_executables}
+        row['build_log'] = dict(path=log_path.name, bytes=log_path.stat().st_size, sha256=sha(log_path))
         if args.bin:
             row['final_executable_artifacts'] = final_artifacts
+            row['final_executable_modes'] = {str(final_path.relative_to(target)): oct(final_path.stat().st_mode & 0o777)} if final_artifacts else {}
             if proc.returncode == 0 and args.probe_help:
-                help_result = subprocess.run([str(final_path), '--help'], env=env, capture_output=True, timeout=30)
-                row['cli_help_exit_code'] = help_result.returncode
-                row['cli_help_sha256'] = hashlib.sha256(help_result.stdout).hexdigest()
-                if help_result.returncode or b'Usage:' not in help_result.stdout:
-                    raise RuntimeError('Final executable failed explicit --help probe')
+                row.update(probe_help(final_path, env))
+        # Preserve the completed compiler result even if capture verification or
+        # reference copying fails. Later validation enriches this same row.
+        result['builds'].append(row)
+        save()
         if capture:
             capture.finish(row, target, origin_ns, event_path, event_offset, log_path)
         if implementation not in references:
@@ -235,6 +239,7 @@ def main():
             compiled_script_references[implementation] = compiled_executables
             native_references[implementation] = native
             final_references[implementation] = final_artifacts
+            mode_references[implementation] = row.get('final_executable_modes', {})
         else:
             row["matches_own_cold_native_artifacts"] = native_references[implementation] == native
             row["matches_own_cold_artifacts"] = references[implementation] == artifacts
@@ -242,16 +247,18 @@ def main():
             row["matches_own_cold_build_script_executables"] = executable_references[implementation] == executables
             if args.bin:
                 row['matches_own_cold_final_executable'] = final_references[implementation] == final_artifacts
+                row['matches_own_cold_final_executable_modes'] = mode_references[implementation] == row['final_executable_modes']
         if implementation == "nanocompile" and not (args.native_clang or args.portable_cc or args.native_artifacts):
             row["matches_direct_artifacts"] = artifacts == references.get("direct")
             row["matches_direct_macro_dylibs"] = macros == macro_references.get("direct")
             row["matches_direct_build_script_executables"] = compiled_executables == compiled_script_references.get("direct")
-        result["builds"].append(row)
         save()
         print(json.dumps({k: v for k, v in row.items() if k not in ("artifacts", "macro_dylibs", "build_script_executables", "native_objects_and_archives", "compiled_build_script_executables", "trace")}), flush=True)
         if proc.returncode or not artifacts or (args.bin and not final_artifacts):
             raise RuntimeError(f"Build failed or produced no libraries; see {log_path}")
-        if any(row.get(check) is False for check in ("matches_own_cold_final_executable", "matches_own_cold_native_artifacts", "matches_own_cold_artifacts", "matches_direct_artifacts", "matches_own_cold_macro_dylibs", "matches_direct_macro_dylibs", "matches_own_cold_build_script_executables", "matches_direct_build_script_executables")):
+        if row.get('cli_help_valid') is False:
+            raise RuntimeError(f'Final executable failed explicit --help probe; saved result in {output}')
+        if any(row.get(check) is False for check in ("matches_own_cold_final_executable_modes", "matches_own_cold_final_executable", "matches_own_cold_native_artifacts", "matches_own_cold_artifacts", "matches_direct_artifacts", "matches_own_cold_macro_dylibs", "matches_direct_macro_dylibs", "matches_own_cold_build_script_executables", "matches_direct_build_script_executables")):
             raise RuntimeError(f"Artifact validation failed; see {log_path}")
         if phase == "warm" and implementation == "nanocompile" and args.native_clang:
             if (row['events'].get('clang_native_hit', 0) < 20 and not row['events'].get('build_script_hit',0)) or row['events'].get('hit', 0) < 165:
@@ -331,7 +338,14 @@ def main():
         save()
         if not result['tracked_sources_unchanged']:
             raise RuntimeError('Tracked Rust sources changed during the comparison; results are not comparable')
+        result['completed'] = True
+        save()
         print(json.dumps(result.get("summary", result["cold_summary"]), indent=2), flush=True)
+    except Exception as error:
+        result['completed'] = False
+        result['failure'] = dict(type=type(error).__name__, message=str(error))
+        save()
+        raise
     finally:
         if daemon is not None:
             if daemon.poll() is None:

@@ -6,7 +6,7 @@ import subprocess
 import sys
 import tempfile
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'tools'))
-from build_trace import Capture, analyze, verify_capture, capture_notifications
+from build_trace import Capture, analyze, verify_capture, capture_notifications, verify_logs
 
 with tempfile.TemporaryDirectory() as temp:
     state = Path(temp)
@@ -147,4 +147,29 @@ int main(){
     assert 'ablation' in plan[0]['next_measurement']
     assert 'not predicted' in plan[0]['claim']
     assert 'private-marker' not in (state / 'paired/index.html').read_text()
+    console_report = state / 'consoles.json'
+    console_report.write_text(json.dumps(dict(builds=[dict(build_log=dict(
+        path=console.name, bytes=console.stat().st_size,
+        sha256=hashlib.sha256(console.read_bytes()).hexdigest()))])))
+    assert verify_logs(console_report, state)['verified_build_logs'] == 1
+    console.write_bytes(b'changed')
+    try:
+        verify_logs(console_report, state)
+        raise AssertionError('Changed console accepted')
+    except ValueError:
+        pass
+    console_report.write_text(json.dumps(dict(builds=[dict(build_log=dict(path='../escape'))])))
+    try:
+        verify_logs(console_report, state)
+        raise AssertionError('Escaping console path accepted')
+    except ValueError:
+        pass
+    paired[0]['cli_help_valid'] = False
+    fixture.write_text(json.dumps(dict(builds=paired, completed=False,
+                                      failure=dict(type='RuntimeError', message='probe failed'))))
+    rejected = analyze(fixture, state / 'rejected')
+    assert len(rejected['excluded_builds']) == 1
+    assert rejected['comparisons'][0]['nanocompile'] is None
+    instructions = json.loads((state / 'rejected/experiments.json').read_text())
+    assert not instructions['experiments'] and instructions['provenance']['completed'] is False
 print('Native capture transparency, concurrent records and missing-counterpart analysis passed')

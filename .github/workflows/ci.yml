@@ -42,6 +42,7 @@ jobs:
       - name: Build and real compiler tests
         run: |
           python3 tests/reference_artifacts_check.py
+          python3 tests/executable_probe_check.py
           python3 tests/build_trace_capture.py
           python3 tests/r2_transport.py
           zig build -Doptimize=ReleaseFast
