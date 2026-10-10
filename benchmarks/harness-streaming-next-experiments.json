@@ -57,5 +57,12 @@
     "Repeated separate comparisons against kache, actual source edits and reverts.",
     "Publish all samples and rejected runs; leave streaming off by default until warm regression resolved."
   ],
-  "diagnostic_evidence": "harness-streaming-diagnostic.json"
+  "diagnostic_evidence": "harness-streaming-diagnostic.json",
+  "follow_up": {
+    "implementation": "docs/pipelined-companions.md",
+    "measurements": "harness-pipelined-companions.json",
+    "matched_cold_ab": "harness-pipelined-companions-cold-ab.json",
+    "real_edits": "harness-pipelined-companions-source-edits.json",
+    "status": "Full warm coverage restored in opt-in variation; hosted Linux/macOS checks passed. Default promotion and broader comparisons remain."
+  }
 }

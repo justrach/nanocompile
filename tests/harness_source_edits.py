@@ -196,10 +196,20 @@ def main():
             row["matches_own_cold_artifacts"] = references[reference_key] == artifacts
             row["matches_own_cold_macro_dylibs"] = macro_references[reference_key] == macros
             row["matches_own_cold_build_script_executables"] = executable_references[reference_key] == executables
-        if implementation == "nanocompile" and not args.native_clang:
-            row["matches_direct_artifacts"] = artifacts == references.get((scenario,"direct"))
-            row["matches_direct_macro_dylibs"] = macros == macro_references.get((scenario,"direct"))
-            row["matches_direct_build_script_executables"] = compiled_executables == compiled_script_references.get((scenario,"direct"))
+        if not args.native_clang:
+            direct_key = (scenario, "direct")
+            if direct_key in references:
+                # Rotation can put Nano before direct for an edit. Compare
+                # retained rows once that scenario's direct outputs exist.
+                for candidate in [*result['builds'], row]:
+                    if candidate['scenario'] != scenario or candidate['implementation'] != 'nanocompile':
+                        continue
+                    candidate['matches_direct_artifacts'] = candidate['artifacts'] == references[direct_key]
+                    candidate['matches_direct_macro_dylibs'] = candidate['macro_dylibs'] == macro_references[direct_key]
+                    candidate['matches_direct_build_script_executables'] = candidate['compiled_build_script_executables'] == compiled_script_references[direct_key]
+                    candidate.pop('direct_comparison_pending', None)
+            elif implementation == 'nanocompile':
+                row['direct_comparison_pending'] = True
         assert proc.returncode == 0, log_path.read_text()[-4000:]
         library = next((target/'release/deps').glob('libharness_adapters-*.rlib'))
         probe_output = state/'probe'
@@ -215,7 +225,7 @@ def main():
         print(json.dumps({k: v for k, v in row.items() if k not in ("artifacts", "macro_dylibs", "build_script_executables", "native_objects_and_archives", "compiled_build_script_executables")}), flush=True)
         if proc.returncode or not artifacts:
             raise RuntimeError(f"Build failed or produced no libraries; see {log_path}")
-        if any(row.get(check) is False for check in ("matches_own_cold_native_artifacts", "matches_own_cold_artifacts", "matches_direct_artifacts", "matches_own_cold_macro_dylibs", "matches_direct_macro_dylibs", "matches_own_cold_build_script_executables", "matches_direct_build_script_executables")):
+        if any(record.get(check) is False for record in result['builds'] for check in ("matches_own_cold_native_artifacts", "matches_own_cold_artifacts", "matches_direct_artifacts", "matches_own_cold_macro_dylibs", "matches_direct_macro_dylibs", "matches_own_cold_build_script_executables", "matches_direct_build_script_executables")):
             raise RuntimeError(f"Artifact validation failed; see {log_path}")
         if phase == "warm" and implementation == "nanocompile" and args.native_clang:
             if row['events'].get('clang_native_hit', 0) < 20 or row['events'].get('hit', 0) < 165:
@@ -270,6 +280,7 @@ def main():
                     saved.rename(active)
                     if implementation=='kache': start_daemon()
                     verifying=False
+        assert not any(row.get('direct_comparison_pending') for row in result['builds']), 'Missing direct artifact references'
         result['summary']={phase:{mode:next(r['seconds'] for r in result['builds'] if r['scenario']==phase and r['implementation']==mode and not r['verification']) for mode in schedule} for phase in ('initial','leaf-edit','shared-edit','revert')}
         result['original_tracked_sources_unchanged']=all((original_project/name).is_file() and sha(original_project/name)==digest for name,digest in original_hashes.items())
         assert result['original_tracked_sources_unchanged']
