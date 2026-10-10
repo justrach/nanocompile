@@ -1,0 +1,145 @@
+diff --git a/src/compiler.zig b/src/compiler.zig
+index 47bbb80..0e20986 100644
+--- a/src/compiler.zig
++++ b/src/compiler.zig
+@@ -262,7 +262,7 @@ fn zigPlan(ctx: *cache.Context, argv: []const []const u8) !Plan {
+             output = arg[11..];
+             continue;
+         }
+-        if (eq(arg, "-O") or eq(arg, "-target") or eq(arg, "-mcpu") or eq(arg, "--name")) {
++        if (eq(arg, "-O") or eq(arg, "-target") or eq(arg, "-mcpu") or eq(arg, "--name") or eq(arg, "--cache-dir") or eq(arg, "--global-cache-dir")) {
+             i += 1;
+             if (i == argv.len) return error.MissingValue;
+             if (eq(arg, "-target") and (std.mem.indexOf(u8, argv[i], "windows") != null or std.mem.indexOf(u8, argv[i], "uefi") != null)) return error.UnsupportedZigTarget;
+@@ -485,6 +485,7 @@ fn keyFor(ctx: *cache.Context, kind: Kind, argv: []const []const u8) ![]const u8
+     cache.field(&hash, host.cpu.model.name);
+     cache.field(&hash, std.mem.asBytes(&host.cpu.features.ints));
+     cache.field(&hash, try std.fmt.allocPrint(ctx.a, "{any}", .{host.os}));
++    if (kind == .zig) cache.field(&hash, "zig-private-local-cache-v1");
+     for (argv) |arg| cache.field(&hash, arg);
+     const toolchain = try identity.fingerprint(ctx, kind == .zig, argv[0]);
+     ctx.compiler_identity = toolchain;
+@@ -680,9 +681,26 @@ pub fn execute(ctx: *cache.Context, kind: Kind, argv: []const []const u8) !u8 {
+         return bypass(ctx, argv, try std.fmt.allocPrint(ctx.a, "bypass: native inputs unavailable ({s})", .{@errorName(err)}));
+     try before.appendSlice(ctx.a, native);
+     const directories = rust_dependencies.snapshot(ctx, plan.library_dirs, plan.outputs) catch return bypass(ctx, argv, "bypass: cannot enumerate dependency directories");
++    // Zig's parsed-source cache can reuse stale input when size and mtime are
++    // preserved. Each actual miss gets fresh local parsing state; the global
++    // compiler cache remains available. Restore hits launch no compiler.
++    const zig_job = if (kind == .zig) try @import("producer_job.zig").Job.create(ctx) else null;
++    defer if (zig_job) |job| job.cleanup(ctx) catch {};
++    var command: std.ArrayList([]const u8) = .empty;
++    if (zig_job) |job| {
++        var i: usize = 0;
++        while (i < argv.len) : (i += 1) {
++            if (eq(argv[i], "--cache-dir")) {
++                i += 1;
++                continue;
++            }
++            try command.append(ctx.a, argv[i]);
++        }
++        try command.appendSlice(ctx.a, &.{ "--cache-dir", job.out });
++    } else try command.appendSlice(ctx.a, argv);
+     const started = std.Io.Clock.real.now(ctx.io).nanoseconds;
+     ctx.trace("miss: compiling");
+-    const result = try std.process.run(ctx.a, ctx.io, .{ .argv = argv, .environ_map = ctx.env });
++    const result = try std.process.run(ctx.a, ctx.io, .{ .argv = command.items, .environ_map = ctx.env });
+     try ctx.out(result.stdout);
+     try std.Io.File.stderr().writeStreamingAll(ctx.io, result.stderr);
+     const code = exitCode(result.term);
+diff --git a/src/identity.zig b/src/identity.zig
+index 17fb762..570ac15 100644
+--- a/src/identity.zig
++++ b/src/identity.zig
+@@ -77,16 +77,43 @@ fn tree(ctx: *cache.Context, stamps: *std.ArrayList(Stamp), root: []const u8) !v
+     }
+ }
+ 
+-fn readMemo(ctx: *cache.Context, path: []const u8, minimum_stamps: usize) ?[]const u8 {
++fn stampWorker(ctx: *cache.Context, stamps: []const Stamp, next: *std.atomic.Value(usize), valid: *std.atomic.Value(bool)) void {
++    while (true) {
++        const start = next.fetchAdd(32, .monotonic);
++        if (start >= stamps.len) return;
++        for (stamps[start..@min(start + 32, stamps.len)]) |expected| {
++            const current = stamp(ctx, expected.path) catch {
++                valid.store(false, .monotonic);
++                continue;
++            };
++            if (!equal(current, expected)) valid.store(false, .monotonic);
++        }
++    }
++}
++
++fn validStamps(ctx: *cache.Context, stamps: []const Stamp, parallel: bool) bool {
++    if (!parallel or stamps.len < 512) {
++        for (stamps) |expected| if (!equal(expected, stamp(ctx, expected.path) catch return false)) return false;
++        return true;
++    }
++    ctx.trace("toolchain: parallel Zig stamp validation");
++    var next = std.atomic.Value(usize).init(0);
++    var valid = std.atomic.Value(bool).init(true);
++    var group: std.Io.Group = .init;
++    defer group.cancel(ctx.io);
++    for (0..3) |_| group.concurrent(ctx.io, stampWorker, .{ ctx, stamps, &next, &valid }) catch break;
++    stampWorker(ctx, stamps, &next, &valid);
++    group.await(ctx.io) catch return false;
++    return valid.load(.monotonic);
++}
++
++fn readMemo(ctx: *cache.Context, path: []const u8, minimum_stamps: usize, is_zig: bool) ?[]const u8 {
+     const bytes = ctx.read(path) catch return null;
+     const payload = cache.unseal(ctx, bytes) catch return null;
+     const parsed = std.json.parseFromSlice(Memo, ctx.a, payload, .{ .allocate = .alloc_always }) catch return null;
+     const memo = parsed.value;
+     if (memo.schema != 5 or !cache.validHash(memo.decoder_hash) or !cache.validHash(memo.hash) or memo.stamps.len < minimum_stamps) return null;
+-    for (memo.stamps) |s| {
+-        const current = stamp(ctx, s.path) catch return null;
+-        if (!equal(current, s)) return null;
+-    }
++    if (!validStamps(ctx, memo.stamps, is_zig)) return null;
+     rememberEpoch(ctx, payload) catch return null;
+     ctx.compiler_decoder_identity = memo.decoder_hash;
+     return memo.hash;
+@@ -232,11 +259,11 @@ pub fn fingerprint(ctx: *cache.Context, is_zig: bool, executable: []const u8) ![
+     {
+         const shared = try cache.Lock.acquire(ctx, lock_name, false);
+         defer shared.release();
+-        if (readMemo(ctx, path, selectors.items.len)) |hash| return hash;
++        if (readMemo(ctx, path, selectors.items.len, is_zig)) |hash| return hash;
+     }
+     const lock = try cache.Lock.acquire(ctx, lock_name, true);
+     defer lock.release();
+-    if (readMemo(ctx, path, selectors.items.len)) |hash| return hash;
++    if (readMemo(ctx, path, selectors.items.len, is_zig)) |hash| return hash;
+     const version = try std.process.run(ctx.a, ctx.io, .{ .argv = &.{ executable, if (is_zig) "version" else "-vV" }, .environ_map = ctx.env });
+     switch (version.term) {
+         .exited => |code| if (code != 0) return error.CompilerIdentityFailed,
+@@ -352,3 +379,28 @@ test "shared Rust toolchain digests reject corruption and preserved-mtime edits"
+     try memos.writeFile(io, .{ .sub_path = entry.name, .data = "corrupt" });
+     try std.testing.expectEqualStrings(second, try rustFileDigest(&ctx, after));
+ }
++
++test "parallel installed stamp validation rejects edits and missing files" {
++    var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
++    defer arena.deinit();
++    const a = arena.allocator();
++    const io = std.testing.io;
++    var tmp = std.testing.tmpDir(.{});
++    defer tmp.cleanup();
++    const cwd = try Dir.cwd().realPathFileAlloc(io, try std.fs.path.join(a, &.{ ".zig-cache", "tmp", &tmp.sub_path }), a);
++    var env = std.process.Environ.Map.init(a);
++    var ctx: cache.Context = .{ .a = a, .io = io, .env = &env, .root = cwd, .cwd = cwd };
++    try tmp.dir.writeFile(io, .{ .sub_path = "resource", .data = "before" });
++    const path = try std.fs.path.join(a, &.{ cwd, "resource" });
++    const expected = try stamp(&ctx, path);
++    const stamps = try a.alloc(Stamp, 512);
++    @memset(stamps, expected);
++    try std.testing.expect(validStamps(&ctx, stamps, true));
++    try tmp.dir.writeFile(io, .{ .sub_path = "resource", .data = "after_" });
++    const file = try tmp.dir.openFile(io, "resource", .{});
++    defer file.close(io);
++    try file.setTimestamps(io, .{ .modify_timestamp = .{ .new = .{ .nanoseconds = expected.mtime } } });
++    try std.testing.expect(!validStamps(&ctx, stamps, true));
++    try tmp.dir.deleteFile(io, "resource");
++    try std.testing.expect(!validStamps(&ctx, stamps, true));
++}

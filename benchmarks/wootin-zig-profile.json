@@ -1,0 +1,178 @@
+{
+  "method": "Isolated instrumented binary; one cold compile and nine restores; hashes identical; timings diagnostic, not optimization comparison.",
+  "records": [
+    {
+      "label": "hit",
+      "data": {
+        "plan_ns": 109875,
+        "key_ns": 3278750,
+        "restore_ns": 1359375,
+        "total_ns": 4863584
+      }
+    },
+    {
+      "label": "hit",
+      "data": {
+        "plan_ns": 93666,
+        "key_ns": 2781584,
+        "restore_ns": 630750,
+        "total_ns": 3585125
+      }
+    },
+    {
+      "label": "hit",
+      "data": {
+        "plan_ns": 99459,
+        "key_ns": 2539000,
+        "restore_ns": 623084,
+        "total_ns": 3336209
+      }
+    },
+    {
+      "label": "hit",
+      "data": {
+        "plan_ns": 84500,
+        "key_ns": 2341792,
+        "restore_ns": 583583,
+        "total_ns": 3082208
+      }
+    },
+    {
+      "label": "hit",
+      "data": {
+        "plan_ns": 112167,
+        "key_ns": 3247083,
+        "restore_ns": 642792,
+        "total_ns": 4080042
+      }
+    },
+    {
+      "label": "hit",
+      "data": {
+        "plan_ns": 96583,
+        "key_ns": 2604167,
+        "restore_ns": 606291,
+        "total_ns": 3379708
+      }
+    },
+    {
+      "label": "hit",
+      "data": {
+        "plan_ns": 92666,
+        "key_ns": 2571583,
+        "restore_ns": 605666,
+        "total_ns": 3344291
+      }
+    },
+    {
+      "label": "hit",
+      "data": {
+        "plan_ns": 97750,
+        "key_ns": 2616959,
+        "restore_ns": 588084,
+        "total_ns": 3381792
+      }
+    },
+    {
+      "label": "hit",
+      "data": {
+        "plan_ns": 91834,
+        "key_ns": 2549792,
+        "restore_ns": 623166,
+        "total_ns": 3336375
+      }
+    },
+    {
+      "label": "identity",
+      "data": {
+        "stamps": 982,
+        "parse_seal_ns": 744667,
+        "stat_ns": 1759042,
+        "epoch_ns": 117916
+      }
+    },
+    {
+      "label": "identity",
+      "data": {
+        "stamps": 982,
+        "parse_seal_ns": 677708,
+        "stat_ns": 1260584,
+        "epoch_ns": 134958
+      }
+    },
+    {
+      "label": "identity",
+      "data": {
+        "stamps": 982,
+        "parse_seal_ns": 677125,
+        "stat_ns": 1246583,
+        "epoch_ns": 118708
+      }
+    },
+    {
+      "label": "identity",
+      "data": {
+        "stamps": 982,
+        "parse_seal_ns": 624083,
+        "stat_ns": 1132375,
+        "epoch_ns": 105875
+      }
+    },
+    {
+      "label": "identity",
+      "data": {
+        "stamps": 982,
+        "parse_seal_ns": 696042,
+        "stat_ns": 1851458,
+        "epoch_ns": 113959
+      }
+    },
+    {
+      "label": "identity",
+      "data": {
+        "stamps": 982,
+        "parse_seal_ns": 697584,
+        "stat_ns": 1272208,
+        "epoch_ns": 110708
+      }
+    },
+    {
+      "label": "identity",
+      "data": {
+        "stamps": 982,
+        "parse_seal_ns": 677958,
+        "stat_ns": 1267958,
+        "epoch_ns": 120542
+      }
+    },
+    {
+      "label": "identity",
+      "data": {
+        "stamps": 982,
+        "parse_seal_ns": 695125,
+        "stat_ns": 1238959,
+        "epoch_ns": 108666
+      }
+    },
+    {
+      "label": "identity",
+      "data": {
+        "stamps": 982,
+        "parse_seal_ns": 703375,
+        "stat_ns": 1223250,
+        "epoch_ns": 120875
+      }
+    },
+    {
+      "label": "miss",
+      "data": {
+        "plan_ns": 350209,
+        "key_ns": 226776208,
+        "precompile_ns": 227756125,
+        "compiler_ns": 6794509375,
+        "post_ns": 1366792
+      }
+    }
+  ],
+  "artifact_sha256": "b7a8e16e7fe2ec5cd960fde7c29db115ed6d73b25aab115f1a9262d5893bd59c"
+}

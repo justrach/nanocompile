@@ -262,7 +262,7 @@ fn zigPlan(ctx: *cache.Context, argv: []const []const u8) !Plan {
             output = arg[11..];
             continue;
         }
-        if (eq(arg, "-O") or eq(arg, "-target") or eq(arg, "-mcpu") or eq(arg, "--name")) {
+        if (eq(arg, "-O") or eq(arg, "-target") or eq(arg, "-mcpu") or eq(arg, "--name") or eq(arg, "--cache-dir") or eq(arg, "--global-cache-dir")) {
             i += 1;
             if (i == argv.len) return error.MissingValue;
             if (eq(arg, "-target") and (std.mem.indexOf(u8, argv[i], "windows") != null or std.mem.indexOf(u8, argv[i], "uefi") != null)) return error.UnsupportedZigTarget;
@@ -485,6 +485,7 @@ fn keyFor(ctx: *cache.Context, kind: Kind, argv: []const []const u8) ![]const u8
     cache.field(&hash, host.cpu.model.name);
     cache.field(&hash, std.mem.asBytes(&host.cpu.features.ints));
     cache.field(&hash, try std.fmt.allocPrint(ctx.a, "{any}", .{host.os}));
+    if (kind == .zig) cache.field(&hash, "zig-private-local-cache-v1");
     for (argv) |arg| cache.field(&hash, arg);
     const toolchain = try identity.fingerprint(ctx, kind == .zig, argv[0]);
     ctx.compiler_identity = toolchain;
@@ -680,9 +681,26 @@ pub fn execute(ctx: *cache.Context, kind: Kind, argv: []const []const u8) !u8 {
         return bypass(ctx, argv, try std.fmt.allocPrint(ctx.a, "bypass: native inputs unavailable ({s})", .{@errorName(err)}));
     try before.appendSlice(ctx.a, native);
     const directories = rust_dependencies.snapshot(ctx, plan.library_dirs, plan.outputs) catch return bypass(ctx, argv, "bypass: cannot enumerate dependency directories");
+    // Zig's parsed-source cache can reuse stale input when size and mtime are
+    // preserved. Each actual miss gets fresh local parsing state; the global
+    // compiler cache remains available. Restore hits launch no compiler.
+    const zig_job = if (kind == .zig) try @import("producer_job.zig").Job.create(ctx) else null;
+    defer if (zig_job) |job| job.cleanup(ctx) catch {};
+    var command: std.ArrayList([]const u8) = .empty;
+    if (zig_job) |job| {
+        var i: usize = 0;
+        while (i < argv.len) : (i += 1) {
+            if (eq(argv[i], "--cache-dir")) {
+                i += 1;
+                continue;
+            }
+            try command.append(ctx.a, argv[i]);
+        }
+        try command.appendSlice(ctx.a, &.{ "--cache-dir", job.out });
+    } else try command.appendSlice(ctx.a, argv);
     const started = std.Io.Clock.real.now(ctx.io).nanoseconds;
     ctx.trace("miss: compiling");
-    const result = try std.process.run(ctx.a, ctx.io, .{ .argv = argv, .environ_map = ctx.env });
+    const result = try std.process.run(ctx.a, ctx.io, .{ .argv = command.items, .environ_map = ctx.env });
     try ctx.out(result.stdout);
     try std.Io.File.stderr().writeStreamingAll(ctx.io, result.stderr);
     const code = exitCode(result.term);

@@ -1,5 +1,7 @@
 # Measured optimization trail
 
+The [real Wootin raw Zig benchmark](zig-wootin.md) covers cold compilation, restores and source edits, with a measured 9–11% reduction in restore latency and a preserved-timestamp correctness fix.
+
 Start with the [current cold Harness profile and repeated kache comparisons](harness-cold.md): eight-job Nano median 18.82 s versus kache 17.16 s; controlled four-to-eight-job Nano tuning reduces median time by 38%. Rejected runtime candidates and all raw samples are retained.
 
 The [Xcode comparison](xcode.md) covers Apple Clang compatibility and Xcode's native compilation cache separately from the Rust/Harness comparison.

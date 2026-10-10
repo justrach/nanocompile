@@ -77,16 +77,43 @@ fn tree(ctx: *cache.Context, stamps: *std.ArrayList(Stamp), root: []const u8) !v
     }
 }
 
-fn readMemo(ctx: *cache.Context, path: []const u8, minimum_stamps: usize) ?[]const u8 {
+fn stampWorker(ctx: *cache.Context, stamps: []const Stamp, next: *std.atomic.Value(usize), valid: *std.atomic.Value(bool)) void {
+    while (true) {
+        const start = next.fetchAdd(32, .monotonic);
+        if (start >= stamps.len) return;
+        for (stamps[start..@min(start + 32, stamps.len)]) |expected| {
+            const current = stamp(ctx, expected.path) catch {
+                valid.store(false, .monotonic);
+                continue;
+            };
+            if (!equal(current, expected)) valid.store(false, .monotonic);
+        }
+    }
+}
+
+fn validStamps(ctx: *cache.Context, stamps: []const Stamp, parallel: bool) bool {
+    if (!parallel or stamps.len < 512) {
+        for (stamps) |expected| if (!equal(expected, stamp(ctx, expected.path) catch return false)) return false;
+        return true;
+    }
+    ctx.trace("toolchain: parallel Zig stamp validation");
+    var next = std.atomic.Value(usize).init(0);
+    var valid = std.atomic.Value(bool).init(true);
+    var group: std.Io.Group = .init;
+    defer group.cancel(ctx.io);
+    for (0..3) |_| group.concurrent(ctx.io, stampWorker, .{ ctx, stamps, &next, &valid }) catch break;
+    stampWorker(ctx, stamps, &next, &valid);
+    group.await(ctx.io) catch return false;
+    return valid.load(.monotonic);
+}
+
+fn readMemo(ctx: *cache.Context, path: []const u8, minimum_stamps: usize, is_zig: bool) ?[]const u8 {
     const bytes = ctx.read(path) catch return null;
     const payload = cache.unseal(ctx, bytes) catch return null;
     const parsed = std.json.parseFromSlice(Memo, ctx.a, payload, .{ .allocate = .alloc_always }) catch return null;
     const memo = parsed.value;
     if (memo.schema != 5 or !cache.validHash(memo.decoder_hash) or !cache.validHash(memo.hash) or memo.stamps.len < minimum_stamps) return null;
-    for (memo.stamps) |s| {
-        const current = stamp(ctx, s.path) catch return null;
-        if (!equal(current, s)) return null;
-    }
+    if (!validStamps(ctx, memo.stamps, is_zig)) return null;
     rememberEpoch(ctx, payload) catch return null;
     ctx.compiler_decoder_identity = memo.decoder_hash;
     return memo.hash;
@@ -232,11 +259,11 @@ pub fn fingerprint(ctx: *cache.Context, is_zig: bool, executable: []const u8) ![
     {
         const shared = try cache.Lock.acquire(ctx, lock_name, false);
         defer shared.release();
-        if (readMemo(ctx, path, selectors.items.len)) |hash| return hash;
+        if (readMemo(ctx, path, selectors.items.len, is_zig)) |hash| return hash;
     }
     const lock = try cache.Lock.acquire(ctx, lock_name, true);
     defer lock.release();
-    if (readMemo(ctx, path, selectors.items.len)) |hash| return hash;
+    if (readMemo(ctx, path, selectors.items.len, is_zig)) |hash| return hash;
     const version = try std.process.run(ctx.a, ctx.io, .{ .argv = &.{ executable, if (is_zig) "version" else "-vV" }, .environ_map = ctx.env });
     switch (version.term) {
         .exited => |code| if (code != 0) return error.CompilerIdentityFailed,
@@ -351,4 +378,29 @@ test "shared Rust toolchain digests reject corruption and preserved-mtime edits"
     const entry = (try iterator.next(io)).?;
     try memos.writeFile(io, .{ .sub_path = entry.name, .data = "corrupt" });
     try std.testing.expectEqualStrings(second, try rustFileDigest(&ctx, after));
+}
+
+test "parallel installed stamp validation rejects edits and missing files" {
+    var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer arena.deinit();
+    const a = arena.allocator();
+    const io = std.testing.io;
+    var tmp = std.testing.tmpDir(.{});
+    defer tmp.cleanup();
+    const cwd = try Dir.cwd().realPathFileAlloc(io, try std.fs.path.join(a, &.{ ".zig-cache", "tmp", &tmp.sub_path }), a);
+    var env = std.process.Environ.Map.init(a);
+    var ctx: cache.Context = .{ .a = a, .io = io, .env = &env, .root = cwd, .cwd = cwd };
+    try tmp.dir.writeFile(io, .{ .sub_path = "resource", .data = "before" });
+    const path = try std.fs.path.join(a, &.{ cwd, "resource" });
+    const expected = try stamp(&ctx, path);
+    const stamps = try a.alloc(Stamp, 512);
+    @memset(stamps, expected);
+    try std.testing.expect(validStamps(&ctx, stamps, true));
+    try tmp.dir.writeFile(io, .{ .sub_path = "resource", .data = "after_" });
+    const file = try tmp.dir.openFile(io, "resource", .{});
+    defer file.close(io);
+    try file.setTimestamps(io, .{ .modify_timestamp = .{ .new = .{ .nanoseconds = expected.mtime } } });
+    try std.testing.expect(!validStamps(&ctx, stamps, true));
+    try tmp.dir.deleteFile(io, "resource");
+    try std.testing.expect(!validStamps(&ctx, stamps, true));
 }

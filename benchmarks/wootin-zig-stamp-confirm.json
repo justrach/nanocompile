@@ -1,0 +1,663 @@
+{
+  "method": "27 alternating real Wootin executable restores; same wrapper path, cache, compiler args, environment and output; both binaries have the parsing correctness fix; only candidate parallelizes >=512 Zig toolchain stamps; compiler caches deleted before every timed restore; byte-identical artifact and trace coverage required; compiler prime excluded; OS caches warm",
+  "binary_sha256": {
+    "baseline": "f4a48a46a7c587e26968abdbf2c59e4e84431933f89ceb99de778530495cefde",
+    "candidate": "14f704a468d9afba48d15012ad1f2430ef9c5102694e494b8617f741f569dd8d"
+  },
+  "script_sha256": "409e1a78d04491417469e1b424e39bf64eca069dbd46a4a3d69209fc204fb511",
+  "timestamp": "2026-10-10T10:00:46.472899+00:00",
+  "source_sha256": {
+    "build.zig": "d8b022ee53131ae9cd6fadad9016a6397a82a606e1b06e2b192c3df98d5a54bc",
+    "Sources/WootinCore/grapheme_break.zig": "832576b2481957c024940c7f0f55daa0c1d57a3909a41016a7b5e2ba4ba7e425",
+    "Sources/WootinCore/progress.zig": "ef4aa9b6b82903416f01307254ea9322537f93850262494d5ef1172e78b380ee",
+    "Sources/WootinCore/core.zig": "9e6688c118c8b7c6c68ef91cf6047b2ea109041bfcec25e3765d8e35077db227",
+    "Sources/WootinCore/kitty_clipboard.zig": "0cdbe80fa1914e1edcec9a94de2242257f18a864c9a0289a5f24c117262239a2",
+    "Sources/WootinCore/frame_metadata.zig": "11b74bd694facd74d5202ae81d80986737ac52643be8b22b32fba5f0035c48ae",
+    "Sources/WootinCore/base64_strict.zig": "a8823dd64dfb268b1ee53832e269654a7016a5b7881a6569fd820a89791ad7d2",
+    "Sources/WootinCore/grapheme_break_tests.zig": "910f078ca49fe4267104bbc0749e702d137ed03002e89f35d3225496b3d1549a",
+    "Sources/WootinCore/terminal/reflow_helpers_a.zig": "27702bb57bf871feed729226364b153e6669b410f1105ef5a5b3d3b019548ecb",
+    "Sources/WootinCore/terminal/utf8_grapheme_batch.zig": "96c499195c4d3b3920c0445d7ff8e618600cffb6c1c15c515f756744894c9c98",
+    "Sources/WootinCore/terminal/reflow_helpers_b.zig": "d88045dfb29fc8e06f9b57d43185d264c8460a40a63ee45ef1ed25953ec81c0c",
+    "Sources/WootinCore/terminal/hot_grid_materialization.zig": "95b88816bab9daa8e7ee30858f9f54e40c69e0bb7af15f10ec22802e0b8a6b9d",
+    "Sources/WootinCore/terminal/scrollback_writer.zig": "85c25ecc2a6ffb372709452e3db6cf16170567b049c9c1431fbb239c7f82ebf7",
+    "Sources/WootinCore/terminal/rectangles.zig": "d4a34609179b024bcb635181ced58176f699cd0e1edc9d8e70a248a1fe109d98",
+    "Sources/WootinCore/terminal/primitives.zig": "241b2192d239f80932cf9e793df9ec5493a19f887934f8ced6a0572cc2518923",
+    "Sources/WootinCore/terminal/scrollback_types.zig": "dc785a17bfda25634c9161bb3d4fdf53dd86dd0d32eaba3aa924b79f0eba0e65",
+    "Sources/WootinCore/terminal/hot_grid.zig": "a7ca3436f91d4ef679b30a51be979bbde5c3780eb5a39ba49257ddbd6bffae57",
+    "Sources/WootinCore/terminal/stored_cell_transfer.zig": "cf3e6f755ada88dc909bf41716911bd7016a4ea11b5ab3308de2d8351ada1933",
+    "Sources/WootinCore/terminal/hot_grid_extension_pool.zig": "4c3a53070ba0ebca2a25efcb25394cd3396b84e4be87fb348f33a600a09f12f4",
+    "Sources/WootinCore/terminal/ascii_graphics.zig": "e05ae5cf0891a951f3be18919012807c93066b9b5ee2766e900b1d5c59751750",
+    "Sources/WootinCore/terminal/parser.zig": "637013c0e6c9dedb821b50e4d88bc6d5525d544fcb3898d0cd5b3ac62eb4a04e",
+    "Sources/WootinCore/terminal/utf8.zig": "c21fc8e2d91f975f94653ca2ffbae942f06c503f352304616813569111208995",
+    "Sources/WootinCore/terminal/misc_helpers.zig": "13a50179a016068b85bb8309c787aa6ad8f624311d21567e5fbae5fb9f8983c4",
+    "Sources/WootinCore/terminal/publication_abi.zig": "0d351fce266a2774870194ce482fac5e407ef892f939c860649f1836054b8e01",
+    "Sources/WootinCore/terminal/feed.zig": "854c9f308f22a253ec24cccb84ccc5d2fda6d0eb724af53f846db8b258acca89",
+    "Sources/WootinCore/terminal/publication_cell.zig": "d947bce08433584b39d1ca8a260a9b449caa1f653fb6fb7104162b7b2a36a0bc",
+    "Sources/WootinCore/terminal/screen_ranges.zig": "77d8918fc43a00ad759e18a1e2884f3868d353fe3feb7442793f8b3baee2fe2e",
+    "Sources/WootinCore/terminal/wide_cell_repairs.zig": "b71774a1e554fbc65cee0a204c266124ec34092a5deccc84dd2ef2af9109e9b2",
+    "Sources/WootinCore/terminal/screen_actions.zig": "b44102c80a05bd297283a84e940b90fb93b0c6301c91637e6952307c94dc2f31",
+    "Sources/WootinCore/terminal/mouse_shape.zig": "a6947849e32efbcb4cee43919626b1fc61c7cb9dca7389149a94fedc934ba2e6",
+    "Sources/WootinCore/terminal/screen_cells.zig": "dd7a91002232f9efc4427e7bc50fad64a07a554556a4f6c8093e7ede5f5caa0c",
+    "Sources/WootinCore/terminal/history_extension.zig": "a3edb5e917d3cf2193daa2df4a7d62116b360a3765d54559e9b86653466500ac",
+    "Sources/WootinCore/terminal/cursor_horizontal_motion.zig": "f7ed7325fa71c275d91a9107b1eaa6ce1db3ddcb6f3f7741bf7b7272a92af5e8",
+    "Sources/WootinCore/terminal/storage_metrics.zig": "96d7b1658cc397fde38508ea5463f1ce6f8c31c39b248f5e841a43e398431cf0",
+    "Sources/WootinCore/terminal/resize_screen_buffers.zig": "f598f305949345685ffc6ed09f2d3a284c320a8fed6f1a05cb58d9b4a1750958",
+    "Sources/WootinCore/terminal/value_types.zig": "dc4ae89a6e2c14d0ddcf05609fd825e295153c7c2821e677209f6626ab4acd13",
+    "Sources/WootinCore/terminal/writing.zig": "25d0ca70627e27b69d19e458ac8f92bddd27e3432561bf2ea7969ed7ba7b9e3e",
+    "Sources/WootinCore/terminal/vm_scrollback_cells.zig": "dc485b188254a7a844857d8ad9dd6f1d1a502d071e915e04e6a9f916b145ac54",
+    "Sources/WootinCore/terminal/cell_helpers.zig": "945f3661191e7029c110b7f0271adbdcc8e90722e8a161120fc4659412d4ace4",
+    "Sources/WootinCore/terminal/row_damage.zig": "df445cfc099cdb984a528cd2875a4d2287217123730e1db015f293c79e61a167",
+    "Sources/WootinCore/terminal/storage_fault.zig": "90a413f14e50d0b50012b7b6a6db4733e14b6399ce87006601e12a8f5408c271",
+    "Sources/WootinCore/terminal/resize_fixed_rows.zig": "8854a421d1f0a321b3a687d496d60f3db4be616ebf90f67d7350b54e2ccc0c36",
+    "Sources/WootinCore/terminal/resize.zig": "d687768c50bc94506e028a51492a453f79d2586657a9a6110ae9a77ef72648ad",
+    "Sources/WootinCore/terminal/scrollback_ops.zig": "f75d30c2ba03871ec816bc7aac84b5632bf23023bc56c360b78e43ebfd6325ae",
+    "Sources/WootinCore/terminal/history_style.zig": "3e828a4cc83b81f760c0f7115314bf915e1cc0a382fe1f16978a85519a17a6eb",
+    "Sources/WootinCore/terminal/modes.zig": "b2f8e7410390743e75745a9f30612fc8890d15390be6d8c535d6cd0211a9e602",
+    "Sources/WootinCore/terminal/abi.zig": "8794a46452a7d4a5b64c93a3fd2c4f7c84a33f20fac4708d2adb0e2505e5ab7b",
+    "Sources/WootinCore/terminal/utf8_screen_writer.zig": "6a7d88df3e631459244f81fea795405c7dbab67d182ccbe6d443069b893f9b5f",
+    "Sources/WootinCore/terminal/resize_trailing_rows.zig": "55568524a7913fafb7a8e23a212054922e012818f3ef210eb60bb57eff09c52b",
+    "Sources/WootinCore/terminal/lifecycle.zig": "cb88d1fa89b529ee700191a825912196ebc37c452109bc7b64c6c53b43adf577",
+    "Sources/WootinCore/terminal/state.zig": "1640c7bcc57671a1ab705ff34209523ca5b1e2cf0fa2eba27420baa1febb38db",
+    "Sources/WootinCore/terminal/context.zig": "66056e47a6d17df0d04e8b036433d3f0e1226ca5651854b7a97908c5bfbd84c9",
+    "Sources/WootinCore/terminal/clipboard_colors.zig": "0b77f35b42f7e3c84484026d80c53d40497ce9410ee4839a35c61a1a747a42d1",
+    "Sources/WootinCore/terminal/ascii_screen_writer.zig": "fadd0d1f6fa58d211da1718198eba1d617773c4672dd5c4a728d4dc2adcf67e0",
+    "Sources/WootinCore/terminal/screen_storage.zig": "17ffd275d524d3d207720017eaab644d9fd1a14e9f41f1c3186814e753bd0ebc",
+    "Sources/WootinCore/terminal/csi_cursor.zig": "21913dcd81fc2a1d172dc2cb1fba92686a57b3b7ca25f0b92cd32c70353a6eb9",
+    "Sources/WootinCore/terminal/tests/grapheme_clusters.zig": "d6e01662d59509ff4da8890f4ca815cf0ad8f6526ff5bc05ec7efe77a7c2381a",
+    "Sources/WootinCore/terminal/tests/history_storage.zig": "a249d8b2b599b61db26b92f225b6947804917e81cff3e2ef8a6da7e870b96d22",
+    "Sources/WootinCore/terminal/tests/rectangles_and_modes.zig": "054497a0e682a4cc8b093fc974ce999898554921c6c6dff7b39f194c2d001972",
+    "Sources/WootinCore/terminal/tests/fused_viewport_generations.zig": "e48cc4b41358c91c10c1857e0498ec89314c4cc435870c127789b9804061fcd9",
+    "Sources/WootinCore/terminal/tests/fast_paths.zig": "f92b2576122544114502a1fe114273192a529e65ee3800f6785aabc34388aaf4",
+    "Sources/WootinCore/terminal/tests/alternate_screen_modes.zig": "4042bab41f71cceacaeced903cc43da42bf4aa5ac2a998f9ca9055a6a2b5a533",
+    "Sources/WootinCore/terminal/tests/hot_grid.zig": "fb2a01194759ee7b38ae1f8a10c890327436f65859b6d900de2de32df0f4fecc",
+    "Sources/WootinCore/terminal/tests/backarrow_key_mode.zig": "6a9da0e550a6c18ebddf3ddcde14fe7b880140a80ddd97765271cf6fcdd06de4",
+    "Sources/WootinCore/terminal/tests/dirty_row_index.zig": "f236f7c687cda90c763c13987794f9368ccb0c0d18efffa430660bb1b46193d0",
+    "Sources/WootinCore/terminal/tests/rectangles_origin_mode.zig": "79258b995177145bd438f6f674b90b7c14ff881701800380e706b4580eea9b23",
+    "Sources/WootinCore/terminal/tests/unicode_and_dec.zig": "b96668497639a32cdf8c4e45a938e867f63a866e0e1cc9e792e6295b1cb229d8",
+    "Sources/WootinCore/terminal/tests/publication_cell.zig": "69ddb8532bf389c148b3a13b47e864ee27cd9d1160c7d16c84523fba0f1c3cb0",
+    "Sources/WootinCore/terminal/tests/screen_ranges.zig": "621000d167058075178bb80c7533bdb5e4cf7f45c5f35eb2d2766f0d08a1e67a",
+    "Sources/WootinCore/terminal/tests/screen_actions.zig": "b104ae58f4d1552dde37ad5d22ff3b24691ccb162172c552a487cebab56dcefb",
+    "Sources/WootinCore/terminal/tests/mouse_shape.zig": "8d2e925527267179157f587fe3bb3e8f986d34c918dd47ae848fa780e9bbf0f2",
+    "Sources/WootinCore/terminal/tests/support.zig": "ad52c1ae4f0c1db8090b0f597f874754839485f1ca1eb9fc2ff22cc36d5bdd5d",
+    "Sources/WootinCore/terminal/tests/compact_reflow_transfer.zig": "7b432b0a27edc9eeaa6b9ca7ee1de664006543adcb924c51fb9f60e0597213e3",
+    "Sources/WootinCore/terminal/tests/screen_cells.zig": "9c61eda8dcd2c3705ccf0cddba51f28669bd71c80729acaad671eea646dac435",
+    "Sources/WootinCore/terminal/tests/sgr_parameters.zig": "c77a33284ff7fe961d16680769a462aa0e3b9c09783f4233978d054f1f70c440",
+    "Sources/WootinCore/terminal/tests/wide_character_editing.zig": "72cccc47136d42e014ec09d86a115916e5efd8709f45210f4fc02d37969f933b",
+    "Sources/WootinCore/terminal/tests/scrollback_vm_reset.zig": "1e6c79ee890b244b8f75722ca4aef821cd4811f392c615afbd225e08e71553af",
+    "Sources/WootinCore/terminal/tests/alternate_scroll_mode.zig": "8efca668c70429f5412de4742795a8ad15eefd8a96a093cc08d72c89654a78da",
+    "Sources/WootinCore/terminal/tests/modify_other_keys.zig": "f05e9ef2457275d0bd60049e8b461fe16b9cb541db4faf3162bcb47472c02d88",
+    "Sources/WootinCore/terminal/tests/scroll_clear_state.zig": "c087c8e138ad47bc7b2d437118535f19919464c79ec12e3c5cdb8946591539c6",
+    "Sources/WootinCore/terminal/tests/unicode_grapheme_sequences.zig": "ccf3151f9cf11ecb0bb5890ed9238e69e8d68a9369032693ad4209fb688d4a21",
+    "Sources/WootinCore/terminal/tests/recycled_row_metadata.zig": "7ca289a0c2ab45d4639faec16cb4c52e8091cedf65cc804b55ce2da4474933e4",
+    "Sources/WootinCore/terminal/tests/reverse_wrap_modes.zig": "4500e7e5d58e54acf12cf730a0bddab6680f9408ffe45f8b22e22400338700d3",
+    "Sources/WootinCore/terminal/tests/graphics_event_storage.zig": "4064a8ba5168494d24ed48c8d392bbdf7aca334beab171bcef500e1cd4a9cc37",
+    "Sources/WootinCore/terminal/tests/application_keypad.zig": "b664f3e23df048e7bc324db6f1944df85e15964c3e90ccd7ce8d2010a73bcbc2",
+    "Sources/WootinCore/terminal/tests/reflow_and_history.zig": "1ac0d3506df995d12a6a2bd0bb5416b26af04699fad0ae415e91d97ddf4d1d8c",
+    "Sources/WootinCore/terminal/tests/kitty_clipboard_streaming.zig": "648f4f6dc0093b945c97729fb98a9c3fd260f15edf4b3b7912d9956be15a0008",
+    "Sources/WootinCore/terminal/tests/alt_escape_prefix_mode.zig": "f21d098add3fff8eb67cc3ebf6a950400abcfd6a59096d0fb855c7046959ddef",
+    "Sources/WootinCore/terminal/tests/parser_protocol.zig": "001e21cfe3d0e286732c093d3d3c3236123ffd4818c760cef643fa32eb4135d0",
+    "Sources/WootinCore/terminal/tests/cursor_and_repeat.zig": "f1eee020588fbe35ac94c75f3840cee3e192cd1c70f454c8800a5aeae49624c5",
+    "Sources/WootinCore/terminal/tests/osc_and_clipboard.zig": "12c05f46d004dbabb9568ef09221845838b191f83dbec9e6d1d38811b3274c20",
+    "Sources/WootinCore/terminal/tests/c0_controls.zig": "338c365a3afa172d6b5a345d88a1b5fad280e2dfce1582d328e57d9de221cbb4",
+    "Sources/WootinCore/terminal/tests/resize_basics.zig": "40f1a58ba79517780c2d039e481cf72c7a607d1ecd1942b85742e98772d37d26",
+    "Sources/WootinCore/terminal/tests/decoded_c1.zig": "72cb790176a18171b136cf7c8a1b2fd11dd72898783f70452888f697c7fa580c",
+    "Sources/WootinCore/terminal/tests/colors_and_hosts.zig": "65e0df04d930fe10cd517b65e8483991442e134614b48187c3bb61d75f6fff76",
+    "Sources/WootinCore/terminal/tests/screen_storage.zig": "e6534632186ad31d39c4065e45fcf92022660f73f89a75e9cabcaa8bba0362e3",
+    "Sources/WootinCore/terminal/tests/history_side_pool_storage.zig": "c4487cfb3bdc97b8235723fa26d1aceff46782a4168e5f310d270dba750078c1",
+    "Tests/RowRunScreenBenchmark/RowRunScreenModel.zig": "061ffdd9341b7051d89435426b0ead164f0a4c58b6ce6b048d1078f4a37afb0b",
+    "Tests/RowRunScreenBenchmark/RowRunScreenBenchmarkMain.zig": "27c8e222d7a592e230996aef5d0a7b3c75de3a9c06d0df6fdf7c2b9e4bfd7900",
+    "Tests/RowRunScreenBenchmark/RowRunScreenModelTests.zig": "63a53c16c1e3e52e59e41de84e5574e1e1746a3e5e6b25ca5865b912693fd2cc",
+    "Tests/CompactReflowBenchmark/CompactReflowBenchmarkMain.zig": "dbe1d3681400da645a8b914abd6faae0ca512cf0bfe2eaa1b7562d1adf375cf6",
+    "Tests/Base64Benchmark/Base64BenchmarkMain.zig": "2a486dc36fc0addecde089bd306fe2400dc0149b7dd050b7f8d375093ee39ccd"
+  },
+  "command": [
+    "/private/tmp/nanocompile-zig-20261010/stamp-confirm/nanocompile",
+    "zig",
+    "build-exe",
+    "-O",
+    "ReleaseFast",
+    "--dep",
+    "strict_base64",
+    "-Mroot=Tests/Base64Benchmark/Base64BenchmarkMain.zig",
+    "-Mstrict_base64=Sources/WootinCore/base64_strict.zig",
+    "-femit-bin=/private/tmp/nanocompile-zig-20261010/stamp-confirm/base64"
+  ],
+  "builds": [
+    {
+      "mode": "baseline",
+      "phase": "prime",
+      "ms": 7089.045709,
+      "events": [
+        "miss"
+      ],
+      "parallel_coverage": false
+    },
+    {
+      "mode": "baseline",
+      "phase": "hit",
+      "ms": 34.255666,
+      "events": [
+        "hit"
+      ],
+      "parallel_coverage": false
+    },
+    {
+      "mode": "candidate",
+      "phase": "hit",
+      "ms": 7.222625,
+      "events": [
+        "hit"
+      ],
+      "parallel_coverage": true
+    },
+    {
+      "mode": "candidate",
+      "phase": "hit",
+      "ms": 7.322667,
+      "events": [
+        "hit"
+      ],
+      "parallel_coverage": true
+    },
+    {
+      "mode": "baseline",
+      "phase": "hit",
+      "ms": 7.967833,
+      "events": [
+        "hit"
+      ],
+      "parallel_coverage": false
+    },
+    {
+      "mode": "baseline",
+      "phase": "hit",
+      "ms": 7.735208,
+      "events": [
+        "hit"
+      ],
+      "parallel_coverage": false
+    },
+    {
+      "mode": "candidate",
+      "phase": "hit",
+      "ms": 6.977,
+      "events": [
+        "hit"
+      ],
+      "parallel_coverage": true
+    },
+    {
+      "mode": "candidate",
+      "phase": "hit",
+      "ms": 6.897791,
+      "events": [
+        "hit"
+      ],
+      "parallel_coverage": true
+    },
+    {
+      "mode": "baseline",
+      "phase": "hit",
+      "ms": 7.785625,
+      "events": [
+        "hit"
+      ],
+      "parallel_coverage": false
+    },
+    {
+      "mode": "baseline",
+      "phase": "hit",
+      "ms": 7.887833,
+      "events": [
+        "hit"
+      ],
+      "parallel_coverage": false
+    },
+    {
+      "mode": "candidate",
+      "phase": "hit",
+      "ms": 6.884542,
+      "events": [
+        "hit"
+      ],
+      "parallel_coverage": true
+    },
+    {
+      "mode": "candidate",
+      "phase": "hit",
+      "ms": 7.005416,
+      "events": [
+        "hit"
+      ],
+      "parallel_coverage": true
+    },
+    {
+      "mode": "baseline",
+      "phase": "hit",
+      "ms": 7.910541,
+      "events": [
+        "hit"
+      ],
+      "parallel_coverage": false
+    },
+    {
+      "mode": "baseline",
+      "phase": "hit",
+      "ms": 8.012667,
+      "events": [
+        "hit"
+      ],
+      "parallel_coverage": false
+    },
+    {
+      "mode": "candidate",
+      "phase": "hit",
+      "ms": 6.567583,
+      "events": [
+        "hit"
+      ],
+      "parallel_coverage": true
+    },
+    {
+      "mode": "candidate",
+      "phase": "hit",
+      "ms": 6.45325,
+      "events": [
+        "hit"
+      ],
+      "parallel_coverage": true
+    },
+    {
+      "mode": "baseline",
+      "phase": "hit",
+      "ms": 7.475708,
+      "events": [
+        "hit"
+      ],
+      "parallel_coverage": false
+    },
+    {
+      "mode": "baseline",
+      "phase": "hit",
+      "ms": 7.469708,
+      "events": [
+        "hit"
+      ],
+      "parallel_coverage": false
+    },
+    {
+      "mode": "candidate",
+      "phase": "hit",
+      "ms": 7.250292,
+      "events": [
+        "hit"
+      ],
+      "parallel_coverage": true
+    },
+    {
+      "mode": "candidate",
+      "phase": "hit",
+      "ms": 7.085958,
+      "events": [
+        "hit"
+      ],
+      "parallel_coverage": true
+    },
+    {
+      "mode": "baseline",
+      "phase": "hit",
+      "ms": 7.544375,
+      "events": [
+        "hit"
+      ],
+      "parallel_coverage": false
+    },
+    {
+      "mode": "baseline",
+      "phase": "hit",
+      "ms": 7.617,
+      "events": [
+        "hit"
+      ],
+      "parallel_coverage": false
+    },
+    {
+      "mode": "candidate",
+      "phase": "hit",
+      "ms": 6.148667,
+      "events": [
+        "hit"
+      ],
+      "parallel_coverage": true
+    },
+    {
+      "mode": "candidate",
+      "phase": "hit",
+      "ms": 6.368416,
+      "events": [
+        "hit"
+      ],
+      "parallel_coverage": true
+    },
+    {
+      "mode": "baseline",
+      "phase": "hit",
+      "ms": 6.974125,
+      "events": [
+        "hit"
+      ],
+      "parallel_coverage": false
+    },
+    {
+      "mode": "baseline",
+      "phase": "hit",
+      "ms": 7.239959,
+      "events": [
+        "hit"
+      ],
+      "parallel_coverage": false
+    },
+    {
+      "mode": "candidate",
+      "phase": "hit",
+      "ms": 6.34075,
+      "events": [
+        "hit"
+      ],
+      "parallel_coverage": true
+    },
+    {
+      "mode": "candidate",
+      "phase": "hit",
+      "ms": 6.164916,
+      "events": [
+        "hit"
+      ],
+      "parallel_coverage": true
+    },
+    {
+      "mode": "baseline",
+      "phase": "hit",
+      "ms": 6.991083,
+      "events": [
+        "hit"
+      ],
+      "parallel_coverage": false
+    },
+    {
+      "mode": "baseline",
+      "phase": "hit",
+      "ms": 7.278,
+      "events": [
+        "hit"
+      ],
+      "parallel_coverage": false
+    },
+    {
+      "mode": "candidate",
+      "phase": "hit",
+      "ms": 6.752167,
+      "events": [
+        "hit"
+      ],
+      "parallel_coverage": true
+    },
+    {
+      "mode": "candidate",
+      "phase": "hit",
+      "ms": 6.66675,
+      "events": [
+        "hit"
+      ],
+      "parallel_coverage": true
+    },
+    {
+      "mode": "baseline",
+      "phase": "hit",
+      "ms": 7.326667,
+      "events": [
+        "hit"
+      ],
+      "parallel_coverage": false
+    },
+    {
+      "mode": "baseline",
+      "phase": "hit",
+      "ms": 7.410792,
+      "events": [
+        "hit"
+      ],
+      "parallel_coverage": false
+    },
+    {
+      "mode": "candidate",
+      "phase": "hit",
+      "ms": 6.55,
+      "events": [
+        "hit"
+      ],
+      "parallel_coverage": true
+    },
+    {
+      "mode": "candidate",
+      "phase": "hit",
+      "ms": 6.57675,
+      "events": [
+        "hit"
+      ],
+      "parallel_coverage": true
+    },
+    {
+      "mode": "baseline",
+      "phase": "hit",
+      "ms": 7.291875,
+      "events": [
+        "hit"
+      ],
+      "parallel_coverage": false
+    },
+    {
+      "mode": "baseline",
+      "phase": "hit",
+      "ms": 7.425083,
+      "events": [
+        "hit"
+      ],
+      "parallel_coverage": false
+    },
+    {
+      "mode": "candidate",
+      "phase": "hit",
+      "ms": 6.657041,
+      "events": [
+        "hit"
+      ],
+      "parallel_coverage": true
+    },
+    {
+      "mode": "candidate",
+      "phase": "hit",
+      "ms": 6.529125,
+      "events": [
+        "hit"
+      ],
+      "parallel_coverage": true
+    },
+    {
+      "mode": "baseline",
+      "phase": "hit",
+      "ms": 7.057625,
+      "events": [
+        "hit"
+      ],
+      "parallel_coverage": false
+    },
+    {
+      "mode": "baseline",
+      "phase": "hit",
+      "ms": 7.263,
+      "events": [
+        "hit"
+      ],
+      "parallel_coverage": false
+    },
+    {
+      "mode": "candidate",
+      "phase": "hit",
+      "ms": 6.275584,
+      "events": [
+        "hit"
+      ],
+      "parallel_coverage": true
+    },
+    {
+      "mode": "candidate",
+      "phase": "hit",
+      "ms": 6.452916,
+      "events": [
+        "hit"
+      ],
+      "parallel_coverage": true
+    },
+    {
+      "mode": "baseline",
+      "phase": "hit",
+      "ms": 35.635208,
+      "events": [
+        "hit"
+      ],
+      "parallel_coverage": false
+    },
+    {
+      "mode": "baseline",
+      "phase": "hit",
+      "ms": 7.673875,
+      "events": [
+        "hit"
+      ],
+      "parallel_coverage": false
+    },
+    {
+      "mode": "candidate",
+      "phase": "hit",
+      "ms": 6.966125,
+      "events": [
+        "hit"
+      ],
+      "parallel_coverage": true
+    },
+    {
+      "mode": "candidate",
+      "phase": "hit",
+      "ms": 6.513666,
+      "events": [
+        "hit"
+      ],
+      "parallel_coverage": true
+    },
+    {
+      "mode": "baseline",
+      "phase": "hit",
+      "ms": 7.136166,
+      "events": [
+        "hit"
+      ],
+      "parallel_coverage": false
+    },
+    {
+      "mode": "baseline",
+      "phase": "hit",
+      "ms": 7.007709,
+      "events": [
+        "hit"
+      ],
+      "parallel_coverage": false
+    },
+    {
+      "mode": "candidate",
+      "phase": "hit",
+      "ms": 6.898208,
+      "events": [
+        "hit"
+      ],
+      "parallel_coverage": true
+    },
+    {
+      "mode": "candidate",
+      "phase": "hit",
+      "ms": 6.927166,
+      "events": [
+        "hit"
+      ],
+      "parallel_coverage": true
+    },
+    {
+      "mode": "baseline",
+      "phase": "hit",
+      "ms": 7.40575,
+      "events": [
+        "hit"
+      ],
+      "parallel_coverage": false
+    },
+    {
+      "mode": "baseline",
+      "phase": "hit",
+      "ms": 7.690792,
+      "events": [
+        "hit"
+      ],
+      "parallel_coverage": false
+    },
+    {
+      "mode": "candidate",
+      "phase": "hit",
+      "ms": 6.901833,
+      "events": [
+        "hit"
+      ],
+      "parallel_coverage": true
+    }
+  ],
+  "median_ms": {
+    "baseline": 7.469708,
+    "candidate": 6.66675
+  },
+  "paired_ms_saved": [
+    27.033040999999997,
+    0.6451659999999997,
+    0.7582079999999998,
+    0.8878339999999998,
+    1.003291,
+    0.905125,
+    1.4450840000000005,
+    1.0224580000000003,
+    0.21941599999999983,
+    0.45841699999999985,
+    1.4683330000000003,
+    0.605709,
+    0.8992089999999999,
+    0.8261669999999999,
+    0.5258329999999996,
+    0.6599169999999992,
+    0.860792,
+    0.7151250000000005,
+    0.7680419999999994,
+    0.5285000000000002,
+    0.9874159999999996,
+    29.182291999999997,
+    0.7077499999999999,
+    0.6225000000000005,
+    0.10950099999999985,
+    0.47858400000000056,
+    0.7889590000000002
+  ],
+  "paired_summary": {
+    "wins": 27,
+    "mean_ms_saved": 2.7819507037037035,
+    "median_ms_saved": 0.7680419999999994,
+    "standard_error_ms": 1.4071466893757538
+  },
+  "artifact_sha256": "2841c8857a0e886db2eeb7863219d5802c8fdfc80d19dc1b7d6649a9889e7828",
+  "sources_unchanged": true
+}

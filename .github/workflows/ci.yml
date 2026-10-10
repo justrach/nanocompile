@@ -42,6 +42,7 @@ jobs:
           python3 tests/r2_transport.py
           zig build -Doptimize=ReleaseFast
           zig build test
+          python3 tests/zig_preserved_mtime.py zig-out/bin/nanocompile --output bench-results/zig-preserved-mtime.json
           python3 benchmarks/experiments/selected_decoder_scope_check.py zig-out/bin/nanocompile --other-toolchain 1.98.1 --output bench-results/decoder-scope.json
           python3 tests/clang_cache.py zig-out/bin/nanocompile --output bench-results/clang-cache.json
           zig build integration -Doptimize=ReleaseFast

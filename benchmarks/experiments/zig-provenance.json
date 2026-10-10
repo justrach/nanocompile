@@ -1,0 +1,25 @@
+{
+  "base_commit": "537a79b87923473a56b66484ef2c345ed789454f",
+  "binary_sha256": {
+    "baseline": "b2a06e09aaae409bdd4afd8c8f2f2f9d9c7fe5db6f30752c09cf2fcbdbea5595",
+    "serial_fixed": "f4a48a46a7c587e26968abdbf2c59e4e84431933f89ceb99de778530495cefde",
+    "parallel_candidate": "14f704a468d9afba48d15012ad1f2430ef9c5102694e494b8617f741f569dd8d",
+    "profile": "93bd3c816c5b53249eb32e0bec531c5a853981065d3764388d0011772d191c28"
+  },
+  "source_sha256": {
+    "compiler.zig": "8a632a7685c68c422bf6e6f371255ddc12b629b9b76d951f91d9b2b913aef4ac",
+    "identity.zig": "ea8624fba4203326a92193391064fdbbb7e173763c5546585a6e4cd4db40666c"
+  },
+  "candidate_patch": "zig-cache-changes.patch",
+  "serial_fixed": "Apply only compiler.zig hunks of candidate patch; identity.zig remains base revision",
+  "profile_patch": "zig-phase-profile.patch",
+  "platform": "ProductName:\t\tmacOS\nProductVersion:\t\t27.0\nBuildVersion:\t\t26A428\n",
+  "cpu": "Apple M3 Ultra",
+  "integrated_binary_sha256": "8b925e85a6a5e8d0c9a644e574b48d9f8857d65b053d5aa76a9044d07db3e8b4",
+  "validation": [
+    "zig build -Doptimize=ReleaseFast",
+    "zig build test",
+    "zig build integration -Doptimize=ReleaseFast",
+    "tests/zig_preserved_mtime.py integrated binary"
+  ]
+}

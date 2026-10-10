@@ -1,0 +1,99 @@
+--- a/src/compiler.zig
++++ b/src/compiler.zig
+@@ -1,3 +1,4 @@
++const profile = @import("zig_profile.zig");
+ const std = @import("std");
+ const cache = @import("cache.zig");
+ const identity = @import("identity.zig");
+@@ -642,14 +643,18 @@
+ }
+ 
+ pub fn execute(ctx: *cache.Context, kind: Kind, argv: []const []const u8) !u8 {
++    const profile_begin = profile.now(ctx);
+     if (ctx.env.get("NANOCOMPILE_DISABLE")) |v| if (eq(v, "1")) return bypass(ctx, argv, "bypass: disabled");
+     const plan = (if (kind == .rust) rustPlan(ctx, argv) else zigPlan(ctx, argv)) catch |err|
+         return bypass(ctx, argv, try std.fmt.allocPrint(ctx.a, "bypass: {s}", .{@errorName(err)}));
++    const profile_plan = profile.now(ctx);
+     if (plan.producer) return executeProducer(ctx, plan, argv);
+     ctx.prepare() catch return bypass(ctx, argv, "bypass: cache unavailable");
+     const maintenance = cache.Lock.acquire(ctx, "maintenance", false) catch return bypass(ctx, argv, "bypass: cache lock unavailable");
+     defer maintenance.release();
++    const profile_key_start = profile.now(ctx);
+     const key = keyFor(ctx, kind, argv) catch |err| return bypass(ctx, argv, try std.fmt.allocPrint(ctx.a, "bypass: compiler identity unavailable ({s})", .{@errorName(err)}));
++    const profile_key_end = profile.now(ctx);
+     const flight = cache.Lock.acquire(ctx, key, true) catch return bypass(ctx, argv, "bypass: key lock unavailable");
+     defer flight.release();
+     // Different argument sets can still write the same output. Serialize those
+@@ -669,9 +674,11 @@
+         const current = ctx.digest(config.path) catch return bypass(ctx, argv, "bypass: cannot read extra input declaration");
+         if (!eq(config.hash, current)) return bypass(ctx, argv, "bypass: extra input declaration changed");
+     }
++    const profile_restore = profile.now(ctx);
+     if (cache.restoreVariants(ctx, key, plan.outputs) catch false) {
+         ctx.trace("hit");
+         ctx.event("hit");
++        profile.emit(ctx, "hit", .{ .plan_ns = profile_plan-profile_begin, .key_ns = profile_key_end-profile_key_start, .restore_ns = profile.now(ctx)-profile_restore, .total_ns = profile.now(ctx)-profile_begin });
+         return 0;
+     }
+     var before: std.ArrayList(cache.Dependency) = .empty;
+@@ -682,7 +689,9 @@
+     const directories = rust_dependencies.snapshot(ctx, plan.library_dirs, plan.outputs) catch return bypass(ctx, argv, "bypass: cannot enumerate dependency directories");
+     const started = std.Io.Clock.real.now(ctx.io).nanoseconds;
+     ctx.trace("miss: compiling");
++    const profile_compile = profile.now(ctx);
+     const result = try std.process.run(ctx.a, ctx.io, .{ .argv = argv, .environ_map = ctx.env });
++    const profile_compiled = profile.now(ctx);
+     try ctx.out(result.stdout);
+     try std.Io.File.stderr().writeStreamingAll(ctx.io, result.stderr);
+     const code = exitCode(result.term);
+@@ -692,6 +701,7 @@
+     }
+     ctx.event("miss");
+     save(ctx, key, plan, argv, before.items, directories, started, result, &.{}) catch |err| ctx.trace(try std.fmt.allocPrint(ctx.a, "uncached: {s}", .{@errorName(err)}));
++    profile.emit(ctx, "miss", .{ .plan_ns = profile_plan-profile_begin, .key_ns = profile_key_end-profile_key_start, .precompile_ns = profile_compile-profile_begin, .compiler_ns = profile_compiled-profile_compile, .post_ns = profile.now(ctx)-profile_compiled });
+     return 0;
+ }
+ 
+--- a/src/identity.zig
++++ b/src/identity.zig
+@@ -1,6 +1,7 @@
+ //! Toolchains are fingerprinted by content once. Their identity is memoized
+ //! behind inode/size/mtime/ctime checks and directory membership checks.
+ //! Source dependencies and stored outputs never use this metadata shortcut.
++const profile = @import("zig_profile.zig");
+ const std = @import("std");
+ const cache = @import("cache.zig");
+ const Dir = std.Io.Dir;
+@@ -78,16 +79,20 @@
+ }
+ 
+ fn readMemo(ctx: *cache.Context, path: []const u8, minimum_stamps: usize) ?[]const u8 {
++    const begin = profile.now(ctx);
+     const bytes = ctx.read(path) catch return null;
+     const payload = cache.unseal(ctx, bytes) catch return null;
+     const parsed = std.json.parseFromSlice(Memo, ctx.a, payload, .{ .allocate = .alloc_always }) catch return null;
+     const memo = parsed.value;
+     if (memo.schema != 5 or !cache.validHash(memo.decoder_hash) or !cache.validHash(memo.hash) or memo.stamps.len < minimum_stamps) return null;
++    const parsed_at = profile.now(ctx);
+     for (memo.stamps) |s| {
+         const current = stamp(ctx, s.path) catch return null;
+         if (!equal(current, s)) return null;
+     }
++    const checked_at = profile.now(ctx);
+     rememberEpoch(ctx, payload) catch return null;
++    profile.emit(ctx, "identity", .{ .stamps = memo.stamps.len, .parse_seal_ns = parsed_at-begin, .stat_ns = checked_at-parsed_at, .epoch_ns = profile.now(ctx)-checked_at });
+     ctx.compiler_decoder_identity = memo.decoder_hash;
+     return memo.hash;
+ }
+--- a/src/zig_profile.zig
++++ b/src/zig_profile.zig
+@@ -0,0 +1,9 @@
++const std = @import("std");
++const cache = @import("cache.zig");
++pub fn now(ctx: *cache.Context) i96 { return std.Io.Clock.awake.now(ctx.io).nanoseconds; }
++pub fn emit(ctx: *cache.Context, label: []const u8, data: anytype) void {
++    if (ctx.env.get("NANOCOMPILE_ZIG_PROFILE") == null) return;
++    const bytes = std.json.Stringify.valueAlloc(ctx.a, .{ .label = label, .data = data }, .{}) catch return;
++    const filename = std.fmt.allocPrint(ctx.a, "{s}/{s}-{d}-{d}.json", .{ctx.root, label, std.c.getpid(), now(ctx)}) catch return;
++    ctx.atomic(filename, bytes) catch {};
++}

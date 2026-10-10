@@ -34,6 +34,8 @@ This implementation targets repeated compilation of unchanged inputs. It is an e
 
 Measured performance and its limits are published with raw samples: [Rust versus kache](benchmarks/harness-hill.md), [Xcode](benchmarks/xcode.md), and [Turborepo with R2 restores](benchmarks/turborepo.md).
 
+The [real Wootin raw Zig benchmark](benchmarks/zig-wootin.md) covers cold compilation, restores and source edits, with a measured 9–11% reduction in restore latency and a preserved-timestamp correctness fix.
+
 The [latest cold Harness trial](benchmarks/harness-cold.md) cuts Nano build time by 38% using eight Cargo jobs on the test Mac, while kache still wins at equal concurrency. Both attempted cache-core optimizations were rejected after timing and coverage checks.
 
 The [producer profile](docs/producer-phase-profile.md), [restore breakdown](docs/restore-phase-profile.md), and [ordinary-hit profile](docs/library-phase-profile.md) record where warm-hit time goes and link optimization experiments, including rejected candidates.
