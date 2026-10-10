@@ -59,7 +59,7 @@ def main():
             shutil.rmtree(cache)
             argv[0] = candidate_argv
         build(a)
-        first = memos(cache/'toolchains',5)
+        first = memos(cache/'toolchains',8)
         assert len(first) == 1
         original = first[0][1]
         if baseline_hash is not None:
@@ -68,7 +68,7 @@ def main():
                     for path,row in memos(cache/'metadata',2) if row.get('identity','').startswith('toolchain:')}
         assert builtins
         build(b)
-        second = memos(cache/'toolchains',5)
+        second = memos(cache/'toolchains',8)
         assert len(second) == 2
         assert len({row['hash'] for _,row in second}) == 2
         second_hashes = {row['hash'] for _,row in second}
@@ -78,7 +78,7 @@ def main():
             assert path.stat().st_mtime_ns == mtime and hashlib.sha256(path.read_bytes()).hexdigest() == digest
         (b/'rust-toolchain.toml').write_text('[toolchain]\nchannel = "1.97.1"\n')
         build(b)
-        third = memos(cache/'toolchains',5)
+        third = memos(cache/'toolchains',8)
         assert len({row['hash'] for _,row in third}) == 2
         assert {row['hash'] for _,row in third} != second_hashes
         assert {row['decoder_hash'] for _,row in third} == {original['decoder_hash']}
@@ -87,18 +87,18 @@ def main():
             assert path.stat().st_mtime_ns == mtime and hashlib.sha256(path.read_bytes()).hexdigest() == digest
         (b/'rust-toolchain.toml').unlink()
         build(b, expected=None)
-        fourth = memos(cache/'toolchains',5)
+        fourth = memos(cache/'toolchains',8)
         assert {row['hash'] for _,row in fourth} == second_hashes
         assert {row['decoder_hash'] for _,row in fourth} == {original['decoder_hash']}
         env['RUSTUP_TOOLCHAIN'] = args.other_toolchain
         switched_version = subprocess.check_output(['rustc','-vV'],env=env,text=True)
         build(b)
-        switched = memos(cache/'toolchains',5)
+        switched = memos(cache/'toolchains',8)
         assert len(switched) == 3
         assert len({row['decoder_hash'] for _,row in switched}) == 2
         env['RUSTUP_TOOLCHAIN'] = '1.97.1'
         build(b, expected=None)
-        returned = memos(cache/'toolchains',5)
+        returned = memos(cache/'toolchains',8)
         assert len(returned) == 3
         assert len({row['decoder_hash'] for _,row in returned}) == 2
         # Exercise selection by the caller file itself, without an environment override.
@@ -106,7 +106,7 @@ def main():
         (b/'rust-toolchain.toml').write_text('[toolchain]\nchannel = "1.97.1"\n')
         prior_paths = {path for path,_ in returned}
         build(b)
-        selected = [(path,row) for path,row in memos(cache/'toolchains',5) if path not in prior_paths]
+        selected = [(path,row) for path,row in memos(cache/'toolchains',8) if path not in prior_paths]
         assert len(selected) == 1
         selected_path, selected_row = selected[0]
         assert selected_row['decoder_hash'] == original['decoder_hash']

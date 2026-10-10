@@ -6,7 +6,7 @@ import subprocess
 import sys
 import tempfile
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'tools'))
-from build_trace import Capture, analyze
+from build_trace import Capture, analyze, verify_capture
 
 with tempfile.TemporaryDirectory() as temp:
     state = Path(temp)
@@ -42,10 +42,49 @@ with tempfile.TemporaryDirectory() as temp:
     subprocess.run(['cc', str(killer), '-o', str(child)], check=True)
     terminated = subprocess.run([wrapper], capture_output=True)
     assert terminated.returncode == -signal.SIGTERM
+    console = state / 'console.log'
+    console.write_bytes(b'complete build console\nprivate-marker\x00')
+    event_log = state / 'events'
+    event_log.write_text('hit\n')
+    captured = dict(implementation='nanocompile', phase='warm')
+    capture.finish(captured, state / 'target', 0, event_log, 0, console)
+    manifest = json.loads((capture.directory / 'manifest.json').read_text())
+    import hashlib
+    assert manifest['files']['cargo.log']['sha256'] == hashlib.sha256(console.read_bytes()).hexdigest()
+    assert manifest['files']['cargo.log']['bytes'] == len(console.read_bytes())
+    assert manifest['compiler_records'] == 17 and manifest['build_log_captured']
+    assert verify_capture(capture.directory)['verified_files'] == len(manifest['files'])
+    (capture.directory / 'cargo.log').write_bytes(b'truncated')
+    try:
+        verify_capture(capture.directory)
+        raise AssertionError('Truncated log was accepted')
+    except ValueError:
+        pass
+    (capture.directory / 'cargo.log').write_bytes(console.read_bytes())
+    victim = capture.directory / records[0].name
+    original_record = victim.read_bytes()
+    victim.unlink()
+    try:
+        verify_capture(capture.directory)
+        raise AssertionError('Missing record was accepted')
+    except ValueError:
+        pass
+    victim.write_bytes(original_record)
     fixture = state / 'report.json'
     fixture.write_text(json.dumps({'builds': [dict(implementation='nanocompile',phase='cold',trace=dict(requests=[dict(name='<unsafe>',kind='rust',seconds=1,start_seconds=0)],cargo_units=[],kache_service_events=[]))]}))
     analysis = analyze(fixture, state / 'analysis')
     assert analysis['comparisons'][0]['kache'] is None
     assert '&lt;unsafe&gt;' in (state / 'analysis/index.html').read_text()
     assert '<unsafe>' not in (state / 'analysis/index.html').read_text()
+    paired = [dict(implementation=tool, phase='warm', trace=dict(requests=[],
+              cargo_units=[dict(name='ring', mode='run-custom-build', duration=duration)],
+              kache_service_events=[])) for tool, duration in [('nanocompile', 1.2), ('kache', .1)]]
+    fixture.write_text(json.dumps(dict(builds=paired)))
+    analyze(fixture, state / 'paired')
+    plan = json.loads((state / 'paired/experiments.json').read_text())['experiments']
+    assert len(plan) == 1 and plan[0]['observation']['name'].startswith('ring')
+    assert plan[0]['observation']['nanocompile']['samples'] == 1
+    assert 'ablation' in plan[0]['next_measurement']
+    assert 'not predicted' in plan[0]['claim']
+    assert 'private-marker' not in (state / 'paired/index.html').read_text()
 print('Native capture transparency, concurrent records and missing-counterpart analysis passed')

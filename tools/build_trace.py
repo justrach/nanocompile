@@ -2,6 +2,7 @@
 import argparse
 import collections
 import html
+import hashlib
 import json
 from pathlib import Path
 import shutil
@@ -10,6 +11,25 @@ import subprocess
 import sys
 
 ROOT = Path(__file__).resolve().parents[1]
+
+def verify_capture(directory):
+    """Check a local capture against its manifest; this is integrity, not authentication."""
+    manifest = json.loads((directory / 'manifest.json').read_text())
+    if manifest.get('schema') != 1:
+        raise ValueError('Unsupported capture manifest')
+    actual = {str(p.relative_to(directory)) for p in directory.rglob('*')
+              if p.is_file() and p != directory / 'manifest.json'}
+    if actual != set(manifest['files']):
+        raise ValueError('Capture file set differs from manifest')
+    for name, expected in manifest['files'].items():
+        path = directory / name
+        if not path.resolve().is_relative_to(directory.resolve()) or path.is_symlink():
+            raise ValueError('Capture path escapes directory or is linked')
+        raw = path.read_bytes()
+        if len(raw) != expected['bytes'] or hashlib.sha256(raw).hexdigest() != expected['sha256']:
+            raise ValueError('Capture content differs from manifest: ' + name)
+    return dict(verified_files=len(actual), compiler_records=manifest['compiler_records'],
+                cargo_units=manifest['cargo_units'])
 
 class Capture:
     def __init__(self, state, binaries):
@@ -31,7 +51,9 @@ class Capture:
         if implementation in self.wrappers:
             (self.root / implementation / 'current').write_text(str(self.directory) + '\n')
 
-    def finish(self, row, target, origin_ns, event_path, event_offset):
+    def finish(self, row, target, origin_ns, event_path, event_offset, build_log=None):
+        if build_log is not None:
+            shutil.copyfile(build_log, self.directory / 'cargo.log')
         units = []
         timing = target / 'cargo-timings/cargo-timing.html'
         if timing.exists():
@@ -76,6 +98,17 @@ class Capture:
         row['trace'] = dict(capture_directory=str(self.directory), requests=calls, cargo_units=units,
                             kache_service_events=service, diagnostic=True,
                             limitations='Captured request CPU excludes daemon work. Cargo intervals are rounded and approximately aligned to process launch. Overlapping durations cannot be added to infer build savings. Cache service events are not joined to requests.')
+        # Local audit manifest: retain every byte, including empty streams, and
+        # make missing/truncated records discoverable without publishing logs.
+        files = {str(p.relative_to(self.directory)): dict(bytes=p.stat().st_size,
+                 sha256=hashlib.sha256(p.read_bytes()).hexdigest())
+                 for p in sorted(self.directory.rglob('*')) if p.is_file()}
+        manifest = dict(schema=1, files=files, compiler_records=len(calls),
+                        cargo_units=len(units), build_log_captured=build_log is not None,
+                        direct_compiler_records_captured=row['implementation'] != 'direct',
+                        scope='Cargo console, timings, compiler frontends and build-script streams; no syscall or arbitrary subprocess tracing')
+        (self.directory / 'manifest.json').write_text(json.dumps(manifest, indent=2) + '\n')
+        row['trace']['capture_coverage'] = {k: v for k, v in manifest.items() if k != 'files'}
         if row['implementation'] != 'direct' and not calls:
             raise RuntimeError('No wrapper calls captured')
 
@@ -111,14 +144,41 @@ def analyze(report, output):
         row = dict(zip(('phase', 'kind', 'mode', 'name'), key))
         for implementation in ('direct', 'nanocompile', 'kache'):
             values = grouped.get((*key, implementation), [])
-            row[implementation] = dict(samples=len(values), median_seconds=statistics.median(values)) if values else None
+            row[implementation] = dict(samples=len(values), median_seconds=statistics.median(values),
+                                       min_seconds=min(values), max_seconds=max(values)) if values else None
         n, k = row['nanocompile'], row['kache']
         row['nano_minus_kache_seconds'] = n['median_seconds'] - k['median_seconds'] if n and k else None
         comparison.append(row)
     comparison.sort(key=lambda r: r['nano_minus_kache_seconds'] or 0, reverse=True)
+    experiments = []
+    for row in comparison:
+        if len(experiments) == 12:
+            break
+        gap = row['nano_minus_kache_seconds']
+        if gap is None or gap <= 0:
+            continue
+        experiments.append(dict(priority=len(experiments)+1,
+            observation={k: row[k] for k in ('phase', 'kind', 'mode', 'name', 'nanocompile', 'kache', 'nano_minus_kache_seconds')},
+            hypothesis='Execution reuse may remove repeated work' if row['mode'] == 'run-custom-build' else 'Identity, coordination or restore work may explain the interval gap',
+            next_measurement='Inspect matching private records and instrument Nano stages; run one controlled ablation before changing behavior',
+            acceptance=['repeated alternating untraced A/B against frozen production and kache',
+                        'real input edits and reverts invalidate correctly',
+                        'loader, toolchain and environment changes invalidate correctly',
+                        'source hashes stable and own-cold artifact hashes equal',
+                        'report cold and warm regressions and rejected variations'],
+            claim='Diagnostic hypothesis; interval gap is not predicted wall-time savings'))
+    provenance = {key: data[key] for key in ('commit', 'nanocompile_sha256', 'kache_sha256',
+                  'kache_version', 'rustc', 'script_sha256', 'jobs', 'timestamp',
+                  'diagnostic_trace', 'native_clang', 'nanocompile_proc_macros',
+                  'nanocompile_proc_macro_producers', 'nanocompile_executable_producers',
+                  'build_script_contract_sha256', 'kache_build_script_cache') if key in data}
+    provenance['report_sha256'] = hashlib.sha256(report.read_bytes()).hexdigest()
+    (output / 'experiments.json').write_text(json.dumps(dict(schema=1, provenance=provenance,
+        instruction='Reproduce this configuration before changing one cause; freeze the baseline binary and keep diagnostic and untraced benchmark results separate',
+        candidate_limit=12, complete_comparisons='analysis.json', experiments=experiments), indent=2)+'\n')
     (output / 'trace.json').write_text(json.dumps({'traceEvents': traces}))
     analysis = dict(diagnostic=True, comparisons=comparison, kache_service_summaries=service_summaries, kache_build_script_runs=build_script_runs,
-                    build_coverage=[dict(implementation=b["implementation"], phase=b["phase"], events=b.get("events", {}), request_kinds=dict(collections.Counter(r["kind"] for r in b.get("trace", {}).get("requests", []))), own_artifact_checks={k: v for k, v in b.items() if k.startswith("matches_own_cold")}) for b in data["builds"]],
+                    build_coverage=[dict(implementation=b["implementation"], phase=b["phase"], events=b.get("events", {}), capture_coverage=b.get('trace', {}).get('capture_coverage'), request_kinds=dict(collections.Counter(r["kind"] for r in b.get("trace", {}).get("requests", []))), own_artifact_checks={k: v for k, v in b.items() if k.startswith("matches_own_cold")}) for b in data["builds"]],
                     limitations='compile_time_ms on cache hits can describe the stored original compilation; stage summaries exclude hit/dup compile_time_ms. Per-unit medians are scheduling-sensitive, unpaired diagnostic observations. Request durations overlap. Missing counterparts are unknown, not zero. No optimization or overall speed win is established by this capture.')
     (output / 'analysis.json').write_text(json.dumps(analysis, indent=2) + '\n')
     brief = ['# Instructions for the next variation', '', analysis['limitations'], '',
@@ -149,12 +209,16 @@ def main():
     report = sub.add_parser('analyze')
     report.add_argument('report', type=Path)
     report.add_argument('--output', required=True, type=Path)
+    verify = sub.add_parser('verify-capture', help='check private captured file sets, sizes and hashes')
+    verify.add_argument('directory', type=Path)
     args = parser.parse_args()
     if args.action == 'capture':
         forwarded = args.arguments[1:] if args.arguments[:1] == ['--'] else args.arguments
         subprocess.run([sys.executable, str(ROOT / 'tests/project_comparison.py'), *forwarded, '--trace-builds'], check=True)
-    else:
+    elif args.action == 'analyze':
         analyze(args.report, args.output)
+    else:
+        print(json.dumps(verify_capture(args.directory)))
 
 if __name__ == '__main__':
     main()

@@ -1,0 +1,409 @@
+{
+  "schema": 1,
+  "provenance": {
+    "commit": "32b41cb0bff55e3c9cbfab3012acec2b179ad199",
+    "nanocompile_sha256": "8b925e85a6a5e8d0c9a644e574b48d9f8857d65b053d5aa76a9044d07db3e8b4",
+    "kache_sha256": "0e4ab2b2f651f1c3685fe31b9ad7d0008ce12c44332e5e4842fa5257a0a82cd0",
+    "kache_version": "kache 1.0.0",
+    "rustc": "rustc 1.97.1 (8bab26f4f 2026-07-14)\nbinary: rustc\ncommit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452\ncommit-date: 2026-07-14\nhost: aarch64-apple-darwin\nrelease: 1.97.1\nLLVM version: 22.1.6\n",
+    "script_sha256": "8af8312e230e5e1534b2b87b725d479f14e67304777df1daf7fe3adccad7c42b",
+    "jobs": 8,
+    "timestamp": "2026-10-10T11:02:49.585020+00:00",
+    "diagnostic_trace": true,
+    "native_clang": true,
+    "nanocompile_proc_macros": "reported",
+    "nanocompile_proc_macro_producers": true,
+    "nanocompile_executable_producers": true,
+    "kache_build_script_cache": true,
+    "report_sha256": "2526548de8ebab8e9783f94ab3eab87ce927a7f1534a322c4704f2f2fe7d8109"
+  },
+  "instruction": "Reproduce this configuration before changing one cause; freeze the baseline binary and keep diagnostic and untraced benchmark results separate",
+  "candidate_limit": 12,
+  "complete_comparisons": "analysis.json",
+  "experiments": [
+    {
+      "priority": 1,
+      "observation": {
+        "phase": "warm",
+        "kind": "cargo",
+        "mode": "run-custom-build",
+        "name": "ring 0.17.14  build-script (run) features=alloc,default,dev_urandom_fallback",
+        "nanocompile": {
+          "samples": 2,
+          "median_seconds": 1.28,
+          "min_seconds": 1.28,
+          "max_seconds": 1.28
+        },
+        "kache": {
+          "samples": 2,
+          "median_seconds": 0.05,
+          "min_seconds": 0.05,
+          "max_seconds": 0.05
+        },
+        "nano_minus_kache_seconds": 1.23
+      },
+      "hypothesis": "Execution reuse may remove repeated work",
+      "next_measurement": "Inspect matching private records and instrument Nano stages; run one controlled ablation before changing behavior",
+      "acceptance": [
+        "repeated alternating untraced A/B against frozen production and kache",
+        "real input edits and reverts invalidate correctly",
+        "loader, toolchain and environment changes invalidate correctly",
+        "source hashes stable and own-cold artifact hashes equal",
+        "report cold and warm regressions and rejected variations"
+      ],
+      "claim": "Diagnostic hypothesis; interval gap is not predicted wall-time savings"
+    },
+    {
+      "priority": 2,
+      "observation": {
+        "phase": "cold",
+        "kind": "cargo",
+        "mode": "todo",
+        "name": "quote 1.0.47  build-script features=default,proc-macro",
+        "nanocompile": {
+          "samples": 1,
+          "median_seconds": 1.1,
+          "min_seconds": 1.1,
+          "max_seconds": 1.1
+        },
+        "kache": {
+          "samples": 1,
+          "median_seconds": 0.17,
+          "min_seconds": 0.17,
+          "max_seconds": 0.17
+        },
+        "nano_minus_kache_seconds": 0.93
+      },
+      "hypothesis": "Identity, coordination or restore work may explain the interval gap",
+      "next_measurement": "Inspect matching private records and instrument Nano stages; run one controlled ablation before changing behavior",
+      "acceptance": [
+        "repeated alternating untraced A/B against frozen production and kache",
+        "real input edits and reverts invalidate correctly",
+        "loader, toolchain and environment changes invalidate correctly",
+        "source hashes stable and own-cold artifact hashes equal",
+        "report cold and warm regressions and rejected variations"
+      ],
+      "claim": "Diagnostic hypothesis; interval gap is not predicted wall-time savings"
+    },
+    {
+      "priority": 3,
+      "observation": {
+        "phase": "cold",
+        "kind": "cargo",
+        "mode": "todo",
+        "name": "cfg-if 1.0.4  features=",
+        "nanocompile": {
+          "samples": 1,
+          "median_seconds": 0.98,
+          "min_seconds": 0.98,
+          "max_seconds": 0.98
+        },
+        "kache": {
+          "samples": 1,
+          "median_seconds": 0.05,
+          "min_seconds": 0.05,
+          "max_seconds": 0.05
+        },
+        "nano_minus_kache_seconds": 0.9299999999999999
+      },
+      "hypothesis": "Identity, coordination or restore work may explain the interval gap",
+      "next_measurement": "Inspect matching private records and instrument Nano stages; run one controlled ablation before changing behavior",
+      "acceptance": [
+        "repeated alternating untraced A/B against frozen production and kache",
+        "real input edits and reverts invalidate correctly",
+        "loader, toolchain and environment changes invalidate correctly",
+        "source hashes stable and own-cold artifact hashes equal",
+        "report cold and warm regressions and rejected variations"
+      ],
+      "claim": "Diagnostic hypothesis; interval gap is not predicted wall-time savings"
+    },
+    {
+      "priority": 4,
+      "observation": {
+        "phase": "cold",
+        "kind": "request",
+        "mode": "rust",
+        "name": "cfg_if",
+        "nanocompile": {
+          "samples": 1,
+          "median_seconds": 0.963966,
+          "min_seconds": 0.963966,
+          "max_seconds": 0.963966
+        },
+        "kache": {
+          "samples": 1,
+          "median_seconds": 0.036574,
+          "min_seconds": 0.036574,
+          "max_seconds": 0.036574
+        },
+        "nano_minus_kache_seconds": 0.927392
+      },
+      "hypothesis": "Identity, coordination or restore work may explain the interval gap",
+      "next_measurement": "Inspect matching private records and instrument Nano stages; run one controlled ablation before changing behavior",
+      "acceptance": [
+        "repeated alternating untraced A/B against frozen production and kache",
+        "real input edits and reverts invalidate correctly",
+        "loader, toolchain and environment changes invalidate correctly",
+        "source hashes stable and own-cold artifact hashes equal",
+        "report cold and warm regressions and rejected variations"
+      ],
+      "claim": "Diagnostic hypothesis; interval gap is not predicted wall-time savings"
+    },
+    {
+      "priority": 5,
+      "observation": {
+        "phase": "cold",
+        "kind": "request",
+        "mode": "rust",
+        "name": "stable_deref_trait",
+        "nanocompile": {
+          "samples": 1,
+          "median_seconds": 0.965198,
+          "min_seconds": 0.965198,
+          "max_seconds": 0.965198
+        },
+        "kache": {
+          "samples": 1,
+          "median_seconds": 0.037823,
+          "min_seconds": 0.037823,
+          "max_seconds": 0.037823
+        },
+        "nano_minus_kache_seconds": 0.927375
+      },
+      "hypothesis": "Identity, coordination or restore work may explain the interval gap",
+      "next_measurement": "Inspect matching private records and instrument Nano stages; run one controlled ablation before changing behavior",
+      "acceptance": [
+        "repeated alternating untraced A/B against frozen production and kache",
+        "real input edits and reverts invalidate correctly",
+        "loader, toolchain and environment changes invalidate correctly",
+        "source hashes stable and own-cold artifact hashes equal",
+        "report cold and warm regressions and rejected variations"
+      ],
+      "claim": "Diagnostic hypothesis; interval gap is not predicted wall-time savings"
+    },
+    {
+      "priority": 6,
+      "observation": {
+        "phase": "cold",
+        "kind": "cargo",
+        "mode": "todo",
+        "name": "proc-macro2 1.0.107  build-script features=default,proc-macro",
+        "nanocompile": {
+          "samples": 1,
+          "median_seconds": 1.11,
+          "min_seconds": 1.11,
+          "max_seconds": 1.11
+        },
+        "kache": {
+          "samples": 1,
+          "median_seconds": 0.19,
+          "min_seconds": 0.19,
+          "max_seconds": 0.19
+        },
+        "nano_minus_kache_seconds": 0.9200000000000002
+      },
+      "hypothesis": "Identity, coordination or restore work may explain the interval gap",
+      "next_measurement": "Inspect matching private records and instrument Nano stages; run one controlled ablation before changing behavior",
+      "acceptance": [
+        "repeated alternating untraced A/B against frozen production and kache",
+        "real input edits and reverts invalidate correctly",
+        "loader, toolchain and environment changes invalidate correctly",
+        "source hashes stable and own-cold artifact hashes equal",
+        "report cold and warm regressions and rejected variations"
+      ],
+      "claim": "Diagnostic hypothesis; interval gap is not predicted wall-time savings"
+    },
+    {
+      "priority": 7,
+      "observation": {
+        "phase": "cold",
+        "kind": "cargo",
+        "mode": "todo",
+        "name": "stable_deref_trait 1.2.1  features=",
+        "nanocompile": {
+          "samples": 1,
+          "median_seconds": 0.97,
+          "min_seconds": 0.97,
+          "max_seconds": 0.97
+        },
+        "kache": {
+          "samples": 1,
+          "median_seconds": 0.05,
+          "min_seconds": 0.05,
+          "max_seconds": 0.05
+        },
+        "nano_minus_kache_seconds": 0.9199999999999999
+      },
+      "hypothesis": "Identity, coordination or restore work may explain the interval gap",
+      "next_measurement": "Inspect matching private records and instrument Nano stages; run one controlled ablation before changing behavior",
+      "acceptance": [
+        "repeated alternating untraced A/B against frozen production and kache",
+        "real input edits and reverts invalidate correctly",
+        "loader, toolchain and environment changes invalidate correctly",
+        "source hashes stable and own-cold artifact hashes equal",
+        "report cold and warm regressions and rejected variations"
+      ],
+      "claim": "Diagnostic hypothesis; interval gap is not predicted wall-time savings"
+    },
+    {
+      "priority": 8,
+      "observation": {
+        "phase": "cold",
+        "kind": "cargo",
+        "mode": "todo",
+        "name": "unicode-ident 1.0.24  features=",
+        "nanocompile": {
+          "samples": 1,
+          "median_seconds": 0.98,
+          "min_seconds": 0.98,
+          "max_seconds": 0.98
+        },
+        "kache": {
+          "samples": 1,
+          "median_seconds": 0.06,
+          "min_seconds": 0.06,
+          "max_seconds": 0.06
+        },
+        "nano_minus_kache_seconds": 0.9199999999999999
+      },
+      "hypothesis": "Identity, coordination or restore work may explain the interval gap",
+      "next_measurement": "Inspect matching private records and instrument Nano stages; run one controlled ablation before changing behavior",
+      "acceptance": [
+        "repeated alternating untraced A/B against frozen production and kache",
+        "real input edits and reverts invalidate correctly",
+        "loader, toolchain and environment changes invalidate correctly",
+        "source hashes stable and own-cold artifact hashes equal",
+        "report cold and warm regressions and rejected variations"
+      ],
+      "claim": "Diagnostic hypothesis; interval gap is not predicted wall-time savings"
+    },
+    {
+      "priority": 9,
+      "observation": {
+        "phase": "cold",
+        "kind": "request",
+        "mode": "rust",
+        "name": "pin_project_lite",
+        "nanocompile": {
+          "samples": 1,
+          "median_seconds": 0.96086,
+          "min_seconds": 0.96086,
+          "max_seconds": 0.96086
+        },
+        "kache": {
+          "samples": 1,
+          "median_seconds": 0.041894,
+          "min_seconds": 0.041894,
+          "max_seconds": 0.041894
+        },
+        "nano_minus_kache_seconds": 0.9189660000000001
+      },
+      "hypothesis": "Identity, coordination or restore work may explain the interval gap",
+      "next_measurement": "Inspect matching private records and instrument Nano stages; run one controlled ablation before changing behavior",
+      "acceptance": [
+        "repeated alternating untraced A/B against frozen production and kache",
+        "real input edits and reverts invalidate correctly",
+        "loader, toolchain and environment changes invalidate correctly",
+        "source hashes stable and own-cold artifact hashes equal",
+        "report cold and warm regressions and rejected variations"
+      ],
+      "claim": "Diagnostic hypothesis; interval gap is not predicted wall-time savings"
+    },
+    {
+      "priority": 10,
+      "observation": {
+        "phase": "cold",
+        "kind": "request",
+        "mode": "rust",
+        "name": "unicode_ident",
+        "nanocompile": {
+          "samples": 1,
+          "median_seconds": 0.970547,
+          "min_seconds": 0.970547,
+          "max_seconds": 0.970547
+        },
+        "kache": {
+          "samples": 1,
+          "median_seconds": 0.05419,
+          "min_seconds": 0.05419,
+          "max_seconds": 0.05419
+        },
+        "nano_minus_kache_seconds": 0.9163570000000001
+      },
+      "hypothesis": "Identity, coordination or restore work may explain the interval gap",
+      "next_measurement": "Inspect matching private records and instrument Nano stages; run one controlled ablation before changing behavior",
+      "acceptance": [
+        "repeated alternating untraced A/B against frozen production and kache",
+        "real input edits and reverts invalidate correctly",
+        "loader, toolchain and environment changes invalidate correctly",
+        "source hashes stable and own-cold artifact hashes equal",
+        "report cold and warm regressions and rejected variations"
+      ],
+      "claim": "Diagnostic hypothesis; interval gap is not predicted wall-time savings"
+    },
+    {
+      "priority": 11,
+      "observation": {
+        "phase": "cold",
+        "kind": "request",
+        "mode": "rust",
+        "name": "smallvec",
+        "nanocompile": {
+          "samples": 1,
+          "median_seconds": 1.02203,
+          "min_seconds": 1.02203,
+          "max_seconds": 1.02203
+        },
+        "kache": {
+          "samples": 1,
+          "median_seconds": 0.111269,
+          "min_seconds": 0.111269,
+          "max_seconds": 0.111269
+        },
+        "nano_minus_kache_seconds": 0.9107609999999999
+      },
+      "hypothesis": "Identity, coordination or restore work may explain the interval gap",
+      "next_measurement": "Inspect matching private records and instrument Nano stages; run one controlled ablation before changing behavior",
+      "acceptance": [
+        "repeated alternating untraced A/B against frozen production and kache",
+        "real input edits and reverts invalidate correctly",
+        "loader, toolchain and environment changes invalidate correctly",
+        "source hashes stable and own-cold artifact hashes equal",
+        "report cold and warm regressions and rejected variations"
+      ],
+      "claim": "Diagnostic hypothesis; interval gap is not predicted wall-time savings"
+    },
+    {
+      "priority": 12,
+      "observation": {
+        "phase": "cold",
+        "kind": "cargo",
+        "mode": "todo",
+        "name": "smallvec 1.15.2  features=const_generics,const_new",
+        "nanocompile": {
+          "samples": 1,
+          "median_seconds": 1.03,
+          "min_seconds": 1.03,
+          "max_seconds": 1.03
+        },
+        "kache": {
+          "samples": 1,
+          "median_seconds": 0.12,
+          "min_seconds": 0.12,
+          "max_seconds": 0.12
+        },
+        "nano_minus_kache_seconds": 0.91
+      },
+      "hypothesis": "Identity, coordination or restore work may explain the interval gap",
+      "next_measurement": "Inspect matching private records and instrument Nano stages; run one controlled ablation before changing behavior",
+      "acceptance": [
+        "repeated alternating untraced A/B against frozen production and kache",
+        "real input edits and reverts invalidate correctly",
+        "loader, toolchain and environment changes invalidate correctly",
+        "source hashes stable and own-cold artifact hashes equal",
+        "report cold and warm regressions and rejected variations"
+      ],
+      "claim": "Diagnostic hypothesis; interval gap is not predicted wall-time savings"
+    }
+  ]
+}

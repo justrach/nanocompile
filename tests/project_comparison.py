@@ -170,7 +170,7 @@ def main():
                "exit_code": proc.returncode, "events": dict(after - before), "rlibs": len(artifacts), "artifacts": artifacts,
                "peak_sampled_process_tree_rss_bytes": peak, "macro_dylibs": macros, "build_script_executables": executables}
         if capture:
-            capture.finish(row, target, origin_ns, event_path, event_offset)
+            capture.finish(row, target, origin_ns, event_path, event_offset, log_path)
         if implementation not in references:
             references[implementation] = artifacts
             macro_references[implementation] = macros
