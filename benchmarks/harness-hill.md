@@ -1570,3 +1570,9 @@ the production commands remain separate.
 ## Continued cold hill climb: live-query overlap rejected
 
 The [fresh selected-resource profile](../docs/selected-resource-graph-profile.md) confirms a single decoder scope and only 32 resolver queries, versus 264 before the adopted resource change. It shifts attention to the two live compiler queries. A [concurrent-query candidate](../docs/root-query-overlap-experiment.md) passes compiler, toolchain-switch and explicit live-root-disagreement gates, but wins only 1/3 cold pairs. Medians 29.641 s versus 29.394 s are too mixed to justify adoption; all six builds match 193 artifacts and retain full input validation. Every sample and the rejected patch are published.
+
+## Direct rmeta graph decoding (Rust 1.97.1)
+
+A new version-gated Zig decoder replaces ordinary own-artifact rustc root queries while preserving live compiler selection, validation and full input hashing. Two independent controlled three-pair cold batches reduce medians from 28.253485 to 27.252123 s and 29.059118 to 27.593439 s; six of six pairs favor the candidate. All twelve builds match 193 artifacts. Two independent 27-pair warm batches have opposite median directions (first 1.46% slower, confirmation 2.45% faster), so no repeatable warm improvement is claimed. The change is adopted for the cold benefit, with unknown formats/versions falling back to rustc. This is a Nano predecessor comparison, not a fresh kache result.
+
+[Method, checks, limitations and all raw samples](../docs/direct-rmeta-experiment.md); [broader next experiments](../docs/performance-roadmap.md).

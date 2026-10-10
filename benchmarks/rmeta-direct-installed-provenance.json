@@ -1,0 +1,20 @@
+{
+  "binary_sha256": "0bc634b775e255682d282656375ae53713343ed5524e78a4e15b19df2c166fee",
+  "candidate_binary_sha256": "5ed66df486b821e3e5ff90eaa42b14996eae9afd2fe3468314aa5469783ecd93",
+  "source_sha256": {
+    "src/rmeta_direct.zig": "fb261c47837913525cceb90a789e258ad377ecdde160aa8c4fe9c057b03a3f25",
+    "src/rust_dependencies.zig": "b77f5473441cade99ea60f7296e77c2847eddc151701e2842b99f5a3cc554181"
+  },
+  "sources_equal_measured_candidate": true,
+  "note": "Build roots differ; producer observer binary digests remain part of cache keys. Performance samples refer to measured candidate executable, with byte-identical adopted source.",
+  "checks": [
+    {
+      "command": "zig build test",
+      "passed": true
+    },
+    {
+      "command": "zig build integration -Doptimize=ReleaseFast",
+      "passed": true
+    }
+  ]
+}

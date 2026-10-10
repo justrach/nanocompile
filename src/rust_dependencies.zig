@@ -96,6 +96,22 @@ fn unusedCompanion(resolver: *metadata.Resolver, dir: Directory, filename: []con
     return false;
 }
 
+const DirectGraph = struct { root: metadata.Root, names: []const Crate };
+fn directGraph(ctx: *cache.Context, path: []const u8) !?DirectGraph {
+    if (!std.mem.endsWith(u8, path, ".rmeta")) return null;
+    const before = Dir.cwd().statFile(ctx.io, path, .{}) catch return null;
+    const bytes = ctx.read(path) catch return null;
+    const graph = @import("rmeta_direct.zig").decode(ctx.a, bytes) catch return null;
+    const after = try Dir.cwd().statFile(ctx.io, path, .{});
+    if (!cache.sameFileState(before, after)) return error.InputChangedDuringMetadataQuery;
+    var names: std.ArrayList(Crate) = .empty;
+    for (graph.dependencies) |crate| {
+        if (!reportedMacros(ctx) and crate.proc_macro) return error.ProceduralMacroDependency;
+        try names.append(ctx.a, .{ .name = crate.name, .hash = crate.hash, .proc_macro = crate.proc_macro });
+    }
+    return .{ .root = .{ .name = graph.root.name, .hash = graph.root.hash, .triple = graph.root.triple, .proc_macro = graph.root.proc_macro }, .names = names.items };
+}
+
 pub fn collect(ctx: *cache.Context, argv: []const []const u8, outputs: []const []const u8, before: []const Directory, started: i96, records: *std.ArrayList(cache.Dependency), metadata_only: bool, validated: *const std.StringHashMapUnmanaged(cache.CheckedDigest), hidden_native: bool) !void {
     var artifact: ?[]const u8 = null;
     for (outputs) |out| if (std.mem.endsWith(u8, out, ".rmeta")) {
@@ -132,10 +148,13 @@ pub fn collect(ctx: *cache.Context, argv: []const []const u8, outputs: []const [
     const query_cwd = try ctx.path(&.{"metadata-queries"});
     try Dir.cwd().createDirPath(ctx.io, query_cwd);
     const native_checked = if (hidden_native) try ctx.checkedDigest(path) else null;
-    const result = try std.process.run(ctx.a, ctx.io, .{ .argv = &.{ reader_compiler, "-Zls=root", path }, .environ_map = &query_env, .cwd = .{ .path = query_cwd } });
-    if (!success(result)) return error.RustMetadataQueryFailed;
-    const names = try parse(ctx.a, result.stdout, reportedMacros(ctx));
-    const own_root = try metadata.parse(result.stdout);
+    const graph = (try directGraph(ctx, path)) orelse blk: {
+        const result = try std.process.run(ctx.a, ctx.io, .{ .argv = &.{ reader_compiler, "-Zls=root", path }, .environ_map = &query_env, .cwd = .{ .path = query_cwd } });
+        if (!success(result)) return error.RustMetadataQueryFailed;
+        break :blk DirectGraph{ .names = try parse(ctx.a, result.stdout, reportedMacros(ctx)), .root = try metadata.parse(result.stdout) };
+    };
+    const names = graph.names;
+    const own_root = graph.root;
     if (native_checked) |checked| {
         if (!std.mem.endsWith(u8, path, ".rmeta")) return error.HiddenNativeLinkInput;
         const bytes = try ctx.read(path);

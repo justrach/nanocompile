@@ -1,0 +1,20 @@
+# Next performance directions
+
+The next work should cover more workloads and remove larger costs. Small changes to one metadata query are only one part of the search. This map distinguishes implemented capabilities, tested/rejected approaches and new experiments. The [direct metadata experiment](direct-rmeta-experiment.md) is the first concrete new trial.
+
+| Direction | Potential benefit | Current evidence / next useful test |
+| --- | --- | --- |
+| Direct Rust metadata decoding | Avoid one compiler process for most cold graph collectors | New exact-version Zig prototype matches rustc for 129/135 Harness rmeta files; six fall back. Six controlled cold pairs all improved; two 27-pair warm batches show no repeatable regression. Adopted with rustc fallback; newer metadata versions still need separate support. |
+| Portable C/C++ object caching | Raise Linux and default-policy hit coverage, including native build-script work | Current native adapter depends on Apple Clang CAS; hosted Harness default-policy restores leave many calls uncached. Build a separate bounded Clang/GCC adapter with complete header/compiler/environment validation and real C-link/run checks. |
+| Builds after source changes | Measure the development workflow beyond identical-build repetition | Add a disposable Harness checkout, rotate controlled leaf/shared-crate edits and compare direct/Nano/kache over the same edit sequence. Preserve the human checkout. |
+| Output verification scheduling | Overlap full input and blob reads, particularly large producer outputs | Current restore reads/validates inputs then output blobs. Benchmark a bounded combined verifier while retaining all byte reads and the validate-before-materialize boundary. |
+| Batched service requests | Amortize IPC and immutable entry parsing across many hits | Earlier persistent workers alone had modest/inconclusive gains. A new service needs changed transport/batching, request isolation and explicit served-hit counters, not just another daemon label. |
+| Declared whole-task caching | Avoid Cargo/build-script scheduling and compilation for a fully matching build task | Turbo already caches declared task outputs. An opt-in Cargo task adapter needs an explicit input/environment/toolchain contract; arbitrary build-script reads cannot be inferred from a source glob. Keep task and compiler results separate. |
+| R2 streaming and artifact-level transport | Reduce snapshot upload/download and improve partial reuse | Current transport is explicit compressed snapshots. Measure bytes, network latency and upload/download separately; validate every restored blob. Cross-machine reuse additionally needs key/path normalization. |
+| Real Zig project coverage | Improve supported build invocation coverage and measure actual Zig workloads | Current direct Zig invocations are supported; build-runner/listen protocol and arbitrary `zig build` are outside eligibility. Add a real project benchmark before changing protocol handling. |
+
+Already tested: decoder scope sharing, native-query overlap, integrated cc1, persistent ordinary/producer workers, alternative file readers and an upstream BLAKE3 backend. Several yielded no dependable whole-project gain. Watched mutable digest reuse was rejected because an already-dirty writable mmap defeats its change-detection assumptions. Preserve full mutable content verification rather than rerunning that unsafe shortcut.
+
+The comparison axes remain separate: cold/miss overhead, warm-hit latency, hit coverage, edit builds, and remote transport. Improvement on one axis is not evidence for another, and favorable microbenchmarks need complete project confirmation.
+
+Prioritize a controlled source-edit benchmark next: it reveals how much useful work the cache avoids in normal development and prevents identical-build timing from hiding poor invalidation or hit coverage. Then build portable native caching to address the Linux coverage gap. Profile warm restore reads before choosing a verifier-overlap implementation. Keep separate Zig and Xcode suites because Cargo improvements do not establish gains for those build systems.

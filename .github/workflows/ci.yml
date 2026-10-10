@@ -45,6 +45,10 @@ jobs:
           python3 benchmarks/experiments/selected_decoder_scope_check.py zig-out/bin/nanocompile --other-toolchain 1.98.1 --output bench-results/decoder-scope.json
           python3 tests/clang_cache.py zig-out/bin/nanocompile --output bench-results/clang-cache.json
           zig build integration -Doptimize=ReleaseFast
+      - name: Verify direct Rust metadata against rustc
+        run: |
+          zig build-exe -OReleaseFast -lc src/rmeta_direct.zig -femit-bin="$RUNNER_TEMP/rmeta-direct"
+          python3 benchmarks/experiments/rmeta_direct_fixture_check.py "$RUNNER_TEMP/rmeta-direct" --output bench-results/rmeta-direct.json
       - name: Verify live native selector overlap
         if: runner.os == 'macOS'
         run: python3 tests/clang_selection.py zig-out/bin/nanocompile --output bench-results/clang-selection.json

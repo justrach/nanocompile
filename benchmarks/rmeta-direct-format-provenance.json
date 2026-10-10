@@ -1,0 +1,12 @@
+{
+  "compiler_commit": "8bab26f4f68e0e26f0bb7960be334d5b520ea452",
+  "sources": {
+    "crate_root_and_dependencies": "https://github.com/rust-lang/rust/blob/8bab26f4f68e0e26f0bb7960be334d5b520ea452/compiler/rustc_metadata/src/rmeta/mod.rs",
+    "root_query_formatter": "https://github.com/rust-lang/rust/blob/8bab26f4f68e0e26f0bb7960be334d5b520ea452/compiler/rustc_metadata/src/rmeta/decoder.rs",
+    "symbol_indices": "https://github.com/rust-lang/rust/blob/8bab26f4f68e0e26f0bb7960be334d5b520ea452/compiler/rustc_span/src/symbol.rs",
+    "symbol_index_assignment": "https://github.com/rust-lang/rust/blob/8bab26f4f68e0e26f0bb7960be334d5b520ea452/compiler/rustc_macros/src/symbols.rs",
+    "dependency_kind": "https://github.com/rust-lang/rust/blob/8bab26f4f68e0e26f0bb7960be334d5b520ea452/compiler/rustc_session/src/cstore.rs"
+  },
+  "downloaded_symbol_source_sha256": "2522a3fdc0ade20dc1165aec1dd96a9fb103e21e5f974773aafb8e096865a621",
+  "sparse_predefined_symbol_policy": "Only a bounded table of known names is accepted; all other predefined indices refuse, and integration falls back to rustc. No heuristic scan for dependency names."
+}

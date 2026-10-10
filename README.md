@@ -315,6 +315,8 @@ The [initial Harness comparison with kache](benchmarks/kache-harness.md) measure
 
 GitHub Actions runs real compiler tests and the synthetic benchmark on Linux and macOS. Each run uploads its measured JSON as an artifact. No R2 credentials are needed by pull-request jobs.
 
+The [direct Rust metadata experiment](docs/direct-rmeta-experiment.md) removes own-artifact query subprocesses for supported Rust 1.97.1 metadata. Two controlled Harness cold batches improve by **3.5% and 5.0%** against the previous Nano implementation, with six of six pair wins and 193 matching artifacts. Two 27-pair warm batches are mixed; no general warm speedup is claimed. Unknown versions and encodings retain the rustc query fallback. See the [next performance experiments](docs/performance-roadmap.md) for native caching, source-edit builds and restore validation.
+
 ## Attribution
 
 Inspired by [kunobi-ninja/kache](https://github.com/kunobi-ninja/kache), inspected at commit `943dd2b0bbbf28958623eba689e7ad71bf8888e5`. The Zig implementation is original; it adapts architectural ideas rather than copying Rust source. Apache-2.0; see `LICENSE` and `NOTICE`.

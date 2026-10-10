@@ -1,0 +1,681 @@
+{
+  "binary_sha256": "9bde1d2b667c8801061e301812fde9c0726c55c8bd7a9b26d5106e2fc4079f63",
+  "script_sha256": "12e0ad6707736bcbb1853a42cf84f0808d66db028dfb61954cdc95981638b1db",
+  "rustc": "rustc 1.97.1 (8bab26f4f 2026-07-14)\nbinary: rustc\ncommit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452\ncommit-date: 2026-07-14\nhost: aarch64-apple-darwin\nrelease: 1.97.1\nLLVM version: 22.1.6\n",
+  "files": 135,
+  "accepted": 129,
+  "fallback_files": [
+    "libharness_adapters-17d251dcff5f9858.rmeta",
+    "libquote-df8f46198e30c35b.rmeta",
+    "libsha2-1601e36a0b1ba348.rmeta",
+    "libsyn-804e1da7bee6720d.rmeta",
+    "libsyn-bd9e1d5bf0bba7fc.rmeta",
+    "libsynstructure-8160d14f41635618.rmeta"
+  ],
+  "comparisons": [
+    {
+      "file": "libanyhow-3d654b9144e6a33e.rmeta",
+      "sha256": "8bb78a73f014d1a67a3c8c29a3b910c913632d91249e351078c4a45a27896eb7",
+      "dependencies": 19
+    },
+    {
+      "file": "libatomic_waker-53a408e11b95220b.rmeta",
+      "sha256": "24879702f76dfa08b61e908bf45f9c873644e568808a13879dcd61bcc3f10fc6",
+      "dependencies": 2
+    },
+    {
+      "file": "libautocfg-3cd7061a28c1130a.rmeta",
+      "sha256": "bd71f5e9ca508f1a7a97117f0d6e820ae8d66c63ebd254846abb363206438bf8",
+      "dependencies": 19
+    },
+    {
+      "file": "libbase64-e44112297735895b.rmeta",
+      "sha256": "80c9edbd04b25894dd25273f4bd8235ac18ef4785b5ad65e05081f54f059d57b",
+      "dependencies": 19
+    },
+    {
+      "file": "libbitflags-5f5c2f24ffc5fe1c.rmeta",
+      "sha256": "555c4020fa691d8187480807a743c776818786814752a33bdb59ce704f7b6e52",
+      "dependencies": 2
+    },
+    {
+      "file": "libblock_buffer-7e2c560011e022fb.rmeta",
+      "sha256": "2c458c0417223193a85b662e419c235e5ceba44b9bae50edfaf9c80e32209ec5",
+      "dependencies": 4
+    },
+    {
+      "file": "libbytes-57b7e8cd0b5c6b02.rmeta",
+      "sha256": "5d4fb91fe022e777fb96c36683b25e5862cccf92b9178226b99697cef115e6f5",
+      "dependencies": 19
+    },
+    {
+      "file": "libcc-987898de1db8b53e.rmeta",
+      "sha256": "93618516cd1bc7e23602c7aa39532e160ab910d7a3328391e09d2ee3b04d08a4",
+      "dependencies": 21
+    },
+    {
+      "file": "libcfg_if-5f159fa1e1d6f550.rmeta",
+      "sha256": "9e565669e7b11aa3ec474a877df2f5987f6c7b3231aa65b87e75e2b017898c3b",
+      "dependencies": 2
+    },
+    {
+      "file": "libchrono-0542171e04b7d30b.rmeta",
+      "sha256": "cd31e6803864e88c05b3fd2557c9563da3630b95302d407d0d0741d402615cac",
+      "dependencies": 25
+    },
+    {
+      "file": "libcore_foundation-6693f0b15e66eb94.rmeta",
+      "sha256": "1607e949b5832cbd1b890f98727308f35c197c300040eca736369e26fc5d299c",
+      "dependencies": 21
+    },
+    {
+      "file": "libcore_foundation_sys-998a3b102ff90cbb.rmeta",
+      "sha256": "115c4041594a0bbb6116ed2805b4cf1ea5046a86e9dc4422a908636477de792b",
+      "dependencies": 19
+    },
+    {
+      "file": "libcpufeatures-48ac0232e69c8964.rmeta",
+      "sha256": "2759bcc3550aa4fe7598e6f48c97426bd93ec7e701499dd4fa6bdc3bac8b519d",
+      "dependencies": 3
+    },
+    {
+      "file": "libcrc32fast-380d052a77cd660f.rmeta",
+      "sha256": "8bf65852f74276daee43721a40857c91d2ef50bd5b5ae2ef30ac758030c1d4d1",
+      "dependencies": 20
+    },
+    {
+      "file": "libcrypto_common-dd6842b96b2b2277.rmeta",
+      "sha256": "64212fbc71cbdb79cda57a1d3b25008b1209c642d5eb82bac771d6114255e216",
+      "dependencies": 21
+    },
+    {
+      "file": "libdeser_hjson-ba20530e097cc3cb.rmeta",
+      "sha256": "ac288b351fa0bb5b72e955986963bbec73b4d7e0bc0ac6d05062e1be588a98b2",
+      "dependencies": 22
+    },
+    {
+      "file": "libdigest-8988ee47af6e172c.rmeta",
+      "sha256": "29d6399f87431cac24bbaae2031c4a32a5ccd30774d3f79649b6987afdc35fc0",
+      "dependencies": 23
+    },
+    {
+      "file": "libequivalent-d649a3871765edb4.rmeta",
+      "sha256": "bd16bb98e385946861ea5600faa22170a14a5b5f8392347a46522b6c53b0d655",
+      "dependencies": 2
+    },
+    {
+      "file": "liberrno-f74f1f0bed37f2f1.rmeta",
+      "sha256": "4f7729e3d523313b18e5ad44d913cf80fcd7ee889bf27c1b78268d7edbf0d1a0",
+      "dependencies": 20
+    },
+    {
+      "file": "libfind_msvc_tools-cd4948411b364b84.rmeta",
+      "sha256": "290a3c5f31f1f45371725a3e194fcac51669ffe7d945d653c2db5a84ab14e8dd",
+      "dependencies": 19
+    },
+    {
+      "file": "libflate2-90155988e2458bc7.rmeta",
+      "sha256": "b3124c3a216e34226d0baf37cd094377336f82f0cec7e72498b32b783cbf42a8",
+      "dependencies": 20
+    },
+    {
+      "file": "libform_urlencoded-f90ca2d83bb633a2.rmeta",
+      "sha256": "fc654b0dfa26cb8f8d1c7370f0f32981e4bb1de15b3002f27350af3cc9712782",
+      "dependencies": 20
+    },
+    {
+      "file": "libfutures-9a024f57b7c25c9b.rmeta",
+      "sha256": "850d6e0b96c533be01f8cd56d10eb341c0e2a3b1ce1a583623bffd361f07cec5",
+      "dependencies": 30
+    },
+    {
+      "file": "libfutures_channel-5698ca5666dda318.rmeta",
+      "sha256": "17db65db0773e06ff8b9d7fbe1c92e3868abaff3eeefbddfc0fd2c9da60ebee5",
+      "dependencies": 21
+    },
+    {
+      "file": "libfutures_core-4336bb07ed063f25.rmeta",
+      "sha256": "03e2d3d9818d17a72c829317d721917a69104f22f073bc3cbe4fa363f8a745f7",
+      "dependencies": 19
+    },
+    {
+      "file": "libfutures_executor-d9f7b8f09db2cdc0.rmeta",
+      "sha256": "52a9c5f435697ebbfdfb3d4a8314f02bbfbe1c68a42acedb8056e41d9daaa593",
+      "dependencies": 29
+    },
+    {
+      "file": "libfutures_io-b150f06adfe854fc.rmeta",
+      "sha256": "807420a4fe8fa2d0f1b4d24c4b1fafc7a5fbc3ea8d043cc6b791ad2ec25ff497",
+      "dependencies": 19
+    },
+    {
+      "file": "libfutures_sink-54cf49c90f74ee69.rmeta",
+      "sha256": "d9849e2852d21e87701c16836f8f57375b565619b0ac7a76926c6ebe0d07598e",
+      "dependencies": 19
+    },
+    {
+      "file": "libfutures_task-a03edfdddc9ac4b3.rmeta",
+      "sha256": "e5df91841683ff867e7e6802073eb21222a540f33dd254fbb50531a8e0d55879",
+      "dependencies": 19
+    },
+    {
+      "file": "libfutures_util-8a928e3dc8248b9b.rmeta",
+      "sha256": "525ffebe09a3b2aa283774b79b552ade8bac0ebeee4cc6adc0e6d654fd87f9f5",
+      "dependencies": 28
+    },
+    {
+      "file": "libgeneric_array-1e4468a4eed99301.rmeta",
+      "sha256": "ce9cae91085c7df4acd3e157ef4e2a7f72ff1af6f8444e45824d37bf9364aab7",
+      "dependencies": 3
+    },
+    {
+      "file": "libgetopts-b7ecbdf71764dde0.rmeta",
+      "sha256": "2f26087a18a61b9b686287399ef6d9b098644707636d6074f4a5ec4f71f03d5e",
+      "dependencies": 20
+    },
+    {
+      "file": "libgetrandom-76234583db67fa91.rmeta",
+      "sha256": "50837f5130ab4c10262b43e07e86763e4e1197a32a67f26b42da89ddc64c3edc",
+      "dependencies": 4
+    },
+    {
+      "file": "libgetrandom-cf274c4f0437ecb5.rmeta",
+      "sha256": "c96f7e1f8ac80b26d1f7de04f848cf937412831e4f4e29f63fe118cbd60b538e",
+      "dependencies": 4
+    },
+    {
+      "file": "libharness_proto-a9623e7cfcc2e9d0.rmeta",
+      "sha256": "02627b1e9caa6a3716ea8630ea7e2ac37bcb2b59b8cbf1d9dbbc4200496e9f2b",
+      "dependencies": 34
+    },
+    {
+      "file": "libhashbrown-6e09da29f783b3e3.rmeta",
+      "sha256": "dcc6d94644142d50f18596ca4b7e3cd7f40551ae79cbfb2a5cbf79c5d74eb303",
+      "dependencies": 3
+    },
+    {
+      "file": "libhttp-d6837422dc416ee8.rmeta",
+      "sha256": "19a4e5e39fe547efddaade2b0308817cc67c07162dfa89841f06e0e06a86d81c",
+      "dependencies": 21
+    },
+    {
+      "file": "libhttp_body-44b29b31cdf434dc.rmeta",
+      "sha256": "b62921501dac43eaa1a02213b9c7b602dc24f47eec86c8f874b85f04831ed7ec",
+      "dependencies": 22
+    },
+    {
+      "file": "libhttp_body_util-dd67076514bfd02e.rmeta",
+      "sha256": "3d8e653e3d83f0f48675834ff5c0d5e9d1a05c2b470079d911b1b8dc2f1f2827",
+      "dependencies": 25
+    },
+    {
+      "file": "libhttparse-8bba6c4c427bbb43.rmeta",
+      "sha256": "bc5f4405711739d02975d915710bd1bda9cceaab2da9867f198a6a7d11b55de2",
+      "dependencies": 19
+    },
+    {
+      "file": "libhyper-8b524d55650868f5.rmeta",
+      "sha256": "a969ff47336f4294ec6650507f74813404be68b9b56c395309d33cdd43764d0f",
+      "dependencies": 44
+    },
+    {
+      "file": "libhyper_rustls-4a7d1c86c6bed221.rmeta",
+      "sha256": "0627a990f58d4c9eae89266a44f8c89f3e09d04afaef852286894fd39d8a99e4",
+      "dependencies": 75
+    },
+    {
+      "file": "libhyper_util-d69e16cd0d4c8c3b.rmeta",
+      "sha256": "7a7d525a9fb69a9a331ac7cb88b50d115473cc60231492b77699024fc9c3b970",
+      "dependencies": 64
+    },
+    {
+      "file": "libiana_time_zone-64c659366bddd179.rmeta",
+      "sha256": "3f2b7d870244f2e0949811f2c41b3577e468bb1ed747194024714f088832327d",
+      "dependencies": 20
+    },
+    {
+      "file": "libicu_collections-aea04bb7b26458cd.rmeta",
+      "sha256": "d0f0e72cdbe36f060ad953ba072526246a01e220d4925e25e9ce4e0b4f0f3af7",
+      "dependencies": 12
+    },
+    {
+      "file": "libicu_locale_core-9ae80006160d66a9.rmeta",
+      "sha256": "231b5caa574fc6b2581a5bba8b15f04d782c6501479bd4fbfa8d49166b2d1f4d",
+      "dependencies": 13
+    },
+    {
+      "file": "libicu_normalizer-c8e4f7cf0d77a185.rmeta",
+      "sha256": "9832427aa66aeeef7826efd8d9c220c38a8d713ab4fdf16b21c1c497d7dc880a",
+      "dependencies": 22
+    },
+    {
+      "file": "libicu_normalizer_data-cab81a9dc4d2c20b.rmeta",
+      "sha256": "43a70c48538f2b88479e1ad62ad764b1397c4e853eb64bd49500e602b0adc662",
+      "dependencies": 2
+    },
+    {
+      "file": "libicu_properties-c26e3ef68abf2a2b.rmeta",
+      "sha256": "bbcf2855b46382e5eb03ddb8bb64ee061f4099597b32fbf9836186212b5d86a1",
+      "dependencies": 20
+    },
+    {
+      "file": "libicu_properties_data-6fc1f7ed269514f2.rmeta",
+      "sha256": "47fc35cd49040be28ce6b169b9e9d3290a942223fd2a38d852730cb4b467616b",
+      "dependencies": 2
+    },
+    {
+      "file": "libicu_provider-bb70cf542f0e6c82.rmeta",
+      "sha256": "23c356bcf2420584df5eddad24018b14da002260b461e5ebaf0064017fc5dd02",
+      "dependencies": 15
+    },
+    {
+      "file": "libidna-9c92d3faa1db705a.rmeta",
+      "sha256": "b1b9051eb2a81e66b7914fe65b036dba9e415714413369cf60f1054329289e0a",
+      "dependencies": 42
+    },
+    {
+      "file": "libidna_adapter-ffed8268c988923a.rmeta",
+      "sha256": "8dbd72c899493815821f0f0116b713d38b83083774035f334fb9bf411ab49c26",
+      "dependencies": 25
+    },
+    {
+      "file": "libindexmap-b5a3f0384098519a.rmeta",
+      "sha256": "55d4799e87ec5762bdfec238a0cec617fb7b9dba4bea9e8e73cdb0bbb5d48692",
+      "dependencies": 21
+    },
+    {
+      "file": "libipnet-cb345e56877caa8e.rmeta",
+      "sha256": "c78d73af7fa80adabe1ae0447411d8bd97d6615cb5221b7cead1f9cf64f8809b",
+      "dependencies": 19
+    },
+    {
+      "file": "libitoa-b3aec5c269e3997a.rmeta",
+      "sha256": "2375fa186defc080312c630a44f78b732995805301c389a9583d73ce53360642",
+      "dependencies": 2
+    },
+    {
+      "file": "liblibc-ed4b6486ad6ca64c.rmeta",
+      "sha256": "cb6e87c415818eab4c56524bffc946f31ec5d222a2ac5fb05f812fc4ba21f7f0",
+      "dependencies": 2
+    },
+    {
+      "file": "liblitemap-ee6de1cf61e24e76.rmeta",
+      "sha256": "851409e5d42cd62f6ca89157760472f8814f10c30b8dfa569d6c7b12a08b14af",
+      "dependencies": 2
+    },
+    {
+      "file": "liblock_api-2c149588f587c28b.rmeta",
+      "sha256": "31b6e8dd5d79bf1c94b88f01ebd429c6fe7209268eab544d26aa9be3a2d29b5f",
+      "dependencies": 3
+    },
+    {
+      "file": "liblog-f6d71a11c25911d5.rmeta",
+      "sha256": "49b6147ba3b8a329d2adf1e7e01a54238d75a90c39c170a57014777298da94f0",
+      "dependencies": 2
+    },
+    {
+      "file": "libmemchr-63e6f72d89f13a83.rmeta",
+      "sha256": "616fd5468258504ef53379d8f12b3ad6958d63654bb679761c3ceff9f4e7caae",
+      "dependencies": 19
+    },
+    {
+      "file": "libmio-50763cf482836d12.rmeta",
+      "sha256": "03da62cb43134c1d4db241af8e3ca623916ae1239a93a105cbd6f1c5cbcf5d65",
+      "dependencies": 20
+    },
+    {
+      "file": "libnum_traits-097f929d1f6d9c8b.rmeta",
+      "sha256": "ee2ed1fddd0b098038e15cc571603ea5d3e4f0151937afa4d36bc8db87838d73",
+      "dependencies": 2
+    },
+    {
+      "file": "libonce_cell-0a0976b59482d558.rmeta",
+      "sha256": "19116672fd207a964f61e472968d7f28d4fa951d4ba21efef1986b8d16fe85b1",
+      "dependencies": 19
+    },
+    {
+      "file": "libparking_lot-7bd943447494526a.rmeta",
+      "sha256": "af16711ff35db7b9c62e44b92b579a81a6e892e62530e742a98ffd7c45b7aca1",
+      "dependencies": 25
+    },
+    {
+      "file": "libparking_lot_core-0890bc3df38b4cbf.rmeta",
+      "sha256": "24c4fd99a785ab0daa104ff01d92c225bf7da522d59c0ea7766b86f81ba38106",
+      "dependencies": 22
+    },
+    {
+      "file": "libpercent_encoding-37ef885d7fa18f4c.rmeta",
+      "sha256": "5b42292d040c5ff1326d481a19f1ec7a3dcf2a1642d4976a4cd77f7acef2f599",
+      "dependencies": 19
+    },
+    {
+      "file": "libpin_project_lite-5a225b22ab734508.rmeta",
+      "sha256": "5a7e88d6087f0ea5a24b8720017fd7ab4361b73be649ad652f2233c3ec52b7f9",
+      "dependencies": 2
+    },
+    {
+      "file": "libpotential_utf-a3fb9babee306001.rmeta",
+      "sha256": "0b6337bccaa0208abb92827855013cafcf80de10bda72e5fa9aa209e80482270",
+      "dependencies": 9
+    },
+    {
+      "file": "libproc_macro2-ed2afefe3f7bd927.rmeta",
+      "sha256": "95e18371f0f7a55f0f0146b439dd66f373fd098397c67064d5b28d2371927a30",
+      "dependencies": 22
+    },
+    {
+      "file": "libpulldown_cmark-e5a0da118bc14167.rmeta",
+      "sha256": "fadd3e0fe5024b1578f57274fbcf66d524b1d4282dfa9be4fb2237d9158f41b4",
+      "dependencies": 23
+    },
+    {
+      "file": "libpulldown_cmark_escape-52020fba0f7b69a7.rmeta",
+      "sha256": "97b8c00a1d8b072cd7028ee79c441bc2c2c5bd66f201d4b514e5d1f11b559665",
+      "dependencies": 19
+    },
+    {
+      "file": "libreqwest-fe6e4c1ab3fe0d6d.rmeta",
+      "sha256": "dc119b77a3e26b5569bac8e8c7cc7e7bd9cfc858b8b2eaeda67765f8ff57a7f8",
+      "dependencies": 115
+    },
+    {
+      "file": "libring-3421073a26f6c3c3.rmeta",
+      "sha256": "b3830ddd1098bbb02354e1674c5d08510b433810c524be3bd74bba3599fa285b",
+      "dependencies": 7
+    },
+    {
+      "file": "librustls-cfdcb75ad1842407.rmeta",
+      "sha256": "19b0009456ccbb9c79d4d7fa434dc3cf03de0182de76bb931c14e1ec36b890e1",
+      "dependencies": 28
+    },
+    {
+      "file": "librustls_pki_types-f23c208479f6a60b.rmeta",
+      "sha256": "7e4af3fca6858952e835c174209bd9921930467a86ef81e2167388e5b209647a",
+      "dependencies": 20
+    },
+    {
+      "file": "libryu-44d2c0bacf4342dd.rmeta",
+      "sha256": "de2f2957eb8a36a055cfc896b8f9b6e4b88079427b8b11c1a40e9633a349d460",
+      "dependencies": 2
+    },
+    {
+      "file": "libscopeguard-39c9ebcb63780a34.rmeta",
+      "sha256": "737548cc896cac8e1d9b0adc43a3e5d735d043fdfa66653eeb6d311a1e830343",
+      "dependencies": 2
+    },
+    {
+      "file": "libsemver-0cde153d1b3df50b.rmeta",
+      "sha256": "c8e594d514b97e494acc4d59704ef9749d2add6f24c6bb26e02af1136f09d64e",
+      "dependencies": 19
+    },
+    {
+      "file": "libserde-94f41745341d2f90.rmeta",
+      "sha256": "f44aaed5f1fea3cf28290049cf5bbdf08ac2f7c0d7310dd60ed19aedfa8ed9d3",
+      "dependencies": 21
+    },
+    {
+      "file": "libserde_core-06480abe3dbf146e.rmeta",
+      "sha256": "d83b75b10e6777bf819e1aba11532f095bc2dba133ffa8ff58becf8b2d5e5b26",
+      "dependencies": 19
+    },
+    {
+      "file": "libserde_json-66015f7e12ee7e56.rmeta",
+      "sha256": "259449aa9e8717d6df5004e3477b60559f2009c70d5105355027c4c40c59a1cb",
+      "dependencies": 23
+    },
+    {
+      "file": "libserde_urlencoded-1581fa851d89bf2d.rmeta",
+      "sha256": "2f5fccc483af51370d09eb8b77f3561ca5d2e6e859ad59381bf654c2e7073db6",
+      "dependencies": 26
+    },
+    {
+      "file": "libserde_yaml_ng-0567742b0b1dc1d1.rmeta",
+      "sha256": "1b5c309aa453fc80148a67aa72426685132006da156409c30bdb00b0ac6d6654",
+      "dependencies": 28
+    },
+    {
+      "file": "libshlex-f787f6a9140b8950.rmeta",
+      "sha256": "8cf7fed248518aaf80c68abc633013143c56e14e40f9bd5b6c3930090764c332",
+      "dependencies": 19
+    },
+    {
+      "file": "libsignal_hook_registry-40110f67458a193d.rmeta",
+      "sha256": "c6876357ae129065747ea19f58e3e139fd6bd0f95059c7b71ebb707cb93f2f2e",
+      "dependencies": 21
+    },
+    {
+      "file": "libslab-2c9e831d99ce87f4.rmeta",
+      "sha256": "6aac0b870bc3e94624e0973f667fb7c8d7b6ed592c86e5f156ea1c9bdc71029e",
+      "dependencies": 19
+    },
+    {
+      "file": "libsmallvec-5eb572d20004b00a.rmeta",
+      "sha256": "44a195cfa282911a682ab4742b15d58ba954be03ba8661c252fe6eaef2d84bca",
+      "dependencies": 3
+    },
+    {
+      "file": "libsocket2-b52b59a8cd7a7dab.rmeta",
+      "sha256": "378c11cf515e1bd9a55355e96db73e46973dfbe0ca01aa8f05dc43050bd66c40",
+      "dependencies": 20
+    },
+    {
+      "file": "libstable_deref_trait-e2fbc26ba98d968e.rmeta",
+      "sha256": "beef635277691c543e8aef33fe82bfc2c063fa1dfde2c1270f115029177d87e2",
+      "dependencies": 2
+    },
+    {
+      "file": "libsubtle-df8ffb87e30f0ef2.rmeta",
+      "sha256": "302391ea7b4adb3e733cee3c80d02c0077d0dda8045f021b32c439ffc5e04ada",
+      "dependencies": 2
+    },
+    {
+      "file": "libsync_wrapper-120698048ed05f3b.rmeta",
+      "sha256": "a519c467277a3411e1f2a03815fcc2b199006616af6549e9a0ff8f3566ab451d",
+      "dependencies": 20
+    },
+    {
+      "file": "libsystem_configuration-9a8b0ed3f3fb2afb.rmeta",
+      "sha256": "fc26029a06123e867f7b13242ff5d3d32bbe149a174cb5d6415e4f414a5d652e",
+      "dependencies": 24
+    },
+    {
+      "file": "libsystem_configuration_sys-a4999e5045265465.rmeta",
+      "sha256": "b80b3ad7e950a2156ec4181cd5e83e4d07436c719228e82229c56b1904eefc2c",
+      "dependencies": 21
+    },
+    {
+      "file": "libthiserror-66640b89fdd1c8f0.rmeta",
+      "sha256": "a1376c1d216faa48e9efeccf9ed4d0d011df4c41f95416620282849861bb7677",
+      "dependencies": 20
+    },
+    {
+      "file": "libtinystr-4bd014e0468f81eb.rmeta",
+      "sha256": "732cdefc5a492e0cccedf277c7dfbaec9a51d24b6ac2cce81d35b6dbcbb079f5",
+      "dependencies": 10
+    },
+    {
+      "file": "libtokio-06724a61f6594382.rmeta",
+      "sha256": "f1ad2c07bd625fc8b50c9ef43f880b69ad40d6b5251ceba52262a921371c2006",
+      "dependencies": 33
+    },
+    {
+      "file": "libtokio_rustls-49c0c4710ffb5edc.rmeta",
+      "sha256": "bffc96da5fc4d97c87515d5cef4c9825857972f512398d8b9f423c82dff2e080",
+      "dependencies": 42
+    },
+    {
+      "file": "libtokio_util-8e3131c77978314b.rmeta",
+      "sha256": "40ea554c9e910d2039c145a83c7fccfa4bb538612874497fe73a51fcf53d6a16",
+      "dependencies": 36
+    },
+    {
+      "file": "libtower-8f103d794ac0f725.rmeta",
+      "sha256": "8525edce595329dfb51baa95964dfa879393272a17eb9adb6163794881254c12",
+      "dependencies": 46
+    },
+    {
+      "file": "libtower_http-1f06dbe502c653bb.rmeta",
+      "sha256": "441790f0fc9a004fdf45f6209019c8cf077412a9fab2907f5b867b9d6dfd81cd",
+      "dependencies": 77
+    },
+    {
+      "file": "libtower_layer-3d04bc78c5694443.rmeta",
+      "sha256": "027831ec18ae5a967411e39ec16b61a3e0624a3a612a3b288a3ceed2ec1a5cbb",
+      "dependencies": 19
+    },
+    {
+      "file": "libtower_service-c2837f075e4b025e.rmeta",
+      "sha256": "1ead3cf25661571b7516d26b6dfb2133eb4173ccab7cc4968fe227f547bd1c81",
+      "dependencies": 19
+    },
+    {
+      "file": "libtracing-40b61a21a0211c75.rmeta",
+      "sha256": "06d71cd5a4ca0f6d670a917928b1939a5ae73d1ad020936c1597c32d0f8f8326",
+      "dependencies": 23
+    },
+    {
+      "file": "libtracing_core-0d931d4f85cfae0d.rmeta",
+      "sha256": "3636edc5062e83fcf2db830edc20026ff423571a55ac84fc5e35e8f6e9f57ab8",
+      "dependencies": 20
+    },
+    {
+      "file": "libtry_lock-017303daf5514a8d.rmeta",
+      "sha256": "676d379c3e17ac9f203aada3144a4ff06281a63b4ebb490c3ea80b9ef505c9bb",
+      "dependencies": 2
+    },
+    {
+      "file": "libtyped_path-7ad93d6b37362ed2.rmeta",
+      "sha256": "b6bc7474660c1107ab2ca8368583815cbec87bdbabd0eab377c87abb07995b60",
+      "dependencies": 19
+    },
+    {
+      "file": "libtypenum-311a1d1e88cb8a0b.rmeta",
+      "sha256": "175fea31b8d9e212162350557d2c9badb0c17770eb47b0bdbb6b759c197b0ff9",
+      "dependencies": 2
+    },
+    {
+      "file": "libunicase-bd8b1a170d387fd3.rmeta",
+      "sha256": "2899f8d947881f6ab307bbe2508ebcb84e6557af4fce47477f623c2d131b5e4e",
+      "dependencies": 3
+    },
+    {
+      "file": "libunicode_ident-b2ea577c2d17a23b.rmeta",
+      "sha256": "44eaa3e44340ee4c63aa34abe9f87675f06feb19b2682cac96e2cecd6c402ce2",
+      "dependencies": 2
+    },
+    {
+      "file": "libunicode_width-224867fa6d65e533.rmeta",
+      "sha256": "e0120d87df73ff756d487f652fd529a4880304f8ad91e667ca7d42b90ae90693",
+      "dependencies": 2
+    },
+    {
+      "file": "libunsafe_libyaml-82db630b6f0e6423.rmeta",
+      "sha256": "f54f79eb2d98d54baf609ab46c7d3f7d50ada9683409547d95a7c0fd455b156a",
+      "dependencies": 3
+    },
+    {
+      "file": "libuntrusted-90d4cc07113aa537.rmeta",
+      "sha256": "e74d9405e346e1178c8a8e8525bd9977e16c027041afbb3c6e776991210e382d",
+      "dependencies": 2
+    },
+    {
+      "file": "liburl-0988456d1577aad0.rmeta",
+      "sha256": "a7897c8d937a304936a4b9a484ef715bab2ce81638f673d59ed2d525eec4335b",
+      "dependencies": 45
+    },
+    {
+      "file": "libutf8_iter-e497333a7e2605ab.rmeta",
+      "sha256": "24b01fc6bdcab4401a38061e0f57a4777d55b5489c7bf70cfc6606303bd84a8d",
+      "dependencies": 2
+    },
+    {
+      "file": "libuuid-16ef9df633a9adb3.rmeta",
+      "sha256": "563bc44f77064a0be05884374cff4f50feb06bbcdd183a35850cfab33a06428d",
+      "dependencies": 23
+    },
+    {
+      "file": "libversion_check-195aca2b08b2218c.rmeta",
+      "sha256": "724947ba5074a451d165cdd88bd6a47b786fe2cae0d7971b340346c8f21007d6",
+      "dependencies": 19
+    },
+    {
+      "file": "libwant-377d46cac2edf5bd.rmeta",
+      "sha256": "0419daf522fb75a229495486ad711e06021fb87f3367db9cc4db273f974f74de",
+      "dependencies": 20
+    },
+    {
+      "file": "libwebpki-203672f5d5edc792.rmeta",
+      "sha256": "f8f7bafd15455fa1d8d1987390e57f7b7bd8896f64bda426fce732b8d605f669",
+      "dependencies": 26
+    },
+    {
+      "file": "libwebpki_roots-8b35853d9077e52b.rmeta",
+      "sha256": "6643a563a4066f90921ef49ff48774a2d6282bab2571b658a40579972ae81435",
+      "dependencies": 21
+    },
+    {
+      "file": "libwriteable-123a71ece0d6eda7.rmeta",
+      "sha256": "374943ed173e18c0717ed642f62914ab63ee0c6b93cc4bf3156330553f4bf104",
+      "dependencies": 2
+    },
+    {
+      "file": "libyoke-492c07f9f29f9bba.rmeta",
+      "sha256": "a2bfa94fb0639076080ae5892a98e16aacd9649c44484cdefd5e75adb70cf8f5",
+      "dependencies": 6
+    },
+    {
+      "file": "libzerofrom-cdc90b53d293ea01.rmeta",
+      "sha256": "714d92e3aaae8dee0e568290b289ab4ceaeb2d33b70579a0a7137e9283312fd9",
+      "dependencies": 3
+    },
+    {
+      "file": "libzeroize-0e5ce9bacb5f4308.rmeta",
+      "sha256": "aa8123aaa92b97f1d376d03c431213f4431f9760b50452ccfd8ab6ea8701556a",
+      "dependencies": 3
+    },
+    {
+      "file": "libzerotrie-06d305be356bf959.rmeta",
+      "sha256": "7ba3807dae51e472fa5e7222e6d63f97f4381fc299b23f09b4206fb0f0653e7b",
+      "dependencies": 8
+    },
+    {
+      "file": "libzerovec-1cf4ec3eb0269ebe.rmeta",
+      "sha256": "782ebe0aa214436286f593ce3ee3e34fdbc43062be3486910db04d2b86ac1e38",
+      "dependencies": 8
+    },
+    {
+      "file": "libzip-ec8df72f736c34a9.rmeta",
+      "sha256": "59203a0ca5a0bff15d5859200ad65f7dc364acb94e655ad53e5c5d730eba92f1",
+      "dependencies": 28
+    },
+    {
+      "file": "libzlib_rs-e895157a4c799032.rmeta",
+      "sha256": "75ef1196733e8fe7b0b6810b1cc2cf9adcb96a0df27574aeb5a23f64e4a15e29",
+      "dependencies": 19
+    },
+    {
+      "file": "libzmij-62d5c0e5646342aa.rmeta",
+      "sha256": "577c5ed5824d02995e322f9e964b53eb60515b10d23068ec814c71502ce18b28",
+      "dependencies": 2
+    }
+  ],
+  "checks": [
+    "every accepted root and ordered dependency list matches rustc",
+    "truncated/malformed/unknown-version metadata refuses",
+    "Rust 1.98.1 metadata refuses"
+  ],
+  "diagnostic_batch_seconds": [
+    0.020856207993347198,
+    0.018228250031825155,
+    0.01776079199044034,
+    0.018952874990645796,
+    0.018691791978199035,
+    0.0188639999832958,
+    0.019069625006522983,
+    0.01900687499437481,
+    0.0190012080129236
+  ],
+  "diagnostic_batch_median_seconds": 0.018952874990645796,
+  "oracle_seconds": 3.064469665987417,
+  "timing_limits": "The direct batch amortizes process startup and includes reading all files and JSON output; the oracle launches rustc separately per accepted file. These timings are diagnostics, not an end-to-end build comparison."
+}
