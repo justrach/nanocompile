@@ -1,0 +1,21 @@
+{
+  "binary_sha256": "09035c5f06cd07e728997b22707813394e8b181e91d7a50945fb59a34cde975c",
+  "platform": "darwin",
+  "compilers": [
+    {
+      "compiler": "/Applications/Xcode_16.4.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang",
+      "version": "Apple clang version 17.0.0 (clang-1700.0.13.5)\nTarget: arm64-apple-darwin24.6.0\nThread model: posix\nInstalledDir: /Applications/Xcode_16.4.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin\n",
+      "checks": [
+        "C/C++ byte-identical objects and depfiles",
+        "linked behavior",
+        "preserved-mtime header change",
+        "new higher-priority include",
+        "has_include absence/presence",
+        "debug bypass",
+        "failed compiler",
+        "blob corruption repair",
+        "GC"
+      ]
+    }
+  ]
+}

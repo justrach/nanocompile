@@ -1,0 +1,85 @@
+{
+  "binary_sha256": "09035c5f06cd07e728997b22707813394e8b181e91d7a50945fb59a34cde975c",
+  "compiler": "/Applications/Xcode_16.4.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang",
+  "compiler_version": "Apple clang version 17.0.0 (clang-1700.0.13.5)\nTarget: arm64-apple-darwin24.6.0\nThread model: posix\nInstalledDir: /Applications/Xcode_16.4.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin\n",
+  "script_sha256": "657e5239811cc262b9518423969d6e1abacb8a85cbd1868d46430f87dcad7447",
+  "method": "512 real C++ template instances, O2, g0; alternate direct recompilation and warm portable cache; remove object every time; exact object hashes, cc_hit counters and linked behavior; synthetic compiler workload, not Harness or a general cold-build improvement",
+  "rows": [
+    {
+      "mode": "direct",
+      "phase": "cold",
+      "seconds": 0.42062033399997745,
+      "object_sha256": "56e696ae57658559c1f5c54c65637b984b9b9ed5177f6613cf7d112da915f078"
+    },
+    {
+      "mode": "nanocompile",
+      "phase": "cold",
+      "seconds": 0.7349165420000645,
+      "object_sha256": "56e696ae57658559c1f5c54c65637b984b9b9ed5177f6613cf7d112da915f078"
+    },
+    {
+      "mode": "direct",
+      "phase": "warm",
+      "seconds": 0.4063407080000161,
+      "object_sha256": "56e696ae57658559c1f5c54c65637b984b9b9ed5177f6613cf7d112da915f078"
+    },
+    {
+      "mode": "nanocompile",
+      "phase": "warm",
+      "seconds": 0.06372245800002929,
+      "object_sha256": "56e696ae57658559c1f5c54c65637b984b9b9ed5177f6613cf7d112da915f078"
+    },
+    {
+      "mode": "nanocompile",
+      "phase": "warm",
+      "seconds": 0.0676764589998129,
+      "object_sha256": "56e696ae57658559c1f5c54c65637b984b9b9ed5177f6613cf7d112da915f078"
+    },
+    {
+      "mode": "direct",
+      "phase": "warm",
+      "seconds": 0.4121509999999944,
+      "object_sha256": "56e696ae57658559c1f5c54c65637b984b9b9ed5177f6613cf7d112da915f078"
+    },
+    {
+      "mode": "direct",
+      "phase": "warm",
+      "seconds": 0.41056241699993734,
+      "object_sha256": "56e696ae57658559c1f5c54c65637b984b9b9ed5177f6613cf7d112da915f078"
+    },
+    {
+      "mode": "nanocompile",
+      "phase": "warm",
+      "seconds": 0.06632500000000618,
+      "object_sha256": "56e696ae57658559c1f5c54c65637b984b9b9ed5177f6613cf7d112da915f078"
+    },
+    {
+      "mode": "nanocompile",
+      "phase": "warm",
+      "seconds": 0.0656922079999731,
+      "object_sha256": "56e696ae57658559c1f5c54c65637b984b9b9ed5177f6613cf7d112da915f078"
+    },
+    {
+      "mode": "direct",
+      "phase": "warm",
+      "seconds": 0.4041018329999133,
+      "object_sha256": "56e696ae57658559c1f5c54c65637b984b9b9ed5177f6613cf7d112da915f078"
+    },
+    {
+      "mode": "direct",
+      "phase": "warm",
+      "seconds": 0.4121981670000423,
+      "object_sha256": "56e696ae57658559c1f5c54c65637b984b9b9ed5177f6613cf7d112da915f078"
+    },
+    {
+      "mode": "nanocompile",
+      "phase": "warm",
+      "seconds": 0.06464729200001784,
+      "object_sha256": "56e696ae57658559c1f5c54c65637b984b9b9ed5177f6613cf7d112da915f078"
+    }
+  ],
+  "median_warm_seconds": {
+    "direct": 0.41056241699993734,
+    "nanocompile": 0.0656922079999731
+  }
+}

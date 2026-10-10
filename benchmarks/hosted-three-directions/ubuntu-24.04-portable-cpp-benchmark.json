@@ -1,0 +1,85 @@
+{
+  "binary_sha256": "9979a7ca244aebac4552ff93d992b62f529343a0451ab47a0eafc4bea02fa317",
+  "compiler": "g++",
+  "compiler_version": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n",
+  "script_sha256": "657e5239811cc262b9518423969d6e1abacb8a85cbd1868d46430f87dcad7447",
+  "method": "512 real C++ template instances, O2, g0; alternate direct recompilation and warm portable cache; remove object every time; exact object hashes, cc_hit counters and linked behavior; synthetic compiler workload, not Harness or a general cold-build improvement",
+  "rows": [
+    {
+      "mode": "direct",
+      "phase": "cold",
+      "seconds": 3.60597606500005,
+      "object_sha256": "dbaa33ee6d60e0f14a74bfa0f46d473ff91445fcbd7fe4f78f4771ce6813d87b"
+    },
+    {
+      "mode": "nanocompile",
+      "phase": "cold",
+      "seconds": 3.7480419610000126,
+      "object_sha256": "dbaa33ee6d60e0f14a74bfa0f46d473ff91445fcbd7fe4f78f4771ce6813d87b"
+    },
+    {
+      "mode": "direct",
+      "phase": "warm",
+      "seconds": 3.609748784999965,
+      "object_sha256": "dbaa33ee6d60e0f14a74bfa0f46d473ff91445fcbd7fe4f78f4771ce6813d87b"
+    },
+    {
+      "mode": "nanocompile",
+      "phase": "warm",
+      "seconds": 0.04530667900002072,
+      "object_sha256": "dbaa33ee6d60e0f14a74bfa0f46d473ff91445fcbd7fe4f78f4771ce6813d87b"
+    },
+    {
+      "mode": "nanocompile",
+      "phase": "warm",
+      "seconds": 0.04419003900000007,
+      "object_sha256": "dbaa33ee6d60e0f14a74bfa0f46d473ff91445fcbd7fe4f78f4771ce6813d87b"
+    },
+    {
+      "mode": "direct",
+      "phase": "warm",
+      "seconds": 3.607447125999954,
+      "object_sha256": "dbaa33ee6d60e0f14a74bfa0f46d473ff91445fcbd7fe4f78f4771ce6813d87b"
+    },
+    {
+      "mode": "direct",
+      "phase": "warm",
+      "seconds": 3.6159891550000225,
+      "object_sha256": "dbaa33ee6d60e0f14a74bfa0f46d473ff91445fcbd7fe4f78f4771ce6813d87b"
+    },
+    {
+      "mode": "nanocompile",
+      "phase": "warm",
+      "seconds": 0.045369246000007024,
+      "object_sha256": "dbaa33ee6d60e0f14a74bfa0f46d473ff91445fcbd7fe4f78f4771ce6813d87b"
+    },
+    {
+      "mode": "nanocompile",
+      "phase": "warm",
+      "seconds": 0.04450999599998795,
+      "object_sha256": "dbaa33ee6d60e0f14a74bfa0f46d473ff91445fcbd7fe4f78f4771ce6813d87b"
+    },
+    {
+      "mode": "direct",
+      "phase": "warm",
+      "seconds": 3.6118893730000536,
+      "object_sha256": "dbaa33ee6d60e0f14a74bfa0f46d473ff91445fcbd7fe4f78f4771ce6813d87b"
+    },
+    {
+      "mode": "direct",
+      "phase": "warm",
+      "seconds": 3.6164276910000126,
+      "object_sha256": "dbaa33ee6d60e0f14a74bfa0f46d473ff91445fcbd7fe4f78f4771ce6813d87b"
+    },
+    {
+      "mode": "nanocompile",
+      "phase": "warm",
+      "seconds": 0.04531237600002669,
+      "object_sha256": "dbaa33ee6d60e0f14a74bfa0f46d473ff91445fcbd7fe4f78f4771ce6813d87b"
+    }
+  ],
+  "median_warm_seconds": {
+    "direct": 3.6118893730000536,
+    "nanocompile": 0.04530667900002072
+  }
+}

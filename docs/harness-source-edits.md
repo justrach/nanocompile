@@ -32,3 +32,5 @@ RUSTUP_TOOLCHAIN=1.97.1 python3 tests/harness_source_edits.py \
 ```
 
 Use a fresh state directory. The runner creates its own snapshot and records exact source hashes. Do not confuse this dirty local workload with the pinned public Harness revision used by hosted comparisons.
+
+A separate [hosted pinned-revision comparison](hosted-three-directions.md) gives Nano small single cold leads on Linux/macOS but substantial warm losses with default producer policy and all portable native jobs bypassing. Those differing workload/policy observations do not overturn the local source-edit losses or establish a repeatable cold advantage.

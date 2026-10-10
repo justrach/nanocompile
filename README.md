@@ -321,6 +321,8 @@ The [direct Rust metadata experiment](docs/direct-rmeta-experiment.md) removes o
 
 The next three performance directions now have implementations and checks: [portable C/C++ object caching](docs/portable-cc.md), [overlapping restore validation](docs/restore-validation-overlap.md) and a [verified Harness source-edit comparison](docs/harness-source-edits.md). The new edit sequence favors kache: cold 28.709 s Nano versus 27.297 s kache; leaf edits 10.715 versus 10.205 s; shared edits 12.308 versus 11.858 s; reverts 11.981 versus 2.058 s. These are single samples with clean targets, verified against fresh artifact bytes and linked behavior. Restore overlap improves two 27-pair Harness warm batches by about 2.1%. A separate [experimental declared-task runner](docs/declared-tasks.md) compares the same two-package Node pipeline against real Turbo local caching; this small pipeline does not establish a general scheduler advantage.
 
+Hosted Linux/macOS [validation and coverage results](docs/hosted-three-directions.md) are published separately. GCC/Clang fixture checks pass, but the pinned Linux Harness profile currently bypasses all 30 portable native calls; kache leads its warm project comparison.
+
 ## Attribution
 
 Inspired by [kunobi-ninja/kache](https://github.com/kunobi-ninja/kache), inspected at commit `943dd2b0bbbf28958623eba689e7ad71bf8888e5`. The Zig implementation is original; it adapts architectural ideas rather than copying Rust source. Apache-2.0; see `LICENSE` and `NOTICE`.
