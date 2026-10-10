@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "tasks": [
+    {
+      "name": "message",
+      "cwd": "packages/message",
+      "command": [
+        "node",
+        "build.mjs"
+      ],
+      "inputs": [
+        "package.json",
+        "build.mjs",
+        "greeting.txt",
+        "../../package.json"
+      ],
+      "outputs": [
+        "dist/message.json"
+      ]
+    },
+    {
+      "name": "site",
+      "cwd": "apps/site",
+      "depends_on": [
+        "message"
+      ],
+      "command": [
+        "node",
+        "build.mjs"
+      ],
+      "inputs": [
+        "package.json",
+        "build.mjs",
+        "../../packages/message/dist/message.json",
+        "../../package.json"
+      ],
+      "outputs": [
+        "dist/index.html"
+      ]
+    }
+  ]
+}

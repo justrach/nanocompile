@@ -1,0 +1,21 @@
+{
+  "binary_sha256": "b4f64f12c63e320f38bbed6ed3d319222ef2d3c7e80ea5ac447b35e6ab54c0fb",
+  "platform": "darwin",
+  "compilers": [
+    {
+      "compiler": "/Library/Developer/CommandLineTools/usr/bin/clang",
+      "version": "Apple clang version 21.0.0 (clang-2100.3.34.2)\nTarget: arm64-apple-darwin27.0.0\nThread model: posix\nInstalledDir: /Library/Developer/CommandLineTools/usr/bin\n",
+      "checks": [
+        "C/C++ byte-identical objects and depfiles",
+        "linked behavior",
+        "preserved-mtime header change",
+        "new higher-priority include",
+        "has_include absence/presence",
+        "debug bypass",
+        "failed compiler",
+        "blob corruption repair",
+        "GC"
+      ]
+    }
+  ]
+}

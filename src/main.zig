@@ -17,8 +17,10 @@ const help =
     \\  nanocompile zig build-exe|build-obj|build-lib FILE -femit-bin=OUTPUT [FLAGS]
     \\  nanocompile rustc [RUSTC FLAGS]
     \\  nanocompile clang [CLANG FLAGS]  opt into Apple Clang native CAS (macOS)
+    \\  nanocompile cc|c++ [FLAGS]  opt-in portable compile-only C/C++ cache
     \\  nanocompile xcodebuild [XCODE FLAGS]  use Xcode native Swift/Clang CAS (macOS)
     \\  RUSTC_WRAPPER=/absolute/path/nanocompile cargo build
+    \\  nanocompile task SPEC.json  experimental ordered declared-file task cache
     \\  nanocompile artifact put|get|head NAMESPACE KEY [FILE] [METADATA_JSON]
     \\  nanocompile stats | clear | doctor
     \\  nanocompile gc [MAX_BYTES]  remove orphan blobs and evict to a budget
@@ -31,6 +33,7 @@ const help =
     \\  NANOCOMPILE_ZIG       Zig executable (default: zig)
     \\  NANOCOMPILE_RUSTC     rustc executable (default: rustc)
     \\  NANOCOMPILE_CLANG     Clang executable (default: live xcrun selection on macOS)
+    \\  NANOCOMPILE_CC / NANOCOMPILE_CXX  selected native C/C++ compiler
     \\  NANOCOMPILE_CLANG_REMARKS=1  native cache remarks and hit/miss observations
     \\Unsupported invocations transparently run the original compiler.
     \\
@@ -84,7 +87,12 @@ fn dispatch(ctx: *cache.Context, args: []const [:0]const u8) !u8 {
         return @import("link_observer.zig").execute(ctx, args[2], args[3..]);
     }
     if (std.mem.eql(u8, command, "clang")) return @import("clang.zig").execute(ctx, args[2..]);
+    if (std.mem.eql(u8, command, "cc") or std.mem.eql(u8, command, "c++")) return @import("portable_cc.zig").execute(ctx, args[2..], std.mem.eql(u8, command, "c++"));
     if (std.mem.eql(u8, command, "xcodebuild")) return xcode.execute(ctx, args[2..]);
+    if (std.mem.eql(u8, command, "task")) {
+        if (args.len != 3) return error.MissingTaskSpec;
+        return @import("task.zig").execute(ctx, args[2]);
+    }
     if (std.mem.eql(u8, command, "artifact")) {
         if (args.len < 5) return error.MissingArtifactArguments;
         const op = args[2];

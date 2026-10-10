@@ -7,6 +7,10 @@ on:
         type: choice
         default: reported
         options: [tracked, reported]
+      portable_cc:
+        description: Enable Nano portable C/C++ object caching
+        type: boolean
+        default: false
 permissions:
   contents: read
 jobs:
@@ -35,10 +39,12 @@ jobs:
         run: zig build -Doptimize=ReleaseFast
       - name: Compare clean release library builds
         run: |
+          native_option=""
+          if [ "${{ inputs.portable_cc }}" = "true" ]; then native_option="--portable-cc"; fi
           python3 tests/project_comparison.py zig-out/bin/nanocompile workload \
             --kache "$RUNNER_TEMP/kache/kache" --package harness-adapters \
             --state "$RUNNER_TEMP/harness-kache-comparison" --jobs 4 --runs 3 \
-            --proc-macros "${{ inputs.proc_macros }}" \
+            --proc-macros "${{ inputs.proc_macros }}" $native_option \
             --output bench-results/harness-kache.json
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()

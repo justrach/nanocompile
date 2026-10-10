@@ -1,4 +1,4 @@
-"""Compare direct Cargo, nanocompile and kache on clean real-project builds."""
+"""Compare real Harness leaf/shared edits and reversions in a disposable dirty-source snapshot."""
 import argparse
 import collections
 import datetime
@@ -35,22 +35,45 @@ def main():
     p.add_argument("--package", default="harness-adapters")
     p.add_argument("--state", required=True, help="new, dedicated benchmark directory")
     p.add_argument("--output", required=True)
-    p.add_argument("--runs", type=int, default=3)
+    p.add_argument("--runs", type=int, default=1, choices=(1,), help="one fully verified edit sequence; each point is a single sample")
     p.add_argument("--jobs", type=int, default=4)
     p.add_argument("--native-clang", action="store_true", help="opt Nano into Apple Clang native CAS; validate each mode against its own cold artifacts")
-    p.add_argument("--portable-cc", action="store_true", help="opt Nano into portable compile-only C/C++ caching")
     p.add_argument("--standalone", action="store_true", help="disable kache's daemon for this comparison")
     p.add_argument("--proc-macros", choices=("tracked", "reported"), default="tracked", help="nanocompile proc-macro input policy; reported requires declaring unreported file reads")
     p.add_argument("--proc-macro-producers", action="store_true", help="enable the experimental macOS producer cache; verify macro dylib artifacts too")
     p.add_argument("--executable-producers", action="store_true", help="enable experimental macOS executable compilation caching")
     args = p.parse_args()
-    if args.native_clang and args.portable_cc:
-        p.error("choose one native adapter")
     if args.runs < 1 or args.jobs < 1:
         p.error("runs and jobs must be positive")
     binary, kache = str(Path(args.binary).resolve()), str(Path(args.kache).resolve())
-    project, state = Path(args.project).resolve(), Path(args.state).resolve()
+    original_project, state = Path(args.project).resolve(), Path(args.state).resolve()
+    project = state / "project"
     state.mkdir(parents=True, mode=0o700, exist_ok=False)
+    original_tracked = subprocess.check_output(['git', 'ls-files', '-z'], cwd=original_project).decode().split('\0')
+    original_hashes = {name: sha(original_project/name) for name in original_tracked if name and
+                       (name.endswith(('.rs','.toml')) or Path(name).name == 'Cargo.lock') and (original_project/name).is_file()}
+    subprocess.run(['git','clone','--shared','--quiet',str(original_project),str(project)],check=True)
+    names = subprocess.check_output(['git','ls-files','--cached','--others','--exclude-standard','-z'],cwd=original_project).decode().split('\0')
+    for name in names:
+        if not name or Path(name).name.startswith('.env'): continue
+        src, dst = original_project/name, project/name
+        if src.is_file() or src.is_symlink():
+            dst.parent.mkdir(parents=True,exist_ok=True)
+            if dst.is_symlink(): dst.unlink()
+            shutil.copy2(src,dst,follow_symlinks=False)
+        elif src.is_dir():
+            shutil.copytree(src,dst,dirs_exist_ok=True,ignore=shutil.ignore_patterns('.git','target','node_modules','.env*'))
+        elif dst.is_file(): dst.unlink()
+    leaf, shared = project/'crates/harness/src/lib.rs', project/'crates/proto/src/lib.rs'
+    assert leaf.is_file() and shared.is_file() and not leaf.is_symlink() and not shared.is_symlink()
+    originals = {path:path.read_bytes() for path in (leaf,shared)}
+    scenario, expected, verifying = 'initial', 300, False
+    def edit(leaf_value, shared_value):
+        leaf.write_bytes(originals[leaf]+f'\npub fn nanocompile_benchmark_probe() -> u64 {{ harness_proto::nanocompile_benchmark_shared() + {leaf_value} }}\n'.encode())
+        shared.write_bytes(originals[shared]+f'\npub fn nanocompile_benchmark_shared() -> u64 {{ {shared_value} }}\n'.encode())
+    edit(100,200)
+    probe = state/'probe.rs'
+    probe.write_text('fn main() { println!("{}", harness_adapters::nanocompile_benchmark_probe()); }\n')
     config = state / "kache.toml"
     config.write_text("[cache]\nrecord_sessions=true\n")
     target, cache, kcache = state / "target", state / "nano-cache", state / "kache-cache"
@@ -67,15 +90,15 @@ def main():
         env["NANOCOMPILE_EXECUTABLE_PRODUCERS"] = "1"
     command = ["cargo", "build", "--release", "--locked", "--offline", "--lib",
                "-p", args.package, "-j", str(args.jobs), "--message-format=json-render-diagnostics"]
-    result = {"script_sha256": sha(Path(__file__)), "project": str(project), "commit": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=project, text=True).strip(),
+    result = {"original_project":str(original_project), "source_edits":"exported leaf function and shared dependency function; linked result checked; history-cache timed builds compared to empty-cache builds at identical paths", "script_sha256": sha(Path(__file__)), "project": str(project), "commit": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=project, text=True).strip(),
               "dirty": bool(subprocess.check_output(["git", "status", "--porcelain"], cwd=project)),
               "platform": platform.platform(), "jobs": args.jobs, "runs": args.runs,
               "rustc": subprocess.check_output(["rustc", "--version", "--verbose"], cwd=project, text=True),
               "nanocompile_sha256": sha(Path(binary)), "kache_sha256": sha(Path(kache)),
               "kache_version": subprocess.check_output([kache, "--version"], text=True).strip(),
-              "kache_daemon": not args.standalone, "native_clang": args.native_clang, "portable_cc":args.portable_cc, "nanocompile_proc_macros": args.proc_macros, "nanocompile_proc_macro_producers": args.proc_macro_producers, "nanocompile_executable_producers": args.executable_producers, "command": command,
+              "kache_daemon": not args.standalone, "native_clang": args.native_clang, "nanocompile_proc_macros": args.proc_macros, "nanocompile_proc_macro_producers": args.proc_macro_producers, "nanocompile_executable_producers": args.executable_producers, "command": command,
               "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat(), "builds": [],
-              "method": "offline clean release package builds; same target path; prime direct build then empty caches; rotate three-way warm measurement order; validate each wrapper against its own cold artifact hashes (kache remaps paths)"}
+              "method": "disposable tracked/untracked dirty-source snapshot; one cold + leaf/shared/revert sequence; clean target before every build; retained cache timed edits; empty-cache artifact equality reference after each wrapper edit; linked behavior probe; fixed paths and four jobs; no human source edits"}
     tracked = subprocess.check_output(['git', 'ls-files', '-z'], cwd=project).decode().split('\0')
     result['tracked_rust_and_manifest_hashes'] = {
         name: sha(project / name) for name in tracked
@@ -114,10 +137,6 @@ def main():
             build_env['CC'] = binary + ' clang'
             build_env['CC_KNOWN_WRAPPER_CUSTOM'] = Path(binary).name
             build_env['NANOCOMPILE_CLANG_REMARKS'] = '1'
-        if implementation == "nanocompile" and args.portable_cc:
-            build_env['CC'] = binary + ' cc'
-            build_env['CXX'] = binary + ' c++'
-            build_env['CC_KNOWN_WRAPPER_CUSTOM'] = Path(binary).name
         number = len(result["builds"])
         print(f"Starting {implementation} {phase} clean release build {number + 1}", flush=True)
         log_path = state / f"{number}-{implementation}-{phase}.log"
@@ -144,24 +163,35 @@ def main():
         macros = {str(path.relative_to(target)): sha(path) for path in sorted((target / "release/deps").glob("*.dylib"))}
         executables = {str(path.relative_to(target)): sha(path) for path in sorted((target / "release/build").glob("*/build-script-build")) if path.is_file()}
         native = {str(path.relative_to(target)): sha(path) for path in sorted(target.rglob('*'))
-                  if path.is_file() and path.suffix in ('.o', '.a')} if (args.native_clang or args.portable_cc) else {}
+                  if path.is_file() and path.suffix in ('.o', '.a')} if args.native_clang else {}
         row = {"native_objects_and_archives": native, "implementation": implementation, "phase": phase, "seconds": seconds,
                "exit_code": proc.returncode, "events": dict(after - before), "rlibs": len(artifacts), "artifacts": artifacts,
-               "peak_sampled_process_tree_rss_bytes": peak, "macro_dylibs": macros, "build_script_executables": executables}
-        if implementation not in references:
-            references[implementation] = artifacts
-            macro_references[implementation] = macros
-            executable_references[implementation] = executables
-            native_references[implementation] = native
+               "scenario":scenario, "verification":verifying, "expected_probe":expected, "peak_sampled_process_tree_rss_bytes": peak, "macro_dylibs": macros, "build_script_executables": executables}
+        reference_key = (scenario, implementation)
+        if reference_key not in references:
+            references[reference_key] = artifacts
+            macro_references[reference_key] = macros
+            executable_references[reference_key] = executables
+            native_references[reference_key] = native
         else:
-            row["matches_own_cold_native_artifacts"] = native_references[implementation] == native
-            row["matches_own_cold_artifacts"] = references[implementation] == artifacts
-            row["matches_own_cold_macro_dylibs"] = macro_references[implementation] == macros
-            row["matches_own_cold_build_script_executables"] = executable_references[implementation] == executables
-        if implementation == "nanocompile" and not (args.native_clang or args.portable_cc):
-            row["matches_direct_artifacts"] = artifacts == references.get("direct")
-            row["matches_direct_macro_dylibs"] = macros == macro_references.get("direct")
-            row["matches_direct_build_script_executables"] = executables == executable_references.get("direct")
+            row["matches_own_cold_native_artifacts"] = native_references[reference_key] == native
+            row["matches_own_cold_artifacts"] = references[reference_key] == artifacts
+            row["matches_own_cold_macro_dylibs"] = macro_references[reference_key] == macros
+            row["matches_own_cold_build_script_executables"] = executable_references[reference_key] == executables
+        if implementation == "nanocompile" and not args.native_clang:
+            row["matches_direct_artifacts"] = artifacts == references.get((scenario,"direct"))
+            row["matches_direct_macro_dylibs"] = macros == macro_references.get((scenario,"direct"))
+            row["matches_direct_build_script_executables"] = executables == executable_references.get((scenario,"direct"))
+        assert proc.returncode == 0, log_path.read_text()[-4000:]
+        library = next((target/'release/deps').glob('libharness_adapters-*.rlib'))
+        probe_output = state/'probe'
+        checked = subprocess.run(['rustc',str(probe),'--edition=2024','-C','lto=thin','-C','opt-level=3','--extern','harness_adapters='+str(library),
+                                  '-Ldependency='+str(target/'release/deps'),'-o',str(probe_output)],
+                                  cwd=project,env=env,capture_output=True,timeout=180)
+        assert checked.returncode == 0, checked.stderr.decode(errors='replace')[-4000:]
+        observed = int(subprocess.check_output([str(probe_output)],env=env,text=True).strip())
+        assert observed == expected, (scenario,implementation,expected,observed)
+        row['observed_probe'] = observed
         result["builds"].append(row)
         save()
         print(json.dumps({k: v for k, v in row.items() if k not in ("artifacts", "macro_dylibs", "build_script_executables", "native_objects_and_archives")}), flush=True)
@@ -177,57 +207,62 @@ def main():
 
     if args.native_clang:
         result['method'] += '; Nano explicitly uses CC=nanocompile clang and native remarks; direct and kache retain their usual native compiler selection. Inline scanner changes debug representation, so every mode must match its own cold Rust, macro, executable and native artifact bytes. RSS includes benchmark parent, private kache daemon and Cargo descendants.'
-    if args.portable_cc:
-        result["method"] += "; Nano explicitly uses portable CC/CXX; count cc_hit/cc_miss/cc_bypass separately; compare native outputs to own cold bytes; initial coverage has unsupported jobs"
     daemon = None
-    daemon_log = None
-    try:
-        with (state / "fetch.log").open("w") as log:
-            subprocess.run(["cargo", "fetch", "--locked"], cwd=project, env=env, stdout=log, stderr=log, check=True)
-        if not args.standalone:
-            daemon_log = (state / "daemon.log").open("w")
-            daemon = subprocess.Popen([kache, "daemon", "run"], cwd=project, env=env, stdout=daemon_log, stderr=daemon_log)
-            deadline = time.monotonic() + 15
-            while not (state / "daemon.sock").exists():
-                if daemon.poll() is not None or time.monotonic() > deadline:
-                    raise RuntimeError("Isolated kache daemon failed to start; see daemon.log")
-                time.sleep(0.1)
-            # Confirm the private daemon is reachable before any measurements.
-            status = subprocess.run([kache, "--json", "daemon", "status"], cwd=project, env=env, capture_output=True, text=True, check=True)
-            result["daemon_status"] = status.stdout
-        build("direct", "prime")
-        build("nanocompile", "cold")
-        build("kache", "cold")
-        schedule = ["direct", "nanocompile", "kache"]
-        for iteration in range(args.runs):
-            offset = iteration % len(schedule)
-            for implementation in schedule[offset:] + schedule[:offset]:
-                build(implementation, "warm")
-        for implementation in schedule:
-            samples = [r["seconds"] for r in result["builds"] if r["implementation"] == implementation and r["phase"] == "warm"]
-            result.setdefault("summary", {})[implementation] = {"samples_seconds": samples, "median_seconds": statistics.median(samples)}
-        stats = subprocess.run([kache, "--json", "stats"], cwd=project, env=env, capture_output=True, text=True, check=True)
-        result["kache_stats"] = json.loads(stats.stdout)
-        result['tracked_sources_unchanged'] = all((project / name).is_file() and sha(project / name) == digest
-                                                  for name, digest in result['tracked_rust_and_manifest_hashes'].items())
-        save()
-        if not result['tracked_sources_unchanged']:
-            raise RuntimeError('Tracked Rust sources changed during the comparison; results are not comparable')
-        print(json.dumps(result["summary"], indent=2), flush=True)
-    finally:
+    daemon_log = (state/'daemon.log').open('w')
+    def stop_daemon():
+        nonlocal daemon
         if daemon is not None:
-            if daemon.poll() is None:
-                daemon.send_signal(signal.SIGINT)
+            daemon.send_signal(signal.SIGINT)
+            try: daemon.wait(timeout=15)
+            except subprocess.TimeoutExpired: daemon.kill(); daemon.wait()
+            daemon = None
+    def start_daemon():
+        nonlocal daemon
+        if args.standalone: return
+        daemon = subprocess.Popen([kache,'daemon','run'],cwd=project,env=env,stdout=daemon_log,stderr=daemon_log)
+        deadline=time.monotonic()+15
+        while not (state/'daemon.sock').exists():
+            if daemon.poll() is not None or time.monotonic()>deadline: raise RuntimeError('Private kache daemon did not start')
+            time.sleep(.1)
+    try:
+        subprocess.run(['cargo','fetch','--locked'],cwd=project,env=env,check=True,capture_output=True)
+        start_daemon()
+        schedule=['direct','nanocompile','kache']
+        for implementation in schedule: build(implementation,'cold')
+        for number,(scenario,lv,sv,expected) in enumerate([('leaf-edit',101,200,301),('shared-edit',101,211,312),('revert',100,200,300)]):
+            edit(lv,sv)
+            rotated=schedule[number%3:]+schedule[:number%3]
+            for implementation in rotated:
+                verifying=False
+                build(implementation,'edit')
+                if implementation == 'direct': continue
+                active=cache if implementation=='nanocompile' else kcache
+                saved=state/('saved-'+implementation)
+                if implementation=='kache': stop_daemon()
+                active.rename(saved)
+                active.mkdir()
+                if implementation=='kache': start_daemon()
                 try:
-                    daemon.wait(timeout=10)
-                except subprocess.TimeoutExpired:
-                    daemon.kill()
-                    daemon.wait()
-        elif args.standalone:
-            # stats may opportunistically start a daemon even in standalone mode.
-            subprocess.run([kache, "daemon", "stop"], cwd=project, env=env, capture_output=True)
-        if daemon_log is not None:
-            daemon_log.close()
+                    verifying=True
+                    build(implementation,'empty-cache-reference')
+                    assert all(result['builds'][-1][check] for check in ('matches_own_cold_native_artifacts','matches_own_cold_artifacts','matches_own_cold_macro_dylibs','matches_own_cold_build_script_executables'))
+                finally:
+                    if implementation=='kache': stop_daemon()
+                    shutil.rmtree(active)
+                    saved.rename(active)
+                    if implementation=='kache': start_daemon()
+                    verifying=False
+        result['summary']={phase:{mode:next(r['seconds'] for r in result['builds'] if r['scenario']==phase and r['implementation']==mode and not r['verification']) for mode in schedule} for phase in ('initial','leaf-edit','shared-edit','revert')}
+        result['original_tracked_sources_unchanged']=all((original_project/name).is_file() and sha(original_project/name)==digest for name,digest in original_hashes.items())
+        assert result['original_tracked_sources_unchanged']
+        result['original_tracked_rust_and_manifest_hashes']=original_hashes
+        result['snapshot_sources_unchanged_except_declared_edits']=all((project/name).is_file() and sha(project/name)==digest for name,digest in result['tracked_rust_and_manifest_hashes'].items() if name not in ('crates/harness/src/lib.rs','crates/proto/src/lib.rs'))
+        assert result['snapshot_sources_unchanged_except_declared_edits']
+        save()
+        print(json.dumps(result['summary'],indent=2),flush=True)
+    finally:
+        stop_daemon()
+        daemon_log.close()
 
 
 if __name__ == "__main__":

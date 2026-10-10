@@ -1,0 +1,133 @@
+{
+  "binary_sha256": "f70f5385542df5c53a4b473ec2c5f3d3e51272fd71db8ba1d2bfab998af20e61",
+  "compiler": "/Library/Developer/CommandLineTools/usr/bin/clang",
+  "compiler_version": "Apple clang version 21.0.0 (clang-2100.3.34.2)\nTarget: arm64-apple-darwin27.0.0\nThread model: posix\nInstalledDir: /Library/Developer/CommandLineTools/usr/bin\n",
+  "script_sha256": "9a6e4b7876f0fbfccfedd7d3a0a0356eede85315fa1f28ff1a21e461f27f049f",
+  "method": "512 real C++ template instances, O2, g0; alternate direct recompilation and warm portable cache; remove object every time; exact object hashes, cc_hit counters and linked behavior; synthetic compiler workload, not Harness or a general cold-build improvement",
+  "rows": [
+    {
+      "mode": "direct",
+      "phase": "cold",
+      "seconds": 0.3146148750092834,
+      "object_sha256": "ab401ae5987284e14a75d7f74cfa711694189490542b8fdd6cbebe6e1aba379a"
+    },
+    {
+      "mode": "nanocompile",
+      "phase": "cold",
+      "seconds": 0.5749384160153568,
+      "object_sha256": "ab401ae5987284e14a75d7f74cfa711694189490542b8fdd6cbebe6e1aba379a"
+    },
+    {
+      "mode": "direct",
+      "phase": "warm",
+      "seconds": 0.3221790000097826,
+      "object_sha256": "ab401ae5987284e14a75d7f74cfa711694189490542b8fdd6cbebe6e1aba379a"
+    },
+    {
+      "mode": "nanocompile",
+      "phase": "warm",
+      "seconds": 0.04709162499057129,
+      "object_sha256": "ab401ae5987284e14a75d7f74cfa711694189490542b8fdd6cbebe6e1aba379a"
+    },
+    {
+      "mode": "nanocompile",
+      "phase": "warm",
+      "seconds": 0.0459360409877263,
+      "object_sha256": "ab401ae5987284e14a75d7f74cfa711694189490542b8fdd6cbebe6e1aba379a"
+    },
+    {
+      "mode": "direct",
+      "phase": "warm",
+      "seconds": 0.313742334023118,
+      "object_sha256": "ab401ae5987284e14a75d7f74cfa711694189490542b8fdd6cbebe6e1aba379a"
+    },
+    {
+      "mode": "direct",
+      "phase": "warm",
+      "seconds": 0.29951862496091053,
+      "object_sha256": "ab401ae5987284e14a75d7f74cfa711694189490542b8fdd6cbebe6e1aba379a"
+    },
+    {
+      "mode": "nanocompile",
+      "phase": "warm",
+      "seconds": 0.04420320800272748,
+      "object_sha256": "ab401ae5987284e14a75d7f74cfa711694189490542b8fdd6cbebe6e1aba379a"
+    },
+    {
+      "mode": "nanocompile",
+      "phase": "warm",
+      "seconds": 0.04154987499350682,
+      "object_sha256": "ab401ae5987284e14a75d7f74cfa711694189490542b8fdd6cbebe6e1aba379a"
+    },
+    {
+      "mode": "direct",
+      "phase": "warm",
+      "seconds": 0.2933989590383135,
+      "object_sha256": "ab401ae5987284e14a75d7f74cfa711694189490542b8fdd6cbebe6e1aba379a"
+    },
+    {
+      "mode": "direct",
+      "phase": "warm",
+      "seconds": 0.3118257079622708,
+      "object_sha256": "ab401ae5987284e14a75d7f74cfa711694189490542b8fdd6cbebe6e1aba379a"
+    },
+    {
+      "mode": "nanocompile",
+      "phase": "warm",
+      "seconds": 0.043049000028986484,
+      "object_sha256": "ab401ae5987284e14a75d7f74cfa711694189490542b8fdd6cbebe6e1aba379a"
+    },
+    {
+      "mode": "nanocompile",
+      "phase": "warm",
+      "seconds": 0.04307241702917963,
+      "object_sha256": "ab401ae5987284e14a75d7f74cfa711694189490542b8fdd6cbebe6e1aba379a"
+    },
+    {
+      "mode": "direct",
+      "phase": "warm",
+      "seconds": 0.31724220799515024,
+      "object_sha256": "ab401ae5987284e14a75d7f74cfa711694189490542b8fdd6cbebe6e1aba379a"
+    },
+    {
+      "mode": "direct",
+      "phase": "warm",
+      "seconds": 0.31637858401518315,
+      "object_sha256": "ab401ae5987284e14a75d7f74cfa711694189490542b8fdd6cbebe6e1aba379a"
+    },
+    {
+      "mode": "nanocompile",
+      "phase": "warm",
+      "seconds": 0.040169292013160884,
+      "object_sha256": "ab401ae5987284e14a75d7f74cfa711694189490542b8fdd6cbebe6e1aba379a"
+    },
+    {
+      "mode": "nanocompile",
+      "phase": "warm",
+      "seconds": 0.041372458974365145,
+      "object_sha256": "ab401ae5987284e14a75d7f74cfa711694189490542b8fdd6cbebe6e1aba379a"
+    },
+    {
+      "mode": "direct",
+      "phase": "warm",
+      "seconds": 0.3197504589916207,
+      "object_sha256": "ab401ae5987284e14a75d7f74cfa711694189490542b8fdd6cbebe6e1aba379a"
+    },
+    {
+      "mode": "direct",
+      "phase": "warm",
+      "seconds": 0.3195173750282265,
+      "object_sha256": "ab401ae5987284e14a75d7f74cfa711694189490542b8fdd6cbebe6e1aba379a"
+    },
+    {
+      "mode": "nanocompile",
+      "phase": "warm",
+      "seconds": 0.04450625000754371,
+      "object_sha256": "ab401ae5987284e14a75d7f74cfa711694189490542b8fdd6cbebe6e1aba379a"
+    }
+  ],
+  "median_warm_seconds": {
+    "direct": 0.31637858401518315,
+    "nanocompile": 0.04307241702917963
+  }
+}

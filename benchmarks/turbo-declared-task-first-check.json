@@ -1,0 +1,668 @@
+{
+  "nanocompile_sha256": "b4f64f12c63e320f38bbed6ed3d319222ef2d3c7e80ea5ac447b35e6ab54c0fb",
+  "script_sha256": "a4d1edf5290a6778d96572b118ec01f49fb4ce1328930531139517d34027ed8d",
+  "turbo_version": "2.11.7",
+  "node_version": "v24.10.0",
+  "runs_per_mode": 9,
+  "method": "same example, scripts, source paths and fixed environment; cold once per backend; alternating warm pairs; remove every declared output before every build; assert actual execution log and output bytes; Turbo local-only no daemon; Nano explicit ordered file contracts, full environment and installed Node identity; fixture-specific, not a general scheduler comparison",
+  "rows": [
+    {
+      "mode": "nanocompile",
+      "phase": "cold",
+      "seconds": 0.13191549998009577,
+      "executed": [
+        "message",
+        "site"
+      ],
+      "artifacts": {
+        "apps/site/dist/index.html": "322ac3d0713d957d89de228eae1705133f7b7d452c39e53fe9b79e664f055122",
+        "packages/message/dist/message.json": "199bad7de96eb1cd175e3769a2844ee64ffe444d7b4770d55f58bba2a7d3aa14"
+      }
+    },
+    {
+      "mode": "turborepo",
+      "phase": "cold",
+      "seconds": 0.3299766250420362,
+      "executed": [
+        "message",
+        "site"
+      ],
+      "artifacts": {
+        "apps/site/dist/index.html": "322ac3d0713d957d89de228eae1705133f7b7d452c39e53fe9b79e664f055122",
+        "packages/message/dist/message.json": "199bad7de96eb1cd175e3769a2844ee64ffe444d7b4770d55f58bba2a7d3aa14"
+      },
+      "tasks": [
+        {
+          "taskId": "@nano/message#build",
+          "hash": "d5a91ae64eb5d5ec",
+          "cache": {
+            "local": false,
+            "remote": false,
+            "status": "MISS",
+            "timeSaved": 0
+          }
+        },
+        {
+          "taskId": "@nano/site#build",
+          "hash": "a8aa55b2bc552344",
+          "cache": {
+            "local": false,
+            "remote": false,
+            "status": "MISS",
+            "timeSaved": 0
+          }
+        }
+      ]
+    },
+    {
+      "mode": "nanocompile",
+      "phase": "warm",
+      "seconds": 0.007852834009099752,
+      "executed": [],
+      "artifacts": {
+        "apps/site/dist/index.html": "322ac3d0713d957d89de228eae1705133f7b7d452c39e53fe9b79e664f055122",
+        "packages/message/dist/message.json": "199bad7de96eb1cd175e3769a2844ee64ffe444d7b4770d55f58bba2a7d3aa14"
+      }
+    },
+    {
+      "mode": "turborepo",
+      "phase": "warm",
+      "seconds": 0.057192916981875896,
+      "executed": [],
+      "artifacts": {
+        "apps/site/dist/index.html": "322ac3d0713d957d89de228eae1705133f7b7d452c39e53fe9b79e664f055122",
+        "packages/message/dist/message.json": "199bad7de96eb1cd175e3769a2844ee64ffe444d7b4770d55f58bba2a7d3aa14"
+      },
+      "tasks": [
+        {
+          "taskId": "@nano/message#build",
+          "hash": "d5a91ae64eb5d5ec",
+          "cache": {
+            "local": true,
+            "remote": false,
+            "status": "HIT",
+            "source": "LOCAL",
+            "timeSaved": 143
+          }
+        },
+        {
+          "taskId": "@nano/site#build",
+          "hash": "a8aa55b2bc552344",
+          "cache": {
+            "local": true,
+            "remote": false,
+            "status": "HIT",
+            "source": "LOCAL",
+            "timeSaved": 128
+          }
+        }
+      ]
+    },
+    {
+      "mode": "turborepo",
+      "phase": "warm",
+      "seconds": 0.0582329590106383,
+      "executed": [],
+      "artifacts": {
+        "apps/site/dist/index.html": "322ac3d0713d957d89de228eae1705133f7b7d452c39e53fe9b79e664f055122",
+        "packages/message/dist/message.json": "199bad7de96eb1cd175e3769a2844ee64ffe444d7b4770d55f58bba2a7d3aa14"
+      },
+      "tasks": [
+        {
+          "taskId": "@nano/message#build",
+          "hash": "d5a91ae64eb5d5ec",
+          "cache": {
+            "local": true,
+            "remote": false,
+            "status": "HIT",
+            "source": "LOCAL",
+            "timeSaved": 143
+          }
+        },
+        {
+          "taskId": "@nano/site#build",
+          "hash": "a8aa55b2bc552344",
+          "cache": {
+            "local": true,
+            "remote": false,
+            "status": "HIT",
+            "source": "LOCAL",
+            "timeSaved": 128
+          }
+        }
+      ]
+    },
+    {
+      "mode": "nanocompile",
+      "phase": "warm",
+      "seconds": 0.006908416049554944,
+      "executed": [],
+      "artifacts": {
+        "apps/site/dist/index.html": "322ac3d0713d957d89de228eae1705133f7b7d452c39e53fe9b79e664f055122",
+        "packages/message/dist/message.json": "199bad7de96eb1cd175e3769a2844ee64ffe444d7b4770d55f58bba2a7d3aa14"
+      }
+    },
+    {
+      "mode": "nanocompile",
+      "phase": "warm",
+      "seconds": 0.006900166044943035,
+      "executed": [],
+      "artifacts": {
+        "apps/site/dist/index.html": "322ac3d0713d957d89de228eae1705133f7b7d452c39e53fe9b79e664f055122",
+        "packages/message/dist/message.json": "199bad7de96eb1cd175e3769a2844ee64ffe444d7b4770d55f58bba2a7d3aa14"
+      }
+    },
+    {
+      "mode": "turborepo",
+      "phase": "warm",
+      "seconds": 0.06038991699460894,
+      "executed": [],
+      "artifacts": {
+        "apps/site/dist/index.html": "322ac3d0713d957d89de228eae1705133f7b7d452c39e53fe9b79e664f055122",
+        "packages/message/dist/message.json": "199bad7de96eb1cd175e3769a2844ee64ffe444d7b4770d55f58bba2a7d3aa14"
+      },
+      "tasks": [
+        {
+          "taskId": "@nano/message#build",
+          "hash": "d5a91ae64eb5d5ec",
+          "cache": {
+            "local": true,
+            "remote": false,
+            "status": "HIT",
+            "source": "LOCAL",
+            "timeSaved": 143
+          }
+        },
+        {
+          "taskId": "@nano/site#build",
+          "hash": "a8aa55b2bc552344",
+          "cache": {
+            "local": true,
+            "remote": false,
+            "status": "HIT",
+            "source": "LOCAL",
+            "timeSaved": 128
+          }
+        }
+      ]
+    },
+    {
+      "mode": "turborepo",
+      "phase": "warm",
+      "seconds": 0.06842033303109929,
+      "executed": [],
+      "artifacts": {
+        "apps/site/dist/index.html": "322ac3d0713d957d89de228eae1705133f7b7d452c39e53fe9b79e664f055122",
+        "packages/message/dist/message.json": "199bad7de96eb1cd175e3769a2844ee64ffe444d7b4770d55f58bba2a7d3aa14"
+      },
+      "tasks": [
+        {
+          "taskId": "@nano/message#build",
+          "hash": "d5a91ae64eb5d5ec",
+          "cache": {
+            "local": true,
+            "remote": false,
+            "status": "HIT",
+            "source": "LOCAL",
+            "timeSaved": 143
+          }
+        },
+        {
+          "taskId": "@nano/site#build",
+          "hash": "a8aa55b2bc552344",
+          "cache": {
+            "local": true,
+            "remote": false,
+            "status": "HIT",
+            "source": "LOCAL",
+            "timeSaved": 128
+          }
+        }
+      ]
+    },
+    {
+      "mode": "nanocompile",
+      "phase": "warm",
+      "seconds": 0.09819620801135898,
+      "executed": [],
+      "artifacts": {
+        "apps/site/dist/index.html": "322ac3d0713d957d89de228eae1705133f7b7d452c39e53fe9b79e664f055122",
+        "packages/message/dist/message.json": "199bad7de96eb1cd175e3769a2844ee64ffe444d7b4770d55f58bba2a7d3aa14"
+      }
+    },
+    {
+      "mode": "nanocompile",
+      "phase": "warm",
+      "seconds": 0.03853041701950133,
+      "executed": [],
+      "artifacts": {
+        "apps/site/dist/index.html": "322ac3d0713d957d89de228eae1705133f7b7d452c39e53fe9b79e664f055122",
+        "packages/message/dist/message.json": "199bad7de96eb1cd175e3769a2844ee64ffe444d7b4770d55f58bba2a7d3aa14"
+      }
+    },
+    {
+      "mode": "turborepo",
+      "phase": "warm",
+      "seconds": 0.059145208972040564,
+      "executed": [],
+      "artifacts": {
+        "apps/site/dist/index.html": "322ac3d0713d957d89de228eae1705133f7b7d452c39e53fe9b79e664f055122",
+        "packages/message/dist/message.json": "199bad7de96eb1cd175e3769a2844ee64ffe444d7b4770d55f58bba2a7d3aa14"
+      },
+      "tasks": [
+        {
+          "taskId": "@nano/message#build",
+          "hash": "d5a91ae64eb5d5ec",
+          "cache": {
+            "local": true,
+            "remote": false,
+            "status": "HIT",
+            "source": "LOCAL",
+            "timeSaved": 143
+          }
+        },
+        {
+          "taskId": "@nano/site#build",
+          "hash": "a8aa55b2bc552344",
+          "cache": {
+            "local": true,
+            "remote": false,
+            "status": "HIT",
+            "source": "LOCAL",
+            "timeSaved": 128
+          }
+        }
+      ]
+    },
+    {
+      "mode": "turborepo",
+      "phase": "warm",
+      "seconds": 0.05995516601251438,
+      "executed": [],
+      "artifacts": {
+        "apps/site/dist/index.html": "322ac3d0713d957d89de228eae1705133f7b7d452c39e53fe9b79e664f055122",
+        "packages/message/dist/message.json": "199bad7de96eb1cd175e3769a2844ee64ffe444d7b4770d55f58bba2a7d3aa14"
+      },
+      "tasks": [
+        {
+          "taskId": "@nano/message#build",
+          "hash": "d5a91ae64eb5d5ec",
+          "cache": {
+            "local": true,
+            "remote": false,
+            "status": "HIT",
+            "source": "LOCAL",
+            "timeSaved": 143
+          }
+        },
+        {
+          "taskId": "@nano/site#build",
+          "hash": "a8aa55b2bc552344",
+          "cache": {
+            "local": true,
+            "remote": false,
+            "status": "HIT",
+            "source": "LOCAL",
+            "timeSaved": 128
+          }
+        }
+      ]
+    },
+    {
+      "mode": "nanocompile",
+      "phase": "warm",
+      "seconds": 0.007720540976151824,
+      "executed": [],
+      "artifacts": {
+        "apps/site/dist/index.html": "322ac3d0713d957d89de228eae1705133f7b7d452c39e53fe9b79e664f055122",
+        "packages/message/dist/message.json": "199bad7de96eb1cd175e3769a2844ee64ffe444d7b4770d55f58bba2a7d3aa14"
+      }
+    },
+    {
+      "mode": "nanocompile",
+      "phase": "warm",
+      "seconds": 0.006993457966018468,
+      "executed": [],
+      "artifacts": {
+        "apps/site/dist/index.html": "322ac3d0713d957d89de228eae1705133f7b7d452c39e53fe9b79e664f055122",
+        "packages/message/dist/message.json": "199bad7de96eb1cd175e3769a2844ee64ffe444d7b4770d55f58bba2a7d3aa14"
+      }
+    },
+    {
+      "mode": "turborepo",
+      "phase": "warm",
+      "seconds": 0.061354041972663254,
+      "executed": [],
+      "artifacts": {
+        "apps/site/dist/index.html": "322ac3d0713d957d89de228eae1705133f7b7d452c39e53fe9b79e664f055122",
+        "packages/message/dist/message.json": "199bad7de96eb1cd175e3769a2844ee64ffe444d7b4770d55f58bba2a7d3aa14"
+      },
+      "tasks": [
+        {
+          "taskId": "@nano/message#build",
+          "hash": "d5a91ae64eb5d5ec",
+          "cache": {
+            "local": true,
+            "remote": false,
+            "status": "HIT",
+            "source": "LOCAL",
+            "timeSaved": 143
+          }
+        },
+        {
+          "taskId": "@nano/site#build",
+          "hash": "a8aa55b2bc552344",
+          "cache": {
+            "local": true,
+            "remote": false,
+            "status": "HIT",
+            "source": "LOCAL",
+            "timeSaved": 128
+          }
+        }
+      ]
+    },
+    {
+      "mode": "turborepo",
+      "phase": "warm",
+      "seconds": 0.05310937500325963,
+      "executed": [],
+      "artifacts": {
+        "apps/site/dist/index.html": "322ac3d0713d957d89de228eae1705133f7b7d452c39e53fe9b79e664f055122",
+        "packages/message/dist/message.json": "199bad7de96eb1cd175e3769a2844ee64ffe444d7b4770d55f58bba2a7d3aa14"
+      },
+      "tasks": [
+        {
+          "taskId": "@nano/message#build",
+          "hash": "d5a91ae64eb5d5ec",
+          "cache": {
+            "local": true,
+            "remote": false,
+            "status": "HIT",
+            "source": "LOCAL",
+            "timeSaved": 143
+          }
+        },
+        {
+          "taskId": "@nano/site#build",
+          "hash": "a8aa55b2bc552344",
+          "cache": {
+            "local": true,
+            "remote": false,
+            "status": "HIT",
+            "source": "LOCAL",
+            "timeSaved": 128
+          }
+        }
+      ]
+    },
+    {
+      "mode": "nanocompile",
+      "phase": "warm",
+      "seconds": 0.006396917044185102,
+      "executed": [],
+      "artifacts": {
+        "apps/site/dist/index.html": "322ac3d0713d957d89de228eae1705133f7b7d452c39e53fe9b79e664f055122",
+        "packages/message/dist/message.json": "199bad7de96eb1cd175e3769a2844ee64ffe444d7b4770d55f58bba2a7d3aa14"
+      }
+    },
+    {
+      "mode": "nanocompile",
+      "phase": "warm",
+      "seconds": 0.006054750003386289,
+      "executed": [],
+      "artifacts": {
+        "apps/site/dist/index.html": "322ac3d0713d957d89de228eae1705133f7b7d452c39e53fe9b79e664f055122",
+        "packages/message/dist/message.json": "199bad7de96eb1cd175e3769a2844ee64ffe444d7b4770d55f58bba2a7d3aa14"
+      }
+    },
+    {
+      "mode": "turborepo",
+      "phase": "warm",
+      "seconds": 0.055364000028930604,
+      "executed": [],
+      "artifacts": {
+        "apps/site/dist/index.html": "322ac3d0713d957d89de228eae1705133f7b7d452c39e53fe9b79e664f055122",
+        "packages/message/dist/message.json": "199bad7de96eb1cd175e3769a2844ee64ffe444d7b4770d55f58bba2a7d3aa14"
+      },
+      "tasks": [
+        {
+          "taskId": "@nano/message#build",
+          "hash": "d5a91ae64eb5d5ec",
+          "cache": {
+            "local": true,
+            "remote": false,
+            "status": "HIT",
+            "source": "LOCAL",
+            "timeSaved": 143
+          }
+        },
+        {
+          "taskId": "@nano/site#build",
+          "hash": "a8aa55b2bc552344",
+          "cache": {
+            "local": true,
+            "remote": false,
+            "status": "HIT",
+            "source": "LOCAL",
+            "timeSaved": 128
+          }
+        }
+      ]
+    },
+    {
+      "mode": "nanocompile",
+      "phase": "changed-source",
+      "seconds": 0.08051841601263732,
+      "executed": [
+        "message",
+        "site"
+      ],
+      "artifacts": {
+        "apps/site/dist/index.html": "1ac2dd72b4a7f4af4bfe49c8ecb474a4ef53a32fb2f4482d092c11577a9e41b4",
+        "packages/message/dist/message.json": "42c4873aaa769a37ae8d1c849408b6f64043aeefd6f7a88e11236b2c82ef70e0"
+      }
+    },
+    {
+      "mode": "turborepo",
+      "phase": "changed-source",
+      "seconds": 0.333897040982265,
+      "executed": [
+        "message",
+        "site"
+      ],
+      "artifacts": {
+        "apps/site/dist/index.html": "1ac2dd72b4a7f4af4bfe49c8ecb474a4ef53a32fb2f4482d092c11577a9e41b4",
+        "packages/message/dist/message.json": "42c4873aaa769a37ae8d1c849408b6f64043aeefd6f7a88e11236b2c82ef70e0"
+      },
+      "tasks": [
+        {
+          "taskId": "@nano/message#build",
+          "hash": "4d1c25491c34c0c4",
+          "cache": {
+            "local": false,
+            "remote": false,
+            "status": "MISS",
+            "timeSaved": 0
+          }
+        },
+        {
+          "taskId": "@nano/site#build",
+          "hash": "67a0717f5a28b1a8",
+          "cache": {
+            "local": false,
+            "remote": false,
+            "status": "MISS",
+            "timeSaved": 0
+          }
+        }
+      ]
+    },
+    {
+      "mode": "nanocompile",
+      "phase": "changed-source-warm",
+      "seconds": 0.011138917005155236,
+      "executed": [],
+      "artifacts": {
+        "apps/site/dist/index.html": "1ac2dd72b4a7f4af4bfe49c8ecb474a4ef53a32fb2f4482d092c11577a9e41b4",
+        "packages/message/dist/message.json": "42c4873aaa769a37ae8d1c849408b6f64043aeefd6f7a88e11236b2c82ef70e0"
+      }
+    },
+    {
+      "mode": "turborepo",
+      "phase": "changed-source-warm",
+      "seconds": 0.0539207499823533,
+      "executed": [],
+      "artifacts": {
+        "apps/site/dist/index.html": "1ac2dd72b4a7f4af4bfe49c8ecb474a4ef53a32fb2f4482d092c11577a9e41b4",
+        "packages/message/dist/message.json": "42c4873aaa769a37ae8d1c849408b6f64043aeefd6f7a88e11236b2c82ef70e0"
+      },
+      "tasks": [
+        {
+          "taskId": "@nano/message#build",
+          "hash": "4d1c25491c34c0c4",
+          "cache": {
+            "local": true,
+            "remote": false,
+            "status": "HIT",
+            "source": "LOCAL",
+            "timeSaved": 145
+          }
+        },
+        {
+          "taskId": "@nano/site#build",
+          "hash": "67a0717f5a28b1a8",
+          "cache": {
+            "local": true,
+            "remote": false,
+            "status": "HIT",
+            "source": "LOCAL",
+            "timeSaved": 130
+          }
+        }
+      ]
+    },
+    {
+      "mode": "nanocompile",
+      "phase": "changed-site",
+      "seconds": 0.03588445798959583,
+      "executed": [
+        "site"
+      ],
+      "artifacts": {
+        "apps/site/dist/index.html": "626cc09697b552a928ad8588af49fe49272fd3f982fabf4dcea1f7744be1d9df",
+        "packages/message/dist/message.json": "42c4873aaa769a37ae8d1c849408b6f64043aeefd6f7a88e11236b2c82ef70e0"
+      }
+    },
+    {
+      "mode": "turborepo",
+      "phase": "changed-site",
+      "seconds": 0.1834420830127783,
+      "executed": [
+        "site"
+      ],
+      "artifacts": {
+        "apps/site/dist/index.html": "626cc09697b552a928ad8588af49fe49272fd3f982fabf4dcea1f7744be1d9df",
+        "packages/message/dist/message.json": "42c4873aaa769a37ae8d1c849408b6f64043aeefd6f7a88e11236b2c82ef70e0"
+      },
+      "tasks": [
+        {
+          "taskId": "@nano/message#build",
+          "hash": "4d1c25491c34c0c4",
+          "cache": {
+            "local": true,
+            "remote": false,
+            "status": "HIT",
+            "source": "LOCAL",
+            "timeSaved": 145
+          }
+        },
+        {
+          "taskId": "@nano/site#build",
+          "hash": "3a69f5190ed4338e",
+          "cache": {
+            "local": false,
+            "remote": false,
+            "status": "MISS",
+            "timeSaved": 0
+          }
+        }
+      ]
+    },
+    {
+      "mode": "nanocompile",
+      "phase": "changed-env",
+      "seconds": 0.06217162503162399,
+      "executed": [
+        "message",
+        "site"
+      ],
+      "artifacts": {
+        "apps/site/dist/index.html": "100fe278da062e3b4660a513cbc9a40cd6e10fb826872cca1246820d794eb8d4",
+        "packages/message/dist/message.json": "42c4873aaa769a37ae8d1c849408b6f64043aeefd6f7a88e11236b2c82ef70e0"
+      }
+    },
+    {
+      "mode": "turborepo",
+      "phase": "changed-env",
+      "seconds": 0.3064643330289982,
+      "executed": [
+        "message",
+        "site"
+      ],
+      "artifacts": {
+        "apps/site/dist/index.html": "100fe278da062e3b4660a513cbc9a40cd6e10fb826872cca1246820d794eb8d4",
+        "packages/message/dist/message.json": "42c4873aaa769a37ae8d1c849408b6f64043aeefd6f7a88e11236b2c82ef70e0"
+      },
+      "tasks": [
+        {
+          "taskId": "@nano/message#build",
+          "hash": "95e111e32fbe2d29",
+          "cache": {
+            "local": false,
+            "remote": false,
+            "status": "MISS",
+            "timeSaved": 0
+          }
+        },
+        {
+          "taskId": "@nano/site#build",
+          "hash": "b96e68c401788e42",
+          "cache": {
+            "local": false,
+            "remote": false,
+            "status": "MISS",
+            "timeSaved": 0
+          }
+        }
+      ]
+    },
+    {
+      "mode": "nanocompile",
+      "phase": "corruption-repair",
+      "seconds": 0.061276790976990014,
+      "executed": [
+        "message"
+      ],
+      "artifacts": {
+        "apps/site/dist/index.html": "100fe278da062e3b4660a513cbc9a40cd6e10fb826872cca1246820d794eb8d4",
+        "packages/message/dist/message.json": "42c4873aaa769a37ae8d1c849408b6f64043aeefd6f7a88e11236b2c82ef70e0"
+      }
+    }
+  ],
+  "median_warm_seconds": {
+    "nanocompile": 0.006993457966018468,
+    "turborepo": 0.059145208972040564
+  },
+  "checks": [
+    "real Turbo local hits",
+    "Nano zero-execution restores",
+    "byte equality against direct Node",
+    "source/preserved-mtime changes",
+    "dependent/site-only edits",
+    "environment changes",
+    "corruption repair",
+    "invalid graph executes nothing",
+    "failed task status"
+  ]
+}

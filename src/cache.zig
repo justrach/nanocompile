@@ -467,6 +467,25 @@ fn parallelFileHashes(ctx: *Context, dependencies: []const Dependency, hashes: *
     return true;
 }
 
+// One additional worker overlaps immutable output verification with complete
+// dependency hashing. Its allocator is private; no output is written until join.
+const OutputCheck = struct {
+    entry: *const Entry,
+    valid: bool = false,
+    fn run(check: *OutputCheck, ctx: *const Context) void {
+        var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
+        defer arena.deinit();
+        var local = ctx.*;
+        local.a = arena.allocator();
+        for (check.entry.outputs) |output| {
+            const path = blobPath(&local, output.hash) catch return;
+            const hash = local.digest(path) catch return;
+            if (!std.mem.eql(u8, hash, output.hash)) return;
+        }
+        check.valid = true;
+    }
+};
+
 pub fn restore(ctx: *Context, key: []const u8, allowed_outputs: []const []const u8) !bool {
     const bytes = ctx.read(try ctx.path(&.{ "entries", key })) catch return false;
     const entry = parseEntry(ctx, bytes) catch return false;
@@ -475,6 +494,21 @@ pub fn restore(ctx: *Context, key: []const u8, allowed_outputs: []const []const 
     // and explicit externs can also appear in the transitive graph. Reuse the
     // enumeration and content hashes only within this restore. No metadata
     // shortcut survives a compiler invocation or a before/after input check.
+    for (entry.outputs, allowed_outputs) |output, allowed| if (!std.mem.eql(u8, output.path, allowed)) return false;
+    var output_check: OutputCheck = .{ .entry = &entry };
+    var output_group: std.Io.Group = .init;
+    defer output_group.cancel(ctx.io);
+    const overlap = blk: {
+        if (entry.dependencies.len < 32) break :blk false;
+        var size: u64 = 0;
+        for (entry.outputs) |output| {
+            const st = Dir.cwd().statFile(ctx.io, try blobPath(ctx, output.hash), .{}) catch return false;
+            size +|= st.size;
+        }
+        if (size < 1024 * 1024) break :blk false;
+        output_group.concurrent(ctx.io, OutputCheck.run, .{ &output_check, ctx }) catch break :blk false;
+        break :blk true;
+    };
     var library_names: std.StringHashMapUnmanaged([]const []const u8) = .empty;
     defer library_names.deinit(ctx.a);
     var file_hashes: std.StringHashMapUnmanaged([]const u8) = .empty;
@@ -511,10 +545,14 @@ pub fn restore(ctx: *Context, key: []const u8, allowed_outputs: []const []const 
         }
     }
     // Validate every blob and destination before writing any output.
-    for (entry.outputs, allowed_outputs) |output, allowed| {
-        if (!std.mem.eql(u8, output.path, allowed)) return false;
-        const hash = ctx.digest(try blobPath(ctx, output.hash)) catch return false;
-        if (!std.mem.eql(u8, hash, output.hash)) return false;
+    if (overlap) {
+        try output_group.await(ctx.io);
+        if (!output_check.valid) return false;
+    } else {
+        for (entry.outputs) |output| {
+            const hash = ctx.digest(try blobPath(ctx, output.hash)) catch return false;
+            if (!std.mem.eql(u8, hash, output.hash)) return false;
+        }
     }
     const stdout = ctx.read(try blobPath(ctx, entry.stdout)) catch return false;
     const stderr = ctx.read(try blobPath(ctx, entry.stderr)) catch return false;
@@ -545,6 +583,10 @@ pub fn stats(ctx: *Context) !void {
     var clang_failed: usize = 0;
     var clang_hit: usize = 0;
     var clang_miss: usize = 0;
+    var cc_hit: usize = 0;
+    var cc_miss: usize = 0;
+    var cc_bypass: usize = 0;
+    var cc_failed: usize = 0;
     var it = std.mem.tokenizeScalar(u8, events, '\n');
     while (it.next()) |event| {
         if (std.mem.eql(u8, event, "hit")) hit += 1;
@@ -557,6 +599,10 @@ pub fn stats(ctx: *Context) !void {
         if (std.mem.eql(u8, event, "clang_native_failed")) clang_failed += 1;
         if (std.mem.eql(u8, event, "clang_native_hit")) clang_hit += 1;
         if (std.mem.eql(u8, event, "clang_native_miss")) clang_miss += 1;
+        if (std.mem.eql(u8, event, "cc_hit")) cc_hit += 1;
+        if (std.mem.eql(u8, event, "cc_miss")) cc_miss += 1;
+        if (std.mem.eql(u8, event, "cc_bypass")) cc_bypass += 1;
+        if (std.mem.eql(u8, event, "cc_failed")) cc_failed += 1;
     }
     var blobs: usize = 0;
     var size: u64 = 0;
@@ -571,6 +617,7 @@ pub fn stats(ctx: *Context) !void {
     try ctx.out(try std.fmt.allocPrint(ctx.a, "hits: {d}\nmisses: {d}\nbypasses: {d}\nfailed compilations: {d}\nblobs: {d}\nlogical bytes: {d}\n", .{ hit, miss, bypass, failed, blobs, size }));
     try ctx.out(try std.fmt.allocPrint(ctx.a, "native Xcode invocations: {d}\nnative Xcode failures: {d}\n", .{ xcode_runs, xcode_failed }));
     try ctx.out(try std.fmt.allocPrint(ctx.a, "native Clang invocations: {d}\nnative Clang failures: {d}\nobserved Clang hits: {d}\nobserved Clang misses: {d}\nClang hit/miss observations require NANOCOMPILE_CLANG_REMARKS=1\n", .{ clang_run, clang_failed, clang_hit, clang_miss }));
+    try ctx.out(try std.fmt.allocPrint(ctx.a, "portable C/C++ hits: {d}\nportable C/C++ misses: {d}\nportable C/C++ bypasses: {d}\nportable C/C++ failures: {d}\n", .{ cc_hit, cc_miss, cc_bypass, cc_failed }));
 }
 
 pub fn clear(ctx: *Context) !void {
@@ -809,13 +856,15 @@ test "large restore hashes every unique file and refuses changes before writes" 
     }
     try records.append(a, records.items[3]);
     const output = try std.fs.path.join(a, &.{ cwd, "output" });
-    try tmp.dir.writeFile(io, .{ .sub_path = "output", .data = "compiled" });
+    const compiled = try a.alloc(u8, 1024 * 1024);
+    @memset(compiled, 42);
+    try tmp.dir.writeFile(io, .{ .sub_path = "output", .data = compiled });
     const key = "123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0";
     const output_hash = try ctx.digest(output);
     try store(&ctx, key, records.items, &.{output}, "", "");
     try tmp.dir.deleteFile(io, "output");
     try std.testing.expect(try restore(&ctx, key, &.{output}));
-    try std.testing.expectEqualStrings("compiled", try ctx.read(output));
+    try std.testing.expectEqualStrings(output_hash, try ctx.digest(output));
     data[0] = 99;
     try tmp.dir.writeFile(io, .{ .sub_path = "input-17", .data = data });
     try tmp.dir.writeFile(io, .{ .sub_path = "output", .data = "untouched" });

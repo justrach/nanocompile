@@ -49,6 +49,10 @@ jobs:
         run: |
           zig build-exe -OReleaseFast -lc src/rmeta_direct.zig -femit-bin="$RUNNER_TEMP/rmeta-direct"
           python3 benchmarks/experiments/rmeta_direct_fixture_check.py "$RUNNER_TEMP/rmeta-direct" --output bench-results/rmeta-direct.json
+      - name: Verify portable C/C++ cache and linked outputs
+        run: |
+          python3 tests/portable_cc.py zig-out/bin/nanocompile --output bench-results/portable-cc.json
+          python3 tests/portable_cc_benchmark.py zig-out/bin/nanocompile --runs 5 --output bench-results/portable-cpp-benchmark.json
       - name: Verify live native selector overlap
         if: runner.os == 'macOS'
         run: python3 tests/clang_selection.py zig-out/bin/nanocompile --output bench-results/clang-selection.json
@@ -57,6 +61,7 @@ jobs:
           python3 tests/turbo_server.py
           npm ci --prefix examples/turborepo --ignore-scripts --no-audit --no-fund
           python3 tests/turbo_integration.py zig-out/bin/nanocompile --output bench-results/turborepo.json
+          python3 tests/task_comparison.py zig-out/bin/nanocompile --runs 9 --output bench-results/declared-tasks.json
       - name: Benchmark complete compiler invocations
         run: python3 tests/benchmark.py zig-out/bin/nanocompile --runs 9 --output bench-results/runner.json
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
