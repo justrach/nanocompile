@@ -164,6 +164,12 @@ int main(){
         raise AssertionError('Escaping console path accepted')
     except ValueError:
         pass
+    paired[0]['trace']['requests'] = [dict(name='app', kind='rust', seconds=12,
+        start_seconds=0, nano_decisions=['nanocompile: bypass: UnsupportedProducerConfiguration'])]
+    fixture.write_text(json.dumps(dict(builds=paired)))
+    support = analyze(fixture, state / 'support')
+    assert support['uncached_work'][0]['reason'] == 'UnsupportedProducerConfiguration'
+    assert 'cold-build savings' in support['uncached_work'][0]['claim']
     paired[0]['cli_help_valid'] = False
     fixture.write_text(json.dumps(dict(builds=paired, completed=False,
                                       failure=dict(type='RuntimeError', message='probe failed'))))
@@ -171,5 +177,6 @@ int main(){
     assert len(rejected['excluded_builds']) == 1
     assert rejected['comparisons'][0]['nanocompile'] is None
     instructions = json.loads((state / 'rejected/experiments.json').read_text())
-    assert not instructions['experiments'] and instructions['provenance']['completed'] is False
+    assert not instructions['experiments'] and not instructions['uncached_work']
+    assert instructions['provenance']['completed'] is False
 print('Native capture transparency, concurrent records and missing-counterpart analysis passed')

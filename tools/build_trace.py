@@ -195,6 +195,7 @@ def analyze(report, output):
     service_summaries = []
     build_script_runs = []
     excluded_builds = []
+    uncached_work = []
     for index, build in enumerate(data['builds']):
         if (build.get('exit_code', 0) != 0 or build.get('cli_help_valid') is False
                 or any(value is False for key, value in build.items() if key.startswith('matches_'))):
@@ -203,6 +204,16 @@ def analyze(report, output):
             continue
         traces.append(dict(name='process_name', ph='M', pid=index, tid=0, args=dict(name=f"{index}: {build['implementation']} {build['phase']}")))
         trace = build.get('trace', {})
+        if build['implementation'] == 'nanocompile':
+            for request in trace.get('requests', []):
+                reasons = [line[len('nanocompile: bypass: '):] for line in request.get('nano_decisions', [])
+                           if line.startswith('nanocompile: bypass: ')]
+                reason = request.get('bypass_reason') or next((r for r in reasons if r.isidentifier()), None)
+                if reason and request['kind'] == 'rust' and request['seconds'] >= .1:
+                    uncached_work.append(dict(build=index, phase=build['phase'], name=request['name'],
+                        seconds=request['seconds'], reason=reason,
+                        instruction='Inspect exact compiler arguments and the rejecting guard. Extend support only after measuring this configuration and proving complete input discovery, miss/hit byte and mode equality, edits/reverts and toolchain invalidation. Retain passthrough for unsupported cases.',
+                        claim='Uncached request interval; potential reuse applies only to matching inputs and does not predict cold-build savings.'))
         service_events = trace.get('kache_service_events', [])
         if service_events:
             build_script_runs.extend(dict(build=index, phase=build['phase'], **event) for event in service_events if event.get('crate_name') == 'build_script_run')
@@ -234,6 +245,7 @@ def analyze(report, output):
         row['nano_minus_kache_seconds'] = n['median_seconds'] - k['median_seconds'] if n and k else None
         comparison.append(row)
     comparison.sort(key=lambda r: r['nano_minus_kache_seconds'] or 0, reverse=True)
+    uncached_work.sort(key=lambda r: r['seconds'], reverse=True)
     experiments = []
     for row in comparison:
         if len(experiments) == 12:
@@ -265,9 +277,9 @@ def analyze(report, output):
     (output / 'experiments.json').write_text(json.dumps(dict(schema=1, provenance=provenance,
         instruction='Reproduce this configuration before changing one cause; freeze the baseline binary and keep diagnostic and untraced benchmark results separate',
         candidate_limit=12, excluded_builds=excluded_builds,
-        complete_comparisons='analysis.json', experiments=experiments), indent=2)+'\n')
+        complete_comparisons='analysis.json', uncached_work=uncached_work, experiments=experiments), indent=2)+'\n')
     (output / 'trace.json').write_text(json.dumps({'traceEvents': traces}))
-    analysis = dict(diagnostic=True, excluded_builds=excluded_builds, comparisons=comparison, kache_service_summaries=service_summaries, kache_build_script_runs=build_script_runs,
+    analysis = dict(diagnostic=True, excluded_builds=excluded_builds, uncached_work=uncached_work, comparisons=comparison, kache_service_summaries=service_summaries, kache_build_script_runs=build_script_runs,
                     build_coverage=[dict(implementation=b["implementation"], phase=b["phase"], events=b.get("events", {}), capture_coverage=b.get('trace', {}).get('capture_coverage'), request_kinds=dict(collections.Counter(r["kind"] for r in b.get("trace", {}).get("requests", []))), own_artifact_checks={k: v for k, v in b.items() if k.startswith("matches_own_cold")}) for b in data["builds"]],
                     limitations='compile_time_ms on cache hits can describe the stored original compilation; stage summaries exclude hit/dup compile_time_ms. Per-unit medians are scheduling-sensitive, unpaired diagnostic observations. Request durations overlap. Missing counterparts are unknown, not zero. No optimization or overall speed win is established by this capture.')
     (output / 'analysis.json').write_text(json.dumps(analysis, indent=2) + '\n')
@@ -276,6 +288,9 @@ def analyze(report, output):
              'Investigate these observed Nano-minus-kache interval gaps; a long overlapping interval does not establish critical-path savings:', '']
     for row in [r for r in comparison if r['nano_minus_kache_seconds'] and r['nano_minus_kache_seconds'] > 0][:12]:
         brief.append(f"- {row['phase']} / {row['kind']} / {row['mode']} / {row['name']}: {row['nano_minus_kache_seconds']:.6f}s median interval gap; samples Nano={row['nanocompile']['samples']}, kache={row['kache']['samples']}.")
+    if uncached_work:
+        brief += ['', 'Uncached Nano work to investigate separately from interval gaps:', '']
+        brief.extend(f"- {r['phase']} / {r['name']}: {r['seconds']:.6f}s, {r['reason']}. {r['instruction']} {r['claim']}" for r in uncached_work[:12])
     brief += ['', 'Kache service stage measurements (sums overlap and do not predict wall savings):', '', *[json.dumps(row, sort_keys=True) for row in service_summaries], '', 'Inspect the private compiler records and build-script logs for each candidate. Use kache service breakdowns to distinguish key, lookup, compile and restore costs; do not infer Nano stage costs from kache events. Add Nano phase instrumentation if that distinction is missing.', '',
               'Require repeated alternating untraced cold and warm pairs, actual source edits and reverts, zero cold hits, expected warm coverage, unchanged source hashes, and matching own-cold artifact bytes. Report rejected variations and uncertainty. Promote only repeatable improvements without correctness regressions.']
     nano_native = [sum(r['kind'] == 'native' for r in b.get('trace', {}).get('requests', [])) for b in data['builds'] if b['phase'] == 'warm' and b['implementation'] == 'nanocompile']
