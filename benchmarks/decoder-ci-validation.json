@@ -1,0 +1,165 @@
+{
+  "source_revision": "bb55f9777db5ced3024e49a5d311f7bcda3e32a2",
+  "run_url": "https://github.com/justrach/nanocompile/actions/runs/38007374944",
+  "workflow_passed": true,
+  "jobs": [
+    {
+      "name": "runtime (macos-15)",
+      "passed": true,
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Install verified Zig 0.17.0",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Rust toolchain",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Verify proc-macro final linker inputs",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Build and real compiler tests",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Verify live native selector overlap",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Verify real Turborepo task cache",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Benchmark complete compiler invocations",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ],
+      "scope_artifact_sha256": "f3e903a45e2da85bbeb6f88267df2b340435a5455f6b4c5933b89fb15020230d",
+      "scope": {
+        "binary_sha256": "15f4276d2fdd50ae57afc77be7510ec7b924ab7a39d974fb3cfab65b962ff52d",
+        "script_sha256": "aed4749cc9b2ef7a00d04f56ad5ba270f21094a695a33a4df306a0f9b002f54b",
+        "checks": [
+          "different caller directories retain different complete compilation fingerprints",
+          "identical present compiler/resource state shares decoder identity",
+          "toolchain root-classification memos reused without rewriting across callers",
+          "adding a caller selector invalidates both full and present-state identities",
+          "removing a caller selector restores original full and decoder identities"
+        ],
+        "shared_toolchain_classifications": 19
+      }
+    },
+    {
+      "name": "runtime (ubuntu-24.04)",
+      "passed": true,
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Install verified Zig 0.17.0",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Rust toolchain",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Verify proc-macro final linker inputs",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Build and real compiler tests",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Verify live native selector overlap",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Verify real Turborepo task cache",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Benchmark complete compiler invocations",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ],
+      "scope_artifact_sha256": "a36b63037709d19bcc35ea8b8bfb42027215e34d8474e4f6f772a91e95cacd11",
+      "scope": {
+        "binary_sha256": "a0e29205ad90309a9c712109ecf814e9fc29b21a85ebce2a7250528e4fa6d9e3",
+        "script_sha256": "aed4749cc9b2ef7a00d04f56ad5ba270f21094a695a33a4df306a0f9b002f54b",
+        "checks": [
+          "different caller directories retain different complete compilation fingerprints",
+          "identical present compiler/resource state shares decoder identity",
+          "toolchain root-classification memos reused without rewriting across callers",
+          "adding a caller selector invalidates both full and present-state identities",
+          "removing a caller selector restores original full and decoder identities"
+        ],
+        "shared_toolchain_classifications": 19
+      }
+    }
+  ]
+}

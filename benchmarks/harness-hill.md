@@ -1505,3 +1505,24 @@ sources stay unchanged. Unit and profiling-enabled Rust/Zig integration pass.
 [Method and next candidate requirements](../docs/decoder-graph-profile.md);
 [graph records](harness-decoder-graph-profile.json);
 [identity analysis](harness-decoder-graph-identities.json).
+
+## Selected-resource decoder candidate: first cold batch
+
+An isolated schema-5 candidate retains full compilation fingerprints and
+all selector stamps while scoping metadata classifications to selected
+compiler/resources. Six cold pairs have medians **31.150235 s → 29.524911 s**
+(5.22%), winning 5/6 pairs. Mean paired saving is 1.777745 s with descriptive
+SE 0.679835 s. The losing pair and all other samples are retained. All twelve
+builds match 193 artifacts, with 167 Rust misses and 24 native misses and
+no hits, and unchanged tracked sources. Unit and real Rust/Zig integration
+pass. The scope fixture proves unchanged full fingerprints, reuse across
+selectors choosing the same compiler, and invalidation when the caller
+selector actively chooses Rust 1.98.1 instead of 1.97.1. Three diagnostic
+warm restores retain 167 Rust/24 native hits and matching artifacts.
+The candidate remains isolated pending independent confirmation and broader
+gates; this batch does not compare kache. The accepted version now passes
+both Linux and macOS CI.
+[Candidate method and patch](../docs/selected-decoder-experiment.md);
+[cold pairs](harness-selected-decoder-cold-paired.json);
+[warm correctness](harness-selected-decoder-warm-check.json);
+[accepted-version CI evidence](decoder-ci-validation.json).

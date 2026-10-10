@@ -92,5 +92,6 @@ python3 benchmarks/experiments/cargo_timing_capture.py \
 [all cold phases](../benchmarks/harness-decoder-graph-cold-phases.json),
 [all graph records](../benchmarks/harness-decoder-graph-profile.json), and
 [diagnostic test gates](../benchmarks/decoder-graph-profile-check.json)
-retain provenance. Linux CI for the adopted core passed; macOS CI remains
-queued at publication. The local diagnostic does not replace that check.
+retain provenance. The adopted core now passes Linux and macOS CI;
+[hosted job/scope evidence](../benchmarks/decoder-ci-validation.json)
+is separate from this local diagnostic capture.

@@ -51,9 +51,12 @@ env RUSTUP_TOOLCHAIN=1.97.1 python3 tests/project_comparison.py \
 [Full build report](../benchmarks/harness-decoder-nine-samples.json),
 [all-sample analysis](../benchmarks/harness-decoder-nine-analysis.json) and
 [summary script](../benchmarks/experiments/three_way_summary.py) retain the evidence.
-Local adoption gates pass. At publication, the adopted revision's
+Local adoption gates pass. The adopted revision's
 [CI run](https://github.com/justrach/nanocompile/actions/runs/38007374944)
-has passed Linux and macOS is queued; cross-platform validation is pending.
+now passes Linux and macOS, including the scope fixture on both hosts.
+[Hosted CI evidence](../benchmarks/decoder-ci-validation.json) retains job
+results and both scope artifacts. These fixture checks are separate from
+the local Harness performance comparison.
 
 The [previous integrated-cc1 comparison](clang-integrated-nine-samples.md)
 reported a larger warm gap with more kache variability. The earlier
