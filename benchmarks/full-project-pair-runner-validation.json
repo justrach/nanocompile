@@ -1,0 +1,36 @@
+{
+  "scope": "Actual tiny Rust library and executable scheduling/artifact/log validation; no performance claim",
+  "runner_sha256": "4940cce5afdd9f1090b2748a42e188fbf00ef717097a692adf94c40e98f9b42a",
+  "checks": [
+    {
+      "kind": "tiny",
+      "report_sha256": "0ce455cf249813f32eb97bcc38913d8d4f290213d2bd5f24b6e9e45a313c4b70",
+      "binary_sha256": {
+        "baseline": "afca7d75dde84cd87592987a553c765f50ca43a2ca2655beb072915c5b648811",
+        "candidate": "1334413436ce3d00b7f4e7f6859ab6babc6c7d89daca08ddf9ec6c37d6138f71"
+      },
+      "verified_logs": {
+        "verified_build_logs": 6
+      },
+      "builds": 6,
+      "own_artifact_bytes_and_modes": true,
+      "cli_help": false,
+      "tracked_sources_unchanged": true
+    },
+    {
+      "kind": "binary",
+      "report_sha256": "846288d081cbf363170f07e104a49d66ab38327ff73ddbd991dbd213fe1c08c9",
+      "binary_sha256": {
+        "baseline": "afca7d75dde84cd87592987a553c765f50ca43a2ca2655beb072915c5b648811",
+        "candidate": "1334413436ce3d00b7f4e7f6859ab6babc6c7d89daca08ddf9ec6c37d6138f71"
+      },
+      "verified_logs": {
+        "verified_build_logs": 6
+      },
+      "builds": 6,
+      "own_artifact_bytes_and_modes": true,
+      "cli_help": true,
+      "tracked_sources_unchanged": true
+    }
+  ]
+}
