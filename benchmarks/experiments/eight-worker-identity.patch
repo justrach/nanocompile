@@ -1,0 +1,11 @@
+--- a/src/identity.zig
++++ b/src/identity.zig
+@@ -172,7 +172,7 @@
+     var next: std.atomic.Value(usize) = .init(0);
+     var group: std.Io.Group = .init;
+     defer group.cancel(ctx.io);
+-    const workers = @min(@as(usize, 4), std.Thread.getCpuCount() catch 1);
++    const workers = @min(@as(usize, 8), std.Thread.getCpuCount() catch 1);
+     for (1..@max(workers, 1)) |_| group.concurrent(ctx.io, rustDigestWorker, .{ ctx, stamps, jobs, &next }) catch break;
+     rustDigestWorker(ctx, stamps, jobs, &next);
+     try group.await(ctx.io);

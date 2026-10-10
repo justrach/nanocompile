@@ -1,0 +1,49 @@
+diff --git a/src/identity.zig b/src/identity.zig
+index 7ba7fd6..107e07b 100644
+--- a/src/identity.zig
++++ b/src/identity.zig
+@@ -140,10 +140,11 @@ pub fn installedFileDigest(ctx: *cache.Context, path: []const u8) ![]const u8 {
+ }
+ 
+ const RustDigestJob = struct { hash: [64]u8 = undefined, err: ?anyerror = null };
+-fn rustDigestWorker(ctx: *cache.Context, stamps: []const Stamp, jobs: []RustDigestJob, next: *std.atomic.Value(usize)) void {
++fn rustDigestWorker(ctx: *cache.Context, stamps: []const Stamp, order: []const usize, jobs: []RustDigestJob, next: *std.atomic.Value(usize)) void {
+     while (true) {
+-        const i = next.fetchAdd(1, .monotonic);
+-        if (i >= stamps.len) return;
++        const position = next.fetchAdd(1, .monotonic);
++        if (position >= order.len) return;
++        const i = order[position];
+         const expected = stamps[i];
+         if (!expected.exists or expected.kind != .file) continue;
+         // Independent allocators keep concurrent memo reads, locks and atomic
+@@ -169,12 +170,27 @@ fn parallelRustDigests(ctx: *cache.Context, stamps: []const Stamp) !?[]RustDiges
+     if (count < 16 or size < 8 * 1024 * 1024) return null;
+     const jobs = try ctx.a.alloc(RustDigestJob, stamps.len);
+     for (jobs) |*job| job.* = .{};
++    // Start large installed files first so a late large resource cannot leave
++    // the other workers idle. Results keep their original sorted stamp indices;
++    // scheduling never changes fingerprint order or any content/stamp checks.
++    const order = try ctx.a.alloc(usize, count);
++    var position: usize = 0;
++    for (stamps, 0..) |st, i| if (st.exists and st.kind == .file) {
++        order[position] = i;
++        position += 1;
++    };
++    std.mem.sort(usize, order, stamps, struct {
++        fn less(items: []const Stamp, left: usize, right: usize) bool {
++            if (items[left].size == items[right].size) return left < right;
++            return items[left].size > items[right].size;
++        }
++    }.less);
+     var next: std.atomic.Value(usize) = .init(0);
+     var group: std.Io.Group = .init;
+     defer group.cancel(ctx.io);
+     const workers = @min(@as(usize, 4), std.Thread.getCpuCount() catch 1);
+-    for (1..@max(workers, 1)) |_| group.concurrent(ctx.io, rustDigestWorker, .{ ctx, stamps, jobs, &next }) catch break;
+-    rustDigestWorker(ctx, stamps, jobs, &next);
++    for (1..@max(workers, 1)) |_| group.concurrent(ctx.io, rustDigestWorker, .{ ctx, stamps, order, jobs, &next }) catch break;
++    rustDigestWorker(ctx, stamps, order, jobs, &next);
+     try group.await(ctx.io);
+     return jobs;
+ }

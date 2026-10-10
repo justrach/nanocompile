@@ -1,0 +1,17 @@
+{
+  "base_commit": "83673363fd8b4eb6c4d28b52bb2ac1574d7bf343",
+  "production_changed": false,
+  "decisions": {
+    "largest_first": "rejected: 2/11 isolated cold wins and slower median",
+    "eight_workers": "not promoted: isolated 11/11 wins did not establish dependable whole-Harness improvement"
+  },
+  "source_patches": {
+    "largest-first-identity.patch": "50784038fc5ae5cd80e4ae5a40627307597dcaf91f8c065fa0e2babb732b4c56",
+    "eight-worker-identity.patch": "0f0f0ca2aa04fe245d856bdda1906294d4aeb75b27de09ad25b17f18336eef92"
+  },
+  "binary_sha256": {
+    "baseline": "977ffde7c47c9ad024f0ae8219b3c0395729d7c99bbce919cacfc04e95daf2a0",
+    "eight_workers": "25be45a4c47333f2debf9d60aa695b1356e9ed07839c61e90726bd48f8d4aa4c",
+    "largest_first": "f20e63f68d577ecf28102dda7ce5cb58c7e54af2fc82917ced2c986e7fa34faa"
+  }
+}

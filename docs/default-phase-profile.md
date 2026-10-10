@@ -25,3 +25,5 @@ Instrumentation lives only in the retained [patch](../benchmarks/experiments/def
 4. Split validation/graph/storage timings before attempting to reduce the separate cold save outliers. Full mutable inputs and output validation must remain mandatory. Record rejected variations and retain every timing sample; promote only repeatable whole-build gains.
 
 The current production runtime's [repeated cold/warm results and verified edits](default-pipelining.md) remain the performance evidence. This profile establishes the next measured target, not a new speedup.
+
+The [follow-up scheduling experiments](rust-fingerprint-concurrency.md) reject largest-first order and decline to promote eight workers: lower isolated fingerprint time did not yield a dependable additional whole-Harness gain. Production retains four workers; validation/graph/storage attribution is the next target.

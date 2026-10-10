@@ -18,7 +18,7 @@ def main():
     args=p.parse_args();assert args.runs>0
     binaries={name:getattr(args,name).resolve() for name in ('baseline','candidate')}
     env={k:v for k,v in os.environ.items() if not k.startswith(('NANOCOMPILE_','R2_','KACHE_'))}
-    rows=[];digests=set()
+    rows=[];digests=set();decoder_digests=set()
     with tempfile.TemporaryDirectory(prefix='nano installed tree ') as tmp:
         for pair in range(args.runs):
             order=('baseline','candidate') if pair%2==0 else ('candidate','baseline')
@@ -31,10 +31,13 @@ def main():
                     row=json.loads(raw);digests.add(row['hash'])
                     memos=list((root/'toolchains').glob('*'));assert len(memos)==1
                     memo=json.loads(memos[0].read_bytes()[65:])
+                    decoder_digests.add(memo['decoder_hash'])
                     rows.append(dict(pair=pair,implementation=name,phase=phase,wall_seconds=wall,
                         fingerprint_seconds=row['elapsed_ns']/1e9,hash=row['hash'],stamps=len(memo['stamps']),links=0,
+                        decoder_hash=memo['decoder_hash'],resource_bytes=sum(s['size'] for s in memo['stamps'] if s['exists'] and s['kind']=='file'),
                         independent_file_memos=len(list((root/'toolchain-files').glob('*')))))
         assert len(digests)==1,'Both variants must fingerprint exactly the same complete input graph'
+        assert len(decoder_digests)==1,'Both variants must preserve the selected decoder content identity'
     report=dict(script_sha256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
         binary_sha256={name:hashlib.sha256(path.read_bytes()).hexdigest() for name,path in binaries.items()},
         tree=str(args.tree.resolve()),runs=args.runs,observations=rows,
