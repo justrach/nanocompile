@@ -63,3 +63,14 @@ HTTP server performs a reverse DNS lookup during bind; the loopback adapter now
 skips that unnecessary lookup. A regression test starts it with an unavailable
 resolver, and both hosted Mac checks passed after this change. The original
 failed Mac run is not included as successful evidence.
+
+## Selected-resource revision refresh
+
+[Fresh actual R2 validation](https://github.com/justrach/nanocompile/actions/runs/38010359904) passes on both Ubuntu 24.04 and macOS 26 for source `3fdc90645289254397e51eccf37a21ba9bb1233e`. Both restored tasks record remote hits, zero executions and output hashes matching the cold build. Dependency, site, environment and corruption checks retain the expected execution patterns.
+
+| Runner | Empty-cache build | Remote restore | Restore after R2 snapshot |
+| --- | ---: | ---: | ---: |
+| Ubuntu 24.04 | 0.454 s | 0.126 s | 0.130 s |
+| macOS 26 | 1.178 s | 0.082 s | 0.099 s |
+
+These remain single-sample fixture demonstrations; S3 transfer time is outside task timers. [Linux raw results](turbo-selected-decoder-r2-linux.json) and [Mac raw results](turbo-selected-decoder-r2-macos.json) preserve all samples and versions.
