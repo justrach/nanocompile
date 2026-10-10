@@ -1,0 +1,391 @@
+{
+  "schema": 1,
+  "packages": [
+    {
+      "package": "ring",
+      "inputs": [
+        ".",
+        "/usr/local/include"
+      ],
+      "tools": [
+        "ar",
+        "ranlib",
+        "/Library/Developer/CommandLineTools/usr/bin/ranlib"
+      ],
+      "installed_inputs": [
+        "/Library/Developer/CommandLineTools/usr/lib/libLTO.dylib"
+      ],
+      "apple_native": true,
+      "apple_tools": [
+        "ar"
+      ]
+    },
+    {
+      "package": "libsqlite3-sys",
+      "inputs": [
+        ".",
+        "/usr/local/include"
+      ],
+      "tools": [
+        "ar",
+        "ranlib",
+        "/Library/Developer/CommandLineTools/usr/bin/ranlib"
+      ],
+      "installed_inputs": [
+        "/Library/Developer/CommandLineTools/usr/lib/libLTO.dylib"
+      ],
+      "apple_native": true,
+      "apple_tools": [
+        "ar"
+      ],
+      "environment": [
+        {
+          "name": "CARGO_PKG_VERSION",
+          "value": "0.30.1"
+        },
+        {
+          "name": "CARGO_FEATURE_BUNDLED",
+          "value": "1"
+        },
+        {
+          "name": "CARGO_FEATURE_BUNDLED_BINDINGS",
+          "value": "1"
+        },
+        {
+          "name": "CARGO_CFG_TARGET_OS",
+          "value": "macos"
+        },
+        {
+          "name": "HOST",
+          "value": "aarch64-apple-darwin"
+        },
+        {
+          "name": "TARGET",
+          "value": "aarch64-apple-darwin"
+        },
+        {
+          "name": "DEBUG",
+          "value": "false"
+        },
+        {
+          "name": "OPT_LEVEL",
+          "value": "3"
+        },
+        {
+          "name": "AR",
+          "value": null
+        },
+        {
+          "name": "ARFLAGS",
+          "value": null
+        },
+        {
+          "name": "ARFLAGS_aarch64-apple-darwin",
+          "value": null
+        },
+        {
+          "name": "ARFLAGS_aarch64_apple_darwin",
+          "value": null
+        },
+        {
+          "name": "AR_aarch64-apple-darwin",
+          "value": null
+        },
+        {
+          "name": "AR_aarch64_apple_darwin",
+          "value": null
+        },
+        {
+          "name": "CARGO_FEATURE_BUILDTIME_BINDGEN",
+          "value": null
+        },
+        {
+          "name": "CARGO_FEATURE_BUNDLED_SQLCIPHER",
+          "value": null
+        },
+        {
+          "name": "CARGO_FEATURE_BUNDLED_SQLCIPHER_VENDORED_OPENSSL",
+          "value": null
+        },
+        {
+          "name": "CARGO_FEATURE_IN_GECKO",
+          "value": null
+        },
+        {
+          "name": "CARGO_FEATURE_LOADABLE_EXTENSION",
+          "value": null
+        },
+        {
+          "name": "CARGO_FEATURE_SQLCIPHER",
+          "value": null
+        },
+        {
+          "name": "CARGO_FEATURE_WASM32_WASI_VFS",
+          "value": null
+        },
+        {
+          "name": "CC",
+          "value": null
+        },
+        {
+          "name": "CC_FORCE_DISABLE",
+          "value": null
+        },
+        {
+          "name": "CC_KNOWN_WRAPPER_CUSTOM",
+          "value": null
+        },
+        {
+          "name": "CC_SHELL_ESCAPED_FLAGS",
+          "value": null
+        },
+        {
+          "name": "CC_aarch64-apple-darwin",
+          "value": null
+        },
+        {
+          "name": "CC_aarch64_apple_darwin",
+          "value": null
+        },
+        {
+          "name": "CFLAGS",
+          "value": null
+        },
+        {
+          "name": "CFLAGS_aarch64-apple-darwin",
+          "value": null
+        },
+        {
+          "name": "CFLAGS_aarch64_apple_darwin",
+          "value": null
+        },
+        {
+          "name": "COMPILER_PATH",
+          "value": null
+        },
+        {
+          "name": "CPATH",
+          "value": null
+        },
+        {
+          "name": "CPLUS_INCLUDE_PATH",
+          "value": null
+        },
+        {
+          "name": "CPPFLAGS",
+          "value": null
+        },
+        {
+          "name": "CPPFLAGS_aarch64-apple-darwin",
+          "value": null
+        },
+        {
+          "name": "CPPFLAGS_aarch64_apple_darwin",
+          "value": null
+        },
+        {
+          "name": "CRATE_CC_NO_DEFAULTS",
+          "value": null
+        },
+        {
+          "name": "CROSS_COMPILE",
+          "value": null
+        },
+        {
+          "name": "CXX",
+          "value": null
+        },
+        {
+          "name": "CXXFLAGS",
+          "value": null
+        },
+        {
+          "name": "CXXFLAGS_aarch64-apple-darwin",
+          "value": null
+        },
+        {
+          "name": "CXXFLAGS_aarch64_apple_darwin",
+          "value": null
+        },
+        {
+          "name": "CXX_aarch64-apple-darwin",
+          "value": null
+        },
+        {
+          "name": "CXX_aarch64_apple_darwin",
+          "value": null
+        },
+        {
+          "name": "C_INCLUDE_PATH",
+          "value": null
+        },
+        {
+          "name": "DEVELOPER_DIR",
+          "value": null
+        },
+        {
+          "name": "DYLD_INSERT_LIBRARIES",
+          "value": null
+        },
+        {
+          "name": "DYLD_LIBRARY_PATH",
+          "value": null
+        },
+        {
+          "name": "GCC_EXEC_PREFIX",
+          "value": null
+        },
+        {
+          "name": "HOST_AR",
+          "value": null
+        },
+        {
+          "name": "HOST_ARFLAGS",
+          "value": null
+        },
+        {
+          "name": "HOST_CC",
+          "value": null
+        },
+        {
+          "name": "HOST_CFLAGS",
+          "value": null
+        },
+        {
+          "name": "HOST_CPPFLAGS",
+          "value": null
+        },
+        {
+          "name": "HOST_CXX",
+          "value": null
+        },
+        {
+          "name": "HOST_CXXFLAGS",
+          "value": null
+        },
+        {
+          "name": "HOST_RANLIB",
+          "value": null
+        },
+        {
+          "name": "HOST_RANLIBFLAGS",
+          "value": null
+        },
+        {
+          "name": "LIBRARY_PATH",
+          "value": null
+        },
+        {
+          "name": "LIBSQLITE3_FLAGS",
+          "value": null
+        },
+        {
+          "name": "LIBSQLITE3_SYS_USE_PKG_CONFIG",
+          "value": null
+        },
+        {
+          "name": "MACOSX_DEPLOYMENT_TARGET",
+          "value": null
+        },
+        {
+          "name": "OBJC_INCLUDE_PATH",
+          "value": null
+        },
+        {
+          "name": "RANLIB",
+          "value": null
+        },
+        {
+          "name": "RANLIBFLAGS",
+          "value": null
+        },
+        {
+          "name": "RANLIBFLAGS_aarch64-apple-darwin",
+          "value": null
+        },
+        {
+          "name": "RANLIBFLAGS_aarch64_apple_darwin",
+          "value": null
+        },
+        {
+          "name": "RANLIB_aarch64-apple-darwin",
+          "value": null
+        },
+        {
+          "name": "RANLIB_aarch64_apple_darwin",
+          "value": null
+        },
+        {
+          "name": "SDKROOT",
+          "value": null
+        },
+        {
+          "name": "SQLITE_MAX_COLUMN",
+          "value": null
+        },
+        {
+          "name": "SQLITE_MAX_EXPR_DEPTH",
+          "value": null
+        },
+        {
+          "name": "SQLITE_MAX_VARIABLE_NUMBER",
+          "value": null
+        },
+        {
+          "name": "TARGET_AR",
+          "value": null
+        },
+        {
+          "name": "TARGET_ARFLAGS",
+          "value": null
+        },
+        {
+          "name": "TARGET_CC",
+          "value": null
+        },
+        {
+          "name": "TARGET_CFLAGS",
+          "value": null
+        },
+        {
+          "name": "TARGET_CPPFLAGS",
+          "value": null
+        },
+        {
+          "name": "TARGET_CXX",
+          "value": null
+        },
+        {
+          "name": "TARGET_CXXFLAGS",
+          "value": null
+        },
+        {
+          "name": "TARGET_RANLIB",
+          "value": null
+        },
+        {
+          "name": "TARGET_RANLIBFLAGS",
+          "value": null
+        },
+        {
+          "name": "RUSTC_WRAPPER",
+          "value": "/private/tmp/nano-sqlite-guarded-20261011/bin/nanocompile"
+        }
+      ],
+      "tool_selection": [
+        {
+          "tool": "cc",
+          "path": "/usr/bin/cc"
+        },
+        {
+          "tool": "ar",
+          "path": "/usr/bin/ar"
+        },
+        {
+          "tool": "ranlib",
+          "path": "/usr/bin/ranlib"
+        }
+      ]
+    }
+  ]
+}

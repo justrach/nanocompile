@@ -3,7 +3,9 @@ const std = @import("std");
 const cache = @import("cache.zig");
 const identity = @import("identity.zig");
 const Dir = std.Io.Dir;
-const Contract = struct { package: []const u8, inputs: []const []const u8, tools: []const []const u8 = &.{}, installed_inputs: []const []const u8 = &.{}, apple_native: bool = false, apple_tools: []const []const u8 = &.{} };
+const ToolSelection = struct { tool: []const u8, path: []const u8 };
+const EnvironmentRule = struct { name: []const u8, value: ?[]const u8 = null };
+const Contract = struct { tool_selection: []const ToolSelection = &.{}, environment: []const EnvironmentRule = &.{}, package: []const u8, inputs: []const []const u8, tools: []const []const u8 = &.{}, installed_inputs: []const []const u8 = &.{}, apple_native: bool = false, apple_tools: []const []const u8 = &.{} };
 const Spec = struct { schema: u32 = 1, packages: []const Contract };
 const Launch = struct { real: []const u8 };
 const Receipt = struct { schema: u32 = 1, outputs: []const []const u8 };
@@ -21,6 +23,20 @@ fn contract(ctx: *cache.Context) !Contract {
     for (parsed.value.packages) |item| if (eq(item.package, name) and item.inputs.len > 0) return item;
     return error.NoContract;
 }
+// Execution-only constraints: Cargo's compiler environment need not contain
+// runtime feature selectors. Install a transparent shim, then refuse reuse
+// when the caller leaves the audited configuration.
+fn environmentMatches(ctx: *cache.Context, item: Contract) bool {
+    for (item.environment) |rule| {
+        if (rule.name.len == 0) return false;
+        const actual = ctx.env.get(rule.name);
+        if (rule.value) |expected| {
+            if (!eq(actual orelse return false, expected)) return false;
+        } else if (actual != null) return false;
+    }
+    return true;
+}
+
 const Snapshot = struct { records: []const cache.Dependency, epoch: []const u8 };
 fn state(h: *cache.Hash, path: []const u8, st: std.Io.File.Stat) void {
     cache.field(h, path);
@@ -107,6 +123,13 @@ fn material(ctx: *cache.Context, real: []const u8, argv: []const []const u8, ite
     var phase = profileStart(ctx);
     var h = cache.Hash.init(.{});
     cache.field(&h, "nano-build-script-explicit-v2");
+    for (item.tool_selection) |rule| {
+        const selected = try identity.selectedExecutable(ctx, rule.tool);
+        if (!std.fs.path.isAbsolute(rule.path) or !eq(selected, rule.path)) return error.UnsupportedContractToolSelection;
+        cache.field(&h, rule.tool);
+        cache.field(&h, selected);
+        cache.field(&h, try identity.installedFileDigest(ctx, selected));
+    }
     if (ctx.env.get("OUT_DIR")) |out| cache.field(&h, try Dir.cwd().realPathFileAlloc(ctx.io, out, ctx.a));
     cache.field(&h, ctx.cwd);
     cache.field(&h, real);
@@ -314,6 +337,11 @@ fn restoreOutputs(ctx: *cache.Context, key: []const u8, root: []const u8, paths:
 pub fn execute(ctx: *cache.Context, real: []const u8, args: []const []const u8) !u8 {
     ctx.prepare() catch return passthrough(ctx, real, args);
     const item = contract(ctx) catch return passthrough(ctx, real, args);
+    if (!environmentMatches(ctx, item)) {
+        ctx.event("build_script_bypass");
+        ctx.trace("build-script environment outside explicit contract");
+        return passthrough(ctx, real, args);
+    }
     if (eq(ctx.env.get("NANOCOMPILE_DISABLE") orelse "", "1")) return passthrough(ctx, real, args);
     if (!nullStdin(ctx)) {
         ctx.event("build_script_bypass");
@@ -496,4 +524,23 @@ test "snapshot reuse refuses changed input state before atomic publication" {
     try std.testing.expectEqualStrings("compiled", try ctx.read(output));
     var it = tmp.dir.iterate();
     while (try it.next(io)) |entry| try std.testing.expect(!std.mem.startsWith(u8, entry.name, ".nano-script-"));
+}
+
+test "execution contract distinguishes absent, empty and exact environment values" {
+    var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer arena.deinit();
+    const a = arena.allocator();
+    var env = std.process.Environ.Map.init(a);
+    var ctx: cache.Context = .{ .a = a, .io = std.testing.io, .env = &env, .root = "/unused", .cwd = "/unused" };
+    const item: Contract = .{ .package = "test", .inputs = &.{"."}, .environment = &.{ .{ .name = "MODE", .value = "bundled" }, .{ .name = "EXTERNAL_INCLUDE" } } };
+    try std.testing.expect(!environmentMatches(&ctx, item));
+    try env.put("MODE", "bundled");
+    try std.testing.expect(environmentMatches(&ctx, item));
+    try env.put("EXTERNAL_INCLUDE", "");
+    try std.testing.expect(!environmentMatches(&ctx, item));
+    _ = env.swapRemove("EXTERNAL_INCLUDE");
+    try env.put("MODE", "linked");
+    try std.testing.expect(!environmentMatches(&ctx, item));
+    try env.put("MODE", "bundled");
+    try std.testing.expect(environmentMatches(&ctx, item));
 }

@@ -1,0 +1,26 @@
+{
+  "binary_sha256": "27d4f6fd0d1be3ca1145c41191329d1e5b5570a3677c9158dc28734c7ad5e696",
+  "script_sha256": "50741f4fd92d32452affe14050acf07ed4f220597d95b80c8d92894fc415d6a6",
+  "checks": [
+    "real Cargo cold execution and warm restored executable agree",
+    "declared tool bytes with preserved mtime invalidate and revert safely",
+    "same-size preserved-mtime mutable source edit and revert",
+    "linked installed target content, link retarget and directory membership invalidate",
+    "environment changes invalidate execution",
+    "restored stdout and stderr match executed streams",
+    "read-only OUT_DIR bypasses cached success and preserves the real script failure",
+    "staging permission failure leaves OUT_DIR empty without replay; subsequent atomic hit restores all outputs and permissions",
+    "non-null stdin bypass preserves incoming bytes",
+    "failed executions never cached and preserve exit code",
+    "nested outputs execute each time rather than partially restoring",
+    "corrupt receipt reruns rather than accepting incomplete evidence",
+    "corrupt output blobs rerun and produce correct output",
+    "jobserver descriptors preserved on cache miss, disabled and missing-contract fallback",
+    "disabled installed shim executes the real script",
+    "cache-store permission failure preserves successful execution and correct output",
+    "execution-only exact/absent environment constraints preserve live fallback and reuse on return",
+    "required resolved executable selection rejects unaudited tools and restores on return",
+    "stats count script decisions; clear removes receipts/resources and forces a correct fresh miss then hit",
+    "live xcrun-selected system-only archiver participates in identities on this installation"
+  ]
+}

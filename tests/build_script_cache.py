@@ -207,6 +207,29 @@ fn main(){
         finally:
             directory.chmod(mode)
         checks.append('cache-store permission failure preserves successful execution and correct output')
+        spec=json.loads(config.read_text())
+        spec['packages'][0]['environment']=[dict(name='EXTRA',value='3'),dict(name='UNDECLARED_INCLUDE',value=None)]
+        config.write_text(json.dumps(spec))
+        launch_script('build_script_miss')
+        launch_script('build_script_hit')
+        menv['EXTRA']='4'
+        launch_script('build_script_bypass')
+        assert 'VALUE:u32=66' in (manual/'value.rs').read_text()
+        menv['EXTRA']='3';menv['UNDECLARED_INCLUDE']=''
+        launch_script('build_script_bypass')
+        del menv['UNDECLARED_INCLUDE']
+        launch_script('build_script_hit')
+        checks.append('execution-only exact/absent environment constraints preserve live fallback and reuse on return')
+        spec['packages'][0]['tool_selection']=[dict(tool=str(tool),path=str(tool.resolve()))]
+        config.write_text(json.dumps(spec))
+        launch_script('build_script_miss');launch_script('build_script_hit')
+        spec['packages'][0]['tool_selection'][0]['path']=str(project/'input')
+        config.write_text(json.dumps(spec))
+        launch_script('build_script_bypass')
+        spec['packages'][0]['tool_selection'][0]['path']=str(tool.resolve())
+        config.write_text(json.dumps(spec))
+        launch_script('build_script_hit')
+        checks.append('required resolved executable selection rejects unaudited tools and restores on return')
         from collections import Counter
         counts=Counter(events())
         stats=subprocess.check_output([str(binary),'stats'],env=env,text=True)

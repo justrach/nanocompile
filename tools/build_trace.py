@@ -268,7 +268,7 @@ def analyze(report, output):
             claim='Diagnostic hypothesis; interval gap is not predicted wall-time savings'))
     provenance = {key: data[key] for key in ('commit', 'nanocompile_sha256', 'kache_sha256',
                   'kache_version', 'rustc', 'script_sha256', 'jobs', 'timestamp',
-                  'diagnostic_trace', 'compiler_stream', 'pipelined_companions', 'native_clang', 'native_artifacts', 'portable_cc',
+                  'diagnostic_trace', 'script_profile', 'thin_lto_producers', 'compiler_stream', 'pipelined_companions', 'native_clang', 'native_artifacts', 'portable_cc',
                   'command', 'runs', 'cold_runs', 'cold_only', 'dirty', 'method', 'nanocompile_proc_macros',
                   'nanocompile_proc_macro_producers', 'nanocompile_executable_producers',
                   'build_script_contract_sha256', 'kache_build_script_cache', 'source_date_epoch',

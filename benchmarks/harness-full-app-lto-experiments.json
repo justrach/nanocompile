@@ -1,0 +1,505 @@
+{
+  "schema": 1,
+  "provenance": {
+    "commit": "32b41cb0bff55e3c9cbfab3012acec2b179ad199",
+    "nanocompile_sha256": "1d2f3e56d26ef51ffa5fbb43e090b397fce871d7837d556786927e90507e043c",
+    "kache_sha256": "0e4ab2b2f651f1c3685fe31b9ad7d0008ce12c44332e5e4842fa5257a0a82cd0",
+    "kache_version": "kache 1.0.0",
+    "rustc": "rustc 1.97.1 (8bab26f4f 2026-07-14)\nbinary: rustc\ncommit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452\ncommit-date: 2026-07-14\nhost: aarch64-apple-darwin\nrelease: 1.97.1\nLLVM version: 22.1.6\n",
+    "script_sha256": "766f3a98ef2d8cb885b5451ff4cba7dad7ae8e9727a20f6c2bbf478d38e1a0dc",
+    "jobs": 8,
+    "timestamp": "2026-10-10T18:40:30.368743+00:00",
+    "diagnostic_trace": true,
+    "script_profile": true,
+    "thin_lto_producers": true,
+    "compiler_stream": null,
+    "pipelined_companions": null,
+    "native_clang": false,
+    "native_artifacts": true,
+    "portable_cc": false,
+    "command": [
+      "cargo",
+      "build",
+      "--release",
+      "--locked",
+      "--offline",
+      "--bin",
+      "harness",
+      "-p",
+      "harness",
+      "-j",
+      "8",
+      "--message-format=json-render-diagnostics",
+      "--timings",
+      "-vv"
+    ],
+    "runs": 1,
+    "cold_runs": 1,
+    "cold_only": false,
+    "dirty": true,
+    "method": "offline clean release package builds; same target path; prime direct build then empty caches; rotate three-way warm measurement order unless cold-only; validate each wrapper against its own cold artifact hashes (kache remaps paths); cold pairs alternate wrapper order, clear both compiler caches, and restart the private kache daemon outside timing; Cargo target removed every build; OS filesystem cache is not flushed",
+    "nanocompile_proc_macros": "reported",
+    "nanocompile_proc_macro_producers": true,
+    "nanocompile_executable_producers": true,
+    "build_script_contract_sha256": "3353e4d1252a1c554254195e919380ec840bd8a6bb07402c930c69a3ff7be4a5",
+    "kache_build_script_cache": true,
+    "source_date_epoch": "1791423832",
+    "binary_target": "harness",
+    "cli_help_probe": true,
+    "completed": true,
+    "analyzer_sha256": "c129a986c8f078a13db011e819f05e630be30b457c60af43c89249c4b2171a0b",
+    "report_sha256": "2891537c64444c1272ed46f8f832b10abba735326bc6856a8b8d0df71ff1db8a"
+  },
+  "instruction": "Reproduce this configuration before changing one cause; freeze the baseline binary and keep diagnostic and untraced benchmark results separate",
+  "candidate_limit": 12,
+  "excluded_builds": [],
+  "complete_comparisons": "analysis.json",
+  "uncached_work": [
+    {
+      "build": 1,
+      "phase": "cold",
+      "name": "tree_sitter_highlight",
+      "seconds": 1.363338,
+      "reason": "UnsupportedCrateType",
+      "instruction": "Inspect exact compiler arguments and the rejecting guard. Extend support only after measuring this configuration and proving complete input discovery, miss/hit byte and mode equality, edits/reverts and toolchain invalidation. Retain passthrough for unsupported cases.",
+      "claim": "Uncached request interval; potential reuse applies only to matching inputs and does not predict cold-build savings."
+    },
+    {
+      "build": 1,
+      "phase": "cold",
+      "name": "wry",
+      "seconds": 1.328091,
+      "reason": "UnsupportedNativeLibrary",
+      "instruction": "Inspect exact compiler arguments and the rejecting guard. Extend support only after measuring this configuration and proving complete input discovery, miss/hit byte and mode equality, edits/reverts and toolchain invalidation. Retain passthrough for unsupported cases.",
+      "claim": "Uncached request interval; potential reuse applies only to matching inputs and does not predict cold-build savings."
+    },
+    {
+      "build": 4,
+      "phase": "warm",
+      "name": "tree_sitter_highlight",
+      "seconds": 0.817381,
+      "reason": "UnsupportedCrateType",
+      "instruction": "Inspect exact compiler arguments and the rejecting guard. Extend support only after measuring this configuration and proving complete input discovery, miss/hit byte and mode equality, edits/reverts and toolchain invalidation. Retain passthrough for unsupported cases.",
+      "claim": "Uncached request interval; potential reuse applies only to matching inputs and does not predict cold-build savings."
+    },
+    {
+      "build": 4,
+      "phase": "warm",
+      "name": "wry",
+      "seconds": 0.815689,
+      "reason": "UnsupportedNativeLibrary",
+      "instruction": "Inspect exact compiler arguments and the rejecting guard. Extend support only after measuring this configuration and proving complete input discovery, miss/hit byte and mode equality, edits/reverts and toolchain invalidation. Retain passthrough for unsupported cases.",
+      "claim": "Uncached request interval; potential reuse applies only to matching inputs and does not predict cold-build savings."
+    }
+  ],
+  "experiments": [
+    {
+      "priority": 1,
+      "observation": {
+        "phase": "warm",
+        "kind": "cargo",
+        "mode": "run-custom-build",
+        "name": "libsqlite3-sys 0.30.1  build-script (run) features=bundled,bundled_bindings,cc,default,min_sqlite_version_3_14_0,pkg-config,vcpkg",
+        "nanocompile": {
+          "samples": 1,
+          "median_seconds": 12.45,
+          "min_seconds": 12.45,
+          "max_seconds": 12.45
+        },
+        "kache": {
+          "samples": 1,
+          "median_seconds": 0.06,
+          "min_seconds": 0.06,
+          "max_seconds": 0.06
+        },
+        "nano_minus_kache_seconds": 12.389999999999999
+      },
+      "hypothesis": "Execution reuse may remove repeated work",
+      "next_measurement": "Inspect matching private records and instrument Nano stages; run one controlled ablation before changing behavior",
+      "implementation_instruction": "Add phase measurements around the suspected work, then change only that cause behind a reversible control. Preserve fallback execution and compare the control on/off with identical inputs.",
+      "rollback": "Keep the accepted binary frozen; reject the candidate on a correctness failure or a cold/warm regression that repeats in the confirmation session.",
+      "acceptance": [
+        "repeated alternating untraced A/B against frozen production and kache",
+        "real input edits and reverts invalidate correctly",
+        "loader, toolchain and environment changes invalidate correctly",
+        "source hashes stable and own-cold artifact hashes equal",
+        "report cold and warm regressions and rejected variations"
+      ],
+      "claim": "Diagnostic hypothesis; interval gap is not predicted wall-time savings"
+    },
+    {
+      "priority": 2,
+      "observation": {
+        "phase": "cold",
+        "kind": "cargo",
+        "mode": "todo",
+        "name": "harness 0.2.108  harness \"bin\" features=",
+        "nanocompile": {
+          "samples": 1,
+          "median_seconds": 68.81,
+          "min_seconds": 68.81,
+          "max_seconds": 68.81
+        },
+        "kache": {
+          "samples": 1,
+          "median_seconds": 65.07,
+          "min_seconds": 65.07,
+          "max_seconds": 65.07
+        },
+        "nano_minus_kache_seconds": 3.740000000000009
+      },
+      "hypothesis": "Identity, coordination or restore work may explain the interval gap",
+      "next_measurement": "Inspect matching private records and instrument Nano stages; run one controlled ablation before changing behavior",
+      "implementation_instruction": "Add phase measurements around the suspected work, then change only that cause behind a reversible control. Preserve fallback execution and compare the control on/off with identical inputs.",
+      "rollback": "Keep the accepted binary frozen; reject the candidate on a correctness failure or a cold/warm regression that repeats in the confirmation session.",
+      "acceptance": [
+        "repeated alternating untraced A/B against frozen production and kache",
+        "real input edits and reverts invalidate correctly",
+        "loader, toolchain and environment changes invalidate correctly",
+        "source hashes stable and own-cold artifact hashes equal",
+        "report cold and warm regressions and rejected variations"
+      ],
+      "claim": "Diagnostic hypothesis; interval gap is not predicted wall-time savings"
+    },
+    {
+      "priority": 3,
+      "observation": {
+        "phase": "cold",
+        "kind": "request",
+        "mode": "rust",
+        "name": "harness",
+        "nanocompile": {
+          "samples": 1,
+          "median_seconds": 68.801436,
+          "min_seconds": 68.801436,
+          "max_seconds": 68.801436
+        },
+        "kache": {
+          "samples": 1,
+          "median_seconds": 65.06397,
+          "min_seconds": 65.06397,
+          "max_seconds": 65.06397
+        },
+        "nano_minus_kache_seconds": 3.7374659999999977
+      },
+      "hypothesis": "Identity, coordination or restore work may explain the interval gap",
+      "next_measurement": "Inspect matching private records and instrument Nano stages; run one controlled ablation before changing behavior",
+      "implementation_instruction": "Add phase measurements around the suspected work, then change only that cause behind a reversible control. Preserve fallback execution and compare the control on/off with identical inputs.",
+      "rollback": "Keep the accepted binary frozen; reject the candidate on a correctness failure or a cold/warm regression that repeats in the confirmation session.",
+      "acceptance": [
+        "repeated alternating untraced A/B against frozen production and kache",
+        "real input edits and reverts invalidate correctly",
+        "loader, toolchain and environment changes invalidate correctly",
+        "source hashes stable and own-cold artifact hashes equal",
+        "report cold and warm regressions and rejected variations"
+      ],
+      "claim": "Diagnostic hypothesis; interval gap is not predicted wall-time savings"
+    },
+    {
+      "priority": 4,
+      "observation": {
+        "phase": "warm",
+        "kind": "cargo",
+        "mode": "run-custom-build",
+        "name": "media 0.1.0  build-script (run) features=",
+        "nanocompile": {
+          "samples": 2,
+          "median_seconds": 3.085,
+          "min_seconds": 3.07,
+          "max_seconds": 3.1
+        },
+        "kache": {
+          "samples": 2,
+          "median_seconds": 0.215,
+          "min_seconds": 0.21,
+          "max_seconds": 0.22
+        },
+        "nano_minus_kache_seconds": 2.87
+      },
+      "hypothesis": "Execution reuse may remove repeated work",
+      "next_measurement": "Inspect matching private records and instrument Nano stages; run one controlled ablation before changing behavior",
+      "implementation_instruction": "Add phase measurements around the suspected work, then change only that cause behind a reversible control. Preserve fallback execution and compare the control on/off with identical inputs.",
+      "rollback": "Keep the accepted binary frozen; reject the candidate on a correctness failure or a cold/warm regression that repeats in the confirmation session.",
+      "acceptance": [
+        "repeated alternating untraced A/B against frozen production and kache",
+        "real input edits and reverts invalidate correctly",
+        "loader, toolchain and environment changes invalidate correctly",
+        "source hashes stable and own-cold artifact hashes equal",
+        "report cold and warm regressions and rejected variations"
+      ],
+      "claim": "Diagnostic hypothesis; interval gap is not predicted wall-time savings"
+    },
+    {
+      "priority": 5,
+      "observation": {
+        "phase": "warm",
+        "kind": "cargo",
+        "mode": "run-custom-build",
+        "name": "tree-sitter 0.26.11  build-script (run) features=default,std",
+        "nanocompile": {
+          "samples": 1,
+          "median_seconds": 2.2,
+          "min_seconds": 2.2,
+          "max_seconds": 2.2
+        },
+        "kache": {
+          "samples": 1,
+          "median_seconds": 0.05,
+          "min_seconds": 0.05,
+          "max_seconds": 0.05
+        },
+        "nano_minus_kache_seconds": 2.1500000000000004
+      },
+      "hypothesis": "Execution reuse may remove repeated work",
+      "next_measurement": "Inspect matching private records and instrument Nano stages; run one controlled ablation before changing behavior",
+      "implementation_instruction": "Add phase measurements around the suspected work, then change only that cause behind a reversible control. Preserve fallback execution and compare the control on/off with identical inputs.",
+      "rollback": "Keep the accepted binary frozen; reject the candidate on a correctness failure or a cold/warm regression that repeats in the confirmation session.",
+      "acceptance": [
+        "repeated alternating untraced A/B against frozen production and kache",
+        "real input edits and reverts invalidate correctly",
+        "loader, toolchain and environment changes invalidate correctly",
+        "source hashes stable and own-cold artifact hashes equal",
+        "report cold and warm regressions and rejected variations"
+      ],
+      "claim": "Diagnostic hypothesis; interval gap is not predicted wall-time savings"
+    },
+    {
+      "priority": 6,
+      "observation": {
+        "phase": "warm",
+        "kind": "cargo",
+        "mode": "run-custom-build",
+        "name": "tree-sitter-php 0.24.2  build-script (run) features=",
+        "nanocompile": {
+          "samples": 1,
+          "median_seconds": 1.47,
+          "min_seconds": 1.47,
+          "max_seconds": 1.47
+        },
+        "kache": {
+          "samples": 1,
+          "median_seconds": 0.03,
+          "min_seconds": 0.03,
+          "max_seconds": 0.03
+        },
+        "nano_minus_kache_seconds": 1.44
+      },
+      "hypothesis": "Execution reuse may remove repeated work",
+      "next_measurement": "Inspect matching private records and instrument Nano stages; run one controlled ablation before changing behavior",
+      "implementation_instruction": "Add phase measurements around the suspected work, then change only that cause behind a reversible control. Preserve fallback execution and compare the control on/off with identical inputs.",
+      "rollback": "Keep the accepted binary frozen; reject the candidate on a correctness failure or a cold/warm regression that repeats in the confirmation session.",
+      "acceptance": [
+        "repeated alternating untraced A/B against frozen production and kache",
+        "real input edits and reverts invalidate correctly",
+        "loader, toolchain and environment changes invalidate correctly",
+        "source hashes stable and own-cold artifact hashes equal",
+        "report cold and warm regressions and rejected variations"
+      ],
+      "claim": "Diagnostic hypothesis; interval gap is not predicted wall-time savings"
+    },
+    {
+      "priority": 7,
+      "observation": {
+        "phase": "warm",
+        "kind": "cargo",
+        "mode": "run-custom-build",
+        "name": "tree-sitter-typescript 0.23.2  build-script (run) features=",
+        "nanocompile": {
+          "samples": 1,
+          "median_seconds": 1.48,
+          "min_seconds": 1.48,
+          "max_seconds": 1.48
+        },
+        "kache": {
+          "samples": 1,
+          "median_seconds": 0.04,
+          "min_seconds": 0.04,
+          "max_seconds": 0.04
+        },
+        "nano_minus_kache_seconds": 1.44
+      },
+      "hypothesis": "Execution reuse may remove repeated work",
+      "next_measurement": "Inspect matching private records and instrument Nano stages; run one controlled ablation before changing behavior",
+      "implementation_instruction": "Add phase measurements around the suspected work, then change only that cause behind a reversible control. Preserve fallback execution and compare the control on/off with identical inputs.",
+      "rollback": "Keep the accepted binary frozen; reject the candidate on a correctness failure or a cold/warm regression that repeats in the confirmation session.",
+      "acceptance": [
+        "repeated alternating untraced A/B against frozen production and kache",
+        "real input edits and reverts invalidate correctly",
+        "loader, toolchain and environment changes invalidate correctly",
+        "source hashes stable and own-cold artifact hashes equal",
+        "report cold and warm regressions and rejected variations"
+      ],
+      "claim": "Diagnostic hypothesis; interval gap is not predicted wall-time savings"
+    },
+    {
+      "priority": 8,
+      "observation": {
+        "phase": "warm",
+        "kind": "cargo",
+        "mode": "run-custom-build",
+        "name": "tree-sitter-sequel 0.3.11  build-script (run) features=",
+        "nanocompile": {
+          "samples": 1,
+          "median_seconds": 1.45,
+          "min_seconds": 1.45,
+          "max_seconds": 1.45
+        },
+        "kache": {
+          "samples": 1,
+          "median_seconds": 0.02,
+          "min_seconds": 0.02,
+          "max_seconds": 0.02
+        },
+        "nano_minus_kache_seconds": 1.43
+      },
+      "hypothesis": "Execution reuse may remove repeated work",
+      "next_measurement": "Inspect matching private records and instrument Nano stages; run one controlled ablation before changing behavior",
+      "implementation_instruction": "Add phase measurements around the suspected work, then change only that cause behind a reversible control. Preserve fallback execution and compare the control on/off with identical inputs.",
+      "rollback": "Keep the accepted binary frozen; reject the candidate on a correctness failure or a cold/warm regression that repeats in the confirmation session.",
+      "acceptance": [
+        "repeated alternating untraced A/B against frozen production and kache",
+        "real input edits and reverts invalidate correctly",
+        "loader, toolchain and environment changes invalidate correctly",
+        "source hashes stable and own-cold artifact hashes equal",
+        "report cold and warm regressions and rejected variations"
+      ],
+      "claim": "Diagnostic hypothesis; interval gap is not predicted wall-time savings"
+    },
+    {
+      "priority": 9,
+      "observation": {
+        "phase": "cold",
+        "kind": "request",
+        "mode": "rust",
+        "name": "harness_preview",
+        "nanocompile": {
+          "samples": 1,
+          "median_seconds": 11.242686,
+          "min_seconds": 11.242686,
+          "max_seconds": 11.242686
+        },
+        "kache": {
+          "samples": 1,
+          "median_seconds": 9.949968,
+          "min_seconds": 9.949968,
+          "max_seconds": 9.949968
+        },
+        "nano_minus_kache_seconds": 1.2927180000000007
+      },
+      "hypothesis": "Identity, coordination or restore work may explain the interval gap",
+      "next_measurement": "Inspect matching private records and instrument Nano stages; run one controlled ablation before changing behavior",
+      "implementation_instruction": "Add phase measurements around the suspected work, then change only that cause behind a reversible control. Preserve fallback execution and compare the control on/off with identical inputs.",
+      "rollback": "Keep the accepted binary frozen; reject the candidate on a correctness failure or a cold/warm regression that repeats in the confirmation session.",
+      "acceptance": [
+        "repeated alternating untraced A/B against frozen production and kache",
+        "real input edits and reverts invalidate correctly",
+        "loader, toolchain and environment changes invalidate correctly",
+        "source hashes stable and own-cold artifact hashes equal",
+        "report cold and warm regressions and rejected variations"
+      ],
+      "claim": "Diagnostic hypothesis; interval gap is not predicted wall-time savings"
+    },
+    {
+      "priority": 10,
+      "observation": {
+        "phase": "warm",
+        "kind": "cargo",
+        "mode": "run-custom-build",
+        "name": "tree-sitter-swift 0.7.3  build-script (run) features=",
+        "nanocompile": {
+          "samples": 1,
+          "median_seconds": 1.32,
+          "min_seconds": 1.32,
+          "max_seconds": 1.32
+        },
+        "kache": {
+          "samples": 1,
+          "median_seconds": 0.03,
+          "min_seconds": 0.03,
+          "max_seconds": 0.03
+        },
+        "nano_minus_kache_seconds": 1.29
+      },
+      "hypothesis": "Execution reuse may remove repeated work",
+      "next_measurement": "Inspect matching private records and instrument Nano stages; run one controlled ablation before changing behavior",
+      "implementation_instruction": "Add phase measurements around the suspected work, then change only that cause behind a reversible control. Preserve fallback execution and compare the control on/off with identical inputs.",
+      "rollback": "Keep the accepted binary frozen; reject the candidate on a correctness failure or a cold/warm regression that repeats in the confirmation session.",
+      "acceptance": [
+        "repeated alternating untraced A/B against frozen production and kache",
+        "real input edits and reverts invalidate correctly",
+        "loader, toolchain and environment changes invalidate correctly",
+        "source hashes stable and own-cold artifact hashes equal",
+        "report cold and warm regressions and rejected variations"
+      ],
+      "claim": "Diagnostic hypothesis; interval gap is not predicted wall-time savings"
+    },
+    {
+      "priority": 11,
+      "observation": {
+        "phase": "cold",
+        "kind": "cargo",
+        "mode": "todo",
+        "name": "harness-preview 0.2.108  features=",
+        "nanocompile": {
+          "samples": 1,
+          "median_seconds": 11.25,
+          "min_seconds": 11.25,
+          "max_seconds": 11.25
+        },
+        "kache": {
+          "samples": 1,
+          "median_seconds": 9.96,
+          "min_seconds": 9.96,
+          "max_seconds": 9.96
+        },
+        "nano_minus_kache_seconds": 1.2899999999999991
+      },
+      "hypothesis": "Identity, coordination or restore work may explain the interval gap",
+      "next_measurement": "Inspect matching private records and instrument Nano stages; run one controlled ablation before changing behavior",
+      "implementation_instruction": "Add phase measurements around the suspected work, then change only that cause behind a reversible control. Preserve fallback execution and compare the control on/off with identical inputs.",
+      "rollback": "Keep the accepted binary frozen; reject the candidate on a correctness failure or a cold/warm regression that repeats in the confirmation session.",
+      "acceptance": [
+        "repeated alternating untraced A/B against frozen production and kache",
+        "real input edits and reverts invalidate correctly",
+        "loader, toolchain and environment changes invalidate correctly",
+        "source hashes stable and own-cold artifact hashes equal",
+        "report cold and warm regressions and rejected variations"
+      ],
+      "claim": "Diagnostic hypothesis; interval gap is not predicted wall-time savings"
+    },
+    {
+      "priority": 12,
+      "observation": {
+        "phase": "warm",
+        "kind": "cargo",
+        "mode": "run-custom-build",
+        "name": "tree-sitter-c-sharp 0.23.5  build-script (run) features=",
+        "nanocompile": {
+          "samples": 1,
+          "median_seconds": 1.18,
+          "min_seconds": 1.18,
+          "max_seconds": 1.18
+        },
+        "kache": {
+          "samples": 1,
+          "median_seconds": 0.05,
+          "min_seconds": 0.05,
+          "max_seconds": 0.05
+        },
+        "nano_minus_kache_seconds": 1.13
+      },
+      "hypothesis": "Execution reuse may remove repeated work",
+      "next_measurement": "Inspect matching private records and instrument Nano stages; run one controlled ablation before changing behavior",
+      "implementation_instruction": "Add phase measurements around the suspected work, then change only that cause behind a reversible control. Preserve fallback execution and compare the control on/off with identical inputs.",
+      "rollback": "Keep the accepted binary frozen; reject the candidate on a correctness failure or a cold/warm regression that repeats in the confirmation session.",
+      "acceptance": [
+        "repeated alternating untraced A/B against frozen production and kache",
+        "real input edits and reverts invalidate correctly",
+        "loader, toolchain and environment changes invalidate correctly",
+        "source hashes stable and own-cold artifact hashes equal",
+        "report cold and warm regressions and rejected variations"
+      ],
+      "claim": "Diagnostic hypothesis; interval gap is not predicted wall-time savings"
+    }
+  ]
+}
