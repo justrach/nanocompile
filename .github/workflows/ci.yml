@@ -48,6 +48,7 @@ jobs:
           python3 tests/executable_probe_check.py
           python3 tests/benchmark_storage_test.py
           python3 tests/build_trace_capture.py
+          python3 tests/script_phase_profiles.py
           python3 tests/r2_transport.py
           zig build -Doptimize=ReleaseFast
           zig build test

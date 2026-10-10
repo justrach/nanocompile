@@ -9,6 +9,7 @@ import shutil
 import statistics
 import subprocess
 import sys
+from script_phase_profiles import collect as collect_script_profiles
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -171,6 +172,7 @@ class Capture:
                 raw = json.loads(line)
                 service.append({k: v for k, v in raw.items() if k in allowed or isinstance(v, (int, float))})
         row['trace'] = dict(capture_directory=str(self.directory), requests=calls, cargo_units=units,
+                            script_phase_profiles=collect_script_profiles(self.directory),
                             kache_service_events=service, diagnostic=True,
                             limitations='Captured request CPU excludes daemon work. Cargo intervals are rounded and approximately aligned to process launch. Overlapping durations cannot be added to infer build savings. Cache service events are not joined to requests.')
         # Local audit manifest: retain every byte, including empty streams, and
@@ -196,6 +198,7 @@ def analyze(report, output):
     build_script_runs = []
     excluded_builds = []
     uncached_work = []
+    script_profiles, script_profile_coverage = [], []
     for index, build in enumerate(data['builds']):
         if (build.get('exit_code', 0) != 0 or build.get('cli_help_valid') is False
                 or any(value is False for key, value in build.items() if key.startswith('matches_'))):
@@ -204,6 +207,19 @@ def analyze(report, output):
             continue
         traces.append(dict(name='process_name', ph='M', pid=index, tid=0, args=dict(name=f"{index}: {build['implementation']} {build['phase']}")))
         trace = build.get('trace', {})
+        profiles = trace.get('script_phase_profiles')
+        profile_status = 'embedded' if profiles is not None else 'not_requested'
+        if profiles is None and data.get('script_profile') and build['implementation'] == 'nanocompile':
+            directory = trace.get('capture_directory')
+            if directory and Path(directory).is_dir():
+                verify_capture(Path(directory))
+                profiles = collect_script_profiles(Path(directory))
+                profile_status = 'verified_private_capture'
+            else:
+                profile_status = 'unavailable'
+        script_profiles.extend(dict(build=index, build_phase=build['phase'], implementation=build['implementation'], **row)
+                               for row in profiles or [])
+        script_profile_coverage.append(dict(build=index, status=profile_status, stage_rows=len(profiles or [])))
         if build['implementation'] == 'nanocompile':
             for request in trace.get('requests', []):
                 reasons = [line[len(prefix):] for line in request.get('nano_decisions', [])
@@ -274,15 +290,18 @@ def analyze(report, output):
                   'build_script_contract_sha256', 'kache_build_script_cache', 'source_date_epoch',
                   'binary_target', 'cli_help_probe', 'completed', 'failure') if key in data}
     provenance['analyzer_sha256'] = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
+    provenance['script_phase_parser_sha256'] = hashlib.sha256(Path(__file__).with_name('script_phase_profiles.py').read_bytes()).hexdigest()
     provenance['report_sha256'] = hashlib.sha256(report.read_bytes()).hexdigest()
     (output / 'experiments.json').write_text(json.dumps(dict(schema=1, provenance=provenance,
         instruction='Reproduce this configuration before changing one cause; freeze the baseline binary and keep diagnostic and untraced benchmark results separate',
         candidate_limit=12, excluded_builds=excluded_builds,
+        script_phase_profiles=script_profiles, script_profile_coverage=script_profile_coverage,
         complete_comparisons='analysis.json', uncached_work=uncached_work, experiments=experiments), indent=2)+'\n')
     (output / 'trace.json').write_text(json.dumps({'traceEvents': traces}))
     analysis = dict(diagnostic=True, excluded_builds=excluded_builds, uncached_work=uncached_work, comparisons=comparison, kache_service_summaries=service_summaries, kache_build_script_runs=build_script_runs,
+                    script_phase_profiles=script_profiles, script_profile_coverage=script_profile_coverage,
                     build_coverage=[dict(implementation=b["implementation"], phase=b["phase"], events=b.get("events", {}), capture_coverage=b.get('trace', {}).get('capture_coverage'), request_kinds=dict(collections.Counter(r["kind"] for r in b.get("trace", {}).get("requests", []))), own_artifact_checks={k: v for k, v in b.items() if k.startswith("matches_own_cold")}) for b in data["builds"]],
-                    limitations='compile_time_ms on cache hits can describe the stored original compilation; stage summaries exclude hit/dup compile_time_ms. Per-unit medians are scheduling-sensitive, unpaired diagnostic observations. Request durations overlap. Missing counterparts are unknown, not zero. No optimization or overall speed win is established by this capture.')
+                    limitations='compile_time_ms on cache hits can describe the stored original compilation; stage summaries exclude hit/dup compile_time_ms. Per-unit medians are scheduling-sensitive, unpaired diagnostic observations. Request durations overlap. Script phases describe logged calls and nested totals/publication overlap child stages; do not sum them into build savings. Missing counterparts are unknown, not zero. No optimization or overall speed win is established by this capture.')
     (output / 'analysis.json').write_text(json.dumps(analysis, indent=2) + '\n')
     brief = ['# Instructions for the next variation', '', analysis['limitations'], '',
              'Reproduce the captured configuration and freeze its exact binary as the experiment baseline. Also compare against the accepted production binary. Change one measured cause at a time. Preserve full content hashing, loader selection, native include discovery and artifact validation. Never optimize by skipping an unverified input.', '',
@@ -292,6 +311,12 @@ def analyze(report, output):
     if uncached_work:
         brief += ['', 'Uncached Nano work to investigate separately from interval gaps:', '']
         brief.extend(f"- {r['phase']} / {r['name']}: {r['seconds']:.6f}s, {r['reason']}. {r['instruction']} {r['claim']}" for r in uncached_work[:12])
+    if script_profiles:
+        brief += ['', 'Observed native-script phases (nested and overlapping; never add into projected build savings):', '']
+        observed = sorted((r for r in script_profiles if r['build_phase'] == 'warm' and not r['stage'].endswith('.total')),
+                          key=lambda r: r['median_seconds'], reverse=True)
+        brief.extend(f"- {r['script']} / {r['stage']}: {r['median_seconds']:.6f}s median of {r['samples']} logged calls. Inspect the source record and Cargo interval, then change one measured cause while preserving input hashing, live tool/SDK selection, restoration validation and failure fallback." for r in observed[:12])
+        brief += ['', 'All phase samples and source-log digests are in analysis.json and experiments.json. These are observed calls, not kache comparisons or critical-path estimates. An unavailable capture is unknown, not zero cost.']
     brief += ['', 'Kache service stage measurements (sums overlap and do not predict wall savings):', '', *[json.dumps(row, sort_keys=True) for row in service_summaries], '', 'Inspect the private compiler records and build-script logs for each candidate. Use kache service breakdowns to distinguish key, lookup, compile and restore costs; do not infer Nano stage costs from kache events. Add Nano phase instrumentation if that distinction is missing.', '',
               'Require repeated alternating untraced cold and warm pairs, actual source edits and reverts, zero cold hits, expected warm coverage, unchanged source hashes, and matching own-cold artifact bytes. Report rejected variations and uncertainty. Promote only repeatable improvements without correctness regressions.']
     nano_native = [sum(r['kind'] == 'native' for r in b.get('trace', {}).get('requests', [])) for b in data['builds'] if b['phase'] == 'warm' and b['implementation'] == 'nanocompile']
@@ -303,6 +328,11 @@ def analyze(report, output):
     body = ''.join('<tr>' + ''.join('<td>'+html.escape(str(v))+'</td>' for v in
                    (r['phase'], r['kind'], r['mode'], r['name'],
                     r['nanocompile'], r['kache'], r['nano_minus_kache_seconds'])) + '</tr>' for r in comparison)
+    if script_profiles:
+        body += ''.join('<tr>' + ''.join('<td>'+html.escape(str(v))+'</td>' for v in
+                       (r['build_phase'], 'script phase (nested)', r['stage'], r['script'],
+                        f"{r['median_seconds']:.6f}s; {r['samples']} logged calls", 'unknown', 'unknown')) + '</tr>'
+                        for r in script_profiles)
     (output / 'index.html').write_text('<!doctype html><meta charset="utf-8"><title>Build trace comparison</title><style>body{font:15px system-ui;margin:32px}td,th{padding:8px;text-align:left;border-bottom:1px solid #ddd}input{padding:10px;width:400px}</style><h1>Whole-build diagnostic comparison</h1><p>'+html.escape(analysis['limitations'])+'</p><p>Open trace.json in Perfetto for overlapping request and Cargo timelines. Full logs stay in the private capture directory.</p><input placeholder="Filter crate, mode or phase" oninput="for(const row of document.querySelectorAll(\'tbody tr\'))row.hidden=!row.textContent.toLowerCase().includes(this.value.toLowerCase())"><table><thead><tr>'+''.join('<th>'+v+'</th>' for v in ('Phase','Layer','Mode','Name','Nano','kache','Gap (s)'))+'</tr></thead><tbody>'+body+'</tbody></table>')
     return analysis
 
