@@ -95,15 +95,18 @@ def main():
         changed_source = run([str(binary), *rust])
         assert b'hit: proc-macro producer' not in changed_source.stderr
         consume(14)
-        entry_path = next((root / 'cache' / 'entries').iterdir())
-        entry = json.loads(entry_path.read_bytes().split(b'\n', 1)[1])
-        blob = next(o['hash'] for o in entry['outputs'] if o['path'].endswith('.dylib'))
-        (root / 'cache' / 'blobs' / blob[:2] / blob).write_bytes(b'corrupt')
+        # A valid historical manifest may recover a damaged primary. Damage
+        # every candidate when requiring a recompilation and repair.
+        for entry_path in (root / 'cache' / 'entries').iterdir():
+            entry = json.loads(entry_path.read_bytes().split(b'\n', 1)[1])
+            blob = next(o['hash'] for o in entry['outputs'] if o['path'].endswith('.dylib'))
+            (root / 'cache' / 'blobs' / blob[:2] / blob).write_bytes(b'corrupt')
         remove()
         repaired = run([str(binary), *rust])
         assert b'hit: proc-macro producer' not in repaired.stderr
         consume(14)
-        entry_path.write_bytes(b'corrupt')
+        for entry_path in (root / 'cache' / 'entries').iterdir():
+            entry_path.write_bytes(b'corrupt')
         remove()
         repaired_manifest = run([str(binary), *rust])
         assert b'hit: proc-macro producer' not in repaired_manifest.stderr

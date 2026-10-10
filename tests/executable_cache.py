@@ -89,14 +89,17 @@ def main():
         remove()
         assert b'hit: executable producer' not in run([str(binary), *rust]).stderr
         execute('14 second')
-        entry_path = next((root / 'cache' / 'entries').iterdir())
-        entry = json.loads(entry_path.read_bytes()[65:])
-        blob = next(o['hash'] for o in entry['outputs'] if o['path'] == str(executable))
-        (root / 'cache' / 'blobs' / blob[:2] / blob).write_bytes(b'corrupt')
+        # Invalidate all historical candidates to require a miss, rather than
+        # rejecting legitimate recovery through another validated manifest.
+        for entry_path in (root / 'cache' / 'entries').iterdir():
+            entry = json.loads(entry_path.read_bytes()[65:])
+            blob = next(o['hash'] for o in entry['outputs'] if o['path'] == str(executable))
+            (root / 'cache' / 'blobs' / blob[:2] / blob).write_bytes(b'corrupt')
         remove()
         assert b'hit: executable producer' not in run([str(binary), *rust]).stderr
         execute('14 second')
-        entry_path.write_bytes(b'corrupt')
+        for entry_path in (root / 'cache' / 'entries').iterdir():
+            entry_path.write_bytes(b'corrupt')
         remove()
         assert b'hit: executable producer' not in run([str(binary), *rust]).stderr
         execute('14 second')
