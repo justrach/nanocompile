@@ -1,0 +1,12 @@
+{
+  "binary_sha256": "b21c09269803e88a7e84c9352fbc4055c5bc13d055e06ce35c9b6651036e6d05",
+  "script_sha256": "e75a220ddec8a4164f55dbe16df3d2a327bbcda1886d4dd33a9b7458dade3d8a",
+  "checks": [
+    "two cwd and fallback values share one fully validated physical memo",
+    "new rustup cwd override does not change direct stock compiler selection",
+    "each compiled artifact matches direct rustc in its own working directory",
+    "same-size preserved-mtime source edits and reverts retain correct outputs without changing installation memo",
+    "DYLD_LIBRARY_PATH retains contextual identity and live queries",
+    "native proxy with installation-shaped path refuses shared memo"
+  ]
+}

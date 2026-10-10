@@ -1,0 +1,330 @@
+{
+  "script_sha256": "42d9980020ff55ec4baa7ad2feb86a20657a009de9a5c2360ea1293389263c24",
+  "binary_sha256": {
+    "baseline": "60a7ed9cba39bfd60dfb4f264cd0636c8cddcba4f6faea41a740fe59671b27c2",
+    "candidate": "9086873982056a92776cdc50402a518919b4b4531b698e12541fd4a624fe981c"
+  },
+  "tree": "/Users/rachpradhan/.rustup/toolchains/1.97.1-aarch64-apple-darwin/bin/rustc",
+  "runs": 7,
+  "observations": [
+    {
+      "pair": 0,
+      "implementation": "baseline",
+      "phase": "cold",
+      "wall_seconds": 0.8361346250167117,
+      "fingerprint_seconds": 0.831966333,
+      "hash": "19a8671df3fa7598533a6cb110cb46302eafd7eb0d431b0c46df2f88cf1b98eb",
+      "stamps": 376,
+      "links": 0,
+      "independent_file_memos": 360
+    },
+    {
+      "pair": 0,
+      "implementation": "baseline",
+      "phase": "warm",
+      "wall_seconds": 0.005392291990574449,
+      "fingerprint_seconds": 0.001088917,
+      "hash": "19a8671df3fa7598533a6cb110cb46302eafd7eb0d431b0c46df2f88cf1b98eb",
+      "stamps": 376,
+      "links": 0,
+      "independent_file_memos": 360
+    },
+    {
+      "pair": 0,
+      "implementation": "candidate",
+      "phase": "cold",
+      "wall_seconds": 0.7011708749923855,
+      "fingerprint_seconds": 0.365117209,
+      "hash": "19a8671df3fa7598533a6cb110cb46302eafd7eb0d431b0c46df2f88cf1b98eb",
+      "stamps": 376,
+      "links": 0,
+      "independent_file_memos": 360
+    },
+    {
+      "pair": 0,
+      "implementation": "candidate",
+      "phase": "warm",
+      "wall_seconds": 0.004941916966345161,
+      "fingerprint_seconds": 0.000937459,
+      "hash": "19a8671df3fa7598533a6cb110cb46302eafd7eb0d431b0c46df2f88cf1b98eb",
+      "stamps": 376,
+      "links": 0,
+      "independent_file_memos": 360
+    },
+    {
+      "pair": 1,
+      "implementation": "candidate",
+      "phase": "cold",
+      "wall_seconds": 0.33873133396264166,
+      "fingerprint_seconds": 0.334832541,
+      "hash": "19a8671df3fa7598533a6cb110cb46302eafd7eb0d431b0c46df2f88cf1b98eb",
+      "stamps": 376,
+      "links": 0,
+      "independent_file_memos": 360
+    },
+    {
+      "pair": 1,
+      "implementation": "candidate",
+      "phase": "warm",
+      "wall_seconds": 0.004970500012859702,
+      "fingerprint_seconds": 0.000943083,
+      "hash": "19a8671df3fa7598533a6cb110cb46302eafd7eb0d431b0c46df2f88cf1b98eb",
+      "stamps": 376,
+      "links": 0,
+      "independent_file_memos": 360
+    },
+    {
+      "pair": 1,
+      "implementation": "baseline",
+      "phase": "cold",
+      "wall_seconds": 0.8614127080072649,
+      "fingerprint_seconds": 0.857307333,
+      "hash": "19a8671df3fa7598533a6cb110cb46302eafd7eb0d431b0c46df2f88cf1b98eb",
+      "stamps": 376,
+      "links": 0,
+      "independent_file_memos": 360
+    },
+    {
+      "pair": 1,
+      "implementation": "baseline",
+      "phase": "warm",
+      "wall_seconds": 0.005656624969560653,
+      "fingerprint_seconds": 0.0010525,
+      "hash": "19a8671df3fa7598533a6cb110cb46302eafd7eb0d431b0c46df2f88cf1b98eb",
+      "stamps": 376,
+      "links": 0,
+      "independent_file_memos": 360
+    },
+    {
+      "pair": 2,
+      "implementation": "baseline",
+      "phase": "cold",
+      "wall_seconds": 0.8806355830165558,
+      "fingerprint_seconds": 0.876110833,
+      "hash": "19a8671df3fa7598533a6cb110cb46302eafd7eb0d431b0c46df2f88cf1b98eb",
+      "stamps": 376,
+      "links": 0,
+      "independent_file_memos": 360
+    },
+    {
+      "pair": 2,
+      "implementation": "baseline",
+      "phase": "warm",
+      "wall_seconds": 0.0060034170164726675,
+      "fingerprint_seconds": 0.00124425,
+      "hash": "19a8671df3fa7598533a6cb110cb46302eafd7eb0d431b0c46df2f88cf1b98eb",
+      "stamps": 376,
+      "links": 0,
+      "independent_file_memos": 360
+    },
+    {
+      "pair": 2,
+      "implementation": "candidate",
+      "phase": "cold",
+      "wall_seconds": 0.36539670900674537,
+      "fingerprint_seconds": 0.361169,
+      "hash": "19a8671df3fa7598533a6cb110cb46302eafd7eb0d431b0c46df2f88cf1b98eb",
+      "stamps": 376,
+      "links": 0,
+      "independent_file_memos": 360
+    },
+    {
+      "pair": 2,
+      "implementation": "candidate",
+      "phase": "warm",
+      "wall_seconds": 0.0056414579739794135,
+      "fingerprint_seconds": 0.001135708,
+      "hash": "19a8671df3fa7598533a6cb110cb46302eafd7eb0d431b0c46df2f88cf1b98eb",
+      "stamps": 376,
+      "links": 0,
+      "independent_file_memos": 360
+    },
+    {
+      "pair": 3,
+      "implementation": "candidate",
+      "phase": "cold",
+      "wall_seconds": 0.3726935839513317,
+      "fingerprint_seconds": 0.368290167,
+      "hash": "19a8671df3fa7598533a6cb110cb46302eafd7eb0d431b0c46df2f88cf1b98eb",
+      "stamps": 376,
+      "links": 0,
+      "independent_file_memos": 360
+    },
+    {
+      "pair": 3,
+      "implementation": "candidate",
+      "phase": "warm",
+      "wall_seconds": 0.005477792001329362,
+      "fingerprint_seconds": 0.001034459,
+      "hash": "19a8671df3fa7598533a6cb110cb46302eafd7eb0d431b0c46df2f88cf1b98eb",
+      "stamps": 376,
+      "links": 0,
+      "independent_file_memos": 360
+    },
+    {
+      "pair": 3,
+      "implementation": "baseline",
+      "phase": "cold",
+      "wall_seconds": 0.8978919169749133,
+      "fingerprint_seconds": 0.893458667,
+      "hash": "19a8671df3fa7598533a6cb110cb46302eafd7eb0d431b0c46df2f88cf1b98eb",
+      "stamps": 376,
+      "links": 0,
+      "independent_file_memos": 360
+    },
+    {
+      "pair": 3,
+      "implementation": "baseline",
+      "phase": "warm",
+      "wall_seconds": 0.005697707994841039,
+      "fingerprint_seconds": 0.001104709,
+      "hash": "19a8671df3fa7598533a6cb110cb46302eafd7eb0d431b0c46df2f88cf1b98eb",
+      "stamps": 376,
+      "links": 0,
+      "independent_file_memos": 360
+    },
+    {
+      "pair": 4,
+      "implementation": "baseline",
+      "phase": "cold",
+      "wall_seconds": 0.8634670000174083,
+      "fingerprint_seconds": 0.859005917,
+      "hash": "19a8671df3fa7598533a6cb110cb46302eafd7eb0d431b0c46df2f88cf1b98eb",
+      "stamps": 376,
+      "links": 0,
+      "independent_file_memos": 360
+    },
+    {
+      "pair": 4,
+      "implementation": "baseline",
+      "phase": "warm",
+      "wall_seconds": 0.005081083974801004,
+      "fingerprint_seconds": 0.000979333,
+      "hash": "19a8671df3fa7598533a6cb110cb46302eafd7eb0d431b0c46df2f88cf1b98eb",
+      "stamps": 376,
+      "links": 0,
+      "independent_file_memos": 360
+    },
+    {
+      "pair": 4,
+      "implementation": "candidate",
+      "phase": "cold",
+      "wall_seconds": 0.34250937501201406,
+      "fingerprint_seconds": 0.338209792,
+      "hash": "19a8671df3fa7598533a6cb110cb46302eafd7eb0d431b0c46df2f88cf1b98eb",
+      "stamps": 376,
+      "links": 0,
+      "independent_file_memos": 360
+    },
+    {
+      "pair": 4,
+      "implementation": "candidate",
+      "phase": "warm",
+      "wall_seconds": 0.005066916986834258,
+      "fingerprint_seconds": 0.001000709,
+      "hash": "19a8671df3fa7598533a6cb110cb46302eafd7eb0d431b0c46df2f88cf1b98eb",
+      "stamps": 376,
+      "links": 0,
+      "independent_file_memos": 360
+    },
+    {
+      "pair": 5,
+      "implementation": "candidate",
+      "phase": "cold",
+      "wall_seconds": 0.3401725000003353,
+      "fingerprint_seconds": 0.336205875,
+      "hash": "19a8671df3fa7598533a6cb110cb46302eafd7eb0d431b0c46df2f88cf1b98eb",
+      "stamps": 376,
+      "links": 0,
+      "independent_file_memos": 360
+    },
+    {
+      "pair": 5,
+      "implementation": "candidate",
+      "phase": "warm",
+      "wall_seconds": 0.005185166955925524,
+      "fingerprint_seconds": 0.001013625,
+      "hash": "19a8671df3fa7598533a6cb110cb46302eafd7eb0d431b0c46df2f88cf1b98eb",
+      "stamps": 376,
+      "links": 0,
+      "independent_file_memos": 360
+    },
+    {
+      "pair": 5,
+      "implementation": "baseline",
+      "phase": "cold",
+      "wall_seconds": 0.8268081669812091,
+      "fingerprint_seconds": 0.822457292,
+      "hash": "19a8671df3fa7598533a6cb110cb46302eafd7eb0d431b0c46df2f88cf1b98eb",
+      "stamps": 376,
+      "links": 0,
+      "independent_file_memos": 360
+    },
+    {
+      "pair": 5,
+      "implementation": "baseline",
+      "phase": "warm",
+      "wall_seconds": 0.005019250034820288,
+      "fingerprint_seconds": 0.000965084,
+      "hash": "19a8671df3fa7598533a6cb110cb46302eafd7eb0d431b0c46df2f88cf1b98eb",
+      "stamps": 376,
+      "links": 0,
+      "independent_file_memos": 360
+    },
+    {
+      "pair": 6,
+      "implementation": "baseline",
+      "phase": "cold",
+      "wall_seconds": 0.834534750028979,
+      "fingerprint_seconds": 0.830666375,
+      "hash": "19a8671df3fa7598533a6cb110cb46302eafd7eb0d431b0c46df2f88cf1b98eb",
+      "stamps": 376,
+      "links": 0,
+      "independent_file_memos": 360
+    },
+    {
+      "pair": 6,
+      "implementation": "baseline",
+      "phase": "warm",
+      "wall_seconds": 0.00498329201946035,
+      "fingerprint_seconds": 0.000938083,
+      "hash": "19a8671df3fa7598533a6cb110cb46302eafd7eb0d431b0c46df2f88cf1b98eb",
+      "stamps": 376,
+      "links": 0,
+      "independent_file_memos": 360
+    },
+    {
+      "pair": 6,
+      "implementation": "candidate",
+      "phase": "cold",
+      "wall_seconds": 0.3407520000473596,
+      "fingerprint_seconds": 0.336745417,
+      "hash": "19a8671df3fa7598533a6cb110cb46302eafd7eb0d431b0c46df2f88cf1b98eb",
+      "stamps": 376,
+      "links": 0,
+      "independent_file_memos": 360
+    },
+    {
+      "pair": 6,
+      "implementation": "candidate",
+      "phase": "warm",
+      "wall_seconds": 0.004983957973308861,
+      "fingerprint_seconds": 0.000915208,
+      "hash": "19a8671df3fa7598533a6cb110cb46302eafd7eb0d431b0c46df2f88cf1b98eb",
+      "stamps": 376,
+      "links": 0,
+      "independent_file_memos": 360
+    }
+  ],
+  "method": "alternate cold order with empty private compiler cache; immediately revalidate whole-tree memo; OS caches unflushed; fingerprints byte-equal",
+  "medians": {
+    "cold": {
+      "baseline": 0.857307333,
+      "candidate": 0.338209792
+    },
+    "warm": {
+      "baseline": 0.0010525,
+      "candidate": 0.001000709
+    }
+  }
+}

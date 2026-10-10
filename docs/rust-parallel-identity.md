@@ -1,0 +1,19 @@
+# Parallel initial Rust resource hashing
+
+The runtime now fingerprints eligible large Rust installations with at most four workers. Each worker uses its own allocator and computes the same installed-file content digest and stamp checks as before. The caller combines results in the original sorted order and revalidates every installation stamp before publishing the complete identity. Zig fingerprints and small installations retain their serial hashing path. Existing memo identities and decoder identities remain compatible.
+
+[Seven alternating isolated pairs](../benchmarks/rust-parallel-identity-profile.json) measure median cold identity time of 857.307 ms for serial hashing versus 338.210 ms for parallel hashing, a 60.55% reduction. Every complete fingerprint is identical. Warm validation remains approximately 1 ms. OS filesystem caches are unflushed; this isolates first-use compiler-cache work, not a whole build. The [exact profiling adapter](../benchmarks/experiments/rust_parallel_identity_profile.py) uses the `internal-rust-identity` command available in the archived hardening prototype; its positional `tree` argument and report field contain the actual installed rustc path.
+
+The independent production candidate passed unit tests, real Rust/Zig integration, [physical memo correctness checks](../benchmarks/rust-parallel-production-physical-check.json) and [compiler switching and decoder scope checks](../benchmarks/rust-parallel-production-scope-check.json). Those cover preserved-mtime source changes/reverts, live loader overrides, proxies, caller selectors, actual compiler switching, corruption, isolation, failures and environment changes. The standalone runtime binary SHA-256 is `b21c09269803e88a7e84c9352fbc4055c5bc13d055e06ce35c9b6651036e6d05`. The root test module now explicitly imports the existing loader tests so they are included in the unit run.
+
+## Harness observations with the separate execution prototype
+
+These benchmarks combine parallel identity hashing with the **experimental** build-script execution cache and its existing diagnostic ring contract. They do not demonstrate default production warm performance, and the contract's helper/archiver selection is still being completed separately.
+
+[Three cold/warm pairs](../benchmarks/harness-parallel-identity-execution.json) show cold medians Nano 16.593537 seconds and kache 16.630959, with Nano winning two pairs. Warm medians are 1.132913 and 1.286026, with Nano winning two pairs. The final warm pair favors kache. All repeated artifact sets match their implementation's own cold reference.
+
+[A separate seven-pair cold confirmation](../benchmarks/harness-parallel-identity-cold-confirm.json) gives medians Nano 16.689938 seconds and kache 17.016190, a 1.92% difference in medians. Nano wins four pairs and loses three; median paired saving is 127.298 ms. This is a modest, variable lead, not a dependable general cold-build advantage. All repeated native objects/archives, rlibs, macro dylibs and script launchers match their own initial cold hashes. Every cold Nano build has 167 Rust misses and one script execution miss with no hits; kache records no local/remote hits.
+
+Both sessions use the same real dirty Harness adapters snapshot, Rust 1.97.1, kache 1.0.0, eight jobs, unchanged native compiler, clean target per build, offline dependencies and fresh caches for every cold pair. Order alternates. Daemon startup and cache deletion are outside timing; R2 is not used. This remains the adapters library, not the complete GUI. Compare implementations within a session; differences between sessions do not establish additional causal gains.
+
+The standalone phase improvement is accepted independently of the experimental execution cache. Finishing that cache's tool contract and failure-path validation, repeating real edits on the combined runtime, and profiling the remaining cold overhead are still required before claiming broad superiority over kache.

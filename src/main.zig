@@ -152,6 +152,7 @@ fn dispatch(ctx: *cache.Context, args: []const [:0]const u8) !u8 {
 }
 
 test {
+    _ = @import("rust_loader.zig");
     _ = @import("clang.zig");
     _ = cache;
     _ = compiler;

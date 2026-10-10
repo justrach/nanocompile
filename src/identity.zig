@@ -139,6 +139,46 @@ pub fn installedFileDigest(ctx: *cache.Context, path: []const u8) ![]const u8 {
     return installedDigest(ctx, try stamp(ctx, path), "native-toolchain-file-v1");
 }
 
+const RustDigestJob = struct { hash: [64]u8 = undefined, err: ?anyerror = null };
+fn rustDigestWorker(ctx: *cache.Context, stamps: []const Stamp, jobs: []RustDigestJob, next: *std.atomic.Value(usize)) void {
+    while (true) {
+        const i = next.fetchAdd(1, .monotonic);
+        if (i >= stamps.len) return;
+        const expected = stamps[i];
+        if (!expected.exists or expected.kind != .file) continue;
+        // Independent allocators keep concurrent memo reads, locks and atomic
+        // writes away from the caller's non-threadsafe arena.
+        var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
+        defer arena.deinit();
+        var local = ctx.*;
+        local.a = arena.allocator();
+        const hash = rustFileDigest(&local, expected) catch |err| {
+            jobs[i].err = err;
+            continue;
+        };
+        @memcpy(&jobs[i].hash, hash);
+    }
+}
+fn parallelRustDigests(ctx: *cache.Context, stamps: []const Stamp) !?[]RustDigestJob {
+    var count: usize = 0;
+    var size: u64 = 0;
+    for (stamps) |st| if (st.exists and st.kind == .file) {
+        count += 1;
+        size +|= st.size;
+    };
+    if (count < 16 or size < 8 * 1024 * 1024) return null;
+    const jobs = try ctx.a.alloc(RustDigestJob, stamps.len);
+    for (jobs) |*job| job.* = .{};
+    var next: std.atomic.Value(usize) = .init(0);
+    var group: std.Io.Group = .init;
+    defer group.cancel(ctx.io);
+    const workers = @min(@as(usize, 4), std.Thread.getCpuCount() catch 1);
+    for (1..@max(workers, 1)) |_| group.concurrent(ctx.io, rustDigestWorker, .{ ctx, stamps, jobs, &next }) catch break;
+    rustDigestWorker(ctx, stamps, jobs, &next);
+    try group.await(ctx.io);
+    return jobs;
+}
+
 fn rustFileDigest(ctx: *cache.Context, expected: Stamp) ![]const u8 {
     return installedDigest(ctx, expected, "rust-toolchain-file-v1");
 }
@@ -350,7 +390,8 @@ pub fn fingerprint(ctx: *cache.Context, is_zig: bool, executable: []const u8) ![
             return std.mem.order(u8, a.path, b.path) == .lt;
         }
     }.less);
-    for (stamps.items) |s| {
+    const prefetched = if (is_zig) null else try parallelRustDigests(ctx, stamps.items);
+    for (stamps.items, 0..) |s, i| {
         cache.field(&h, s.path);
         // Selection state stays in the complete fingerprint and all stamp
         // checks. Classification is scoped to the resolved compiler resources.
@@ -365,7 +406,10 @@ pub fn fingerprint(ctx: *cache.Context, is_zig: bool, executable: []const u8) ![
         }
         if (decoder_resource) cache.field(&decoder, s.path);
         if (s.exists and s.kind == .file) {
-            const digest = (if (is_zig) ctx.digest(s.path) else rustFileDigest(ctx, s)) catch |err| {
+            const digest = (if (prefetched) |jobs| blk: {
+                if (jobs[i].err) |err| break :blk @as(anyerror![]const u8, err);
+                break :blk @as(anyerror![]const u8, &jobs[i].hash);
+            } else if (is_zig) ctx.digest(s.path) else rustFileDigest(ctx, s)) catch |err| {
                 ctx.trace(try std.fmt.allocPrint(ctx.a, "toolchain file unavailable: {s} ({s})", .{ s.path, @errorName(err) }));
                 return err;
             };
