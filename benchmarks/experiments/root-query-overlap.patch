@@ -1,0 +1,142 @@
+--- a/src/cache.zig
++++ b/src/cache.zig
+@@ -37,6 +37,7 @@
+     cwd: []const u8,
+     compiler_identity: ?[]const u8 = null,
+     compiler_decoder_identity: ?[]const u8 = null,
++    compiler_selected_sysroot: ?[]const u8 = null,
+     compiler_epoch: ?[]const u8 = null,
+ 
+     pub fn init(a: std.mem.Allocator, io: std.Io, env: *std.process.Environ.Map) !Context {
+--- a/src/identity.zig
++++ b/src/identity.zig
+@@ -13,7 +13,7 @@
+     ctime: i96 = 0,
+     kind: std.Io.File.Kind = .unknown,
+ };
+-const Memo = struct { schema: u32 = 5, hash: []const u8, decoder_hash: []const u8, stamps: []const Stamp };
++const Memo = struct { schema: u32 = 6, selected_sysroot: ?[]const u8 = null, hash: []const u8, decoder_hash: []const u8, stamps: []const Stamp };
+ 
+ fn rememberEpoch(ctx: *cache.Context, payload: []const u8) !void {
+     var h = cache.Hash.init(.{});
+@@ -82,13 +82,14 @@
+     const payload = cache.unseal(ctx, bytes) catch return null;
+     const parsed = std.json.parseFromSlice(Memo, ctx.a, payload, .{ .allocate = .alloc_always }) catch return null;
+     const memo = parsed.value;
+-    if (memo.schema != 5 or !cache.validHash(memo.decoder_hash) or !cache.validHash(memo.hash) or memo.stamps.len < minimum_stamps) return null;
++    if (memo.schema != 6 or !cache.validHash(memo.decoder_hash) or !cache.validHash(memo.hash) or memo.stamps.len < minimum_stamps) return null;
+     for (memo.stamps) |s| {
+         const current = stamp(ctx, s.path) catch return null;
+         if (!equal(current, s)) return null;
+     }
+     rememberEpoch(ctx, payload) catch return null;
+     ctx.compiler_decoder_identity = memo.decoder_hash;
++    ctx.compiler_selected_sysroot = memo.selected_sysroot;
+     return memo.hash;
+ }
+ 
+@@ -242,6 +243,7 @@
+         .exited => |code| if (code != 0) return error.CompilerIdentityFailed,
+         else => return error.CompilerIdentityFailed,
+     }
++    var selected_sysroot: ?[]const u8 = null;
+     var stamps: std.ArrayList(Stamp) = .empty;
+     try stamps.appendSlice(ctx.a, selectors.items);
+     if (is_zig) {
+@@ -264,6 +266,7 @@
+         const result = try std.process.run(ctx.a, ctx.io, .{ .argv = &.{ executable, "--print", "sysroot" }, .environ_map = ctx.env });
+         const sysroot = std.mem.trim(u8, result.stdout, "\r\n");
+         if (!std.fs.path.isAbsolute(sysroot)) return error.InvalidSysroot;
++        selected_sysroot = sysroot;
+         try add(ctx, &stamps, try std.fs.path.join(ctx.a, &.{ sysroot, "bin", "rustc" }));
+         rustResources(ctx, &stamps, try std.fs.path.join(ctx.a, &.{ sysroot, "lib" })) catch |err| {
+             ctx.trace(try std.fmt.allocPrint(ctx.a, "Rust resources unavailable: {s} ({s})", .{ sysroot, @errorName(err) }));
+@@ -310,10 +313,11 @@
+     for (stamps.items) |s| if (!equal(s, try stamp(ctx, s.path))) return error.ToolchainChanged;
+     const hash = try cache.finish(ctx.a, &h);
+     const decoder_hash = try cache.finish(ctx.a, &decoder);
+-    const bytes = try std.json.Stringify.valueAlloc(ctx.a, Memo{ .hash = hash, .decoder_hash = decoder_hash, .stamps = stamps.items }, .{});
++    const bytes = try std.json.Stringify.valueAlloc(ctx.a, Memo{ .selected_sysroot = selected_sysroot, .hash = hash, .decoder_hash = decoder_hash, .stamps = stamps.items }, .{});
+     try ctx.atomic(path, try cache.seal(ctx, bytes));
+     try rememberEpoch(ctx, bytes);
+     ctx.compiler_decoder_identity = decoder_hash;
++    ctx.compiler_selected_sysroot = selected_sysroot;
+     return hash;
+ }
+ 
+--- a/src/rust_dependencies.zig
++++ b/src/rust_dependencies.zig
+@@ -96,6 +96,28 @@
+     return false;
+ }
+ 
++// Separate allocator: the calling context arena is not threadsafe.
++const LiveSysrootQuery = struct {
++    result: ?std.process.RunResult = null,
++    failure: ?anyerror = null,
++    fn run(self: *LiveSysrootQuery, io: std.Io, argv: []const []const u8, env: *const std.process.Environ.Map) void {
++        self.result = std.process.run(std.heap.page_allocator, io, .{ .argv = argv, .environ_map = env }) catch |err| {
++            self.failure = err;
++            return;
++        };
++    }
++    fn raw(self: *const LiveSysrootQuery) !std.process.RunResult {
++        if (self.failure) |err| return err;
++        return self.result orelse error.RustSysrootQueryFailed;
++    }
++    fn deinit(self: *LiveSysrootQuery) void {
++        if (self.result) |result| {
++            std.heap.page_allocator.free(result.stdout);
++            std.heap.page_allocator.free(result.stderr);
++        }
++    }
++};
++
+ pub fn collect(ctx: *cache.Context, argv: []const []const u8, outputs: []const []const u8, before: []const Directory, started: i96, records: *std.ArrayList(cache.Dependency), metadata_only: bool, validated: *const std.StringHashMapUnmanaged(cache.CheckedDigest), hidden_native: bool) !void {
+     var artifact: ?[]const u8 = null;
+     for (outputs) |out| if (std.mem.endsWith(u8, out, ".rmeta")) {
+@@ -119,20 +141,35 @@
+             i += 1;
+         } else if (std.mem.startsWith(u8, argv[i], "--target=")) try print_args.append(ctx.a, argv[i]);
+     }
+-    const sysroot_result = try std.process.run(ctx.a, ctx.io, .{ .argv = print_args.items, .environ_map = ctx.env });
++    // The fingerprint validates the selected root and every selection stamp.
++    // Still resolve it live here, while decoding with that validated root.
++    const pinned_sysroot = ctx.compiler_selected_sysroot orelse return error.InvalidSysroot;
++    if (!std.fs.path.isAbsolute(pinned_sysroot)) return error.InvalidSysroot;
++    var query_env = try ctx.env.clone(ctx.a);
++    try query_env.put("RUSTC_BOOTSTRAP", "1");
++    try query_env.put("RUSTUP_TOOLCHAIN", pinned_sysroot);
++    const reader_compiler = try metadata.readerCompiler(ctx, argv[0]);
++    const query_cwd = try ctx.path(&.{"metadata-queries"});
++    try Dir.cwd().createDirPath(ctx.io, query_cwd);
++    const native_checked = if (hidden_native) try ctx.checkedDigest(path) else null;
++    var live: LiveSysrootQuery = .{};
++    defer live.deinit();
++    var group: std.Io.Group = .init;
++    defer group.cancel(ctx.io);
++    const launched = blk: {
++        group.concurrent(ctx.io, LiveSysrootQuery.run, .{ &live, ctx.io, print_args.items, ctx.env }) catch break :blk false;
++        break :blk true;
++    };
++    if (!launched) live.run(ctx.io, print_args.items, ctx.env);
++    const result = try std.process.run(ctx.a, ctx.io, .{ .argv = &.{ reader_compiler, "-Zls=root", path }, .environ_map = &query_env, .cwd = .{ .path = query_cwd } });
++    try group.await(ctx.io);
++    const sysroot_result = try live.raw();
+     if (!success(sysroot_result)) return error.RustSysrootQueryFailed;
+     var locations = std.mem.tokenizeAny(u8, sysroot_result.stdout, "\r\n");
+     const selected_sysroot = locations.next() orelse return error.InvalidSysroot;
+     const sysroot = locations.next() orelse return error.InvalidSysroot;
+     if (locations.next() != null or !std.fs.path.isAbsolute(selected_sysroot) or !std.fs.path.isAbsolute(sysroot)) return error.InvalidSysroot;
+-    var query_env = try ctx.env.clone(ctx.a);
+-    try query_env.put("RUSTC_BOOTSTRAP", "1");
+-    try query_env.put("RUSTUP_TOOLCHAIN", selected_sysroot);
+-    const reader_compiler = try metadata.readerCompiler(ctx, argv[0]);
+-    const query_cwd = try ctx.path(&.{"metadata-queries"});
+-    try Dir.cwd().createDirPath(ctx.io, query_cwd);
+-    const native_checked = if (hidden_native) try ctx.checkedDigest(path) else null;
+-    const result = try std.process.run(ctx.a, ctx.io, .{ .argv = &.{ reader_compiler, "-Zls=root", path }, .environ_map = &query_env, .cwd = .{ .path = query_cwd } });
++    if (!std.mem.eql(u8, selected_sysroot, pinned_sysroot)) return error.ToolchainChanged;
+     if (!success(result)) return error.RustMetadataQueryFailed;
+     const names = try parse(ctx.a, result.stdout, reportedMacros(ctx));
+     const own_root = try metadata.parse(result.stdout);

@@ -20,7 +20,7 @@ def main():
         data = path.read_bytes()
         assert len(data) >= 65 and data[64:65] == b'\n'
         row = json.loads(data[65:])
-        assert row['schema'] in (3, 4)
+        assert row['schema'] in (3, 4, 5)
         rows.append(row)
         digests[path.name] = hashlib.sha256(data).hexdigest()
     groups = collections.defaultdict(list)

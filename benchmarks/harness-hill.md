@@ -1566,3 +1566,7 @@ the production commands remain separate.
 [raw comparison](harness-selected-decoder-nine-samples.json);
 [all-sample analysis](harness-selected-decoder-nine-analysis.json);
 [hosted CI evidence](selected-decoder-ci-validation.json).
+
+## Continued cold hill climb: live-query overlap rejected
+
+The [fresh selected-resource profile](../docs/selected-resource-graph-profile.md) confirms a single decoder scope and only 32 resolver queries, versus 264 before the adopted resource change. It shifts attention to the two live compiler queries. A [concurrent-query candidate](../docs/root-query-overlap-experiment.md) passes compiler, toolchain-switch and explicit live-root-disagreement gates, but wins only 1/3 cold pairs. Medians 29.641 s versus 29.394 s are too mixed to justify adoption; all six builds match 193 artifacts and retain full input validation. Every sample and the rejected patch are published.

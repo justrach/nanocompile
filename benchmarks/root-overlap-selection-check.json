@@ -1,0 +1,15 @@
+{
+  "binary_sha256": "ac45332af0bba2438b8c96f17eff63c1e8537995040e120557fb3d3714e9dc56",
+  "script_sha256": "5c5f35f78a305d468b7e6da193a98dda8587d9f74d576416fed91cce232420de",
+  "method": "Native compiler proxy forwards real compilation and identity probes, but reports a disagreeing root on the live combined sysroot/target-libdir query.",
+  "checks": [
+    "live root disagreement rejects metadata before cache storage",
+    "successful compiler output remains available",
+    "second clean build recompiles instead of restoring",
+    "both uncached outputs match"
+  ],
+  "events": [
+    "miss",
+    "miss"
+  ]
+}

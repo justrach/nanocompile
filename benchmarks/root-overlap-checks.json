@@ -1,0 +1,30 @@
+{
+  "base_revision": "a21296b29e8d6da3995d22f234ff8999a726a166",
+  "binary_sha256": "ac45332af0bba2438b8c96f17eff63c1e8537995040e120557fb3d3714e9dc56",
+  "source_sha256": {
+    "src/cache.zig": "1a25101837ce89b9163fbeb4444481fb95c119ffbce9803f8b8cacfb0fbabee8",
+    "src/identity.zig": "a86bf30db43c7faa32da75fd467b889c957d367bfbc312b6a9c4dcc325974e15",
+    "src/rust_dependencies.zig": "52607fb72784792c2dcff22190948c5a40c2879d81351f4cbcbe405100d7bd59"
+  },
+  "patch_sha256": "a884bdd21d2de9961fec0040fbd1bcbd8f0d9ee74e56f4aafece700a28d2e109",
+  "checks": [
+    {
+      "command": [
+        "zig",
+        "build",
+        "test"
+      ],
+      "passed": true
+    },
+    {
+      "command": [
+        "zig",
+        "build",
+        "integration",
+        "-Doptimize=ReleaseFast"
+      ],
+      "passed": true
+    }
+  ],
+  "adopted": false
+}

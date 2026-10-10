@@ -1,0 +1,28 @@
+{
+  "core_revision": "a21296b29e8d6da3995d22f234ff8999a726a166",
+  "binary_sha256": "e519f304ed0a40e05227a5daab0a451b74fcb42899efedc157fd18f6d9c62963",
+  "patch_sha256": "024503e82c06b703a10816bac503a4de137e40ec83bf4d7085714df45be1bfbe",
+  "checks": [
+    {
+      "command": [
+        "zig",
+        "build",
+        "test"
+      ],
+      "passed": true
+    },
+    {
+      "command": [
+        "zig",
+        "build",
+        "integration",
+        "-Doptimize=ReleaseFast"
+      ],
+      "environment": {
+        "RUSTUP_TOOLCHAIN": "1.97.1",
+        "NANOCOMPILE_MISS_PROFILE": "1"
+      },
+      "passed": true
+    }
+  ]
+}
