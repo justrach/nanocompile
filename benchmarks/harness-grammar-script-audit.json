@@ -1,0 +1,79 @@
+{
+  "schema": 1,
+  "scope": "Six individually read high-duration real Harness grammar build scripts. No contracts enabled, no performance claim.",
+  "entries": [
+    {
+      "package": "tree-sitter-kotlin-ng",
+      "version": "1.1.0",
+      "script_relative_path": "bindings/rust/build.rs",
+      "build_script_sha256": "8f497bb1459c09529efecfb9ae0dbc6e6f3c5892911e535f6551e15337d2cd6c",
+      "language": "C",
+      "external_inputs": "default native compiler/archiver and SDK/resource headers; source/scanner/common/query files are within complete package root",
+      "native_target_guard": "aarch64-apple-darwin",
+      "tool_override_policy": "refuse custom CC/CXX/AR/RANLIB, flags, include/compiler/library search paths, loader injection and SDK selection",
+      "special_cases": "package parser/scanner sources",
+      "status": "source audit complete; executable fixture and project speed validation pending"
+    },
+    {
+      "package": "tree-sitter-php",
+      "version": "0.24.2",
+      "script_relative_path": "bindings/rust/build.rs",
+      "build_script_sha256": "64a9fe1d12863855ad4eda623639b603d2de3fd3c1702f68ff8b8bd0921b049b",
+      "language": "C",
+      "external_inputs": "default native compiler/archiver and SDK/resource headers; source/scanner/common/query files are within complete package root",
+      "native_target_guard": "aarch64-apple-darwin",
+      "tool_override_policy": "refuse custom CC/CXX/AR/RANLIB, flags, include/compiler/library search paths, loader injection and SDK selection",
+      "special_cases": "two parsers/scanners and common directory",
+      "status": "source audit complete; executable fixture and project speed validation pending"
+    },
+    {
+      "package": "tree-sitter-sequel",
+      "version": "0.3.11",
+      "script_relative_path": "bindings/rust/build.rs",
+      "build_script_sha256": "e77395b9ddee352b6cd32e36ddc655615e267b2d9bda1a93ffb927974c5c1c0a",
+      "language": "C",
+      "external_inputs": "default native compiler/archiver and SDK/resource headers; source/scanner/common/query files are within complete package root",
+      "native_target_guard": "aarch64-apple-darwin",
+      "tool_override_policy": "refuse custom CC/CXX/AR/RANLIB, flags, include/compiler/library search paths, loader injection and SDK selection",
+      "special_cases": "package parser/scanner sources",
+      "status": "source audit complete; executable fixture and project speed validation pending"
+    },
+    {
+      "package": "tree-sitter-swift",
+      "version": "0.7.3",
+      "script_relative_path": "bindings/rust/build.rs",
+      "build_script_sha256": "0b33a0c436b781f93037411cc1fd1d8536268e616949a222bf6b8d34dcc5366e",
+      "language": "C",
+      "external_inputs": "default native compiler/archiver and SDK/resource headers; source/scanner/common/query files are within complete package root",
+      "native_target_guard": "aarch64-apple-darwin",
+      "tool_override_policy": "refuse custom CC/CXX/AR/RANLIB, flags, include/compiler/library search paths, loader injection and SDK selection",
+      "special_cases": "package parser/scanner sources",
+      "status": "source audit complete; executable fixture and project speed validation pending"
+    },
+    {
+      "package": "tree-sitter-typescript",
+      "version": "0.23.2",
+      "script_relative_path": "bindings/rust/build.rs",
+      "build_script_sha256": "8e3ee9baddea25add039fc5d12d76fecfe81f1fd175429eb08694ccfcdaf85f4",
+      "language": "C",
+      "external_inputs": "default native compiler/archiver and SDK/resource headers; source/scanner/common/query files are within complete package root",
+      "native_target_guard": "aarch64-apple-darwin",
+      "tool_override_policy": "refuse custom CC/CXX/AR/RANLIB, flags, include/compiler/library search paths, loader injection and SDK selection",
+      "special_cases": "two parsers/scanners and common scanner header",
+      "status": "source audit complete; executable fixture and project speed validation pending"
+    },
+    {
+      "package": "tree-sitter-c-sharp",
+      "version": "0.23.5",
+      "script_relative_path": "bindings/rust/build.rs",
+      "build_script_sha256": "a79cda4849518b66f82fb41a83e304421cd24f0738c73e025cb18864eca8a1fd",
+      "language": "C",
+      "external_inputs": "default native compiler/archiver and SDK/resource headers; source/scanner/common/query files are within complete package root",
+      "native_target_guard": "aarch64-apple-darwin",
+      "tool_override_policy": "refuse custom CC/CXX/AR/RANLIB, flags, include/compiler/library search paths, loader injection and SDK selection",
+      "special_cases": "scanner/query existence checks captured by full package membership; wasm DEP_TREE_SITTER_LANGUAGE inputs excluded by native target guard",
+      "status": "source audit complete; executable fixture and project speed validation pending"
+    }
+  ],
+  "instruction": "Prepare a separate native default-tool contract, keeping full package snapshots and feature/target/tool guards. Run actual retained script fixtures with direct/cold/hit equality, preserved-mtime parser and scanner/header edits, linked grammar ABI probes, overrides/failures, reverts, membership and corruption. Only then test full Harness output equality and repeated untraced kache comparisons. Do not modify the currently running frozen media/core contract."
+}
