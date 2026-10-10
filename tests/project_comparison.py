@@ -11,6 +11,10 @@ import signal
 import statistics
 import subprocess
 import time
+import sys
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
+from build_trace import Capture
 
 from project_benchmark import sha
 
@@ -45,6 +49,7 @@ def main():
     p.add_argument("--proc-macros", choices=("tracked", "reported"), default="tracked", help="nanocompile proc-macro input policy; reported requires declaring unreported file reads")
     p.add_argument("--proc-macro-producers", action="store_true", help="enable the experimental macOS producer cache; verify macro dylib artifacts too")
     p.add_argument("--executable-producers", action="store_true", help="enable experimental macOS executable compilation caching")
+    p.add_argument("--trace-builds", action="store_true", help="private full compiler logs and Cargo timings; diagnostic overhead, not a benchmark")
     args = p.parse_args()
     if args.native_clang and args.portable_cc:
         p.error("choose one native adapter")
@@ -53,6 +58,7 @@ def main():
     binary, kache = str(Path(args.binary).resolve()), str(Path(args.kache).resolve())
     project, state = Path(args.project).resolve(), Path(args.state).resolve()
     state.mkdir(parents=True, mode=0o700, exist_ok=False)
+    capture = Capture(state, {"nanocompile": binary, "kache": kache}) if args.trace_builds else None
     config = state / "kache.toml"
     config.write_text("[cache]\nrecord_sessions=true\n")
     target, cache, kcache = state / "target", state / "nano-cache", state / "kache-cache"
@@ -63,13 +69,17 @@ def main():
     env.update(CARGO_TARGET_DIR=str(target), CARGO_INCREMENTAL="0", NANOCOMPILE_DIR=str(cache),
                KACHE_CACHE_DIR=str(kcache), KACHE_CONFIG=str(config), KACHE_HOST_CONFIG="",
                NANOCOMPILE_PROC_MACROS=args.proc_macros, KACHE_SOCKET_PATH=str(state / "daemon.sock"), KACHE_DAEMON_IDLE_TIMEOUT="600")
+    if capture:
+        env["NANOCOMPILE_TRACE"] = "1"
     if args.proc_macro_producers:
         env["NANOCOMPILE_PROC_MACRO_PRODUCERS"] = "1"
     if args.executable_producers:
         env["NANOCOMPILE_EXECUTABLE_PRODUCERS"] = "1"
     command = ["cargo", "build", "--release", "--locked", "--offline", "--lib",
                "-p", args.package, "-j", str(args.jobs), "--message-format=json-render-diagnostics"]
-    result = {"script_sha256": sha(Path(__file__)), "project": str(project), "commit": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=project, text=True).strip(),
+    if capture:
+        command += ["--timings", "-vv"]
+    result = {"diagnostic_trace": bool(capture), "script_sha256": sha(Path(__file__)), "project": str(project), "commit": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=project, text=True).strip(),
               "dirty": bool(subprocess.check_output(["git", "status", "--porcelain"], cwd=project)),
               "platform": platform.platform(), "jobs": args.jobs, "runs": args.runs, "cold_runs": args.cold_runs, "cold_only": args.cold_only,
               "rustc": subprocess.check_output(["rustc", "--version", "--verbose"], cwd=project, text=True),
@@ -110,19 +120,25 @@ def main():
         shutil.rmtree(target, ignore_errors=True)
         before = nano_events() if implementation == "nanocompile" else kache_events() if implementation == "kache" else collections.Counter()
         build_env = dict(env)
+        nano_frontend = capture.wrappers["nanocompile"] if capture else binary
         if implementation != "direct":
-            build_env["RUSTC_WRAPPER"] = binary if implementation == "nanocompile" else kache
+            build_env["RUSTC_WRAPPER"] = capture.wrappers[implementation] if capture else binary if implementation == "nanocompile" else kache
         if implementation == "nanocompile" and args.native_clang:
-            build_env['CC'] = binary + ' clang'
-            build_env['CC_KNOWN_WRAPPER_CUSTOM'] = Path(binary).name
+            build_env['CC'] = nano_frontend + ' clang'
+            build_env['CC_KNOWN_WRAPPER_CUSTOM'] = Path(nano_frontend).name
             build_env['NANOCOMPILE_CLANG_REMARKS'] = '1'
         if implementation == "nanocompile" and args.portable_cc:
-            build_env['CC'] = binary + ' cc'
-            build_env['CXX'] = binary + ' c++'
-            build_env['CC_KNOWN_WRAPPER_CUSTOM'] = Path(binary).name
+            build_env['CC'] = nano_frontend + ' cc'
+            build_env['CXX'] = nano_frontend + ' c++'
+            build_env['CC_KNOWN_WRAPPER_CUSTOM'] = Path(nano_frontend).name
         number = len(result["builds"])
         print(f"Starting {implementation} {phase} clean release build {number + 1}", flush=True)
         log_path = state / f"{number}-{implementation}-{phase}.log"
+        event_path = kcache / "events.jsonl" if implementation == "kache" else cache / "events"
+        event_offset = event_path.stat().st_size if event_path.exists() else 0
+        if capture:
+            capture.begin(number, implementation)
+        origin_ns = time.clock_gettime_ns(time.CLOCK_MONOTONIC)
         start = time.monotonic()
         peak = 0
         last_sample = 0
@@ -150,6 +166,8 @@ def main():
         row = {"native_objects_and_archives": native, "implementation": implementation, "phase": phase, "seconds": seconds,
                "exit_code": proc.returncode, "events": dict(after - before), "rlibs": len(artifacts), "artifacts": artifacts,
                "peak_sampled_process_tree_rss_bytes": peak, "macro_dylibs": macros, "build_script_executables": executables}
+        if capture:
+            capture.finish(row, target, origin_ns, event_path, event_offset)
         if implementation not in references:
             references[implementation] = artifacts
             macro_references[implementation] = macros
@@ -166,7 +184,7 @@ def main():
             row["matches_direct_build_script_executables"] = executables == executable_references.get("direct")
         result["builds"].append(row)
         save()
-        print(json.dumps({k: v for k, v in row.items() if k not in ("artifacts", "macro_dylibs", "build_script_executables", "native_objects_and_archives")}), flush=True)
+        print(json.dumps({k: v for k, v in row.items() if k not in ("artifacts", "macro_dylibs", "build_script_executables", "native_objects_and_archives", "trace")}), flush=True)
         if proc.returncode or not artifacts:
             raise RuntimeError(f"Build failed or produced no libraries; see {log_path}")
         if any(row.get(check) is False for check in ("matches_own_cold_native_artifacts", "matches_own_cold_artifacts", "matches_direct_artifacts", "matches_own_cold_macro_dylibs", "matches_direct_macro_dylibs", "matches_own_cold_build_script_executables", "matches_direct_build_script_executables")):

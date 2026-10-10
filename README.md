@@ -42,6 +42,8 @@ The [producer profile](docs/producer-phase-profile.md), [restore breakdown](docs
 
 **Try it today:** Cargo library builds, supported direct Zig invocations, and the runnable Turbo example. Rust proc-macro producers run directly by default. Xcode uses Apple's native cache, and R2 currently transports explicit snapshots. See [supported builds](#current-eligibility) before choosing a workload.
 
+Capture full real-project builds and generate a Perfetto timeline, crate/native comparisons and instructions for future variations with the [build tracing tools](docs/build-tracing.md). Diagnostic logs stay private; speed claims use separate untraced benchmarks.
+
 ## Build and use
 
 ```sh
