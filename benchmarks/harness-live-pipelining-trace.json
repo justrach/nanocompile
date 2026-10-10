@@ -69711,7 +69711,6 @@
     },
     "stores": [
       {
-        "path": "/private/tmp/nano-live-default-trace-20261010/kache-cache",
         "bytes": 339714246,
         "max_size": 99857989632,
         "entries": 211,
