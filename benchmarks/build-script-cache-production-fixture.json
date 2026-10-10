@@ -1,6 +1,6 @@
 {
   "binary_sha256": "b29b3cef66f688842e5b8b2395b1f6a34cff957a502c71ec30bbd578cae1f478",
-  "script_sha256": "edcd3e5aabceda007596f18d7aded798c44cbe26a484cd1573935dbc7a374361",
+  "script_sha256": "e4185e75c874b38a834ffcf1932ab307b670fb74e927db3790af7a0f41a03810",
   "checks": [
     "real Cargo cold execution and warm restored executable agree",
     "declared tool bytes with preserved mtime invalidate and revert safely",

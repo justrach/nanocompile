@@ -221,6 +221,7 @@ fn main(){
         checks.append('stats count script decisions; clear removes receipts/resources and forces a correct fresh miss then hit')
 
     report=dict(binary_sha256=hashlib.sha256(binary.read_bytes()).hexdigest(),script_sha256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),checks=checks)
+    args.output.parent.mkdir(parents=True,exist_ok=True)
     args.output.write_text(json.dumps(report,indent=2)+'\n');print(json.dumps(report))
 
 if __name__=='__main__':main()
