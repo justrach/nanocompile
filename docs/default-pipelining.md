@@ -17,6 +17,21 @@ Set `NANOCOMPILE_STREAM_COMPILER=0` or `NANOCOMPILE_PIPELINED_COMPANIONS=0` to d
 
 Nano's medians are 7.3% lower cold and 30.2% lower warm in this session. Every cold Nano run has 167 Rust misses and one script miss; every warm run has 167 Rust hits and one script hit. Every repeated rlib, macro dylib, script launcher, original script executable, native object and archive matches its implementation's own cold reference. Tracked sources are unchanged. OS filesystem caches are unflushed; fetching, daemon startup and R2 are excluded. The direct warm-reference median is 14.460527s; compiler-cache cold wins do not imply beating direct compilation without cache bookkeeping.
 
-The frozen default binary SHA-256 is `977ffde7c47c9ad024f0ae8219b3c0395729d7c99bbce919cacfc04e95daf2a0`. [Rust 1.97.1 checks](../benchmarks/default-pipelining-priority.json), [Rust 1.98.1 checks](../benchmarks/default-pipelining-priority-198.json) and [disabled-companion checks](../benchmarks/default-pipelining-disabled.json) preserve the real compiler evidence. Local unit tests, Linux cross-compilation and the full Rust/Zig integration suite pass. Hosted checks are required before calling this revision validated on both platforms.
+The frozen default binary SHA-256 is `977ffde7c47c9ad024f0ae8219b3c0395729d7c99bbce919cacfc04e95daf2a0`. [Rust 1.97.1 checks](../benchmarks/default-pipelining-priority.json), [Rust 1.98.1 checks](../benchmarks/default-pipelining-priority-198.json) and [disabled-companion checks](../benchmarks/default-pipelining-disabled.json) preserve the real compiler evidence. Local unit tests, Linux cross-compilation and the full Rust/Zig integration suite pass. [Hosted CI for the default-runtime and live-capture commit](https://github.com/justrach/nanocompile/actions/runs/38064754357) passes on Ubuntu 24.04 and macOS 15, including real Rust 1.97.1/1.98.1 companion probes, stream forwarding, integration, build-script, native, Zig and Turbo checks. The [sanitized-report follow-up](https://github.com/justrach/nanocompile/actions/runs/38064876995) also passes on both platforms.
 
 The [preceding guarded variation](pipelined-companions.md) also has five matched cold A/B wins and a verified real leaf/shared/revert sequence. Those source-edit points are single samples and use a different frozen binary with explicit flags; they are not repeated default-binary edit medians.
+
+## Real source edits with the default binary
+
+[The completed default-binary edit sequence](../benchmarks/harness-default-pipelining-source-edits.json) uses the same frozen `977ffd…` binary without streaming or companion overrides. These are single samples per point, with a separate empty-cache validation build for each tool at every edit/revert. Sources are changed only in a disposable Harness snapshot.
+
+| Point | Nano | kache | Nano Rust hits / misses |
+| --- | ---: | ---: | ---: |
+| Initial cold | 15.371445s | 17.450059s | 0 / 167 |
+| Leaf edit | 7.640419s | 8.144585s | 166 / 1 |
+| Shared edit | 9.101730s | 9.623256s | 165 / 2 |
+| Revert | 0.944173s | 1.833134s | 167 / 0 |
+
+The linked probe returns 300 → 301 → 312 → 300. Every Nano Rust library, macro dylib and actual compiled script matches direct compilation. Each tool's history-cache outputs also match its fresh same-path outputs, including native objects/archives and Nano's copied script launcher plus original executable. The original project remains unchanged. Expected failed feature probes do not fail Cargo. Source-edit wins in this sequence supplement the repeated cold/warm results; they are not repeated edit medians.
+
+The [current ordinary-compiler phase profile](default-phase-profile.md) attributes the remaining first-wave cold startup gap to identity/key preparation and gives reproducible instructions for the next variation. It is diagnostic evidence, excluded from the untraced performance figures above.

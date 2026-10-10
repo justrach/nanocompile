@@ -1,0 +1,6 @@
+{
+  "base_commit": "b640f5247396ee308c12d8f364bb1811456b82df",
+  "scope": "ordinary compiler successes only; excludes producer, native, script and bypass paths; isolated diagnostic binary; no production change",
+  "binary_sha256": "f79702c8bc6aa359a2e7e98acc56bb34fd6a34726312e6f9f9fe6aaf1bbc322c",
+  "patch_sha256": "c366341205fb1f2534f3e001275c785b80563065edc4234041e87d44758307b5"
+}

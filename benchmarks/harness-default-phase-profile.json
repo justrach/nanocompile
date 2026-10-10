@@ -1,0 +1,3769 @@
+{
+  "diagnostic_only": true,
+  "scope": "Completed ordinary compiler calls only; producers, scripts, native calls, failures and bypasses excluded. Intervals overlap and sums are not build wall time. Atomic diagnostic writes add overhead after recorded phases.",
+  "binary_sha256": "f79702c8bc6aa359a2e7e98acc56bb34fd6a34726312e6f9f9fe6aaf1bbc322c",
+  "summary": {
+    "miss": {
+      "records": 136,
+      "stages": {
+        "compiler": {
+          "samples": 136,
+          "median_seconds": 0.131245646,
+          "sum_seconds": 51.181020251,
+          "max_seconds": 6.35758325
+        },
+        "identity": {
+          "samples": 136,
+          "median_seconds": 0.001419166,
+          "sum_seconds": 1.911516782,
+          "max_seconds": 0.349981042
+        },
+        "locks": {
+          "samples": 136,
+          "median_seconds": 0.0002426665,
+          "sum_seconds": 0.050404504,
+          "max_seconds": 0.004648375
+        },
+        "lookup": {
+          "samples": 136,
+          "median_seconds": 2.1896000000000002e-05,
+          "sum_seconds": 0.00340321,
+          "max_seconds": 0.000328917
+        },
+        "plan": {
+          "samples": 136,
+          "median_seconds": 1.325e-05,
+          "sum_seconds": 0.001840917,
+          "max_seconds": 3.0916e-05
+        },
+        "prepare": {
+          "samples": 136,
+          "median_seconds": 4.59375e-05,
+          "sum_seconds": 0.006395884,
+          "max_seconds": 7.2709e-05
+        },
+        "save": {
+          "samples": 136,
+          "median_seconds": 0.0082137295,
+          "sum_seconds": 2.448832709,
+          "max_seconds": 0.239628417
+        },
+        "snapshot": {
+          "samples": 136,
+          "median_seconds": 0.000527916,
+          "sum_seconds": 0.284595951,
+          "max_seconds": 0.024489917
+        }
+      }
+    },
+    "hit": {
+      "records": 136,
+      "stages": {
+        "identity": {
+          "samples": 136,
+          "median_seconds": 0.001440354,
+          "sum_seconds": 0.201081702,
+          "max_seconds": 0.002339584
+        },
+        "locks": {
+          "samples": 136,
+          "median_seconds": 0.0001545415,
+          "sum_seconds": 0.024511422,
+          "max_seconds": 0.001434292
+        },
+        "plan": {
+          "samples": 136,
+          "median_seconds": 1.225e-05,
+          "sum_seconds": 0.00176066,
+          "max_seconds": 3.4625e-05
+        },
+        "prepare": {
+          "samples": 136,
+          "median_seconds": 4.25205e-05,
+          "sum_seconds": 0.006245173,
+          "max_seconds": 8.55e-05
+        },
+        "restore": {
+          "samples": 136,
+          "median_seconds": 0.0050472085,
+          "sum_seconds": 0.952857167,
+          "max_seconds": 0.032918083
+        }
+      }
+    }
+  },
+  "records": [
+    {
+      "label": "miss",
+      "key": "8a7b23107cb2a55b6c22763ded08d28e1633d41f641e0340860cb7d8adb1e65e",
+      "crate": "unicode_ident",
+      "data": {
+        "plan_ns": 13083,
+        "prepare_ns": 46542,
+        "identity_ns": 349981042,
+        "locks_ns": 177291,
+        "lookup_ns": 14292,
+        "snapshot_ns": 53792,
+        "compiler_ns": 35273833,
+        "save_ns": 17892708
+      }
+    },
+    {
+      "label": "miss",
+      "key": "5cb02ee314b63978a9a1e790e453001ca42851eb7b1cedb5f7550c5be8d35e47",
+      "crate": "pin_project_lite",
+      "data": {
+        "plan_ns": 14500,
+        "prepare_ns": 39875,
+        "identity_ns": 346383916,
+        "locks_ns": 170500,
+        "lookup_ns": 34500,
+        "snapshot_ns": 96875,
+        "compiler_ns": 27458250,
+        "save_ns": 30612625
+      }
+    },
+    {
+      "label": "miss",
+      "key": "56ab0a96093f49ae701ecdd875c147e6153f7fd2a82a71b32ee0342735871522",
+      "crate": "stable_deref_trait",
+      "data": {
+        "plan_ns": 11208,
+        "prepare_ns": 38167,
+        "identity_ns": 344568708,
+        "locks_ns": 205209,
+        "lookup_ns": 16666,
+        "snapshot_ns": 59625,
+        "compiler_ns": 21852292,
+        "save_ns": 30223000
+      }
+    },
+    {
+      "label": "miss",
+      "key": "5a59fc47c8fd75d04d862398c6b35ba01530e58ff621e1a0bd23ea9d77394c3c",
+      "crate": "cfg_if",
+      "data": {
+        "plan_ns": 12541,
+        "prepare_ns": 43417,
+        "identity_ns": 342581458,
+        "locks_ns": 180584,
+        "lookup_ns": 15125,
+        "snapshot_ns": 54500,
+        "compiler_ns": 19976458,
+        "save_ns": 32277917
+      }
+    },
+    {
+      "label": "miss",
+      "key": "01d0bb9775ae8cd12466f63246c057327489bd6cbfec0d07ef7aac7db0cde39b",
+      "crate": "smallvec",
+      "data": {
+        "plan_ns": 14250,
+        "prepare_ns": 42584,
+        "identity_ns": 341831750,
+        "locks_ns": 174500,
+        "lookup_ns": 16375,
+        "snapshot_ns": 107458,
+        "compiler_ns": 88610167,
+        "save_ns": 21060708
+      }
+    },
+    {
+      "label": "miss",
+      "key": "9ef9c12dbdf4edce963679d9136d34703f3fe0fd22212d8779e0d748c1e9a45e",
+      "crate": "futures_core",
+      "data": {
+        "plan_ns": 12833,
+        "prepare_ns": 50959,
+        "identity_ns": 1443291,
+        "locks_ns": 281500,
+        "lookup_ns": 19459,
+        "snapshot_ns": 78416,
+        "compiler_ns": 49775167,
+        "save_ns": 239628417
+      }
+    },
+    {
+      "label": "miss",
+      "key": "c1bb959fca1f0a873188a757cf66246ae82e40f100001dcda9f8af58160dd7f6",
+      "crate": "bytes",
+      "data": {
+        "plan_ns": 9875,
+        "prepare_ns": 38334,
+        "identity_ns": 1030666,
+        "locks_ns": 199584,
+        "lookup_ns": 16416,
+        "snapshot_ns": 65500,
+        "compiler_ns": 303964125,
+        "save_ns": 7200542
+      }
+    },
+    {
+      "label": "miss",
+      "key": "36939f468739c9082b76e967bba34f5180b0a15a91781b7f656f38cebf501b39",
+      "crate": "memchr",
+      "data": {
+        "plan_ns": 13167,
+        "prepare_ns": 41208,
+        "identity_ns": 1495167,
+        "locks_ns": 238375,
+        "lookup_ns": 21125,
+        "snapshot_ns": 88416,
+        "compiler_ns": 276198000,
+        "save_ns": 24267625
+      }
+    },
+    {
+      "label": "miss",
+      "key": "69b86488f920cc6d381b27fe5ec92adc98f5287a5c5d18a22d78a8835d25af01",
+      "crate": "itoa",
+      "data": {
+        "plan_ns": 13000,
+        "prepare_ns": 46458,
+        "identity_ns": 1696583,
+        "locks_ns": 263584,
+        "lookup_ns": 30875,
+        "snapshot_ns": 98000,
+        "compiler_ns": 80059125,
+        "save_ns": 2635250
+      }
+    },
+    {
+      "label": "miss",
+      "key": "5c00036c9ae9d8a3b27384c4daef60c63c7035b0ae3182645293be88a1ace42a",
+      "crate": "scopeguard",
+      "data": {
+        "plan_ns": 12625,
+        "prepare_ns": 51083,
+        "identity_ns": 1588458,
+        "locks_ns": 272917,
+        "lookup_ns": 22208,
+        "snapshot_ns": 99917,
+        "compiler_ns": 27442333,
+        "save_ns": 2753084
+      }
+    },
+    {
+      "label": "miss",
+      "key": "56a42ad4fad0843d46e97f94e7b93af90a3d8b02c0c61669f9e46c8c83c1988d",
+      "crate": "futures_sink",
+      "data": {
+        "plan_ns": 13417,
+        "prepare_ns": 50667,
+        "identity_ns": 1462750,
+        "locks_ns": 245875,
+        "lookup_ns": 17000,
+        "snapshot_ns": 93833,
+        "compiler_ns": 33252042,
+        "save_ns": 134574875
+      }
+    },
+    {
+      "label": "miss",
+      "key": "9bd11d45ebff3fa24785aeff3cb9b912d8826b7c2425c1eed4a3bfe3f265bd3b",
+      "crate": "libc",
+      "data": {
+        "plan_ns": 13708,
+        "prepare_ns": 64417,
+        "identity_ns": 1477833,
+        "locks_ns": 210958,
+        "lookup_ns": 19167,
+        "snapshot_ns": 104583,
+        "compiler_ns": 222772625,
+        "save_ns": 15466542
+      }
+    },
+    {
+      "label": "miss",
+      "key": "61a19816fc6522e4539aad2369fe992a4afd239f9ccc30c0177e03080907a575",
+      "crate": null,
+      "data": {
+        "plan_ns": 9750,
+        "prepare_ns": 53375,
+        "identity_ns": 1521833,
+        "locks_ns": 206917,
+        "lookup_ns": 17083,
+        "snapshot_ns": 36083,
+        "compiler_ns": 20979625,
+        "save_ns": 1278875
+      }
+    },
+    {
+      "label": "miss",
+      "key": "69e594d3182388e864728b0215c9a3195dda2fae2299291df9848e19fac9a4f7",
+      "crate": null,
+      "data": {
+        "plan_ns": 11459,
+        "prepare_ns": 46833,
+        "identity_ns": 1497000,
+        "locks_ns": 138333,
+        "lookup_ns": 16625,
+        "snapshot_ns": 35167,
+        "compiler_ns": 20642333,
+        "save_ns": 1305209
+      }
+    },
+    {
+      "label": "miss",
+      "key": "4a3b8fa7f1b951e9571a47e97c208514bc096c7486e2c5f9f1358cebce359d5b",
+      "crate": "proc_macro2",
+      "data": {
+        "plan_ns": 13250,
+        "prepare_ns": 53667,
+        "identity_ns": 1459958,
+        "locks_ns": 254750,
+        "lookup_ns": 26000,
+        "snapshot_ns": 216042,
+        "compiler_ns": 257078875,
+        "save_ns": 34257875
+      }
+    },
+    {
+      "label": "miss",
+      "key": "05204797ef0110d2ca7c29dbc80cc1ab773e0202bafaeea65a4f8daac443158c",
+      "crate": "lock_api",
+      "data": {
+        "plan_ns": 12000,
+        "prepare_ns": 45542,
+        "identity_ns": 1458292,
+        "locks_ns": 289333,
+        "lookup_ns": 19458,
+        "snapshot_ns": 191250,
+        "compiler_ns": 90071334,
+        "save_ns": 3421791
+      }
+    },
+    {
+      "label": "miss",
+      "key": "98f6b64efe42be5416ff4ca4ac54d837da98326200ee87596d16b5425ece6b8b",
+      "crate": "find_msvc_tools",
+      "data": {
+        "plan_ns": 12958,
+        "prepare_ns": 36167,
+        "identity_ns": 1384958,
+        "locks_ns": 4098625,
+        "lookup_ns": 23250,
+        "snapshot_ns": 105208,
+        "compiler_ns": 84736250,
+        "save_ns": 3174292
+      }
+    },
+    {
+      "label": "miss",
+      "key": "df1676587c3ef3b7287eabc7e9deb286e3d333453df866b352a3f78f9103f06b",
+      "crate": "shlex",
+      "data": {
+        "plan_ns": 11542,
+        "prepare_ns": 66125,
+        "identity_ns": 1352750,
+        "locks_ns": 300833,
+        "lookup_ns": 16750,
+        "snapshot_ns": 91875,
+        "compiler_ns": 58607625,
+        "save_ns": 2994417
+      }
+    },
+    {
+      "label": "miss",
+      "key": "573a89f35e6b696f656e34fb4c0a121109bedd0a5273ecc4be1482e2fa949409",
+      "crate": "futures_channel",
+      "data": {
+        "plan_ns": 12875,
+        "prepare_ns": 34542,
+        "identity_ns": 1177458,
+        "locks_ns": 246042,
+        "lookup_ns": 16542,
+        "snapshot_ns": 185750,
+        "compiler_ns": 88850416,
+        "save_ns": 5051042
+      }
+    },
+    {
+      "label": "miss",
+      "key": "9110224867b8b82ab5d5914c7ed7fbcf91e02ea6ebe17ec29c865113a52d0860",
+      "crate": "core_foundation_sys",
+      "data": {
+        "plan_ns": 11375,
+        "prepare_ns": 34208,
+        "identity_ns": 1506792,
+        "locks_ns": 263666,
+        "lookup_ns": 27542,
+        "snapshot_ns": 123292,
+        "compiler_ns": 73112833,
+        "save_ns": 7593458
+      }
+    },
+    {
+      "label": "miss",
+      "key": "76fcd69e2ebde7598f2321a827953f5cf0c68b02f01999498ff29d8a2db0333b",
+      "crate": "writeable",
+      "data": {
+        "plan_ns": 16000,
+        "prepare_ns": 46916,
+        "identity_ns": 1475084,
+        "locks_ns": 218625,
+        "lookup_ns": 20541,
+        "snapshot_ns": 110542,
+        "compiler_ns": 96410292,
+        "save_ns": 3952833
+      }
+    },
+    {
+      "label": "miss",
+      "key": "94ee63951fc419f84543f7c62d576fb9a25258bd2ca24cc35bb728b2b7f98039",
+      "crate": "cc",
+      "data": {
+        "plan_ns": 12791,
+        "prepare_ns": 69709,
+        "identity_ns": 1491208,
+        "locks_ns": 242708,
+        "lookup_ns": 18834,
+        "snapshot_ns": 347541,
+        "compiler_ns": 559306667,
+        "save_ns": 7975625
+      }
+    },
+    {
+      "label": "miss",
+      "key": "129d91bd38d81dd0369ec12d9a59944d913e49f9cd17ef5e6580cec0348fc0c6",
+      "crate": "litemap",
+      "data": {
+        "plan_ns": 13500,
+        "prepare_ns": 49083,
+        "identity_ns": 1384250,
+        "locks_ns": 272625,
+        "lookup_ns": 25167,
+        "snapshot_ns": 115750,
+        "compiler_ns": 73131333,
+        "save_ns": 3678792
+      }
+    },
+    {
+      "label": "miss",
+      "key": "35d015a6067f8ca5bb61eefde467da3745c67ef252b105b881634cd05fc260bb",
+      "crate": "slab",
+      "data": {
+        "plan_ns": 11542,
+        "prepare_ns": 58750,
+        "identity_ns": 1687916,
+        "locks_ns": 206667,
+        "lookup_ns": 14583,
+        "snapshot_ns": 114042,
+        "compiler_ns": 65506625,
+        "save_ns": 3914167
+      }
+    },
+    {
+      "label": "miss",
+      "key": "111afd6c7e4e7d8201c8d9cb29bc76ccaf5e2b8321f7bf4265b9c1fb6c92809c",
+      "crate": "utf8_iter",
+      "data": {
+        "plan_ns": 12125,
+        "prepare_ns": 36000,
+        "identity_ns": 1257583,
+        "locks_ns": 402209,
+        "lookup_ns": 22916,
+        "snapshot_ns": 116042,
+        "compiler_ns": 45850250,
+        "save_ns": 2783500
+      }
+    },
+    {
+      "label": "miss",
+      "key": "c91c1ea0b88ee3e87b126d58027628a166fd5ab1a5f367f1d03632a32ae14a31",
+      "crate": "serde_core",
+      "data": {
+        "plan_ns": 12333,
+        "prepare_ns": 41500,
+        "identity_ns": 1512959,
+        "locks_ns": 224708,
+        "lookup_ns": 17792,
+        "snapshot_ns": 109708,
+        "compiler_ns": 959550333,
+        "save_ns": 18975667
+      }
+    },
+    {
+      "label": "miss",
+      "key": "0a7b4ca209a286a869a29930e9ed9faf8bfce808993a24e4a9dc12a4ccee9388",
+      "crate": "quote",
+      "data": {
+        "plan_ns": 13542,
+        "prepare_ns": 46166,
+        "identity_ns": 1398959,
+        "locks_ns": 264458,
+        "lookup_ns": 18167,
+        "snapshot_ns": 409958,
+        "compiler_ns": 101925750,
+        "save_ns": 17766583
+      }
+    },
+    {
+      "label": "miss",
+      "key": "9c9437cffd0424ce650e17cfb8a6eb80c6ef6d9ce8045235c9404ead397effb9",
+      "crate": "parking_lot_core",
+      "data": {
+        "plan_ns": 13542,
+        "prepare_ns": 56000,
+        "identity_ns": 1846125,
+        "locks_ns": 317583,
+        "lookup_ns": 33375,
+        "snapshot_ns": 2152584,
+        "compiler_ns": 120334083,
+        "save_ns": 5670583
+      }
+    },
+    {
+      "label": "miss",
+      "key": "bbfd4c0ea66a0902a08497be8759a6c2b57f295acc28a9947f24a6bd50a44514",
+      "crate": "errno",
+      "data": {
+        "plan_ns": 12375,
+        "prepare_ns": 72583,
+        "identity_ns": 1681750,
+        "locks_ns": 352542,
+        "lookup_ns": 29583,
+        "snapshot_ns": 1766375,
+        "compiler_ns": 49016500,
+        "save_ns": 5299875
+      }
+    },
+    {
+      "label": "miss",
+      "key": "79317db7c84a26f4e9ad6e2e378a34ebef1083d5a0f7cc69bf11d2e58be1a294",
+      "crate": "mio",
+      "data": {
+        "plan_ns": 11125,
+        "prepare_ns": 33000,
+        "identity_ns": 1218834,
+        "locks_ns": 223125,
+        "lookup_ns": 16833,
+        "snapshot_ns": 1664458,
+        "compiler_ns": 262692959,
+        "save_ns": 7461500
+      }
+    },
+    {
+      "label": "miss",
+      "key": "ff665f79c63ee194f62dc5a5cdf8c5ac6cf65a914e41ed98fd42cc83566f6939",
+      "crate": "socket2",
+      "data": {
+        "plan_ns": 11208,
+        "prepare_ns": 31917,
+        "identity_ns": 1161000,
+        "locks_ns": 214875,
+        "lookup_ns": 15292,
+        "snapshot_ns": 1682333,
+        "compiler_ns": 215039583,
+        "save_ns": 6106959
+      }
+    },
+    {
+      "label": "miss",
+      "key": "51caef7a6a06eb2bc6cf0eafa31eff24e33ae1edf1a82d2f123222c14350ea67",
+      "crate": "syn",
+      "data": {
+        "plan_ns": 13458,
+        "prepare_ns": 52708,
+        "identity_ns": 1452875,
+        "locks_ns": 238500,
+        "lookup_ns": 17375,
+        "snapshot_ns": 631709,
+        "compiler_ns": 1884026291,
+        "save_ns": 41527792
+      }
+    },
+    {
+      "label": "miss",
+      "key": "adb977202492eed40da18bbe1af184c265499e66bdb1b1f06ee887ca237a3717",
+      "crate": "syn",
+      "data": {
+        "plan_ns": 13542,
+        "prepare_ns": 43500,
+        "identity_ns": 1365750,
+        "locks_ns": 231708,
+        "lookup_ns": 17750,
+        "snapshot_ns": 616208,
+        "compiler_ns": 2037051709,
+        "save_ns": 43866750
+      }
+    },
+    {
+      "label": "miss",
+      "key": "dbdaa0d16b19b4327fd41dd37f3e1a90d00c868a5e8e2a0fbfbd5b9d639dde04",
+      "crate": "parking_lot",
+      "data": {
+        "plan_ns": 12250,
+        "prepare_ns": 34500,
+        "identity_ns": 1375167,
+        "locks_ns": 243750,
+        "lookup_ns": 17833,
+        "snapshot_ns": 561292,
+        "compiler_ns": 281876000,
+        "save_ns": 7797541
+      }
+    },
+    {
+      "label": "miss",
+      "key": "a88547d08b13c890d33a4775cb63425878b7bdc5d6934a2340797f367c744978",
+      "crate": "signal_hook_registry",
+      "data": {
+        "plan_ns": 13959,
+        "prepare_ns": 48500,
+        "identity_ns": 1504833,
+        "locks_ns": 250167,
+        "lookup_ns": 23625,
+        "snapshot_ns": 1799250,
+        "compiler_ns": 135722500,
+        "save_ns": 4799125
+      }
+    },
+    {
+      "label": "miss",
+      "key": "ec7c11f96ccc386c0204bfb3266ae94701086be33321171dde99cc4fe66edb44",
+      "crate": "futures_io",
+      "data": {
+        "plan_ns": 13875,
+        "prepare_ns": 43250,
+        "identity_ns": 1525750,
+        "locks_ns": 229541,
+        "lookup_ns": 21834,
+        "snapshot_ns": 129458,
+        "compiler_ns": 57606208,
+        "save_ns": 2936875
+      }
+    },
+    {
+      "label": "miss",
+      "key": "e481cadc28ba125cf669de4d402243df26b815aa7be75f8cbfe62376a8870136",
+      "crate": "futures_task",
+      "data": {
+        "plan_ns": 13583,
+        "prepare_ns": 48292,
+        "identity_ns": 1555167,
+        "locks_ns": 283583,
+        "lookup_ns": 26917,
+        "snapshot_ns": 154625,
+        "compiler_ns": 52478541,
+        "save_ns": 3483000
+      }
+    },
+    {
+      "label": "miss",
+      "key": "5b62b37fd29cdec92f40cbd00d3025e0b4af5f3f9da4c94515d8c8b19777ea96",
+      "crate": "http",
+      "data": {
+        "plan_ns": 13792,
+        "prepare_ns": 46583,
+        "identity_ns": 1367958,
+        "locks_ns": 244000,
+        "lookup_ns": 19209,
+        "snapshot_ns": 922625,
+        "compiler_ns": 599504583,
+        "save_ns": 10627958
+      }
+    },
+    {
+      "label": "miss",
+      "key": "daae3455112d6572a3649bbfbca3c5bb26a09ec8824427edff25bc00021fcca3",
+      "crate": "version_check",
+      "data": {
+        "plan_ns": 13375,
+        "prepare_ns": 56792,
+        "identity_ns": 1512041,
+        "locks_ns": 232750,
+        "lookup_ns": 19834,
+        "snapshot_ns": 141708,
+        "compiler_ns": 110227333,
+        "save_ns": 3813334
+      }
+    },
+    {
+      "label": "miss",
+      "key": "f3f3dee6ad0062041cf3cd5319356d042dbff257616f7df06aadf88e77fe4c84",
+      "crate": "zeroize",
+      "data": {
+        "plan_ns": 13459,
+        "prepare_ns": 39291,
+        "identity_ns": 1567750,
+        "locks_ns": 257292,
+        "lookup_ns": 29125,
+        "snapshot_ns": 183167,
+        "compiler_ns": 58303333,
+        "save_ns": 4234583
+      }
+    },
+    {
+      "label": "miss",
+      "key": "fd0e7d6667da38faf657d2c407ec37a5259537388197cbfc7bdbab023bb39798",
+      "crate": "bitflags",
+      "data": {
+        "plan_ns": 13334,
+        "prepare_ns": 45291,
+        "identity_ns": 1275709,
+        "locks_ns": 237000,
+        "lookup_ns": 19750,
+        "snapshot_ns": 155125,
+        "compiler_ns": 115158250,
+        "save_ns": 3820208
+      }
+    },
+    {
+      "label": "miss",
+      "key": "728462e3d74984e33b3e241a4440216a09cc65d64f8d1c4ac1eeb371be75da66",
+      "crate": "percent_encoding",
+      "data": {
+        "plan_ns": 13166,
+        "prepare_ns": 45542,
+        "identity_ns": 1386917,
+        "locks_ns": 223291,
+        "lookup_ns": 19667,
+        "snapshot_ns": 133333,
+        "compiler_ns": 77324834,
+        "save_ns": 4393416
+      }
+    },
+    {
+      "label": "miss",
+      "key": "b020a7b97f7f49291c073033c16b1ceaeaac62878afa9d39fb39b9e1220c94b1",
+      "crate": "once_cell",
+      "data": {
+        "plan_ns": 12333,
+        "prepare_ns": 36292,
+        "identity_ns": 1182958,
+        "locks_ns": 242125,
+        "lookup_ns": 19542,
+        "snapshot_ns": 157417,
+        "compiler_ns": 80585958,
+        "save_ns": 3640417
+      }
+    },
+    {
+      "label": "miss",
+      "key": "adf28d469e2a6c07d6b0da26ac3943fdd430455992bb4ef4d3a8c03239687641",
+      "crate": "rustls_pki_types",
+      "data": {
+        "plan_ns": 13209,
+        "prepare_ns": 34416,
+        "identity_ns": 1440709,
+        "locks_ns": 221875,
+        "lookup_ns": 18250,
+        "snapshot_ns": 537291,
+        "compiler_ns": 265234167,
+        "save_ns": 6713417
+      }
+    },
+    {
+      "label": "miss",
+      "key": "d40a977982b54422616faf17ef5368579666b8134ffa7cec22a524077ff8c0c6",
+      "crate": "icu_normalizer_data",
+      "data": {
+        "plan_ns": 11583,
+        "prepare_ns": 34875,
+        "identity_ns": 1168792,
+        "locks_ns": 206708,
+        "lookup_ns": 20875,
+        "snapshot_ns": 141833,
+        "compiler_ns": 22890542,
+        "save_ns": 3633708
+      }
+    },
+    {
+      "label": "miss",
+      "key": "f61b72ab9d3dadb9110bb7d9e0e7b9cdf8e57fccda2f0763d2740e6909d80c8f",
+      "crate": "icu_properties_data",
+      "data": {
+        "plan_ns": 13709,
+        "prepare_ns": 59750,
+        "identity_ns": 1750000,
+        "locks_ns": 258708,
+        "lookup_ns": 25208,
+        "snapshot_ns": 147750,
+        "compiler_ns": 55598667,
+        "save_ns": 12902625
+      }
+    },
+    {
+      "label": "miss",
+      "key": "bc89054e0dd6262af53dd84be79c2d1c6e66e35e4ba490abe7f529e814f5a54c",
+      "crate": "http_body",
+      "data": {
+        "plan_ns": 13833,
+        "prepare_ns": 47042,
+        "identity_ns": 1513208,
+        "locks_ns": 242625,
+        "lookup_ns": 21792,
+        "snapshot_ns": 2042000,
+        "compiler_ns": 47225625,
+        "save_ns": 18940208
+      }
+    },
+    {
+      "label": "miss",
+      "key": "f5c62592a338db9e56acc136005cba2fc63fa907710f37509a75f7246beabfa4",
+      "crate": "getrandom",
+      "data": {
+        "plan_ns": 13125,
+        "prepare_ns": 44167,
+        "identity_ns": 1531042,
+        "locks_ns": 228125,
+        "lookup_ns": 23041,
+        "snapshot_ns": 1806292,
+        "compiler_ns": 52507417,
+        "save_ns": 5236583
+      }
+    },
+    {
+      "label": "miss",
+      "key": "7eea0c63222de48375c671d98c4f219cee836b76ee04654c56d55b5eacaaa68c",
+      "crate": "untrusted",
+      "data": {
+        "plan_ns": 12000,
+        "prepare_ns": 61375,
+        "identity_ns": 1776333,
+        "locks_ns": 382667,
+        "lookup_ns": 43000,
+        "snapshot_ns": 248625,
+        "compiler_ns": 36440583,
+        "save_ns": 2806375
+      }
+    },
+    {
+      "label": "miss",
+      "key": "5fcadd31ba60c18ec54a3ed30b16d150c2b5856be93ceefa82ec5148dbc0650c",
+      "crate": "autocfg",
+      "data": {
+        "plan_ns": 13291,
+        "prepare_ns": 56834,
+        "identity_ns": 1510708,
+        "locks_ns": 256792,
+        "lookup_ns": 17208,
+        "snapshot_ns": 160458,
+        "compiler_ns": 151235084,
+        "save_ns": 3617791
+      }
+    },
+    {
+      "label": "miss",
+      "key": "9fdfa81b62ba2e5f5f6d5c3d758313b34adfdaa45b306b945842455b498a29d3",
+      "crate": "try_lock",
+      "data": {
+        "plan_ns": 14292,
+        "prepare_ns": 55125,
+        "identity_ns": 1520708,
+        "locks_ns": 357625,
+        "lookup_ns": 24542,
+        "snapshot_ns": 182958,
+        "compiler_ns": 29600000,
+        "save_ns": 1935292
+      }
+    },
+    {
+      "label": "miss",
+      "key": "c9651c9d6602a8fe4b8043459d382e2c3f67ff73395542b89996e33b3174008e",
+      "crate": "typenum",
+      "data": {
+        "plan_ns": 11792,
+        "prepare_ns": 51750,
+        "identity_ns": 1740208,
+        "locks_ns": 293459,
+        "lookup_ns": 33750,
+        "snapshot_ns": 210916,
+        "compiler_ns": 277868000,
+        "save_ns": 12257500
+      }
+    },
+    {
+      "label": "miss",
+      "key": "d7dd4d785c0b73ca1a459f3738301aaed5c9863780c5bfacadb91d1c0e61981a",
+      "crate": "tower_service",
+      "data": {
+        "plan_ns": 14750,
+        "prepare_ns": 48709,
+        "identity_ns": 1254791,
+        "locks_ns": 247334,
+        "lookup_ns": 20708,
+        "snapshot_ns": 166500,
+        "compiler_ns": 26143500,
+        "save_ns": 7228708
+      }
+    },
+    {
+      "label": "miss",
+      "key": "b9ae50b1f337a7c87e354ff119b46433bf3ff93bbfcdc0e099fcf5ca2867de06",
+      "crate": "httparse",
+      "data": {
+        "plan_ns": 13250,
+        "prepare_ns": 42000,
+        "identity_ns": 1666709,
+        "locks_ns": 299791,
+        "lookup_ns": 25875,
+        "snapshot_ns": 257125,
+        "compiler_ns": 151465459,
+        "save_ns": 5042000
+      }
+    },
+    {
+      "label": "miss",
+      "key": "650844384239e2975aecbef454860162c6dfaa11cb4f344d74a6d7ab8f863666",
+      "crate": "want",
+      "data": {
+        "plan_ns": 13541,
+        "prepare_ns": 66709,
+        "identity_ns": 1412166,
+        "locks_ns": 325292,
+        "lookup_ns": 23417,
+        "snapshot_ns": 252750,
+        "compiler_ns": 48776958,
+        "save_ns": 3861750
+      }
+    },
+    {
+      "label": "miss",
+      "key": "330db7092f7abd55566a96a0dc6007dfbfa19b1dc9b79c0430ca9f2aa1c5c0a2",
+      "crate": "tracing_core",
+      "data": {
+        "plan_ns": 13083,
+        "prepare_ns": 43167,
+        "identity_ns": 1275166,
+        "locks_ns": 227834,
+        "lookup_ns": 17375,
+        "snapshot_ns": 337416,
+        "compiler_ns": 302521459,
+        "save_ns": 5880416
+      }
+    },
+    {
+      "label": "miss",
+      "key": "54001341f6e776b661f74b6d35e90a7f1690573e07b79da398d269a93a42a598",
+      "crate": "generic_array",
+      "data": {
+        "plan_ns": 12458,
+        "prepare_ns": 62417,
+        "identity_ns": 1574958,
+        "locks_ns": 256208,
+        "lookup_ns": 26459,
+        "snapshot_ns": 1973541,
+        "compiler_ns": 242748959,
+        "save_ns": 7175250
+      }
+    },
+    {
+      "label": "miss",
+      "key": "27d922a7bb2f4950b7976b393c091625ece2fd82967d21a37c0057962896a73a",
+      "crate": "form_urlencoded",
+      "data": {
+        "plan_ns": 11541,
+        "prepare_ns": 37167,
+        "identity_ns": 1150792,
+        "locks_ns": 242208,
+        "lookup_ns": 24833,
+        "snapshot_ns": 239750,
+        "compiler_ns": 71652417,
+        "save_ns": 2802250
+      }
+    },
+    {
+      "label": "miss",
+      "key": "008567728c50b4a007e7557e76e220d717a3a1f670657ec99f8d3216c38959c9",
+      "crate": "core_foundation",
+      "data": {
+        "plan_ns": 11625,
+        "prepare_ns": 41667,
+        "identity_ns": 1187542,
+        "locks_ns": 209416,
+        "lookup_ns": 16625,
+        "snapshot_ns": 2226459,
+        "compiler_ns": 153790083,
+        "save_ns": 7736167
+      }
+    },
+    {
+      "label": "miss",
+      "key": "fa7e429eca50172df51eb5368307484f1b109b82e8ae7030e0fd4e47ed9a7194",
+      "crate": "synstructure",
+      "data": {
+        "plan_ns": 13833,
+        "prepare_ns": 43917,
+        "identity_ns": 1424250,
+        "locks_ns": 260791,
+        "lookup_ns": 16834,
+        "snapshot_ns": 3846208,
+        "compiler_ns": 225579958,
+        "save_ns": 36328125
+      }
+    },
+    {
+      "label": "miss",
+      "key": "219a8d4d2749c622865857108d5944ce17590ee1b080a7d9749ff75980673ad1",
+      "crate": "subtle",
+      "data": {
+        "plan_ns": 12750,
+        "prepare_ns": 43625,
+        "identity_ns": 1505875,
+        "locks_ns": 212583,
+        "lookup_ns": 19417,
+        "snapshot_ns": 175791,
+        "compiler_ns": 47889625,
+        "save_ns": 2333125
+      }
+    },
+    {
+      "label": "miss",
+      "key": "88e656e1310b5de9e1e7040256fa43e593a0af71362344bd7bc11ae1dfc15e2a",
+      "crate": "atomic_waker",
+      "data": {
+        "plan_ns": 12000,
+        "prepare_ns": 61625,
+        "identity_ns": 1293417,
+        "locks_ns": 268541,
+        "lookup_ns": 23250,
+        "snapshot_ns": 191125,
+        "compiler_ns": 31297917,
+        "save_ns": 2218042
+      }
+    },
+    {
+      "label": "miss",
+      "key": "8778286e90c8cb900776af04dfbd81297bc977f04df031a8202c35f792de7fb4",
+      "crate": "system_configuration",
+      "data": {
+        "plan_ns": 11667,
+        "prepare_ns": 44125,
+        "identity_ns": 1263250,
+        "locks_ns": 374291,
+        "lookup_ns": 25125,
+        "snapshot_ns": 947792,
+        "compiler_ns": 136494792,
+        "save_ns": 20282583
+      }
+    },
+    {
+      "label": "miss",
+      "key": "13ee7576ab59ef825c759d1e72f7c74f3072272ab69a43b3be925a8fc6012e9f",
+      "crate": "zmij",
+      "data": {
+        "plan_ns": 12542,
+        "prepare_ns": 45541,
+        "identity_ns": 1416834,
+        "locks_ns": 246666,
+        "lookup_ns": 23875,
+        "snapshot_ns": 234167,
+        "compiler_ns": 136741125,
+        "save_ns": 2845708
+      }
+    },
+    {
+      "label": "miss",
+      "key": "6e88f082cc1ab8918aa93c0c76d2059a5f02fc6d82ae82f43669b45decc1194b",
+      "crate": "sync_wrapper",
+      "data": {
+        "plan_ns": 12917,
+        "prepare_ns": 57333,
+        "identity_ns": 1549875,
+        "locks_ns": 231917,
+        "lookup_ns": 16791,
+        "snapshot_ns": 247084,
+        "compiler_ns": 29670666,
+        "save_ns": 3294292
+      }
+    },
+    {
+      "label": "miss",
+      "key": "003e772e055e6e06ad673b1668399c106040d05a7506bcf34a4466cd062def53",
+      "crate": "equivalent",
+      "data": {
+        "plan_ns": 11000,
+        "prepare_ns": 30417,
+        "identity_ns": 1120625,
+        "locks_ns": 216500,
+        "lookup_ns": 19916,
+        "snapshot_ns": 181292,
+        "compiler_ns": 21890458,
+        "save_ns": 2812334
+      }
+    },
+    {
+      "label": "miss",
+      "key": "0d46c6acd56ac10407b07f00bd798d38330c4c15a60e03a55e509425ce3cf304",
+      "crate": "hashbrown",
+      "data": {
+        "plan_ns": 13083,
+        "prepare_ns": 48042,
+        "identity_ns": 1455833,
+        "locks_ns": 290375,
+        "lookup_ns": 30667,
+        "snapshot_ns": 211000,
+        "compiler_ns": 281549166,
+        "save_ns": 8019417
+      }
+    },
+    {
+      "label": "miss",
+      "key": "bd17498a387c67ec79570e212fa7b0619bbe9fab8e2bab06c2d89b0475cb8246",
+      "crate": "ipnet",
+      "data": {
+        "plan_ns": 11083,
+        "prepare_ns": 40500,
+        "identity_ns": 1327167,
+        "locks_ns": 256541,
+        "lookup_ns": 18000,
+        "snapshot_ns": 182459,
+        "compiler_ns": 319816833,
+        "save_ns": 4821542
+      }
+    },
+    {
+      "label": "miss",
+      "key": "1666eaf06f1b7cfdb835aa6b075e6ed3b6227c2dcaf13b5085155721cb49b4d7",
+      "crate": "base64",
+      "data": {
+        "plan_ns": 11417,
+        "prepare_ns": 36000,
+        "identity_ns": 1383416,
+        "locks_ns": 4483375,
+        "lookup_ns": 24084,
+        "snapshot_ns": 332166,
+        "compiler_ns": 166644250,
+        "save_ns": 5837000
+      }
+    },
+    {
+      "label": "miss",
+      "key": "c1e05456107d202448d2445d0ca06ae9f711e24684be8bf36719aa1f5ca206ad",
+      "crate": "unicode_width",
+      "data": {
+        "plan_ns": 11916,
+        "prepare_ns": 35709,
+        "identity_ns": 1223916,
+        "locks_ns": 256792,
+        "lookup_ns": 20125,
+        "snapshot_ns": 223417,
+        "compiler_ns": 100979208,
+        "save_ns": 7294208
+      }
+    },
+    {
+      "label": "miss",
+      "key": "37f3a34f10097c611a57eac8d7caee575523f007e6f53b4b5b553d108cd16f88",
+      "crate": "ryu",
+      "data": {
+        "plan_ns": 12792,
+        "prepare_ns": 48667,
+        "identity_ns": 1279416,
+        "locks_ns": 267959,
+        "lookup_ns": 32041,
+        "snapshot_ns": 245959,
+        "compiler_ns": 92540583,
+        "save_ns": 3109083
+      }
+    },
+    {
+      "label": "miss",
+      "key": "db68e1e884ce81294cc8d60eebdc65e466ba088117bf9f4f00b04d8aa121b8b2",
+      "crate": "tower_layer",
+      "data": {
+        "plan_ns": 10750,
+        "prepare_ns": 32375,
+        "identity_ns": 1145500,
+        "locks_ns": 224959,
+        "lookup_ns": 34083,
+        "snapshot_ns": 186583,
+        "compiler_ns": 79197292,
+        "save_ns": 3236292
+      }
+    },
+    {
+      "label": "miss",
+      "key": "bf6b159c5a6704042305a9f2d83849194eea24cc8bab94ca0dc11a3ef0f8fed7",
+      "crate": "indexmap",
+      "data": {
+        "plan_ns": 14917,
+        "prepare_ns": 47542,
+        "identity_ns": 1419166,
+        "locks_ns": 221917,
+        "lookup_ns": 23250,
+        "snapshot_ns": 1212000,
+        "compiler_ns": 344120458,
+        "save_ns": 9591125
+      }
+    },
+    {
+      "label": "miss",
+      "key": "25e0f15006a01cd9d067bae46196e7950ec972587a19e8ac2fd474939e3588f8",
+      "crate": "tokio",
+      "data": {
+        "plan_ns": 13917,
+        "prepare_ns": 35083,
+        "identity_ns": 1659750,
+        "locks_ns": 326417,
+        "lookup_ns": 25708,
+        "snapshot_ns": 4772792,
+        "compiler_ns": 3665995041,
+        "save_ns": 57662250
+      }
+    },
+    {
+      "label": "miss",
+      "key": "e62a541198617718214afea674505647e1f83ed406d546eb8d1163137602d2ee",
+      "crate": "futures_util",
+      "data": {
+        "plan_ns": 14000,
+        "prepare_ns": 48917,
+        "identity_ns": 1343292,
+        "locks_ns": 245875,
+        "lookup_ns": 19625,
+        "snapshot_ns": 2840291,
+        "compiler_ns": 1166424209,
+        "save_ns": 49081000
+      }
+    },
+    {
+      "label": "miss",
+      "key": "64094da8de7b5055ddd09736e8b8c7a69996887df254f667617ebe077ff40b00",
+      "crate": "getopts",
+      "data": {
+        "plan_ns": 13916,
+        "prepare_ns": 52334,
+        "identity_ns": 1410833,
+        "locks_ns": 243458,
+        "lookup_ns": 20917,
+        "snapshot_ns": 803708,
+        "compiler_ns": 314140042,
+        "save_ns": 4797500
+      }
+    },
+    {
+      "label": "miss",
+      "key": "2fe32cc34c7dd71f58859a21b1dd78f6a1ff7904b3c0e5b65317a6593e73f070",
+      "crate": "zerofrom",
+      "data": {
+        "plan_ns": 16459,
+        "prepare_ns": 48375,
+        "identity_ns": 1419166,
+        "locks_ns": 236334,
+        "lookup_ns": 21250,
+        "snapshot_ns": 1793541,
+        "compiler_ns": 83055792,
+        "save_ns": 18481458
+      }
+    },
+    {
+      "label": "miss",
+      "key": "ad41933e5739994fd8d9383192bd77dc4759d4bff9120b765b872cc18b2bdae9",
+      "crate": "serde_json",
+      "data": {
+        "plan_ns": 13708,
+        "prepare_ns": 59084,
+        "identity_ns": 1838541,
+        "locks_ns": 249875,
+        "lookup_ns": 23834,
+        "snapshot_ns": 4695000,
+        "compiler_ns": 795371000,
+        "save_ns": 14523791
+      }
+    },
+    {
+      "label": "miss",
+      "key": "e305ebff27dad7dfa9abb043b7a1bca5cd1ea5a19ff3c84ae5e610cbb1986073",
+      "crate": "num_traits",
+      "data": {
+        "plan_ns": 11042,
+        "prepare_ns": 45916,
+        "identity_ns": 1320709,
+        "locks_ns": 243041,
+        "lookup_ns": 21625,
+        "snapshot_ns": 225125,
+        "compiler_ns": 287555750,
+        "save_ns": 12109000
+      }
+    },
+    {
+      "label": "miss",
+      "key": "0a5ce5d5a5285b28f681894140734c0d785f07919d3dad881b4e9964d21b5d2e",
+      "crate": "yoke",
+      "data": {
+        "plan_ns": 13875,
+        "prepare_ns": 42167,
+        "identity_ns": 1160667,
+        "locks_ns": 240541,
+        "lookup_ns": 22625,
+        "snapshot_ns": 1773709,
+        "compiler_ns": 113157791,
+        "save_ns": 21881792
+      }
+    },
+    {
+      "label": "miss",
+      "key": "9962030ee129887734cc216e891c841a2271ba8f0918a04e9fe92e1ed7cfcfbb",
+      "crate": "tracing",
+      "data": {
+        "plan_ns": 14292,
+        "prepare_ns": 43417,
+        "identity_ns": 1542791,
+        "locks_ns": 303667,
+        "lookup_ns": 29500,
+        "snapshot_ns": 2507000,
+        "compiler_ns": 149733125,
+        "save_ns": 22857083
+      }
+    },
+    {
+      "label": "miss",
+      "key": "7f94f531b08e6795bf19b173619c44e7ebfcafacfa175bfeb789f315bbd48a7d",
+      "crate": "zerovec",
+      "data": {
+        "plan_ns": 17542,
+        "prepare_ns": 48750,
+        "identity_ns": 1359250,
+        "locks_ns": 212250,
+        "lookup_ns": 23250,
+        "snapshot_ns": 1807375,
+        "compiler_ns": 284575375,
+        "save_ns": 26216583
+      }
+    },
+    {
+      "label": "miss",
+      "key": "bd27836b67604eaeaa35a5d64feb2c0ab73a42254d4492c66540de5e6e3c07e1",
+      "crate": "zerotrie",
+      "data": {
+        "plan_ns": 16334,
+        "prepare_ns": 45250,
+        "identity_ns": 1489458,
+        "locks_ns": 332417,
+        "lookup_ns": 29666,
+        "snapshot_ns": 2058375,
+        "compiler_ns": 168035209,
+        "save_ns": 24510875
+      }
+    },
+    {
+      "label": "miss",
+      "key": "c53c9b89d4b23dea7c630959f4ddcdcc862ea7b84a584addf221abf3e709b836",
+      "crate": "ring",
+      "data": {
+        "plan_ns": 30916,
+        "prepare_ns": 31084,
+        "identity_ns": 1213541,
+        "locks_ns": 213292,
+        "lookup_ns": 22083,
+        "snapshot_ns": 3566834,
+        "compiler_ns": 1101931916,
+        "save_ns": 21672917
+      }
+    },
+    {
+      "label": "miss",
+      "key": "de0cdd3ae5f44de50933900ae3c0f8d912a85da9ae2f1def097ad5f4d8015071",
+      "crate": "getrandom",
+      "data": {
+        "plan_ns": 14000,
+        "prepare_ns": 45208,
+        "identity_ns": 1204375,
+        "locks_ns": 231792,
+        "lookup_ns": 22458,
+        "snapshot_ns": 1856375,
+        "compiler_ns": 42779292,
+        "save_ns": 4793208
+      }
+    },
+    {
+      "label": "miss",
+      "key": "0d5bb06b4fc3f4c0f97a2f6bb896c1f0679c03b0fd8c97c94a41fde14adf9b0f",
+      "crate": "crypto_common",
+      "data": {
+        "plan_ns": 13792,
+        "prepare_ns": 43333,
+        "identity_ns": 1403000,
+        "locks_ns": 222458,
+        "lookup_ns": 24750,
+        "snapshot_ns": 2688125,
+        "compiler_ns": 37390917,
+        "save_ns": 5582708
+      }
+    },
+    {
+      "label": "miss",
+      "key": "abf14aa3d6e85d54fbd78862c6718b3a3f453cb674b8a04b9b77230e0273b6d7",
+      "crate": "serde",
+      "data": {
+        "plan_ns": 12333,
+        "prepare_ns": 40834,
+        "identity_ns": 1196083,
+        "locks_ns": 269792,
+        "lookup_ns": 28458,
+        "snapshot_ns": 5455000,
+        "compiler_ns": 303922250,
+        "save_ns": 26455875
+      }
+    },
+    {
+      "label": "miss",
+      "key": "0119f6674fd4c863b82b32f9fa49b7fe267199b2304f1d1ba93b11473c69ee1d",
+      "crate": "block_buffer",
+      "data": {
+        "plan_ns": 13709,
+        "prepare_ns": 50375,
+        "identity_ns": 1593250,
+        "locks_ns": 263291,
+        "lookup_ns": 24292,
+        "snapshot_ns": 893250,
+        "compiler_ns": 44642875,
+        "save_ns": 5289333
+      }
+    },
+    {
+      "label": "miss",
+      "key": "b7349236dbe308bfba5e34f94dbcbcbeca109fea6961a2535f0e10499c1acd5f",
+      "crate": "webpki_roots",
+      "data": {
+        "plan_ns": 12625,
+        "prepare_ns": 37542,
+        "identity_ns": 1479750,
+        "locks_ns": 208000,
+        "lookup_ns": 21500,
+        "snapshot_ns": 808292,
+        "compiler_ns": 35779333,
+        "save_ns": 5195833
+      }
+    },
+    {
+      "label": "miss",
+      "key": "3f5d98868a872d01cc1e6e39bf1c28e34bc2983b655d3216f13abc11de07e2f7",
+      "crate": "iana_time_zone",
+      "data": {
+        "plan_ns": 13250,
+        "prepare_ns": 46209,
+        "identity_ns": 1419208,
+        "locks_ns": 238958,
+        "lookup_ns": 20459,
+        "snapshot_ns": 712500,
+        "compiler_ns": 48302375,
+        "save_ns": 3273125
+      }
+    },
+    {
+      "label": "miss",
+      "key": "3ef426d019e979dd4806f8cca4676de1f13ddff054ce10e927c163309664d87b",
+      "crate": "tinystr",
+      "data": {
+        "plan_ns": 14667,
+        "prepare_ns": 49917,
+        "identity_ns": 1393250,
+        "locks_ns": 278916,
+        "lookup_ns": 24209,
+        "snapshot_ns": 2378958,
+        "compiler_ns": 69098250,
+        "save_ns": 11451958
+      }
+    },
+    {
+      "label": "miss",
+      "key": "afe92e576b32dd3823b9cbf28ec22515edcc88ac63fe6930badd875003f7f387",
+      "crate": "potential_utf",
+      "data": {
+        "plan_ns": 15584,
+        "prepare_ns": 45041,
+        "identity_ns": 1383750,
+        "locks_ns": 248917,
+        "lookup_ns": 20542,
+        "snapshot_ns": 1079916,
+        "compiler_ns": 49027375,
+        "save_ns": 8648167
+      }
+    },
+    {
+      "label": "miss",
+      "key": "152fe4b7018ecd640ce7ed2ffe38faff64425e44ca27cbd7324966a566197c27",
+      "crate": "zlib_rs",
+      "data": {
+        "plan_ns": 12459,
+        "prepare_ns": 64166,
+        "identity_ns": 1368500,
+        "locks_ns": 241459,
+        "lookup_ns": 19000,
+        "snapshot_ns": 245083,
+        "compiler_ns": 1767778500,
+        "save_ns": 8408042
+      }
+    },
+    {
+      "label": "miss",
+      "key": "5c1be901db41859e8e35e867acebf344de66adc6ab8e179016692d01abad9f19",
+      "crate": "icu_locale_core",
+      "data": {
+        "plan_ns": 16833,
+        "prepare_ns": 47708,
+        "identity_ns": 1476625,
+        "locks_ns": 254209,
+        "lookup_ns": 24541,
+        "snapshot_ns": 3160375,
+        "compiler_ns": 790695084,
+        "save_ns": 20318500
+      }
+    },
+    {
+      "label": "miss",
+      "key": "e7eceff825c7eb0570a2ddcabd28e47fdc629225e46b4c32389044cf303321a3",
+      "crate": "icu_collections",
+      "data": {
+        "plan_ns": 15417,
+        "prepare_ns": 40500,
+        "identity_ns": 1190083,
+        "locks_ns": 227959,
+        "lookup_ns": 20458,
+        "snapshot_ns": 2670125,
+        "compiler_ns": 233153750,
+        "save_ns": 12334542
+      }
+    },
+    {
+      "label": "miss",
+      "key": "cd08dc5a015a8656765f7383e6eba4f64dae33f9bf09f66726893ccba74711c0",
+      "crate": "unicase",
+      "data": {
+        "plan_ns": 11833,
+        "prepare_ns": 42250,
+        "identity_ns": 1424125,
+        "locks_ns": 209417,
+        "lookup_ns": 24083,
+        "snapshot_ns": 240125,
+        "compiler_ns": 79320084,
+        "save_ns": 3333958
+      }
+    },
+    {
+      "label": "miss",
+      "key": "08a76b79eee885c4b045719fe13cd737b4c6db4be2d94303357f4224ebda6f59",
+      "crate": "pulldown_cmark_escape",
+      "data": {
+        "plan_ns": 13042,
+        "prepare_ns": 49625,
+        "identity_ns": 1429417,
+        "locks_ns": 241083,
+        "lookup_ns": 22833,
+        "snapshot_ns": 244625,
+        "compiler_ns": 44317125,
+        "save_ns": 2907292
+      }
+    },
+    {
+      "label": "miss",
+      "key": "c4b7cf9a85438d055bc4467879f866324002d7e2ca711f421d89d8539b0edb5b",
+      "crate": "webpki",
+      "data": {
+        "plan_ns": 14375,
+        "prepare_ns": 56708,
+        "identity_ns": 1538708,
+        "locks_ns": 4139667,
+        "lookup_ns": 28500,
+        "snapshot_ns": 4187917,
+        "compiler_ns": 647319541,
+        "save_ns": 12674417
+      }
+    },
+    {
+      "label": "miss",
+      "key": "56a73c70a78ddb0a90103407017b1465e243943b61051d1bd85ed6b1e77fd9b6",
+      "crate": "pulldown_cmark",
+      "data": {
+        "plan_ns": 13292,
+        "prepare_ns": 46666,
+        "identity_ns": 1429250,
+        "locks_ns": 4648375,
+        "lookup_ns": 328917,
+        "snapshot_ns": 1759250,
+        "compiler_ns": 1199734208,
+        "save_ns": 11891959
+      }
+    },
+    {
+      "label": "miss",
+      "key": "dd2200698876237ea0bb3ff0e36d4ab2594fbdc42b91fa5759de4b467050ec8f",
+      "crate": "icu_provider",
+      "data": {
+        "plan_ns": 17958,
+        "prepare_ns": 52709,
+        "identity_ns": 1420958,
+        "locks_ns": 230583,
+        "lookup_ns": 22709,
+        "snapshot_ns": 4370958,
+        "compiler_ns": 172046542,
+        "save_ns": 30669583
+      }
+    },
+    {
+      "label": "miss",
+      "key": "74ccb7eb13f5248ef82613b43cae22f7286b8fab014bb68c2bbb8c6635a12549",
+      "crate": "serde_urlencoded",
+      "data": {
+        "plan_ns": 11625,
+        "prepare_ns": 31625,
+        "identity_ns": 1124333,
+        "locks_ns": 220709,
+        "lookup_ns": 20541,
+        "snapshot_ns": 1087500,
+        "compiler_ns": 91576250,
+        "save_ns": 10503792
+      }
+    },
+    {
+      "label": "miss",
+      "key": "f6649afa99c8c5e6d8258cbe161b1959e1caa216ee146ac3f0b4b7fc5932cb0b",
+      "crate": "icu_properties",
+      "data": {
+        "plan_ns": 17292,
+        "prepare_ns": 47583,
+        "identity_ns": 1401250,
+        "locks_ns": 229792,
+        "lookup_ns": 19541,
+        "snapshot_ns": 5805042,
+        "compiler_ns": 542082958,
+        "save_ns": 24169625
+      }
+    },
+    {
+      "label": "miss",
+      "key": "7e25abb0a77ec7664d55a10ecc4fc330befafd8e7d61fd1338c4936b8b94d0e2",
+      "crate": "icu_normalizer",
+      "data": {
+        "plan_ns": 19042,
+        "prepare_ns": 46375,
+        "identity_ns": 1414875,
+        "locks_ns": 241167,
+        "lookup_ns": 22500,
+        "snapshot_ns": 2338500,
+        "compiler_ns": 352964833,
+        "save_ns": 16118375
+      }
+    },
+    {
+      "label": "miss",
+      "key": "63fec715a2cc84f10180110d91ac959f4faa61b04d1c173c5997e8970c7049ef",
+      "crate": "rustls",
+      "data": {
+        "plan_ns": 14000,
+        "prepare_ns": 42334,
+        "identity_ns": 1418000,
+        "locks_ns": 250250,
+        "lookup_ns": 22458,
+        "snapshot_ns": 5181292,
+        "compiler_ns": 2936223083,
+        "save_ns": 34312375
+      }
+    },
+    {
+      "label": "miss",
+      "key": "1a80321f6635179f1d8f437c124ea6a2dcd2ca4576befd99f6eb91daae6a18c4",
+      "crate": "hyper",
+      "data": {
+        "plan_ns": 22125,
+        "prepare_ns": 46000,
+        "identity_ns": 1355375,
+        "locks_ns": 222291,
+        "lookup_ns": 18709,
+        "snapshot_ns": 9283791,
+        "compiler_ns": 895722042,
+        "save_ns": 24959500
+      }
+    },
+    {
+      "label": "miss",
+      "key": "834b5bd3d74f8f90eaae9436953cd655175166b63a3cddaf4233abfc34c1c8aa",
+      "crate": "tower",
+      "data": {
+        "plan_ns": 14167,
+        "prepare_ns": 45333,
+        "identity_ns": 1407750,
+        "locks_ns": 219167,
+        "lookup_ns": 25292,
+        "snapshot_ns": 10910208,
+        "compiler_ns": 211825500,
+        "save_ns": 56322042
+      }
+    },
+    {
+      "label": "miss",
+      "key": "d2cd8f520049c26b6115a7927035f137e55ca2acaba15274fdd4a96e8e02fa4a",
+      "crate": "idna_adapter",
+      "data": {
+        "plan_ns": 13625,
+        "prepare_ns": 45583,
+        "identity_ns": 1430792,
+        "locks_ns": 242791,
+        "lookup_ns": 24584,
+        "snapshot_ns": 2522583,
+        "compiler_ns": 35169875,
+        "save_ns": 32182667
+      }
+    },
+    {
+      "label": "miss",
+      "key": "3ee500745f90571eca0ba185942d62d350bfc8ba033e92fb55507e3061023a5b",
+      "crate": "idna",
+      "data": {
+        "plan_ns": 14041,
+        "prepare_ns": 45250,
+        "identity_ns": 1405084,
+        "locks_ns": 232750,
+        "lookup_ns": 21208,
+        "snapshot_ns": 552917,
+        "compiler_ns": 561953000,
+        "save_ns": 20103583
+      }
+    },
+    {
+      "label": "miss",
+      "key": "879510760c1a19aa9251cd4a5e092f1ee1113f91638008a91312a54f9f78c7d3",
+      "crate": "tokio_util",
+      "data": {
+        "plan_ns": 13708,
+        "prepare_ns": 71333,
+        "identity_ns": 1538375,
+        "locks_ns": 232959,
+        "lookup_ns": 18333,
+        "snapshot_ns": 7263208,
+        "compiler_ns": 248244875,
+        "save_ns": 19683709
+      }
+    },
+    {
+      "label": "miss",
+      "key": "421c80d7c31308954d1cd30ab89d45ce19b3a2573f7de735f29dbd1032a832ca",
+      "crate": "hyper_util",
+      "data": {
+        "plan_ns": 17875,
+        "prepare_ns": 44375,
+        "identity_ns": 1379125,
+        "locks_ns": 221417,
+        "lookup_ns": 20708,
+        "snapshot_ns": 16533709,
+        "compiler_ns": 890690708,
+        "save_ns": 37739542
+      }
+    },
+    {
+      "label": "miss",
+      "key": "eec3a36d0947199af234444b9c9d4f33eaae7daddfe521f7c4f8b4c69b194491",
+      "crate": "url",
+      "data": {
+        "plan_ns": 13166,
+        "prepare_ns": 54750,
+        "identity_ns": 1615917,
+        "locks_ns": 286708,
+        "lookup_ns": 26584,
+        "snapshot_ns": 679500,
+        "compiler_ns": 671099875,
+        "save_ns": 21088875
+      }
+    },
+    {
+      "label": "miss",
+      "key": "f4dae58a41fef0af323a7689f8d5bf9c591880ec06d6eba8847a7304c65a734c",
+      "crate": "flate2",
+      "data": {
+        "plan_ns": 12791,
+        "prepare_ns": 44584,
+        "identity_ns": 1400458,
+        "locks_ns": 244125,
+        "lookup_ns": 24375,
+        "snapshot_ns": 832000,
+        "compiler_ns": 192219042,
+        "save_ns": 39053541
+      }
+    },
+    {
+      "label": "miss",
+      "key": "cda52c5bbd537fef167f2b6dbdfefc512a236d6498eb1a30c1219f9621e9eb45",
+      "crate": "tower_http",
+      "data": {
+        "plan_ns": 15000,
+        "prepare_ns": 49042,
+        "identity_ns": 1588625,
+        "locks_ns": 511542,
+        "lookup_ns": 45750,
+        "snapshot_ns": 15244416,
+        "compiler_ns": 232925042,
+        "save_ns": 56219417
+      }
+    },
+    {
+      "label": "miss",
+      "key": "00d2be3e52b3b7fad0f55c886378c0cfa5549232241c7325f9f59bc4e50445b1",
+      "crate": "chrono",
+      "data": {
+        "plan_ns": 12834,
+        "prepare_ns": 45625,
+        "identity_ns": 1612250,
+        "locks_ns": 210041,
+        "lookup_ns": 20750,
+        "snapshot_ns": 2102042,
+        "compiler_ns": 1113080958,
+        "save_ns": 23089584
+      }
+    },
+    {
+      "label": "miss",
+      "key": "49b3cc80a9379e96adf95a099ed28a00981d47e24d800ae13af4d556d04ab044",
+      "crate": "futures_executor",
+      "data": {
+        "plan_ns": 11375,
+        "prepare_ns": 39875,
+        "identity_ns": 1184167,
+        "locks_ns": 280000,
+        "lookup_ns": 26875,
+        "snapshot_ns": 4550208,
+        "compiler_ns": 126768792,
+        "save_ns": 10314291
+      }
+    },
+    {
+      "label": "miss",
+      "key": "6ac36d985ef5af1549bce42d6e162cc5abbd859c92d8d1facaf5a4f55fcfb20d",
+      "crate": "digest",
+      "data": {
+        "plan_ns": 11666,
+        "prepare_ns": 34625,
+        "identity_ns": 1197000,
+        "locks_ns": 216959,
+        "lookup_ns": 21416,
+        "snapshot_ns": 370000,
+        "compiler_ns": 74531000,
+        "save_ns": 6371375
+      }
+    },
+    {
+      "label": "miss",
+      "key": "06f0485cfb10223049ee70c0402096a5119382c9d276175192763af2bf75250a",
+      "crate": "uuid",
+      "data": {
+        "plan_ns": 13375,
+        "prepare_ns": 44959,
+        "identity_ns": 1399916,
+        "locks_ns": 240042,
+        "lookup_ns": 19250,
+        "snapshot_ns": 3789083,
+        "compiler_ns": 196245375,
+        "save_ns": 10737417
+      }
+    },
+    {
+      "label": "miss",
+      "key": "f21ac35f1c7fc902e61bf8e3204136be488d7b4fa58eccd7bd7c6cae4bf4bd6a",
+      "crate": "crc32fast",
+      "data": {
+        "plan_ns": 13458,
+        "prepare_ns": 61125,
+        "identity_ns": 1503667,
+        "locks_ns": 261500,
+        "lookup_ns": 22000,
+        "snapshot_ns": 305667,
+        "compiler_ns": 74113958,
+        "save_ns": 3315958
+      }
+    },
+    {
+      "label": "miss",
+      "key": "f7c3f32641cc52b8a0e97d5876392d8ccbc41d8d745c92603da5d5147ccae279",
+      "crate": "http_body_util",
+      "data": {
+        "plan_ns": 13333,
+        "prepare_ns": 43209,
+        "identity_ns": 1234750,
+        "locks_ns": 213833,
+        "lookup_ns": 20042,
+        "snapshot_ns": 2315125,
+        "compiler_ns": 105670166,
+        "save_ns": 7479959
+      }
+    },
+    {
+      "label": "miss",
+      "key": "844798ea63f5fc59d855e4722a1116aee50e510f5d05b1758fa62369be2db8d7",
+      "crate": "cpufeatures",
+      "data": {
+        "plan_ns": 13125,
+        "prepare_ns": 49167,
+        "identity_ns": 1390917,
+        "locks_ns": 271958,
+        "lookup_ns": 20917,
+        "snapshot_ns": 1851625,
+        "compiler_ns": 34610250,
+        "save_ns": 4042166
+      }
+    },
+    {
+      "label": "miss",
+      "key": "b240d7cff0ecbc0d17d56c2f59ad91985c56c2cf59b6d29b2ee4905e0398724e",
+      "crate": "log",
+      "data": {
+        "plan_ns": 13208,
+        "prepare_ns": 72709,
+        "identity_ns": 1821666,
+        "locks_ns": 357750,
+        "lookup_ns": 42334,
+        "snapshot_ns": 490291,
+        "compiler_ns": 66876959,
+        "save_ns": 3226666
+      }
+    },
+    {
+      "label": "miss",
+      "key": "3db2d17ff6f715c786243142ded10e2f17f572cbd9e17f45933e4705d1916f70",
+      "crate": "typed_path",
+      "data": {
+        "plan_ns": 11250,
+        "prepare_ns": 64958,
+        "identity_ns": 1337000,
+        "locks_ns": 299042,
+        "lookup_ns": 35291,
+        "snapshot_ns": 273000,
+        "compiler_ns": 805731959,
+        "save_ns": 13659708
+      }
+    },
+    {
+      "label": "miss",
+      "key": "6d6435d53eda4c5107d0c13333b6851b38c4a8dace4c88b7c96d7d4a2d806928",
+      "crate": "unsafe_libyaml",
+      "data": {
+        "plan_ns": 12959,
+        "prepare_ns": 52583,
+        "identity_ns": 1620208,
+        "locks_ns": 239334,
+        "lookup_ns": 22458,
+        "snapshot_ns": 298875,
+        "compiler_ns": 683577167,
+        "save_ns": 5801916
+      }
+    },
+    {
+      "label": "miss",
+      "key": "5f684863244d8f7a9e463a032ab383840c5c4fd5702afd53a88c1bacc5e4c81c",
+      "crate": "sha2",
+      "data": {
+        "plan_ns": 13875,
+        "prepare_ns": 45959,
+        "identity_ns": 1413708,
+        "locks_ns": 243875,
+        "lookup_ns": 22667,
+        "snapshot_ns": 518541,
+        "compiler_ns": 276380417,
+        "save_ns": 24872125
+      }
+    },
+    {
+      "label": "miss",
+      "key": "a5cc424677fe6bd08391f5c935da76c9a21ff90cf9fb5b32dbcb45160d20a8a3",
+      "crate": "futures",
+      "data": {
+        "plan_ns": 15292,
+        "prepare_ns": 50917,
+        "identity_ns": 1489916,
+        "locks_ns": 227000,
+        "lookup_ns": 22792,
+        "snapshot_ns": 5086833,
+        "compiler_ns": 24729084,
+        "save_ns": 10456500
+      }
+    },
+    {
+      "label": "miss",
+      "key": "20ee9b70de1fe5bda8d49b926c1086f1fd53e520b62efb1d8a23dea3ccef42cf",
+      "crate": "anyhow",
+      "data": {
+        "plan_ns": 13417,
+        "prepare_ns": 47625,
+        "identity_ns": 1467000,
+        "locks_ns": 250125,
+        "lookup_ns": 23000,
+        "snapshot_ns": 310083,
+        "compiler_ns": 186553167,
+        "save_ns": 5506750
+      }
+    },
+    {
+      "label": "miss",
+      "key": "29936ea83f15dfb84ef3326ac5a5fab1e03540c7f1ced9b021de20988ef336e1",
+      "crate": "tokio_rustls",
+      "data": {
+        "plan_ns": 14083,
+        "prepare_ns": 45333,
+        "identity_ns": 1411209,
+        "locks_ns": 229458,
+        "lookup_ns": 20542,
+        "snapshot_ns": 11389041,
+        "compiler_ns": 111210584,
+        "save_ns": 38161500
+      }
+    },
+    {
+      "label": "miss",
+      "key": "f498ade8f48e2d1359d05fb1bd3ab09b41098c148d78f9397291fa6f813f3f11",
+      "crate": "serde_yaml_ng",
+      "data": {
+        "plan_ns": 13083,
+        "prepare_ns": 43958,
+        "identity_ns": 1404875,
+        "locks_ns": 274834,
+        "lookup_ns": 23750,
+        "snapshot_ns": 2623500,
+        "compiler_ns": 811004208,
+        "save_ns": 20232583
+      }
+    },
+    {
+      "label": "miss",
+      "key": "f4421fb5a893aabdbe3bb5c15d6f31f1c8bcf6882abbdd939e656ff244b66db2",
+      "crate": "hyper_rustls",
+      "data": {
+        "plan_ns": 14916,
+        "prepare_ns": 46500,
+        "identity_ns": 1333000,
+        "locks_ns": 228667,
+        "lookup_ns": 23667,
+        "snapshot_ns": 14631875,
+        "compiler_ns": 172883583,
+        "save_ns": 40014208
+      }
+    },
+    {
+      "label": "miss",
+      "key": "c062b6ef63feb98a340804d3841b579006eced827012d9b15373f9752982b8c9",
+      "crate": "zip",
+      "data": {
+        "plan_ns": 11375,
+        "prepare_ns": 30208,
+        "identity_ns": 1128833,
+        "locks_ns": 214959,
+        "lookup_ns": 20833,
+        "snapshot_ns": 4314500,
+        "compiler_ns": 728015708,
+        "save_ns": 15395334
+      }
+    },
+    {
+      "label": "miss",
+      "key": "82492b2da002b888d994af962761b1fdd32170548ed8ea886214e237a91fae40",
+      "crate": "thiserror",
+      "data": {
+        "plan_ns": 13167,
+        "prepare_ns": 56542,
+        "identity_ns": 1505458,
+        "locks_ns": 257792,
+        "lookup_ns": 21958,
+        "snapshot_ns": 1674917,
+        "compiler_ns": 72141541,
+        "save_ns": 19328417
+      }
+    },
+    {
+      "label": "miss",
+      "key": "5ffe4213041a699161acbae16dfed4224d95afc5a1483c96cdff77c50673b01c",
+      "crate": "reqwest",
+      "data": {
+        "plan_ns": 20500,
+        "prepare_ns": 45250,
+        "identity_ns": 1393416,
+        "locks_ns": 239792,
+        "lookup_ns": 21125,
+        "snapshot_ns": 24489917,
+        "compiler_ns": 1353487333,
+        "save_ns": 73865250
+      }
+    },
+    {
+      "label": "miss",
+      "key": "7abf0bf2761cbe3ab4932ec1809e91b8c6813bb644719fa6e9b24cc604707407",
+      "crate": "harness_proto",
+      "data": {
+        "plan_ns": 12875,
+        "prepare_ns": 61875,
+        "identity_ns": 1731458,
+        "locks_ns": 271417,
+        "lookup_ns": 34875,
+        "snapshot_ns": 5331041,
+        "compiler_ns": 1955376000,
+        "save_ns": 39746792
+      }
+    },
+    {
+      "label": "miss",
+      "key": "d93e4bc6bc3e3f52afecd3f05dc32507c20565d36eca16837912321c2358a1ba",
+      "crate": "deser_hjson",
+      "data": {
+        "plan_ns": 12459,
+        "prepare_ns": 37291,
+        "identity_ns": 1202292,
+        "locks_ns": 215458,
+        "lookup_ns": 23125,
+        "snapshot_ns": 921792,
+        "compiler_ns": 247484000,
+        "save_ns": 9948542
+      }
+    },
+    {
+      "label": "miss",
+      "key": "99a563d8f21431d36cf9dbc8810cc4d655d2dd9ff9ab6f15c1f7571945c30153",
+      "crate": "semver",
+      "data": {
+        "plan_ns": 13291,
+        "prepare_ns": 48250,
+        "identity_ns": 1397917,
+        "locks_ns": 242542,
+        "lookup_ns": 21500,
+        "snapshot_ns": 298791,
+        "compiler_ns": 175530084,
+        "save_ns": 3694208
+      }
+    },
+    {
+      "label": "miss",
+      "key": "4ee5364a06e0358e2bd27793f0321f432c5a6588555d542881be7f63bf55c646",
+      "crate": "harness_adapters",
+      "data": {
+        "plan_ns": 17000,
+        "prepare_ns": 45083,
+        "identity_ns": 1376292,
+        "locks_ns": 217333,
+        "lookup_ns": 21250,
+        "snapshot_ns": 23320375,
+        "compiler_ns": 6357583250,
+        "save_ns": 164101417
+      }
+    },
+    {
+      "label": "hit",
+      "key": "8a7b23107cb2a55b6c22763ded08d28e1633d41f641e0340860cb7d8adb1e65e",
+      "crate": "unicode_ident",
+      "data": {
+        "plan_ns": 11125,
+        "prepare_ns": 39292,
+        "identity_ns": 1455958,
+        "locks_ns": 112000,
+        "restore_ns": 2091084
+      }
+    },
+    {
+      "label": "hit",
+      "key": "5a59fc47c8fd75d04d862398c6b35ba01530e58ff621e1a0bd23ea9d77394c3c",
+      "crate": "cfg_if",
+      "data": {
+        "plan_ns": 11833,
+        "prepare_ns": 58000,
+        "identity_ns": 1280584,
+        "locks_ns": 119666,
+        "restore_ns": 1674959
+      }
+    },
+    {
+      "label": "hit",
+      "key": "56ab0a96093f49ae701ecdd875c147e6153f7fd2a82a71b32ee0342735871522",
+      "crate": "stable_deref_trait",
+      "data": {
+        "plan_ns": 11750,
+        "prepare_ns": 40167,
+        "identity_ns": 1336833,
+        "locks_ns": 167250,
+        "restore_ns": 1612167
+      }
+    },
+    {
+      "label": "hit",
+      "key": "5cb02ee314b63978a9a1e790e453001ca42851eb7b1cedb5f7550c5be8d35e47",
+      "crate": "pin_project_lite",
+      "data": {
+        "plan_ns": 13833,
+        "prepare_ns": 34167,
+        "identity_ns": 1314250,
+        "locks_ns": 150208,
+        "restore_ns": 2269542
+      }
+    },
+    {
+      "label": "hit",
+      "key": "01d0bb9775ae8cd12466f63246c057327489bd6cbfec0d07ef7aac7db0cde39b",
+      "crate": "smallvec",
+      "data": {
+        "plan_ns": 12459,
+        "prepare_ns": 53541,
+        "identity_ns": 2002625,
+        "locks_ns": 262542,
+        "restore_ns": 2960625
+      }
+    },
+    {
+      "label": "hit",
+      "key": "9ef9c12dbdf4edce963679d9136d34703f3fe0fd22212d8779e0d748c1e9a45e",
+      "crate": "futures_core",
+      "data": {
+        "plan_ns": 12417,
+        "prepare_ns": 53958,
+        "identity_ns": 1695250,
+        "locks_ns": 171875,
+        "restore_ns": 2497875
+      }
+    },
+    {
+      "label": "hit",
+      "key": "69b86488f920cc6d381b27fe5ec92adc98f5287a5c5d18a22d78a8835d25af01",
+      "crate": "itoa",
+      "data": {
+        "plan_ns": 11250,
+        "prepare_ns": 34458,
+        "identity_ns": 1275667,
+        "locks_ns": 155250,
+        "restore_ns": 1788708
+      }
+    },
+    {
+      "label": "hit",
+      "key": "36939f468739c9082b76e967bba34f5180b0a15a91781b7f656f38cebf501b39",
+      "crate": "memchr",
+      "data": {
+        "plan_ns": 11958,
+        "prepare_ns": 45125,
+        "identity_ns": 1458834,
+        "locks_ns": 150750,
+        "restore_ns": 5872541
+      }
+    },
+    {
+      "label": "hit",
+      "key": "c1bb959fca1f0a873188a757cf66246ae82e40f100001dcda9f8af58160dd7f6",
+      "crate": "bytes",
+      "data": {
+        "plan_ns": 12833,
+        "prepare_ns": 50750,
+        "identity_ns": 1739334,
+        "locks_ns": 151083,
+        "restore_ns": 5083542
+      }
+    },
+    {
+      "label": "hit",
+      "key": "5c00036c9ae9d8a3b27384c4daef60c63c7035b0ae3182645293be88a1ace42a",
+      "crate": "scopeguard",
+      "data": {
+        "plan_ns": 11334,
+        "prepare_ns": 35958,
+        "identity_ns": 1310417,
+        "locks_ns": 177750,
+        "restore_ns": 1566250
+      }
+    },
+    {
+      "label": "hit",
+      "key": "56a42ad4fad0843d46e97f94e7b93af90a3d8b02c0c61669f9e46c8c83c1988d",
+      "crate": "futures_sink",
+      "data": {
+        "plan_ns": 12750,
+        "prepare_ns": 41583,
+        "identity_ns": 1062208,
+        "locks_ns": 151042,
+        "restore_ns": 1700458
+      }
+    },
+    {
+      "label": "hit",
+      "key": "05204797ef0110d2ca7c29dbc80cc1ab773e0202bafaeea65a4f8daac443158c",
+      "crate": "lock_api",
+      "data": {
+        "plan_ns": 11083,
+        "prepare_ns": 32292,
+        "identity_ns": 1237833,
+        "locks_ns": 129459,
+        "restore_ns": 3509916
+      }
+    },
+    {
+      "label": "hit",
+      "key": "df1676587c3ef3b7287eabc7e9deb286e3d333453df866b352a3f78f9103f06b",
+      "crate": "shlex",
+      "data": {
+        "plan_ns": 30584,
+        "prepare_ns": 32583,
+        "identity_ns": 1034875,
+        "locks_ns": 156542,
+        "restore_ns": 1841166
+      }
+    },
+    {
+      "label": "hit",
+      "key": "98f6b64efe42be5416ff4ca4ac54d837da98326200ee87596d16b5425ece6b8b",
+      "crate": "find_msvc_tools",
+      "data": {
+        "plan_ns": 13083,
+        "prepare_ns": 39834,
+        "identity_ns": 1286583,
+        "locks_ns": 137250,
+        "restore_ns": 2296542
+      }
+    },
+    {
+      "label": "hit",
+      "key": "573a89f35e6b696f656e34fb4c0a121109bedd0a5273ecc4be1482e2fa949409",
+      "crate": "futures_channel",
+      "data": {
+        "plan_ns": 12041,
+        "prepare_ns": 37042,
+        "identity_ns": 1534125,
+        "locks_ns": 137125,
+        "restore_ns": 3919083
+      }
+    },
+    {
+      "label": "hit",
+      "key": "129d91bd38d81dd0369ec12d9a59944d913e49f9cd17ef5e6580cec0348fc0c6",
+      "crate": "litemap",
+      "data": {
+        "plan_ns": 13833,
+        "prepare_ns": 34667,
+        "identity_ns": 1043833,
+        "locks_ns": 156875,
+        "restore_ns": 2948333
+      }
+    },
+    {
+      "label": "hit",
+      "key": "94ee63951fc419f84543f7c62d576fb9a25258bd2ca24cc35bb728b2b7f98039",
+      "crate": "cc",
+      "data": {
+        "plan_ns": 11083,
+        "prepare_ns": 50375,
+        "identity_ns": 1489959,
+        "locks_ns": 190208,
+        "restore_ns": 4560917
+      }
+    },
+    {
+      "label": "hit",
+      "key": "76fcd69e2ebde7598f2321a827953f5cf0c68b02f01999498ff29d8a2db0333b",
+      "crate": "writeable",
+      "data": {
+        "plan_ns": 14375,
+        "prepare_ns": 33250,
+        "identity_ns": 1287666,
+        "locks_ns": 113500,
+        "restore_ns": 2781834
+      }
+    },
+    {
+      "label": "hit",
+      "key": "9110224867b8b82ab5d5914c7ed7fbcf91e02ea6ebe17ec29c865113a52d0860",
+      "crate": "core_foundation_sys",
+      "data": {
+        "plan_ns": 10333,
+        "prepare_ns": 27667,
+        "identity_ns": 968708,
+        "locks_ns": 119625,
+        "restore_ns": 3879459
+      }
+    },
+    {
+      "label": "hit",
+      "key": "111afd6c7e4e7d8201c8d9cb29bc76ccaf5e2b8321f7bf4265b9c1fb6c92809c",
+      "crate": "utf8_iter",
+      "data": {
+        "plan_ns": 12583,
+        "prepare_ns": 45167,
+        "identity_ns": 1414333,
+        "locks_ns": 179833,
+        "restore_ns": 1868625
+      }
+    },
+    {
+      "label": "hit",
+      "key": "35d015a6067f8ca5bb61eefde467da3745c67ef252b105b881634cd05fc260bb",
+      "crate": "slab",
+      "data": {
+        "plan_ns": 10708,
+        "prepare_ns": 33167,
+        "identity_ns": 1278333,
+        "locks_ns": 127042,
+        "restore_ns": 2529541
+      }
+    },
+    {
+      "label": "hit",
+      "key": "ec7c11f96ccc386c0204bfb3266ae94701086be33321171dde99cc4fe66edb44",
+      "crate": "futures_io",
+      "data": {
+        "plan_ns": 13166,
+        "prepare_ns": 58667,
+        "identity_ns": 1667000,
+        "locks_ns": 179792,
+        "restore_ns": 2046125
+      }
+    },
+    {
+      "label": "hit",
+      "key": "e481cadc28ba125cf669de4d402243df26b815aa7be75f8cbfe62376a8870136",
+      "crate": "futures_task",
+      "data": {
+        "plan_ns": 11584,
+        "prepare_ns": 50708,
+        "identity_ns": 1492917,
+        "locks_ns": 153875,
+        "restore_ns": 2587541
+      }
+    },
+    {
+      "label": "hit",
+      "key": "9bd11d45ebff3fa24785aeff3cb9b912d8826b7c2425c1eed4a3bfe3f265bd3b",
+      "crate": "libc",
+      "data": {
+        "plan_ns": 11458,
+        "prepare_ns": 38292,
+        "identity_ns": 1219250,
+        "locks_ns": 168167,
+        "restore_ns": 8017333
+      }
+    },
+    {
+      "label": "hit",
+      "key": "c91c1ea0b88ee3e87b126d58027628a166fd5ab1a5f367f1d03632a32ae14a31",
+      "crate": "serde_core",
+      "data": {
+        "plan_ns": 13000,
+        "prepare_ns": 54083,
+        "identity_ns": 1458708,
+        "locks_ns": 171375,
+        "restore_ns": 13668709
+      }
+    },
+    {
+      "label": "hit",
+      "key": "5b62b37fd29cdec92f40cbd00d3025e0b4af5f3f9da4c94515d8c8b19777ea96",
+      "crate": "http",
+      "data": {
+        "plan_ns": 11750,
+        "prepare_ns": 44416,
+        "identity_ns": 1431959,
+        "locks_ns": 140625,
+        "restore_ns": 8979416
+      }
+    },
+    {
+      "label": "hit",
+      "key": "61a19816fc6522e4539aad2369fe992a4afd239f9ccc30c0177e03080907a575",
+      "crate": null,
+      "data": {
+        "plan_ns": 9667,
+        "prepare_ns": 65000,
+        "identity_ns": 1885416,
+        "locks_ns": 1434292,
+        "restore_ns": 1535833
+      }
+    },
+    {
+      "label": "hit",
+      "key": "9c9437cffd0424ce650e17cfb8a6eb80c6ef6d9ce8045235c9404ead397effb9",
+      "crate": "parking_lot_core",
+      "data": {
+        "plan_ns": 12416,
+        "prepare_ns": 74875,
+        "identity_ns": 1359000,
+        "locks_ns": 114834,
+        "restore_ns": 6874375
+      }
+    },
+    {
+      "label": "hit",
+      "key": "69e594d3182388e864728b0215c9a3195dda2fae2299291df9848e19fac9a4f7",
+      "crate": null,
+      "data": {
+        "plan_ns": 10458,
+        "prepare_ns": 32583,
+        "identity_ns": 1303875,
+        "locks_ns": 88250,
+        "restore_ns": 1428959
+      }
+    },
+    {
+      "label": "hit",
+      "key": "bbfd4c0ea66a0902a08497be8759a6c2b57f295acc28a9947f24a6bd50a44514",
+      "crate": "errno",
+      "data": {
+        "plan_ns": 11750,
+        "prepare_ns": 50125,
+        "identity_ns": 1541958,
+        "locks_ns": 189833,
+        "restore_ns": 3262542
+      }
+    },
+    {
+      "label": "hit",
+      "key": "ff665f79c63ee194f62dc5a5cdf8c5ac6cf65a914e41ed98fd42cc83566f6939",
+      "crate": "socket2",
+      "data": {
+        "plan_ns": 12167,
+        "prepare_ns": 30000,
+        "identity_ns": 1327000,
+        "locks_ns": 177083,
+        "restore_ns": 5134792
+      }
+    },
+    {
+      "label": "hit",
+      "key": "4a3b8fa7f1b951e9571a47e97c208514bc096c7486e2c5f9f1358cebce359d5b",
+      "crate": "proc_macro2",
+      "data": {
+        "plan_ns": 11334,
+        "prepare_ns": 32875,
+        "identity_ns": 1005125,
+        "locks_ns": 154125,
+        "restore_ns": 4009666
+      }
+    },
+    {
+      "label": "hit",
+      "key": "dbdaa0d16b19b4327fd41dd37f3e1a90d00c868a5e8e2a0fbfbd5b9d639dde04",
+      "crate": "parking_lot",
+      "data": {
+        "plan_ns": 12875,
+        "prepare_ns": 46875,
+        "identity_ns": 1233166,
+        "locks_ns": 149917,
+        "restore_ns": 7416875
+      }
+    },
+    {
+      "label": "hit",
+      "key": "79317db7c84a26f4e9ad6e2e378a34ebef1083d5a0f7cc69bf11d2e58be1a294",
+      "crate": "mio",
+      "data": {
+        "plan_ns": 10916,
+        "prepare_ns": 28292,
+        "identity_ns": 1165125,
+        "locks_ns": 194875,
+        "restore_ns": 4213542
+      }
+    },
+    {
+      "label": "hit",
+      "key": "a88547d08b13c890d33a4775cb63425878b7bdc5d6934a2340797f367c744978",
+      "crate": "signal_hook_registry",
+      "data": {
+        "plan_ns": 11125,
+        "prepare_ns": 40584,
+        "identity_ns": 1443541,
+        "locks_ns": 176125,
+        "restore_ns": 4068209
+      }
+    },
+    {
+      "label": "hit",
+      "key": "0a7b4ca209a286a869a29930e9ed9faf8bfce808993a24e4a9dc12a4ccee9388",
+      "crate": "quote",
+      "data": {
+        "plan_ns": 10417,
+        "prepare_ns": 42458,
+        "identity_ns": 1378667,
+        "locks_ns": 109750,
+        "restore_ns": 4512291
+      }
+    },
+    {
+      "label": "hit",
+      "key": "b020a7b97f7f49291c073033c16b1ceaeaac62878afa9d39fb39b9e1220c94b1",
+      "crate": "once_cell",
+      "data": {
+        "plan_ns": 11708,
+        "prepare_ns": 60417,
+        "identity_ns": 1833458,
+        "locks_ns": 181375,
+        "restore_ns": 2864417
+      }
+    },
+    {
+      "label": "hit",
+      "key": "fd0e7d6667da38faf657d2c407ec37a5259537388197cbfc7bdbab023bb39798",
+      "crate": "bitflags",
+      "data": {
+        "plan_ns": 11791,
+        "prepare_ns": 64709,
+        "identity_ns": 1780750,
+        "locks_ns": 161750,
+        "restore_ns": 3052916
+      }
+    },
+    {
+      "label": "hit",
+      "key": "f3f3dee6ad0062041cf3cd5319356d042dbff257616f7df06aadf88e77fe4c84",
+      "crate": "zeroize",
+      "data": {
+        "plan_ns": 14833,
+        "prepare_ns": 49250,
+        "identity_ns": 1877125,
+        "locks_ns": 148334,
+        "restore_ns": 4217416
+      }
+    },
+    {
+      "label": "hit",
+      "key": "51caef7a6a06eb2bc6cf0eafa31eff24e33ae1edf1a82d2f123222c14350ea67",
+      "crate": "syn",
+      "data": {
+        "plan_ns": 13417,
+        "prepare_ns": 40542,
+        "identity_ns": 1672041,
+        "locks_ns": 207750,
+        "restore_ns": 14992542
+      }
+    },
+    {
+      "label": "hit",
+      "key": "adb977202492eed40da18bbe1af184c265499e66bdb1b1f06ee887ca237a3717",
+      "crate": "syn",
+      "data": {
+        "plan_ns": 12667,
+        "prepare_ns": 32625,
+        "identity_ns": 1395083,
+        "locks_ns": 161875,
+        "restore_ns": 16668959
+      }
+    },
+    {
+      "label": "hit",
+      "key": "728462e3d74984e33b3e241a4440216a09cc65d64f8d1c4ac1eeb371be75da66",
+      "crate": "percent_encoding",
+      "data": {
+        "plan_ns": 11166,
+        "prepare_ns": 62792,
+        "identity_ns": 1735708,
+        "locks_ns": 188334,
+        "restore_ns": 2635333
+      }
+    },
+    {
+      "label": "hit",
+      "key": "daae3455112d6572a3649bbfbca3c5bb26a09ec8824427edff25bc00021fcca3",
+      "crate": "version_check",
+      "data": {
+        "plan_ns": 14167,
+        "prepare_ns": 51042,
+        "identity_ns": 1867208,
+        "locks_ns": 166417,
+        "restore_ns": 3219666
+      }
+    },
+    {
+      "label": "hit",
+      "key": "f61b72ab9d3dadb9110bb7d9e0e7b9cdf8e57fccda2f0763d2740e6909d80c8f",
+      "crate": "icu_properties_data",
+      "data": {
+        "plan_ns": 11459,
+        "prepare_ns": 42583,
+        "identity_ns": 1565958,
+        "locks_ns": 126459,
+        "restore_ns": 8167500
+      }
+    },
+    {
+      "label": "hit",
+      "key": "adf28d469e2a6c07d6b0da26ac3943fdd430455992bb4ef4d3a8c03239687641",
+      "crate": "rustls_pki_types",
+      "data": {
+        "plan_ns": 13250,
+        "prepare_ns": 45542,
+        "identity_ns": 1652333,
+        "locks_ns": 247334,
+        "restore_ns": 4119708
+      }
+    },
+    {
+      "label": "hit",
+      "key": "d40a977982b54422616faf17ef5368579666b8134ffa7cec22a524077ff8c0c6",
+      "crate": "icu_normalizer_data",
+      "data": {
+        "plan_ns": 10000,
+        "prepare_ns": 46834,
+        "identity_ns": 1528000,
+        "locks_ns": 336083,
+        "restore_ns": 4394625
+      }
+    },
+    {
+      "label": "hit",
+      "key": "bc89054e0dd6262af53dd84be79c2d1c6e66e35e4ba490abe7f529e814f5a54c",
+      "crate": "http_body",
+      "data": {
+        "plan_ns": 13250,
+        "prepare_ns": 64333,
+        "identity_ns": 2029458,
+        "locks_ns": 241542,
+        "restore_ns": 8382667
+      }
+    },
+    {
+      "label": "hit",
+      "key": "fa7e429eca50172df51eb5368307484f1b109b82e8ae7030e0fd4e47ed9a7194",
+      "crate": "synstructure",
+      "data": {
+        "plan_ns": 12042,
+        "prepare_ns": 56333,
+        "identity_ns": 1879333,
+        "locks_ns": 159250,
+        "restore_ns": 7092542
+      }
+    },
+    {
+      "label": "hit",
+      "key": "f5c62592a338db9e56acc136005cba2fc63fa907710f37509a75f7246beabfa4",
+      "crate": "getrandom",
+      "data": {
+        "plan_ns": 12333,
+        "prepare_ns": 56042,
+        "identity_ns": 1575083,
+        "locks_ns": 1208500,
+        "restore_ns": 3789584
+      }
+    },
+    {
+      "label": "hit",
+      "key": "7eea0c63222de48375c671d98c4f219cee836b76ee04654c56d55b5eacaaa68c",
+      "crate": "untrusted",
+      "data": {
+        "plan_ns": 12333,
+        "prepare_ns": 71167,
+        "identity_ns": 2225250,
+        "locks_ns": 170083,
+        "restore_ns": 1898708
+      }
+    },
+    {
+      "label": "hit",
+      "key": "e62a541198617718214afea674505647e1f83ed406d546eb8d1163137602d2ee",
+      "crate": "futures_util",
+      "data": {
+        "plan_ns": 13834,
+        "prepare_ns": 40291,
+        "identity_ns": 1271792,
+        "locks_ns": 157292,
+        "restore_ns": 20862791
+      }
+    },
+    {
+      "label": "hit",
+      "key": "25e0f15006a01cd9d067bae46196e7950ec972587a19e8ac2fd474939e3588f8",
+      "crate": "tokio",
+      "data": {
+        "plan_ns": 15833,
+        "prepare_ns": 37042,
+        "identity_ns": 1190000,
+        "locks_ns": 193500,
+        "restore_ns": 26362875
+      }
+    },
+    {
+      "label": "hit",
+      "key": "c53c9b89d4b23dea7c630959f4ddcdcc862ea7b84a584addf221abf3e709b836",
+      "crate": "ring",
+      "data": {
+        "plan_ns": 34625,
+        "prepare_ns": 33584,
+        "identity_ns": 1360125,
+        "locks_ns": 177916,
+        "restore_ns": 27316042
+      }
+    },
+    {
+      "label": "hit",
+      "key": "abf14aa3d6e85d54fbd78862c6718b3a3f453cb674b8a04b9b77230e0273b6d7",
+      "crate": "serde",
+      "data": {
+        "plan_ns": 11791,
+        "prepare_ns": 29000,
+        "identity_ns": 1320709,
+        "locks_ns": 241583,
+        "restore_ns": 15943833
+      }
+    },
+    {
+      "label": "hit",
+      "key": "2fe32cc34c7dd71f58859a21b1dd78f6a1ff7904b3c0e5b65317a6593e73f070",
+      "crate": "zerofrom",
+      "data": {
+        "plan_ns": 12000,
+        "prepare_ns": 35125,
+        "identity_ns": 1969750,
+        "locks_ns": 466167,
+        "restore_ns": 8649958
+      }
+    },
+    {
+      "label": "hit",
+      "key": "0a5ce5d5a5285b28f681894140734c0d785f07919d3dad881b4e9964d21b5d2e",
+      "crate": "yoke",
+      "data": {
+        "plan_ns": 14250,
+        "prepare_ns": 33250,
+        "identity_ns": 1205875,
+        "locks_ns": 177917,
+        "restore_ns": 7274833
+      }
+    },
+    {
+      "label": "hit",
+      "key": "d7dd4d785c0b73ca1a459f3738301aaed5c9863780c5bfacadb91d1c0e61981a",
+      "crate": "tower_service",
+      "data": {
+        "plan_ns": 10666,
+        "prepare_ns": 36125,
+        "identity_ns": 1519042,
+        "locks_ns": 230000,
+        "restore_ns": 1773250
+      }
+    },
+    {
+      "label": "hit",
+      "key": "7f94f531b08e6795bf19b173619c44e7ebfcafacfa175bfeb789f315bbd48a7d",
+      "crate": "zerovec",
+      "data": {
+        "plan_ns": 14750,
+        "prepare_ns": 35208,
+        "identity_ns": 1844500,
+        "locks_ns": 174875,
+        "restore_ns": 9657417
+      }
+    },
+    {
+      "label": "hit",
+      "key": "bd27836b67604eaeaa35a5d64feb2c0ab73a42254d4492c66540de5e6e3c07e1",
+      "crate": "zerotrie",
+      "data": {
+        "plan_ns": 15375,
+        "prepare_ns": 58209,
+        "identity_ns": 1691083,
+        "locks_ns": 177125,
+        "restore_ns": 9601542
+      }
+    },
+    {
+      "label": "hit",
+      "key": "9fdfa81b62ba2e5f5f6d5c3d758313b34adfdaa45b306b945842455b498a29d3",
+      "crate": "try_lock",
+      "data": {
+        "plan_ns": 11542,
+        "prepare_ns": 38916,
+        "identity_ns": 1318917,
+        "locks_ns": 144458,
+        "restore_ns": 1791584
+      }
+    },
+    {
+      "label": "hit",
+      "key": "5fcadd31ba60c18ec54a3ed30b16d150c2b5856be93ceefa82ec5148dbc0650c",
+      "crate": "autocfg",
+      "data": {
+        "plan_ns": 11958,
+        "prepare_ns": 53209,
+        "identity_ns": 1495750,
+        "locks_ns": 156833,
+        "restore_ns": 2800625
+      }
+    },
+    {
+      "label": "hit",
+      "key": "3ef426d019e979dd4806f8cca4676de1f13ddff054ce10e927c163309664d87b",
+      "crate": "tinystr",
+      "data": {
+        "plan_ns": 15833,
+        "prepare_ns": 50375,
+        "identity_ns": 1975375,
+        "locks_ns": 171375,
+        "restore_ns": 12916167
+      }
+    },
+    {
+      "label": "hit",
+      "key": "afe92e576b32dd3823b9cbf28ec22515edcc88ac63fe6930badd875003f7f387",
+      "crate": "potential_utf",
+      "data": {
+        "plan_ns": 15167,
+        "prepare_ns": 66125,
+        "identity_ns": 1333166,
+        "locks_ns": 154750,
+        "restore_ns": 10229250
+      }
+    },
+    {
+      "label": "hit",
+      "key": "c9651c9d6602a8fe4b8043459d382e2c3f67ff73395542b89996e33b3174008e",
+      "crate": "typenum",
+      "data": {
+        "plan_ns": 11667,
+        "prepare_ns": 39083,
+        "identity_ns": 1224042,
+        "locks_ns": 139458,
+        "restore_ns": 8512459
+      }
+    },
+    {
+      "label": "hit",
+      "key": "b9ae50b1f337a7c87e354ff119b46433bf3ff93bbfcdc0e099fcf5ca2867de06",
+      "crate": "httparse",
+      "data": {
+        "plan_ns": 12917,
+        "prepare_ns": 83750,
+        "identity_ns": 1522583,
+        "locks_ns": 127125,
+        "restore_ns": 3751583
+      }
+    },
+    {
+      "label": "hit",
+      "key": "5c1be901db41859e8e35e867acebf344de66adc6ab8e179016692d01abad9f19",
+      "crate": "icu_locale_core",
+      "data": {
+        "plan_ns": 15875,
+        "prepare_ns": 30500,
+        "identity_ns": 1233958,
+        "locks_ns": 113667,
+        "restore_ns": 7316916
+      }
+    },
+    {
+      "label": "hit",
+      "key": "e7eceff825c7eb0570a2ddcabd28e47fdc629225e46b4c32389044cf303321a3",
+      "crate": "icu_collections",
+      "data": {
+        "plan_ns": 16917,
+        "prepare_ns": 46583,
+        "identity_ns": 1418792,
+        "locks_ns": 204166,
+        "restore_ns": 9522459
+      }
+    },
+    {
+      "label": "hit",
+      "key": "54001341f6e776b661f74b6d35e90a7f1690573e07b79da398d269a93a42a598",
+      "crate": "generic_array",
+      "data": {
+        "plan_ns": 11709,
+        "prepare_ns": 85500,
+        "identity_ns": 2165166,
+        "locks_ns": 161667,
+        "restore_ns": 8131000
+      }
+    },
+    {
+      "label": "hit",
+      "key": "650844384239e2975aecbef454860162c6dfaa11cb4f344d74a6d7ab8f863666",
+      "crate": "want",
+      "data": {
+        "plan_ns": 13750,
+        "prepare_ns": 55916,
+        "identity_ns": 1964917,
+        "locks_ns": 158458,
+        "restore_ns": 2209834
+      }
+    },
+    {
+      "label": "hit",
+      "key": "dd2200698876237ea0bb3ff0e36d4ab2594fbdc42b91fa5759de4b467050ec8f",
+      "crate": "icu_provider",
+      "data": {
+        "plan_ns": 15458,
+        "prepare_ns": 38208,
+        "identity_ns": 1670459,
+        "locks_ns": 138875,
+        "restore_ns": 15873416
+      }
+    },
+    {
+      "label": "hit",
+      "key": "c4b7cf9a85438d055bc4467879f866324002d7e2ca711f421d89d8539b0edb5b",
+      "crate": "webpki",
+      "data": {
+        "plan_ns": 12166,
+        "prepare_ns": 71834,
+        "identity_ns": 1523166,
+        "locks_ns": 144750,
+        "restore_ns": 10725542
+      }
+    },
+    {
+      "label": "hit",
+      "key": "27d922a7bb2f4950b7976b393c091625ece2fd82967d21a37c0057962896a73a",
+      "crate": "form_urlencoded",
+      "data": {
+        "plan_ns": 11708,
+        "prepare_ns": 58667,
+        "identity_ns": 1274125,
+        "locks_ns": 106250,
+        "restore_ns": 2295916
+      }
+    },
+    {
+      "label": "hit",
+      "key": "330db7092f7abd55566a96a0dc6007dfbfa19b1dc9b79c0430ca9f2aa1c5c0a2",
+      "crate": "tracing_core",
+      "data": {
+        "plan_ns": 11000,
+        "prepare_ns": 38208,
+        "identity_ns": 1223375,
+        "locks_ns": 139292,
+        "restore_ns": 4193958
+      }
+    },
+    {
+      "label": "hit",
+      "key": "008567728c50b4a007e7557e76e220d717a3a1f670657ec99f8d3216c38959c9",
+      "crate": "core_foundation",
+      "data": {
+        "plan_ns": 12208,
+        "prepare_ns": 39292,
+        "identity_ns": 1253250,
+        "locks_ns": 113542,
+        "restore_ns": 4380958
+      }
+    },
+    {
+      "label": "hit",
+      "key": "219a8d4d2749c622865857108d5944ce17590ee1b080a7d9749ff75980673ad1",
+      "crate": "subtle",
+      "data": {
+        "plan_ns": 11541,
+        "prepare_ns": 51500,
+        "identity_ns": 1513250,
+        "locks_ns": 136750,
+        "restore_ns": 2153459
+      }
+    },
+    {
+      "label": "hit",
+      "key": "88e656e1310b5de9e1e7040256fa43e593a0af71362344bd7bc11ae1dfc15e2a",
+      "crate": "atomic_waker",
+      "data": {
+        "plan_ns": 11208,
+        "prepare_ns": 45208,
+        "identity_ns": 1365209,
+        "locks_ns": 148666,
+        "restore_ns": 1618584
+      }
+    },
+    {
+      "label": "hit",
+      "key": "7e25abb0a77ec7664d55a10ecc4fc330befafd8e7d61fd1338c4936b8b94d0e2",
+      "crate": "icu_normalizer",
+      "data": {
+        "plan_ns": 14500,
+        "prepare_ns": 36666,
+        "identity_ns": 1315750,
+        "locks_ns": 105667,
+        "restore_ns": 15110292
+      }
+    },
+    {
+      "label": "hit",
+      "key": "f6649afa99c8c5e6d8258cbe161b1959e1caa216ee146ac3f0b4b7fc5932cb0b",
+      "crate": "icu_properties",
+      "data": {
+        "plan_ns": 12666,
+        "prepare_ns": 42417,
+        "identity_ns": 1450250,
+        "locks_ns": 240042,
+        "restore_ns": 15971166
+      }
+    },
+    {
+      "label": "hit",
+      "key": "8778286e90c8cb900776af04dfbd81297bc977f04df031a8202c35f792de7fb4",
+      "crate": "system_configuration",
+      "data": {
+        "plan_ns": 12958,
+        "prepare_ns": 48709,
+        "identity_ns": 1295416,
+        "locks_ns": 136750,
+        "restore_ns": 10755334
+      }
+    },
+    {
+      "label": "hit",
+      "key": "1a80321f6635179f1d8f437c124ea6a2dcd2ca4576befd99f6eb91daae6a18c4",
+      "crate": "hyper",
+      "data": {
+        "plan_ns": 23125,
+        "prepare_ns": 52875,
+        "identity_ns": 1480291,
+        "locks_ns": 141417,
+        "restore_ns": 12892250
+      }
+    },
+    {
+      "label": "hit",
+      "key": "63fec715a2cc84f10180110d91ac959f4faa61b04d1c173c5997e8970c7049ef",
+      "crate": "rustls",
+      "data": {
+        "plan_ns": 12917,
+        "prepare_ns": 78708,
+        "identity_ns": 1535792,
+        "locks_ns": 154125,
+        "restore_ns": 16849042
+      }
+    },
+    {
+      "label": "hit",
+      "key": "13ee7576ab59ef825c759d1e72f7c74f3072272ab69a43b3be925a8fc6012e9f",
+      "crate": "zmij",
+      "data": {
+        "plan_ns": 12333,
+        "prepare_ns": 54000,
+        "identity_ns": 1299000,
+        "locks_ns": 193958,
+        "restore_ns": 2745584
+      }
+    },
+    {
+      "label": "hit",
+      "key": "9962030ee129887734cc216e891c841a2271ba8f0918a04e9fe92e1ed7cfcfbb",
+      "crate": "tracing",
+      "data": {
+        "plan_ns": 11750,
+        "prepare_ns": 42083,
+        "identity_ns": 1390084,
+        "locks_ns": 147083,
+        "restore_ns": 6118208
+      }
+    },
+    {
+      "label": "hit",
+      "key": "d2cd8f520049c26b6115a7927035f137e55ca2acaba15274fdd4a96e8e02fa4a",
+      "crate": "idna_adapter",
+      "data": {
+        "plan_ns": 11833,
+        "prepare_ns": 63167,
+        "identity_ns": 1313292,
+        "locks_ns": 176500,
+        "restore_ns": 19319458
+      }
+    },
+    {
+      "label": "hit",
+      "key": "6e88f082cc1ab8918aa93c0c76d2059a5f02fc6d82ae82f43669b45decc1194b",
+      "crate": "sync_wrapper",
+      "data": {
+        "plan_ns": 10542,
+        "prepare_ns": 37583,
+        "identity_ns": 1780334,
+        "locks_ns": 134041,
+        "restore_ns": 1574417
+      }
+    },
+    {
+      "label": "hit",
+      "key": "003e772e055e6e06ad673b1668399c106040d05a7506bcf34a4466cd062def53",
+      "crate": "equivalent",
+      "data": {
+        "plan_ns": 11375,
+        "prepare_ns": 31667,
+        "identity_ns": 1514583,
+        "locks_ns": 121375,
+        "restore_ns": 1734667
+      }
+    },
+    {
+      "label": "hit",
+      "key": "bd17498a387c67ec79570e212fa7b0619bbe9fab8e2bab06c2d89b0475cb8246",
+      "crate": "ipnet",
+      "data": {
+        "plan_ns": 11584,
+        "prepare_ns": 37666,
+        "identity_ns": 1089334,
+        "locks_ns": 125041,
+        "restore_ns": 3185625
+      }
+    },
+    {
+      "label": "hit",
+      "key": "db68e1e884ce81294cc8d60eebdc65e466ba088117bf9f4f00b04d8aa121b8b2",
+      "crate": "tower_layer",
+      "data": {
+        "plan_ns": 12542,
+        "prepare_ns": 31750,
+        "identity_ns": 1541208,
+        "locks_ns": 150959,
+        "restore_ns": 3996416
+      }
+    },
+    {
+      "label": "hit",
+      "key": "c1e05456107d202448d2445d0ca06ae9f711e24684be8bf36719aa1f5ca206ad",
+      "crate": "unicode_width",
+      "data": {
+        "plan_ns": 11208,
+        "prepare_ns": 47000,
+        "identity_ns": 1521583,
+        "locks_ns": 158042,
+        "restore_ns": 5878125
+      }
+    },
+    {
+      "label": "hit",
+      "key": "3ee500745f90571eca0ba185942d62d350bfc8ba033e92fb55507e3061023a5b",
+      "crate": "idna",
+      "data": {
+        "plan_ns": 13625,
+        "prepare_ns": 41792,
+        "identity_ns": 1357083,
+        "locks_ns": 115042,
+        "restore_ns": 15834750
+      }
+    },
+    {
+      "label": "hit",
+      "key": "37f3a34f10097c611a57eac8d7caee575523f007e6f53b4b5b553d108cd16f88",
+      "crate": "ryu",
+      "data": {
+        "plan_ns": 12125,
+        "prepare_ns": 44125,
+        "identity_ns": 1456875,
+        "locks_ns": 137125,
+        "restore_ns": 2447166
+      }
+    },
+    {
+      "label": "hit",
+      "key": "1666eaf06f1b7cfdb835aa6b075e6ed3b6227c2dcaf13b5085155721cb49b4d7",
+      "crate": "base64",
+      "data": {
+        "plan_ns": 11541,
+        "prepare_ns": 35000,
+        "identity_ns": 1600250,
+        "locks_ns": 137125,
+        "restore_ns": 3825959
+      }
+    },
+    {
+      "label": "hit",
+      "key": "0d46c6acd56ac10407b07f00bd798d38330c4c15a60e03a55e509425ce3cf304",
+      "crate": "hashbrown",
+      "data": {
+        "plan_ns": 11834,
+        "prepare_ns": 38791,
+        "identity_ns": 1491500,
+        "locks_ns": 229834,
+        "restore_ns": 6322541
+      }
+    },
+    {
+      "label": "hit",
+      "key": "de0cdd3ae5f44de50933900ae3c0f8d912a85da9ae2f1def097ad5f4d8015071",
+      "crate": "getrandom",
+      "data": {
+        "plan_ns": 14083,
+        "prepare_ns": 36250,
+        "identity_ns": 1621292,
+        "locks_ns": 242708,
+        "restore_ns": 4032375
+      }
+    },
+    {
+      "label": "hit",
+      "key": "ad41933e5739994fd8d9383192bd77dc4759d4bff9120b765b872cc18b2bdae9",
+      "crate": "serde_json",
+      "data": {
+        "plan_ns": 12541,
+        "prepare_ns": 42292,
+        "identity_ns": 1319083,
+        "locks_ns": 137584,
+        "restore_ns": 7327916
+      }
+    },
+    {
+      "label": "hit",
+      "key": "421c80d7c31308954d1cd30ab89d45ce19b3a2573f7de735f29dbd1032a832ca",
+      "crate": "hyper_util",
+      "data": {
+        "plan_ns": 15583,
+        "prepare_ns": 29959,
+        "identity_ns": 1199291,
+        "locks_ns": 143250,
+        "restore_ns": 12274917
+      }
+    },
+    {
+      "label": "hit",
+      "key": "eec3a36d0947199af234444b9c9d4f33eaae7daddfe521f7c4f8b4c69b194491",
+      "crate": "url",
+      "data": {
+        "plan_ns": 10625,
+        "prepare_ns": 57500,
+        "identity_ns": 1482916,
+        "locks_ns": 145209,
+        "restore_ns": 6635000
+      }
+    },
+    {
+      "label": "hit",
+      "key": "bf6b159c5a6704042305a9f2d83849194eea24cc8bab94ca0dc11a3ef0f8fed7",
+      "crate": "indexmap",
+      "data": {
+        "plan_ns": 11333,
+        "prepare_ns": 41542,
+        "identity_ns": 1947417,
+        "locks_ns": 149958,
+        "restore_ns": 6129250
+      }
+    },
+    {
+      "label": "hit",
+      "key": "64094da8de7b5055ddd09736e8b8c7a69996887df254f667617ebe077ff40b00",
+      "crate": "getopts",
+      "data": {
+        "plan_ns": 13583,
+        "prepare_ns": 38334,
+        "identity_ns": 1442250,
+        "locks_ns": 220500,
+        "restore_ns": 4548500
+      }
+    },
+    {
+      "label": "hit",
+      "key": "834b5bd3d74f8f90eaae9436953cd655175166b63a3cddaf4233abfc34c1c8aa",
+      "crate": "tower",
+      "data": {
+        "plan_ns": 15542,
+        "prepare_ns": 45208,
+        "identity_ns": 1804583,
+        "locks_ns": 138125,
+        "restore_ns": 8730250
+      }
+    },
+    {
+      "label": "hit",
+      "key": "29936ea83f15dfb84ef3326ac5a5fab1e03540c7f1ced9b021de20988ef336e1",
+      "crate": "tokio_rustls",
+      "data": {
+        "plan_ns": 11417,
+        "prepare_ns": 32041,
+        "identity_ns": 1132625,
+        "locks_ns": 121875,
+        "restore_ns": 9746709
+      }
+    },
+    {
+      "label": "hit",
+      "key": "0d5bb06b4fc3f4c0f97a2f6bb896c1f0679c03b0fd8c97c94a41fde14adf9b0f",
+      "crate": "crypto_common",
+      "data": {
+        "plan_ns": 13708,
+        "prepare_ns": 54500,
+        "identity_ns": 1876667,
+        "locks_ns": 252292,
+        "restore_ns": 7093875
+      }
+    },
+    {
+      "label": "hit",
+      "key": "0119f6674fd4c863b82b32f9fa49b7fe267199b2304f1d1ba93b11473c69ee1d",
+      "crate": "block_buffer",
+      "data": {
+        "plan_ns": 12542,
+        "prepare_ns": 58125,
+        "identity_ns": 1524583,
+        "locks_ns": 128667,
+        "restore_ns": 5977500
+      }
+    },
+    {
+      "label": "hit",
+      "key": "b7349236dbe308bfba5e34f94dbcbcbeca109fea6961a2535f0e10499c1acd5f",
+      "crate": "webpki_roots",
+      "data": {
+        "plan_ns": 12375,
+        "prepare_ns": 49708,
+        "identity_ns": 1971667,
+        "locks_ns": 142416,
+        "restore_ns": 4170500
+      }
+    },
+    {
+      "label": "hit",
+      "key": "3f5d98868a872d01cc1e6e39bf1c28e34bc2983b655d3216f13abc11de07e2f7",
+      "crate": "iana_time_zone",
+      "data": {
+        "plan_ns": 12292,
+        "prepare_ns": 38708,
+        "identity_ns": 1540500,
+        "locks_ns": 197458,
+        "restore_ns": 2485875
+      }
+    },
+    {
+      "label": "hit",
+      "key": "152fe4b7018ecd640ce7ed2ffe38faff64425e44ca27cbd7324966a566197c27",
+      "crate": "zlib_rs",
+      "data": {
+        "plan_ns": 10792,
+        "prepare_ns": 45792,
+        "identity_ns": 1201250,
+        "locks_ns": 160458,
+        "restore_ns": 4666375
+      }
+    },
+    {
+      "label": "hit",
+      "key": "cd08dc5a015a8656765f7383e6eba4f64dae33f9bf09f66726893ccba74711c0",
+      "crate": "unicase",
+      "data": {
+        "plan_ns": 10333,
+        "prepare_ns": 31292,
+        "identity_ns": 1235708,
+        "locks_ns": 114875,
+        "restore_ns": 2201625
+      }
+    },
+    {
+      "label": "hit",
+      "key": "08a76b79eee885c4b045719fe13cd737b4c6db4be2d94303357f4224ebda6f59",
+      "crate": "pulldown_cmark_escape",
+      "data": {
+        "plan_ns": 11833,
+        "prepare_ns": 33250,
+        "identity_ns": 1359000,
+        "locks_ns": 109625,
+        "restore_ns": 2172167
+      }
+    },
+    {
+      "label": "hit",
+      "key": "e305ebff27dad7dfa9abb043b7a1bca5cd1ea5a19ff3c84ae5e610cbb1986073",
+      "crate": "num_traits",
+      "data": {
+        "plan_ns": 11500,
+        "prepare_ns": 56958,
+        "identity_ns": 1199584,
+        "locks_ns": 154333,
+        "restore_ns": 7474375
+      }
+    },
+    {
+      "label": "hit",
+      "key": "f4dae58a41fef0af323a7689f8d5bf9c591880ec06d6eba8847a7304c65a734c",
+      "crate": "flate2",
+      "data": {
+        "plan_ns": 10959,
+        "prepare_ns": 39708,
+        "identity_ns": 1327417,
+        "locks_ns": 134000,
+        "restore_ns": 4797291
+      }
+    },
+    {
+      "label": "hit",
+      "key": "f4421fb5a893aabdbe3bb5c15d6f31f1c8bcf6882abbdd939e656ff244b66db2",
+      "crate": "hyper_rustls",
+      "data": {
+        "plan_ns": 13417,
+        "prepare_ns": 44417,
+        "identity_ns": 1446333,
+        "locks_ns": 158750,
+        "restore_ns": 15306750
+      }
+    },
+    {
+      "label": "hit",
+      "key": "f21ac35f1c7fc902e61bf8e3204136be488d7b4fa58eccd7bd7c6cae4bf4bd6a",
+      "crate": "crc32fast",
+      "data": {
+        "plan_ns": 12458,
+        "prepare_ns": 81792,
+        "identity_ns": 1641792,
+        "locks_ns": 139333,
+        "restore_ns": 3035042
+      }
+    },
+    {
+      "label": "hit",
+      "key": "56a73c70a78ddb0a90103407017b1465e243943b61051d1bd85ed6b1e77fd9b6",
+      "crate": "pulldown_cmark",
+      "data": {
+        "plan_ns": 12959,
+        "prepare_ns": 46416,
+        "identity_ns": 2339584,
+        "locks_ns": 320375,
+        "restore_ns": 7428250
+      }
+    },
+    {
+      "label": "hit",
+      "key": "6ac36d985ef5af1549bce42d6e162cc5abbd859c92d8d1facaf5a4f55fcfb20d",
+      "crate": "digest",
+      "data": {
+        "plan_ns": 10958,
+        "prepare_ns": 62459,
+        "identity_ns": 1523666,
+        "locks_ns": 190500,
+        "restore_ns": 7695709
+      }
+    },
+    {
+      "label": "hit",
+      "key": "00d2be3e52b3b7fad0f55c886378c0cfa5549232241c7325f9f59bc4e50445b1",
+      "crate": "chrono",
+      "data": {
+        "plan_ns": 11875,
+        "prepare_ns": 48917,
+        "identity_ns": 1183708,
+        "locks_ns": 241250,
+        "restore_ns": 9470167
+      }
+    },
+    {
+      "label": "hit",
+      "key": "cda52c5bbd537fef167f2b6dbdfefc512a236d6498eb1a30c1219f9621e9eb45",
+      "crate": "tower_http",
+      "data": {
+        "plan_ns": 29083,
+        "prepare_ns": 55750,
+        "identity_ns": 2261625,
+        "locks_ns": 188042,
+        "restore_ns": 12153083
+      }
+    },
+    {
+      "label": "hit",
+      "key": "06f0485cfb10223049ee70c0402096a5119382c9d276175192763af2bf75250a",
+      "crate": "uuid",
+      "data": {
+        "plan_ns": 12500,
+        "prepare_ns": 61417,
+        "identity_ns": 1274542,
+        "locks_ns": 107875,
+        "restore_ns": 7986791
+      }
+    },
+    {
+      "label": "hit",
+      "key": "74ccb7eb13f5248ef82613b43cae22f7286b8fab014bb68c2bbb8c6635a12549",
+      "crate": "serde_urlencoded",
+      "data": {
+        "plan_ns": 13167,
+        "prepare_ns": 59958,
+        "identity_ns": 1941875,
+        "locks_ns": 209417,
+        "restore_ns": 9614417
+      }
+    },
+    {
+      "label": "hit",
+      "key": "879510760c1a19aa9251cd4a5e092f1ee1113f91638008a91312a54f9f78c7d3",
+      "crate": "tokio_util",
+      "data": {
+        "plan_ns": 13000,
+        "prepare_ns": 37167,
+        "identity_ns": 1357500,
+        "locks_ns": 117333,
+        "restore_ns": 7659250
+      }
+    },
+    {
+      "label": "hit",
+      "key": "49b3cc80a9379e96adf95a099ed28a00981d47e24d800ae13af4d556d04ab044",
+      "crate": "futures_executor",
+      "data": {
+        "plan_ns": 13375,
+        "prepare_ns": 54959,
+        "identity_ns": 1800166,
+        "locks_ns": 173417,
+        "restore_ns": 9198042
+      }
+    },
+    {
+      "label": "hit",
+      "key": "f7c3f32641cc52b8a0e97d5876392d8ccbc41d8d745c92603da5d5147ccae279",
+      "crate": "http_body_util",
+      "data": {
+        "plan_ns": 16291,
+        "prepare_ns": 28500,
+        "identity_ns": 1274125,
+        "locks_ns": 161084,
+        "restore_ns": 6001250
+      }
+    },
+    {
+      "label": "hit",
+      "key": "844798ea63f5fc59d855e4722a1116aee50e510f5d05b1758fa62369be2db8d7",
+      "crate": "cpufeatures",
+      "data": {
+        "plan_ns": 12292,
+        "prepare_ns": 31958,
+        "identity_ns": 1320667,
+        "locks_ns": 112750,
+        "restore_ns": 3685833
+      }
+    },
+    {
+      "label": "hit",
+      "key": "b240d7cff0ecbc0d17d56c2f59ad91985c56c2cf59b6d29b2ee4905e0398724e",
+      "crate": "log",
+      "data": {
+        "plan_ns": 10416,
+        "prepare_ns": 35292,
+        "identity_ns": 1221583,
+        "locks_ns": 176667,
+        "restore_ns": 3436333
+      }
+    },
+    {
+      "label": "hit",
+      "key": "3db2d17ff6f715c786243142ded10e2f17f572cbd9e17f45933e4705d1916f70",
+      "crate": "typed_path",
+      "data": {
+        "plan_ns": 11125,
+        "prepare_ns": 37833,
+        "identity_ns": 1523167,
+        "locks_ns": 177042,
+        "restore_ns": 6842375
+      }
+    },
+    {
+      "label": "hit",
+      "key": "6d6435d53eda4c5107d0c13333b6851b38c4a8dace4c88b7c96d7d4a2d806928",
+      "crate": "unsafe_libyaml",
+      "data": {
+        "plan_ns": 10667,
+        "prepare_ns": 37167,
+        "identity_ns": 1311041,
+        "locks_ns": 137292,
+        "restore_ns": 5148792
+      }
+    },
+    {
+      "label": "hit",
+      "key": "5f684863244d8f7a9e463a032ab383840c5c4fd5702afd53a88c1bacc5e4c81c",
+      "crate": "sha2",
+      "data": {
+        "plan_ns": 12000,
+        "prepare_ns": 37167,
+        "identity_ns": 1286292,
+        "locks_ns": 117791,
+        "restore_ns": 6858000
+      }
+    },
+    {
+      "label": "hit",
+      "key": "5ffe4213041a699161acbae16dfed4224d95afc5a1483c96cdff77c50673b01c",
+      "crate": "reqwest",
+      "data": {
+        "plan_ns": 19000,
+        "prepare_ns": 36625,
+        "identity_ns": 1106250,
+        "locks_ns": 195375,
+        "restore_ns": 20454250
+      }
+    },
+    {
+      "label": "hit",
+      "key": "a5cc424677fe6bd08391f5c935da76c9a21ff90cf9fb5b32dbcb45160d20a8a3",
+      "crate": "futures",
+      "data": {
+        "plan_ns": 13500,
+        "prepare_ns": 49333,
+        "identity_ns": 1861000,
+        "locks_ns": 139917,
+        "restore_ns": 9664750
+      }
+    },
+    {
+      "label": "hit",
+      "key": "f498ade8f48e2d1359d05fb1bd3ab09b41098c148d78f9397291fa6f813f3f11",
+      "crate": "serde_yaml_ng",
+      "data": {
+        "plan_ns": 10125,
+        "prepare_ns": 54334,
+        "identity_ns": 1375083,
+        "locks_ns": 173000,
+        "restore_ns": 7857833
+      }
+    },
+    {
+      "label": "hit",
+      "key": "c062b6ef63feb98a340804d3841b579006eced827012d9b15373f9752982b8c9",
+      "crate": "zip",
+      "data": {
+        "plan_ns": 14083,
+        "prepare_ns": 47500,
+        "identity_ns": 1561375,
+        "locks_ns": 113000,
+        "restore_ns": 12322667
+      }
+    },
+    {
+      "label": "hit",
+      "key": "7abf0bf2761cbe3ab4932ec1809e91b8c6813bb644719fa6e9b24cc604707407",
+      "crate": "harness_proto",
+      "data": {
+        "plan_ns": 10708,
+        "prepare_ns": 28917,
+        "identity_ns": 1356458,
+        "locks_ns": 146250,
+        "restore_ns": 22059792
+      }
+    },
+    {
+      "label": "hit",
+      "key": "d93e4bc6bc3e3f52afecd3f05dc32507c20565d36eca16837912321c2358a1ba",
+      "crate": "deser_hjson",
+      "data": {
+        "plan_ns": 12417,
+        "prepare_ns": 76250,
+        "identity_ns": 1438458,
+        "locks_ns": 182875,
+        "restore_ns": 10198583
+      }
+    },
+    {
+      "label": "hit",
+      "key": "99a563d8f21431d36cf9dbc8810cc4d655d2dd9ff9ab6f15c1f7571945c30153",
+      "crate": "semver",
+      "data": {
+        "plan_ns": 12542,
+        "prepare_ns": 66500,
+        "identity_ns": 1533417,
+        "locks_ns": 195125,
+        "restore_ns": 3020916
+      }
+    },
+    {
+      "label": "hit",
+      "key": "82492b2da002b888d994af962761b1fdd32170548ed8ea886214e237a91fae40",
+      "crate": "thiserror",
+      "data": {
+        "plan_ns": 11750,
+        "prepare_ns": 48834,
+        "identity_ns": 1265041,
+        "locks_ns": 105667,
+        "restore_ns": 5010875
+      }
+    },
+    {
+      "label": "hit",
+      "key": "20ee9b70de1fe5bda8d49b926c1086f1fd53e520b62efb1d8a23dea3ccef42cf",
+      "crate": "anyhow",
+      "data": {
+        "plan_ns": 10417,
+        "prepare_ns": 29875,
+        "identity_ns": 1198458,
+        "locks_ns": 148542,
+        "restore_ns": 4431625
+      }
+    },
+    {
+      "label": "hit",
+      "key": "4ee5364a06e0358e2bd27793f0321f432c5a6588555d542881be7f63bf55c646",
+      "crate": "harness_adapters",
+      "data": {
+        "plan_ns": 13541,
+        "prepare_ns": 32875,
+        "identity_ns": 1173959,
+        "locks_ns": 103958,
+        "restore_ns": 32918083
+      }
+    }
+  ]
+}
