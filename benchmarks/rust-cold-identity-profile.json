@@ -1,0 +1,111 @@
+{
+  "binary_sha256": "60a7ed9cba39bfd60dfb4f264cd0636c8cddcba4f6faea41a740fe59671b27c2",
+  "compiler": "/Users/rachpradhan/.rustup/toolchains/1.97.1-aarch64-apple-darwin/bin/rustc",
+  "observations": [
+    {
+      "run": 0,
+      "phase": "cold",
+      "fingerprint_seconds": 0.838445,
+      "wall_seconds": 1.1776886659790762,
+      "hash": "19a8671df3fa7598533a6cb110cb46302eafd7eb0d431b0c46df2f88cf1b98eb",
+      "stamps": 376,
+      "file_memos": 360,
+      "file_memo_bytes": 1238109116
+    },
+    {
+      "run": 0,
+      "phase": "warm",
+      "fingerprint_seconds": 0.001001708,
+      "wall_seconds": 0.011640292010270059,
+      "hash": "19a8671df3fa7598533a6cb110cb46302eafd7eb0d431b0c46df2f88cf1b98eb",
+      "stamps": 376,
+      "file_memos": 360,
+      "file_memo_bytes": 1238109116
+    },
+    {
+      "run": 1,
+      "phase": "cold",
+      "fingerprint_seconds": 0.835214458,
+      "wall_seconds": 0.8498540830332786,
+      "hash": "19a8671df3fa7598533a6cb110cb46302eafd7eb0d431b0c46df2f88cf1b98eb",
+      "stamps": 376,
+      "file_memos": 360,
+      "file_memo_bytes": 1238109116
+    },
+    {
+      "run": 1,
+      "phase": "warm",
+      "fingerprint_seconds": 0.00124125,
+      "wall_seconds": 0.012991749972570688,
+      "hash": "19a8671df3fa7598533a6cb110cb46302eafd7eb0d431b0c46df2f88cf1b98eb",
+      "stamps": 376,
+      "file_memos": 360,
+      "file_memo_bytes": 1238109116
+    },
+    {
+      "run": 2,
+      "phase": "cold",
+      "fingerprint_seconds": 0.820669416,
+      "wall_seconds": 0.8325937080080621,
+      "hash": "19a8671df3fa7598533a6cb110cb46302eafd7eb0d431b0c46df2f88cf1b98eb",
+      "stamps": 376,
+      "file_memos": 360,
+      "file_memo_bytes": 1238109116
+    },
+    {
+      "run": 2,
+      "phase": "warm",
+      "fingerprint_seconds": 0.000966292,
+      "wall_seconds": 0.011477457999717444,
+      "hash": "19a8671df3fa7598533a6cb110cb46302eafd7eb0d431b0c46df2f88cf1b98eb",
+      "stamps": 376,
+      "file_memos": 360,
+      "file_memo_bytes": 1238109116
+    },
+    {
+      "run": 3,
+      "phase": "cold",
+      "fingerprint_seconds": 0.814610792,
+      "wall_seconds": 0.8259523750166409,
+      "hash": "19a8671df3fa7598533a6cb110cb46302eafd7eb0d431b0c46df2f88cf1b98eb",
+      "stamps": 376,
+      "file_memos": 360,
+      "file_memo_bytes": 1238109116
+    },
+    {
+      "run": 3,
+      "phase": "warm",
+      "fingerprint_seconds": 0.001022959,
+      "wall_seconds": 0.011780124972574413,
+      "hash": "19a8671df3fa7598533a6cb110cb46302eafd7eb0d431b0c46df2f88cf1b98eb",
+      "stamps": 376,
+      "file_memos": 360,
+      "file_memo_bytes": 1238109116
+    },
+    {
+      "run": 4,
+      "phase": "cold",
+      "fingerprint_seconds": 0.822263209,
+      "wall_seconds": 0.8337013749987818,
+      "hash": "19a8671df3fa7598533a6cb110cb46302eafd7eb0d431b0c46df2f88cf1b98eb",
+      "stamps": 376,
+      "file_memos": 360,
+      "file_memo_bytes": 1238109116
+    },
+    {
+      "run": 4,
+      "phase": "warm",
+      "fingerprint_seconds": 0.001014875,
+      "wall_seconds": 0.011865167005453259,
+      "hash": "19a8671df3fa7598533a6cb110cb46302eafd7eb0d431b0c46df2f88cf1b98eb",
+      "stamps": 376,
+      "file_memos": 360,
+      "file_memo_bytes": 1238109116
+    }
+  ],
+  "medians": {
+    "cold": 0.822263209,
+    "warm": 0.001014875
+  },
+  "method": "five empty-cache cold identities followed by warm validation; same installed compiler; OS caches unflushed; fingerprint hashes identical"
+}
