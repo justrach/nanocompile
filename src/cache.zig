@@ -920,16 +920,15 @@ pub fn prefixDigest(a: std.mem.Allocator, names: []const []const u8, prefix: []c
 
 // Only a proven metadata-first same-stem regular archive may be absent or
 // appear without changing the candidate set. The metadata name remains guarded.
+pub fn regularMetadataCandidate(names: []const []const u8, prefix: []const u8) bool {
+    if (!std.mem.startsWith(u8, prefix, "lib") or prefix.len <= 3) return false;
+    for (prefix) |ch| if (!std.ascii.isAlphanumeric(ch) and ch != '_' and ch != '-') return false;
+    for (names) |name| if (std.mem.startsWith(u8, name, prefix) and std.mem.eql(u8, name[prefix.len..], ".rmeta:file")) return true;
+    return false;
+}
+
 pub fn metadataCompanionDigest(a: std.mem.Allocator, names: []const []const u8, prefix: []const u8) ![]const u8 {
-    if (!std.mem.startsWith(u8, prefix, "lib") or prefix.len <= 3) return error.InvalidMetadataCompanion;
-    for (prefix) |ch| if (!std.ascii.isAlphanumeric(ch) and ch != '_' and ch != '-') return error.InvalidMetadataCompanion;
-    const meta = try std.fmt.allocPrint(a, "{s}.rmeta:file", .{prefix});
-    var present = false;
-    for (names) |name| if (std.mem.eql(u8, name, meta)) {
-        present = true;
-        break;
-    };
-    if (!present) return error.InvalidMetadataCompanion;
+    if (!regularMetadataCandidate(names, prefix)) return error.InvalidMetadataCompanion;
     const archive = try std.fmt.allocPrint(a, "{s}.rlib:file", .{prefix});
     var hash = Hash.init(.{});
     field(&hash, "nano-metadata-companion-membership-v1");

@@ -6,7 +6,7 @@ import subprocess
 import sys
 import tempfile
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'tools'))
-from build_trace import Capture, analyze, verify_capture
+from build_trace import Capture, analyze, verify_capture, capture_notifications
 
 with tempfile.TemporaryDirectory() as temp:
     state = Path(temp)
@@ -36,6 +36,59 @@ with tempfile.TemporaryDirectory() as temp:
         assert row['args'] == args and row['exit_code'] == 7 and row['end_ns'] >= row['start_ns']
         assert path.with_suffix('.stdout').read_bytes() == expected.stdout
         assert path.with_suffix('.stderr').read_bytes() == expected.stderr
+    # The compiler must be able to notify Cargo before it finishes. A gate
+    # makes this deterministic rather than relying on a speed threshold.
+    import selectors
+    live = state / 'live.c'
+    live.write_text(r'''#define _POSIX_C_SOURCE 200809L
+#include <stdlib.h>
+#include <unistd.h>
+#include <time.h>
+int main(){
+ const char notice[]="{\"$message_type\":\"artifact\",\"artifact\":\"out.rmeta\",\"emit\":\"metadata\"}\n";
+ write(2,notice,sizeof notice-1);
+ struct timespec delay={0,1000000};
+ while(access(getenv("CAPTURE_GATE"),F_OK))nanosleep(&delay,0);
+ unsigned char bytes[16384];for(int i=0;i<16384;++i)bytes[i]=i%256;
+ for(int fd=1;fd<=2;++fd)for(int j=0;j<128;++j){int p=0;while(p<16384){int n=write(fd,bytes+p,16384-p);if(n<=0)return 1;p+=n;}}
+ return 0;
+}''')
+    subprocess.run(['cc', str(live), '-o', str(child)], check=True)
+    gate = state / 'gate'
+    before_live = set(capture.directory.glob('*.json'))
+    running = subprocess.Popen([wrapper], env=dict(env, CAPTURE_GATE=str(gate)), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    try:
+        with selectors.DefaultSelector() as sel:
+            sel.register(running.stderr, selectors.EVENT_READ)
+            assert sel.select(10), 'capture frontend delayed compiler metadata'
+        notice = running.stderr.readline()
+        assert json.loads(notice)['emit'] == 'metadata'
+        assert running.poll() is None
+        gate.write_text('go')
+        stdout, stderr = running.communicate(timeout=30)
+        assert running.returncode == 0
+        payload = bytes(range(256)) * 8192
+        assert stdout == payload and stderr == payload
+        live_record = (set(capture.directory.glob('*.json')) - before_live).pop()
+        assert live_record.with_suffix('.stdout').read_bytes() == stdout
+        assert live_record.with_suffix('.stderr').read_bytes() == notice + stderr
+        assert json.loads(live_record.read_text())['capture_complete'] is True
+        chunk_file = live_record.with_suffix('.chunks')
+        original_chunks = chunk_file.read_bytes()
+        lines = original_chunks.decode().splitlines()
+        parts = lines[0].split(','); parts[1] = '1'; lines[0] = ','.join(parts)
+        chunk_file.write_text('\n'.join(lines) + '\n')
+        try:
+            capture_notifications(live_record, json.loads(live_record.read_text()), 0)
+            raise AssertionError('Noncontiguous chunk coverage was accepted')
+        except ValueError:
+            pass
+        chunk_file.write_bytes(original_chunks)
+    finally:
+        if running.poll() is None:
+            gate.write_text('abort')
+            running.kill()
+            running.communicate()
     import signal
     killer = state / 'killer.c'
     killer.write_text('#include <signal.h>\nint main(){raise(SIGTERM);}')
@@ -48,11 +101,13 @@ with tempfile.TemporaryDirectory() as temp:
     event_log.write_text('hit\n')
     captured = dict(implementation='nanocompile', phase='warm')
     capture.finish(captured, state / 'target', 0, event_log, 0, console)
+    observed = [request for request in captured['trace']['requests'] if request.get('metadata_notifications_seconds')]
+    assert len(observed) == 1 and len(observed[0]['metadata_notifications_seconds']) == 1
     manifest = json.loads((capture.directory / 'manifest.json').read_text())
     import hashlib
     assert manifest['files']['cargo.log']['sha256'] == hashlib.sha256(console.read_bytes()).hexdigest()
     assert manifest['files']['cargo.log']['bytes'] == len(console.read_bytes())
-    assert manifest['compiler_records'] == 17 and manifest['build_log_captured']
+    assert manifest['compiler_records'] == 18 and manifest['build_log_captured']
     assert verify_capture(capture.directory)['verified_files'] == len(manifest['files'])
     (capture.directory / 'cargo.log').write_bytes(b'truncated')
     try:

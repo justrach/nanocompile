@@ -14,6 +14,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 def verify_capture(directory):
     """Check a local capture against its manifest; this is integrity, not authentication."""
+    check_stream_owners(directory)
     manifest = json.loads((directory / 'manifest.json').read_text())
     if manifest.get('schema') != 1:
         raise ValueError('Unsupported capture manifest')
@@ -28,8 +29,56 @@ def verify_capture(directory):
         raw = path.read_bytes()
         if len(raw) != expected['bytes'] or hashlib.sha256(raw).hexdigest() != expected['sha256']:
             raise ValueError('Capture content differs from manifest: ' + name)
+    for path in directory.glob('*.json'):
+        if path.name == 'manifest.json':
+            continue
+        raw = json.loads(path.read_text())
+        capture_notifications(path, raw, raw.get('start_ns', 0))
     return dict(verified_files=len(actual), compiler_records=manifest['compiler_records'],
                 cargo_units=manifest['cargo_units'])
+
+def check_stream_owners(directory):
+    for suffix in ('.stdout', '.stderr', '.chunks'):
+        for path in directory.glob('*' + suffix):
+            if not path.with_suffix('.json').is_file():
+                raise ValueError('Compiler stream has no completed record: ' + path.name)
+
+def capture_notifications(path, raw, origin_ns):
+    """Validate chunk coverage and timestamp complete observed metadata messages."""
+    if not raw.get('streaming_capture'):
+        return []
+    if raw.get('capture_complete') is not True:
+        raise ValueError('Incomplete compiler capture: ' + path.name)
+    offsets = [0, 0]
+    stderr_chunks = []
+    last_time = raw['start_ns']
+    for line in path.with_suffix('.chunks').read_text().splitlines():
+        stream, offset, size, timestamp = map(int, line.split(','))
+        if stream not in (0, 1) or offset != offsets[stream] or size <= 0 or not last_time <= timestamp <= raw['end_ns']:
+            raise ValueError('Invalid compiler chunk coverage: ' + path.name)
+        offsets[stream] += size
+        last_time = timestamp
+        if stream == 1:
+            stderr_chunks.append((offsets[stream], timestamp))
+    for stream, suffix in enumerate(('.stdout', '.stderr')):
+        if path.with_suffix(suffix).stat().st_size != offsets[stream]:
+            raise ValueError('Truncated compiler stream: ' + path.name)
+    notifications = []
+    end = 0
+    chunk = 0
+    for line in path.with_suffix('.stderr').read_bytes().splitlines(keepends=True):
+        end += len(line)
+        try:
+            message = json.loads(line)
+        except (ValueError, UnicodeDecodeError):
+            continue
+        if not isinstance(message, dict) or message.get('$message_type') != 'artifact' or message.get('emit') != 'metadata':
+            continue
+        while chunk < len(stderr_chunks) and stderr_chunks[chunk][0] < end:
+            chunk += 1
+        if chunk < len(stderr_chunks):
+            notifications.append((stderr_chunks[chunk][1] - origin_ns) / 1e9)
+    return notifications
 
 class Capture:
     def __init__(self, state, binaries):
@@ -72,9 +121,11 @@ class Capture:
                 f.seek(event_offset)
                 events = f.read()
         (self.directory / 'cache-events').write_bytes(events)
+        check_stream_owners(self.directory)
         calls = []
         for path in sorted(self.directory.glob('*.json')):
             raw = json.loads(path.read_text())
+            notifications = capture_notifications(path, raw, origin_ns)
             args = raw['args']
             crate = args[args.index('--crate-name') + 1] if '--crate-name' in args else None
             stderr = path.with_suffix('.stderr').read_text(errors='replace')
@@ -87,7 +138,8 @@ class Capture:
                               exit_code=raw['exit_code'],
                               nano_decisions=[line.strip() for line in stderr.splitlines()
                                               if line.strip().startswith('nanocompile:')],
-                              record=path.name))
+                              metadata_notifications_seconds=notifications,
+                              streaming_capture=raw.get('streaming_capture', False), record=path.name))
         service = []
         if row['implementation'] == 'kache':
             allowed = ('crate_name', 'package', 'result', 'elapsed_ms', 'compile_time_ms', 'key_ms', 'lookup_ms',
@@ -127,6 +179,9 @@ def analyze(report, output):
             build_script_runs.extend(dict(build=index, phase=build['phase'], **event) for event in service_events if event.get('crate_name') == 'build_script_run')
             metrics = sorted({key for event in service_events for key, value in event.items() if key.endswith('_ms') and isinstance(value, (int, float))})
             service_summaries.append(dict(build=index, phase=build['phase'], results=dict(collections.Counter(event.get('result', 'unknown') for event in service_events)), stages={key: dict(samples=len(values), median_ms=statistics.median(values), sum_ms=sum(values)) for key in metrics if (values := [e[key] for e in service_events if isinstance(e.get(key), (int, float)) and (key != 'compile_time_ms' or e.get('result') in ('miss', 'passthrough'))])}))
+        for request in trace.get('requests', []):
+            for timestamp in request.get('metadata_notifications_seconds', []):
+                traces.append(dict(name=request['name'] + ' metadata notification', cat='metadata', ph='i', s='t', ts=max(0, timestamp)*1e6, pid=index, tid='request'))
         for kind, rows in [('request', trace.get('requests', [])), ('cargo', trace.get('cargo_units', []))]:
             for row in rows:
                 name = row['name']
@@ -169,7 +224,7 @@ def analyze(report, output):
             claim='Diagnostic hypothesis; interval gap is not predicted wall-time savings'))
     provenance = {key: data[key] for key in ('commit', 'nanocompile_sha256', 'kache_sha256',
                   'kache_version', 'rustc', 'script_sha256', 'jobs', 'timestamp',
-                  'diagnostic_trace', 'native_clang', 'native_artifacts', 'portable_cc',
+                  'diagnostic_trace', 'compiler_stream', 'pipelined_companions', 'native_clang', 'native_artifacts', 'portable_cc',
                   'command', 'runs', 'cold_runs', 'cold_only', 'dirty', 'method', 'nanocompile_proc_macros',
                   'nanocompile_proc_macro_producers', 'nanocompile_executable_producers',
                   'build_script_contract_sha256', 'kache_build_script_cache') if key in data}

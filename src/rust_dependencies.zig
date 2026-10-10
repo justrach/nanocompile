@@ -244,7 +244,8 @@ pub fn collect(ctx: *cache.Context, argv: []const []const u8, outputs: []const [
         var found = false;
         for (before, current.items) |old, dir| {
             const normalize_companion = metadata_only and primary_found and
-                std.mem.eql(u8, ctx.env.get("NANOCOMPILE_PIPELINED_COMPANIONS") orelse "", "1") and
+                std.mem.eql(u8, ctx.env.get("NANOCOMPILE_PIPELINED_COMPANIONS") orelse "1", "1") and
+                cache.regularMetadataCandidate(old.names, prefix) and cache.regularMetadataCandidate(dir.names, prefix) and
                 try unusedCompanion(&resolver, dir, try std.fmt.allocPrint(ctx.a, "lib{s}.rlib", .{name}), crate, own_root.triple);
             const old_hash = if (normalize_companion) try cache.metadataCompanionDigest(ctx.a, old.names, prefix) else try cache.prefixDigest(ctx.a, old.names, prefix);
             const new_hash = if (normalize_companion) try cache.metadataCompanionDigest(ctx.a, dir.names, prefix) else try cache.prefixDigest(ctx.a, dir.names, prefix);

@@ -57,7 +57,11 @@ def main():
     p.add_argument("--script-profile", action="store_true", help="diagnostic build-script phase timings; requires execution contract")
     p.add_argument("--trace-builds", action="store_true", help="private full compiler logs and Cargo timings; diagnostic overhead, not a benchmark")
     p.add_argument('--pipelined-companions', action='store_true', help='experimental guarded metadata-first archive membership')
+    p.add_argument('--no-compiler-stream', action='store_true', help='disable default Rust stream forwarding')
+    p.add_argument('--no-pipelined-companions', action='store_true', help='disable default guarded companion membership')
     args = p.parse_args()
+    if (args.compiler_stream and args.no_compiler_stream) or (args.pipelined_companions and args.no_pipelined_companions):
+        p.error('choose either enable or disable for each compiler control')
     if args.native_clang and args.portable_cc:
         p.error("choose one native adapter")
     if args.runs < 1 or args.jobs < 1 or args.cold_runs < 1:
@@ -80,6 +84,10 @@ def main():
         env["NANOCOMPILE_BUILD_SCRIPTS_FILE"] = str(args.build_script_contract.resolve())
     if args.pipelined_companions:
         env['NANOCOMPILE_PIPELINED_COMPANIONS'] = '1'
+    if args.no_compiler_stream:
+        env['NANOCOMPILE_STREAM_COMPILER'] = '0'
+    if args.no_pipelined_companions:
+        env['NANOCOMPILE_PIPELINED_COMPANIONS'] = '0'
     if args.compiler_stream:
         env["NANOCOMPILE_STREAM_COMPILER"] = "1"
     if args.script_profile:
@@ -97,7 +105,7 @@ def main():
                "-p", args.package, "-j", str(args.jobs), "--message-format=json-render-diagnostics"]
     if capture:
         command += ["--timings", "-vv"]
-    result = {"diagnostic_trace": bool(capture) or args.script_profile, "script_profile": args.script_profile, "compiler_stream": args.compiler_stream, "pipelined_companions": args.pipelined_companions, "script_sha256": sha(Path(__file__)), "project": str(project), "commit": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=project, text=True).strip(),
+    result = {"diagnostic_trace": bool(capture) or args.script_profile, "script_profile": args.script_profile, "compiler_stream": env.get("NANOCOMPILE_STREAM_COMPILER"), "pipelined_companions": env.get("NANOCOMPILE_PIPELINED_COMPANIONS"), "script_sha256": sha(Path(__file__)), "project": str(project), "commit": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=project, text=True).strip(),
               "dirty": bool(subprocess.check_output(["git", "status", "--porcelain"], cwd=project)),
               "platform": platform.platform(), "jobs": args.jobs, "runs": args.runs, "cold_runs": args.cold_runs, "cold_only": args.cold_only,
               "rustc": subprocess.check_output(["rustc", "--version", "--verbose"], cwd=project, text=True),

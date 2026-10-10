@@ -1,6 +1,6 @@
 # Compiler pipelining with guarded archive companions
 
-This opt-in variation repairs the warm-cache regression in the [streaming experiment](harness-streaming-experiment.md). Enable both `NANOCOMPILE_STREAM_COMPILER=1` and `NANOCOMPILE_PIPELINED_COMPANIONS=1` for experimental comparisons. Defaults remain unchanged pending broader validation.
+This historical opt-in variation repairs the warm-cache regression in the [streaming experiment](harness-streaming-experiment.md). Enable both `NANOCOMPILE_STREAM_COMPILER=1` and `NANOCOMPILE_PIPELINED_COMPANIONS=1` for experimental comparisons. The [current runtime enables the validated path by default](default-pipelining.md); the measurements below describe the frozen opt-in predecessor.
 
 Nano's dependency collector already proves that metadata-only Rust library compilation ignores an exact same-stem archive when matching metadata is selected. Its directory membership guard nevertheless treated the archive appearing after metadata as an input change. That rejected cache stores during pipelining. The variation records a distinct membership digest that omits only that proven regular archive entry. Matching metadata must be present as a regular file in both snapshots; its entire bytes remain a dependency. All other prefix candidates, metadata removal or corruption, candidate kind changes, proc macros, explicit archive inputs, native linkage and broad fallback keep their existing guards. Restore requires the guarded metadata entry to remain present, and rechecks every dependency and output blob.
 

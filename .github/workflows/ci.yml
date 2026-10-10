@@ -31,7 +31,8 @@ jobs:
           python3 tests/producer_cache.py zig-out/bin/nanocompile --cargo-flags --output bench-results/producer-cache-cargo-flags.json
           python3 tests/static_native_cache.py zig-out/bin/nanocompile --output bench-results/static-native-cache.json
           python3 tests/rmeta_priority_probe.py zig-out/bin/nanocompile --output bench-results/rmeta-priority-probe.json
-          python3 tests/rmeta_priority_probe.py zig-out/bin/nanocompile --pipelined-companions --output bench-results/pipelined-companion-probe.json
+          python3 tests/rmeta_priority_probe.py zig-out/bin/nanocompile --toolchain 1.98.1 --output bench-results/pipelined-companion-probe-198.json
+          python3 tests/rmeta_priority_probe.py zig-out/bin/nanocompile --disable-pipelined-companions --output bench-results/pipelined-companion-disabled.json
           python3 tests/native_metadata_probe.py --output bench-results/native-metadata-probe.json
           python3 tests/native_metadata_cache.py zig-out/bin/nanocompile --output bench-results/native-metadata-cache.json
           python3 tests/executable_cache.py zig-out/bin/nanocompile --output bench-results/executable-cache.json

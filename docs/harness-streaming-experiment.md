@@ -49,3 +49,7 @@ The updated collector includes ring's real `.nano-real` build-script executable.
 ## Follow-up: guarded companions
 
 The [guarded companion variation](pipelined-companions.md) restores full warm coverage in three Harness rounds while retaining cold leads. It remains opt-in during source-edit and hosted validation. The rejected streaming-only evidence above remains historical evidence; enable both flags for the follow-up, rather than assuming streaming alone is fixed.
+
+## Default promotion
+
+The [current runtime](default-pipelining.md) enables the guarded path by default. The logging frontend now forwards streams live and records chunk arrival ranges; the buffering limitation above describes historical captures. Logging remains diagnostic overhead, and speed claims still require separate untraced measurements.

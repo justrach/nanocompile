@@ -14,18 +14,23 @@ def main():
     parser.add_argument('binary', type=Path, nargs='?')
     parser.add_argument('--output', type=Path)
     parser.add_argument('--pipelined-companions', action='store_true')
+    parser.add_argument('--disable-pipelined-companions', action='store_true')
+    parser.add_argument('--toolchain', default='1.97.1')
     args = parser.parse_args()
+    companions = not args.disable_pipelined_companions
     env = {k: v for k, v in os.environ.items()
            if not k.startswith(('R2_', 'KACHE_', 'NANOCOMPILE_'))
            and k not in ('RUSTC_WRAPPER', 'RUSTC_WORKSPACE_WRAPPER', 'RUSTC_BOOTSTRAP')}
-    env['RUSTUP_TOOLCHAIN'] = '1.97.1'
+    env['RUSTUP_TOOLCHAIN'] = args.toolchain
+    if args.disable_pipelined_companions:
+        env['NANOCOMPILE_PIPELINED_COMPANIONS'] = '0'
     if args.pipelined_companions:
         env['NANOCOMPILE_PIPELINED_COMPANIONS'] = '1'
     with tempfile.TemporaryDirectory(prefix='nano-rmeta-priority-') as tmp:
         root = Path(tmp)
         if args.binary:
             env.update(NANOCOMPILE_DIR=str(root / 'cache'), NANOCOMPILE_TRACE='1')
-        for folder in ('deps', 'out', 'alternate', 'kind-cache'):
+        for folder in ('deps', 'out', 'alternate', 'kind-cache', 'symlink-cache'):
             (root / folder).mkdir()
 
         def run(command, success=True):
@@ -82,7 +87,7 @@ def main():
         # Explicit --extern archive paths retain their full input semantics.
         explicit = library('middle', 'out', ['--extern', 'dep=deps/libdep.rlib'])
         run(explicit, success=False)
-        if args.binary and args.pipelined_companions:
+        if args.binary and companions:
             archive.unlink()
             assert compile_top() == reference
             cached(True)
@@ -146,7 +151,7 @@ def main():
             failed = run([str(args.binary.resolve()), *explicit], success=False)
             assert b'nanocompile: hit' not in failed.stderr
             archive.write_bytes(original_archive)
-        if args.binary and args.pipelined_companions:
+        if args.binary and companions:
             seed = root / 'archive-seed'
             seed.write_bytes(original_archive)
             proxy = root / 'late-rustc'
@@ -168,6 +173,26 @@ def main():
             second_late = run(late)
             assert b'nanocompile: hit' in second_late.stderr, second_late.stderr.decode()
             assert {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in (root / 'out').iterdir()} == reference
+        if args.binary:
+            # Nonregular metadata retains the full directory guard, while
+            # unchanged static inputs still cache normally.
+            regular_cache = env['NANOCOMPILE_DIR']
+            env['NANOCOMPILE_DIR'] = str(root / 'symlink-cache')
+            alias = root / 'metadata-alias'
+            alias.write_bytes(original_metadata)
+            metadata.unlink()
+            metadata.symlink_to(alias)
+            assert compile_top() == reference
+            cached(False)
+            cached(True)
+            archive.unlink()
+            assert compile_top() == reference
+            cached(False)
+            cached(True)
+            archive.write_bytes(original_archive)
+            metadata.unlink()
+            metadata.write_bytes(original_metadata)
+            env['NANOCOMPILE_DIR'] = regular_cache
         metadata.unlink()
         assert compile_top() == reference
         if args.binary:
@@ -208,8 +233,8 @@ def main():
                             full_metadata_bytes_checked_with_same_root_and_preserved_mtime=True,
                             competing_candidate_content_and_membership_checked=True,
                             explicit_archive_cache_mutation_detected=True,
-                            pipelined_companions=args.pipelined_companions,
-                            late_unused_archive_store_and_restore=args.pipelined_companions)
+                            pipelined_companions=companions,
+                            late_unused_archive_store_and_restore=companions)
         if args.output:
             args.output.parent.mkdir(parents=True, exist_ok=True)
             args.output.write_text(json.dumps(evidence, indent=2) + '\n')

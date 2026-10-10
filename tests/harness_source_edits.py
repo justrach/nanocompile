@@ -48,7 +48,11 @@ def main():
     p.add_argument('--compiler-stream', action='store_true')
     p.add_argument('--pipelined-companions', action='store_true')
     p.add_argument('--native-artifacts', action='store_true', help='hash native objects/archives without changing the compiler')
+    p.add_argument('--no-compiler-stream', action='store_true', help='disable default Rust stream forwarding')
+    p.add_argument('--no-pipelined-companions', action='store_true', help='disable default guarded companion membership')
     args = p.parse_args()
+    if (args.compiler_stream and args.no_compiler_stream) or (args.pipelined_companions and args.no_pipelined_companions):
+        p.error('choose either enable or disable for each compiler control')
     if args.runs < 1 or args.jobs < 1:
         p.error("runs and jobs must be positive")
     binary, kache = str(Path(args.binary).resolve()), str(Path(args.kache).resolve())
@@ -93,6 +97,10 @@ def main():
     env.update(CARGO_TARGET_DIR=str(target), CARGO_INCREMENTAL="0", NANOCOMPILE_DIR=str(cache),
                KACHE_CACHE_DIR=str(kcache), KACHE_CONFIG=str(config), KACHE_HOST_CONFIG="",
                NANOCOMPILE_PROC_MACROS=args.proc_macros, KACHE_SOCKET_PATH=str(state / "daemon.sock"), KACHE_DAEMON_IDLE_TIMEOUT="600")
+    if args.no_compiler_stream:
+        env['NANOCOMPILE_STREAM_COMPILER'] = '0'
+    if args.no_pipelined_companions:
+        env['NANOCOMPILE_PIPELINED_COMPANIONS'] = '0'
     if args.compiler_stream:
         env['NANOCOMPILE_STREAM_COMPILER'] = '1'
     if args.pipelined_companions:
@@ -105,7 +113,7 @@ def main():
         env["NANOCOMPILE_EXECUTABLE_PRODUCERS"] = "1"
     command = ["cargo", "build", "--release", "--locked", "--offline", "--lib",
                "-p", args.package, "-j", str(args.jobs), "--message-format=json-render-diagnostics"]
-    result = {"compiler_stream": args.compiler_stream, "pipelined_companions": args.pipelined_companions, "probe_functions": [leaf_name, shared_name], "original_project":str(original_project), "source_edits":"exported leaf function and shared dependency function; linked result checked; history-cache timed builds compared to empty-cache builds at identical paths", "script_sha256": sha(Path(__file__)), "project": str(project), "commit": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=project, text=True).strip(),
+    result = {"compiler_stream": env.get("NANOCOMPILE_STREAM_COMPILER"), "pipelined_companions": env.get("NANOCOMPILE_PIPELINED_COMPANIONS"), "probe_functions": [leaf_name, shared_name], "original_project":str(original_project), "source_edits":"exported leaf function and shared dependency function; linked result checked; history-cache timed builds compared to empty-cache builds at identical paths", "script_sha256": sha(Path(__file__)), "project": str(project), "commit": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=project, text=True).strip(),
               "dirty": bool(subprocess.check_output(["git", "status", "--porcelain"], cwd=project)),
               "platform": platform.platform(), "jobs": args.jobs, "runs": args.runs,
               "rustc": subprocess.check_output(["rustc", "--version", "--verbose"], cwd=project, text=True),

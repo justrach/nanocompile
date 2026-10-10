@@ -33,7 +33,11 @@ def main():
     p.add_argument('--compiler-stream', action='store_true', help='same streaming flag environment for both binaries')
     p.add_argument('--build-script-contract', type=Path)
     p.add_argument('--pipelined-companions', action='store_true', help='experimental guarded metadata-first archive membership')
+    p.add_argument('--no-compiler-stream', action='store_true', help='disable default Rust stream forwarding')
+    p.add_argument('--no-pipelined-companions', action='store_true', help='disable default guarded companion membership')
     args = p.parse_args()
+    if (args.compiler_stream and args.no_compiler_stream) or (args.pipelined_companions and args.no_pipelined_companions):
+        p.error('choose either enable or disable for each compiler control')
     assert args.runs > 0 and args.jobs > 0
     binaries = {name: getattr(args, name).resolve() for name in ('baseline', 'candidate')}
     project, root = args.project.resolve(), args.state.resolve()
@@ -48,6 +52,10 @@ def main():
                NANOCOMPILE_PROC_MACRO_PRODUCERS='1', NANOCOMPILE_EXECUTABLE_PRODUCERS='1')
     if args.pipelined_companions:
         env['NANOCOMPILE_PIPELINED_COMPANIONS'] = '1'
+    if args.no_compiler_stream:
+        env['NANOCOMPILE_STREAM_COMPILER'] = '0'
+    if args.no_pipelined_companions:
+        env['NANOCOMPILE_PIPELINED_COMPANIONS'] = '0'
     if args.compiler_stream:
         env['NANOCOMPILE_STREAM_COMPILER'] = '1'
     if args.build_script_contract:
@@ -66,7 +74,7 @@ def main():
         'timestamp': datetime.datetime.now(datetime.timezone.utc).isoformat(),
         'binary_sha256': {name: sha(path) for name, path in binaries.items()},
         'script_sha256': sha(Path(__file__)), 'jobs': args.jobs, 'runs_per_binary': args.runs,
-        'pipelined_companions': args.pipelined_companions, 'cold': args.cold, 'compiler_stream': args.compiler_stream,
+        'pipelined_companions': env.get('NANOCOMPILE_PIPELINED_COMPANIONS'), 'cold': args.cold, 'compiler_stream': env.get('NANOCOMPILE_STREAM_COMPILER'),
         'build_script_contract_sha256': sha(args.build_script_contract) if args.build_script_contract else None,
         'command': command, 'tracked_rust_and_manifest_hashes': source_hashes, 'builds': [],
     }
