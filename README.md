@@ -339,3 +339,5 @@ The subsequent [bounded source-variant cache](docs/source-variants.md) eliminate
 ## Attribution
 
 Inspired by [kunobi-ninja/kache](https://github.com/kunobi-ninja/kache), inspected at commit `943dd2b0bbbf28958623eba689e7ad71bf8888e5`. The Zig implementation is original; it adapts architectural ideas rather than copying Rust source. Apache-2.0; see `LICENSE` and `NOTICE`.
+
+Large Rust metadata now uses a separate bounded, state-checked snapshot reader; the actual Harness `objc2_app_kit` replay restores byte-identical artifacts. See [scope and checks](docs/large-rust-metadata.md). [Thin-LTO producer support](docs/thin-lto-producer-investigation.md) remains an unresolved experiment and is refused by production.

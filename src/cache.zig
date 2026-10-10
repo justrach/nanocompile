@@ -29,6 +29,20 @@ pub fn sameFileState(a: std.Io.File.Stat, b: std.Io.File.Stat) bool {
         a.mtime.nanoseconds == b.mtime.nanoseconds and a.ctime.nanoseconds == b.ctime.nanoseconds;
 }
 
+// Metadata readers need random access to lazy tables. Bound the owned snapshot
+// separately from small manifests/sources, and reject growth or replacement.
+pub fn readMetadata(io: std.Io, a: std.mem.Allocator, path: []const u8) ![]const u8 {
+    const before = try Dir.cwd().statFile(io, path, .{});
+    if (before.kind != .file or before.size > 512 * 1024 * 1024) return error.UnsupportedMetadataSize;
+    // std's limit is exclusive: allow EOF at the recorded size, then require
+    // exact length below. At most one extra byte can be read on file growth.
+    const bytes = try Dir.cwd().readFileAlloc(io, path, a, .limited(@intCast(before.size + 1)));
+    errdefer a.free(bytes);
+    if (bytes.len != before.size or !sameFileState(before, try Dir.cwd().statFile(io, path, .{})))
+        return error.InputChangedDuringMetadataQuery;
+    return bytes;
+}
+
 pub const RustLocations = struct { compiler: []const u8, sysroot: []const u8, target_libdir: []const u8, fallback_verified: bool = false };
 
 pub const Context = struct {
@@ -818,6 +832,30 @@ test "hash fields cannot collide through concatenation" {
     left.final(&l);
     right.final(&r);
     try std.testing.expect(!std.mem.eql(u8, &l, &r));
+}
+
+test "metadata snapshots cross manifest limit and reject oversized files" {
+    const a = std.testing.allocator;
+    const io = std.testing.io;
+    var tmp = std.testing.tmpDir(.{});
+    defer tmp.cleanup();
+    const lexical = try std.fs.path.join(a, &.{ ".zig-cache", "tmp", &tmp.sub_path });
+    defer a.free(lexical);
+    const root = try Dir.cwd().realPathFileAlloc(io, lexical, a);
+    defer a.free(root);
+    const path = try std.fs.path.join(a, &.{root, "large.rmeta"});
+    defer a.free(path);
+    const file = try Dir.cwd().createFile(io, path, .{});
+    defer file.close(io);
+    const size = 64 * 1024 * 1024 + 1;
+    try file.setLength(io, size);
+    try file.writePositionalAll(io, "tail", size - 4);
+    const snapshot = try readMetadata(io, a, path);
+    defer a.free(snapshot);
+    try std.testing.expectEqual(size, snapshot.len);
+    try std.testing.expectEqualStrings("tail", snapshot[snapshot.len - 4 ..]);
+    try file.setLength(io, 512 * 1024 * 1024 + 1);
+    try std.testing.expectError(error.UnsupportedMetadataSize, readMetadata(io, a, path));
 }
 
 test "blob hashes reject traversal" {

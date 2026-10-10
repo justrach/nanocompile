@@ -96,11 +96,11 @@ fn unusedCompanion(resolver: *metadata.Resolver, dir: Directory, filename: []con
     return false;
 }
 
-const DirectGraph = struct { root: metadata.Root, names: []const Crate };
+const DirectGraph = struct { root: metadata.Root, names: []const Crate, bytes: ?[]const u8 = null };
 fn directGraph(ctx: *cache.Context, path: []const u8) !?DirectGraph {
     if (!std.mem.endsWith(u8, path, ".rmeta")) return null;
     const before = Dir.cwd().statFile(ctx.io, path, .{}) catch return null;
-    const bytes = ctx.read(path) catch return null;
+    const bytes = cache.readMetadata(ctx.io, ctx.a, path) catch return null;
     const graph = @import("rmeta_direct.zig").decode(ctx.a, bytes) catch return null;
     const after = try Dir.cwd().statFile(ctx.io, path, .{});
     if (!cache.sameFileState(before, after)) return error.InputChangedDuringMetadataQuery;
@@ -109,7 +109,7 @@ fn directGraph(ctx: *cache.Context, path: []const u8) !?DirectGraph {
         if (!reportedMacros(ctx) and crate.proc_macro) return error.ProceduralMacroDependency;
         try names.append(ctx.a, .{ .name = crate.name, .hash = crate.hash, .proc_macro = crate.proc_macro });
     }
-    return .{ .root = .{ .name = graph.root.name, .hash = graph.root.hash, .triple = graph.root.triple, .proc_macro = graph.root.proc_macro }, .names = names.items };
+    return .{ .root = .{ .name = graph.root.name, .hash = graph.root.hash, .triple = graph.root.triple, .proc_macro = graph.root.proc_macro }, .names = names.items, .bytes = bytes };
 }
 
 fn cachedLocations(ctx: *cache.Context, argv: []const []const u8) ?cache.RustLocations {
@@ -191,7 +191,7 @@ pub fn collect(ctx: *cache.Context, argv: []const []const u8, outputs: []const [
     const own_root = graph.root;
     if (native_checked) |checked| {
         if (!std.mem.endsWith(u8, path, ".rmeta")) return error.HiddenNativeLinkInput;
-        const bytes = try ctx.read(path);
+        const bytes = graph.bytes orelse try cache.readMetadata(ctx.io, ctx.a, path);
         try @import("native_metadata.zig").dynamicOnly(bytes, own_root);
         const after = try ctx.checkedDigest(path);
         if (!std.mem.eql(u8, checked.hash, after.hash) or !cache.sameFileState(checked.state, after.state)) return error.InputChangedDuringMetadataQuery;

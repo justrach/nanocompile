@@ -1,0 +1,24 @@
+diff --git a/src/compiler.zig b/src/compiler.zig
+index 0377fc6..302a62a 100644
+--- a/src/compiler.zig
++++ b/src/compiler.zig
+@@ -125,7 +125,10 @@ fn rustPlan(ctx: *cache.Context, argv: []const []const u8) !Plan {
+             const split = std.mem.indexOfScalar(u8, v, '=') orelse v.len;
+             const key = v[0..split];
+             if (eq(key, "debuginfo")) debug_info = v[@min(split + 1, v.len)..];
++            const thin_lto_trial = eq(key, "lto") and eq(v[@min(split + 1, v.len)..], "thin") and
++                eq(ctx.env.get("NANOCOMPILE_THIN_LTO_PRODUCERS") orelse "", "1");
+             for ([_][]const u8{ "lto", "linker-plugin-lto", "relocation-model" }) |unsupported| {
++                if (eq(unsupported, "lto") and thin_lto_trial) continue;
+                 if (eq(key, unsupported)) producer_unsafe_codegen = true;
+             }
+             if (eq(key, "extra-filename")) {
+@@ -591,6 +594,8 @@ fn executeProducer(ctx: *cache.Context, plan: Plan, argv: []const []const u8) !u
+         } else try command.append(ctx.a, argv[i]);
+     }
+     try command.appendSlice(ctx.a, &.{ "-C", try std.fmt.allocPrint(ctx.a, "linker={s}", .{linker}) });
++    if (eq(ctx.env.get("NANOCOMPILE_THIN_LTO_PRODUCERS") orelse "", "1"))
++        try command.append(ctx.a, try std.fmt.allocPrint(ctx.a, "--remap-path-prefix={s}={s}", .{ job.out, plan.out_dir.? }));
+     if (plan.producer_dylib) {
+         const install_name = try std.fs.path.join(ctx.a, &.{ plan.out_dir.?, std.fs.path.basename(original) });
+         for ([_][]const u8{ "-Xlinker", "-install_name", "-Xlinker", install_name }) |arg|

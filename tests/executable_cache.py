@@ -1,5 +1,6 @@
 """Real executable producer restore; execution and runtime inputs stay live."""
 import argparse
+import contextlib
 import hashlib
 import json
 import os
@@ -14,12 +15,16 @@ def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument('binary', type=Path)
     p.add_argument('--output', type=Path)
+    p.add_argument('--thin-lto', action='store_true', help='exercise opt-in thin-LTO compilation and transitive bitcode changes')
+    p.add_argument('--state', type=Path, help='new directory to retain probe artifacts for diagnosis')
     args = p.parse_args()
     binary = args.binary.resolve()
     if sys.platform != 'darwin':
         print('SKIP: experimental executable producers require Apple tools')
         return
-    with tempfile.TemporaryDirectory(prefix='nano executable cache, ') as tmp:
+    if args.state:
+        args.state.mkdir(parents=True, exist_ok=False)
+    with contextlib.nullcontext(str(args.state)) if args.state else tempfile.TemporaryDirectory(prefix='nano executable cache, ') as tmp:
         root = Path(tmp).resolve()
         for name in ('src', 'out', 'native'):
             (root / name).mkdir()
@@ -28,6 +33,8 @@ def main():
                and k not in ('RUSTC_WRAPPER', 'RUSTC_WORKSPACE_WRAPPER', 'RUSTC_BOOTSTRAP')}
         env.update(RUSTUP_TOOLCHAIN='1.97.1', NANOCOMPILE_DIR=str(root / 'cache'),
                    NANOCOMPILE_TRACE='1', NANOCOMPILE_EXECUTABLE_PRODUCERS='1')
+        if args.thin_lto:
+            env['NANOCOMPILE_THIN_LTO_PRODUCERS'] = '1'
         cc = shutil.which('cc')
         assert cc
         def run(command, success=True):
@@ -52,6 +59,16 @@ def main():
                 '--crate-type', 'bin', '--emit=dep-info,link', '--out-dir', 'out',
                 '-C', 'extra-filename=-fixture', '-C', 'strip=symbols',
                 '-L', 'native=native', '-l', 'static=probe', '--error-format=json', '--json=artifacts']
+        if args.thin_lto:
+            helper = root / 'helper.rs'
+            helper.write_text('pub fn adjustment()->u32{0}\n')
+            (root / 'helper-out').mkdir()
+            helper_command = ['rustc', 'helper.rs', '--crate-type', 'rlib', '--crate-name', 'helper',
+                              '--emit=dep-info,metadata,link', '--out-dir', 'helper-out', '-C', 'embed-bitcode=yes']
+            run(helper_command)
+            source = source.replace('unsafe{value()}', 'unsafe{value()}+helper::adjustment()')
+            src.write_text(source)
+            rust += ['-C', 'lto=thin', '--extern', 'helper=helper-out/libhelper.rlib', '-L', 'dependency=helper-out']
         executable = root / 'out' / 'build_script_build-fixture'
         dep_info = root / 'out' / 'build_script_build-fixture.d'
         def hashes():
@@ -63,11 +80,13 @@ def main():
             assert run([str(executable)]).stdout == expected.encode() + b'\n'
         direct = run(rust)
         reference = hashes()
+        if args.state:
+            shutil.copy2(executable, root / 'direct-executable')
         mode = executable.stat().st_mode & 0o777
         execute('12 first')
         remove()
         cold = run([str(binary), *rust])
-        assert b'miss: compiling executable producer' in cold.stderr and hashes() == reference, cold.stderr.decode()
+        assert b'miss: compiling executable producer' in cold.stderr and hashes() == reference, (reference, hashes(), cold.stderr.decode())
         execute('12 first')
         remove()
         runtime.write_text('second\n')
@@ -75,6 +94,17 @@ def main():
         assert b'hit: executable producer' in warm.stderr and hashes() == reference, warm.stderr.decode()
         assert executable.stat().st_mode & 0o777 == mode
         execute('12 second')
+        if args.thin_lto:
+            helper.write_text('pub fn adjustment()->u32{1}\n')
+            run(helper_command)
+            remove()
+            assert b'hit: executable producer' not in run([str(binary), *rust]).stderr
+            execute('13 second')
+            helper.write_text('pub fn adjustment()->u32{0}\n')
+            run(helper_command)
+            remove()
+            run([str(binary), *rust])
+            execute('12 second')
         def diagnostics(r):
             return [line for line in r.stderr.splitlines() if not line.startswith(b'nanocompile: ')]
         assert direct.stdout == cold.stdout == warm.stdout
@@ -107,6 +137,11 @@ def main():
         assert b'hit: executable producer' in run([str(binary), *rust]).stderr
         execute('14 second')
         assert b'bypass: UnsupportedProducerConfiguration' in run([str(binary), *rust, '-C', 'debuginfo=2']).stderr
+        if args.thin_lto:
+            assert b'bypass: UnsupportedProducerConfiguration' in run([str(binary), *rust, '-C', 'lto=fat']).stderr
+            guarded_env = dict(env, NANOCOMPILE_THIN_LTO_PRODUCERS='0')
+            guarded = subprocess.run([str(binary), *rust], cwd=root, env=guarded_env, capture_output=True, timeout=180)
+            assert guarded.returncode == 0 and b'bypass: UnsupportedProducerConfiguration' in guarded.stderr
         disabled_env = dict(env)
         disabled_env.pop('NANOCOMPILE_EXECUTABLE_PRODUCERS')
         disabled = subprocess.run([str(binary), *rust], cwd=root, env=disabled_env, capture_output=True, timeout=180)
@@ -121,6 +156,7 @@ def main():
                     'source_and_preserved_mtime_native_changes_detected': True,
                     'corrupt_blob_and_manifest_repaired': True, 'failed_compilation_not_cached': True,
                     'debug_and_default_policy_bypass': True,
+                    'thin_lto': args.thin_lto,
                     'limits': 'Apple native zero-debug executable compilation only; execution is not cached; no project speed claim'}
         if args.output:
             args.output.parent.mkdir(parents=True, exist_ok=True)

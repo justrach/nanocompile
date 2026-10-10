@@ -133,7 +133,7 @@ pub fn main(init: std.process.Init) !void {
     const Row = struct { file: []const u8, graph: ?Graph = null, failure: ?[]const u8 = null };
     var rows: std.ArrayList(Row) = .empty;
     for (args[1..]) |path| {
-        const input = try std.Io.Dir.cwd().readFileAlloc(init.io, path, a, .limited(64 * 1024 * 1024));
+        const input = try @import("cache.zig").readMetadata(init.io, a, path);
         const graph = decode(a, input) catch |err| {
             try rows.append(a, .{ .file = path, .failure = @errorName(err) });
             continue;
