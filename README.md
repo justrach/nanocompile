@@ -323,6 +323,8 @@ The next three performance directions now have implementations and checks: [port
 
 Hosted Linux/macOS [validation and coverage results](docs/hosted-three-directions.md) are published separately. GCC/Clang fixture checks pass, but the pinned Linux Harness profile currently bypasses all 30 portable native calls; kache leads its warm project comparison.
 
+The subsequent [bounded source-variant cache](docs/source-variants.md) eliminates both revert recompilations: Nano restores the verified Harness revert in **2.078 s**, versus **2.238 s kache** in this single-sample session. Cold and new leaf/shared edits still favor kache. All 18 builds and six complete artifact references pass; the tracked source/manifests match the earlier workload.
+
 ## Attribution
 
 Inspired by [kunobi-ninja/kache](https://github.com/kunobi-ninja/kache), inspected at commit `943dd2b0bbbf28958623eba689e7ad71bf8888e5`. The Zig implementation is original; it adapts architectural ideas rather than copying Rust source. Apache-2.0; see `LICENSE` and `NOTICE`.

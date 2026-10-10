@@ -1582,3 +1582,7 @@ The freshly installed version also completes a nine-round rotating comparison: w
 ## Real source edits and restore overlap
 
 The [verified real source-edit sequence](../docs/harness-source-edits.md) favors kache on cold, leaf/shared changes and reversions. Nano still roughly halves edited clean-target builds versus direct, but replacing one source manifest per command makes reversions recompile two crates. Every edited wrapper result matches its same-path empty-cache artifact reference and passes a linked behavior probe. All raw losses are retained. Separately, [bounded output/input validation overlap](../docs/restore-validation-overlap.md) improves two 27-pair identical-build Harness batches by about 2.1%; that optimization does not establish a cold or edit-build win.
+
+## Bounded source variants fix the revert gap
+
+The [bounded history cache](../docs/source-variants.md) now retains three preceding sealed manifests per compiler command. In a new fully verified real source-edit sequence, Nano records 167 Rust hits, 24 native hits and two historical restores on revert, with no compilation misses: 2.078 s versus kache 2.238 s. The earlier Nano revert was 11.981 s; these are separate sessions, not a paired statistical timing experiment. The tracked source/manifests are identical. All 18 builds and six empty-cache artifact references pass. Cold and new leaf/shared edits still favor kache. Runtime and final fixture updates pass hosted Linux/macOS CI; raw wins and losses remain public.
