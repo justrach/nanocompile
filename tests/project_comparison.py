@@ -1,5 +1,7 @@
 """Compare direct Cargo, nanocompile and kache on clean real-project builds."""
 import argparse
+from benchmark_storage import require_space, save_report, save_failure
+from bindgen_controls import load as bindgen_controls
 import collections
 import datetime
 import hashlib
@@ -61,6 +63,7 @@ def main():
     p.add_argument("--rlib-frameworks", action="store_true", help="opt-in native macOS rlib command-line framework metadata caching")
     p.add_argument("--executable-producers", action="store_true", help="enable experimental macOS executable compilation caching")
     p.add_argument("--build-script-contract", type=Path, help="opt Nano into explicit whole build-script execution contracts")
+    p.add_argument("--bindgen-tools-file", type=Path, help="explicit libclang, clang and rustfmt paths shared by all implementations")
     p.add_argument("--kache-no-build-scripts", action="store_true", help="diagnostic ablation: disable only kache build-script execution caching")
     p.add_argument("--compiler-stream", action="store_true", help="experimental immediate Rust compiler stream forwarding")
     p.add_argument("--script-profile", action="store_true", help="diagnostic build-script phase timings; requires execution contract")
@@ -68,7 +71,12 @@ def main():
     p.add_argument('--pipelined-companions', action='store_true', help='experimental guarded metadata-first archive membership')
     p.add_argument('--no-compiler-stream', action='store_true', help='disable default Rust stream forwarding')
     p.add_argument('--no-pipelined-companions', action='store_true', help='disable default guarded companion membership')
+    p.add_argument("--min-free-gib", type=float, help="free-space gate before each build; default 32 for full binaries, 8 for libraries")
     args = p.parse_args()
+    if args.min_free_gib is None:
+        args.min_free_gib = 32 if args.bin else 8
+    if not 0 < args.min_free_gib < float("inf"):
+        p.error("--min-free-gib must be positive and finite")
     if args.thin_lto_producers and not args.executable_producers:
         p.error("--thin-lto-producers requires --executable-producers")
     if args.probe_help and not args.bin:
@@ -83,6 +91,7 @@ def main():
         p.error("runs and jobs must be positive")
     binary, kache = str(Path(args.binary).resolve()), str(Path(args.kache).resolve())
     project, state = Path(args.project).resolve(), Path(args.state).resolve()
+    require_space(state, args.min_free_gib)
     state.mkdir(parents=True, mode=0o700, exist_ok=False)
     capture = Capture(state, {"nanocompile": binary, "kache": kache}) if args.trace_builds else None
     config = state / "kache.toml"
@@ -92,8 +101,12 @@ def main():
     # other wrapper overrides and user kache configuration are excluded.
     env = {k: v for k, v in os.environ.items() if not k.startswith(("R2_", "KACHE_", "NANOCOMPILE_"))
            and k not in ("RUSTC_WRAPPER", "RUSTC_WORKSPACE_WRAPPER")}
+    selected_bindgen_tools, bindgen_tools_hash = (None, None)
     if args.source_date_epoch is not None:
         env['SOURCE_DATE_EPOCH'] = str(args.source_date_epoch)
+    if args.bindgen_tools_file:
+        selected_bindgen_tools, bindgen_tools_hash = bindgen_controls(args.bindgen_tools_file)
+        env.update(selected_bindgen_tools)
     env.update(CARGO_TARGET_DIR=str(target), CARGO_INCREMENTAL="0", NANOCOMPILE_DIR=str(cache),
                KACHE_CACHE_DIR=str(kcache), KACHE_CONFIG=str(config), KACHE_HOST_CONFIG="",
                NANOCOMPILE_PROC_MACROS=args.proc_macros, KACHE_SOCKET_PATH=str(state / "daemon.sock"), KACHE_DAEMON_IDLE_TIMEOUT="600")
@@ -138,6 +151,8 @@ def main():
               "method": "offline clean release package builds; same target path; prime direct build then empty caches; rotate three-way warm measurement order unless cold-only; validate each wrapper against its own cold artifact hashes (kache remaps paths)"}
     result['source_date_epoch'] = env.get('SOURCE_DATE_EPOCH')
     result['rlib_frameworks'] = args.rlib_frameworks
+    result['bindgen_tools_file_sha256'] = bindgen_tools_hash
+    result['bindgen_tools'] = selected_bindgen_tools
     result['binary_target'] = args.bin
     result['cli_help_probe'] = args.probe_help
     result['reference_artifacts_retained'] = args.retain_artifacts
@@ -146,11 +161,12 @@ def main():
         name: sha(project / name) for name in tracked
         if name and (name.endswith(('.rs', '.toml')) or Path(name).name == 'Cargo.lock') and (project / name).is_file()
     }
+    result["minimum_free_space_gib"] = args.min_free_gib
     output = Path(args.output)
     output.parent.mkdir(parents=True, exist_ok=True)
 
     def save():
-        output.write_text(json.dumps(result, indent=2) + "\n")
+        save_report(output, result)
 
     def nano_events():
         return collections.Counter((cache / "events").read_text().splitlines()) if (cache / "events").exists() else collections.Counter()
@@ -174,6 +190,8 @@ def main():
 
     def build(implementation, phase):
         shutil.rmtree(target, ignore_errors=True)
+        require_space(state, args.min_free_gib)
+        require_space(output.parent, min(args.min_free_gib, 1))
         before = nano_events() if implementation == "nanocompile" else kache_events() if implementation == "kache" else collections.Counter()
         build_env = dict(env)
         nano_frontend = capture.wrappers["nanocompile"] if capture else binary
@@ -353,7 +371,7 @@ def main():
     except Exception as error:
         result['completed'] = False
         result['failure'] = dict(type=type(error).__name__, message=str(error))
-        save()
+        save_failure(output, result)
         raise
     finally:
         if daemon is not None:

@@ -1,5 +1,7 @@
 """Full Harness CLI/parser source edits, verified against empty-cache outputs."""
 import argparse
+from benchmark_storage import require_space, save_report, save_failure
+from bindgen_controls import load as bindgen_controls
 import collections
 import datetime
 import hashlib
@@ -49,12 +51,18 @@ def main():
     p.add_argument("--proc-macro-producers", action="store_true", help="enable the experimental macOS producer cache; verify macro dylib artifacts too")
     p.add_argument("--executable-producers", action="store_true", help="enable experimental macOS executable compilation caching")
     p.add_argument("--build-script-contract", type=Path)
+    p.add_argument("--bindgen-tools-file", type=Path)
     p.add_argument('--compiler-stream', action='store_true')
     p.add_argument('--pipelined-companions', action='store_true')
     p.add_argument('--native-artifacts', action='store_true', help='hash native objects/archives without changing the compiler')
     p.add_argument('--no-compiler-stream', action='store_true', help='disable default Rust stream forwarding')
     p.add_argument('--no-pipelined-companions', action='store_true', help='disable default guarded companion membership')
+    p.add_argument("--min-free-gib", type=float, help="free-space gate before each build; default 32 for full binaries, 8 for libraries")
     args = p.parse_args()
+    if args.min_free_gib is None:
+        args.min_free_gib = 32
+    if not 0 < args.min_free_gib < float("inf"):
+        p.error("--min-free-gib must be positive and finite")
     if (args.compiler_stream and args.no_compiler_stream) or (args.pipelined_companions and args.no_pipelined_companions):
         p.error('choose either enable or disable for each compiler control')
     if args.thin_lto_producers and not args.executable_producers:
@@ -66,6 +74,7 @@ def main():
     binary, kache = str(Path(args.binary).resolve()), str(Path(args.kache).resolve())
     original_project, state = Path(args.project).resolve(), Path(args.state).resolve()
     project = state / "project"
+    require_space(state, args.min_free_gib)
     state.mkdir(parents=True, mode=0o700, exist_ok=False)
     original_tracked = subprocess.check_output(['git', 'ls-files', '-z'], cwd=original_project).decode().split('\0')
     original_hashes = {name: sha(original_project/name) for name in original_tracked if name and
@@ -111,7 +120,11 @@ def main():
     # other wrapper overrides and user kache configuration are excluded.
     env = {k: v for k, v in os.environ.items() if not k.startswith(("R2_", "KACHE_", "NANOCOMPILE_"))
            and k not in ("RUSTC_WRAPPER", "RUSTC_WORKSPACE_WRAPPER")}
+    selected_bindgen_tools, bindgen_tools_hash = (None, None)
     env["SOURCE_DATE_EPOCH"] = str(args.source_date_epoch)
+    if args.bindgen_tools_file:
+        selected_bindgen_tools, bindgen_tools_hash = bindgen_controls(args.bindgen_tools_file)
+        env.update(selected_bindgen_tools)
     if args.thin_lto_producers:
         env["NANOCOMPILE_THIN_LTO_PRODUCERS"] = "1"
     if args.rlib_frameworks:
@@ -151,12 +164,15 @@ def main():
     }
     result['snapshot_rust_and_manifest_hashes'] = {name:sha(project/name) for name in original_input_hashes}
     result['rlib_frameworks'] = args.rlib_frameworks
+    result['bindgen_tools_file_sha256'] = bindgen_tools_hash
+    result['bindgen_tools'] = selected_bindgen_tools
     assert result['snapshot_rust_and_manifest_hashes'] == original_input_hashes, 'Snapshot does not match original inputs'
+    result["minimum_free_space_gib"] = args.min_free_gib
     output = Path(args.output)
     output.parent.mkdir(parents=True, exist_ok=True)
 
     def save():
-        output.write_text(json.dumps(result, indent=2) + "\n")
+        save_report(output, result)
 
     def nano_events():
         return collections.Counter((cache / "events").read_text().splitlines()) if (cache / "events").exists() else collections.Counter()
@@ -180,6 +196,8 @@ def main():
 
     def build(implementation, phase):
         shutil.rmtree(target, ignore_errors=True)
+        require_space(state, args.min_free_gib)
+        require_space(output.parent, min(args.min_free_gib, 1))
         before = nano_events() if implementation == "nanocompile" else kache_events() if implementation == "kache" else collections.Counter()
         build_env = dict(env)
         if implementation != "direct":
@@ -366,7 +384,7 @@ def main():
     except BaseException as error:
         result["completed"]=False
         result["failure"]={"type":type(error).__name__,"message":str(error)}
-        save()
+        save_failure(output, result)
         raise
     finally:
         stop_daemon()
