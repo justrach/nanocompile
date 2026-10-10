@@ -41,6 +41,7 @@ jobs:
           python3 tests/producer_placement.py --output bench-results/producer-placement.json --observer zig-out/bin/nanocompile
       - name: Build and real compiler tests
         run: |
+          python3 tests/reference_artifacts_check.py
           python3 tests/build_trace_capture.py
           python3 tests/r2_transport.py
           zig build -Doptimize=ReleaseFast

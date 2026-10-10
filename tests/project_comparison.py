@@ -14,6 +14,7 @@ import subprocess
 import time
 import sys
 from project_artifacts import compiled_scripts
+from reference_artifacts import retain
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
 from build_trace import Capture
@@ -42,6 +43,7 @@ def main():
     p.add_argument("--bin", help="build this package binary instead of its library; validate the final executable too")
     p.add_argument("--probe-help", action="store_true", help="verify the selected binary's --help outside build timing")
     p.add_argument("--source-date-epoch", type=int, help="explicit reproducible build timestamp shared by every implementation")
+    p.add_argument("--retain-artifacts", action="store_true", help="keep private first-build artifact bytes for later mismatch diagnosis; excluded from timing")
     p.add_argument("--state", required=True, help="new, dedicated benchmark directory")
     p.add_argument("--output", required=True)
     p.add_argument("--runs", type=int, default=3)
@@ -128,6 +130,7 @@ def main():
     result['source_date_epoch'] = env.get('SOURCE_DATE_EPOCH')
     result['binary_target'] = args.bin
     result['cli_help_probe'] = args.probe_help
+    result['reference_artifacts_retained'] = args.retain_artifacts
     tracked = subprocess.check_output(['git', 'ls-files', '-z'], cwd=project).decode().split('\0')
     result['tracked_rust_and_manifest_hashes'] = {
         name: sha(project / name) for name in tracked
@@ -222,6 +225,10 @@ def main():
         if capture:
             capture.finish(row, target, origin_ns, event_path, event_offset, log_path)
         if implementation not in references:
+            if args.retain_artifacts:
+                manifest = retain(target, state / 'reference-artifacts' / implementation,
+                                  {**artifacts, **macros, **executables, **native, **final_artifacts})
+                row['reference_manifest'] = str(manifest.relative_to(state))
             references[implementation] = artifacts
             macro_references[implementation] = macros
             executable_references[implementation] = executables
