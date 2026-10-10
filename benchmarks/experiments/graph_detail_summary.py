@@ -44,8 +44,13 @@ def main():
               'aggregate_seconds': {key.removesuffix('_ns'): value/1e9 for key,value in times.items()},
               'largest_collects': [{**row, 'parent_crate': parents[row['parent_key']]['crate'], 'parent_mode': parents[row['parent_key']]['mode']} for row in ranked[:10]],
               'records': rows}
+    if all(row.get('decoder_identity') for row in rows):
+        report['decoder_identity_count'] = len({row['decoder_identity'] for row in rows})
     args.output.write_text(json.dumps(report, indent=2)+'\n')
-    print(json.dumps({key: report[key] for key in ('collect_calls', 'parent_jobs', 'compiler_identity_count', 'counts', 'aggregate_seconds', 'largest_collects')}, indent=2))
+    summary = {key: report[key] for key in ('collect_calls', 'parent_jobs', 'compiler_identity_count', 'counts', 'aggregate_seconds', 'largest_collects')}
+    if 'decoder_identity_count' in report:
+        summary['decoder_identity_count'] = report['decoder_identity_count']
+    print(json.dumps(summary, indent=2))
 
 
 if __name__ == '__main__':

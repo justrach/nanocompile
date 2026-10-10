@@ -1,0 +1,27 @@
+{
+  "base_revision": "3d4dc68",
+  "binary_sha256": "413c2203389ccf9984095585fce7a74673072afb507a99b2dc5df9240ccf9502",
+  "checks": [
+    {
+      "name": "unit",
+      "command": [
+        "zig",
+        "build",
+        "test"
+      ],
+      "miss_profile": false,
+      "passed": true
+    },
+    {
+      "name": "integration",
+      "command": [
+        "zig",
+        "build",
+        "integration",
+        "-Doptimize=ReleaseFast"
+      ],
+      "miss_profile": true,
+      "passed": true
+    }
+  ]
+}

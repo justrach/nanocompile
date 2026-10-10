@@ -1487,3 +1487,21 @@ pass, while macOS CI is queued at publication.
 [Method and limits](../docs/decoder-nine-samples.md);
 [raw comparison](harness-decoder-nine-samples.json);
 [all-sample analysis](harness-decoder-nine-analysis.json).
+
+## Decoder graph follow-up: remaining selector partition
+
+A new isolated profile records 264 resolver queries, down from 2,885 in the
+prior capture, with unchanged inspection, memory-hit and fresh/reused digest
+counts. There are 143 complete compilation identities and six decoder
+identities. The final Harness collector still launches 114 readers taking
+1.518778 s, because its present selector file partitions classification reuse.
+All six decoder groups have identical remaining existing stamp lists after
+explicitly excluding the recorded selector files in diagnostic grouping.
+This motivates testing actual selected compiler/resource scope while
+preserving all selection, content and directory guards. No new production
+optimization is adopted in this diagnostic turn. All four builds match 193
+artifacts; three warm restores retain 167 Rust/24 native hits, and tracked
+sources stay unchanged. Unit and profiling-enabled Rust/Zig integration pass.
+[Method and next candidate requirements](../docs/decoder-graph-profile.md);
+[graph records](harness-decoder-graph-profile.json);
+[identity analysis](harness-decoder-graph-identities.json).
