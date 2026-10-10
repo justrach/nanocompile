@@ -1,0 +1,81 @@
+{
+  "measured_revision": "a193bff79044a3d2b3957c5b2c99f0641aa6d776",
+  "raw_file": "harness-rmeta-direct-nine-samples.json",
+  "raw_sha256": "57b2ccc6e5a6bba92ced0edf33942ba9f01a5b70bfb3f6778e5203ef14708553",
+  "binary_sha256": "0bc634b775e255682d282656375ae53713343ed5524e78a4e15b19df2c166fee",
+  "script_sha256": "cccb356df988baecca4132464674026f4da2beb4c589a24ffc03bc0c9b90a50e",
+  "summary": {
+    "direct": {
+      "samples_seconds": [
+        23.20867654099129,
+        23.22447591595119,
+        24.255573750007898,
+        23.029810458014254,
+        24.084064542024862,
+        23.420442791015375,
+        23.02177579200361,
+        23.85691712499829,
+        24.342295208014548
+      ],
+      "median_seconds": 23.420442791015375,
+      "mean_seconds": 23.60489245811348,
+      "min_seconds": 23.02177579200361,
+      "max_seconds": 24.342295208014548,
+      "stdev_seconds": 0.5322993881805299
+    },
+    "nanocompile": {
+      "samples_seconds": [
+        2.042355499987025,
+        2.02450299996417,
+        1.9758415840333328,
+        2.00702016701689,
+        2.070009665971156,
+        2.0039615420391783,
+        1.9593235409702174,
+        2.0709782909834757,
+        1.9850780830020085
+      ],
+      "median_seconds": 2.00702016701689,
+      "mean_seconds": 2.015452374885273,
+      "min_seconds": 1.9593235409702174,
+      "max_seconds": 2.0709782909834757,
+      "stdev_seconds": 0.03985993767047939
+    },
+    "kache": {
+      "samples_seconds": [
+        2.223529209033586,
+        2.3688035419909284,
+        2.1423669579671696,
+        2.2872581249685027,
+        2.112371625029482,
+        2.269442207994871,
+        2.3383067920221947,
+        2.201190957974177,
+        2.65456441603601
+      ],
+      "median_seconds": 2.269442207994871,
+      "mean_seconds": 2.2886482036685467,
+      "min_seconds": 2.112371625029482,
+      "max_seconds": 2.65456441603601,
+      "stdev_seconds": 0.16105791622432242
+    }
+  },
+  "same_round_nano_minus_kache": {
+    "method": "Descriptive differences within each rotating round. Samples share one host/session and are not independent machine trials; standard error is descriptive, not a general winner test.",
+    "samples_seconds": [
+      -0.18117370904656127,
+      -0.3443005420267582,
+      -0.16652537393383682,
+      -0.28023795795161277,
+      -0.04236195905832574,
+      -0.26548066595569253,
+      -0.3789832510519773,
+      -0.1302126669907011,
+      -0.6694863330340013
+    ],
+    "nano_faster_rounds": 9,
+    "median_seconds": -0.26548066595569253,
+    "mean_seconds": -0.2731958287832741,
+    "descriptive_standard_error_seconds": 0.06089349245274828
+  }
+}

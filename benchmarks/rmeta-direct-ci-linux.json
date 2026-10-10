@@ -1,0 +1,29 @@
+{
+  "binary_sha256": "81af4c65eeb5c7283773ed2ac7cab44d581277ed1f1eaffb6122705821353505",
+  "script_sha256": "6a649578db0b816484733c808578ed310b7c78057cbcbf11866ee0bb28d0c3bb",
+  "rustc": "rustc 1.97.1 (8bab26f4f 2026-07-14)\nbinary: rustc\ncommit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452\ncommit-date: 2026-07-14\nhost: x86_64-unknown-linux-gnu\nrelease: 1.97.1\nLLVM version: 22.1.6\n",
+  "fixtures": [
+    {
+      "fixture": "libleaf_fixture-direct_fixture.rmeta",
+      "dependencies": 2,
+      "macros_only": 0
+    },
+    {
+      "fixture": "libconsumer_fixture.rmeta",
+      "dependencies": 20,
+      "macros_only": 0
+    },
+    {
+      "fixture": "libmacro_consumer_fixture.rmeta",
+      "dependencies": 20,
+      "macros_only": 1
+    }
+  ],
+  "checks": [
+    "no_std root and extra filename match rustc",
+    "transitive dependency graph matches rustc",
+    "MacrosOnly dependency matches rustc",
+    "proc-macro producer metadata refuses",
+    "malformed and unknown-version records refuse"
+  ]
+}
