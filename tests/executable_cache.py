@@ -187,7 +187,10 @@ def main():
         if args.thin_lto:
             assert b'bypass: UnsupportedProducerConfiguration' in run([str(binary), *rust, '-C', 'lto=fat']).stderr
             macro_env = dict(env, NANOCOMPILE_PROC_MACRO_PRODUCERS='1')
-            macro_command = [*rust, '--crate-type=proc-macro']
+            # Exercise the single proc-macro producer configuration. Appending
+            # another type to a bin command instead tests mixed-output refusal.
+            macro_command = list(rust)
+            macro_command[macro_command.index('--crate-type') + 1] = 'proc-macro'
             macro_direct = subprocess.run(macro_command, cwd=root, env=macro_env, capture_output=True, timeout=180)
             macro_guarded = subprocess.run([str(binary), *macro_command], cwd=root, env=macro_env, capture_output=True, timeout=180)
             assert b'bypass: UnsupportedProducerConfiguration' in macro_guarded.stderr
