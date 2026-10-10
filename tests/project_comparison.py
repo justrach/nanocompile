@@ -2,6 +2,7 @@
 import argparse
 import collections
 import datetime
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -38,6 +39,8 @@ def main():
     p.add_argument("project")
     p.add_argument("--kache", required=True)
     p.add_argument("--package", default="harness-adapters")
+    p.add_argument("--bin", help="build this package binary instead of its library; validate the final executable too")
+    p.add_argument("--probe-help", action="store_true", help="verify the selected binary's --help outside build timing")
     p.add_argument("--state", required=True, help="new, dedicated benchmark directory")
     p.add_argument("--output", required=True)
     p.add_argument("--runs", type=int, default=3)
@@ -60,6 +63,8 @@ def main():
     p.add_argument('--no-compiler-stream', action='store_true', help='disable default Rust stream forwarding')
     p.add_argument('--no-pipelined-companions', action='store_true', help='disable default guarded companion membership')
     args = p.parse_args()
+    if args.probe_help and not args.bin:
+        p.error('--probe-help requires --bin')
     if (args.compiler_stream and args.no_compiler_stream) or (args.pipelined_companions and args.no_pipelined_companions):
         p.error('choose either enable or disable for each compiler control')
     if args.native_clang and args.portable_cc:
@@ -101,7 +106,8 @@ def main():
         env["NANOCOMPILE_PROC_MACRO_PRODUCERS"] = "1"
     if args.executable_producers:
         env["NANOCOMPILE_EXECUTABLE_PRODUCERS"] = "1"
-    command = ["cargo", "build", "--release", "--locked", "--offline", "--lib",
+    target_options = ["--bin", args.bin] if args.bin else ["--lib"]
+    command = ["cargo", "build", "--release", "--locked", "--offline", *target_options,
                "-p", args.package, "-j", str(args.jobs), "--message-format=json-render-diagnostics"]
     if capture:
         command += ["--timings", "-vv"]
@@ -142,6 +148,7 @@ def main():
     executable_references = {}
     compiled_script_references = {}
     native_references = {}
+    final_references = {}
 
     def build(implementation, phase):
         shutil.rmtree(target, ignore_errors=True)
@@ -191,9 +198,19 @@ def main():
         compiled_executables = compiled_scripts(target)
         native = {str(path.relative_to(target)): sha(path) for path in sorted(target.rglob('*'))
                   if path.is_file() and path.suffix in ('.o', '.a')} if (args.native_clang or args.portable_cc or args.native_artifacts) else {}
+        final_path = target / 'release' / (args.bin + ('.exe' if os.name == 'nt' else '')) if args.bin else None
+        final_artifacts = {str(final_path.relative_to(target)): sha(final_path)} if final_path and final_path.is_file() else {}
         row = {"native_objects_and_archives": native, "implementation": implementation, "phase": phase, "seconds": seconds,
                "exit_code": proc.returncode, "events": dict(after - before), "rlibs": len(artifacts), "artifacts": artifacts,
                "peak_sampled_process_tree_rss_bytes": peak, "macro_dylibs": macros, "build_script_executables": executables, "compiled_build_script_executables": compiled_executables}
+        if args.bin:
+            row['final_executable_artifacts'] = final_artifacts
+            if proc.returncode == 0 and args.probe_help:
+                help_result = subprocess.run([str(final_path), '--help'], env=env, capture_output=True, timeout=30)
+                row['cli_help_exit_code'] = help_result.returncode
+                row['cli_help_sha256'] = hashlib.sha256(help_result.stdout).hexdigest()
+                if help_result.returncode or b'Usage:' not in help_result.stdout:
+                    raise RuntimeError('Final executable failed explicit --help probe')
         if capture:
             capture.finish(row, target, origin_ns, event_path, event_offset, log_path)
         if implementation not in references:
@@ -202,11 +219,14 @@ def main():
             executable_references[implementation] = executables
             compiled_script_references[implementation] = compiled_executables
             native_references[implementation] = native
+            final_references[implementation] = final_artifacts
         else:
             row["matches_own_cold_native_artifacts"] = native_references[implementation] == native
             row["matches_own_cold_artifacts"] = references[implementation] == artifacts
             row["matches_own_cold_macro_dylibs"] = macro_references[implementation] == macros
             row["matches_own_cold_build_script_executables"] = executable_references[implementation] == executables
+            if args.bin:
+                row['matches_own_cold_final_executable'] = final_references[implementation] == final_artifacts
         if implementation == "nanocompile" and not (args.native_clang or args.portable_cc or args.native_artifacts):
             row["matches_direct_artifacts"] = artifacts == references.get("direct")
             row["matches_direct_macro_dylibs"] = macros == macro_references.get("direct")
@@ -214,9 +234,9 @@ def main():
         result["builds"].append(row)
         save()
         print(json.dumps({k: v for k, v in row.items() if k not in ("artifacts", "macro_dylibs", "build_script_executables", "native_objects_and_archives", "compiled_build_script_executables", "trace")}), flush=True)
-        if proc.returncode or not artifacts:
+        if proc.returncode or not artifacts or (args.bin and not final_artifacts):
             raise RuntimeError(f"Build failed or produced no libraries; see {log_path}")
-        if any(row.get(check) is False for check in ("matches_own_cold_native_artifacts", "matches_own_cold_artifacts", "matches_direct_artifacts", "matches_own_cold_macro_dylibs", "matches_direct_macro_dylibs", "matches_own_cold_build_script_executables", "matches_direct_build_script_executables")):
+        if any(row.get(check) is False for check in ("matches_own_cold_final_executable", "matches_own_cold_native_artifacts", "matches_own_cold_artifacts", "matches_direct_artifacts", "matches_own_cold_macro_dylibs", "matches_direct_macro_dylibs", "matches_own_cold_build_script_executables", "matches_direct_build_script_executables")):
             raise RuntimeError(f"Artifact validation failed; see {log_path}")
         if phase == "warm" and implementation == "nanocompile" and args.native_clang:
             if (row['events'].get('clang_native_hit', 0) < 20 and not row['events'].get('build_script_hit',0)) or row['events'].get('hit', 0) < 165:

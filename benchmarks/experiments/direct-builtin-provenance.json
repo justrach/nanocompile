@@ -3,5 +3,5 @@
   "candidate_binary_sha256": "eb23be7f672976fdb0da49fe158ad9f7f0ae0fdfbf6234c6683f1ec6339c2353",
   "patch_sha256": "9f65158b6b98835ce688d3698906db9bbe0b72b64fc0bb49bbcd14a8ec93aaa2",
   "production_changed": false,
-  "status": "experimental; confirmation pending"
+  "status": "not promoted: ten whole-Harness adapters pairs do not establish dependable additional build gain"
 }
