@@ -1,0 +1,443 @@
+diff --git a/src/cache.zig b/src/cache.zig
+index 2c2246a..8249a52 100644
+--- a/src/cache.zig
++++ b/src/cache.zig
+@@ -539,15 +539,19 @@ pub fn restoreVariants(ctx: *Context, key: []const u8, allowed_outputs: []const
+     return false;
+ }
+ 
+-pub fn restore(ctx: *Context, key: []const u8, allowed_outputs: []const []const u8) !bool {
+-    const bytes = ctx.read(try ctx.path(&.{ "entries", key })) catch return false;
+-    const entry = parseEntry(ctx, bytes) catch return false;
+-    if (entry.artifact != null or entry.schema != entry_schema or entry.outputs.len != allowed_outputs.len) return false;
++pub const RestoredStreams = struct { stdout: []const u8, stderr: []const u8 };
++
++// Validate against original destinations, then materialize into caller-owned staging paths.
++pub fn restoreStaged(ctx: *Context, key: []const u8, allowed_outputs: []const []const u8, destinations: []const []const u8) !?RestoredStreams {
++    if (destinations.len != allowed_outputs.len) return error.InvalidDestinations;
++    const bytes = ctx.read(try ctx.path(&.{ "entries", key })) catch return null;
++    const entry = parseEntry(ctx, bytes) catch return null;
++    if (entry.artifact != null or entry.schema != entry_schema or entry.outputs.len != allowed_outputs.len) return null;
+     // One crate graph can record many prefixes in the same Cargo directory,
+     // and explicit externs can also appear in the transitive graph. Reuse the
+     // enumeration and content hashes only within this restore. No metadata
+     // shortcut survives a compiler invocation or a before/after input check.
+-    for (entry.outputs, allowed_outputs) |output, allowed| if (!std.mem.eql(u8, output.path, allowed)) return false;
++    for (entry.outputs, allowed_outputs) |output, allowed| if (!std.mem.eql(u8, output.path, allowed)) return null;
+     var output_check: OutputCheck = .{ .entry = &entry };
+     var output_group: std.Io.Group = .init;
+     defer output_group.cancel(ctx.io);
+@@ -555,7 +559,7 @@ pub fn restore(ctx: *Context, key: []const u8, allowed_outputs: []const []const
+         if (entry.dependencies.len < 32) break :blk false;
+         var size: u64 = 0;
+         for (entry.outputs) |output| {
+-            const st = Dir.cwd().statFile(ctx.io, try blobPath(ctx, output.hash), .{}) catch return false;
++            const st = Dir.cwd().statFile(ctx.io, try blobPath(ctx, output.hash), .{}) catch return null;
+             size +|= st.size;
+         }
+         if (size < 1024 * 1024) break :blk false;
+@@ -566,58 +570,63 @@ pub fn restore(ctx: *Context, key: []const u8, allowed_outputs: []const []const
+     defer library_names.deinit(ctx.a);
+     var file_hashes: std.StringHashMapUnmanaged([]const u8) = .empty;
+     defer file_hashes.deinit(ctx.a);
+-    if (!try parallelFileHashes(ctx, entry.dependencies, &file_hashes)) return false;
++    if (!try parallelFileHashes(ctx, entry.dependencies, &file_hashes)) return null;
+     for (entry.dependencies) |dep| {
+         if (dep.symlink_target != null) {
+-            if (!(symlinkValid(ctx, dep) catch false)) return false;
++            if (!(symlinkValid(ctx, dep) catch false)) return null;
+             continue;
+         }
+         if (dep.missing != null) {
+             if (!(missingValid(ctx, dep) catch false)) {
+                 ctx.trace("miss: negative lookup changed or unavailable");
+-                return false;
++                return null;
+             }
+             continue;
+         }
+         const hash = if (dep.library_prefix) |prefix| blk: {
+             const slot = try library_names.getOrPut(ctx.a, dep.path);
+-            if (!slot.found_existing) slot.value_ptr.* = ctx.libraryNames(dep.path, allowed_outputs) catch return false;
++            if (!slot.found_existing) slot.value_ptr.* = ctx.libraryNames(dep.path, allowed_outputs) catch return null;
+             break :blk try prefixDigest(ctx.a, slot.value_ptr.*, prefix);
+         } else if (dep.all_members)
+-            ctx.nativeDirectoryDigest(dep.path) catch return false
++            ctx.nativeDirectoryDigest(dep.path) catch return null
+         else if (dep.directory)
+-            ctx.directoryDigest(dep.path, dep.libraries, allowed_outputs) catch return false
++            ctx.directoryDigest(dep.path, dep.libraries, allowed_outputs) catch return null
+         else blk: {
+             const slot = try file_hashes.getOrPut(ctx.a, dep.path);
+-            if (!slot.found_existing) slot.value_ptr.* = ctx.digest(dep.path) catch return false;
++            if (!slot.found_existing) slot.value_ptr.* = ctx.digest(dep.path) catch return null;
+             break :blk slot.value_ptr.*;
+         };
+         if (!std.mem.eql(u8, hash, dep.hash)) {
+             ctx.trace("miss: dependency content changed");
+-            return false;
++            return null;
+         }
+     }
+     // Validate every blob and destination before writing any output.
+     if (overlap) {
+         try output_group.await(ctx.io);
+-        if (!output_check.valid) return false;
++        if (!output_check.valid) return null;
+     } else {
+         for (entry.outputs) |output| {
+-            const hash = ctx.digest(try blobPath(ctx, output.hash)) catch return false;
+-            if (!std.mem.eql(u8, hash, output.hash)) return false;
++            const hash = ctx.digest(try blobPath(ctx, output.hash)) catch return null;
++            if (!std.mem.eql(u8, hash, output.hash)) return null;
+         }
+     }
+-    const stdout = ctx.read(try blobPath(ctx, entry.stdout)) catch return false;
+-    const stderr = ctx.read(try blobPath(ctx, entry.stderr)) catch return false;
++    const stdout = ctx.read(try blobPath(ctx, entry.stdout)) catch return null;
++    const stderr = ctx.read(try blobPath(ctx, entry.stderr)) catch return null;
+     var h = Hash.init(.{});
+     h.update(stdout);
+-    if (!std.mem.eql(u8, try finish(ctx.a, &h), entry.stdout)) return false;
++    if (!std.mem.eql(u8, try finish(ctx.a, &h), entry.stdout)) return null;
+     h = Hash.init(.{});
+     h.update(stderr);
+-    if (!std.mem.eql(u8, try finish(ctx.a, &h), entry.stderr)) return false;
+-    for (entry.outputs) |output| try materialize(ctx, try blobPath(ctx, output.hash), output.path, output.mode);
+-    try ctx.out(stdout);
+-    try std.Io.File.stderr().writeStreamingAll(ctx.io, stderr);
++    if (!std.mem.eql(u8, try finish(ctx.a, &h), entry.stderr)) return null;
++    for (entry.outputs, destinations) |output, destination| try materialize(ctx, try blobPath(ctx, output.hash), destination, output.mode);
++    return .{ .stdout = stdout, .stderr = stderr };
++}
++
++pub fn restore(ctx: *Context, key: []const u8, allowed_outputs: []const []const u8) !bool {
++    const streams = (try restoreStaged(ctx, key, allowed_outputs, allowed_outputs)) orelse return false;
++    try ctx.out(streams.stdout);
++    try std.Io.File.stderr().writeStreamingAll(ctx.io, streams.stderr);
+     return true;
+ }
+ 
+diff --git a/src/identity.zig b/src/identity.zig
+index 3424015..7ba7fd6 100644
+--- a/src/identity.zig
++++ b/src/identity.zig
+@@ -489,3 +489,86 @@ test "parallel installed stamp validation rejects edits and missing files" {
+     try tmp.dir.deleteFile(io, "resource");
+     try std.testing.expect(!validStamps(&ctx, stamps, true));
+ }
++
++// Trusted installed directories use content fingerprints plus complete stamps.
++// Mutable project trees must never use this memo.
++const InstalledLink = struct { path: []const u8, resolved: []const u8, inode: u64, mtime: i96, ctime: i96 };
++fn installedLink(ctx: *cache.Context, path: []const u8) !InstalledLink {
++    const st = try Dir.cwd().statFile(ctx.io, path, .{ .follow_symlinks = false });
++    if (st.kind != .sym_link) return error.LinkChanged;
++    return .{ .path = path, .resolved = try Dir.cwd().realPathFileAlloc(ctx.io, path, ctx.a), .inode = @intCast(st.inode), .mtime = st.mtime.nanoseconds, .ctime = st.ctime.nanoseconds };
++}
++fn validLinks(ctx: *cache.Context, links: []const InstalledLink) bool {
++    for (links) |expected| {
++        const current = installedLink(ctx, expected.path) catch return false;
++        if (current.inode != expected.inode or current.mtime != expected.mtime or current.ctime != expected.ctime or !std.mem.eql(u8, current.resolved, expected.resolved)) return false;
++    }
++    return true;
++}
++fn installedGraph(ctx: *cache.Context, stamps: *std.ArrayList(Stamp), links: *std.ArrayList(InstalledLink), seen: *std.StringHashMap(void), path: []const u8) !void {
++    if (seen.contains(path)) return;
++    if (seen.count() >= 100000) return error.TooManyInstalledInputs;
++    try seen.put(path, {});
++    const st = try Dir.cwd().statFile(ctx.io, path, .{ .follow_symlinks = false });
++    if (st.kind == .sym_link) {
++        const link = try installedLink(ctx, path);
++        try links.append(ctx.a, link);
++        return installedGraph(ctx, stamps, links, seen, link.resolved);
++    }
++    if (st.kind != .file and st.kind != .directory) return error.UnsupportedInstalledInput;
++    try stamps.append(ctx.a, try stamp(ctx, path));
++    if (st.kind == .directory) {
++        var dir = try Dir.cwd().openDir(ctx.io, path, .{ .iterate = true });
++        defer dir.close(ctx.io);
++        var it = dir.iterate();
++        while (try it.next(ctx.io)) |entry| try installedGraph(ctx, stamps, links, seen, try std.fs.path.join(ctx.a, &.{ path, entry.name }));
++    }
++}
++pub fn installedTreeDigest(ctx: *cache.Context, root: []const u8) ![]const u8 {
++    const TreeMemo = struct { schema: u32 = 2, hash: []const u8, stamps: []const Stamp, links: []const InstalledLink };
++    const canonical = try Dir.cwd().realPathFileAlloc(ctx.io, root, ctx.a);
++    var h = cache.Hash.init(.{});
++    cache.field(&h, "installed-script-tree-v2");
++    cache.field(&h, canonical);
++    const key = try cache.finish(ctx.a, &h);
++    const path = try ctx.path(&.{ "script-tools", key });
++    const lock = try cache.Lock.acquire(ctx, try std.fmt.allocPrint(ctx.a, "script-tool-{s}", .{key}), true);
++    defer lock.release();
++    if (ctx.read(path)) |bytes| memo: {
++        const payload = cache.unseal(ctx, bytes) catch break :memo;
++        const parsed = std.json.parseFromSlice(TreeMemo, ctx.a, payload, .{ .allocate = .alloc_always }) catch break :memo;
++        if (parsed.value.schema == 2 and cache.validHash(parsed.value.hash) and parsed.value.stamps.len > 0 and validLinks(ctx, parsed.value.links) and validStamps(ctx, parsed.value.stamps, false)) return parsed.value.hash;
++    } else |_| {}
++    var stamps: std.ArrayList(Stamp) = .empty;
++    var links: std.ArrayList(InstalledLink) = .empty;
++    var seen = std.StringHashMap(void).init(ctx.a);
++    defer seen.deinit();
++    try installedGraph(ctx, &stamps, &links, &seen, canonical);
++    std.mem.sort(Stamp, stamps.items, {}, struct {
++        fn less(_: void, a: Stamp, b: Stamp) bool {
++            return std.mem.order(u8, a.path, b.path) == .lt;
++        }
++    }.less);
++    std.mem.sort(InstalledLink, links.items, {}, struct {
++        fn less(_: void, a: InstalledLink, b: InstalledLink) bool {
++            return std.mem.order(u8, a.path, b.path) == .lt;
++        }
++    }.less);
++    h = cache.Hash.init(.{});
++    for (links.items) |link| {
++        cache.field(&h, link.path);
++        cache.field(&h, link.resolved);
++    }
++    for (stamps.items) |st| {
++        cache.field(&h, st.path);
++        cache.field(&h, @tagName(st.kind));
++        // The whole-tree record already preserves every trusted-installation
++        // stamp. Hash every initial byte directly; thousands of independent
++        // file locks and persistent records add no validation to this record.
++        if (st.kind == .file) cache.field(&h, try ctx.digest(st.path));
++    }
++    if (!validLinks(ctx, links.items) or !validStamps(ctx, stamps.items, false)) return error.ToolchainChanged;
++    const digest = try cache.finish(ctx.a, &h);
++    try ctx.atomic(path, try cache.seal(ctx, try std.json.Stringify.valueAlloc(ctx.a, TreeMemo{ .hash = digest, .stamps = stamps.items, .links = links.items }, .{})));
++    return digest;
++}
+diff --git a/src/main.zig b/src/main.zig
+index cf90fa0..c57a8b4 100644
+--- a/src/main.zig
++++ b/src/main.zig
+@@ -54,6 +54,7 @@ pub fn main(init: std.process.Init) void {
+ }
+ 
+ fn dispatch(ctx: *cache.Context, args: []const [:0]const u8) !u8 {
++    if (try @import("build_script.zig").launch(ctx, args)) |code| return code;
+     if (args.len != 0 and std.mem.eql(u8, std.fs.path.basename(args[0]), "nanocompile-internal-linker")) {
+         if (!std.fs.path.isAbsolute(args[0])) return error.InvalidLinkObserver;
+         const config = try std.fs.path.join(ctx.a, &.{ std.fs.path.dirname(args[0]) orelse return error.InvalidLinkObserver, "observer.json" });
+@@ -72,6 +73,28 @@ fn dispatch(ctx: *cache.Context, args: []const [:0]const u8) !u8 {
+         try ctx.out("\n");
+         return 0;
+     }
++    if (std.mem.eql(u8, command, "internal-rust-identity")) {
++        if (args.len != 3) return error.InvalidRustIdentity;
++        try ctx.prepare();
++        const maintenance = try cache.Lock.acquire(ctx, "maintenance", false);
++        defer maintenance.release();
++        const start = std.Io.Clock.awake.now(ctx.io).nanoseconds;
++        const hash = try @import("identity.zig").fingerprint(ctx, false, args[2]);
++        const elapsed = std.Io.Clock.awake.now(ctx.io).nanoseconds - start;
++        try ctx.out(try std.fmt.allocPrint(ctx.a, "{{\"hash\":\"{s}\",\"elapsed_ns\":{d}}}\n", .{ hash, elapsed }));
++        return 0;
++    }
++    if (std.mem.eql(u8, command, "internal-installed-tree")) {
++        if (args.len != 3) return error.InvalidInstalledTree;
++        try ctx.prepare();
++        const maintenance = try cache.Lock.acquire(ctx, "maintenance", false);
++        defer maintenance.release();
++        const start = std.Io.Clock.awake.now(ctx.io).nanoseconds;
++        const hash = try @import("identity.zig").installedTreeDigest(ctx, args[2]);
++        const elapsed = std.Io.Clock.awake.now(ctx.io).nanoseconds - start;
++        try ctx.out(try std.fmt.allocPrint(ctx.a, "{{\"hash\":\"{s}\",\"elapsed_ns\":{d}}}\n", .{ hash, elapsed }));
++        return 0;
++    }
+     if (std.mem.eql(u8, command, "internal-native-identity")) {
+         if (args.len != 3) return error.InvalidNativeIdentity;
+         try ctx.prepare();
+@@ -148,6 +171,16 @@ fn dispatch(ctx: *cache.Context, args: []const [:0]const u8) !u8 {
+         try argv.append(ctx.a, command);
+     }
+     for (args[2..]) |arg| try argv.append(ctx.a, arg);
++    if (kind == .rust and @import("build_script.zig").wantsInstall(ctx, argv.items)) {
++        try ctx.prepare();
++        const maintenance = try cache.Lock.acquire(ctx, "maintenance", false);
++        defer maintenance.release();
++        const lock = try cache.Lock.acquire(ctx, try @import("build_script.zig").installLockName(ctx, argv.items), true);
++        defer lock.release();
++        const code = try compiler.execute(ctx, kind, argv.items);
++        if (code == 0) @import("build_script.zig").install(ctx, argv.items) catch |err| ctx.trace(@errorName(err));
++        return code;
++    }
+     return compiler.execute(ctx, kind, argv.items);
+ }
+ 
+diff --git a/src/rust_loader.zig b/src/rust_loader.zig
+index d364fab..f4a6171 100644
+--- a/src/rust_loader.zig
++++ b/src/rust_loader.zig
+@@ -29,9 +29,9 @@ fn header(ctx: *cache.Context, path: []const u8) ![]const u8 {
+     try reader.interface.readSliceAll(result[32..]);
+     return result;
+ }
+-fn loads(bytes: []const u8, executable: bool) !?[]const u8 {
++fn loads(bytes: []const u8, executable: bool, system_tool: bool) !?[]const u8 {
+     if (bytes.len < 32 or try word(bytes, 0) != 0xfeedfacf) return error.InvalidMachO;
+-    if (try word(bytes, 12) != (if (executable) @as(u32, 2) else @as(u32, 6))) return error.InvalidMachO;
++    if (try word(bytes, 12) != (if (executable or system_tool) @as(u32, 2) else @as(u32, 6))) return error.InvalidMachO;
+     const count = try word(bytes, 16);
+     const size = try word(bytes, 20);
+     if (size != bytes.len - 32) return error.InvalidMachO;
+@@ -51,11 +51,12 @@ fn loads(bytes: []const u8, executable: bool) !?[]const u8 {
+                 const value = try string(command, name_offset);
+                 if (std.mem.startsWith(u8, value, "/usr/lib/") or std.mem.startsWith(u8, value, "/System/Library/")) {
+                     if (std.mem.indexOf(u8, value, "/../") != null) return error.InvalidMachO;
+-                } else if (executable and driver == null and std.mem.startsWith(u8, value, "@rpath/librustc_driver-") and std.mem.endsWith(u8, value, ".dylib") and std.mem.indexOfScalar(u8, value[7..], '/') == null) {
++                } else if (executable and !system_tool and driver == null and std.mem.startsWith(u8, value, "@rpath/librustc_driver-") and std.mem.endsWith(u8, value, ".dylib") and std.mem.indexOfScalar(u8, value[7..], '/') == null) {
+                     driver = value[7..];
+                 } else return error.UnprovenLoadPath;
+             },
+             0x8000001c => {
++                if (system_tool) return error.UnprovenLoadPath;
+                 const name_offset = try word(command, 8);
+                 if (name_offset < 12) return error.InvalidMachO;
+                 if (!std.mem.eql(u8, try string(command, name_offset), "@loader_path/../lib")) return error.UnprovenLoadPath;
+@@ -66,7 +67,7 @@ fn loads(bytes: []const u8, executable: bool) !?[]const u8 {
+         }
+         offset += length;
+     }
+-    if (offset != bytes.len or rpaths > 1 or (executable and (rpaths != 1 or driver == null))) return error.UnprovenLoadPath;
++    if (offset != bytes.len or rpaths > 1 or (executable and !system_tool and (rpaths != 1 or driver == null))) return error.UnprovenLoadPath;
+     return driver;
+ }
+ 
+@@ -78,21 +79,33 @@ pub fn allowsFallback(ctx: *cache.Context, compiler: []const u8, sysroot: []cons
+     }
+     const installed = try std.fs.path.join(ctx.a, &.{ sysroot, "bin", "rustc" });
+     if (!std.mem.eql(u8, compiler, installed)) return false;
+-    const driver = (try loads(try header(ctx, compiler), true)) orelse return false;
++    const driver = (try loads(try header(ctx, compiler), true, false)) orelse return false;
+     const path = try std.fs.path.join(ctx.a, &.{ sysroot, "lib", driver });
+     // The matching file is part of rustResources' ordinary content fingerprint
+     // and stamp revalidation. External symlinked implementations do not qualify.
+     if (!std.mem.eql(u8, path, try Dir.cwd().realPathFileAlloc(ctx.io, path, ctx.a))) return false;
+-    _ = try loads(try header(ctx, path), false);
++    _ = try loads(try header(ctx, path), false, false);
+     return true;
+ }
+ 
+ test "malformed and unsupported loader headers refuse reuse" {
+-    try std.testing.expectError(error.InvalidMachO, loads("short", true));
++    try std.testing.expectError(error.InvalidMachO, loads("short", true, false));
+     var header_bytes: [32]u8 = @splat(0);
+     std.mem.writeInt(u32, header_bytes[0..4], 0xfeedfacf, .little);
+     std.mem.writeInt(u32, header_bytes[12..16], 2, .little);
+-    try std.testing.expectError(error.UnprovenLoadPath, loads(&header_bytes, true));
++    try std.testing.expectError(error.UnprovenLoadPath, loads(&header_bytes, true, false));
+     header_bytes[0] = 0;
+-    try std.testing.expectError(error.InvalidMachO, loads(&header_bytes, true));
++    try std.testing.expectError(error.InvalidMachO, loads(&header_bytes, true, false));
++}
++
++/// Selected helper executables may use only ordinary system startup libraries.
++/// Fallback-path changes cannot select any of these absolute load paths.
++pub fn systemTool(ctx: *cache.Context, path: []const u8) !bool {
++    if (builtin.os.tag != .macos) return false;
++    for (ctx.env.keys()) |name| {
++        if (std.mem.eql(u8, name, "DYLD_FALLBACK_LIBRARY_PATH")) continue;
++        if (std.mem.startsWith(u8, name, "DYLD_") or std.mem.startsWith(u8, name, "LD_")) return false;
++    }
++    _ = try loads(try header(ctx, path), false, true);
++    return true;
+ }
+diff --git a/tests/harness_source_edits.py b/tests/harness_source_edits.py
+index da5d2a5..a99fd9f 100644
+--- a/tests/harness_source_edits.py
++++ b/tests/harness_source_edits.py
+@@ -43,6 +43,7 @@ def main():
+     p.add_argument("--proc-macros", choices=("tracked", "reported"), default="tracked", help="nanocompile proc-macro input policy; reported requires declaring unreported file reads")
+     p.add_argument("--proc-macro-producers", action="store_true", help="enable the experimental macOS producer cache; verify macro dylib artifacts too")
+     p.add_argument("--executable-producers", action="store_true", help="enable experimental macOS executable compilation caching")
++    p.add_argument("--build-script-contract", type=Path)
+     args = p.parse_args()
+     if args.runs < 1 or args.jobs < 1:
+         p.error("runs and jobs must be positive")
+@@ -88,6 +89,8 @@ def main():
+     env.update(CARGO_TARGET_DIR=str(target), CARGO_INCREMENTAL="0", NANOCOMPILE_DIR=str(cache),
+                KACHE_CACHE_DIR=str(kcache), KACHE_CONFIG=str(config), KACHE_HOST_CONFIG="",
+                NANOCOMPILE_PROC_MACROS=args.proc_macros, KACHE_SOCKET_PATH=str(state / "daemon.sock"), KACHE_DAEMON_IDLE_TIMEOUT="600")
++    if args.build_script_contract:
++        env["NANOCOMPILE_BUILD_SCRIPTS_FILE"] = str(args.build_script_contract.resolve())
+     if args.proc_macro_producers:
+         env["NANOCOMPILE_PROC_MACRO_PRODUCERS"] = "1"
+     if args.executable_producers:
+@@ -100,7 +103,7 @@ def main():
+               "rustc": subprocess.check_output(["rustc", "--version", "--verbose"], cwd=project, text=True),
+               "nanocompile_sha256": sha(Path(binary)), "kache_sha256": sha(Path(kache)),
+               "kache_version": subprocess.check_output([kache, "--version"], text=True).strip(),
+-              "kache_daemon": not args.standalone, "native_clang": args.native_clang, "nanocompile_proc_macros": args.proc_macros, "nanocompile_proc_macro_producers": args.proc_macro_producers, "nanocompile_executable_producers": args.executable_producers, "command": command,
++              "build_script_contract_sha256": sha(args.build_script_contract) if args.build_script_contract else None, "kache_daemon": not args.standalone, "native_clang": args.native_clang, "nanocompile_proc_macros": args.proc_macros, "nanocompile_proc_macro_producers": args.proc_macro_producers, "nanocompile_executable_producers": args.executable_producers, "command": command,
+               "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat(), "builds": [],
+               "method": f"disposable tracked/untracked dirty-source snapshot; one cold + leaf/shared/revert sequence; clean target before every build; retained cache timed edits; empty-cache artifact equality reference after each wrapper edit; linked behavior probe; fixed paths and {args.jobs} jobs; no human source edits"}
+     tracked = subprocess.check_output(['git', 'ls-files', '-z'], cwd=project).decode().split('\0')
+diff --git a/tests/project_comparison.py b/tests/project_comparison.py
+index b75c60b..bfd690d 100644
+--- a/tests/project_comparison.py
++++ b/tests/project_comparison.py
+@@ -44,11 +44,13 @@ def main():
+     p.add_argument("--cold-runs", type=int, default=1, help="alternating fresh-cache comparisons; restart private daemon before each pair")
+     p.add_argument("--cold-only", action="store_true", help="skip warm builds")
+     p.add_argument("--native-clang", action="store_true", help="opt Nano into Apple Clang native CAS; validate each mode against its own cold artifacts")
++    p.add_argument("--native-artifacts", action="store_true", help="validate native outputs without changing the native compiler")
+     p.add_argument("--portable-cc", action="store_true", help="opt Nano into portable compile-only C/C++ caching")
+     p.add_argument("--standalone", action="store_true", help="disable kache's daemon for this comparison")
+     p.add_argument("--proc-macros", choices=("tracked", "reported"), default="tracked", help="nanocompile proc-macro input policy; reported requires declaring unreported file reads")
+     p.add_argument("--proc-macro-producers", action="store_true", help="enable the experimental macOS producer cache; verify macro dylib artifacts too")
+     p.add_argument("--executable-producers", action="store_true", help="enable experimental macOS executable compilation caching")
++    p.add_argument("--build-script-contract", type=Path, help="opt Nano into explicit whole build-script execution contracts")
+     p.add_argument("--kache-no-build-scripts", action="store_true", help="diagnostic ablation: disable only kache build-script execution caching")
+     p.add_argument("--trace-builds", action="store_true", help="private full compiler logs and Cargo timings; diagnostic overhead, not a benchmark")
+     args = p.parse_args()
+@@ -70,6 +72,8 @@ def main():
+     env.update(CARGO_TARGET_DIR=str(target), CARGO_INCREMENTAL="0", NANOCOMPILE_DIR=str(cache),
+                KACHE_CACHE_DIR=str(kcache), KACHE_CONFIG=str(config), KACHE_HOST_CONFIG="",
+                NANOCOMPILE_PROC_MACROS=args.proc_macros, KACHE_SOCKET_PATH=str(state / "daemon.sock"), KACHE_DAEMON_IDLE_TIMEOUT="600")
++    if args.build_script_contract:
++        env["NANOCOMPILE_BUILD_SCRIPTS_FILE"] = str(args.build_script_contract.resolve())
+     if args.kache_no_build_scripts:
+         env["KACHE_BUILD_SCRIPT_CACHE"] = "0"
+     if capture:
+@@ -88,7 +92,7 @@ def main():
+               "rustc": subprocess.check_output(["rustc", "--version", "--verbose"], cwd=project, text=True),
+               "nanocompile_sha256": sha(Path(binary)), "kache_sha256": sha(Path(kache)),
+               "kache_version": subprocess.check_output([kache, "--version"], text=True).strip(),
+-              "kache_build_script_cache": not args.kache_no_build_scripts, "kache_daemon": not args.standalone, "native_clang": args.native_clang, "portable_cc":args.portable_cc, "nanocompile_proc_macros": args.proc_macros, "nanocompile_proc_macro_producers": args.proc_macro_producers, "nanocompile_executable_producers": args.executable_producers, "command": command,
++              "build_script_contract_sha256": sha(args.build_script_contract) if args.build_script_contract else None, "kache_build_script_cache": not args.kache_no_build_scripts, "kache_daemon": not args.standalone, "native_clang": args.native_clang, "native_artifacts": args.native_artifacts, "portable_cc":args.portable_cc, "nanocompile_proc_macros": args.proc_macros, "nanocompile_proc_macro_producers": args.proc_macro_producers, "nanocompile_executable_producers": args.executable_producers, "command": command,
+               "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat(), "builds": [],
+               "method": "offline clean release package builds; same target path; prime direct build then empty caches; rotate three-way warm measurement order unless cold-only; validate each wrapper against its own cold artifact hashes (kache remaps paths)"}
+     tracked = subprocess.check_output(['git', 'ls-files', '-z'], cwd=project).decode().split('\0')
+@@ -165,7 +169,7 @@ def main():
+         macros = {str(path.relative_to(target)): sha(path) for path in sorted((target / "release/deps").glob("*.dylib"))}
+         executables = {str(path.relative_to(target)): sha(path) for path in sorted((target / "release/build").glob("*/build-script-build")) if path.is_file()}
+         native = {str(path.relative_to(target)): sha(path) for path in sorted(target.rglob('*'))
+-                  if path.is_file() and path.suffix in ('.o', '.a')} if (args.native_clang or args.portable_cc) else {}
++                  if path.is_file() and path.suffix in ('.o', '.a')} if (args.native_clang or args.portable_cc or args.native_artifacts) else {}
+         row = {"native_objects_and_archives": native, "implementation": implementation, "phase": phase, "seconds": seconds,
+                "exit_code": proc.returncode, "events": dict(after - before), "rlibs": len(artifacts), "artifacts": artifacts,
+                "peak_sampled_process_tree_rss_bytes": peak, "macro_dylibs": macros, "build_script_executables": executables}
+@@ -181,7 +185,7 @@ def main():
+             row["matches_own_cold_artifacts"] = references[implementation] == artifacts
+             row["matches_own_cold_macro_dylibs"] = macro_references[implementation] == macros
+             row["matches_own_cold_build_script_executables"] = executable_references[implementation] == executables
+-        if implementation == "nanocompile" and not (args.native_clang or args.portable_cc):
++        if implementation == "nanocompile" and not (args.native_clang or args.portable_cc or args.native_artifacts):
+             row["matches_direct_artifacts"] = artifacts == references.get("direct")
+             row["matches_direct_macro_dylibs"] = macros == macro_references.get("direct")
+             row["matches_direct_build_script_executables"] = executables == executable_references.get("direct")
+@@ -193,8 +197,10 @@ def main():
+         if any(row.get(check) is False for check in ("matches_own_cold_native_artifacts", "matches_own_cold_artifacts", "matches_direct_artifacts", "matches_own_cold_macro_dylibs", "matches_direct_macro_dylibs", "matches_own_cold_build_script_executables", "matches_direct_build_script_executables")):
+             raise RuntimeError(f"Artifact validation failed; see {log_path}")
+         if phase == "warm" and implementation == "nanocompile" and args.native_clang:
+-            if row['events'].get('clang_native_hit', 0) < 20 or row['events'].get('hit', 0) < 165:
++            if (row['events'].get('clang_native_hit', 0) < 20 and not row['events'].get('build_script_hit',0)) or row['events'].get('hit', 0) < 165:
+                 raise RuntimeError('Nano native or Rust cache did not serve expected warm hits')
++        if phase == "warm" and implementation == "nanocompile" and args.build_script_contract and not row["events"].get("build_script_hit", 0):
++            raise RuntimeError("Selected execution cache did not serve a warm script hit")
+         if phase == "warm" and implementation == "kache" and not row["events"].get("local_hit", 0):
+             raise RuntimeError("kache recorded no local hits; comparison is invalid")
+ 

@@ -169,9 +169,11 @@ def analyze(report, output):
             claim='Diagnostic hypothesis; interval gap is not predicted wall-time savings'))
     provenance = {key: data[key] for key in ('commit', 'nanocompile_sha256', 'kache_sha256',
                   'kache_version', 'rustc', 'script_sha256', 'jobs', 'timestamp',
-                  'diagnostic_trace', 'native_clang', 'nanocompile_proc_macros',
+                  'diagnostic_trace', 'native_clang', 'native_artifacts', 'portable_cc',
+                  'command', 'runs', 'cold_runs', 'cold_only', 'dirty', 'method', 'nanocompile_proc_macros',
                   'nanocompile_proc_macro_producers', 'nanocompile_executable_producers',
                   'build_script_contract_sha256', 'kache_build_script_cache') if key in data}
+    provenance['analyzer_sha256'] = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
     provenance['report_sha256'] = hashlib.sha256(report.read_bytes()).hexdigest()
     (output / 'experiments.json').write_text(json.dumps(dict(schema=1, provenance=provenance,
         instruction='Reproduce this configuration before changing one cause; freeze the baseline binary and keep diagnostic and untraced benchmark results separate',
@@ -182,7 +184,7 @@ def analyze(report, output):
                     limitations='compile_time_ms on cache hits can describe the stored original compilation; stage summaries exclude hit/dup compile_time_ms. Per-unit medians are scheduling-sensitive, unpaired diagnostic observations. Request durations overlap. Missing counterparts are unknown, not zero. No optimization or overall speed win is established by this capture.')
     (output / 'analysis.json').write_text(json.dumps(analysis, indent=2) + '\n')
     brief = ['# Instructions for the next variation', '', analysis['limitations'], '',
-             'Use the installed production binary as baseline. Change one measured cause at a time. Preserve full content hashing, loader selection, native include discovery and artifact validation. Never optimize by skipping an unverified input.', '',
+             'Reproduce the captured configuration and freeze its exact binary as the experiment baseline. Also compare against the accepted production binary. Change one measured cause at a time. Preserve full content hashing, loader selection, native include discovery and artifact validation. Never optimize by skipping an unverified input.', '',
              'Investigate these observed Nano-minus-kache interval gaps; a long overlapping interval does not establish critical-path savings:', '']
     for row in [r for r in comparison if r['nano_minus_kache_seconds'] and r['nano_minus_kache_seconds'] > 0][:12]:
         brief.append(f"- {row['phase']} / {row['kind']} / {row['mode']} / {row['name']}: {row['nano_minus_kache_seconds']:.6f}s median interval gap; samples Nano={row['nanocompile']['samples']}, kache={row['kache']['samples']}.")

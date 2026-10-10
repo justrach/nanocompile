@@ -79,9 +79,14 @@ with tempfile.TemporaryDirectory() as temp:
     paired = [dict(implementation=tool, phase='warm', trace=dict(requests=[],
               cargo_units=[dict(name='ring', mode='run-custom-build', duration=duration)],
               kache_service_events=[])) for tool, duration in [('nanocompile', 1.2), ('kache', .1)]]
-    fixture.write_text(json.dumps(dict(builds=paired)))
+    fixture.write_text(json.dumps(dict(builds=paired, native_artifacts=True, portable_cc=False, command=['cargo','build','--release'], runs=2, cold_runs=1)))
     analyze(fixture, state / 'paired')
-    plan = json.loads((state / 'paired/experiments.json').read_text())['experiments']
+    instructions = json.loads((state / 'paired/experiments.json').read_text())
+    assert instructions['provenance']['native_artifacts'] is True
+    assert instructions['provenance']['command'] == ['cargo','build','--release']
+    assert instructions['provenance']['runs'] == 2
+    assert len(instructions['provenance']['analyzer_sha256']) == 64
+    plan = instructions['experiments']
     assert len(plan) == 1 and plan[0]['observation']['name'].startswith('ring')
     assert plan[0]['observation']['nanocompile']['samples'] == 1
     assert 'ablation' in plan[0]['next_measurement']

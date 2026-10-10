@@ -1,0 +1,1 @@
+{"schema": 1, "packages": [{"package": "ring", "inputs": [".", "/usr/local/include"], "tools": ["ar"], "apple_native": true, "apple_tools": ["ar"]}]}

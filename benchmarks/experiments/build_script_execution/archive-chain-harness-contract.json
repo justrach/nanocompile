@@ -1,0 +1,1 @@
+{"schema": 1, "packages": [{"package": "ring", "inputs": [".", "/usr/local/include"], "tools": ["ar", "ranlib", "/Library/Developer/CommandLineTools/usr/bin/ranlib"], "installed_inputs": ["/Library/Developer/CommandLineTools/usr/lib/libLTO.dylib"], "apple_native": true, "apple_tools": ["ar"]}]}
