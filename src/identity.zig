@@ -13,7 +13,7 @@ const Stamp = struct {
     ctime: i96 = 0,
     kind: std.Io.File.Kind = .unknown,
 };
-const Memo = struct { schema: u32 = 5, hash: []const u8, decoder_hash: []const u8, stamps: []const Stamp };
+const Memo = struct { schema: u32 = 6, locations: ?cache.RustLocations = null, hash: []const u8, decoder_hash: []const u8, stamps: []const Stamp };
 
 fn rememberEpoch(ctx: *cache.Context, payload: []const u8) !void {
     var h = cache.Hash.init(.{});
@@ -82,13 +82,14 @@ fn readMemo(ctx: *cache.Context, path: []const u8, minimum_stamps: usize) ?[]con
     const payload = cache.unseal(ctx, bytes) catch return null;
     const parsed = std.json.parseFromSlice(Memo, ctx.a, payload, .{ .allocate = .alloc_always }) catch return null;
     const memo = parsed.value;
-    if (memo.schema != 5 or !cache.validHash(memo.decoder_hash) or !cache.validHash(memo.hash) or memo.stamps.len < minimum_stamps) return null;
+    if (memo.schema != 6 or !cache.validHash(memo.decoder_hash) or !cache.validHash(memo.hash) or memo.stamps.len < minimum_stamps) return null;
     for (memo.stamps) |s| {
         const current = stamp(ctx, s.path) catch return null;
         if (!equal(current, s)) return null;
     }
     rememberEpoch(ctx, payload) catch return null;
     ctx.compiler_decoder_identity = memo.decoder_hash;
+    ctx.rust_locations = memo.locations;
     return memo.hash;
 }
 
@@ -242,6 +243,7 @@ pub fn fingerprint(ctx: *cache.Context, is_zig: bool, executable: []const u8) ![
         .exited => |code| if (code != 0) return error.CompilerIdentityFailed,
         else => return error.CompilerIdentityFailed,
     }
+    var locations: ?cache.RustLocations = null;
     var stamps: std.ArrayList(Stamp) = .empty;
     try stamps.appendSlice(ctx.a, selectors.items);
     if (is_zig) {
@@ -261,9 +263,26 @@ pub fn fingerprint(ctx: *cache.Context, is_zig: bool, executable: []const u8) ![
         // Zig supplies Darwin's implicit libSystem link stubs itself.
         try tree(ctx, &stamps, try std.fs.path.join(ctx.a, &.{ parsed.lib_dir, "libc", "darwin" }));
     } else {
-        const result = try std.process.run(ctx.a, ctx.io, .{ .argv = &.{ executable, "--print", "sysroot" }, .environ_map = ctx.env });
-        const sysroot = std.mem.trim(u8, result.stdout, "\r\n");
-        if (!std.fs.path.isAbsolute(sysroot)) return error.InvalidSysroot;
+        const result = try std.process.run(ctx.a, ctx.io, .{ .argv = &.{ executable, "--print", "sysroot", "--print", "target-libdir" }, .environ_map = ctx.env });
+        switch (result.term) {
+            .exited => |code| if (code != 0) return error.CompilerIdentityFailed,
+            else => return error.CompilerIdentityFailed,
+        }
+        var lines = std.mem.tokenizeAny(u8, result.stdout, "\r\n");
+        const sysroot = lines.next() orelse return error.InvalidSysroot;
+        const target_libdir = lines.next() orelse return error.InvalidSysroot;
+        if (lines.next() != null or !std.fs.path.isAbsolute(sysroot) or !std.fs.path.isAbsolute(target_libdir)) return error.InvalidSysroot;
+        const installed = try std.fs.path.join(ctx.a, &.{ sysroot, "bin", "rustc" });
+        var loader_override = false;
+        for (ctx.env.keys()) |name| if (std.mem.startsWith(u8, name, "LD_") or std.mem.startsWith(u8, name, "DYLD_")) {
+            loader_override = true;
+        };
+        // Only the direct, canonical stock compiler may reuse these locations.
+        // Proxies, aliases, explicit targets and loader overrides query live.
+        if (!loader_override and std.mem.eql(u8, executable, real) and std.mem.eql(u8, real, installed) and
+            std.mem.startsWith(u8, version.stdout, "rustc 1.97.1 (8bab26f4f 2026-07-14)\n"))
+            locations = .{ .compiler = real, .sysroot = sysroot, .target_libdir = target_libdir };
+        try add(ctx, &stamps, target_libdir);
         try add(ctx, &stamps, try std.fs.path.join(ctx.a, &.{ sysroot, "bin", "rustc" }));
         rustResources(ctx, &stamps, try std.fs.path.join(ctx.a, &.{ sysroot, "lib" })) catch |err| {
             ctx.trace(try std.fmt.allocPrint(ctx.a, "Rust resources unavailable: {s} ({s})", .{ sysroot, @errorName(err) }));
@@ -310,10 +329,11 @@ pub fn fingerprint(ctx: *cache.Context, is_zig: bool, executable: []const u8) ![
     for (stamps.items) |s| if (!equal(s, try stamp(ctx, s.path))) return error.ToolchainChanged;
     const hash = try cache.finish(ctx.a, &h);
     const decoder_hash = try cache.finish(ctx.a, &decoder);
-    const bytes = try std.json.Stringify.valueAlloc(ctx.a, Memo{ .hash = hash, .decoder_hash = decoder_hash, .stamps = stamps.items }, .{});
+    const bytes = try std.json.Stringify.valueAlloc(ctx.a, Memo{ .locations = locations, .hash = hash, .decoder_hash = decoder_hash, .stamps = stamps.items }, .{});
     try ctx.atomic(path, try cache.seal(ctx, bytes));
     try rememberEpoch(ctx, bytes);
     ctx.compiler_decoder_identity = decoder_hash;
+    ctx.rust_locations = locations;
     return hash;
 }
 

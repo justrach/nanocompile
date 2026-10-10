@@ -29,6 +29,8 @@ pub fn sameFileState(a: std.Io.File.Stat, b: std.Io.File.Stat) bool {
         a.mtime.nanoseconds == b.mtime.nanoseconds and a.ctime.nanoseconds == b.ctime.nanoseconds;
 }
 
+pub const RustLocations = struct { compiler: []const u8, sysroot: []const u8, target_libdir: []const u8 };
+
 pub const Context = struct {
     a: std.mem.Allocator,
     io: std.Io,
@@ -38,6 +40,7 @@ pub const Context = struct {
     compiler_identity: ?[]const u8 = null,
     compiler_decoder_identity: ?[]const u8 = null,
     compiler_epoch: ?[]const u8 = null,
+    rust_locations: ?RustLocations = null,
 
     pub fn init(a: std.mem.Allocator, io: std.Io, env: *std.process.Environ.Map) !Context {
         const root = env.get("NANOCOMPILE_DIR") orelse try std.fs.path.join(a, &.{

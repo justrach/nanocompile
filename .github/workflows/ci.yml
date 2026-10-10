@@ -30,6 +30,7 @@ jobs:
           python3 tests/producer_cache.py zig-out/bin/nanocompile --output bench-results/producer-cache.json
           python3 tests/producer_cache.py zig-out/bin/nanocompile --cargo-flags --output bench-results/producer-cache-cargo-flags.json
           python3 tests/static_native_cache.py zig-out/bin/nanocompile --output bench-results/static-native-cache.json
+          python3 tests/rust_installation_locations.py zig-out/bin/nanocompile --output bench-results/rust-installation-locations.json
           python3 tests/rmeta_priority_probe.py zig-out/bin/nanocompile --output bench-results/rmeta-priority-probe.json
           python3 tests/native_metadata_probe.py --output bench-results/native-metadata-probe.json
           python3 tests/native_metadata_cache.py zig-out/bin/nanocompile --output bench-results/native-metadata-cache.json

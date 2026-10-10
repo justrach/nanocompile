@@ -112,6 +112,30 @@ fn directGraph(ctx: *cache.Context, path: []const u8) !?DirectGraph {
     return .{ .root = .{ .name = graph.root.name, .hash = graph.root.hash, .triple = graph.root.triple, .proc_macro = graph.root.proc_macro }, .names = names.items };
 }
 
+fn cachedLocations(ctx: *cache.Context, argv: []const []const u8) ?cache.RustLocations {
+    const locations = ctx.rust_locations orelse return null;
+    if (argv.len == 0 or !std.mem.eql(u8, argv[0], locations.compiler)) return null;
+    for (argv[1..]) |arg| if (std.mem.eql(u8, arg, "--target") or std.mem.startsWith(u8, arg, "--target=") or
+        std.mem.eql(u8, arg, "--sysroot") or std.mem.startsWith(u8, arg, "--sysroot=")) return null;
+    for (ctx.env.keys()) |name| if (std.mem.startsWith(u8, name, "LD_") or std.mem.startsWith(u8, name, "DYLD_")) return null;
+    return locations;
+}
+
+test "installation locations refuse alternate selection and loader environments" {
+    const a = std.testing.allocator;
+    var env = std.process.Environ.Map.init(a);
+    defer env.deinit();
+    var ctx: cache.Context = .{ .a = a, .io = std.testing.io, .env = &env, .root = "unused", .cwd = "unused", .rust_locations = .{ .compiler = "/toolchain/bin/rustc", .sysroot = "/toolchain", .target_libdir = "/toolchain/lib/rustlib/host/lib" } };
+    try std.testing.expect(cachedLocations(&ctx, &.{ "/toolchain/bin/rustc", "lib.rs" }) != null);
+    for ([_][]const []const u8{ &.{"rustc"}, &.{"/alias/rustc"}, &.{ "/toolchain/bin/rustc", "--target", "other" }, &.{ "/toolchain/bin/rustc", "--target=host" }, &.{ "/toolchain/bin/rustc", "--sysroot", "/other" }, &.{ "/toolchain/bin/rustc", "--sysroot=/other" } }) |argv|
+        try std.testing.expect(cachedLocations(&ctx, argv) == null);
+    try env.put("DYLD_LIBRARY_PATH", "");
+    try std.testing.expect(cachedLocations(&ctx, &.{"/toolchain/bin/rustc"}) == null);
+    _ = env.remove("DYLD_LIBRARY_PATH");
+    try env.put("LD_PRELOAD", "");
+    try std.testing.expect(cachedLocations(&ctx, &.{"/toolchain/bin/rustc"}) == null);
+}
+
 pub fn collect(ctx: *cache.Context, argv: []const []const u8, outputs: []const []const u8, before: []const Directory, started: i96, records: *std.ArrayList(cache.Dependency), metadata_only: bool, validated: *const std.StringHashMapUnmanaged(cache.CheckedDigest), hidden_native: bool) !void {
     var artifact: ?[]const u8 = null;
     for (outputs) |out| if (std.mem.endsWith(u8, out, ".rmeta")) {
@@ -135,12 +159,18 @@ pub fn collect(ctx: *cache.Context, argv: []const []const u8, outputs: []const [
             i += 1;
         } else if (std.mem.startsWith(u8, argv[i], "--target=")) try print_args.append(ctx.a, argv[i]);
     }
-    const sysroot_result = try std.process.run(ctx.a, ctx.io, .{ .argv = print_args.items, .environ_map = ctx.env });
-    if (!success(sysroot_result)) return error.RustSysrootQueryFailed;
-    var locations = std.mem.tokenizeAny(u8, sysroot_result.stdout, "\r\n");
-    const selected_sysroot = locations.next() orelse return error.InvalidSysroot;
-    const sysroot = locations.next() orelse return error.InvalidSysroot;
-    if (locations.next() != null or !std.fs.path.isAbsolute(selected_sysroot) or !std.fs.path.isAbsolute(sysroot)) return error.InvalidSysroot;
+    const cached = cachedLocations(ctx, argv);
+    const resolved = cached orelse blk: {
+        const sysroot_result = try std.process.run(ctx.a, ctx.io, .{ .argv = print_args.items, .environ_map = ctx.env });
+        if (!success(sysroot_result)) return error.RustSysrootQueryFailed;
+        var locations = std.mem.tokenizeAny(u8, sysroot_result.stdout, "\r\n");
+        const root = locations.next() orelse return error.InvalidSysroot;
+        const libdir = locations.next() orelse return error.InvalidSysroot;
+        if (locations.next() != null or !std.fs.path.isAbsolute(root) or !std.fs.path.isAbsolute(libdir)) return error.InvalidSysroot;
+        break :blk cache.RustLocations{ .compiler = argv[0], .sysroot = root, .target_libdir = libdir };
+    };
+    const selected_sysroot = resolved.sysroot;
+    const sysroot = resolved.target_libdir;
     var query_env = try ctx.env.clone(ctx.a);
     try query_env.put("RUSTC_BOOTSTRAP", "1");
     try query_env.put("RUSTUP_TOOLCHAIN", selected_sysroot);
