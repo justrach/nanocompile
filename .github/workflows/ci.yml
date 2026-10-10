@@ -35,6 +35,7 @@ jobs:
           python3 tests/rmeta_priority_probe.py zig-out/bin/nanocompile --disable-pipelined-companions --output bench-results/pipelined-companion-disabled.json
           python3 tests/native_metadata_probe.py --output bench-results/native-metadata-probe.json
           python3 tests/native_metadata_cache.py zig-out/bin/nanocompile --output bench-results/native-metadata-cache.json
+          python3 tests/rlib_frameworks.py zig-out/bin/nanocompile --output bench-results/rlib-frameworks.json
           python3 tests/executable_cache.py zig-out/bin/nanocompile --output bench-results/executable-cache.json
           python3 tests/executable_cache.py zig-out/bin/nanocompile --retain-jobs --output bench-results/executable-diagnostics.json
           python3 tests/executable_cache.py zig-out/bin/nanocompile --thin-lto --stable-alias-experiment --retain-jobs --output bench-results/executable-thin-lto.json

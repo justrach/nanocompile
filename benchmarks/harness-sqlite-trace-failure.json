@@ -1,0 +1,132 @@
+{
+  "schema": 1,
+  "private_state": "/tmp/nano-full-harness-sqlite-trace-20261011",
+  "private_report_sha256": "0fdf94ff1e5c52c186364f5f1093f65eebca42262292b73ffa7e1817dff736d3",
+  "nanocompile_sha256": "3babe715278078707f076e6e2e1e07256a06355afdabac22d235c26aca79f92f",
+  "build_script_contract_sha256": "aa9e71a6ef927250d62f8ad65276e98973c447d0e4f91415cc43105beb32ce55",
+  "method": "interrupted diagnostic capture; no valid warm comparison; preserve failure and exclude bad direct sample",
+  "failure": {
+    "type": "RuntimeError",
+    "message": "Final executable failed explicit --help probe; saved result in /tmp/nano-full-harness-sqlite-trace-20261011.json"
+  },
+  "tracked_sources_unchanged": true,
+  "builds": [
+    {
+      "implementation": "direct",
+      "phase": "prime",
+      "seconds": 169.38802262500394,
+      "exit_code": 0,
+      "build_log": {
+        "path": "0-direct-prime.log",
+        "bytes": 8006819,
+        "sha256": "d0d020461b5a915d0d7505bef33665a06865ff9d4e3f42b0b89bcc9a4b541d09"
+      },
+      "final_executable_artifacts": {
+        "release/harness": "1d9b7eab4a83d56381365098f4565d6b761c766cfdc93960450e033588d08828"
+      },
+      "final_executable_modes": {
+        "release/harness": "0o755"
+      },
+      "cli_help_valid": true
+    },
+    {
+      "implementation": "nanocompile",
+      "phase": "cold",
+      "seconds": 182.69341066700872,
+      "exit_code": 0,
+      "build_log": {
+        "path": "1-nanocompile-cold.log",
+        "bytes": 8284616,
+        "sha256": "a489bcfff1aa6830fcf9fa24f55b6497f68f37cc8aebd50dae4cb96028dd4d57"
+      },
+      "final_executable_artifacts": {
+        "release/harness": "4d870b2a6927533d8d1f316f751ace2c99542ced5222b2e7a29179c7034e8825"
+      },
+      "final_executable_modes": {
+        "release/harness": "0o755"
+      },
+      "cli_help_valid": true
+    },
+    {
+      "implementation": "kache",
+      "phase": "cold",
+      "seconds": 191.05089179205243,
+      "exit_code": 0,
+      "build_log": {
+        "path": "2-kache-cold.log",
+        "bytes": 8059128,
+        "sha256": "1de2a49a384543cd1970adaa0173cf78b8aa4245e41be1967d61b42395157cef"
+      },
+      "final_executable_artifacts": {
+        "release/harness": "7261dbefcc8f0be0eb7ebc534489d919c0cfe19895e8313c1ce6aa68db451fb0"
+      },
+      "final_executable_modes": {
+        "release/harness": "0o755"
+      },
+      "cli_help_valid": true
+    },
+    {
+      "implementation": "direct",
+      "phase": "warm",
+      "seconds": 177.377267999982,
+      "exit_code": 0,
+      "build_log": {
+        "path": "3-direct-warm.log",
+        "bytes": 8007038,
+        "sha256": "e40d1e2c215ea84e8acfceac79792a6ef923b0249355050f74cfe989fafb2c20"
+      },
+      "final_executable_artifacts": {
+        "release/harness": "e1324baaf84e41742bf570a032d5c30328671d02ebbd46bfb68d3c00b94f5df1"
+      },
+      "final_executable_modes": {
+        "release/harness": "0o644"
+      },
+      "cli_help_valid": false
+    }
+  ],
+  "capture_manifests": [
+    {
+      "build": 0,
+      "sha256": "2dacb664a0b743af52212fd478297ca6ac4aae452428bfac76a97030cf919220",
+      "compiler_records": 0,
+      "cargo_units": 1237
+    },
+    {
+      "build": 1,
+      "sha256": "f147c0fa0d81e2f79debe1973e4e23072ef9e7b077b1a13096399d48329fdabd",
+      "compiler_records": 1145,
+      "cargo_units": 1237
+    },
+    {
+      "build": 2,
+      "sha256": "9dcf4e525926e0a07bd092924f1949730b960122159386769187ea4bbc46d072",
+      "compiler_records": 1226,
+      "cargo_units": 1237
+    },
+    {
+      "build": 3,
+      "sha256": "45f4d99faf64e07267ca7f7d4329f3b6a3c80b4a8dc0c42ad689337bc70b7e52",
+      "compiler_records": 0,
+      "cargo_units": 1237
+    }
+  ],
+  "failed_executable_bytes": 1104,
+  "failed_reference_manifest_sha256": "594aacc843b8a68cd2d5df21fcac0430ea99dc83bf75bb43e97a2656a4234812",
+  "replay": {
+    "exit_code": 0,
+    "seconds": 30.543717166990973,
+    "output": {
+      "bytes": 101483600,
+      "mode": "0o755",
+      "sha256": "1d9b7eab4a83d56381365098f4565d6b761c766cfdc93960450e033588d08828"
+    }
+  },
+  "replay_extra_arguments": [
+    "--print",
+    "link-args"
+  ],
+  "replay_stdout_sha256": "f024688f29c5e7d259c808ca846af990ef1214525858c246ad28006e43bc6774",
+  "replay_stderr_sha256": "30c978117ebe38bde6846b573eddf1bf10f89c7cd5404208b785d56ccbfe8dcc",
+  "first_replay_query_failure": "-Zprint-link-args is not supported by this compiler; no compilation occurred",
+  "cause": "unknown; valid replay recovered exact initial direct executable bytes and mode; do not infer the origin of the bad file"
+}

@@ -36,6 +36,7 @@ def main():
     p.add_argument("--kache", required=True)
     p.add_argument("--source-date-epoch", type=int, required=True)
     p.add_argument("--thin-lto-producers", action="store_true")
+    p.add_argument("--rlib-frameworks", action="store_true")
     p.add_argument("--retain-artifacts", action="store_true")
     p.add_argument("--package", default="harness")
     p.add_argument("--state", required=True, help="new, dedicated benchmark directory")
@@ -113,6 +114,8 @@ def main():
     env["SOURCE_DATE_EPOCH"] = str(args.source_date_epoch)
     if args.thin_lto_producers:
         env["NANOCOMPILE_THIN_LTO_PRODUCERS"] = "1"
+    if args.rlib_frameworks:
+        env["NANOCOMPILE_RLIB_FRAMEWORKS"] = "1"
     env.update(CARGO_TARGET_DIR=str(target), CARGO_INCREMENTAL="0", NANOCOMPILE_DIR=str(cache),
                KACHE_CACHE_DIR=str(kcache), KACHE_CONFIG=str(config), KACHE_HOST_CONFIG="",
                NANOCOMPILE_PROC_MACROS=args.proc_macros, KACHE_SOCKET_PATH=str(state / "daemon.sock"), KACHE_DAEMON_IDLE_TIMEOUT="600")
@@ -147,6 +150,7 @@ def main():
         if name and (name.endswith(('.rs', '.toml')) or Path(name).name == 'Cargo.lock') and (project / name).is_file()
     }
     result['snapshot_rust_and_manifest_hashes'] = {name:sha(project/name) for name in original_input_hashes}
+    result['rlib_frameworks'] = args.rlib_frameworks
     assert result['snapshot_rust_and_manifest_hashes'] == original_input_hashes, 'Snapshot does not match original inputs'
     output = Path(args.output)
     output.parent.mkdir(parents=True, exist_ok=True)

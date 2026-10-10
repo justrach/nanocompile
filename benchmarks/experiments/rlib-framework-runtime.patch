@@ -1,0 +1,51 @@
+diff --git a/src/compiler.zig b/src/compiler.zig
+index d9d29b2..09045f5 100644
+--- a/src/compiler.zig
++++ b/src/compiler.zig
+@@ -60,6 +60,7 @@ fn rustPlan(ctx: *cache.Context, argv: []const []const u8) !Plan {
+     var native_dirs: std.ArrayList([]const u8) = .empty;
+     var configuration: ?cache.Dependency = null;
+     var static_libraries: std.ArrayList([]const u8) = .empty;
++    var deferred_framework = false;
+     var builtin_macro = false;
+     var debug_info: []const u8 = "0";
+     var producer_unsafe_codegen = false;
+@@ -73,6 +74,9 @@ fn rustPlan(ctx: *cache.Context, argv: []const []const u8) !Plan {
+             continue;
+         }
+         if (try option(argv, &i, "--crate-type")) |v| {
++            // Every requested type can create an output. Never let the last
++            // flag hide an earlier executable/staticlib from the restore plan.
++            if (crate_type) |previous| if (!eq(previous, v)) return error.UnsupportedCrateType;
+             crate_type = v;
+             continue;
+         }
+@@ -111,11 +115,14 @@ fn rustPlan(ctx: *cache.Context, argv: []const []const u8) !Plan {
+             continue;
+         }
+         if ((try option(argv, &i, "-l")) orelse (if (std.mem.startsWith(u8, arg, "-l")) arg[2..] else null)) |v| {
+-            if (!std.mem.startsWith(u8, v, "static=")) return error.UnsupportedNativeLibrary;
+-            const library = v[7..];
++            const framework = std.mem.startsWith(u8, v, "framework=") and
++                eq(ctx.env.get("NANOCOMPILE_RLIB_FRAMEWORKS") orelse "", "1");
++            if (!std.mem.startsWith(u8, v, "static=") and !framework) return error.UnsupportedNativeLibrary;
++            const offset: usize = if (framework) 10 else 7;
++            const library = v[offset..];
+             if (library.len == 0) return error.UnsupportedNativeLibrary;
+             for (library) |ch| if (!std.ascii.isAlphanumeric(ch) and ch != '_' and ch != '-') return error.UnsupportedNativeLibrary;
+-            try static_libraries.append(ctx.a, library);
++            if (framework) deferred_framework = true else try static_libraries.append(ctx.a, library);
+             continue;
+         }
+         if (eq(arg, "-C") or std.mem.startsWith(u8, arg, "-C")) {
+@@ -175,6 +182,10 @@ fn rustPlan(ctx: *cache.Context, argv: []const []const u8) !Plan {
+     const executable = eq(ct, "bin") and eq(ctx.env.get("NANOCOMPILE_EXECUTABLE_PRODUCERS") orelse "", "1");
+     const producer = producer_dylib or executable;
+     if (!producer and !eq(ct, "rlib") and !eq(ct, "lib")) return error.UnsupportedCrateType;
++    // A plain rlib registers this exact framework name for final linking; it
++    // does not resolve or bundle the framework. Producer/final links still
++    // require their existing complete linker-input discovery and passthrough.
++    if (deferred_framework and (producer or builtin.os.tag != .macos or target != null)) return error.UnsupportedNativeLibrary;
+     if (!producer_dylib and builtin_macro) return error.UntrackedExtern;
+     if (producer_dylib and thin_lto) return error.UnsupportedProducerConfiguration;
+     if (producer and (builtin.os.tag != .macos or !eq(debug_info, "0") or producer_unsafe_codegen or target != null)) return error.UnsupportedProducerConfiguration;

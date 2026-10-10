@@ -252,6 +252,10 @@ completes three cold pairs and three warm rounds with exact own-cold artifact ch
 Cold medians are **180.88 s Nano versus 188.51 s kache** (2/3 Nano wins);
 warm medians are **10.80 versus 6.56 s** (0/3). Nano still trails on warm full-app
 builds, and the cold result needs independent confirmation.
+The opt-in [Rust rlib framework candidate](docs/rlib-framework-candidate.md)
+adds plain native macOS command-line framework metadata caching, with real linked
+edit/revert checks. Its full-app speed benefit is still unmeasured. A separate
+mixed-crate-type guard fixes warm hits that omitted a requested static archive.
 Two independent [27-pair lookup comparisons](docs/clang-selection-overlap-experiment.md)
 confirm the adopted live-query overlap gains **5.6% and 5.1%**, winning 51/54
 pairs with 193 exact artifacts. Compiler and SDK selection remain live.

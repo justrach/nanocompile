@@ -1,0 +1,98 @@
+{
+  "rows": [
+    {
+      "phase": "direct",
+      "exit_code": 0,
+      "hit": false,
+      "artifacts": {
+        "provider.d": {
+          "sha256": "3dc23791f16409bfcae320c74c21413d67caa5c90100ab3fba38213780d7f6fe",
+          "mode": "0o644"
+        },
+        "libprovider.a": {
+          "sha256": "2f94b4982457259b0e5c3adef13e29ae24e77241bac60659d7568e2d45a7425c",
+          "mode": "0o644"
+        },
+        "libprovider.rlib": {
+          "sha256": "b7726c528669d09e705727dc15df1a23ed9b475ac351f679314a0c93b0079bd1",
+          "mode": "0o644"
+        },
+        "libprovider.rmeta": {
+          "sha256": "ea5ad3f661ba72b8ea85199edcd860ee7dd39ad04d9cbb416acfb4af52180ee1",
+          "mode": "0o644"
+        }
+      },
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "phase": "cold",
+      "exit_code": 0,
+      "hit": false,
+      "artifacts": {
+        "provider.d": {
+          "sha256": "3dc23791f16409bfcae320c74c21413d67caa5c90100ab3fba38213780d7f6fe",
+          "mode": "0o644"
+        },
+        "libprovider.a": {
+          "sha256": "2f94b4982457259b0e5c3adef13e29ae24e77241bac60659d7568e2d45a7425c",
+          "mode": "0o644"
+        },
+        "libprovider.rlib": {
+          "sha256": "b7726c528669d09e705727dc15df1a23ed9b475ac351f679314a0c93b0079bd1",
+          "mode": "0o644"
+        },
+        "libprovider.rmeta": {
+          "sha256": "ea5ad3f661ba72b8ea85199edcd860ee7dd39ad04d9cbb416acfb4af52180ee1",
+          "mode": "0o644"
+        }
+      },
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "594597777d19c2c9dfe12758a39b271d7aaa0860fa165f34e0dae6e87d8439f2"
+    },
+    {
+      "phase": "warm",
+      "exit_code": 0,
+      "hit": true,
+      "artifacts": {
+        "provider.d": {
+          "sha256": "3dc23791f16409bfcae320c74c21413d67caa5c90100ab3fba38213780d7f6fe",
+          "mode": "0o644"
+        },
+        "libprovider.rlib": {
+          "sha256": "b7726c528669d09e705727dc15df1a23ed9b475ac351f679314a0c93b0079bd1",
+          "mode": "0o644"
+        },
+        "libprovider.rmeta": {
+          "sha256": "ea5ad3f661ba72b8ea85199edcd860ee7dd39ad04d9cbb416acfb4af52180ee1",
+          "mode": "0o644"
+        }
+      },
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "016c4b9fe507c2b75fca34a1ba9b6259120ec62bf36361264d5f1706fee630ee"
+    }
+  ],
+  "audit_completed": true,
+  "bug_reproduced": true,
+  "binary_sha256": "3babe715278078707f076e6e2e1e07256a06355afdabac22d235c26aca79f92f",
+  "source_sha256": "47166d823472561cdedd2579485ecdfa617659f8a84989eca372ef5a5df4063d",
+  "private_result_sha256": "0c09e5e3e95bd064f5fd180f61fce461bb1bcff75f773edb460c1a98f06c0b4c",
+  "command": [
+    "rustc",
+    "lib.rs",
+    "--edition=2021",
+    "--crate-name",
+    "provider",
+    "--crate-type",
+    "staticlib",
+    "--crate-type",
+    "rlib",
+    "--emit=dep-info,metadata,link",
+    "--out-dir",
+    "out",
+    "-C",
+    "opt-level=3"
+  ],
+  "rustc": "rustc 1.97.1 (8bab26f4f 2026-07-14)\nbinary: rustc\ncommit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452\ncommit-date: 2026-07-14\nhost: aarch64-apple-darwin\nrelease: 1.97.1\nLLVM version: 22.1.6\n",
+  "method": "isolated source/cache; remove entire output directory before direct, cold and warm; expected old-runtime defect is a missing static archive on a reported hit"
+}
