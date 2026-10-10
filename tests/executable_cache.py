@@ -8,7 +8,9 @@ from pathlib import Path
 import shutil
 import subprocess
 import sys
+from macho_staging import validate_staging_difference
 import tempfile
+
 
 
 def main():
@@ -16,9 +18,12 @@ def main():
     p.add_argument('binary', type=Path)
     p.add_argument('--output', type=Path)
     p.add_argument('--thin-lto', action='store_true', help='exercise opt-in thin-LTO compilation and transitive bitcode changes')
+    p.add_argument('--stable-alias-experiment', action='store_true', help='explicit experimental thin-LTO byte validation profile')
     p.add_argument('--state', type=Path, help='new directory to retain probe artifacts for diagnosis')
     p.add_argument('--retain-jobs', action='store_true', help='verify retained private compiler/linker diagnostics')
     args = p.parse_args()
+    if args.stable_alias_experiment and not (args.thin_lto and args.retain_jobs):
+        p.error("--stable-alias-experiment requires --thin-lto and --retain-jobs")
     binary = args.binary.resolve()
     if sys.platform != 'darwin':
         print('SKIP: experimental executable producers require Apple tools')
@@ -85,11 +90,25 @@ def main():
         reference = hashes()
         if args.state:
             shutil.copy2(executable, root / 'direct-executable')
+        direct_bytes = executable.read_bytes()
+        staging_difference = None
         mode = executable.stat().st_mode & 0o777
         execute('12 first')
         remove()
         cold = run([str(binary), *rust])
-        assert b'miss: compiling executable producer' in cold.stderr and hashes() == reference, (reference, hashes(), cold.stderr.decode())
+        assert b'miss: compiling executable producer' in cold.stderr, cold.stderr.decode()
+        if args.stable_alias_experiment:
+            staging_difference = validate_staging_difference(direct_bytes, executable.read_bytes())
+            run(['codesign', '--verify', '--strict', str(executable)])
+            assert hashes()[1] == reference[1]
+            reference = hashes()
+            run([str(binary), 'clear'])
+            remove()
+            repeat = run([str(binary), *rust])
+            assert b'miss: compiling executable producer' in repeat.stderr and hashes() == reference, repeat.stderr.decode()
+            run(['codesign', '--verify', '--strict', str(executable)])
+        else:
+            assert hashes() == reference, (reference, hashes(), cold.stderr.decode())
         execute('12 first')
         remove()
         runtime.write_text('second\n')
@@ -97,6 +116,31 @@ def main():
         assert b'hit: executable producer' in warm.stderr and hashes() == reference, warm.stderr.decode()
         assert executable.stat().st_mode & 0o777 == mode
         execute('12 second')
+        if args.stable_alias_experiment:
+            # Stale foreign aliases must remain untouched and force direct
+            # compilation rather than adopting an old private job.
+            jobs = list((root / 'cache/producer-jobs').glob('*/compiler-result.json'))
+            record = json.loads(jobs[-1].read_text())
+            alias = Path(record['argv'][record['argv'].index('--out-dir') + 1]).parent
+            shutil.rmtree(root / 'cache/entries')
+            alias.symlink_to(jobs[-1].parent)
+            remove()
+            collision = run([str(binary), *rust])
+            assert b'bypass: exclusive thin-LTO alias unavailable' in collision.stderr
+            assert alias.is_symlink() and alias.resolve() == jobs[-1].parent
+            assert executable.read_bytes() == direct_bytes
+            alias.unlink()
+            remove()
+            # Key/output locks serialize same-key compilers: one genuine miss,
+            # one restore, identical bytes, no shared physical compilation.
+            children = [subprocess.Popen([str(binary), *rust], cwd=root, env=env,
+                        stdout=subprocess.PIPE, stderr=subprocess.PIPE) for _ in range(2)]
+            streams = [child.communicate(timeout=180) for child in children]
+            assert all(child.returncode == 0 for child in children)
+            assert sum(b'miss: compiling executable producer' in err for _, err in streams) == 1
+            assert sum(b'hit: executable producer' in err for _, err in streams) == 1
+            assert hashes() == reference
+            execute('12 second')
         if args.thin_lto:
             helper.write_text('pub fn adjustment()->u32{1}\n')
             run(helper_command)
@@ -142,6 +186,13 @@ def main():
         assert b'bypass: UnsupportedProducerConfiguration' in run([str(binary), *rust, '-C', 'debuginfo=2']).stderr
         if args.thin_lto:
             assert b'bypass: UnsupportedProducerConfiguration' in run([str(binary), *rust, '-C', 'lto=fat']).stderr
+            macro_env = dict(env, NANOCOMPILE_PROC_MACRO_PRODUCERS='1')
+            macro_command = [*rust, '--crate-type=proc-macro']
+            macro_direct = subprocess.run(macro_command, cwd=root, env=macro_env, capture_output=True, timeout=180)
+            macro_guarded = subprocess.run([str(binary), *macro_command], cwd=root, env=macro_env, capture_output=True, timeout=180)
+            assert b'bypass: UnsupportedProducerConfiguration' in macro_guarded.stderr
+            assert macro_guarded.returncode == macro_direct.returncode
+            assert diagnostics(macro_guarded) == diagnostics(macro_direct)
             guarded_env = dict(env, NANOCOMPILE_THIN_LTO_PRODUCERS='0')
             guarded = subprocess.run([str(binary), *rust], cwd=root, env=guarded_env, capture_output=True, timeout=180)
             assert guarded.returncode == 0 and b'bypass: UnsupportedProducerConfiguration' in guarded.stderr
@@ -172,14 +223,19 @@ def main():
                     assert snapshot.resolve().is_relative_to(manifest.parent.resolve())
                     assert snapshot.is_file() and not snapshot.is_symlink() and len(item['blake3']) == 64
                     assert snapshot.stat().st_mode & 0o777 == 0o600
+        if args.stable_alias_experiment:
+            assert not list((root / 'cache/producer-aliases').iterdir())
         evidence = {'platform': sys.platform, 'binary_sha256': hashlib.sha256(binary.read_bytes()).hexdigest(),
                     'probe_sha256': hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
-                    'direct_cold_warm_artifacts_equal': True, 'diagnostics_replayed': True,
+                    'direct_cold_warm_artifacts_equal': not args.stable_alias_experiment or staging_difference['changed_bytes'] == 0,
+                    'own_cold_warm_artifacts_equal': True, 'staging_difference': staging_difference,
+                    'diagnostics_replayed': True,
                     'executable_permissions_preserved': True, 'runtime_reads_stay_live_after_restore': True,
                     'source_and_preserved_mtime_native_changes_detected': True,
                     'corrupt_blob_and_manifest_repaired': True, 'failed_compilation_not_cached': True,
                     'debug_and_default_policy_bypass': True,
                     'thin_lto': args.thin_lto,
+                    'stable_alias_collision_and_same_key_concurrency': args.stable_alias_experiment,
                     'private_producer_jobs_retained': args.retain_jobs,
                     'limits': 'Apple native zero-debug executable compilation only; execution is not cached; no project speed claim'}
         if args.output:

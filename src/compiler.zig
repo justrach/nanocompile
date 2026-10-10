@@ -15,6 +15,7 @@ const Plan = struct {
     configuration: ?cache.Dependency = null,
     producer: bool = false,
     producer_dylib: bool = false,
+    thin_lto: bool = false,
     linked_output: ?[]const u8 = null,
     out_dir: ?[]const u8 = null,
 };
@@ -62,6 +63,7 @@ fn rustPlan(ctx: *cache.Context, argv: []const []const u8) !Plan {
     var builtin_macro = false;
     var debug_info: []const u8 = "0";
     var producer_unsafe_codegen = false;
+    var thin_lto = false;
     var target: ?[]const u8 = null;
     var i: usize = 1;
     while (i < argv.len) : (i += 1) {
@@ -125,7 +127,11 @@ fn rustPlan(ctx: *cache.Context, argv: []const []const u8) !Plan {
             const split = std.mem.indexOfScalar(u8, v, '=') orelse v.len;
             const key = v[0..split];
             if (eq(key, "debuginfo")) debug_info = v[@min(split + 1, v.len)..];
-            for ([_][]const u8{ "lto", "linker-plugin-lto", "relocation-model" }) |unsupported| {
+            if (eq(key, "lto") and eq(v[@min(split + 1, v.len)..], "thin") and
+                eq(ctx.env.get("NANOCOMPILE_THIN_LTO_PRODUCERS") orelse "", "1"))
+            {
+                thin_lto = true;
+            } else for ([_][]const u8{ "lto", "linker-plugin-lto", "relocation-model" }) |unsupported| {
                 if (eq(key, unsupported)) producer_unsafe_codegen = true;
             }
             if (eq(key, "extra-filename")) {
@@ -170,6 +176,7 @@ fn rustPlan(ctx: *cache.Context, argv: []const []const u8) !Plan {
     const producer = producer_dylib or executable;
     if (!producer and !eq(ct, "rlib") and !eq(ct, "lib")) return error.UnsupportedCrateType;
     if (!producer_dylib and builtin_macro) return error.UntrackedExtern;
+    if (producer_dylib and thin_lto) return error.UnsupportedProducerConfiguration;
     if (producer and (builtin.os.tag != .macos or !eq(debug_info, "0") or producer_unsafe_codegen or target != null)) return error.UnsupportedProducerConfiguration;
     if (static_libraries.items.len != 0 and target != null) return error.UnsupportedNativeTarget;
     // Plain static libraries bundle archive members into the rlib. Require a
@@ -230,7 +237,7 @@ fn rustPlan(ctx: *cache.Context, argv: []const []const u8) !Plan {
     }
     if (dep_info == null) return error.NoDependencyInfo;
     if (producer and (std.mem.indexOfAny(u8, dir, "\r\n\t\"\\") != null or std.mem.indexOfAny(u8, ctx.root, "\r\n\t\"\\") != null or std.mem.indexOf(u8, dir, "//") != null)) return error.UnsupportedProducerPath;
-    return .{ .source = src, .outputs = outputs.items, .dependencies = inputs.items, .dep_info = dep_info, .library_dirs = search_dirs.items, .native_dirs = native_dirs.items, .configuration = configuration, .producer = producer, .producer_dylib = producer_dylib, .linked_output = linked_output, .out_dir = dir };
+    return .{ .source = src, .outputs = outputs.items, .dependencies = inputs.items, .dep_info = dep_info, .library_dirs = search_dirs.items, .native_dirs = native_dirs.items, .configuration = configuration, .producer = producer, .producer_dylib = producer_dylib, .thin_lto = thin_lto, .linked_output = linked_output, .out_dir = dir };
 }
 
 fn zigPlan(ctx: *cache.Context, argv: []const []const u8) !Plan {
@@ -574,8 +581,10 @@ fn executeProducer(ctx: *cache.Context, plan: Plan, argv: []const []const u8) !u
     try before.appendSlice(ctx.a, dependencyRecords(ctx, plan.dependencies) catch return bypass(ctx, argv, "bypass: producer inputs unavailable"));
     try before.appendSlice(ctx.a, rust_dependencies.nativeSnapshot(ctx, plan.native_dirs) catch return bypass(ctx, argv, "bypass: producer native search unsupported"));
     const directories = rust_dependencies.snapshot(ctx, plan.library_dirs, plan.outputs) catch return bypass(ctx, argv, "bypass: producer dependency lookup unavailable");
-    const job = @import("producer_job.zig").Job.create(ctx) catch return bypass(ctx, argv, "bypass: producer staging unavailable");
+    var job = @import("producer_job.zig").Job.create(ctx) catch return bypass(ctx, argv, "bypass: producer staging unavailable");
     defer job.cleanup(ctx) catch {};
+    if (plan.thin_lto) job.acquireAlias(ctx, key) catch
+        return bypass(ctx, argv, "bypass: exclusive thin-LTO alias unavailable");
     const original = plan.linked_output orelse return bypass(ctx, argv, "bypass: producer needs link output");
     const output = try std.fs.path.join(ctx.a, &.{ job.out, std.fs.path.basename(original) });
     const retain_job = eq(ctx.env.get("NANOCOMPILE_RETAIN_PRODUCER_JOBS") orelse "", "1");
@@ -604,6 +613,7 @@ fn executeProducer(ctx: *cache.Context, plan: Plan, argv: []const []const u8) !u
         retainProducerResult(ctx, job.root, command.items, started, result) catch |err|
             ctx.trace(try std.fmt.allocPrint(ctx.a, "diagnostic compiler capture failed: {s}", .{@errorName(err)}));
     }
+    job.validateAlias(ctx) catch return bypass(ctx, argv, "bypass: thin-LTO staging alias changed");
     result.stdout = try replacePath(ctx, result.stdout, job.out, plan.out_dir.?);
     result.stderr = try replacePath(ctx, result.stderr, job.out, plan.out_dir.?);
     result.stderr = try replacePath(ctx, result.stderr, linker, "cc");
@@ -649,10 +659,9 @@ fn executeProducer(ctx: *cache.Context, plan: Plan, argv: []const []const u8) !u
 
 fn retainProducerResult(ctx: *cache.Context, root: []const u8, command: []const []const u8, started: i96, result: std.process.RunResult) !void {
     const ended = std.Io.Clock.real.now(ctx.io).nanoseconds;
-    try ctx.atomic(try std.fs.path.join(ctx.a, &.{root, "compiler.stdout"}), result.stdout);
-    try ctx.atomic(try std.fs.path.join(ctx.a, &.{root, "compiler.stderr"}), result.stderr);
-    try ctx.atomic(try std.fs.path.join(ctx.a, &.{root, "compiler-result.json"}),
-        try std.json.Stringify.valueAlloc(ctx.a, .{ .schema = 1, .argv = command, .start_ns = started, .end_ns = ended, .exit_code = exitCode(result.term) }, .{}));
+    try ctx.atomic(try std.fs.path.join(ctx.a, &.{ root, "compiler.stdout" }), result.stdout);
+    try ctx.atomic(try std.fs.path.join(ctx.a, &.{ root, "compiler.stderr" }), result.stderr);
+    try ctx.atomic(try std.fs.path.join(ctx.a, &.{ root, "compiler-result.json" }), try std.json.Stringify.valueAlloc(ctx.a, .{ .schema = 1, .argv = command, .start_ns = started, .end_ns = ended, .exit_code = exitCode(result.term) }, .{}));
 }
 
 pub fn execute(ctx: *cache.Context, kind: Kind, argv: []const []const u8) !u8 {

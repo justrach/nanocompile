@@ -49,6 +49,10 @@ The [default Rust pipelining comparison](docs/default-pipelining.md) wins five c
 
 Capture full real-project builds and generate a Perfetto timeline, crate/native comparisons and instructions for future variations with the [build tracing tools](docs/build-tracing.md). Diagnostic logs stay private; speed claims use separate untraced benchmarks.
 
+Large Rust metadata now uses a separate bounded, state-checked snapshot reader; the actual Harness `objc2_app_kit` replay restores byte-identical artifacts. See [scope and checks](docs/large-rust-metadata.md). [Thin-LTO producer support](docs/thin-lto-producer-investigation.md) has an opt-in stable-staging candidate; default builds still refuse it.
+
+The opt-in [stable-alias full Harness candidate](docs/full-harness-stable-alias.md) restores the thin-LTO application: two warm rounds give **17.690 s Nano versus 6.863 s kache**. Artifact, permission, signature and CLI checks pass; Nano still loses, and no repeated cold win or default promotion is claimed.
+
 ## Build and use
 
 ```sh
@@ -183,8 +187,10 @@ compilations, including Cargo build-script executables, with zero debug
 information and supported codegen flags. It uses the same private linker capture
 and dependency validation as macro producers. Cargo still runs each restored
 build script; execution and its runtime file reads are not cached. Default,
-Linux, test, custom-linker, cross-target, LTO and debug configurations retain
-fallback. See [executable requirements](docs/executable-producers.md).
+Linux, test, custom-linker, cross-target, fat/plugin LTO and debug configurations retain
+fallback. Thin LTO remains refused unless the separate experimental
+`NANOCOMPILE_THIN_LTO_PRODUCERS=1` control is enabled; see the
+[staging investigation](docs/thin-lto-producer-investigation.md). See [executable requirements](docs/executable-producers.md).
 
 ```sh
 NANOCOMPILE_EXECUTABLE_PRODUCERS=1 RUSTC_WRAPPER="$nano_wrapper" cargo build --release
@@ -343,5 +349,3 @@ The subsequent [bounded source-variant cache](docs/source-variants.md) eliminate
 ## Attribution
 
 Inspired by [kunobi-ninja/kache](https://github.com/kunobi-ninja/kache), inspected at commit `943dd2b0bbbf28958623eba689e7ad71bf8888e5`. The Zig implementation is original; it adapts architectural ideas rather than copying Rust source. Apache-2.0; see `LICENSE` and `NOTICE`.
-
-Large Rust metadata now uses a separate bounded, state-checked snapshot reader; the actual Harness `objc2_app_kit` replay restores byte-identical artifacts. See [scope and checks](docs/large-rust-metadata.md). [Thin-LTO producer support](docs/thin-lto-producer-investigation.md) remains an unresolved experiment and is refused by production.

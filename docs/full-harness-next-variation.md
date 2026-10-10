@@ -12,4 +12,6 @@ Require alternating repeated untraced cold and warm trials against both accepted
 
 ## Follow-up state
 
-The [large metadata reader](large-rust-metadata.md) now passes actual crate storage/restoration and broader correctness checks; the completed full-project comparison still favors kache strongly on warm builds. The [thin-LTO trial](thin-lto-producer-investigation.md) fails cold byte reproducibility and has been removed from production. Preserve that failure while resolving the staging/linker cause. SQLite execution reuse remains outstanding.
+The [large metadata reader](large-rust-metadata.md) now passes actual crate storage/restoration and broader correctness checks; the completed full-project comparison still favors kache strongly on warm builds. The original random-path [thin-LTO trial](thin-lto-producer-investigation.md) failed cold byte reproducibility and was removed. The opt-in stable-alias candidate addresses that staging issue; preserve the original rejection and keep the new full-project evidence separate. Preserve that failure while resolving the staging/linker cause. SQLite execution reuse remains outstanding.
+
+The [completed stable-alias candidate session](full-harness-stable-alias.md) restores the full thin-LTO executable, with warm medians of 17.690 s Nano and 6.863 s kache. Nano still loses both warm rounds. Next compare the reversible control repeatedly, validate full-app source edits, and profile the candidate before assuming SQLite accounts for the remaining gap.

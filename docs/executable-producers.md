@@ -9,7 +9,9 @@ compiler inputs merely because a compiled program later reads them.
 Eligibility requires explicit crate name/output directory, dep-info and link
 emission, zero debug information, native host tools, and supported ordinary
 codegen/extern arguments. Tests, metadata-only executables, explicit targets,
-custom linkers, LTO and broader debug/link configurations still bypass. Linux
+custom linkers and broader debug/link configurations still bypass. Thin LTO
+has a separate opt-in [stable-staging candidate](thin-lto-producer-investigation.md);
+it is refused by default, and fat/plugin LTO remains unsupported. Linux
 producer integration remains unfinished. The flag is independent of macro
 producer and reported-input consumer flags. None is enabled by default.
 

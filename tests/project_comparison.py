@@ -57,6 +57,7 @@ def main():
     p.add_argument("--standalone", action="store_true", help="disable kache's daemon for this comparison")
     p.add_argument("--proc-macros", choices=("tracked", "reported"), default="tracked", help="nanocompile proc-macro input policy; reported requires declaring unreported file reads")
     p.add_argument("--proc-macro-producers", action="store_true", help="enable the experimental macOS producer cache; verify macro dylib artifacts too")
+    p.add_argument("--thin-lto-producers", action="store_true", help="opt-in stable-alias LTO candidate; preserve own-cold byte gates")
     p.add_argument("--executable-producers", action="store_true", help="enable experimental macOS executable compilation caching")
     p.add_argument("--build-script-contract", type=Path, help="opt Nano into explicit whole build-script execution contracts")
     p.add_argument("--kache-no-build-scripts", action="store_true", help="diagnostic ablation: disable only kache build-script execution caching")
@@ -67,6 +68,8 @@ def main():
     p.add_argument('--no-compiler-stream', action='store_true', help='disable default Rust stream forwarding')
     p.add_argument('--no-pipelined-companions', action='store_true', help='disable default guarded companion membership')
     args = p.parse_args()
+    if args.thin_lto_producers and not args.executable_producers:
+        p.error("--thin-lto-producers requires --executable-producers")
     if args.probe_help and not args.bin:
         p.error('--probe-help requires --bin')
     if args.source_date_epoch is not None and args.source_date_epoch < 0:
@@ -114,12 +117,14 @@ def main():
         env["NANOCOMPILE_PROC_MACRO_PRODUCERS"] = "1"
     if args.executable_producers:
         env["NANOCOMPILE_EXECUTABLE_PRODUCERS"] = "1"
+    if args.thin_lto_producers:
+        env["NANOCOMPILE_THIN_LTO_PRODUCERS"] = "1"
     target_options = ["--bin", args.bin] if args.bin else ["--lib"]
     command = ["cargo", "build", "--release", "--locked", "--offline", *target_options,
                "-p", args.package, "-j", str(args.jobs), "--message-format=json-render-diagnostics"]
     if capture:
         command += ["--timings", "-vv"]
-    result = {"diagnostic_trace": bool(capture) or args.script_profile, "script_profile": args.script_profile, "compiler_stream": env.get("NANOCOMPILE_STREAM_COMPILER"), "pipelined_companions": env.get("NANOCOMPILE_PIPELINED_COMPANIONS"), "script_sha256": sha(Path(__file__)), "project": str(project), "commit": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=project, text=True).strip(),
+    result = {"thin_lto_producers": args.thin_lto_producers, "diagnostic_trace": bool(capture) or args.script_profile, "script_profile": args.script_profile, "compiler_stream": env.get("NANOCOMPILE_STREAM_COMPILER"), "pipelined_companions": env.get("NANOCOMPILE_PIPELINED_COMPANIONS"), "script_sha256": sha(Path(__file__)), "project": str(project), "commit": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=project, text=True).strip(),
               "dirty": bool(subprocess.check_output(["git", "status", "--porcelain"], cwd=project)),
               "platform": platform.platform(), "jobs": args.jobs, "runs": args.runs, "cold_runs": args.cold_runs, "cold_only": args.cold_only,
               "rustc": subprocess.check_output(["rustc", "--version", "--verbose"], cwd=project, text=True),

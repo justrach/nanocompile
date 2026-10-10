@@ -1,0 +1,183 @@
+diff --git a/src/compiler.zig b/src/compiler.zig
+index c073462..54e9439 100644
+--- a/src/compiler.zig
++++ b/src/compiler.zig
+@@ -15,6 +15,7 @@ const Plan = struct {
+     configuration: ?cache.Dependency = null,
+     producer: bool = false,
+     producer_dylib: bool = false,
++    thin_lto: bool = false,
+     linked_output: ?[]const u8 = null,
+     out_dir: ?[]const u8 = null,
+ };
+@@ -62,6 +63,7 @@ fn rustPlan(ctx: *cache.Context, argv: []const []const u8) !Plan {
+     var builtin_macro = false;
+     var debug_info: []const u8 = "0";
+     var producer_unsafe_codegen = false;
++    var thin_lto = false;
+     var target: ?[]const u8 = null;
+     var i: usize = 1;
+     while (i < argv.len) : (i += 1) {
+@@ -125,7 +127,11 @@ fn rustPlan(ctx: *cache.Context, argv: []const []const u8) !Plan {
+             const split = std.mem.indexOfScalar(u8, v, '=') orelse v.len;
+             const key = v[0..split];
+             if (eq(key, "debuginfo")) debug_info = v[@min(split + 1, v.len)..];
+-            for ([_][]const u8{ "lto", "linker-plugin-lto", "relocation-model" }) |unsupported| {
++            if (eq(key, "lto") and eq(v[@min(split + 1, v.len)..], "thin") and
++                eq(ctx.env.get("NANOCOMPILE_THIN_LTO_PRODUCERS") orelse "", "1"))
++            {
++                thin_lto = true;
++            } else for ([_][]const u8{ "lto", "linker-plugin-lto", "relocation-model" }) |unsupported| {
+                 if (eq(key, unsupported)) producer_unsafe_codegen = true;
+             }
+             if (eq(key, "extra-filename")) {
+@@ -230,7 +236,7 @@ fn rustPlan(ctx: *cache.Context, argv: []const []const u8) !Plan {
+     }
+     if (dep_info == null) return error.NoDependencyInfo;
+     if (producer and (std.mem.indexOfAny(u8, dir, "\r\n\t\"\\") != null or std.mem.indexOfAny(u8, ctx.root, "\r\n\t\"\\") != null or std.mem.indexOf(u8, dir, "//") != null)) return error.UnsupportedProducerPath;
+-    return .{ .source = src, .outputs = outputs.items, .dependencies = inputs.items, .dep_info = dep_info, .library_dirs = search_dirs.items, .native_dirs = native_dirs.items, .configuration = configuration, .producer = producer, .producer_dylib = producer_dylib, .linked_output = linked_output, .out_dir = dir };
++    return .{ .source = src, .outputs = outputs.items, .dependencies = inputs.items, .dep_info = dep_info, .library_dirs = search_dirs.items, .native_dirs = native_dirs.items, .configuration = configuration, .producer = producer, .producer_dylib = producer_dylib, .thin_lto = thin_lto, .linked_output = linked_output, .out_dir = dir };
+ }
+ 
+ fn zigPlan(ctx: *cache.Context, argv: []const []const u8) !Plan {
+@@ -574,8 +580,10 @@ fn executeProducer(ctx: *cache.Context, plan: Plan, argv: []const []const u8) !u
+     try before.appendSlice(ctx.a, dependencyRecords(ctx, plan.dependencies) catch return bypass(ctx, argv, "bypass: producer inputs unavailable"));
+     try before.appendSlice(ctx.a, rust_dependencies.nativeSnapshot(ctx, plan.native_dirs) catch return bypass(ctx, argv, "bypass: producer native search unsupported"));
+     const directories = rust_dependencies.snapshot(ctx, plan.library_dirs, plan.outputs) catch return bypass(ctx, argv, "bypass: producer dependency lookup unavailable");
+-    const job = @import("producer_job.zig").Job.create(ctx) catch return bypass(ctx, argv, "bypass: producer staging unavailable");
++    var job = @import("producer_job.zig").Job.create(ctx) catch return bypass(ctx, argv, "bypass: producer staging unavailable");
+     defer job.cleanup(ctx) catch {};
++    if (plan.thin_lto) job.acquireAlias(ctx, key) catch
++        return bypass(ctx, argv, "bypass: exclusive thin-LTO alias unavailable");
+     const original = plan.linked_output orelse return bypass(ctx, argv, "bypass: producer needs link output");
+     const output = try std.fs.path.join(ctx.a, &.{ job.out, std.fs.path.basename(original) });
+     const retain_job = eq(ctx.env.get("NANOCOMPILE_RETAIN_PRODUCER_JOBS") orelse "", "1");
+@@ -604,6 +612,7 @@ fn executeProducer(ctx: *cache.Context, plan: Plan, argv: []const []const u8) !u
+         retainProducerResult(ctx, job.root, command.items, started, result) catch |err|
+             ctx.trace(try std.fmt.allocPrint(ctx.a, "diagnostic compiler capture failed: {s}", .{@errorName(err)}));
+     }
++    job.validateAlias(ctx) catch return bypass(ctx, argv, "bypass: thin-LTO staging alias changed");
+     result.stdout = try replacePath(ctx, result.stdout, job.out, plan.out_dir.?);
+     result.stderr = try replacePath(ctx, result.stderr, job.out, plan.out_dir.?);
+     result.stderr = try replacePath(ctx, result.stderr, linker, "cc");
+@@ -649,10 +658,9 @@ fn executeProducer(ctx: *cache.Context, plan: Plan, argv: []const []const u8) !u
+ 
+ fn retainProducerResult(ctx: *cache.Context, root: []const u8, command: []const []const u8, started: i96, result: std.process.RunResult) !void {
+     const ended = std.Io.Clock.real.now(ctx.io).nanoseconds;
+-    try ctx.atomic(try std.fs.path.join(ctx.a, &.{root, "compiler.stdout"}), result.stdout);
+-    try ctx.atomic(try std.fs.path.join(ctx.a, &.{root, "compiler.stderr"}), result.stderr);
+-    try ctx.atomic(try std.fs.path.join(ctx.a, &.{root, "compiler-result.json"}),
+-        try std.json.Stringify.valueAlloc(ctx.a, .{ .schema = 1, .argv = command, .start_ns = started, .end_ns = ended, .exit_code = exitCode(result.term) }, .{}));
++    try ctx.atomic(try std.fs.path.join(ctx.a, &.{ root, "compiler.stdout" }), result.stdout);
++    try ctx.atomic(try std.fs.path.join(ctx.a, &.{ root, "compiler.stderr" }), result.stderr);
++    try ctx.atomic(try std.fs.path.join(ctx.a, &.{ root, "compiler-result.json" }), try std.json.Stringify.valueAlloc(ctx.a, .{ .schema = 1, .argv = command, .start_ns = started, .end_ns = ended, .exit_code = exitCode(result.term) }, .{}));
+ }
+ 
+ pub fn execute(ctx: *cache.Context, kind: Kind, argv: []const []const u8) !u8 {
+diff --git a/src/producer_job.zig b/src/producer_job.zig
+index 4b17972..768316d 100644
+--- a/src/producer_job.zig
++++ b/src/producer_job.zig
+@@ -10,6 +10,8 @@ pub const Job = struct {
+     out: []const u8,
+     canonical_out: []const u8,
+     capture_id: []const u8,
++    alias: ?[]const u8 = null,
++    alias_target: ?[]const u8 = null,
+ 
+     pub fn create(ctx: *cache.Context) !Job {
+         const parent = try ctx.path(&.{"producer-jobs"});
+@@ -32,7 +34,45 @@ pub const Job = struct {
+         return error.JobCollision;
+     }
+ 
++    /// Caller holds key and output locks. Never adopt an existing alias: even
++    /// stale links belong to another job. Only lexical spelling is stable;
++    /// physical ownership remains a freshly created exclusive directory.
++    pub fn acquireAlias(self: *Job, ctx: *cache.Context, key: []const u8) !void {
++        if (self.alias != null or key.len != 64) return error.InvalidJobAlias;
++        for (key) |c| if (!std.ascii.isHex(c)) return error.InvalidJobAlias;
++        const parent = try ctx.path(&.{"producer-aliases"});
++        try Dir.cwd().createDirPath(ctx.io, parent);
++        const dir = try Dir.cwd().openDir(ctx.io, parent, .{});
++        defer dir.close(ctx.io);
++        try dir.setPermissions(ctx.io, .fromMode(0o700));
++        const alias = try std.fs.path.join(ctx.a, &.{ parent, key });
++        const target = try Dir.cwd().realPathFileAlloc(ctx.io, self.root, ctx.a);
++        const out = try std.fs.path.join(ctx.a, &.{ alias, "out" });
++        try Dir.cwd().symLink(ctx.io, target, alias, .{});
++        self.alias = alias;
++        self.alias_target = target;
++        self.out = out;
++    }
++
++    pub fn validateAlias(self: Job, ctx: *cache.Context) !void {
++        if (self.alias) |alias| {
++            var buffer: [std.fs.max_path_bytes]u8 = undefined;
++            const n = try Dir.cwd().readLink(ctx.io, alias, &buffer);
++            if (!std.mem.eql(u8, buffer[0..n], self.alias_target.?)) return error.JobAliasChanged;
++            const canonical = try Dir.cwd().realPathFileAlloc(ctx.io, self.out, ctx.a);
++            if (!std.mem.eql(u8, canonical, self.canonical_out)) return error.JobAliasChanged;
++        }
++    }
++
+     pub fn cleanup(self: Job, ctx: *cache.Context) !void {
++        // Release lexical aliases even when physical diagnostics are retained.
++        // A retargeted link is foreign; do not delete it or follow it.
++        if (self.alias) |alias| {
++            var buffer: [std.fs.max_path_bytes]u8 = undefined;
++            const n = Dir.cwd().readLink(ctx.io, alias, &buffer) catch 0;
++            if (std.mem.eql(u8, buffer[0..n], self.alias_target.?))
++                try Dir.cwd().deleteFile(ctx.io, alias);
++        }
+         if (std.mem.eql(u8, ctx.env.get("NANOCOMPILE_RETAIN_PRODUCER_JOBS") orelse "", "1")) {
+             ctx.trace("diagnostic: retaining private producer job");
+             return;
+@@ -116,3 +156,47 @@ test "private jobs own only regular inputs beneath both output spellings" {
+     try std.testing.expectError(error.NotRegularFile, first.classify(&ctx, first.out));
+     try std.testing.expectError(error.FileNotFound, first.classify(&ctx, "missing.o"));
+ }
++
++test "stable aliases never adopt foreign jobs and retained cleanup releases spelling" {
++    var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
++    defer arena.deinit();
++    const a = arena.allocator();
++    const io = std.testing.io;
++    var tmp = std.testing.tmpDir(.{});
++    defer tmp.cleanup();
++    const cwd = try Dir.cwd().realPathFileAlloc(io, try std.fs.path.join(a, &.{ ".zig-cache", "tmp", &tmp.sub_path }), a);
++    var env = std.process.Environ.Map.init(a);
++    var ctx: cache.Context = .{ .a = a, .io = io, .env = &env, .root = try std.fs.path.join(a, &.{ cwd, "cache" }), .cwd = cwd };
++    var first = try Job.create(&ctx);
++    var second = try Job.create(&ctx);
++    defer second.cleanup(&ctx) catch {};
++    const key = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
++    try first.acquireAlias(&ctx, key);
++    const spelling = first.out;
++    try first.validateAlias(&ctx);
++    try std.testing.expectError(error.PathAlreadyExists, second.acquireAlias(&ctx, key));
++    try second.acquireAlias(&ctx, "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb");
++    const generated = try std.fs.path.join(a, &.{ first.out, "generated.o" });
++    try Dir.cwd().writeFile(io, .{ .sub_path = generated, .data = "owned" });
++    try std.testing.expect((try first.classify(&ctx, generated)).owned);
++    try std.testing.expect(!(try second.classify(&ctx, generated)).owned);
++    try env.put("NANOCOMPILE_RETAIN_PRODUCER_JOBS", "1");
++    try first.cleanup(&ctx);
++    try std.testing.expectError(error.FileNotFound, Dir.cwd().statFile(io, first.alias.?, .{ .follow_symlinks = false }));
++    _ = try Dir.cwd().statFile(io, first.root, .{});
++    var next = try Job.create(&ctx);
++    try next.acquireAlias(&ctx, key);
++    try std.testing.expectEqualStrings(spelling, next.out);
++    try std.testing.expect(!std.mem.eql(u8, first.canonical_out, next.canonical_out));
++    try Dir.cwd().deleteFile(io, next.alias.?);
++    try Dir.cwd().symLink(io, second.alias_target.?, next.alias.?, .{});
++    try std.testing.expectError(error.JobAliasChanged, next.validateAlias(&ctx));
++    try Dir.cwd().writeFile(io, .{ .sub_path = try std.fs.path.join(a, &.{ second.out, "generated.o" }), .data = "foreign" });
++    try std.testing.expect(!(try next.classify(&ctx, generated)).owned);
++    try env.put("NANOCOMPILE_RETAIN_PRODUCER_JOBS", "0");
++    try next.cleanup(&ctx);
++    var buffer: [std.fs.max_path_bytes]u8 = undefined;
++    const n = try Dir.cwd().readLink(io, next.alias.?, &buffer);
++    try std.testing.expectEqualStrings(second.alias_target.?, buffer[0..n]);
++    try first.cleanup(&ctx);
++}

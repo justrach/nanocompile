@@ -1,0 +1,32 @@
+{
+  "platform": "darwin",
+  "binary_sha256": "1d2f3e56d26ef51ffa5fbb43e090b397fce871d7837d556786927e90507e043c",
+  "probe_sha256": "d9501048d2b4af27c444f23f19f673ae2e3f7ea255099752539eaf977b9c6199",
+  "direct_cold_warm_artifacts_equal": false,
+  "own_cold_warm_artifacts_equal": true,
+  "staging_difference": {
+    "changed_bytes": 48,
+    "allowed_ranges": [
+      [
+        1944,
+        1960
+      ],
+      [
+        600736,
+        600768
+      ]
+    ],
+    "scope": "LC_UUID and exactly its CodeDirectory page hash; no byte rewriting"
+  },
+  "diagnostics_replayed": true,
+  "executable_permissions_preserved": true,
+  "runtime_reads_stay_live_after_restore": true,
+  "source_and_preserved_mtime_native_changes_detected": true,
+  "corrupt_blob_and_manifest_repaired": true,
+  "failed_compilation_not_cached": true,
+  "debug_and_default_policy_bypass": true,
+  "thin_lto": true,
+  "stable_alias_collision_and_same_key_concurrency": true,
+  "private_producer_jobs_retained": true,
+  "limits": "Apple native zero-debug executable compilation only; execution is not cached; no project speed claim"
+}
