@@ -92,7 +92,8 @@ def main():
             cached(False)
             cached(True)
             metadata.write_bytes(original_metadata)
-            cached(False)
+            # The original metadata bytes match a retained validated state.
+            cached(True)
             # An extra candidate without a proven same-stem metadata match
             # retains its full byte guard, even when rustc ignores it.
             competitor = root / 'deps/libdep-other.rlib'
@@ -106,7 +107,7 @@ def main():
             assert compile_top() == reference
             cached(False)
             competitor.unlink()
-            cached(False)
+            cached(True)
             # Explicit archive inputs must miss even with a valid companion.
             for path in (root / 'out').iterdir():
                 path.unlink()
