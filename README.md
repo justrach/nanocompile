@@ -247,7 +247,7 @@ The [full application capture](docs/full-harness-benchmark.md) exposes a larger
 coverage gap: Nano took 89.0 s warm versus kache's 7.0 s in one diagnostic round.
 Thin-LTO executable and additional build-script work remain uncached by Nano;
 the adapters result does not establish a full-application lead.
-The latest opt-in [guarded SQLite/full-app comparison](docs/sqlite-execution-candidate.md)
+The earlier opt-in [guarded SQLite/full-app comparison](docs/sqlite-execution-candidate.md)
 completes three cold pairs and three warm rounds with exact own-cold artifact checks.
 Cold medians are **180.88 s Nano versus 188.51 s kache** (2/3 Nano wins);
 warm medians are **10.80 versus 6.56 s** (0/3). Nano still trails on warm full-app
@@ -359,6 +359,6 @@ The subsequent [bounded source-variant cache](docs/source-variants.md) eliminate
 
 Inspired by [kunobi-ninja/kache](https://github.com/kunobi-ninja/kache), inspected at commit `943dd2b0bbbf28958623eba689e7ad71bf8888e5`. The Zig implementation is original; it adapts architectural ideas rather than copying Rust source. Apache-2.0; see `LICENSE` and `NOTICE`.
 
-The [scoped media/tree-sitter execution candidate](docs/native-script-candidate.md) has a completed 39-execution actual-script fixture, including source edits, runtime checks and failures. Full-Harness performance validation remains pending; isolated restored-script timings are not a project speed claim.
+The [scoped media/tree-sitter execution candidate](docs/native-script-candidate.md) has a completed 39-execution actual-script fixture, including source edits, runtime checks and failures. The expanded six-grammar/media configuration now has repeated full-Harness measurements; isolated restored-script timings are not a project speed claim.
 
-The subsequent [six-build full-Harness diagnostic](benchmarks/harness-full-app-native-scripts-trace.json) passes all output/log/capture checks, but Nano still loses warm builds (10.587 s versus kache 6.759 s). [Future experiment instructions](benchmarks/harness-native-scripts-experiments.json) target the remaining media context and native grammar scripts, now backed by 44 media and 126 grammar execution checks. Repeated full-project performance validation remains required.
+The subsequent [six-build full-Harness diagnostic](benchmarks/harness-full-app-native-scripts-trace.json) passes all output/log/capture checks, but Nano still loses warm builds (10.587 s versus kache 6.759 s). [Future experiment instructions](benchmarks/harness-native-scripts-experiments.json) target the remaining media context and native grammar scripts, now backed by 44 media and 126 grammar execution checks. The subsequent [16-build untraced comparison](benchmarks/harness-full-app-grammar-release-repeated.json) records cold medians of **182.65 s Nano / 188.12 s kache** (3/3 Nano wins), but warm medians of **8.60 s / 5.80 s** (0/3 Nano wins). All recorded own-cold outputs/modes, CLI probes and 16 log hashes pass. This compares the combined configuration; it does not isolate each feature’s contribution. The [current variation instructions](docs/full-harness-next-variation.md) prioritize the remaining native scripts and full-app source-edit gates.
