@@ -40,12 +40,13 @@ def main():
         argv = [str(binary), 'rustc', str(source/'lib.rs'), '--crate-name', 'scope_fixture',
                 '--crate-type', 'rlib', '--emit=dep-info,metadata,link', '--out-dir', str(out),
                 '-L', 'dependency='+str(out), '-C', 'opt-level=1']
-        def build(cwd):
+        def build(cwd, expected='miss'):
             for path in out.iterdir(): path.unlink()
             before = (cache/'events').read_text().splitlines() if (cache/'events').exists() else []
             q = subprocess.run(argv, cwd=cwd, env=env, capture_output=True)
             assert q.returncode == 0, q.stderr.decode(errors='replace')
-            assert (cache/'events').read_text().splitlines()[len(before):] == ['miss']
+            events = (cache/'events').read_text().splitlines()[len(before):]
+            assert events == [expected] if expected else events in (['miss'], ['hit'])
         baseline_hash = None
         if args.baseline:
             candidate_argv = argv[0]
@@ -69,6 +70,7 @@ def main():
         second = memos(cache/'toolchains',4)
         assert len(second) == 2
         assert len({row['hash'] for _,row in second}) == 2
+        second_hashes = {row['hash'] for _,row in second}
         assert {row['decoder_hash'] for _,row in second} == {original['decoder_hash']}
         for name,(mtime,digest) in builtins.items():
             path = cache/'metadata'/name
@@ -78,6 +80,11 @@ def main():
         third = memos(cache/'toolchains',4)
         assert len({row['hash'] for _,row in third}) == 2
         assert len({row['decoder_hash'] for _,row in third}) == 2
+        (b/'rust-toolchain.toml').unlink()
+        build(b, expected=None)
+        fourth = memos(cache/'toolchains',4)
+        assert {row['hash'] for _,row in fourth} == second_hashes
+        assert {row['decoder_hash'] for _,row in fourth} == {original['decoder_hash']}
         report = {'binary_sha256': hashlib.sha256(binary.read_bytes()).hexdigest(),
                   'script_sha256': hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
                   'checks': ['different caller directories retain different complete compilation fingerprints',
@@ -85,6 +92,7 @@ def main():
                              'toolchain root-classification memos reused without rewriting across callers',
                              'adding a caller selector invalidates both full and present-state identities'],
                   'shared_toolchain_classifications': len(builtins)}
+        report['checks'].append('removing a caller selector restores original full and decoder identities')
         if baseline_hash is not None:
             report['baseline_sha256'] = hashlib.sha256(args.baseline.read_bytes()).hexdigest()
             report['checks'].append('complete compilation fingerprint matches baseline for identical caller state')

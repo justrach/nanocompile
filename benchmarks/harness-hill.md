@@ -1449,3 +1449,25 @@ remain pending. Production is unchanged. This batch does not compare kache.
 [Method and patch](../docs/decoder-scope-experiment.md);
 [all twelve cold builds](harness-decoder-cold-paired.json);
 [scope regression check](decoder-scope-check.json).
+
+## Decoder scope adopted after confirmation
+
+Independent cold confirmation wins 3/3 pairs, with medians **41.487079 s →
+32.063746 s** (22.71%). Together with the first six pairs, cold wins are
+9/9. Every build matches the batch's 193 artifacts; sources are unchanged.
+All cold builds have 167 Rust misses and 24 native misses, with no hits.
+The 52.692516-second baseline outlier remains in the published data.
+
+A 27-pair warm check has medians **2.396014 s → 2.301408 s**, with
+17/27 candidate wins. Mean saving 63.746 ms versus descriptive SE 52.894 ms
+does not establish a reliable warm speedup; no convincing regression is
+shown. All 54 restores have 167 Rust hits and 24 native hits and match
+193 artifacts. The source patch is adopted after unit, real Rust/Zig,
+native identity/metadata/static inputs, macro/executable producer and
+selector add/remove checks pass on the rebuilt executable. CI now runs
+the scope fixture on Linux and macOS. This comparison is against the
+previous Nano version, not kache.
+[Method and limits](../docs/decoder-scope-experiment.md);
+[cold confirmation](harness-decoder-cold-confirm.json);
+[warm pairs](harness-decoder-warm-paired.json);
+[correctness gates](decoder-adoption-checks.json).

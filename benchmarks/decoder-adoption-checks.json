@@ -1,0 +1,248 @@
+{
+  "binary_sha256": "ff22874cb5ac7ced96e67e076f75dc65581b921fa0307cf8f0b5018e8803f521",
+  "script_sha256": "aa4d087bc0b3c6ee8b33e1e14810a10fd5ec696f1c7ddbfc6f946942af147925",
+  "source_sha256": {
+    "src/cache.zig": "35abded96a7d4e436d3541f34a57ca8eb1795401fdf5558d72932f0bad5b04c5",
+    "src/identity.zig": "845fc3774c36f31a0892c643f63a176b151afc585ff9c596d501b27c89cb3f82",
+    "src/rust_metadata.zig": "c37a065a75c2b2e09c01fcc5903e54d3d80e171f4f3bd6e08dbd2ace5e6a2e14"
+  },
+  "checks": [
+    {
+      "name": "unit",
+      "command": [
+        "zig",
+        "build",
+        "test"
+      ],
+      "passed": true
+    },
+    {
+      "name": "integration",
+      "command": [
+        "zig",
+        "build",
+        "integration",
+        "-Doptimize=ReleaseFast"
+      ],
+      "passed": true
+    },
+    {
+      "name": "native_identity",
+      "command": [
+        "python3",
+        "tests/native_identity.py",
+        "/Users/rachpradhan/nanocompile/zig-out/bin/nanocompile",
+        "--output",
+        "/var/folders/t3/zjm3hgy56l551q_ygry8mbjm0000gn/T/decoder gates 2is0ngrm/native_identity.json"
+      ],
+      "passed": true,
+      "results": {
+        "platform": "darwin",
+        "selected": {
+          "driver": "/usr/bin/cc",
+          "clang": "/Library/Developer/CommandLineTools/usr/bin/clang",
+          "linker": "/Library/Developer/CommandLineTools/usr/bin/ld",
+          "sdk": "/Library/Developer/CommandLineTools/SDKs/MacOSX27.0.sdk",
+          "resource_dir": "/Library/Developer/CommandLineTools/usr/lib/clang/21",
+          "files": [
+            "/usr/bin/cc",
+            "/usr/bin/xcrun",
+            "/Library/Developer/CommandLineTools/usr/bin/clang",
+            "/Library/Developer/CommandLineTools/usr/bin/ld",
+            "/Library/Developer/CommandLineTools/usr/lib/libLTO.dylib",
+            "/Library/Developer/CommandLineTools/SDKs/MacOSX27.0.sdk/SDKSettings.json"
+          ],
+          "hash": "c105346a7f5747b604f7a9fb2e9c80687111c6b2aa7f9ed824c1bc4f66e3c907"
+        },
+        "observer_sha256": "ff22874cb5ac7ced96e67e076f75dc65581b921fa0307cf8f0b5018e8803f521",
+        "probe_sha256": "75f9f1fc9b794f7633f687622dd44e10e0cf04cdc000ec01deced7ad1ec3ca92",
+        "stable_warm_identity": true,
+        "invalid_driver_plan_legacy_fallback": true,
+        "private_sdk_selection_changes_identity": true,
+        "preserved_mtime_sdk_metadata_change_detected": true,
+        "corrupt_memos_recomputed": true,
+        "invalid_selections_rejected": true,
+        "limits": "Apple dispatch shim only; experimental producer keys; link input contents and negative lookup guards remain separate"
+      }
+    },
+    {
+      "name": "native_metadata",
+      "command": [
+        "python3",
+        "tests/native_metadata_cache.py",
+        "/Users/rachpradhan/nanocompile/zig-out/bin/nanocompile",
+        "--output",
+        "/var/folders/t3/zjm3hgy56l551q_ygry8mbjm0000gn/T/decoder gates 2is0ngrm/native_metadata.json"
+      ],
+      "passed": true,
+      "results": {
+        "other_compiler_available": true,
+        "other_compiler_version": "rustc 1.94.1 (e408947bf 2026-03-25)",
+        "other_compiler_refused_native_metadata_storage": true,
+        "binary_sha256": "ff22874cb5ac7ced96e67e076f75dc65581b921fa0307cf8f0b5018e8803f521",
+        "probe_sha256": "7ca593139825a70291f4e62369635ccd43096ee7d9d38dad8d2ca028ba4365c8",
+        "compiler": "rustc 1.97.1 (8bab26f4f 2026-07-14)\nbinary: rustc\ncommit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452\ncommit-date: 2026-07-14\nhost: aarch64-apple-darwin\nrelease: 1.97.1\nLLVM version: 22.1.6\n",
+        "cases": {
+          "default": {
+            "restored": true,
+            "direct_cold_warm_bytes_and_modes_equal": true,
+            "native_change_execution_verified": true,
+            "source_preserved_mtime_change_detected": true
+          },
+          "dynamic": {
+            "restored": true,
+            "direct_cold_warm_bytes_and_modes_equal": true,
+            "native_change_execution_verified": true,
+            "source_preserved_mtime_change_detected": true
+          },
+          "two_dynamic": {
+            "restored": true,
+            "direct_cold_warm_bytes_and_modes_equal": true,
+            "native_change_execution_verified": true,
+            "source_preserved_mtime_change_detected": true
+          },
+          "inactive": {
+            "restored": true,
+            "direct_cold_warm_bytes_and_modes_equal": true,
+            "native_change_execution_verified": true,
+            "source_preserved_mtime_change_detected": true
+          },
+          "static": {
+            "restored": false,
+            "direct_cold_warm_bytes_and_modes_equal": true,
+            "native_change_execution_verified": true,
+            "source_preserved_mtime_change_detected": false
+          },
+          "macro_static": {
+            "restored": false,
+            "direct_cold_warm_bytes_and_modes_equal": true,
+            "native_change_execution_verified": true,
+            "source_preserved_mtime_change_detected": false
+          },
+          "framework": {
+            "restored": true,
+            "direct_cold_warm_bytes_and_modes_equal": true,
+            "native_change_execution_verified": true,
+            "source_preserved_mtime_change_detected": true
+          }
+        }
+      }
+    },
+    {
+      "name": "static_native",
+      "command": [
+        "python3",
+        "tests/static_native_cache.py",
+        "/Users/rachpradhan/nanocompile/zig-out/bin/nanocompile",
+        "--output",
+        "/var/folders/t3/zjm3hgy56l551q_ygry8mbjm0000gn/T/decoder gates 2is0ngrm/static_native.json"
+      ],
+      "passed": true,
+      "results": {
+        "binary_sha256": "ff22874cb5ac7ced96e67e076f75dc65581b921fa0307cf8f0b5018e8803f521",
+        "probe_sha256": "6b83d5c8dea9136840d8830631d7b7954131f2f10df389dee2e18e5cd25b3b1c",
+        "direct_cold_warm_artifacts_equal": true,
+        "loaded_values": [
+          12,
+          12,
+          13,
+          14,
+          14
+        ],
+        "preserved_mtime_archive_change_detected": true,
+        "new_preferred_candidate_detected": true,
+        "unsupported_forms_missing_and_thin_bypass": true
+      }
+    },
+    {
+      "name": "producer",
+      "command": [
+        "python3",
+        "tests/producer_cache.py",
+        "/Users/rachpradhan/nanocompile/zig-out/bin/nanocompile",
+        "--cargo-flags",
+        "--output",
+        "/var/folders/t3/zjm3hgy56l551q_ygry8mbjm0000gn/T/decoder gates 2is0ngrm/producer.json"
+      ],
+      "passed": true,
+      "results": {
+        "platform": "darwin",
+        "cargo_flags": true,
+        "binary_sha256": "ff22874cb5ac7ced96e67e076f75dc65581b921fa0307cf8f0b5018e8803f521",
+        "probe_sha256": "8934768ef686edca06564be6b0111cfe7bb89a850dac5165d2f643a995c3f124",
+        "direct_cold_warm_artifacts_equal": true,
+        "diagnostics_replayed": true,
+        "loaded_macro_values": [
+          12,
+          12,
+          12,
+          13,
+          14,
+          14,
+          14,
+          14,
+          14,
+          14
+        ],
+        "native_preserved_mtime_change_detected": true,
+        "source_change_detected": true,
+        "corrupt_blob_and_manifest_repaired": true,
+        "failed_compilation_not_cached": true,
+        "unsupported_debug_and_default_policy_bypass": true,
+        "limits": "experimental opt-in; Apple default driver; debug-info zero; no cross-target or custom linker; no project speed claim"
+      }
+    },
+    {
+      "name": "executable",
+      "command": [
+        "python3",
+        "tests/executable_cache.py",
+        "/Users/rachpradhan/nanocompile/zig-out/bin/nanocompile",
+        "--output",
+        "/var/folders/t3/zjm3hgy56l551q_ygry8mbjm0000gn/T/decoder gates 2is0ngrm/executable.json"
+      ],
+      "passed": true,
+      "results": {
+        "platform": "darwin",
+        "binary_sha256": "ff22874cb5ac7ced96e67e076f75dc65581b921fa0307cf8f0b5018e8803f521",
+        "probe_sha256": "f9d44f74ef3cc1d0bef4fbf43f8c3301a9d87f945d6a80d092bd7c68c8f38a48",
+        "direct_cold_warm_artifacts_equal": true,
+        "diagnostics_replayed": true,
+        "executable_permissions_preserved": true,
+        "runtime_reads_stay_live_after_restore": true,
+        "source_and_preserved_mtime_native_changes_detected": true,
+        "corrupt_blob_and_manifest_repaired": true,
+        "failed_compilation_not_cached": true,
+        "debug_and_default_policy_bypass": true,
+        "limits": "Apple native zero-debug executable compilation only; execution is not cached; no project speed claim"
+      }
+    },
+    {
+      "name": "scope",
+      "command": [
+        "python3",
+        "benchmarks/experiments/decoder_scope_check.py",
+        "/Users/rachpradhan/nanocompile/zig-out/bin/nanocompile",
+        "--baseline",
+        "/private/tmp/nanocompile-decoder-cold-paired/nanocompile",
+        "--output",
+        "/var/folders/t3/zjm3hgy56l551q_ygry8mbjm0000gn/T/decoder gates 2is0ngrm/scope.json"
+      ],
+      "passed": true,
+      "results": {
+        "binary_sha256": "ff22874cb5ac7ced96e67e076f75dc65581b921fa0307cf8f0b5018e8803f521",
+        "script_sha256": "aed4749cc9b2ef7a00d04f56ad5ba270f21094a695a33a4df306a0f9b002f54b",
+        "checks": [
+          "different caller directories retain different complete compilation fingerprints",
+          "identical present compiler/resource state shares decoder identity",
+          "toolchain root-classification memos reused without rewriting across callers",
+          "adding a caller selector invalidates both full and present-state identities",
+          "removing a caller selector restores original full and decoder identities",
+          "complete compilation fingerprint matches baseline for identical caller state"
+        ],
+        "shared_toolchain_classifications": 19,
+        "baseline_sha256": "f03c9570446371873565886f4e6ba980629547f99284437240c13a2003200be1"
+      }
+    }
+  ]
+}

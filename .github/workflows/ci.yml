@@ -39,6 +39,7 @@ jobs:
           python3 tests/r2_transport.py
           zig build -Doptimize=ReleaseFast
           zig build test
+          python3 benchmarks/experiments/decoder_scope_check.py zig-out/bin/nanocompile --output bench-results/decoder-scope.json
           python3 tests/clang_cache.py zig-out/bin/nanocompile --output bench-results/clang-cache.json
           zig build integration -Doptimize=ReleaseFast
       - name: Verify live native selector overlap

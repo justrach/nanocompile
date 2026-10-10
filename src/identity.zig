@@ -13,7 +13,7 @@ const Stamp = struct {
     ctime: i96 = 0,
     kind: std.Io.File.Kind = .unknown,
 };
-const Memo = struct { schema: u32 = 3, hash: []const u8, stamps: []const Stamp };
+const Memo = struct { schema: u32 = 4, hash: []const u8, decoder_hash: []const u8, stamps: []const Stamp };
 
 fn rememberEpoch(ctx: *cache.Context, payload: []const u8) !void {
     var h = cache.Hash.init(.{});
@@ -82,12 +82,13 @@ fn readMemo(ctx: *cache.Context, path: []const u8, minimum_stamps: usize) ?[]con
     const payload = cache.unseal(ctx, bytes) catch return null;
     const parsed = std.json.parseFromSlice(Memo, ctx.a, payload, .{ .allocate = .alloc_always }) catch return null;
     const memo = parsed.value;
-    if (memo.schema != 3 or !cache.validHash(memo.hash) or memo.stamps.len < minimum_stamps) return null;
+    if (memo.schema != 4 or !cache.validHash(memo.decoder_hash) or !cache.validHash(memo.hash) or memo.stamps.len < minimum_stamps) return null;
     for (memo.stamps) |s| {
         const current = stamp(ctx, s.path) catch return null;
         if (!equal(current, s)) return null;
     }
     rememberEpoch(ctx, payload) catch return null;
+    ctx.compiler_decoder_identity = memo.decoder_hash;
     return memo.hash;
 }
 
@@ -272,6 +273,10 @@ pub fn fingerprint(ctx: *cache.Context, is_zig: bool, executable: []const u8) ![
     h = cache.Hash.init(.{});
     cache.field(&h, version.stdout);
     cache.field(&h, version.stderr);
+    var decoder = cache.Hash.init(.{});
+    cache.field(&decoder, "metadata-decoder-existing-state-v1");
+    cache.field(&decoder, version.stdout);
+    cache.field(&decoder, version.stderr);
     // Stable sorting makes the content identity independent of enumeration order.
     std.mem.sort(Stamp, stamps.items, {}, struct {
         fn less(_: void, a: Stamp, b: Stamp) bool {
@@ -280,20 +285,26 @@ pub fn fingerprint(ctx: *cache.Context, is_zig: bool, executable: []const u8) ![
     }.less);
     for (stamps.items) |s| {
         cache.field(&h, s.path);
+        // Classification sees the validated decoder and installed resources;
+        // negative selector paths remain in the complete compilation identity.
+        if (s.exists) cache.field(&decoder, s.path);
         if (s.exists and s.kind == .file) {
             const digest = (if (is_zig) ctx.digest(s.path) else rustFileDigest(ctx, s)) catch |err| {
                 ctx.trace(try std.fmt.allocPrint(ctx.a, "toolchain file unavailable: {s} ({s})", .{ s.path, @errorName(err) }));
                 return err;
             };
             cache.field(&h, digest);
+            cache.field(&decoder, digest);
         }
     }
     // A compiler update concurrent with fingerprinting is not a valid identity.
     for (stamps.items) |s| if (!equal(s, try stamp(ctx, s.path))) return error.ToolchainChanged;
     const hash = try cache.finish(ctx.a, &h);
-    const bytes = try std.json.Stringify.valueAlloc(ctx.a, Memo{ .hash = hash, .stamps = stamps.items }, .{});
+    const decoder_hash = try cache.finish(ctx.a, &decoder);
+    const bytes = try std.json.Stringify.valueAlloc(ctx.a, Memo{ .hash = hash, .decoder_hash = decoder_hash, .stamps = stamps.items }, .{});
     try ctx.atomic(path, try cache.seal(ctx, bytes));
     try rememberEpoch(ctx, bytes);
+    ctx.compiler_decoder_identity = decoder_hash;
     return hash;
 }
 

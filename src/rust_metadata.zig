@@ -55,7 +55,7 @@ pub fn parse(bytes: []const u8) !Root {
     return root;
 }
 
-const Memo = struct { schema: u32 = 1, compiler: []const u8, identity: []const u8, root: Root };
+const Memo = struct { schema: u32 = 2, compiler: []const u8, identity: []const u8, root: Root };
 pub const Resolver = struct {
     ctx: *cache.Context,
     compiler: []const u8,
@@ -82,16 +82,20 @@ pub const Resolver = struct {
         return checked.hash;
     }
 
+    fn decoderIdentity(self: *Resolver) ![]const u8 {
+        return self.ctx.compiler_decoder_identity orelse self.ctx.compiler_identity orelse error.NoCompilerIdentity;
+    }
+
     fn location(self: *Resolver, identity: []const u8) ![]const u8 {
         var hash = cache.Hash.init(.{});
-        cache.field(&hash, "rust-root-classification-v1");
-        cache.field(&hash, self.ctx.compiler_identity orelse return error.NoCompilerIdentity);
+        cache.field(&hash, "rust-root-classification-v2");
+        cache.field(&hash, try self.decoderIdentity());
         cache.field(&hash, identity);
         return self.ctx.path(&.{ "metadata", try cache.finish(self.ctx.a, &hash) });
     }
 
     fn write(self: *Resolver, identity: []const u8, root: Root) !void {
-        const memo: Memo = .{ .compiler = self.ctx.compiler_identity orelse return error.NoCompilerIdentity, .identity = identity, .root = root };
+        const memo: Memo = .{ .compiler = try self.decoderIdentity(), .identity = identity, .root = root };
         const bytes = try std.json.Stringify.valueAlloc(self.ctx.a, memo, .{});
         try self.ctx.atomic(try self.location(identity), try cache.seal(self.ctx, bytes));
     }
@@ -116,7 +120,7 @@ pub const Resolver = struct {
             const payload = cache.unseal(self.ctx, bytes) catch break :read;
             const parsed = std.json.parseFromSlice(Memo, self.ctx.a, payload, .{ .allocate = .alloc_always }) catch break :read;
             const memo = parsed.value;
-            if (memo.schema != 1 or !std.mem.eql(u8, memo.compiler, self.ctx.compiler_identity.?) or !std.mem.eql(u8, memo.identity, identity) or !validCrateHash(memo.root.hash)) break :read;
+            if (memo.schema != 2 or !std.mem.eql(u8, memo.compiler, try self.decoderIdentity()) or !std.mem.eql(u8, memo.identity, identity) or !validCrateHash(memo.root.hash)) break :read;
             try self.roots.put(self.ctx.a, path, memo.root);
             return memo.root;
         } else |_| {}
