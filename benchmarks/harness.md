@@ -62,3 +62,14 @@ whole-build timings are not convincing evidence of a speedup; this sample has
 only two direct and two warm builds. The Linux and local macOS workloads use
 different revisions and machines and must not be treated as a controlled
 cross-platform comparison.
+
+## Selected-resource revision: fresh R2 validation
+
+[Hosted Harness R2 validation](https://github.com/justrach/nanocompile/actions/runs/38010357689) passes on Ubuntu 24.04 and macOS 15 for Nano source `3fdc90645289254397e51eccf37a21ba9bb1233e`. The workload is clean public Harness revision `20c4019201e4b1eee5e04cfbb8dc7bda941b11b9`, using Rust 1.97.1, four jobs and the default producer policy. This differs from the local opt-in full-workload comparison.
+
+| Runner | Direct median (2) | Warm median (2) | R2-restored build | Restored hits | Pull + unpack |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Ubuntu 24.04 | 51.992 s | 36.687 s | 36.545 s | 98 | 3.583 s |
+| macOS 15 | 59.019 s | 45.061 s | 40.792 s | 101 | 4.030 s |
+
+All 131 Linux and 135 Mac library hashes match each runner’s cold build across direct, warm and R2-restored builds. Uploaded/downloaded snapshot digests match. These small hosted samples demonstrate preservation and matching-build reuse; they do not establish cross-machine cache hits or a controlled comparison with kache. [Linux raw evidence](harness-selected-decoder-r2-linux.json) and [Mac raw evidence](harness-selected-decoder-r2-macos.json) retain every sample and transfer measurement.
