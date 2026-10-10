@@ -21,6 +21,8 @@ def main():
     p=argparse.ArgumentParser(description=__doc__)
     for name in ('binary','cargo-log','references','contract','bindgen-tools-file','state','output'):
         p.add_argument('--'+name,type=Path,required=True)
+    p.add_argument('--package',choices=('media','tree-sitter'))
+    p.add_argument('--media-opt-level',choices=('0','3'))
     args=p.parse_args();binary=args.binary.resolve();state=args.state.resolve()
     state.mkdir(parents=True,mode=0o700,exist_ok=False)
     controls,controls_hash=load(args.bindgen_tools_file)
@@ -31,7 +33,7 @@ def main():
                 scope='Actual retained Harness build-script executables, private package copies; isolated diagnostics, no full-project speed claim')
     def save():save_report(args.output,report)
     try:
-        for package_name in ('media','tree-sitter'):
+        for package_name in ((args.package,) if args.package else ('media','tree-sitter')):
             variables=None;command=None
             for line in args.cargo_log.read_text().splitlines():
                 match=re.fullmatch(r'\s*Running `(.*)`',line)
@@ -40,7 +42,7 @@ def main():
                 for i,field in enumerate(fields):
                     if '=' not in field or not re.fullmatch('[A-Za-z_][A-Za-z_0-9]*',field.split('=',1)[0]):break
                     key,value=field.split('=',1);v[key]=value
-                if v.get('CARGO_PKG_NAME')==package_name and 'OUT_DIR' in v and Path(fields[i]).name=='build-script-build':
+                if v.get('CARGO_PKG_NAME')==package_name and 'OUT_DIR' in v and Path(fields[i]).name=='build-script-build' and (package_name!='media' or args.media_opt_level is None or v.get('OPT_LEVEL')==args.media_opt_level):
                     variables=v;command=Path(fields[i]);break
             assert variables and command,package_name
             root=state/package_name;root.mkdir();source=root/'package'
@@ -60,7 +62,7 @@ def main():
             env.update(CARGO_MANIFEST_DIR=str(source),CARGO_MANIFEST_PATH=str(source/'Cargo.toml'),
                        RUSTC_WRAPPER=str(binary),OUT_DIR=str(root/'out'),NANOCOMPILE_DIR=str(root/'cache'),
                        NANOCOMPILE_BUILD_SCRIPTS_FILE=str(args.contract.resolve()),NANOCOMPILE_TRACE='1')
-            rows=[];report['packages'][package_name]=dict(real_sha256=sha(real),source_hashes=original,samples=rows)
+            rows=[];report['packages'][package_name]=dict(real_sha256=sha(real),source_hashes=original,samples=rows,execution_context={k:variables.get(k) for k in ('DEBUG','OPT_LEVEL','PROFILE','TARGET')})
             def run(label,wrapped=True,decision=None,extra=None,success=True,selected=True):
                 out=root/'out';shutil.rmtree(out,ignore_errors=True);out.mkdir()
                 current=dict(env)

@@ -360,3 +360,5 @@ The subsequent [bounded source-variant cache](docs/source-variants.md) eliminate
 Inspired by [kunobi-ninja/kache](https://github.com/kunobi-ninja/kache), inspected at commit `943dd2b0bbbf28958623eba689e7ad71bf8888e5`. The Zig implementation is original; it adapts architectural ideas rather than copying Rust source. Apache-2.0; see `LICENSE` and `NOTICE`.
 
 The [scoped media/tree-sitter execution candidate](docs/native-script-candidate.md) has a completed 39-execution actual-script fixture, including source edits, runtime checks and failures. Full-Harness performance validation remains pending; isolated restored-script timings are not a project speed claim.
+
+The subsequent [six-build full-Harness diagnostic](benchmarks/harness-full-app-native-scripts-trace.json) passes all output/log/capture checks, but Nano still loses warm builds (10.587 s versus kache 6.759 s). [Future experiment instructions](benchmarks/harness-native-scripts-experiments.json) target the remaining media context and native grammar scripts, now backed by 44 media and 126 grammar execution checks. Repeated full-project performance validation remains required.

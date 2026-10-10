@@ -17,6 +17,7 @@ def main():
     parser.add_argument('--output', required=True, type=Path)
     parser.add_argument('--env-output', required=True, type=Path)
     parser.add_argument('--rustc', default='rustc')
+    parser.add_argument('--media-release-contexts', action='store_true', help='candidate: permit both observed media optimization levels; requires both-context validation')
     args = parser.parse_args()
     assert not args.output.exists() and not args.env_output.exists()
     binary, project = args.binary.resolve(), args.project.resolve()
@@ -55,6 +56,9 @@ def main():
         item['package'] = package
         item['environment'] = copy.deepcopy(native_rules)+[dict(name='CARGO_PKG_VERSION',value=version)]
         if package=='media':
+            if args.media_release_contexts:
+                item['environment']=[r for r in item['environment'] if r['name']!='OPT_LEVEL']
+                item['environment'].append(dict(name='PROFILE',value='release'))
             item['environment'] += [dict(name=name,value=value) for name,value in selections.items()]
             item['inputs'] += [str(formatter),str(config)]
             item['tools'] += ['/usr/bin/clang','/usr/bin/xcrun','/bin/sh',str(rustfmt)]
@@ -77,6 +81,7 @@ def main():
                   tools_file_sha256=hashlib.sha256(args.env_output.read_bytes()).hexdigest(),
                   formatter_sha256=hashlib.sha256(formatter.read_bytes()).hexdigest(),
                   rustfmt_config_sha256=hashlib.sha256(config.read_bytes()).hexdigest(),
+                  media_release_contexts=args.media_release_contexts,
                   status='prepared; requires real direct/cold/hit/edit and whole-project validation')
     (tools/'preparation.json').write_text(json.dumps(record,indent=2)+'\n')
     print(json.dumps(record,indent=2))
