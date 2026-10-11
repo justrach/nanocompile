@@ -6,8 +6,9 @@ from pathlib import Path
 
 def analyze(report, state, output):
     from build_trace import verify_logs
-    data = json.loads(report.read_text())
-    integrity = verify_logs(report, state)
+    raw_report = report.read_bytes()
+    data = json.loads(raw_report)
+    integrity = verify_logs(report, state, data=data)
     samples = []
     groups = {}
     for index, build in enumerate(data['builds']):
@@ -48,7 +49,7 @@ def analyze(report, state, output):
         provenance={key: data.get(key) for key in (
             'commit', 'jobs', 'nanocompile_sha256', 'kache_sha256', 'rustc',
             'kache_version', 'source_date_epoch')},
-        report_sha256=hashlib.sha256(report.read_bytes()).hexdigest(),
+        report_sha256=hashlib.sha256(raw_report).hexdigest(),
         analyzer_sha256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
         limitations='One source-edit sequence; single observations, not repeated '
         'medians or a proven speedup. Fresh references are correctness checks. '

@@ -14,9 +14,10 @@ from compiler_phase_profiles import collect as collect_compiler_profiles
 
 ROOT = Path(__file__).resolve().parents[1]
 
-def verify_logs(report, state):
+def verify_logs(report, state, data=None):
     """Verify recorded consoles, including failed untraced build samples."""
-    data = json.loads(report.read_text())
+    if data is None:
+        data = json.loads(report.read_text())
     count = 0
     for build in data['builds']:
         record = build.get('build_log')
