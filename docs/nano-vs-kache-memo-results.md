@@ -20,6 +20,8 @@ All runs shared one busy machine: unrelated processes kept the load average arou
 | Final cold/warm study at that point, warm median (calmer host) | 6.162 s | **5.955 s** | 1/3 |
 | + text build-script shims, warm (6 pairs) | **6.228 s** | 6.593 s | **5/6** |
 | + text build-script shims, cold prime (1 build each) | 174.984 s | 187.569 s | — |
+| + [code-assessment prewarm](code-assessment.md), warm (6 pairs) | **5.772 s** | 5.983 s | **6/6** |
+| + code-assessment prewarm, cold prime (1 build each) | 169.3 s | 182.2 s | — |
 
 In the six-pair warm study, the paired kache-minus-Nano saving is 0.308 s on average, with a standard error of 0.132 s. Every warm build restores all 138 build-script runs. Nano records 1,095 compiler hits, three misses and five bypasses. kache records 1,237 local hits.
 
@@ -77,7 +79,7 @@ Each edit is built with retained caches, then rebuilt with an empty cache at ide
 - **Leaf edit:** kache spends 1.5–5.8 s restoring workspace crates that did not change after a workspace edit, matching its documented dependency re-discovery. Nano restores them in under 0.1 s.
 - **Position effect:** in sample 5 the rotation was shifted. Nano built the leaf edit first and lost it, with its final link 13 s slower than in any other position. Whichever implementation builds first after the large reference-cache cleanup pays a host-level penalty, so per-scenario comparisons need more than one rotation.
 
-### The shared edit is still a loss
+### Why the shared edit was a loss
 
 In all five samples, kache's shared-edit lead comes from one critical-path unit. Medians of the critical-path compiles:
 
@@ -113,6 +115,23 @@ None of these removed the gap ([details](../benchmarks/harness-shared-edit-diagn
 - raising Nano's QoS
 - asynchronous read-ahead of the predicted metadata
 
-Reading every restored rlib and rmeta during the build recovered about a third of it, but not at an acceptable cost. **Nano does not yet beat kache on this scenario.** The mechanism is narrowed to rustc running slower inside Nano's builds after an idle gap, and is not identified.
+Reading every restored rlib and rmeta during the build recovered about a third of it, but not at an acceptable cost.
 
-Records: [sample 1](../benchmarks/harness-source-edits-memo-kache.json), [2](../benchmarks/harness-source-edits-memo-kache-2.json), [3](../benchmarks/harness-source-edits-memo-kache-3.json), [4](../benchmarks/harness-source-edits-memo-kache-4.json), [5](../benchmarks/harness-source-edits-memo-kache-5.json).
+The cause was found with the profiler's [wait diagnostics](rust-profiler.md#wait-diagnostics). The extra time was a fixed 2–4 s stall inside the frontend of the recompiled crates, while codegen time, CPU, faults and free jobserver tokens were unchanged. macOS assesses a new Mach-O file the first time a process registers its signature for library validation, and it serializes those assessments. Every restore creates new proc-macro dylibs. `harness-ui` was the first crate to load 16 of them, and in slow periods each assessment took about 0.3 s. kache pays the same per-file cost, but its first loads happened earlier, off the critical path. The earlier dylib prewarm did not help because it ran before the build, and the build then replaced those files with new restored ones. [Assessing each dylib right after it is restored](code-assessment.md) removed the stall. It is the reason for the result above.
+
+### With the code-assessment prewarm
+
+One more complete sample with the [code-assessment prewarm](code-assessment.md), in the default rotation (where Nano's shared edit previously lost every time). All empty-cache references match their timed builds, both implementations reproduce the initial artifacts after the revert, and all 18 logs rehash:
+
+| Scenario | Nano | kache | direct |
+| --- | ---: | ---: | ---: |
+| initial cold | **169.3 s** | 181.0 s | 169.7 s |
+| leaf edit | **73.6 s** | 80.4 s | 167.0 s |
+| shared edit | **111.2 s** | 115.1 s | 168.3 s |
+| revert | **6.2 s** | 12.9 s | 167.3 s |
+
+The six alternating shared-edit pairs ([record](../benchmarks/harness-shared-edit-pairs-code-assessment.json)) give Nano 6 of 6: median 111.4 s against 113.4 s, saving 2.30 s on average (standard error 0.82 s). Nano's `harness-ui` compile took 25.0–25.1 s in every build.
+
+Record: [sample 6](../benchmarks/harness-source-edits-code-assessment-kache.json).
+
+Records for samples 1–5: [sample 1](../benchmarks/harness-source-edits-memo-kache.json), [2](../benchmarks/harness-source-edits-memo-kache-2.json), [3](../benchmarks/harness-source-edits-memo-kache-3.json), [4](../benchmarks/harness-source-edits-memo-kache-4.json), [5](../benchmarks/harness-source-edits-memo-kache-5.json).

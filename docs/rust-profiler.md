@@ -60,7 +60,7 @@ The first diff of a Nano warm build (7.77 s) against a kache warm build (6.53 s)
 5. Use `simulate --scale` to estimate the payoff of a fix before building it.
 6. Implement the fix, then rerun step 1.
 
-Each round of this loop on Harness produced the next change: build-script runs, then Apple selection, then installed-tree memos, then contract parsing. The same loop also explained the source-edit result. `diff` placed kache's whole shared-edit lead on one `harness-ui` compile. `phases` on a traced reproduction then showed Nano adding only 0.26 s to it, which pointed at benchmark ordering rather than Nano (see [the results](nano-vs-kache-memo-results.md#why-nano-lost-the-shared-edit)).
+Each round of this loop on Harness produced the next change: build-script runs, then Apple selection, then installed-tree memos, then contract parsing. The same loop also explained the source-edit result. `diff` placed kache's whole shared-edit lead on one `harness-ui` compile. `phases` on a traced reproduction showed Nano's own work adding only 0.26 s to it. The [wait diagnostics](#wait-diagnostics) then located the rest: a frontend stall waiting for the system's assessment of freshly restored proc-macro dylibs (see [the results](nano-vs-kache-memo-results.md#why-the-shared-edit-was-a-loss)).
 
 ## Wait diagnostics
 
