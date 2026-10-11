@@ -24,6 +24,22 @@ request-level attribution. Console logs alone cannot explain a timing gap.
 Keep traced diagnostic runs separate from untraced speed trials, and preserve
 failed captures. Compiler phase profiling is opt-in and adds overhead.
 
+Request comparisons and timeline labels retain the source-edit scenario and
+fresh-reference status. Leaf/shared edits and reverts are never pooled solely
+because they share an `edit` phase. Fresh references remain visible but do not
+generate performance-optimization priorities. Missing same-scenario counterparts
+have no timing gap.
+
+The completed Harness capture was reanalyzed with these guards: 11,688 distinct
+comparison groups and no excluded builds. The
+[selected request observations](../benchmarks/harness-full-app-source-edit-request-observations.json)
+retain every scenario/reference comparison for the final executable, UI, engine
+and adapters, plus their execution/storage/total profiles and stream hashes.
+The highest shared-edit request gaps remain UI (4.012s) and final Harness
+(3.131s). Their intervals overlap and are diagnostic; do not add them into
+projected build savings. The full private timeline and filterable HTML are at
+`/tmp/nano-full-harness-source-edit-phase-timeline-20261011`.
+
 The actual source-edit runner also accepts `--trace-builds --compiler-profile`.
 Add both flags to the recorded `tests/harness_full_source_edits.py` invocation
 to retain complete compiler arguments, stdout/stderr and Cargo timelines across

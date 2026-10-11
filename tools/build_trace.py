@@ -204,12 +204,15 @@ def analyze(report, output):
     script_profiles, script_profile_coverage = [], []
     compiler_profiles, compiler_profile_coverage = [], []
     for index, build in enumerate(data['builds']):
+        scenario = str(build.get('scenario') or 'unspecified')
+        verification = bool(build.get('verification'))
+        context = dict(scenario=scenario, verification=verification)
         if (build.get('exit_code', 0) != 0 or build.get('cli_help_valid') is False
                 or any(value is False for key, value in build.items() if key.startswith('matches_'))):
             excluded_builds.append(dict(build=index, implementation=build['implementation'],
-                                        phase=build['phase'], reason='Failed build, executable probe or artifact validation'))
+                                        phase=build['phase'], **context, reason='Failed build, executable probe or artifact validation'))
             continue
-        traces.append(dict(name='process_name', ph='M', pid=index, tid=0, args=dict(name=f"{index}: {build['implementation']} {build['phase']}")))
+        traces.append(dict(name='process_name', ph='M', pid=index, tid=0, args=dict(name=f"{index}: {build['implementation']} {scenario} {build['phase']}" + (' verification' if verification else ''))))
         trace = build.get('trace', {})
         profiles = trace.get('script_phase_profiles')
         profile_status = 'embedded' if profiles is not None else 'not_requested'
@@ -231,10 +234,10 @@ def analyze(report, output):
                 compiler_status = 'verified_private_capture'
             else:
                 compiler_status = 'unavailable'
-        compiler_profiles.extend(dict(build=index, build_phase=build['phase'], implementation=build['implementation'], **row)
+        compiler_profiles.extend(dict(build=index, build_phase=build['phase'], implementation=build['implementation'], **context, **row)
                                  for row in compiler_phases or [])
         compiler_profile_coverage.append(dict(build=index, status=compiler_status, stage_rows=len(compiler_phases or [])))
-        script_profiles.extend(dict(build=index, build_phase=build['phase'], implementation=build['implementation'], **row)
+        script_profiles.extend(dict(build=index, build_phase=build['phase'], implementation=build['implementation'], **context, **row)
                                for row in profiles or [])
         script_profile_coverage.append(dict(build=index, status=profile_status, stage_rows=len(profiles or [])))
         if build['implementation'] == 'nanocompile':
@@ -244,15 +247,15 @@ def analyze(report, output):
                            if line.startswith(prefix)]
                 reason = request.get('bypass_reason') or next((r for r in reasons if r.isidentifier()), None)
                 if reason and request['kind'] == 'rust' and request['seconds'] >= .1:
-                    uncached_work.append(dict(build=index, phase=build['phase'], name=request['name'],
+                    uncached_work.append(dict(build=index, phase=build['phase'], **context, name=request['name'],
                         seconds=request['seconds'], reason=reason,
                         instruction='Inspect exact compiler arguments and the rejecting guard. Extend support only after measuring this configuration and proving complete input discovery, miss/hit byte and mode equality, edits/reverts and toolchain invalidation. Retain passthrough for unsupported cases.',
                         claim='Uncached request interval; potential reuse applies only to matching inputs and does not predict cold-build savings.'))
         service_events = trace.get('kache_service_events', [])
         if service_events:
-            build_script_runs.extend(dict(build=index, phase=build['phase'], **event) for event in service_events if event.get('crate_name') == 'build_script_run')
+            build_script_runs.extend(dict(build=index, phase=build['phase'], **context, **event) for event in service_events if event.get('crate_name') == 'build_script_run')
             metrics = sorted({key for event in service_events for key, value in event.items() if key.endswith('_ms') and isinstance(value, (int, float))})
-            service_summaries.append(dict(build=index, phase=build['phase'], results=dict(collections.Counter(event.get('result', 'unknown') for event in service_events)), stages={key: dict(samples=len(values), median_ms=statistics.median(values), sum_ms=sum(values)) for key in metrics if (values := [e[key] for e in service_events if isinstance(e.get(key), (int, float)) and (key != 'compile_time_ms' or e.get('result') in ('miss', 'passthrough'))])}))
+            service_summaries.append(dict(build=index, phase=build['phase'], **context, results=dict(collections.Counter(event.get('result', 'unknown') for event in service_events)), stages={key: dict(samples=len(values), median_ms=statistics.median(values), sum_ms=sum(values)) for key in metrics if (values := [e[key] for e in service_events if isinstance(e.get(key), (int, float)) and (key != 'compile_time_ms' or e.get('result') in ('miss', 'passthrough'))])}))
         for request in trace.get('requests', []):
             for timestamp in request.get('metadata_notifications_seconds', []):
                 traces.append(dict(name=request['name'] + ' metadata notification', cat='metadata', ph='i', s='t', ts=max(0, timestamp)*1e6, pid=index, tid='request'))
@@ -264,13 +267,13 @@ def analyze(report, output):
                 mode = row.get('kind', row.get('mode', 'unknown'))
                 duration = row.get('seconds', row.get('duration', 0))
                 start = row.get('start_seconds', row.get('start', 0))
-                grouped[(build['phase'], kind, mode, name, build['implementation'])].append(duration)
+                grouped[(scenario, verification, build['phase'], kind, mode, name, build['implementation'])].append(duration)
                 traces.append(dict(name=name, cat=kind + ':' + mode, ph='X', ts=max(0, start)*1e6,
-                                   dur=duration*1e6, pid=index, tid=kind, args=dict(implementation=build['implementation'], phase=build['phase'])))
+                                   dur=duration*1e6, pid=index, tid=kind, args=dict(implementation=build['implementation'], phase=build['phase'], **context)))
     comparison = []
-    identities = sorted({key[:4] for key in grouped})
+    identities = sorted({key[:6] for key in grouped})
     for key in identities:
-        row = dict(zip(('phase', 'kind', 'mode', 'name'), key))
+        row = dict(zip(('scenario', 'verification', 'phase', 'kind', 'mode', 'name'), key))
         for implementation in ('direct', 'nanocompile', 'kache'):
             values = grouped.get((*key, implementation), [])
             row[implementation] = dict(samples=len(values), median_seconds=statistics.median(values),
@@ -285,10 +288,10 @@ def analyze(report, output):
         if len(experiments) == 12:
             break
         gap = row['nano_minus_kache_seconds']
-        if gap is None or gap <= 0:
+        if gap is None or gap <= 0 or row['verification']:
             continue
         experiments.append(dict(priority=len(experiments)+1,
-            observation={k: row[k] for k in ('phase', 'kind', 'mode', 'name', 'nanocompile', 'kache', 'nano_minus_kache_seconds')},
+            observation={k: row[k] for k in ('scenario', 'verification', 'phase', 'kind', 'mode', 'name', 'nanocompile', 'kache', 'nano_minus_kache_seconds')},
             hypothesis='Execution reuse may remove repeated work' if row['mode'] == 'run-custom-build' else 'Identity, coordination or restore work may explain the interval gap',
             next_measurement='Inspect matching private records and instrument Nano stages; run one controlled ablation before changing behavior',
             implementation_instruction='Add phase measurements around the suspected work, then change only that cause behind a reversible control. Preserve fallback execution and compare the control on/off with identical inputs.',
@@ -305,7 +308,7 @@ def analyze(report, output):
                   'command', 'runs', 'cold_runs', 'cold_only', 'dirty', 'method', 'nanocompile_proc_macros',
                   'nanocompile_proc_macro_producers', 'nanocompile_executable_producers',
                   'build_script_contract_sha256', 'kache_build_script_cache', 'source_date_epoch',
-                  'binary_target', 'cli_help_probe', 'completed', 'failure') if key in data}
+                  'binary_target', 'cli_help_probe', 'completed', 'failure', 'resume') if key in data}
     provenance['analyzer_sha256'] = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
     provenance['script_phase_parser_sha256'] = hashlib.sha256(Path(__file__).with_name('script_phase_profiles.py').read_bytes()).hexdigest()
     provenance['compiler_phase_parser_sha256'] = hashlib.sha256(Path(__file__).with_name('compiler_phase_profiles.py').read_bytes()).hexdigest()
@@ -322,12 +325,14 @@ def analyze(report, output):
         compiler_phase_profiles=compiler_profiles, compiler_profile_coverage=compiler_profile_coverage,
                     build_coverage=[dict(implementation=b["implementation"], phase=b["phase"], events=b.get("events", {}), capture_coverage=b.get('trace', {}).get('capture_coverage'), request_kinds=dict(collections.Counter(r["kind"] for r in b.get("trace", {}).get("requests", []))), own_artifact_checks={k: v for k, v in b.items() if k.startswith("matches_own_cold")}) for b in data["builds"]],
                     limitations='compile_time_ms on cache hits can describe the stored original compilation; stage summaries exclude hit/dup compile_time_ms. Per-unit medians are scheduling-sensitive, unpaired diagnostic observations. Request durations overlap. Script phases describe logged calls and nested totals/publication overlap child stages; do not sum them into build savings. Compiler phases are nested request observations and can overlap output hashing; they are not additive. Missing counterparts are unknown, not zero. No optimization or overall speed win is established by this capture.')
+    if data.get('resume'):
+        analysis['limitations'] += ' This session was resumed; inherited environment equality across the pause is not established.'
     (output / 'analysis.json').write_text(json.dumps(analysis, indent=2) + '\n')
     brief = ['# Instructions for the next variation', '', analysis['limitations'], '',
              'Reproduce the captured configuration and freeze its exact binary as the experiment baseline. Also compare against the accepted production binary. Change one measured cause at a time. Preserve full content hashing, loader selection, native include discovery and artifact validation. Never optimize by skipping an unverified input.', '',
              ('This Nano-only capture has no kache measurements. Investigate the observed internal stages below; obtain a matched kache capture before attributing a comparative gap.' if data.get('nano_only') else 'Investigate these observed Nano-minus-kache interval gaps; a long overlapping interval does not establish critical-path savings:'), '']
-    for row in [r for r in comparison if r['nano_minus_kache_seconds'] and r['nano_minus_kache_seconds'] > 0][:12]:
-        brief.append(f"- {row['phase']} / {row['kind']} / {row['mode']} / {row['name']}: {row['nano_minus_kache_seconds']:.6f}s median interval gap; samples Nano={row['nanocompile']['samples']}, kache={row['kache']['samples']}.")
+    for row in [r for r in comparison if not r['verification'] and r['nano_minus_kache_seconds'] and r['nano_minus_kache_seconds'] > 0][:12]:
+        brief.append(f"- {row['scenario']} / {row['phase']} / {row['kind']} / {row['mode']} / {row['name']}: {row['nano_minus_kache_seconds']:.6f}s median interval gap; samples Nano={row['nanocompile']['samples']}, kache={row['kache']['samples']}.")
     if uncached_work:
         brief += ['', 'Uncached Nano work to investigate separately from interval gaps:', '']
         brief.extend(f"- {r['phase']} / {r['name']}: {r['seconds']:.6f}s, {r['reason']}. {r['instruction']} {r['claim']}" for r in uncached_work[:12])
@@ -352,16 +357,16 @@ def analyze(report, output):
     (output / 'next-experiments.md').write_text('\n'.join(brief)+'\n')
     # Escape all captured names. No raw logs or environment are embedded in the report.
     body = ''.join('<tr>' + ''.join('<td>'+html.escape(str(v))+'</td>' for v in
-                   (r['phase'], r['kind'], r['mode'], r['name'],
+                   (r['scenario'] + (' verification' if r['verification'] else '') + ' / ' + r['phase'], r['kind'], r['mode'], r['name'],
                     r['nanocompile'], r['kache'], r['nano_minus_kache_seconds'])) + '</tr>' for r in comparison)
     if compiler_profiles:
         body += ''.join('<tr>' + ''.join('<td>'+html.escape(str(v))+'</td>' for v in
-                       (r['build_phase'], 'compiler phase (nested)', r['stage'], r['request'],
+                       (r['scenario'] + (' verification' if r['verification'] else '') + ' / ' + r['build_phase'], 'compiler phase (nested)', r['stage'], r['request'],
                         f"{r['median_seconds']:.6f}s; {r['samples']} logged calls", 'unknown', 'unknown')) + '</tr>'
                         for r in compiler_profiles)
     if script_profiles:
         body += ''.join('<tr>' + ''.join('<td>'+html.escape(str(v))+'</td>' for v in
-                       (r['build_phase'], 'script phase (nested)', r['stage'], r['script'],
+                       (r['scenario'] + (' verification' if r['verification'] else '') + ' / ' + r['build_phase'], 'script phase (nested)', r['stage'], r['script'],
                         f"{r['median_seconds']:.6f}s; {r['samples']} logged calls", 'unknown', 'unknown')) + '</tr>'
                         for r in script_profiles)
     (output / 'index.html').write_text('<!doctype html><meta charset="utf-8"><title>Build trace comparison</title><style>body{font:15px system-ui;margin:32px}td,th{padding:8px;text-align:left;border-bottom:1px solid #ddd}input{padding:10px;width:400px}</style><h1>Whole-build diagnostic comparison</h1><p>'+html.escape(analysis['limitations'])+'</p><p>Open trace.json in Perfetto for overlapping request and Cargo timelines. Full logs stay in the private capture directory.</p><input placeholder="Filter crate, mode or phase" oninput="for(const row of document.querySelectorAll(\'tbody tr\'))row.hidden=!row.textContent.toLowerCase().includes(this.value.toLowerCase())"><table><thead><tr>'+''.join('<th>'+v+'</th>' for v in ('Phase','Layer','Mode','Name','Nano','kache','Gap (s)'))+'</tr></thead><tbody>'+body+'</tbody></table>')

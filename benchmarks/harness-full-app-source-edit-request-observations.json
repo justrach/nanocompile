@@ -1,0 +1,1424 @@
+{
+  "schema": 1,
+  "completed_diagnostic_sequence": true,
+  "report_sha256": "31bd6b4cca472a0b8837af29b0aea21ce413690c85ec142715ad5edd8c2d7f3e",
+  "analyzer_sha256": "5b304e62cacf4d4113d41a50fc9cc0c8fff6f87cc879f1febc7803d0194b966d",
+  "limitations": "compile_time_ms on cache hits can describe the stored original compilation; stage summaries exclude hit/dup compile_time_ms. Per-unit medians are scheduling-sensitive, unpaired diagnostic observations. Request durations overlap. Script phases describe logged calls and nested totals/publication overlap child stages; do not sum them into build savings. Compiler phases are nested request observations and can overlap output hashing; they are not additive. Missing counterparts are unknown, not zero. No optimization or overall speed win is established by this capture. This session was resumed; inherited environment equality across the pause is not established.",
+  "selection": "All request comparisons for harness, harness_ui, harness_engine and harness_adapters, separated by scenario and fresh-reference status. Selected producer stages for those same requests; every build index/source stream digest is retained. Not a complete trace export.",
+  "comparisons": [
+    {
+      "scenario": "shared-edit",
+      "verification": false,
+      "phase": "edit",
+      "kind": "request",
+      "mode": "rust",
+      "name": "harness_ui",
+      "direct": null,
+      "nanocompile": {
+        "samples": 1,
+        "median_seconds": 30.886367,
+        "min_seconds": 30.886367,
+        "max_seconds": 30.886367
+      },
+      "kache": {
+        "samples": 1,
+        "median_seconds": 26.874391,
+        "min_seconds": 26.874391,
+        "max_seconds": 26.874391
+      },
+      "nano_minus_kache_seconds": 4.011976000000001
+    },
+    {
+      "scenario": "leaf-edit",
+      "verification": true,
+      "phase": "empty-cache-reference",
+      "kind": "request",
+      "mode": "rust",
+      "name": "harness",
+      "direct": null,
+      "nanocompile": {
+        "samples": 1,
+        "median_seconds": 70.949581,
+        "min_seconds": 70.949581,
+        "max_seconds": 70.949581
+      },
+      "kache": {
+        "samples": 1,
+        "median_seconds": 67.201643,
+        "min_seconds": 67.201643,
+        "max_seconds": 67.201643
+      },
+      "nano_minus_kache_seconds": 3.7479379999999907
+    },
+    {
+      "scenario": "shared-edit",
+      "verification": false,
+      "phase": "edit",
+      "kind": "request",
+      "mode": "rust",
+      "name": "harness",
+      "direct": null,
+      "nanocompile": {
+        "samples": 1,
+        "median_seconds": 71.6566,
+        "min_seconds": 71.6566,
+        "max_seconds": 71.6566
+      },
+      "kache": {
+        "samples": 1,
+        "median_seconds": 68.525389,
+        "min_seconds": 68.525389,
+        "max_seconds": 68.525389
+      },
+      "nano_minus_kache_seconds": 3.1312109999999933
+    },
+    {
+      "scenario": "initial",
+      "verification": false,
+      "phase": "cold",
+      "kind": "request",
+      "mode": "rust",
+      "name": "harness",
+      "direct": null,
+      "nanocompile": {
+        "samples": 1,
+        "median_seconds": 69.951065,
+        "min_seconds": 69.951065,
+        "max_seconds": 69.951065
+      },
+      "kache": {
+        "samples": 1,
+        "median_seconds": 66.849679,
+        "min_seconds": 66.849679,
+        "max_seconds": 66.849679
+      },
+      "nano_minus_kache_seconds": 3.101386000000005
+    },
+    {
+      "scenario": "leaf-edit",
+      "verification": false,
+      "phase": "edit",
+      "kind": "request",
+      "mode": "rust",
+      "name": "harness",
+      "direct": null,
+      "nanocompile": {
+        "samples": 1,
+        "median_seconds": 72.760765,
+        "min_seconds": 72.760765,
+        "max_seconds": 72.760765
+      },
+      "kache": {
+        "samples": 1,
+        "median_seconds": 70.03551,
+        "min_seconds": 70.03551,
+        "max_seconds": 70.03551
+      },
+      "nano_minus_kache_seconds": 2.725255000000004
+    },
+    {
+      "scenario": "revert",
+      "verification": true,
+      "phase": "empty-cache-reference",
+      "kind": "request",
+      "mode": "rust",
+      "name": "harness",
+      "direct": null,
+      "nanocompile": {
+        "samples": 1,
+        "median_seconds": 70.42789,
+        "min_seconds": 70.42789,
+        "max_seconds": 70.42789
+      },
+      "kache": {
+        "samples": 1,
+        "median_seconds": 67.710699,
+        "min_seconds": 67.710699,
+        "max_seconds": 67.710699
+      },
+      "nano_minus_kache_seconds": 2.7171909999999997
+    },
+    {
+      "scenario": "leaf-edit",
+      "verification": true,
+      "phase": "empty-cache-reference",
+      "kind": "request",
+      "mode": "rust",
+      "name": "harness_ui",
+      "direct": null,
+      "nanocompile": {
+        "samples": 1,
+        "median_seconds": 27.229926,
+        "min_seconds": 27.229926,
+        "max_seconds": 27.229926
+      },
+      "kache": {
+        "samples": 1,
+        "median_seconds": 25.809161,
+        "min_seconds": 25.809161,
+        "max_seconds": 25.809161
+      },
+      "nano_minus_kache_seconds": 1.4207649999999994
+    },
+    {
+      "scenario": "initial",
+      "verification": false,
+      "phase": "cold",
+      "kind": "request",
+      "mode": "rust",
+      "name": "harness_ui",
+      "direct": null,
+      "nanocompile": {
+        "samples": 1,
+        "median_seconds": 26.098553,
+        "min_seconds": 26.098553,
+        "max_seconds": 26.098553
+      },
+      "kache": {
+        "samples": 1,
+        "median_seconds": 24.954744,
+        "min_seconds": 24.954744,
+        "max_seconds": 24.954744
+      },
+      "nano_minus_kache_seconds": 1.1438089999999974
+    },
+    {
+      "scenario": "shared-edit",
+      "verification": true,
+      "phase": "empty-cache-reference",
+      "kind": "request",
+      "mode": "rust",
+      "name": "harness",
+      "direct": null,
+      "nanocompile": {
+        "samples": 1,
+        "median_seconds": 70.146277,
+        "min_seconds": 70.146277,
+        "max_seconds": 70.146277
+      },
+      "kache": {
+        "samples": 1,
+        "median_seconds": 69.127906,
+        "min_seconds": 69.127906,
+        "max_seconds": 69.127906
+      },
+      "nano_minus_kache_seconds": 1.018371000000002
+    },
+    {
+      "scenario": "leaf-edit",
+      "verification": true,
+      "phase": "empty-cache-reference",
+      "kind": "request",
+      "mode": "rust",
+      "name": "harness_engine",
+      "direct": null,
+      "nanocompile": {
+        "samples": 1,
+        "median_seconds": 20.06425,
+        "min_seconds": 20.06425,
+        "max_seconds": 20.06425
+      },
+      "kache": {
+        "samples": 1,
+        "median_seconds": 19.098976,
+        "min_seconds": 19.098976,
+        "max_seconds": 19.098976
+      },
+      "nano_minus_kache_seconds": 0.9652740000000009
+    },
+    {
+      "scenario": "initial",
+      "verification": false,
+      "phase": "cold",
+      "kind": "request",
+      "mode": "rust",
+      "name": "harness_engine",
+      "direct": null,
+      "nanocompile": {
+        "samples": 1,
+        "median_seconds": 19.731976,
+        "min_seconds": 19.731976,
+        "max_seconds": 19.731976
+      },
+      "kache": {
+        "samples": 1,
+        "median_seconds": 19.135643,
+        "min_seconds": 19.135643,
+        "max_seconds": 19.135643
+      },
+      "nano_minus_kache_seconds": 0.5963329999999978
+    },
+    {
+      "scenario": "shared-edit",
+      "verification": true,
+      "phase": "empty-cache-reference",
+      "kind": "request",
+      "mode": "rust",
+      "name": "harness_ui",
+      "direct": null,
+      "nanocompile": {
+        "samples": 1,
+        "median_seconds": 26.700465,
+        "min_seconds": 26.700465,
+        "max_seconds": 26.700465
+      },
+      "kache": {
+        "samples": 1,
+        "median_seconds": 26.249046,
+        "min_seconds": 26.249046,
+        "max_seconds": 26.249046
+      },
+      "nano_minus_kache_seconds": 0.45141900000000135
+    },
+    {
+      "scenario": "revert",
+      "verification": false,
+      "phase": "edit",
+      "kind": "request",
+      "mode": "rust",
+      "name": "harness",
+      "direct": null,
+      "nanocompile": {
+        "samples": 1,
+        "median_seconds": 0.789222,
+        "min_seconds": 0.789222,
+        "max_seconds": 0.789222
+      },
+      "kache": {
+        "samples": 1,
+        "median_seconds": 0.342756,
+        "min_seconds": 0.342756,
+        "max_seconds": 0.342756
+      },
+      "nano_minus_kache_seconds": 0.446466
+    },
+    {
+      "scenario": "shared-edit",
+      "verification": true,
+      "phase": "empty-cache-reference",
+      "kind": "request",
+      "mode": "rust",
+      "name": "harness_engine",
+      "direct": null,
+      "nanocompile": {
+        "samples": 1,
+        "median_seconds": 19.814107,
+        "min_seconds": 19.814107,
+        "max_seconds": 19.814107
+      },
+      "kache": {
+        "samples": 1,
+        "median_seconds": 19.435425,
+        "min_seconds": 19.435425,
+        "max_seconds": 19.435425
+      },
+      "nano_minus_kache_seconds": 0.3786820000000013
+    },
+    {
+      "scenario": "shared-edit",
+      "verification": true,
+      "phase": "empty-cache-reference",
+      "kind": "request",
+      "mode": "rust",
+      "name": "harness_adapters",
+      "direct": null,
+      "nanocompile": {
+        "samples": 1,
+        "median_seconds": 15.544619,
+        "min_seconds": 15.544619,
+        "max_seconds": 15.544619
+      },
+      "kache": {
+        "samples": 1,
+        "median_seconds": 15.632701,
+        "min_seconds": 15.632701,
+        "max_seconds": 15.632701
+      },
+      "nano_minus_kache_seconds": -0.088082
+    },
+    {
+      "scenario": "revert",
+      "verification": true,
+      "phase": "empty-cache-reference",
+      "kind": "request",
+      "mode": "rust",
+      "name": "harness_ui",
+      "direct": null,
+      "nanocompile": {
+        "samples": 1,
+        "median_seconds": 26.140042,
+        "min_seconds": 26.140042,
+        "max_seconds": 26.140042
+      },
+      "kache": {
+        "samples": 1,
+        "median_seconds": 26.263701,
+        "min_seconds": 26.263701,
+        "max_seconds": 26.263701
+      },
+      "nano_minus_kache_seconds": -0.12365899999999996
+    },
+    {
+      "scenario": "revert",
+      "verification": true,
+      "phase": "empty-cache-reference",
+      "kind": "request",
+      "mode": "rust",
+      "name": "harness_adapters",
+      "direct": null,
+      "nanocompile": {
+        "samples": 1,
+        "median_seconds": 16.487588,
+        "min_seconds": 16.487588,
+        "max_seconds": 16.487588
+      },
+      "kache": {
+        "samples": 1,
+        "median_seconds": 16.65645,
+        "min_seconds": 16.65645,
+        "max_seconds": 16.65645
+      },
+      "nano_minus_kache_seconds": -0.16886200000000073
+    },
+    {
+      "scenario": "revert",
+      "verification": true,
+      "phase": "empty-cache-reference",
+      "kind": "request",
+      "mode": "rust",
+      "name": "harness_engine",
+      "direct": null,
+      "nanocompile": {
+        "samples": 1,
+        "median_seconds": 19.654301,
+        "min_seconds": 19.654301,
+        "max_seconds": 19.654301
+      },
+      "kache": {
+        "samples": 1,
+        "median_seconds": 19.888334,
+        "min_seconds": 19.888334,
+        "max_seconds": 19.888334
+      },
+      "nano_minus_kache_seconds": -0.23403300000000016
+    },
+    {
+      "scenario": "revert",
+      "verification": false,
+      "phase": "edit",
+      "kind": "request",
+      "mode": "rust",
+      "name": "harness_engine",
+      "direct": null,
+      "nanocompile": {
+        "samples": 1,
+        "median_seconds": 0.129965,
+        "min_seconds": 0.129965,
+        "max_seconds": 0.129965
+      },
+      "kache": {
+        "samples": 1,
+        "median_seconds": 0.588676,
+        "min_seconds": 0.588676,
+        "max_seconds": 0.588676
+      },
+      "nano_minus_kache_seconds": -0.458711
+    },
+    {
+      "scenario": "leaf-edit",
+      "verification": false,
+      "phase": "edit",
+      "kind": "request",
+      "mode": "rust",
+      "name": "harness_engine",
+      "direct": null,
+      "nanocompile": {
+        "samples": 1,
+        "median_seconds": 0.084181,
+        "min_seconds": 0.084181,
+        "max_seconds": 0.084181
+      },
+      "kache": {
+        "samples": 1,
+        "median_seconds": 0.549363,
+        "min_seconds": 0.549363,
+        "max_seconds": 0.549363
+      },
+      "nano_minus_kache_seconds": -0.46518200000000004
+    },
+    {
+      "scenario": "initial",
+      "verification": false,
+      "phase": "cold",
+      "kind": "request",
+      "mode": "rust",
+      "name": "harness_adapters",
+      "direct": null,
+      "nanocompile": {
+        "samples": 1,
+        "median_seconds": 14.83684,
+        "min_seconds": 14.83684,
+        "max_seconds": 14.83684
+      },
+      "kache": {
+        "samples": 1,
+        "median_seconds": 15.381322,
+        "min_seconds": 15.381322,
+        "max_seconds": 15.381322
+      },
+      "nano_minus_kache_seconds": -0.5444820000000004
+    },
+    {
+      "scenario": "shared-edit",
+      "verification": false,
+      "phase": "edit",
+      "kind": "request",
+      "mode": "rust",
+      "name": "harness_engine",
+      "direct": null,
+      "nanocompile": {
+        "samples": 1,
+        "median_seconds": 18.458312,
+        "min_seconds": 18.458312,
+        "max_seconds": 18.458312
+      },
+      "kache": {
+        "samples": 1,
+        "median_seconds": 19.224473,
+        "min_seconds": 19.224473,
+        "max_seconds": 19.224473
+      },
+      "nano_minus_kache_seconds": -0.7661610000000003
+    },
+    {
+      "scenario": "shared-edit",
+      "verification": false,
+      "phase": "edit",
+      "kind": "request",
+      "mode": "rust",
+      "name": "harness_adapters",
+      "direct": null,
+      "nanocompile": {
+        "samples": 1,
+        "median_seconds": 10.961626,
+        "min_seconds": 10.961626,
+        "max_seconds": 10.961626
+      },
+      "kache": {
+        "samples": 1,
+        "median_seconds": 11.980701,
+        "min_seconds": 11.980701,
+        "max_seconds": 11.980701
+      },
+      "nano_minus_kache_seconds": -1.019074999999999
+    },
+    {
+      "scenario": "revert",
+      "verification": false,
+      "phase": "edit",
+      "kind": "request",
+      "mode": "rust",
+      "name": "harness_ui",
+      "direct": null,
+      "nanocompile": {
+        "samples": 1,
+        "median_seconds": 0.224014,
+        "min_seconds": 0.224014,
+        "max_seconds": 0.224014
+      },
+      "kache": {
+        "samples": 1,
+        "median_seconds": 1.604984,
+        "min_seconds": 1.604984,
+        "max_seconds": 1.604984
+      },
+      "nano_minus_kache_seconds": -1.38097
+    },
+    {
+      "scenario": "leaf-edit",
+      "verification": false,
+      "phase": "edit",
+      "kind": "request",
+      "mode": "rust",
+      "name": "harness_ui",
+      "direct": null,
+      "nanocompile": {
+        "samples": 1,
+        "median_seconds": 0.117662,
+        "min_seconds": 0.117662,
+        "max_seconds": 0.117662
+      },
+      "kache": {
+        "samples": 1,
+        "median_seconds": 1.511802,
+        "min_seconds": 1.511802,
+        "max_seconds": 1.511802
+      },
+      "nano_minus_kache_seconds": -1.3941400000000002
+    },
+    {
+      "scenario": "leaf-edit",
+      "verification": true,
+      "phase": "empty-cache-reference",
+      "kind": "request",
+      "mode": "rust",
+      "name": "harness_adapters",
+      "direct": null,
+      "nanocompile": {
+        "samples": 1,
+        "median_seconds": 14.832112,
+        "min_seconds": 14.832112,
+        "max_seconds": 14.832112
+      },
+      "kache": {
+        "samples": 1,
+        "median_seconds": 16.384219,
+        "min_seconds": 16.384219,
+        "max_seconds": 16.384219
+      },
+      "nano_minus_kache_seconds": -1.5521070000000012
+    },
+    {
+      "scenario": "leaf-edit",
+      "verification": false,
+      "phase": "edit",
+      "kind": "request",
+      "mode": "rust",
+      "name": "harness_adapters",
+      "direct": null,
+      "nanocompile": {
+        "samples": 1,
+        "median_seconds": 0.040637,
+        "min_seconds": 0.040637,
+        "max_seconds": 0.040637
+      },
+      "kache": {
+        "samples": 1,
+        "median_seconds": 2.384837,
+        "min_seconds": 2.384837,
+        "max_seconds": 2.384837
+      },
+      "nano_minus_kache_seconds": -2.3442000000000003
+    },
+    {
+      "scenario": "revert",
+      "verification": false,
+      "phase": "edit",
+      "kind": "request",
+      "mode": "rust",
+      "name": "harness_adapters",
+      "direct": null,
+      "nanocompile": {
+        "samples": 1,
+        "median_seconds": 0.062846,
+        "min_seconds": 0.062846,
+        "max_seconds": 0.062846
+      },
+      "kache": {
+        "samples": 1,
+        "median_seconds": 2.526108,
+        "min_seconds": 2.526108,
+        "max_seconds": 2.526108
+      },
+      "nano_minus_kache_seconds": -2.463262
+    }
+  ],
+  "producer_profiles": [
+    {
+      "build": 1,
+      "build_phase": "cold",
+      "implementation": "nanocompile",
+      "scenario": "initial",
+      "verification": false,
+      "request": "harness",
+      "stage": "producer.execution",
+      "samples": 1,
+      "samples_ns": [
+        66419638750
+      ],
+      "median_seconds": 66.41963875,
+      "min_seconds": 66.41963875,
+      "max_seconds": 66.41963875,
+      "source_record": "91607-510280115170000.stderr",
+      "source_bytes": 2348,
+      "source_sha256": "30d14dea46a0d3ea794da9f3b3373f56bb7e20b9f761c43cf1451f047dd27989"
+    },
+    {
+      "build": 1,
+      "build_phase": "cold",
+      "implementation": "nanocompile",
+      "scenario": "initial",
+      "verification": false,
+      "request": "harness",
+      "stage": "producer.postcompile_store",
+      "samples": 1,
+      "samples_ns": [
+        3184993625
+      ],
+      "median_seconds": 3.184993625,
+      "min_seconds": 3.184993625,
+      "max_seconds": 3.184993625,
+      "source_record": "91607-510280115170000.stderr",
+      "source_bytes": 2348,
+      "source_sha256": "30d14dea46a0d3ea794da9f3b3373f56bb7e20b9f761c43cf1451f047dd27989"
+    },
+    {
+      "build": 1,
+      "build_phase": "cold",
+      "implementation": "nanocompile",
+      "scenario": "initial",
+      "verification": false,
+      "request": "harness",
+      "stage": "producer.total",
+      "samples": 1,
+      "samples_ns": [
+        69946906917
+      ],
+      "median_seconds": 69.946906917,
+      "min_seconds": 69.946906917,
+      "max_seconds": 69.946906917,
+      "source_record": "91607-510280115170000.stderr",
+      "source_bytes": 2348,
+      "source_sha256": "30d14dea46a0d3ea794da9f3b3373f56bb7e20b9f761c43cf1451f047dd27989"
+    },
+    {
+      "build": 4,
+      "build_phase": "edit",
+      "implementation": "nanocompile",
+      "scenario": "leaf-edit",
+      "verification": false,
+      "request": "harness",
+      "stage": "producer.execution",
+      "samples": 1,
+      "samples_ns": [
+        68889569459
+      ],
+      "median_seconds": 68.889569459,
+      "min_seconds": 68.889569459,
+      "max_seconds": 68.889569459,
+      "source_record": "58182-510740965666000.stderr",
+      "source_bytes": 2530,
+      "source_sha256": "0b37e1362009c173bf50e9dff8979c2540dbcfa027fd1eeadc836afbd360b665"
+    },
+    {
+      "build": 4,
+      "build_phase": "edit",
+      "implementation": "nanocompile",
+      "scenario": "leaf-edit",
+      "verification": false,
+      "request": "harness",
+      "stage": "producer.postcompile_store",
+      "samples": 1,
+      "samples_ns": [
+        3205790167
+      ],
+      "median_seconds": 3.205790167,
+      "min_seconds": 3.205790167,
+      "max_seconds": 3.205790167,
+      "source_record": "58182-510740965666000.stderr",
+      "source_bytes": 2530,
+      "source_sha256": "0b37e1362009c173bf50e9dff8979c2540dbcfa027fd1eeadc836afbd360b665"
+    },
+    {
+      "build": 4,
+      "build_phase": "edit",
+      "implementation": "nanocompile",
+      "scenario": "leaf-edit",
+      "verification": false,
+      "request": "harness",
+      "stage": "producer.total",
+      "samples": 1,
+      "samples_ns": [
+        72755952959
+      ],
+      "median_seconds": 72.755952959,
+      "min_seconds": 72.755952959,
+      "max_seconds": 72.755952959,
+      "source_record": "58182-510740965666000.stderr",
+      "source_bytes": 2530,
+      "source_sha256": "0b37e1362009c173bf50e9dff8979c2540dbcfa027fd1eeadc836afbd360b665"
+    },
+    {
+      "build": 5,
+      "build_phase": "empty-cache-reference",
+      "implementation": "nanocompile",
+      "scenario": "leaf-edit",
+      "verification": true,
+      "request": "harness",
+      "stage": "producer.execution",
+      "samples": 1,
+      "samples_ns": [
+        67372388125
+      ],
+      "median_seconds": 67.372388125,
+      "min_seconds": 67.372388125,
+      "max_seconds": 67.372388125,
+      "source_record": "89134-510934419727000.stderr",
+      "source_bytes": 2348,
+      "source_sha256": "23983ae9b64f21ee10df54f6b6aa757bd1186f35a0d7c2eddc56ce5523dce6a6"
+    },
+    {
+      "build": 5,
+      "build_phase": "empty-cache-reference",
+      "implementation": "nanocompile",
+      "scenario": "leaf-edit",
+      "verification": true,
+      "request": "harness",
+      "stage": "producer.postcompile_store",
+      "samples": 1,
+      "samples_ns": [
+        3217961375
+      ],
+      "median_seconds": 3.217961375,
+      "min_seconds": 3.217961375,
+      "max_seconds": 3.217961375,
+      "source_record": "89134-510934419727000.stderr",
+      "source_bytes": 2348,
+      "source_sha256": "23983ae9b64f21ee10df54f6b6aa757bd1186f35a0d7c2eddc56ce5523dce6a6"
+    },
+    {
+      "build": 5,
+      "build_phase": "empty-cache-reference",
+      "implementation": "nanocompile",
+      "scenario": "leaf-edit",
+      "verification": true,
+      "request": "harness",
+      "stage": "producer.total",
+      "samples": 1,
+      "samples_ns": [
+        70944197542
+      ],
+      "median_seconds": 70.944197542,
+      "min_seconds": 70.944197542,
+      "max_seconds": 70.944197542,
+      "source_record": "89134-510934419727000.stderr",
+      "source_bytes": 2348,
+      "source_sha256": "23983ae9b64f21ee10df54f6b6aa757bd1186f35a0d7c2eddc56ce5523dce6a6"
+    },
+    {
+      "build": 8,
+      "build_phase": "edit",
+      "implementation": "nanocompile",
+      "scenario": "shared-edit",
+      "verification": false,
+      "request": "harness",
+      "stage": "producer.execution",
+      "samples": 1,
+      "samples_ns": [
+        67620791708
+      ],
+      "median_seconds": 67.620791708,
+      "min_seconds": 67.620791708,
+      "max_seconds": 67.620791708,
+      "source_record": "52330-511362572599000.stderr",
+      "source_bytes": 2708,
+      "source_sha256": "4911930784989a62ceee97e05018814bf7d2b661d8e85a71a0f33d7cd03159a5"
+    },
+    {
+      "build": 8,
+      "build_phase": "edit",
+      "implementation": "nanocompile",
+      "scenario": "shared-edit",
+      "verification": false,
+      "request": "harness",
+      "stage": "producer.postcompile_store",
+      "samples": 1,
+      "samples_ns": [
+        3186764542
+      ],
+      "median_seconds": 3.186764542,
+      "min_seconds": 3.186764542,
+      "max_seconds": 3.186764542,
+      "source_record": "52330-511362572599000.stderr",
+      "source_bytes": 2708,
+      "source_sha256": "4911930784989a62ceee97e05018814bf7d2b661d8e85a71a0f33d7cd03159a5"
+    },
+    {
+      "build": 8,
+      "build_phase": "edit",
+      "implementation": "nanocompile",
+      "scenario": "shared-edit",
+      "verification": false,
+      "request": "harness",
+      "stage": "producer.total",
+      "samples": 1,
+      "samples_ns": [
+        71651556708
+      ],
+      "median_seconds": 71.651556708,
+      "min_seconds": 71.651556708,
+      "max_seconds": 71.651556708,
+      "source_record": "52330-511362572599000.stderr",
+      "source_bytes": 2708,
+      "source_sha256": "4911930784989a62ceee97e05018814bf7d2b661d8e85a71a0f33d7cd03159a5"
+    },
+    {
+      "build": 9,
+      "build_phase": "empty-cache-reference",
+      "implementation": "nanocompile",
+      "scenario": "shared-edit",
+      "verification": true,
+      "request": "harness",
+      "stage": "producer.execution",
+      "samples": 1,
+      "samples_ns": [
+        66590547250
+      ],
+      "median_seconds": 66.59054725,
+      "min_seconds": 66.59054725,
+      "max_seconds": 66.59054725,
+      "source_record": "81195-511557735824000.stderr",
+      "source_bytes": 2350,
+      "source_sha256": "ce7ea3545f8b9a447a02c285ac484c69dd26ac72d03f11ff93a9bb34fffde93a"
+    },
+    {
+      "build": 9,
+      "build_phase": "empty-cache-reference",
+      "implementation": "nanocompile",
+      "scenario": "shared-edit",
+      "verification": true,
+      "request": "harness",
+      "stage": "producer.postcompile_store",
+      "samples": 1,
+      "samples_ns": [
+        3196926667
+      ],
+      "median_seconds": 3.196926667,
+      "min_seconds": 3.196926667,
+      "max_seconds": 3.196926667,
+      "source_record": "81195-511557735824000.stderr",
+      "source_bytes": 2350,
+      "source_sha256": "ce7ea3545f8b9a447a02c285ac484c69dd26ac72d03f11ff93a9bb34fffde93a"
+    },
+    {
+      "build": 9,
+      "build_phase": "empty-cache-reference",
+      "implementation": "nanocompile",
+      "scenario": "shared-edit",
+      "verification": true,
+      "request": "harness",
+      "stage": "producer.total",
+      "samples": 1,
+      "samples_ns": [
+        70141601666
+      ],
+      "median_seconds": 70.141601666,
+      "min_seconds": 70.141601666,
+      "max_seconds": 70.141601666,
+      "source_record": "81195-511557735824000.stderr",
+      "source_bytes": 2350,
+      "source_sha256": "ce7ea3545f8b9a447a02c285ac484c69dd26ac72d03f11ff93a9bb34fffde93a"
+    },
+    {
+      "build": 16,
+      "build_phase": "edit",
+      "implementation": "nanocompile",
+      "scenario": "revert",
+      "verification": false,
+      "request": "harness",
+      "stage": "producer.total",
+      "samples": 1,
+      "samples_ns": [
+        785235958
+      ],
+      "median_seconds": 0.785235958,
+      "min_seconds": 0.785235958,
+      "max_seconds": 0.785235958,
+      "source_record": "80150-513360753349000.stderr",
+      "source_bytes": 1799,
+      "source_sha256": "b8f34b1b77da1410168bdad96a40f761bb8e8f12672d7b1fe6cfe9968233ac76"
+    },
+    {
+      "build": 17,
+      "build_phase": "empty-cache-reference",
+      "implementation": "nanocompile",
+      "scenario": "revert",
+      "verification": true,
+      "request": "harness",
+      "stage": "producer.execution",
+      "samples": 1,
+      "samples_ns": [
+        66859954083
+      ],
+      "median_seconds": 66.859954083,
+      "min_seconds": 66.859954083,
+      "max_seconds": 66.859954083,
+      "source_record": "10351-513486004102000.stderr",
+      "source_bytes": 2348,
+      "source_sha256": "cedcdc5521016e5bb55c435a9b398e6a20a8d45fd6fbd74601265a6ac028b92d"
+    },
+    {
+      "build": 17,
+      "build_phase": "empty-cache-reference",
+      "implementation": "nanocompile",
+      "scenario": "revert",
+      "verification": true,
+      "request": "harness",
+      "stage": "producer.postcompile_store",
+      "samples": 1,
+      "samples_ns": [
+        3211843500
+      ],
+      "median_seconds": 3.2118435,
+      "min_seconds": 3.2118435,
+      "max_seconds": 3.2118435,
+      "source_record": "10351-513486004102000.stderr",
+      "source_bytes": 2348,
+      "source_sha256": "cedcdc5521016e5bb55c435a9b398e6a20a8d45fd6fbd74601265a6ac028b92d"
+    },
+    {
+      "build": 17,
+      "build_phase": "empty-cache-reference",
+      "implementation": "nanocompile",
+      "scenario": "revert",
+      "verification": true,
+      "request": "harness",
+      "stage": "producer.total",
+      "samples": 1,
+      "samples_ns": [
+        70423712500
+      ],
+      "median_seconds": 70.4237125,
+      "min_seconds": 70.4237125,
+      "max_seconds": 70.4237125,
+      "source_record": "10351-513486004102000.stderr",
+      "source_bytes": 2348,
+      "source_sha256": "cedcdc5521016e5bb55c435a9b398e6a20a8d45fd6fbd74601265a6ac028b92d"
+    }
+  ],
+  "next_experiments": [
+    {
+      "priority": 1,
+      "observation": {
+        "scenario": "shared-edit",
+        "verification": false,
+        "phase": "edit",
+        "kind": "request",
+        "mode": "rust",
+        "name": "harness_ui",
+        "nanocompile": {
+          "samples": 1,
+          "median_seconds": 30.886367,
+          "min_seconds": 30.886367,
+          "max_seconds": 30.886367
+        },
+        "kache": {
+          "samples": 1,
+          "median_seconds": 26.874391,
+          "min_seconds": 26.874391,
+          "max_seconds": 26.874391
+        },
+        "nano_minus_kache_seconds": 4.011976000000001
+      },
+      "hypothesis": "Identity, coordination or restore work may explain the interval gap",
+      "next_measurement": "Inspect matching private records and instrument Nano stages; run one controlled ablation before changing behavior",
+      "implementation_instruction": "Add phase measurements around the suspected work, then change only that cause behind a reversible control. Preserve fallback execution and compare the control on/off with identical inputs.",
+      "rollback": "Keep the accepted binary frozen; reject the candidate on a correctness failure or a cold/warm regression that repeats in the confirmation session.",
+      "acceptance": [
+        "repeated alternating untraced A/B against frozen production and kache",
+        "real input edits and reverts invalidate correctly",
+        "loader, toolchain and environment changes invalidate correctly",
+        "source hashes stable and own-cold artifact hashes equal",
+        "report cold and warm regressions and rejected variations"
+      ],
+      "claim": "Diagnostic hypothesis; interval gap is not predicted wall-time savings"
+    },
+    {
+      "priority": 2,
+      "observation": {
+        "scenario": "shared-edit",
+        "verification": false,
+        "phase": "edit",
+        "kind": "cargo",
+        "mode": "todo",
+        "name": "harness-ui 0.2.108  features=",
+        "nanocompile": {
+          "samples": 1,
+          "median_seconds": 30.9,
+          "min_seconds": 30.9,
+          "max_seconds": 30.9
+        },
+        "kache": {
+          "samples": 1,
+          "median_seconds": 26.89,
+          "min_seconds": 26.89,
+          "max_seconds": 26.89
+        },
+        "nano_minus_kache_seconds": 4.009999999999998
+      },
+      "hypothesis": "Identity, coordination or restore work may explain the interval gap",
+      "next_measurement": "Inspect matching private records and instrument Nano stages; run one controlled ablation before changing behavior",
+      "implementation_instruction": "Add phase measurements around the suspected work, then change only that cause behind a reversible control. Preserve fallback execution and compare the control on/off with identical inputs.",
+      "rollback": "Keep the accepted binary frozen; reject the candidate on a correctness failure or a cold/warm regression that repeats in the confirmation session.",
+      "acceptance": [
+        "repeated alternating untraced A/B against frozen production and kache",
+        "real input edits and reverts invalidate correctly",
+        "loader, toolchain and environment changes invalidate correctly",
+        "source hashes stable and own-cold artifact hashes equal",
+        "report cold and warm regressions and rejected variations"
+      ],
+      "claim": "Diagnostic hypothesis; interval gap is not predicted wall-time savings"
+    },
+    {
+      "priority": 3,
+      "observation": {
+        "scenario": "shared-edit",
+        "verification": false,
+        "phase": "edit",
+        "kind": "request",
+        "mode": "rust",
+        "name": "harness",
+        "nanocompile": {
+          "samples": 1,
+          "median_seconds": 71.6566,
+          "min_seconds": 71.6566,
+          "max_seconds": 71.6566
+        },
+        "kache": {
+          "samples": 1,
+          "median_seconds": 68.525389,
+          "min_seconds": 68.525389,
+          "max_seconds": 68.525389
+        },
+        "nano_minus_kache_seconds": 3.1312109999999933
+      },
+      "hypothesis": "Identity, coordination or restore work may explain the interval gap",
+      "next_measurement": "Inspect matching private records and instrument Nano stages; run one controlled ablation before changing behavior",
+      "implementation_instruction": "Add phase measurements around the suspected work, then change only that cause behind a reversible control. Preserve fallback execution and compare the control on/off with identical inputs.",
+      "rollback": "Keep the accepted binary frozen; reject the candidate on a correctness failure or a cold/warm regression that repeats in the confirmation session.",
+      "acceptance": [
+        "repeated alternating untraced A/B against frozen production and kache",
+        "real input edits and reverts invalidate correctly",
+        "loader, toolchain and environment changes invalidate correctly",
+        "source hashes stable and own-cold artifact hashes equal",
+        "report cold and warm regressions and rejected variations"
+      ],
+      "claim": "Diagnostic hypothesis; interval gap is not predicted wall-time savings"
+    },
+    {
+      "priority": 4,
+      "observation": {
+        "scenario": "shared-edit",
+        "verification": false,
+        "phase": "edit",
+        "kind": "cargo",
+        "mode": "todo",
+        "name": "harness 0.2.108  harness \"bin\" features=",
+        "nanocompile": {
+          "samples": 1,
+          "median_seconds": 71.66,
+          "min_seconds": 71.66,
+          "max_seconds": 71.66
+        },
+        "kache": {
+          "samples": 1,
+          "median_seconds": 68.53,
+          "min_seconds": 68.53,
+          "max_seconds": 68.53
+        },
+        "nano_minus_kache_seconds": 3.1299999999999955
+      },
+      "hypothesis": "Identity, coordination or restore work may explain the interval gap",
+      "next_measurement": "Inspect matching private records and instrument Nano stages; run one controlled ablation before changing behavior",
+      "implementation_instruction": "Add phase measurements around the suspected work, then change only that cause behind a reversible control. Preserve fallback execution and compare the control on/off with identical inputs.",
+      "rollback": "Keep the accepted binary frozen; reject the candidate on a correctness failure or a cold/warm regression that repeats in the confirmation session.",
+      "acceptance": [
+        "repeated alternating untraced A/B against frozen production and kache",
+        "real input edits and reverts invalidate correctly",
+        "loader, toolchain and environment changes invalidate correctly",
+        "source hashes stable and own-cold artifact hashes equal",
+        "report cold and warm regressions and rejected variations"
+      ],
+      "claim": "Diagnostic hypothesis; interval gap is not predicted wall-time savings"
+    },
+    {
+      "priority": 5,
+      "observation": {
+        "scenario": "initial",
+        "verification": false,
+        "phase": "cold",
+        "kind": "request",
+        "mode": "rust",
+        "name": "harness",
+        "nanocompile": {
+          "samples": 1,
+          "median_seconds": 69.951065,
+          "min_seconds": 69.951065,
+          "max_seconds": 69.951065
+        },
+        "kache": {
+          "samples": 1,
+          "median_seconds": 66.849679,
+          "min_seconds": 66.849679,
+          "max_seconds": 66.849679
+        },
+        "nano_minus_kache_seconds": 3.101386000000005
+      },
+      "hypothesis": "Identity, coordination or restore work may explain the interval gap",
+      "next_measurement": "Inspect matching private records and instrument Nano stages; run one controlled ablation before changing behavior",
+      "implementation_instruction": "Add phase measurements around the suspected work, then change only that cause behind a reversible control. Preserve fallback execution and compare the control on/off with identical inputs.",
+      "rollback": "Keep the accepted binary frozen; reject the candidate on a correctness failure or a cold/warm regression that repeats in the confirmation session.",
+      "acceptance": [
+        "repeated alternating untraced A/B against frozen production and kache",
+        "real input edits and reverts invalidate correctly",
+        "loader, toolchain and environment changes invalidate correctly",
+        "source hashes stable and own-cold artifact hashes equal",
+        "report cold and warm regressions and rejected variations"
+      ],
+      "claim": "Diagnostic hypothesis; interval gap is not predicted wall-time savings"
+    },
+    {
+      "priority": 6,
+      "observation": {
+        "scenario": "initial",
+        "verification": false,
+        "phase": "cold",
+        "kind": "cargo",
+        "mode": "todo",
+        "name": "harness 0.2.108  harness \"bin\" features=",
+        "nanocompile": {
+          "samples": 1,
+          "median_seconds": 69.96,
+          "min_seconds": 69.96,
+          "max_seconds": 69.96
+        },
+        "kache": {
+          "samples": 1,
+          "median_seconds": 66.86,
+          "min_seconds": 66.86,
+          "max_seconds": 66.86
+        },
+        "nano_minus_kache_seconds": 3.0999999999999943
+      },
+      "hypothesis": "Identity, coordination or restore work may explain the interval gap",
+      "next_measurement": "Inspect matching private records and instrument Nano stages; run one controlled ablation before changing behavior",
+      "implementation_instruction": "Add phase measurements around the suspected work, then change only that cause behind a reversible control. Preserve fallback execution and compare the control on/off with identical inputs.",
+      "rollback": "Keep the accepted binary frozen; reject the candidate on a correctness failure or a cold/warm regression that repeats in the confirmation session.",
+      "acceptance": [
+        "repeated alternating untraced A/B against frozen production and kache",
+        "real input edits and reverts invalidate correctly",
+        "loader, toolchain and environment changes invalidate correctly",
+        "source hashes stable and own-cold artifact hashes equal",
+        "report cold and warm regressions and rejected variations"
+      ],
+      "claim": "Diagnostic hypothesis; interval gap is not predicted wall-time savings"
+    },
+    {
+      "priority": 7,
+      "observation": {
+        "scenario": "leaf-edit",
+        "verification": false,
+        "phase": "edit",
+        "kind": "cargo",
+        "mode": "todo",
+        "name": "harness 0.2.108  harness \"bin\" features=",
+        "nanocompile": {
+          "samples": 1,
+          "median_seconds": 72.77,
+          "min_seconds": 72.77,
+          "max_seconds": 72.77
+        },
+        "kache": {
+          "samples": 1,
+          "median_seconds": 70.04,
+          "min_seconds": 70.04,
+          "max_seconds": 70.04
+        },
+        "nano_minus_kache_seconds": 2.7299999999999898
+      },
+      "hypothesis": "Identity, coordination or restore work may explain the interval gap",
+      "next_measurement": "Inspect matching private records and instrument Nano stages; run one controlled ablation before changing behavior",
+      "implementation_instruction": "Add phase measurements around the suspected work, then change only that cause behind a reversible control. Preserve fallback execution and compare the control on/off with identical inputs.",
+      "rollback": "Keep the accepted binary frozen; reject the candidate on a correctness failure or a cold/warm regression that repeats in the confirmation session.",
+      "acceptance": [
+        "repeated alternating untraced A/B against frozen production and kache",
+        "real input edits and reverts invalidate correctly",
+        "loader, toolchain and environment changes invalidate correctly",
+        "source hashes stable and own-cold artifact hashes equal",
+        "report cold and warm regressions and rejected variations"
+      ],
+      "claim": "Diagnostic hypothesis; interval gap is not predicted wall-time savings"
+    },
+    {
+      "priority": 8,
+      "observation": {
+        "scenario": "leaf-edit",
+        "verification": false,
+        "phase": "edit",
+        "kind": "request",
+        "mode": "rust",
+        "name": "harness",
+        "nanocompile": {
+          "samples": 1,
+          "median_seconds": 72.760765,
+          "min_seconds": 72.760765,
+          "max_seconds": 72.760765
+        },
+        "kache": {
+          "samples": 1,
+          "median_seconds": 70.03551,
+          "min_seconds": 70.03551,
+          "max_seconds": 70.03551
+        },
+        "nano_minus_kache_seconds": 2.725255000000004
+      },
+      "hypothesis": "Identity, coordination or restore work may explain the interval gap",
+      "next_measurement": "Inspect matching private records and instrument Nano stages; run one controlled ablation before changing behavior",
+      "implementation_instruction": "Add phase measurements around the suspected work, then change only that cause behind a reversible control. Preserve fallback execution and compare the control on/off with identical inputs.",
+      "rollback": "Keep the accepted binary frozen; reject the candidate on a correctness failure or a cold/warm regression that repeats in the confirmation session.",
+      "acceptance": [
+        "repeated alternating untraced A/B against frozen production and kache",
+        "real input edits and reverts invalidate correctly",
+        "loader, toolchain and environment changes invalidate correctly",
+        "source hashes stable and own-cold artifact hashes equal",
+        "report cold and warm regressions and rejected variations"
+      ],
+      "claim": "Diagnostic hypothesis; interval gap is not predicted wall-time savings"
+    },
+    {
+      "priority": 9,
+      "observation": {
+        "scenario": "initial",
+        "verification": false,
+        "phase": "cold",
+        "kind": "cargo",
+        "mode": "todo",
+        "name": "gpui-base 0.5.2  features=",
+        "nanocompile": {
+          "samples": 1,
+          "median_seconds": 9.05,
+          "min_seconds": 9.05,
+          "max_seconds": 9.05
+        },
+        "kache": {
+          "samples": 1,
+          "median_seconds": 6.59,
+          "min_seconds": 6.59,
+          "max_seconds": 6.59
+        },
+        "nano_minus_kache_seconds": 2.460000000000001
+      },
+      "hypothesis": "Identity, coordination or restore work may explain the interval gap",
+      "next_measurement": "Inspect matching private records and instrument Nano stages; run one controlled ablation before changing behavior",
+      "implementation_instruction": "Add phase measurements around the suspected work, then change only that cause behind a reversible control. Preserve fallback execution and compare the control on/off with identical inputs.",
+      "rollback": "Keep the accepted binary frozen; reject the candidate on a correctness failure or a cold/warm regression that repeats in the confirmation session.",
+      "acceptance": [
+        "repeated alternating untraced A/B against frozen production and kache",
+        "real input edits and reverts invalidate correctly",
+        "loader, toolchain and environment changes invalidate correctly",
+        "source hashes stable and own-cold artifact hashes equal",
+        "report cold and warm regressions and rejected variations"
+      ],
+      "claim": "Diagnostic hypothesis; interval gap is not predicted wall-time savings"
+    },
+    {
+      "priority": 10,
+      "observation": {
+        "scenario": "initial",
+        "verification": false,
+        "phase": "cold",
+        "kind": "request",
+        "mode": "rust",
+        "name": "gpui_base",
+        "nanocompile": {
+          "samples": 1,
+          "median_seconds": 9.043437,
+          "min_seconds": 9.043437,
+          "max_seconds": 9.043437
+        },
+        "kache": {
+          "samples": 1,
+          "median_seconds": 6.583705,
+          "min_seconds": 6.583705,
+          "max_seconds": 6.583705
+        },
+        "nano_minus_kache_seconds": 2.4597320000000007
+      },
+      "hypothesis": "Identity, coordination or restore work may explain the interval gap",
+      "next_measurement": "Inspect matching private records and instrument Nano stages; run one controlled ablation before changing behavior",
+      "implementation_instruction": "Add phase measurements around the suspected work, then change only that cause behind a reversible control. Preserve fallback execution and compare the control on/off with identical inputs.",
+      "rollback": "Keep the accepted binary frozen; reject the candidate on a correctness failure or a cold/warm regression that repeats in the confirmation session.",
+      "acceptance": [
+        "repeated alternating untraced A/B against frozen production and kache",
+        "real input edits and reverts invalidate correctly",
+        "loader, toolchain and environment changes invalidate correctly",
+        "source hashes stable and own-cold artifact hashes equal",
+        "report cold and warm regressions and rejected variations"
+      ],
+      "claim": "Diagnostic hypothesis; interval gap is not predicted wall-time savings"
+    },
+    {
+      "priority": 11,
+      "observation": {
+        "scenario": "initial",
+        "verification": false,
+        "phase": "cold",
+        "kind": "cargo",
+        "mode": "todo",
+        "name": "harness-mcp 0.2.108  features=",
+        "nanocompile": {
+          "samples": 1,
+          "median_seconds": 7.36,
+          "min_seconds": 7.36,
+          "max_seconds": 7.36
+        },
+        "kache": {
+          "samples": 1,
+          "median_seconds": 6.06,
+          "min_seconds": 6.06,
+          "max_seconds": 6.06
+        },
+        "nano_minus_kache_seconds": 1.3000000000000007
+      },
+      "hypothesis": "Identity, coordination or restore work may explain the interval gap",
+      "next_measurement": "Inspect matching private records and instrument Nano stages; run one controlled ablation before changing behavior",
+      "implementation_instruction": "Add phase measurements around the suspected work, then change only that cause behind a reversible control. Preserve fallback execution and compare the control on/off with identical inputs.",
+      "rollback": "Keep the accepted binary frozen; reject the candidate on a correctness failure or a cold/warm regression that repeats in the confirmation session.",
+      "acceptance": [
+        "repeated alternating untraced A/B against frozen production and kache",
+        "real input edits and reverts invalidate correctly",
+        "loader, toolchain and environment changes invalidate correctly",
+        "source hashes stable and own-cold artifact hashes equal",
+        "report cold and warm regressions and rejected variations"
+      ],
+      "claim": "Diagnostic hypothesis; interval gap is not predicted wall-time savings"
+    },
+    {
+      "priority": 12,
+      "observation": {
+        "scenario": "initial",
+        "verification": false,
+        "phase": "cold",
+        "kind": "request",
+        "mode": "rust",
+        "name": "harness_mcp",
+        "nanocompile": {
+          "samples": 1,
+          "median_seconds": 7.347606,
+          "min_seconds": 7.347606,
+          "max_seconds": 7.347606
+        },
+        "kache": {
+          "samples": 1,
+          "median_seconds": 6.052525,
+          "min_seconds": 6.052525,
+          "max_seconds": 6.052525
+        },
+        "nano_minus_kache_seconds": 1.2950809999999997
+      },
+      "hypothesis": "Identity, coordination or restore work may explain the interval gap",
+      "next_measurement": "Inspect matching private records and instrument Nano stages; run one controlled ablation before changing behavior",
+      "implementation_instruction": "Add phase measurements around the suspected work, then change only that cause behind a reversible control. Preserve fallback execution and compare the control on/off with identical inputs.",
+      "rollback": "Keep the accepted binary frozen; reject the candidate on a correctness failure or a cold/warm regression that repeats in the confirmation session.",
+      "acceptance": [
+        "repeated alternating untraced A/B against frozen production and kache",
+        "real input edits and reverts invalidate correctly",
+        "loader, toolchain and environment changes invalidate correctly",
+        "source hashes stable and own-cold artifact hashes equal",
+        "report cold and warm regressions and rejected variations"
+      ],
+      "claim": "Diagnostic hypothesis; interval gap is not predicted wall-time savings"
+    }
+  ],
+  "excluded_builds": []
+}

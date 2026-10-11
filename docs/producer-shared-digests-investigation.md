@@ -33,8 +33,32 @@ records equal sealed dependency payloads and output bytes/modes with sharing off
 and on, a shared-transitive edit with preserved mtime, corrupt input failure,
 revert behavior and four concurrent restores. All 58 fixture streams and five
 smoke logs passed digest verification. The fixture has no within-invocation
-mutation race hook. Isolated cold pairs are running; no speed improvement or
-production adoption is established.
+mutation race hook. The subsequent isolated cold result is recorded below;
+production adoption is not established.
+
+## Five isolated cold pairs completed
+
+The [verified comparison](../benchmarks/harness-producer-shared-digests-cold-paired.json)
+contains 15 executions: direct, separate cold primes, five alternating pairs and
+two cold confirmations. All 60 compiler/CLI streams, own-control artifact bytes
+and modes, CLI behavior, signatures, runtime identity and source checks passed.
+Sharing-on median request time is 33.782539s versus 35.174898s off, with five of
+five wins. Mean paired savings are 1.317177s with 0.285275s standard error.
+
+Postcompile storage median falls from 3.223229s to 1.896423s; mean paired storage
+savings are 1.302870s with 0.021059s standard error. Compiler execution mean
+savings are only 0.015324s with 0.289244s standard error. This supports reducing
+postcompile work, not making rustc itself faster. The initial candidate prime's
+18.107084s storage cost includes fresh metadata reader work and is excluded from
+the paired timing summary. Metadata/toolchain memos are warm in measured pairs.
+
+The matched eight-build **untraced full Harness cold** baseline/candidate
+comparison is now running with the same experimental runtime, sharing off/on,
+eight Cargo jobs, 29 rewritten wrapper guards and unchanged source snapshot.
+Three cold and three warm rounds against pinned kache are queued behind that
+result; they will start only if the full comparison shows a clear gain and
+passes output/source checks. Independent confirmation and candidate source-edit
+checks remain required. Production remains unchanged.
 
 The [exact experimental patch](../benchmarks/experiments/producer-shared-digests.patch)
 has SHA-256 `ccba043908e86662c5902fae984078d61e3585db264bb9ac3f9f99ec1e8ee161`.
