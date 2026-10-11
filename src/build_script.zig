@@ -476,7 +476,11 @@ pub fn execute(ctx: *cache.Context, real: []const u8, args: []const []const u8) 
 fn declaredMode(ctx: *cache.Context) bool {
     return eq(ctx.env.get("NANOCOMPILE_BUILD_SCRIPT_CACHE") orelse "", "declared");
 }
-const DeclaredReceipt = struct { schema: u32 = 1, inputs: []const []const u8 };
+// package_default: the script declared nothing, so its package directory is the
+// input. Only that scan skips VCS metadata and CACHEDIR.TAG target directories;
+// explicitly declared directories are tracked in full.
+const DeclaredReceipt = struct { schema: u32 = 2, inputs: []const []const u8, package_default: bool = false };
+const DeclaredInputs = struct { paths: []const []const u8, package_default: bool };
 const declared_limit = 20000;
 
 // Everything Cargo compares before rerunning a script, plus the tools Cargo
@@ -510,7 +514,7 @@ fn declaredMaterial(ctx: *cache.Context, real: []const u8, argv: []const []const
 /// Inputs from `cargo:rerun-if-changed` lines, resolved against the package as
 /// Cargo does. No file declaration (and no env declaration) means the package.
 /// Null means the run must not be cached.
-fn declaredInputs(ctx: *cache.Context, stdout: []const u8, manifest: []const u8, root: []const u8) !?[]const []const u8 {
+fn declaredInputs(ctx: *cache.Context, stdout: []const u8, manifest: []const u8, root: []const u8) !?DeclaredInputs {
     var inputs: std.ArrayList([]const u8) = .empty;
     var env_declared = false;
     var lines = std.mem.splitScalar(u8, stdout, '\n');
@@ -527,9 +531,10 @@ fn declaredInputs(ctx: *cache.Context, stdout: []const u8, manifest: []const u8,
             try inputs.append(ctx.a, path);
         }
     }
-    if (inputs.items.len == 0 and !env_declared) try inputs.append(ctx.a, try std.fs.path.resolve(ctx.a, &.{manifest}));
+    const package_default = inputs.items.len == 0 and !env_declared;
+    if (package_default) try inputs.append(ctx.a, try std.fs.path.resolve(ctx.a, &.{manifest}));
     std.mem.sort([]const u8, inputs.items, {}, less);
-    return inputs.items;
+    return .{ .paths = inputs.items, .package_default = package_default };
 }
 
 fn declaredKey(ctx: *cache.Context, base: []const u8, records: []const cache.Dependency) ![]const u8 {
@@ -573,11 +578,15 @@ fn executeDeclared(ctx: *cache.Context, real: []const u8, args: []const []const 
     const receipt_path = try ctx.path(&.{ "build-script-declared", base });
     if (ctx.read(receipt_path)) |bytes| restore: {
         const parsed = std.json.parseFromSlice(DeclaredReceipt, ctx.a, cache.unseal(ctx, bytes) catch break :restore, .{ .allocate = .alloc_always }) catch break :restore;
-        if (parsed.value.schema != 1 or parsed.value.inputs.len > declared_limit) break :restore;
+        if (parsed.value.schema != 2 or parsed.value.inputs.len > declared_limit) break :restore;
+        const prune = parsed.value.package_default;
         phase = profileStart(ctx);
-        const before = snapshotWith(ctx, parsed.value.inputs, true, declared_limit) catch break :restore;
+        const before = snapshotWith(ctx, parsed.value.inputs, prune, declared_limit) catch break :restore;
         profileEnd(ctx, "declared.input_snapshot", phase);
-        const key = try declaredKey(ctx, base, before.records);
+        var keyed = cache.Hash.init(.{});
+        cache.field(&keyed, base);
+        cache.field(&keyed, if (prune) "package-default" else "declared");
+        const key = try declaredKey(ctx, try cache.finish(ctx.a, &keyed), before.records);
         const index = ctx.read(try ctx.path(&.{ "build-script-receipts", key })) catch break :restore;
         const outputs_receipt = std.json.parseFromSlice(Receipt, ctx.a, cache.unseal(ctx, index) catch break :restore, .{ .allocate = .alloc_always }) catch break :restore;
         if (outputs_receipt.value.schema != 1 or outputs_receipt.value.outputs.len > 50000) break :restore;
@@ -588,7 +597,7 @@ fn executeDeclared(ctx: *cache.Context, real: []const u8, args: []const []const 
         }
         phase = profileStart(ctx);
         defer profileEnd(ctx, "declared.restore", phase);
-        if (try restoreOutputsWith(ctx, key, root, outputs_receipt.value.outputs, parsed.value.inputs, before, true)) {
+        if (try restoreOutputsWith(ctx, key, root, outputs_receipt.value.outputs, parsed.value.inputs, before, prune)) {
             ctx.event("build_script_hit");
             return 0;
         }
@@ -602,7 +611,7 @@ fn executeDeclared(ctx: *cache.Context, real: []const u8, args: []const []const 
     }
     ctx.event("build_script_miss");
     const inputs = (declaredInputs(ctx, result.stdout, manifest, root) catch return 0) orelse return 0;
-    const after = snapshotWith(ctx, inputs, true, declared_limit) catch return 0;
+    const after = snapshotWith(ctx, inputs.paths, inputs.package_default, declared_limit) catch return 0;
     // Inputs are only known after the run. Record it only when every declared
     // input predates the run, so nothing changed while the script read it.
     if (after.newest >= started) {
@@ -611,13 +620,16 @@ fn executeDeclared(ctx: *cache.Context, real: []const u8, args: []const []const 
     }
     if (!eq(base, declaredMaterial(ctx, real, args, root) catch return 0)) return 0;
     const paths = outputs(ctx, root) catch return 0;
-    const key = try declaredKey(ctx, base, after.records);
+    var keyed = cache.Hash.init(.{});
+    cache.field(&keyed, base);
+    cache.field(&keyed, if (inputs.package_default) "package-default" else "declared");
+    const key = try declaredKey(ctx, try cache.finish(ctx.a, &keyed), after.records);
     cache.store(ctx, key, after.records, paths, result.stdout, result.stderr) catch |err| {
         ctx.trace(@errorName(err));
         return 0;
     };
     ctx.atomic(try ctx.path(&.{ "build-script-receipts", key }), try cache.seal(ctx, try std.json.Stringify.valueAlloc(ctx.a, Receipt{ .outputs = paths }, .{}))) catch return 0;
-    ctx.atomic(receipt_path, try cache.seal(ctx, try std.json.Stringify.valueAlloc(ctx.a, DeclaredReceipt{ .inputs = inputs }, .{}))) catch {};
+    ctx.atomic(receipt_path, try cache.seal(ctx, try std.json.Stringify.valueAlloc(ctx.a, DeclaredReceipt{ .inputs = inputs.paths, .package_default = inputs.package_default }, .{}))) catch {};
     return 0;
 }
 

@@ -773,7 +773,11 @@ fn restoreWithSnapshot(ctx: *Context, key: []const u8, allowed_outputs: []const 
     if (!std.mem.eql(u8, try finish(ctx.a, &h), entry.stderr)) return null;
     ctx.profileEnd("restore.stream_validation", phase);
     phase = ctx.profileStart();
-    for (entry.outputs, destinations) |output, destination| try materializeKnown(ctx, try blobPath(ctx, output.hash), destination, output.mode, output.hash);
+    // Staging destinations are renamed by the caller; memoize final paths only.
+    for (entry.outputs, destinations, allowed_outputs) |output, destination, allowed| {
+        const blob = try blobPath(ctx, output.hash);
+        if (std.mem.eql(u8, destination, allowed)) try materializeKnown(ctx, blob, destination, output.mode, output.hash) else try materialize(ctx, blob, destination, output.mode);
+    }
     ctx.profileEnd("restore.materialization", phase);
     return .{ .stdout = stdout, .stderr = stderr };
 }
@@ -944,7 +948,35 @@ pub fn gc(ctx: *Context, limit: u64) !void {
             }
         }
     }
-    try ctx.out(try std.fmt.allocPrint(ctx.a, "evicted entries: {d}\nfreed logical bytes: {d}\nremaining logical bytes: {d}\n", .{ evicted, freed, total }));
+    const stale = try pruneMemos(ctx);
+    try ctx.out(try std.fmt.allocPrint(ctx.a, "evicted entries: {d}\nfreed logical bytes: {d}\nremaining logical bytes: {d}\nstale digest memos removed: {d}\n", .{ evicted, freed, total, stale }));
+}
+
+/// Remove digest memo records whose file is gone or no longer matches.
+fn pruneMemos(ctx: *Context) !usize {
+    var memo = Dir.cwd().openDir(ctx.io, try ctx.path(&.{"memo"}), .{ .iterate = true }) catch return 0;
+    defer memo.close(ctx.io);
+    var walk = try memo.walk(ctx.a);
+    defer walk.deinit();
+    var removed: usize = 0;
+    while (try walk.next(ctx.io)) |item| {
+        if (item.kind != .file) continue;
+        var buffer: [4096 + 512]u8 = undefined;
+        const bytes = item.dir.readFile(ctx.io, item.basename, &buffer) catch "";
+        const keep = blk: {
+            var lines = std.mem.splitScalar(u8, bytes, '\n');
+            if (!std.mem.eql(u8, lines.next() orelse break :blk false, memo_version)) break :blk false;
+            for (0..6) |_| _ = lines.next() orelse break :blk false;
+            const absolute = lines.next() orelse break :blk false;
+            const state = Dir.cwd().statFile(ctx.io, absolute, .{}) catch break :blk false;
+            break :blk ctx.memoLookup(try ctx.path(&.{ "memo", item.path }), absolute, state) != null;
+        };
+        if (!keep) {
+            item.dir.deleteFile(ctx.io, item.basename) catch continue;
+            removed += 1;
+        }
+    }
+    return removed;
 }
 
 test "hash fields cannot collide through concatenation" {

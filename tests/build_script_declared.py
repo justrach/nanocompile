@@ -24,6 +24,7 @@ fn main() {
         "outdir" => { fs::write(out.join("gen.txt"), "x").unwrap(); println!("cargo:rerun-if-changed={}", out.join("gen.txt").display()); }
         "nested" => { fs::create_dir_all(out.join("sub")).unwrap(); println!("cargo::rerun-if-changed=data.txt"); }
         "env-only" => println!("cargo:rerun-if-env-changed=EXTRA"),
+        "dir" => println!("cargo:rerun-if-changed=assets"),
         _ => { println!("cargo:rerun-if-changed=data.txt"); println!("cargo:rerun-if-env-changed=EXTRA"); }
     }
 }
@@ -100,6 +101,24 @@ def main():
         # Only env declarations: no file inputs, as in Cargo.
         cargo(42, 'build_script_miss', SCRIPT_MODE='env-only')
         cargo(42, 'build_script_hit', SCRIPT_MODE='env-only')
+
+        # An explicitly declared directory is tracked in full, including
+        # VCS-named and CACHEDIR.TAG subdirectories that the package scan skips.
+        for sub in ('.git', 'cached'):
+            (project / 'assets' / sub).mkdir(parents=True, exist_ok=True)
+            (project / 'assets' / sub / 'file').write_text('one\n')
+        (project / 'assets/cached/CACHEDIR.TAG').write_text('Signature: 8a477f597d28d172789f06886806bc55\n')
+        cargo(42, 'build_script_miss', SCRIPT_MODE='dir')
+        cargo(42, 'build_script_hit', SCRIPT_MODE='dir')
+        for sub in ('.git', 'cached'):
+            preserved_edit(project / 'assets' / sub / 'file', 'two\n')
+            cargo(42, 'build_script_miss', SCRIPT_MODE='dir')
+            cargo(42, 'build_script_hit', SCRIPT_MODE='dir')
+        # The package-default scan skips them, as Cargo's package listing does.
+        cargo(42, 'build_script_miss', SCRIPT_MODE='undeclared')
+        cargo(42, 'build_script_hit', SCRIPT_MODE='undeclared')
+        preserved_edit(project / 'assets/.git/file', 'three\n')
+        cargo(42, 'build_script_hit', SCRIPT_MODE='undeclared')
 
         # Never cached: always-rerun, inputs under OUT_DIR, nested outputs.
         for mode in ('always', 'outdir', 'nested'):

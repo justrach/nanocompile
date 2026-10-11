@@ -122,6 +122,19 @@ def main():
         assert last_event() == "hit"
         assert {rlib.name: digest(rlib)} == direct(rust)
 
+        # gc keeps live memo records and removes stale ones.
+        shutil.rmtree(root / "out")
+        run(rust)
+        live = memo_count()
+        assert live > 0
+        rlib.unlink()  # Its materialization memo is now stale.
+        g = subprocess.run([BIN, "gc"], cwd=root, env=env, capture_output=True, text=True)
+        assert g.returncode == 0 and "stale digest memos removed:" in g.stdout, g.stdout + g.stderr
+        removed = int(g.stdout.rsplit(":", 1)[1])
+        assert removed >= 1 and memo_count() == live - removed, (g.stdout, live)
+        run(rust)
+        assert last_event() == "hit"
+
         # The control disables both lookup and recording.
         shutil.rmtree(root / "cache/memo")
         off = dict(env, NANOCOMPILE_DIGEST_MEMO="0")

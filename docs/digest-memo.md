@@ -13,7 +13,7 @@ A memo record is used only when all of the following hold:
 
 Outputs restored from verified immutable blobs record their known digest after materialization. This is done only when the destination is still the clone's inode, size and mtime, since any intervening write changes mtime. `putFile` memoizes a new blob only when the source's full state is unchanged across the hash-then-clone window.
 
-`NANOCOMPILE_DIGEST_MEMO=0` disables both lookup and recording. The cache key includes the environment, so each setting primes its own entries. `nanocompile clear` removes the memo directory.
+Staging destinations that a caller later renames are not memoized. `nanocompile gc` removes memo records whose file is gone or no longer matches. `NANOCOMPILE_DIGEST_MEMO=0` disables both lookup and recording. The cache key includes the environment, so each setting primes its own entries. `nanocompile clear` removes the memo directory.
 
 ### Trust boundary
 
