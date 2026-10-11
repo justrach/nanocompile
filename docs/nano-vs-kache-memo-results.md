@@ -16,6 +16,10 @@ All runs shared one busy machine: unrelated processes kept the load average arou
 | + selection memo + declared build scripts, cold median | 188.955 s | 190.351 s | 2/3 |
 | + compact installed-tree memo, warm (6 pairs) | **6.350 s** | 6.676 s | **5/6** |
 | + compact installed-tree memo, cold prime (1 build each) | 179.085 s | 190.906 s | — |
+| Final cold/warm study at that point, cold median | **174.055 s** | 186.655 s | 3/3 |
+| Final cold/warm study at that point, warm median (calmer host) | 6.162 s | **5.955 s** | 1/3 |
+| + text build-script shims, warm (6 pairs) | **6.228 s** | 6.593 s | **5/6** |
+| + text build-script shims, cold prime (1 build each) | 174.984 s | 187.569 s | — |
 
 In the six-pair warm study, the paired kache-minus-Nano saving is 0.308 s on average, with a standard error of 0.132 s. Every warm build restores all 138 build-script runs. Nano records 1,095 compiler hits, three misses and five bypasses. kache records 1,237 local hits.
 
@@ -49,7 +53,7 @@ After step 5, Nano's warm slot time by category (medians of six builds) is:
 | build-script runs | 8.91 s | 6.33 s |
 | final binary | 0.07 s | 0.06 s |
 
-Build-script runs remain the one category where kache is faster. Contracted scripts still re-validate about 16,000 SDK stamps per hit, and the remaining declared scripts pay about 13 ms more than kache. These are the next targets.
+Build-script runs remained the one category where kache was faster. On a calmer host the final cold/warm study showed why. Nano's warm build-script slot time was 9.53 s against kache's 5.24 s, and the profiler placed the excess on the first wave of scripts (0.28–0.32 s each against 0.02–0.18 s). macOS assesses every newly created executable on its first exec, and Cargo copies each shim to a new inode. The [text shims](declared-build-scripts.md#text-shims) make the kernel run the already-validated Nano binary instead, which cut build-script slot time to 6.48 s (kache 5.65 s). The next warm study won 5 of 6 pairs.
 
 ## Source edits
 
