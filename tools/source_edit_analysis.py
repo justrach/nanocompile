@@ -57,14 +57,14 @@ def analyze(report, state, output):
         'No compiler critical path or cause is inferred from cache counts.')
     lines = ['# Source-edit observations', '', analysis['limitations'], '',
              'Session: '+('complete' if complete else 'INCOMPLETE; provisional observations'), '',
-             '| Case | Phase | Nano (s) | kache (s) | Nano − kache (s) |',
-             '| --- | --- | ---: | ---: | ---: |']
+             '| Case | Phase | Direct (s) | Nano (s) | kache (s) | Nano − kache (s) |',
+             '| --- | --- | ---: | ---: | ---: | ---: |']
     for row in comparisons:
         def seconds(name):
             value = row['timings_seconds'].get(name)
             return f'{value:.3f}' if value is not None else 'unavailable'
         gap = row['nano_minus_kache_seconds']
-        lines.append(f"| {row['scenario']} | {row['phase']} | {seconds('nanocompile')} | {seconds('kache')} | "+(f'{gap:+.3f}' if gap is not None else 'unavailable')+' |')
+        lines.append(f"| {row['scenario']} | {row['phase']} | {seconds('direct')} | {seconds('nanocompile')} | {seconds('kache')} | "+(f'{gap:+.3f}' if gap is not None else 'unavailable')+' |')
     lines += ['', '## Instructions for the next variation', '',
         '1. Preserve this report hash, frozen binaries, source snapshot, toolchain, flags, job count and native contracts. Keep complete logs for both tools and every failure.',
         '2. Reproduce the largest observed Nano loss first in alternating repeated untraced trials. A single gap is a hypothesis; do not claim it is repeatable yet.']
