@@ -172,11 +172,15 @@ int main(int argc, char **argv) {
     fprintf(record,
             "{\"pid\":%ld,\"child_pid\":%ld,\"start_ns\":%lld,\"end_ns\":%lld,"
             "\"epoch_start_ns\":%lld,\"exit_code\":%d,\"user_us\":%lld,"
-            "\"system_us\":%lld,\"cwd\":",
+            "\"system_us\":%lld,\"major_faults\":%ld,\"minor_faults\":%ld,"
+            "\"block_reads\":%ld,\"block_writes\":%ld,"
+            "\"voluntary_switches\":%ld,\"involuntary_switches\":%ld,\"cwd\":",
             (long)getpid(), (long)child, start, end, epoch, result,
             (long long)usage.ru_utime.tv_sec * 1000000 + usage.ru_utime.tv_usec,
             (long long)usage.ru_stime.tv_sec * 1000000 +
-                usage.ru_stime.tv_usec);
+                usage.ru_stime.tv_usec,
+            usage.ru_majflt, usage.ru_minflt, usage.ru_inblock, usage.ru_oublock,
+            usage.ru_nvcsw, usage.ru_nivcsw);
     quoted(record, cwd);
     fputs(",\"args\":[", record);
     for (int i = 1; i < argc; i++) {

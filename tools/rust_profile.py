@@ -437,7 +437,8 @@ def cmd_phases(args):
             name, kind = request_name(record)
             elapsed = (record['end_ns'] - record['start_ns']) / 1e9
             cpu = (record.get('user_us', 0) + record.get('system_us', 0)) / 1e6
-            requests[kind].append((elapsed, cpu, name))
+            counters = {k: record.get(k) for k in ('major_faults', 'block_reads', 'voluntary_switches', 'involuntary_switches')}
+            requests[kind].append((elapsed, cpu, name, counters))
             stderr = meta.with_suffix('.stderr')
             text = stderr.read_text(errors='replace') if stderr.exists() else ''
             for family, stage, ns in PHASE.findall(text):
@@ -450,10 +451,14 @@ def cmd_phases(args):
     for kind, rows in sorted(requests.items(), key=lambda kv: -sum(r[0] for r in kv[1])):
         print(f'{kind:24} {len(rows):6d} {sum(r[0] for r in rows):11.3f}s {statistics.median(r[0] for r in rows) * 1000:10.2f}ms '
               f'{sum(r[1] for r in rows):10.3f}s {statistics.median(r[1] for r in rows) * 1000:9.2f}ms')
-    slowest = sorted((r for rows in requests.values() for r in rows), reverse=True)[:args.top]
+    slowest = sorted((r for rows in requests.values() for r in rows), key=lambda r: r[0], reverse=True)[:args.top]
     print('\nslowest requests:')
-    for elapsed, cpu, name in slowest:
-        print(f'   {elapsed * 1000:9.2f}ms wall {cpu * 1000:8.2f}ms cpu  {name}')
+    for elapsed, cpu, name, counters in slowest:
+        extra = ''
+        if counters.get('voluntary_switches') is not None:
+            extra = (f"  waits {counters['voluntary_switches']} preempted {counters['involuntary_switches']}"
+                     f" page-ins {counters['major_faults']} block-reads {counters['block_reads']}")
+        print(f'   {elapsed * 1000:9.2f}ms wall {cpu * 1000:8.2f}ms cpu  {name}{extra}')
     if totals:
         print('\nstage                                          calls      total     median        max')
         for stage, values in sorted(totals.items(), key=lambda kv: -sum(kv[1]))[:args.top * 2]:
