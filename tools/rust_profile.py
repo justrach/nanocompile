@@ -421,6 +421,24 @@ def request_name(record):
     return 'unknown', 'other'
 
 
+def frontend_seconds(meta, record):
+    """Seconds from request start until the compiler's rmeta artifact notification reached
+    the wrapper, from the capture's stream arrival log; None when it was not emitted."""
+    chunks, stderr = meta.with_suffix('.chunks'), meta.with_suffix('.stderr')
+    if not (chunks.exists() and stderr.exists()):
+        return None
+    data = stderr.read_bytes()
+    for line in chunks.read_text().splitlines():
+        try:
+            stream, offset, size, arrival = map(int, line.split(','))
+        except ValueError:
+            return None
+        piece = data[offset:offset + size]
+        if stream == 1 and b'"artifact"' in piece and b'.rmeta"' in piece:
+            return (arrival - record['start_ns']) / 1e9
+    return None
+
+
 def cmd_phases(args):
     """Aggregate wrapper request time, CPU and Nano phase lines from build_trace capture records."""
     totals = collections.defaultdict(list)
@@ -437,7 +455,8 @@ def cmd_phases(args):
             name, kind = request_name(record)
             elapsed = (record['end_ns'] - record['start_ns']) / 1e9
             cpu = (record.get('user_us', 0) + record.get('system_us', 0)) / 1e6
-            counters = {k: record.get(k) for k in ('major_faults', 'block_reads', 'voluntary_switches', 'involuntary_switches')}
+            counters = {k: record.get(k) for k in ('major_faults', 'block_reads', 'voluntary_switches', 'involuntary_switches', 'jobserver_free')}
+            counters['frontend'] = frontend_seconds(meta, record) if elapsed > 1 else None
             requests[kind].append((elapsed, cpu, name, counters))
             stderr = meta.with_suffix('.stderr')
             text = stderr.read_text(errors='replace') if stderr.exists() else ''
@@ -458,6 +477,10 @@ def cmd_phases(args):
         if counters.get('voluntary_switches') is not None:
             extra = (f"  waits {counters['voluntary_switches']} preempted {counters['involuntary_switches']}"
                      f" page-ins {counters['major_faults']} block-reads {counters['block_reads']}")
+        if counters.get('jobserver_free'):
+            extra += f"  free-tokens mean {counters['jobserver_free']['mean']:.1f} min {counters['jobserver_free']['min']}"
+        if counters.get('frontend') is not None:
+            extra += f"  frontend {counters['frontend']:.2f}s codegen {elapsed - counters['frontend']:.2f}s"
         print(f'   {elapsed * 1000:9.2f}ms wall {cpu * 1000:8.2f}ms cpu  {name}{extra}')
     if totals:
         print('\nstage                                          calls      total     median        max')

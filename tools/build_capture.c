@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/ioctl.h>
 #include <sys/resource.h>
 #include <sys/wait.h>
 #include <time.h>
@@ -64,13 +65,49 @@ static int write_all(int fd, const char *bytes, ssize_t size) {
   }
   return 1;
 }
-static int tee_streams(int *fds, int *logs, FILE *chunks) {
+// Free jobserver tokens (bytes waiting in Cargo's jobserver pipe or FIFO),
+// sampled without consuming them. A build where tokens sit free while a
+// compiler runs below its usual parallelism, or where fewer tokens exist than
+// -j allows, shows up here.
+struct tokens { int fd; long long samples, sum; int min, max, first; };
+static void open_jobserver(struct tokens *t) {
+  t->fd = -1; t->samples = t->sum = 0; t->min = 1 << 30; t->max = -1; t->first = -1;
+  const char *flags = getenv("CARGO_MAKEFLAGS");
+  if (!flags) flags = getenv("MAKEFLAGS");
+  if (!flags) return;
+  const char *auth = strstr(flags, "--jobserver-auth=");
+  if (auth) auth += strlen("--jobserver-auth=");
+  else if ((auth = strstr(flags, "--jobserver-fds="))) auth += strlen("--jobserver-fds=");
+  else return;
+  if (strncmp(auth, "fifo:", 5) == 0) {
+    char fifo[4096];
+    size_t n = strcspn(auth + 5, " ");
+    if (n >= sizeof fifo) return;
+    memcpy(fifo, auth + 5, n); fifo[n] = 0;
+    t->fd = open(fifo, O_RDONLY | O_NONBLOCK | O_CLOEXEC);
+  } else {
+    int fd = atoi(auth);
+    if (fd > 2 && fcntl(fd, F_GETFD) >= 0) t->fd = fd;
+  }
+}
+static void sample_jobserver(struct tokens *t) {
+  int available;
+  if (t->fd < 0 || ioctl(t->fd, FIONREAD, &available) < 0) return;
+  if (t->first < 0) t->first = available;
+  if (available < t->min) t->min = available;
+  if (available > t->max) t->max = available;
+  t->sum += available; t->samples++;
+}
+static int tee_streams(int *fds, int *logs, FILE *chunks, struct tokens *jobserver) {
   struct pollfd streams[2] = {{fds[0], POLLIN, 0}, {fds[1], POLLIN, 0}};
   long long offsets[2] = {0, 0};
   int remaining = 2, complete = 1;
   char bytes[16384];
+  long long sampled = 0;
   while (remaining) {
-    int ready = poll(streams, 2, -1);
+    long long t = now(CLOCK_MONOTONIC);
+    if (t - sampled >= 50000000) { sample_jobserver(jobserver); sampled = t; }
+    int ready = poll(streams, 2, jobserver->fd < 0 ? -1 : 50);
     if (ready < 0 && errno == EINTR) continue;
     if (ready < 0) { complete = 0; break; }
     for (int i = 0; i < 2; ++i) {
@@ -151,7 +188,9 @@ int main(int argc, char **argv) {
   }
   close(output_pipe[1]); close(error_pipe[1]);
   int input_fds[2] = {output_pipe[0], error_pipe[0]}, log_fds[2] = {out, err};
-  int complete = tee_streams(input_fds, log_fds, chunks);
+  struct tokens jobserver;
+  open_jobserver(&jobserver);
+  int complete = tee_streams(input_fds, log_fds, chunks, &jobserver);
   if (fclose(chunks)) complete = 0;
   int status;
   struct rusage usage;
@@ -174,13 +213,17 @@ int main(int argc, char **argv) {
             "\"epoch_start_ns\":%lld,\"exit_code\":%d,\"user_us\":%lld,"
             "\"system_us\":%lld,\"major_faults\":%ld,\"minor_faults\":%ld,"
             "\"block_reads\":%ld,\"block_writes\":%ld,"
-            "\"voluntary_switches\":%ld,\"involuntary_switches\":%ld,\"cwd\":",
+            "\"voluntary_switches\":%ld,\"involuntary_switches\":%ld,",
             (long)getpid(), (long)child, start, end, epoch, result,
             (long long)usage.ru_utime.tv_sec * 1000000 + usage.ru_utime.tv_usec,
             (long long)usage.ru_stime.tv_sec * 1000000 +
                 usage.ru_stime.tv_usec,
             usage.ru_majflt, usage.ru_minflt, usage.ru_inblock, usage.ru_oublock,
             usage.ru_nvcsw, usage.ru_nivcsw);
+    if (jobserver.samples)
+      fprintf(record, "\"jobserver_free\":{\"samples\":%lld,\"first\":%d,\"min\":%d,\"max\":%d,\"mean\":%.3f},",
+              jobserver.samples, jobserver.first, jobserver.min, jobserver.max, (double)jobserver.sum / jobserver.samples);
+    fputs("\"cwd\":", record);
     quoted(record, cwd);
     fputs(",\"args\":[", record);
     for (int i = 1; i < argc; i++) {

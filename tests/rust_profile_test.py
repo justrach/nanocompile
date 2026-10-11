@@ -119,6 +119,20 @@ class ProfileTests(unittest.TestCase):
             self.assertEqual(summary['nanocompile']['wall_median'], 1.75)
             self.assertAlmostEqual(summary['wall_effects']['kache']['library'], 0.5)
 
+    def test_frontend_split_from_stream_arrival(self):
+        with tempfile.TemporaryDirectory() as directory:
+            meta = Path(directory) / '1-100.json'
+            record = dict(start_ns=1_000_000_000, end_ns=4_000_000_000, user_us=0, system_us=0,
+                          args=['rustc', '--crate-name', 'demo'])
+            meta.write_text(json.dumps(record))
+            first = b'{"$message_type":"diagnostic"}\n'
+            second = b'{"$message_type":"artifact","artifact":"/t/libdemo.rmeta","emit":"metadata"}\n'
+            meta.with_suffix('.stderr').write_bytes(first + second)
+            meta.with_suffix('.chunks').write_text(f'1,0,{len(first)},1500000000\n1,{len(first)},{len(second)},2250000000\n')
+            self.assertAlmostEqual(rust_profile.frontend_seconds(meta, record), 1.25)
+            meta.with_suffix('.chunks').write_text(f'1,0,{len(first)},1500000000\n')
+            self.assertIsNone(rust_profile.frontend_seconds(meta, record))
+
     def test_rejects_mismatched_unit_graph(self):
         with tempfile.TemporaryDirectory() as directory:
             html, _ = self.fixture(directory)

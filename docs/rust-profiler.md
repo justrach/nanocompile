@@ -24,7 +24,7 @@ Cargo numbers units the same way in `--timings` and `--unit-graph` for one resol
 | `path TIMING` | Which chain of units ends the build, and how much of it was waiting for a job slot? |
 | `simulate TIMING --scale REGEX=FACTOR` | What would the wall time be if these units (or a category such as `build-script-run`) were faster? |
 | `diff BASELINE CANDIDATE` | Which unit categories and units explain the wall-time gap between two builds? |
-| `phases CAPTURE...` | Which Nano request kinds and compiler/script phases use the most wrapper time and CPU? |
+| `phases CAPTURE...` | Which Nano request kinds and compiler/script phases use the most wrapper time and CPU? For the slowest requests: context switches, page-ins, block reads, free jobserver tokens, and the frontend/codegen split. |
 | `study REPORT --state DIR` | For a whole benchmark run kept with `--cargo-timings`: median wall time and slot time per category for each implementation and phase, plus the median simulated wall effect per category across all Nano/competitor pairs. |
 | `trace TIMING --output trace.json [--simulated]` | A Chrome/Perfetto trace of the observed or simulated schedule, one lane per job slot, with critical-path units tagged. |
 
@@ -61,6 +61,18 @@ The first diff of a Nano warm build (7.77 s) against a kache warm build (6.53 s)
 6. Implement the fix, then rerun step 1.
 
 Each round of this loop on Harness produced the next change: build-script runs, then Apple selection, then installed-tree memos, then contract parsing. The same loop also explained the source-edit result. `diff` placed kache's whole shared-edit lead on one `harness-ui` compile. `phases` on a traced reproduction then showed Nano adding only 0.26 s to it, which pointed at benchmark ordering rather than Nano (see [the results](nano-vs-kache-memo-results.md#why-nano-lost-the-shared-edit)).
+
+## Wait diagnostics
+
+Captured requests (`tools/build_capture.c`) also record:
+
+- the child's page-ins, block reads and writes, and voluntary and involuntary context switches
+- the jobserver tokens left free in Cargo's pipe or FIFO, sampled every 50 ms without consuming any
+- when each output stream chunk arrived
+
+`phases` uses the arrival of the compiler's `rmeta` artifact notification to split a compile into frontend (until metadata) and codegen. A request whose wall time grows while its CPU time, faults and free tokens stay the same is waiting on something outside the compiler. The frontend/codegen split shows where that wait sits.
+
+This is how the shared-edit loss was found. The slow `harness-ui`, `harness-preview` and `harness-adapters` compiles each had a fixed 2–4 s added to the frontend, while codegen time, CPU, faults and free tokens were unchanged. That matched the system's serialized first-load assessment of restored proc-macro dylibs (see [code assessment](code-assessment.md)).
 
 ## Limits
 
