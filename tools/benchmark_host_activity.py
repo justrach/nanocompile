@@ -92,6 +92,7 @@ def main():
                 if report['sample_count'] == 0 and not observation['root_present']:
                     raise RuntimeError('Benchmark PID is not live at monitor start')
                 observation.update(observed_at=datetime.datetime.now(datetime.timezone.utc).isoformat(),
+                                   monotonic_seconds=time.monotonic(),
                                    elapsed_seconds=time.monotonic() - started)
                 stream.write(json.dumps(observation) + '\n')
                 stream.flush()

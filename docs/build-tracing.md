@@ -90,6 +90,8 @@ python3 tools/benchmark_host_activity.py --pid "$benchmark_pid" \
 
 It excludes the benchmark's descendants and records aggregate CPU observations and counts of known build tools outside that process tree. Pass `--owned-pid "$daemon_pid"` for an independently parented daemon belonging to the benchmark. The output contains no unrelated process IDs, executable paths, command arguments or environments. It never stops processes or removes timing samples. The JSON report identifies the tool source and hashes the adjacent JSONL samples.
 
+Each snapshot includes `monotonic_seconds` from Python's `time.monotonic()`. A runner on the same host can record build start/end with that clock to match host observations to individual builds without wall-clock adjustments. A short build can fall between snapshots; an interval with no observations is unknown, not evidence that the host was idle.
+
 Start observation before measured builds, retain all samples, and check the observer's actual coverage window. Attaching it partway through a trial cannot explain earlier outliers. An external compiler observation qualifies the overlapping timings as contended; do not use a contended trial alone for a speed or adoption claim. No observed build tools does not prove an idle host: process-name detection is heuristic, sampling can miss short jobs, other applications can compete for resources, and `ps` CPU percentages have platform-specific semantics. The observer itself adds sampling overhead. A missing initial PID or failed process observation produces an incomplete/error report rather than a clean-host result.
 
 ## Retain producer compiler and linker internals
