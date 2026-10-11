@@ -1,0 +1,452 @@
+{
+  "completed_session": false,
+  "diagnostic_trace": true,
+  "compiler_profile": true,
+  "case": "Nano leaf/shared edits and fresh references",
+  "verified_captures": {
+    "4": {
+      "verified_files": 4997,
+      "compiler_records": 1145,
+      "cargo_units": 1237
+    },
+    "5": {
+      "verified_files": 4997,
+      "compiler_records": 1145,
+      "cargo_units": 1237
+    },
+    "8": {
+      "verified_files": 4997,
+      "compiler_records": 1145,
+      "cargo_units": 1237
+    },
+    "9": {
+      "verified_files": 4997,
+      "compiler_records": 1145,
+      "cargo_units": 1237
+    }
+  },
+  "verified_logs": {
+    "verified_build_logs": 11
+  },
+  "verified_probe_streams": 22,
+  "nanocompile_sha256": "0d38bfa35100b87d0a42abfd8ced2744eb28a91bc86883a663c938e998406499",
+  "script_sha256": "39ccff6b61e877cec4fd497b9ec53d31dcd34c871392b86496e9e455d8825738",
+  "shared_events": {
+    "miss": 13,
+    "bypass": 35,
+    "failed": 8,
+    "hit": 1089,
+    "build_script_hit": 31
+  },
+  "shared_final_phases": [
+    {
+      "request": "harness",
+      "stage": "compiler.plan",
+      "samples": 1,
+      "samples_ns": [
+        21708
+      ],
+      "median_seconds": 2.1708e-05,
+      "min_seconds": 2.1708e-05,
+      "max_seconds": 2.1708e-05,
+      "source_record": "52330-511362572599000.stderr",
+      "source_bytes": 2708,
+      "source_sha256": "4911930784989a62ceee97e05018814bf7d2b661d8e85a71a0f33d7cd03159a5"
+    },
+    {
+      "request": "harness",
+      "stage": "compiler.total",
+      "samples": 1,
+      "samples_ns": [
+        71651595959
+      ],
+      "median_seconds": 71.651595959,
+      "min_seconds": 71.651595959,
+      "max_seconds": 71.651595959,
+      "source_record": "52330-511362572599000.stderr",
+      "source_bytes": 2708,
+      "source_sha256": "4911930784989a62ceee97e05018814bf7d2b661d8e85a71a0f33d7cd03159a5"
+    },
+    {
+      "request": "harness",
+      "stage": "producer.apple_selection",
+      "samples": 1,
+      "samples_ns": [
+        19964333
+      ],
+      "median_seconds": 0.019964333,
+      "min_seconds": 0.019964333,
+      "max_seconds": 0.019964333,
+      "source_record": "52330-511362572599000.stderr",
+      "source_bytes": 2708,
+      "source_sha256": "4911930784989a62ceee97e05018814bf7d2b661d8e85a71a0f33d7cd03159a5"
+    },
+    {
+      "request": "harness",
+      "stage": "producer.cleanup",
+      "samples": 1,
+      "samples_ns": [
+        1654458
+      ],
+      "median_seconds": 0.001654458,
+      "min_seconds": 0.001654458,
+      "max_seconds": 0.001654458,
+      "source_record": "52330-511362572599000.stderr",
+      "source_bytes": 2708,
+      "source_sha256": "4911930784989a62ceee97e05018814bf7d2b661d8e85a71a0f33d7cd03159a5"
+    },
+    {
+      "request": "harness",
+      "stage": "producer.compiler_identity",
+      "samples": 1,
+      "samples_ns": [
+        1358125
+      ],
+      "median_seconds": 0.001358125,
+      "min_seconds": 0.001358125,
+      "max_seconds": 0.001358125,
+      "source_record": "52330-511362572599000.stderr",
+      "source_bytes": 2708,
+      "source_sha256": "4911930784989a62ceee97e05018814bf7d2b661d8e85a71a0f33d7cd03159a5"
+    },
+    {
+      "request": "harness",
+      "stage": "producer.execution",
+      "samples": 1,
+      "samples_ns": [
+        67620791708
+      ],
+      "median_seconds": 67.620791708,
+      "min_seconds": 67.620791708,
+      "max_seconds": 67.620791708,
+      "source_record": "52330-511362572599000.stderr",
+      "source_bytes": 2708,
+      "source_sha256": "4911930784989a62ceee97e05018814bf7d2b661d8e85a71a0f33d7cd03159a5"
+    },
+    {
+      "request": "harness",
+      "stage": "producer.identity_recheck",
+      "samples": 1,
+      "samples_ns": [
+        22769042
+      ],
+      "median_seconds": 0.022769042,
+      "min_seconds": 0.022769042,
+      "max_seconds": 0.022769042,
+      "source_record": "52330-511362572599000.stderr",
+      "source_bytes": 2708,
+      "source_sha256": "4911930784989a62ceee97e05018814bf7d2b661d8e85a71a0f33d7cd03159a5"
+    },
+    {
+      "request": "harness",
+      "stage": "producer.input_snapshot_staging",
+      "samples": 1,
+      "samples_ns": [
+        233340084
+      ],
+      "median_seconds": 0.233340084,
+      "min_seconds": 0.233340084,
+      "max_seconds": 0.233340084,
+      "source_record": "52330-511362572599000.stderr",
+      "source_bytes": 2708,
+      "source_sha256": "4911930784989a62ceee97e05018814bf7d2b661d8e85a71a0f33d7cd03159a5"
+    },
+    {
+      "request": "harness",
+      "stage": "producer.linked_inputs",
+      "samples": 1,
+      "samples_ns": [
+        75971833
+      ],
+      "median_seconds": 0.075971833,
+      "min_seconds": 0.075971833,
+      "max_seconds": 0.075971833,
+      "source_record": "52330-511362572599000.stderr",
+      "source_bytes": 2708,
+      "source_sha256": "4911930784989a62ceee97e05018814bf7d2b661d8e85a71a0f33d7cd03159a5"
+    },
+    {
+      "request": "harness",
+      "stage": "producer.locks_configuration",
+      "samples": 1,
+      "samples_ns": [
+        94167
+      ],
+      "median_seconds": 9.4167e-05,
+      "min_seconds": 9.4167e-05,
+      "max_seconds": 9.4167e-05,
+      "source_record": "52330-511362572599000.stderr",
+      "source_bytes": 2708,
+      "source_sha256": "4911930784989a62ceee97e05018814bf7d2b661d8e85a71a0f33d7cd03159a5"
+    },
+    {
+      "request": "harness",
+      "stage": "producer.observer_identity",
+      "samples": 1,
+      "samples_ns": [
+        1231375
+      ],
+      "median_seconds": 0.001231375,
+      "min_seconds": 0.001231375,
+      "max_seconds": 0.001231375,
+      "source_record": "52330-511362572599000.stderr",
+      "source_bytes": 2708,
+      "source_sha256": "4911930784989a62ceee97e05018814bf7d2b661d8e85a71a0f33d7cd03159a5"
+    },
+    {
+      "request": "harness",
+      "stage": "producer.postcompile_store",
+      "samples": 1,
+      "samples_ns": [
+        3186764542
+      ],
+      "median_seconds": 3.186764542,
+      "min_seconds": 3.186764542,
+      "max_seconds": 3.186764542,
+      "source_record": "52330-511362572599000.stderr",
+      "source_bytes": 2708,
+      "source_sha256": "4911930784989a62ceee97e05018814bf7d2b661d8e85a71a0f33d7cd03159a5"
+    },
+    {
+      "request": "harness",
+      "stage": "producer.publication_forwarding",
+      "samples": 1,
+      "samples_ns": [
+        2138375
+      ],
+      "median_seconds": 0.002138375,
+      "min_seconds": 0.002138375,
+      "max_seconds": 0.002138375,
+      "source_record": "52330-511362572599000.stderr",
+      "source_bytes": 2708,
+      "source_sha256": "4911930784989a62ceee97e05018814bf7d2b661d8e85a71a0f33d7cd03159a5"
+    },
+    {
+      "request": "harness",
+      "stage": "producer.restore",
+      "samples": 1,
+      "samples_ns": [
+        485348791
+      ],
+      "median_seconds": 0.485348791,
+      "min_seconds": 0.485348791,
+      "max_seconds": 0.485348791,
+      "source_record": "52330-511362572599000.stderr",
+      "source_bytes": 2708,
+      "source_sha256": "4911930784989a62ceee97e05018814bf7d2b661d8e85a71a0f33d7cd03159a5"
+    },
+    {
+      "request": "harness",
+      "stage": "producer.total",
+      "samples": 1,
+      "samples_ns": [
+        71651556708
+      ],
+      "median_seconds": 71.651556708,
+      "min_seconds": 71.651556708,
+      "max_seconds": 71.651556708,
+      "source_record": "52330-511362572599000.stderr",
+      "source_bytes": 2708,
+      "source_sha256": "4911930784989a62ceee97e05018814bf7d2b661d8e85a71a0f33d7cd03159a5"
+    },
+    {
+      "request": "harness",
+      "stage": "restore.manifest",
+      "samples": 2,
+      "samples_ns": [
+        7788500,
+        7821584
+      ],
+      "median_seconds": 0.007805042,
+      "min_seconds": 0.0077885,
+      "max_seconds": 0.007821584,
+      "source_record": "52330-511362572599000.stderr",
+      "source_bytes": 2708,
+      "source_sha256": "4911930784989a62ceee97e05018814bf7d2b661d8e85a71a0f33d7cd03159a5"
+    },
+    {
+      "request": "harness",
+      "stage": "restore.parallel_input_hashes",
+      "samples": 2,
+      "samples_ns": [
+        264970500,
+        203274708
+      ],
+      "median_seconds": 0.234122604,
+      "min_seconds": 0.203274708,
+      "max_seconds": 0.2649705,
+      "source_record": "52330-511362572599000.stderr",
+      "source_bytes": 2708,
+      "source_sha256": "4911930784989a62ceee97e05018814bf7d2b661d8e85a71a0f33d7cd03159a5"
+    },
+    {
+      "request": "harness",
+      "stage": "restore.total",
+      "samples": 4,
+      "samples_ns": [
+        273470583,
+        211844000,
+        18625,
+        7292
+      ],
+      "median_seconds": 0.1059313125,
+      "min_seconds": 7.292e-06,
+      "max_seconds": 0.273470583,
+      "source_record": "52330-511362572599000.stderr",
+      "source_bytes": 2708,
+      "source_sha256": "4911930784989a62ceee97e05018814bf7d2b661d8e85a71a0f33d7cd03159a5"
+    }
+  ],
+  "shared_compile_requests": [
+    {
+      "name": "objc2_exception_helper",
+      "seconds": 0.027858,
+      "record": "48174-511308932153000.json"
+    },
+    {
+      "name": "psm",
+      "seconds": 0.039147,
+      "record": "49946-511311662127000.json"
+    },
+    {
+      "name": "psm",
+      "seconds": 0.037875,
+      "record": "49948-511311665880000.json"
+    },
+    {
+      "name": "harness_proto",
+      "seconds": 3.637631,
+      "record": "50019-511311846331000.json"
+    },
+    {
+      "name": "harness_doc",
+      "seconds": 4.629464,
+      "record": "50974-511313947604000.json"
+    },
+    {
+      "name": "harness_adapters",
+      "seconds": 10.961626,
+      "record": "51251-511314640884000.json"
+    },
+    {
+      "name": "harness_preview",
+      "seconds": 7.626433,
+      "record": "51272-511314708073000.json"
+    },
+    {
+      "name": "harness_sync",
+      "seconds": 2.480241,
+      "record": "51458-511317220855000.json"
+    },
+    {
+      "name": "harness_rpc",
+      "seconds": 2.203232,
+      "record": "51472-511318253108000.json"
+    },
+    {
+      "name": "harness_mcp",
+      "seconds": 4.855509,
+      "record": "51499-511319273167000.json"
+    },
+    {
+      "name": "harness_engine",
+      "seconds": 18.458312,
+      "record": "51609-511321752802000.json"
+    },
+    {
+      "name": "harness_ui",
+      "seconds": 30.886367,
+      "record": "51775-511331671716000.json"
+    },
+    {
+      "name": "harness",
+      "seconds": 71.6566,
+      "record": "52330-511362572599000.json"
+    }
+  ],
+  "shared_own_fresh_checks": {
+    "matches_own_cold_final_executable": true,
+    "matches_own_cold_final_executable_modes": true,
+    "matches_own_cold_native_artifacts": true,
+    "matches_own_cold_artifacts": true,
+    "matches_own_cold_macro_dylibs": true,
+    "matches_own_cold_build_script_executables": true
+  },
+  "limits": "Matching kache shared-edit capture, direct shared reference, reverts and final source-restoration gates remain pending. Traced timings are diagnostics, not speed comparisons; overlapping request durations cannot be summed.",
+  "matching_kache_shared_observation": {
+    "capture": {
+      "verified_files": 4829,
+      "compiler_records": 1103,
+      "cargo_units": 1237
+    },
+    "events": {
+      "passthrough": 4,
+      "miss": 10,
+      "unknown": 2,
+      "local_hit": 1227
+    },
+    "request_observations": [
+      {
+        "request": "harness",
+        "nano_seconds": 71.6566,
+        "kache_seconds": 68.525389,
+        "nano_record": "52330-511362572599000.json",
+        "kache_record": "96682-511692404821000.json"
+      },
+      {
+        "request": "harness_ui",
+        "nano_seconds": 30.886367,
+        "kache_seconds": 26.874391,
+        "nano_record": "51775-511331671716000.json",
+        "kache_record": "95534-511665515215000.json"
+      },
+      {
+        "request": "harness_engine",
+        "nano_seconds": 18.458312,
+        "kache_seconds": 19.224473,
+        "nano_record": "51609-511321752802000.json",
+        "kache_record": "95420-511654531019000.json"
+      },
+      {
+        "request": "harness_adapters",
+        "nano_seconds": 10.961626,
+        "kache_seconds": 11.980701,
+        "nano_record": "51251-511314640884000.json",
+        "kache_record": "94959-511647011860000.json"
+      }
+    ],
+    "service_events": [
+      {
+        "crate_name": "harness_ui",
+        "result": "miss",
+        "elapsed_ms": 26866,
+        "compile_time_ms": 26624,
+        "key_ms": 29,
+        "store_ms": 98,
+        "compiler_runs": 1,
+        "key_hash_bytes": 3131123,
+        "key_hash_hits": 90,
+        "key_hash_misses": 581,
+        "store_reflinked_bytes": 157444624,
+        "store_copied_bytes": 0
+      },
+      {
+        "crate_name": "harness",
+        "result": "miss",
+        "elapsed_ms": 68518,
+        "compile_time_ms": 67961,
+        "key_ms": 494,
+        "store_ms": 58,
+        "compiler_runs": 1,
+        "key_hash_bytes": 36074782,
+        "key_hash_hits": 49,
+        "key_hash_misses": 57,
+        "store_reflinked_bytes": 101450576,
+        "store_copied_bytes": 0
+      }
+    ],
+    "nano_diagnostic_seconds": 127.50585041701561,
+    "kache_diagnostic_seconds": 121.07231487502577,
+    "limits": "Diagnostic single samples; service categories are not identical to Nano stages and are not joined by request IDs. Own-fresh kache reference and direct/revert/session gates remain pending. No whole-build causal saving is inferred."
+  }
+}

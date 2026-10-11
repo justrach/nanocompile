@@ -31,3 +31,32 @@ postcompile misses and identical dependency/output manifests. Then run repeated
 alternating full-Harness comparisons against frozen Nano and kache, followed by
 independent confirmation. Reject unknown coverage, changed outputs or repeatable
 regressions. The shared-edit loss still has no established cause.
+
+## Matching shared-edit observations
+
+The [verified partial source-edit observations](../benchmarks/harness-full-app-source-edit-nano-phase-observations.json)
+now include Nano's own fresh leaf/shared reference checks and kache's matching
+shared-edit capture. Nano's final `harness` request takes 71.657s and kache's
+68.525s. Nano records compiler execution 67.621s, postcompile storage 3.187s and
+previous-entry validation 0.485s. Kache's nearby `harness` miss service event
+records compiler time 67.961s, key work 0.494s and storage 0.058s. These categories
+have different scopes and are not joined by request IDs. The storage difference
+is a useful hypothesis; it does not establish a whole-build causal saving.
+
+`harness_ui` request time is 30.886s Nano versus 26.874s kache; Nano's execution
+and stream forwarding stage is 29.642s, while kache's compiler service reports
+26.624s. Inspect scheduling and competing work before attributing that compiler
+variation to a wrapper feature. Request spans overlap.
+
+Kache reports reflinked outputs with zero copied bytes for both requests. Nano
+already attempts macOS `clonefile` in `cache.materialize`; this observation does
+not establish a missing clone operation or a copy bottleneck in Nano. Split graph
+collection from output storage if the digest-sharing trial cannot explain the
+measured cost. The private two-root shared-transitive fixture is prepared and
+queued, with exact payload/output comparisons, preserved-mtime replacement,
+corruption/failure, revert and concurrent restore cases; it has not run yet.
+
+The traced project observations are 127.506s Nano and 121.072s kache. They are
+single diagnostic samples, not repeated untraced speed benchmarks. Kache's own
+fresh shared reference, direct shared reference, reverts and final source
+restoration checks remain pending in this sequence.
