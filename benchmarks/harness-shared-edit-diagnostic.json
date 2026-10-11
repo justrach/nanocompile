@@ -119,5 +119,170 @@
     ],
     "finding": "harness-ui takes 25.0-25.9 s in every condition; Nano miss path adds about 0.3 s over bypass; restored versus byte-copied inputs make no difference. The 29.3 s seen in all three study shared edits is not reproduced outside the study."
   },
-  "study_sample_3": "A pre-build idle wait for the kache daemon did not change the result (Nano 119.833 s, kache 116.993 s; harness-ui 29.36 s). The edit runner now stops the private kache daemon before direct and Nano builds and runs it only for kache builds."
+  "study_sample_3": "A pre-build idle wait for the kache daemon did not change the result (Nano 119.833 s, kache 116.993 s; harness-ui 29.36 s). The edit runner now stops the private kache daemon before direct and Nano builds and runs it only for kache builds.",
+  "direct_wrapper_reproduction": {
+    "method": "Study configuration (Nano as RUSTC_WRAPPER, no trace, declared scripts, same contract) on a cloned snapshot: cold, leaf, then successive distinct shared parser edits.",
+    "builds": [
+      {
+        "build": "cold",
+        "wall": 173.6,
+        "units": {
+          "harness-engine 0.2.108": 18.37,
+          "harness-ui 0.2.108": 24.51
+        }
+      },
+      {
+        "build": "leaf",
+        "wall": 74.48,
+        "units": {
+          "harness-engine 0.2.108": 0.05,
+          "harness-ui 0.2.108": 0.08
+        }
+      },
+      {
+        "build": "shared",
+        "wall": 113.09,
+        "units": {
+          "harness-engine 0.2.108": 17.64,
+          "harness-ui 0.2.108": 25.62
+        }
+      },
+      {
+        "build": "shared-2",
+        "wall": 118.31,
+        "units": {
+          "harness-engine 0.2.108": 17.65,
+          "harness-ui 0.2.108": 28.82
+        }
+      },
+      {
+        "build": "shared-3",
+        "wall": 128.39,
+        "units": {
+          "harness-engine 0.2.108": 19.84,
+          "harness-ui 0.2.108": 33.47
+        }
+      },
+      {
+        "build": "shared-4",
+        "wall": 130.14,
+        "units": {
+          "harness-engine 0.2.108": 21.44,
+          "harness-ui 0.2.108": 30.75
+        }
+      },
+      {
+        "build": "shared-5",
+        "wall": 126.01,
+        "units": {
+          "harness-engine 0.2.108": 21.07,
+          "harness-ui 0.2.108": 29.77
+        }
+      }
+    ],
+    "note": "The first shared edit is fast (harness-ui 25.62 s); later distinct shared edits are slower (28.82-33.47 s), and harness-engine also slows during shared-3 to shared-5 while an unrelated system process used about five cores (load average about 21)."
+  },
+  "page_cache_test": {
+    "method": "All units restored by Nano hits (fresh clones), then only harness-ui source touched and recompiled; with or without reading every dependency file first.",
+    "rows": [
+      {
+        "prefetch": false,
+        "restore_wall": 5.94,
+        "compile_wall": 108.19,
+        "units": {
+          "ring 0.17.14 [build-script (run)]": 2.3,
+          "libsqlite3-sys 0.30.1 [build-script (run)]": 12.45,
+          "media 0.1.0 [build-script (run)]": 3.39,
+          "tree-sitter 0.26.11 [build-script (run)]": 2.47,
+          "tree-sitter-sequel 0.3.11 [build-script (run)]": 1.74,
+          "tree-sitter-swift 0.7.3 [build-script (run)]": 1.59,
+          "tree-sitter-md 0.5.3 [build-script (run)]": 1.07,
+          "tree-sitter-bash 0.25.1 [build-script (run)]": 1.16,
+          "tree-sitter-kotlin-ng 1.1.0 [build-script (run)]": 1.44,
+          "tree-sitter-php 0.24.2 [build-script (run)]": 1.75,
+          "tree-sitter-typescript 0.23.2 [build-script (run)]": 1.72,
+          "tree-sitter-cpp 0.23.4 [build-script (run)]": 1.14,
+          "tree-sitter-ruby 0.23.1 [build-script (run)]": 1.13,
+          "tree-sitter-c-sharp 0.23.5 [build-script (run)]": 1.46,
+          "libmimalloc-sys 0.1.49 [build-script (run)]": 1.37,
+          "harness-ui 0.2.108": 25.9,
+          "harness 0.2.108 [harness \"bin\"]": 67.39
+        }
+      },
+      {
+        "prefetch": true,
+        "restore_wall": 6.34,
+        "compile_wall": 118.91,
+        "units": {
+          "ring 0.17.14 [build-script (run)]": 2.12,
+          "libsqlite3-sys 0.30.1 [build-script (run)]": 12.21,
+          "media 0.1.0 [build-script (run)]": 3.12,
+          "tree-sitter 0.26.11 [build-script (run)]": 2.25,
+          "tree-sitter-typescript 0.23.2 [build-script (run)]": 1.56,
+          "tree-sitter-c-sharp 0.23.5 [build-script (run)]": 1.25,
+          "tree-sitter-kotlin-ng 1.1.0 [build-script (run)]": 1.2,
+          "tree-sitter-sequel 0.3.11 [build-script (run)]": 1.46,
+          "tree-sitter-swift 0.7.3 [build-script (run)]": 1.37,
+          "tree-sitter-php 0.24.2 [build-script (run)]": 1.49,
+          "libmimalloc-sys 0.1.49 [build-script (run)]": 1.12,
+          "harness-ui 0.2.108": 37.12,
+          "harness 0.2.108 [harness \"bin\"]": 67.19
+        }
+      },
+      {
+        "prefetch": false,
+        "restore_wall": 6.14,
+        "compile_wall": 107.74,
+        "units": {
+          "ring 0.17.14 [build-script (run)]": 2.11,
+          "libsqlite3-sys 0.30.1 [build-script (run)]": 12.23,
+          "media 0.1.0 [build-script (run)]": 3.17,
+          "tree-sitter 0.26.11 [build-script (run)]": 2.27,
+          "tree-sitter-c-sharp 0.23.5 [build-script (run)]": 1.24,
+          "tree-sitter-sequel 0.3.11 [build-script (run)]": 1.5,
+          "tree-sitter-typescript 0.23.2 [build-script (run)]": 1.53,
+          "tree-sitter-php 0.24.2 [build-script (run)]": 1.52,
+          "tree-sitter-kotlin-ng 1.1.0 [build-script (run)]": 1.2,
+          "tree-sitter-swift 0.7.3 [build-script (run)]": 1.29,
+          "libmimalloc-sys 0.1.49 [build-script (run)]": 1.14,
+          "harness-ui 0.2.108": 25.92,
+          "harness 0.2.108 [harness \"bin\"]": 67.22
+        }
+      },
+      {
+        "prefetch": true,
+        "restore_wall": 6.02,
+        "compile_wall": 108.17,
+        "units": {
+          "ring 0.17.14 [build-script (run)]": 2.3,
+          "libsqlite3-sys 0.30.1 [build-script (run)]": 12.48,
+          "media 0.1.0 [build-script (run)]": 3.41,
+          "tree-sitter 0.26.11 [build-script (run)]": 2.47,
+          "tree-sitter-kotlin-ng 1.1.0 [build-script (run)]": 1.45,
+          "tree-sitter-sequel 0.3.11 [build-script (run)]": 1.71,
+          "tree-sitter-php 0.24.2 [build-script (run)]": 1.76,
+          "tree-sitter-ruby 0.23.1 [build-script (run)]": 1.13,
+          "tree-sitter-c-sharp 0.23.5 [build-script (run)]": 1.93,
+          "tree-sitter-bash 0.25.1 [build-script (run)]": 1.14,
+          "tree-sitter-typescript 0.23.2 [build-script (run)]": 1.77,
+          "tree-sitter-swift 0.7.3 [build-script (run)]": 1.54,
+          "tree-sitter-cpp 0.23.4 [build-script (run)]": 1.14,
+          "tree-sitter-md 0.5.3 [build-script (run)]": 1.07,
+          "libmimalloc-sys 0.1.49 [build-script (run)]": 1.35,
+          "harness-ui 0.2.108": 25.92,
+          "harness 0.2.108 [harness \"bin\"]": 67.28
+        }
+      }
+    ],
+    "finding": "harness-ui takes 25.9 s with or without prefetch (one prefetch outlier at 37.1 s); restored clones do not slow rustc."
+  },
+  "excluded_causes": [
+    "Nano miss-path bookkeeping (about 0.3 s per large miss)",
+    "restored-file page cache",
+    "private kache daemon activity",
+    "jobserver inheritance (rustc connects through Nano)",
+    "process priority (all background jobs run at nice 5 under zsh)"
+  ],
+  "study_sample_4": "kache daemon stopped during Nano builds: Nano 118.741 s, kache 115.399 s; harness-ui 29.10 s versus 25.66 s.",
+  "open_question": "Every study places Nano first in the shared edit, directly after the leaf scenario reference cleanup. Sample 5 shifts the rotation so kache builds the shared edit first."
 }

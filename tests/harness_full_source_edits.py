@@ -63,6 +63,7 @@ def main():
     p.add_argument('--compiler-profile', action='store_true', help='record compiler phases; requires --trace-builds')
     p.add_argument('--no-compiler-stream', action='store_true', help='disable default Rust stream forwarding')
     p.add_argument('--no-pipelined-companions', action='store_true', help='disable default guarded companion membership')
+    p.add_argument('--rotation-offset', type=int, default=0, choices=(0, 1, 2), help='shift which implementation builds each edit first, to expose order effects')
     p.add_argument('--declared-build-scripts', action='store_true', help="cache every Nano build-script run under Cargo's rerun-if-changed rule")
     p.add_argument('--cargo-timings', action='store_true', help="keep each build's Cargo --timings report for tools/rust_profile.py")
     p.add_argument("--min-free-gib", type=float, help="free-space gate before each build; default 32 for full binaries, 8 for libraries")
@@ -402,6 +403,7 @@ def main():
 
     if args.native_clang:
         result['method'] += '; Nano explicitly uses CC=nanocompile clang and native remarks; direct and kache retain their usual native compiler selection. Inline scanner changes debug representation, so every mode must match its own cold Rust, macro, executable and native artifact bytes. RSS includes benchmark parent, private kache daemon and Cargo descendants.'
+    result['rotation_offset'] = args.rotation_offset
     result['method'] += '; the private kache daemon runs only during kache builds (stopped before direct and Nano builds, started before kache builds, outside timing); before every kache build wait until it is idle (<2% CPU for 3 s, at most 180 s) and record the wait'
     daemon = None
     daemon_log = (state/'daemon.log').open('w')
@@ -427,7 +429,8 @@ def main():
         for implementation in schedule: build(implementation,'cold')
         for number,(scenario,lv,sv,expected) in enumerate([('leaf-edit',True,False,'0.2.12'),('shared-edit',True,True,'none'),('revert',False,False,'0.2.12')]):
             edit(lv,sv)
-            rotated=schedule[number%3:]+schedule[:number%3]
+            shift=(number+args.rotation_offset)%3
+            rotated=schedule[shift:]+schedule[:shift]
             for implementation in rotated:
                 verifying=False
                 build(implementation,'edit')
