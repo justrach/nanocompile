@@ -50,6 +50,7 @@ jobs:
           python3 tests/build_trace_capture.py
           python3 tests/script_phase_profiles.py
           python3 tests/compiler_phase_profiles.py
+          python3 tests/source_edit_analysis.py
           python3 tests/r2_transport.py
           zig build -Doptimize=ReleaseFast
           zig build test

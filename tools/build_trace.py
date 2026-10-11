@@ -380,6 +380,10 @@ def main():
     logs = sub.add_parser('verify-logs', help='check recorded whole-build console hashes, including failures')
     logs.add_argument('report', type=Path)
     logs.add_argument('--state', required=True, type=Path)
+    edits = sub.add_parser('analyze-edits', help='verify source-edit logs and generate variation instructions')
+    edits.add_argument('report', type=Path)
+    edits.add_argument('--state', required=True, type=Path)
+    edits.add_argument('--output', required=True, type=Path)
     args = parser.parse_args()
     if args.action == 'capture':
         forwarded = args.arguments[1:] if args.arguments[:1] == ['--'] else args.arguments
@@ -388,6 +392,9 @@ def main():
         analyze(args.report, args.output)
     elif args.action == 'verify-logs':
         print(json.dumps(verify_logs(args.report, args.state)))
+    elif args.action == 'analyze-edits':
+        from source_edit_analysis import analyze as analyze_edits
+        analyze_edits(args.report, args.state, args.output)
     else:
         print(json.dumps(verify_capture(args.directory)))
 
