@@ -1,0 +1,42 @@
+{
+  "completed": true,
+  "steps": [
+    {
+      "name": "build",
+      "exit_code": 0,
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "unit",
+      "exit_code": 0,
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "profile",
+      "exit_code": 0,
+      "bytes": 99,
+      "sha256": "a8d5cedd186d8481b5437f639da8289b4ae0246aab622f5755bb28897807e9ca"
+    },
+    {
+      "name": "default",
+      "exit_code": 0,
+      "bytes": 99,
+      "sha256": "a8d5cedd186d8481b5437f639da8289b4ae0246aab622f5755bb28897807e9ca"
+    },
+    {
+      "name": "thin-lto-profile",
+      "exit_code": 0,
+      "bytes": 99,
+      "sha256": "a8d5cedd186d8481b5437f639da8289b4ae0246aab622f5755bb28897807e9ca"
+    }
+  ],
+  "binary_sha256": "e74536b2b2a6c48e15ff9130480364758b1481bbe2665a79a0a63dcf59991a15",
+  "hash_workers": 4,
+  "source_sha256": {
+    "src/compiler.zig": "7b852f64fef07bad42ed142cf82f173cb193f81cf3ab0580d96950a2b61698bd",
+    "src/cache.zig": "351d670d6f1c893b7ad0ac688e390dd04c6d327b751c6aa6d66275fd1cb6404b",
+    "tests/executable_cache.py": "e6174ddc757f201a748f94050acd64ab2c389c7d773317d0b4060111a9ab9f85"
+  }
+}

@@ -625,12 +625,17 @@ fn executeProducer(ctx: *cache.Context, plan: Plan, argv: []const []const u8) !u
         ctx.event("hit");
         return 0;
     }
+    phase = ctx.profileStart();
     var before: std.ArrayList(cache.Dependency) = .empty;
     try before.appendSlice(ctx.a, dependencyRecords(ctx, plan.dependencies) catch return bypass(ctx, argv, "bypass: producer inputs unavailable"));
     try before.appendSlice(ctx.a, rust_dependencies.nativeSnapshot(ctx, plan.native_dirs) catch return bypass(ctx, argv, "bypass: producer native search unsupported"));
     const directories = rust_dependencies.snapshot(ctx, plan.library_dirs, plan.outputs) catch return bypass(ctx, argv, "bypass: producer dependency lookup unavailable");
     var job = @import("producer_job.zig").Job.create(ctx) catch return bypass(ctx, argv, "bypass: producer staging unavailable");
-    defer job.cleanup(ctx) catch {};
+    defer {
+        const cleanup_start = ctx.profileStart();
+        job.cleanup(ctx) catch {};
+        ctx.profileEnd("producer.cleanup", cleanup_start);
+    }
     if (plan.thin_lto) job.acquireAlias(ctx, key) catch
         return bypass(ctx, argv, "bypass: exclusive thin-LTO alias unavailable");
     const original = plan.linked_output orelse return bypass(ctx, argv, "bypass: producer needs link output");
@@ -654,9 +659,13 @@ fn executeProducer(ctx: *cache.Context, plan: Plan, argv: []const []const u8) !u
         for ([_][]const u8{ "-Xlinker", "-install_name", "-Xlinker", install_name }) |arg|
             try command.appendSlice(ctx.a, &.{ "-C", try std.fmt.allocPrint(ctx.a, "link-arg={s}", .{arg}) });
     }
+    ctx.profileEnd("producer.input_snapshot_staging", phase);
+    phase = ctx.profileStart();
     const started = std.Io.Clock.real.now(ctx.io).nanoseconds;
     ctx.trace(if (plan.producer_dylib) "miss: compiling proc-macro producer" else "miss: compiling executable producer");
     var result = try std.process.run(ctx.a, ctx.io, .{ .argv = command.items, .environ_map = ctx.env });
+    ctx.profileEnd("producer.execution", phase);
+    phase = ctx.profileStart();
     if (retain_job) {
         retainProducerResult(ctx, job.root, command.items, started, result) catch |err|
             ctx.trace(try std.fmt.allocPrint(ctx.a, "diagnostic compiler capture failed: {s}", .{@errorName(err)}));
@@ -677,31 +686,42 @@ fn executeProducer(ctx: *cache.Context, plan: Plan, argv: []const []const u8) !u
     }
     try ctx.out(result.stdout);
     try std.Io.File.stderr().writeStreamingAll(ctx.io, result.stderr);
+    ctx.profileEnd("producer.publication_forwarding", phase);
     const code = exitCode(result.term);
     if (code != 0) {
         ctx.event("failed");
         return code;
     }
     ctx.event("miss");
-    const linked = @import("producer_dependencies.zig").collect(ctx, config, ctx.read(config.invocation) catch return 0, started) catch |err| {
-        ctx.trace(try std.fmt.allocPrint(ctx.a, "uncached producer inputs: {s}", .{@errorName(err)}));
-        return 0;
+    const linked = linked_inputs: {
+        const collect_start = ctx.profileStart();
+        defer ctx.profileEnd("producer.linked_inputs", collect_start);
+        break :linked_inputs @import("producer_dependencies.zig").collect(ctx, config, ctx.read(config.invocation) catch return 0, started) catch |err| {
+            ctx.trace(try std.fmt.allocPrint(ctx.a, "uncached producer inputs: {s}", .{@errorName(err)}));
+            return 0;
+        };
     };
-    const after = native_identity.apple(ctx, driver) catch return 0;
-    if (!eq(selected.hash, after.hash)) {
-        ctx.trace("uncached: producer tool selection changed");
-        return 0;
+    {
+        const recheck_start = ctx.profileStart();
+        defer ctx.profileEnd("producer.identity_recheck", recheck_start);
+        const after = native_identity.apple(ctx, driver) catch return 0;
+        if (!eq(selected.hash, after.hash)) {
+            ctx.trace("uncached: producer tool selection changed");
+            return 0;
+        }
+        if (!eq(base_key, keyFor(ctx, .rust, argv) catch return 0) or !eq(binary_hash, try ctx.digest(binary))) return 0;
+        if (!eq(compiler_epoch, ctx.compiler_epoch orelse return 0)) return 0;
+        for (selected.files) |path| {
+            const st = try Dir.cwd().statFile(ctx.io, path, .{});
+            if (st.mtime.nanoseconds >= started or st.ctime.nanoseconds >= started) return 0;
+        }
+        const observer_stat = try Dir.cwd().statFile(ctx.io, binary, .{});
+        if (observer_stat.mtime.nanoseconds >= started or observer_stat.ctime.nanoseconds >= started) return 0;
     }
-    if (!eq(base_key, keyFor(ctx, .rust, argv) catch return 0) or !eq(binary_hash, try ctx.digest(binary))) return 0;
-    if (!eq(compiler_epoch, ctx.compiler_epoch orelse return 0)) return 0;
-    for (selected.files) |path| {
-        const st = try Dir.cwd().statFile(ctx.io, path, .{});
-        if (st.mtime.nanoseconds >= started or st.ctime.nanoseconds >= started) return 0;
-    }
-    const observer_stat = try Dir.cwd().statFile(ctx.io, binary, .{});
-    if (observer_stat.mtime.nanoseconds >= started or observer_stat.ctime.nanoseconds >= started) return 0;
+    phase = ctx.profileStart();
     save(ctx, key, plan, argv, before.items, directories, started, result, linked) catch |err|
         ctx.trace(try std.fmt.allocPrint(ctx.a, "uncached producer: {s}", .{@errorName(err)}));
+    ctx.profileEnd("producer.postcompile_store", phase);
     return 0;
 }
 

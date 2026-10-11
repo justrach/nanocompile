@@ -1,0 +1,44 @@
+{
+  "completed": true,
+  "parent_report_sha256": "52d18b5c530ec732a40d469e5454d3197c4f18e41b85cad6c2607a197d494515",
+  "steps": [
+    {
+      "name": "build",
+      "exit_code": 0,
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "unit",
+      "exit_code": 0,
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "profile-executable",
+      "exit_code": 0,
+      "bytes": 99,
+      "sha256": "a8d5cedd186d8481b5437f639da8289b4ae0246aab622f5755bb28897807e9ca"
+    },
+    {
+      "name": "default-executable",
+      "exit_code": 0,
+      "bytes": 99,
+      "sha256": "a8d5cedd186d8481b5437f639da8289b4ae0246aab622f5755bb28897807e9ca"
+    },
+    {
+      "name": "thin-lto-profile",
+      "exit_code": 2,
+      "bytes": 315,
+      "sha256": "2bb64de208cbaf8438c33f191e6cc60ce22bcaff9d9dbf61ea5db70caefd3f9a"
+    },
+    {
+      "name": "thin-lto-profile-corrected-retain-jobs",
+      "exit_code": 0,
+      "bytes": 99,
+      "sha256": "a8d5cedd186d8481b5437f639da8289b4ae0246aab622f5755bb28897807e9ca"
+    }
+  ],
+  "binary_sha256": "0d38bfa35100b87d0a42abfd8ced2744eb28a91bc86883a663c938e998406499",
+  "recovered_failure": "Initial thin-LTO fixture command omitted required --retain-jobs; parser rejected before compilation. Original failed log retained."
+}

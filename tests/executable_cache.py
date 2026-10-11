@@ -100,6 +100,10 @@ def main():
         remove()
         cold = run([str(binary), *rust])
         assert b'miss: compiling executable producer' in cold.stderr, cold.stderr.decode()
+        if args.profile:
+            for stage in ('producer.input_snapshot_staging','producer.execution','producer.publication_forwarding',
+                          'producer.linked_inputs','producer.identity_recheck','producer.postcompile_store','producer.cleanup'):
+                assert ('nanocompile: compiler-phase '+stage+' ns=').encode() in cold.stderr, cold.stderr.decode()
         if args.stable_alias_experiment:
             staging_difference = validate_staging_difference(direct_bytes, executable.read_bytes())
             run(['codesign', '--verify', '--strict', str(executable)])
