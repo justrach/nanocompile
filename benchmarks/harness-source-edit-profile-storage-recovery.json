@@ -1,0 +1,85 @@
+{
+  "completed_session": false,
+  "failure": {
+    "type": "OSError",
+    "message": "Insufficient benchmark storage at /private/tmp/nano-full-harness-source-edit-phase-20261011: 6.82 GiB free; 8 GiB required before starting a build"
+  },
+  "completed_prefix_builds": 12,
+  "remaining_builds": 6,
+  "failed_checkpoint_sha256": "860b31684e362bc4780083089195ef0c24ee325b766683d6b79d4a192f79e721",
+  "prefix_verification": {
+    "verified_build_logs": 12,
+    "captures": {
+      "0": {
+        "verified_files": 417,
+        "compiler_records": 0,
+        "cargo_units": 1237
+      },
+      "1": {
+        "verified_files": 4997,
+        "compiler_records": 1145,
+        "cargo_units": 1237
+      },
+      "2": {
+        "verified_files": 5321,
+        "compiler_records": 1226,
+        "cargo_units": 1237
+      },
+      "3": {
+        "verified_files": 417,
+        "compiler_records": 0,
+        "cargo_units": 1237
+      },
+      "4": {
+        "verified_files": 4997,
+        "compiler_records": 1145,
+        "cargo_units": 1237
+      },
+      "5": {
+        "verified_files": 4997,
+        "compiler_records": 1145,
+        "cargo_units": 1237
+      },
+      "6": {
+        "verified_files": 4829,
+        "compiler_records": 1103,
+        "cargo_units": 1237
+      },
+      "7": {
+        "verified_files": 5321,
+        "compiler_records": 1226,
+        "cargo_units": 1237
+      },
+      "8": {
+        "verified_files": 4997,
+        "compiler_records": 1145,
+        "cargo_units": 1237
+      },
+      "9": {
+        "verified_files": 4997,
+        "compiler_records": 1145,
+        "cargo_units": 1237
+      },
+      "10": {
+        "verified_files": 4829,
+        "compiler_records": 1103,
+        "cargo_units": 1237
+      },
+      "11": {
+        "verified_files": 5321,
+        "compiler_records": 1226,
+        "cargo_units": 1237
+      }
+    },
+    "original_snapshot_hashes_verified": true,
+    "capture_frontends_sha256": {
+      "nanocompile": "91005c31368312490c0560014a8f8826e0b649c557c74528644c39bc1f588a70",
+      "kache": "0114c6de1745a9c6c24955ee227927881e32c4995df4ec0adef7c7a11f6dd2eb"
+    }
+  },
+  "resume_runner_sha256": "8c2a6936df3cf9cdc1bf55e3b65987ade435a65be88ede9096280d4ab58fb27a",
+  "resume_source_manifest_sha256": "d2e7910e1cc9b4e6b2e7a614abceea10de7470735e675ae045f17d788ad7f785",
+  "retired_storage_session": "/tmp/nano-full-harness-native-scripts-trace-20261011",
+  "retired_storage_verification_sha256": "fe95426836efa96e213ca6928d60f7ee2336f6156282bb0374ccd0bd6915d869",
+  "limits": "Source edits and existing cache paths preserved for six remaining builds. Original failure/console/checkpoint and stopped queue states retained. Inherited environment equality across the pause is not established; timings are diagnostic. Revert and final source-restoration gates remain pending."
+}

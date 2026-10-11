@@ -60,3 +60,23 @@ The traced project observations are 127.506s Nano and 121.072s kache. They are
 single diagnostic samples, not repeated untraced speed benchmarks. Kache's own
 fresh shared reference, direct shared reference, reverts and final source
 restoration checks remain pending in this sequence.
+
+## Storage checkpoint recovery
+
+The [storage-recovery record](../benchmarks/harness-source-edit-profile-storage-recovery.json)
+preserves the storage-guard failure before build 13: 6.82GiB free against an 8GiB
+minimum. All 12 completed consoles/captures, probe streams and original source
+hashes were verified before resuming. Kache's fresh shared reference passed its
+own artifact/mode checks. An older completed native-script session's six captures
+and logs were verified and its final CLI/signature preserved before reclaiming
+its target and object caches. Its logs, entries, receipts and captured streams
+remain available.
+
+A private checkpoint runner is executing the six remaining builds at the same
+source, target, cache and capture paths. It validates the recorded runtime,
+toolchain, flags, native contract, bindgen selection and source hashes; rehydrates
+artifact references from completed rows; and skips only the verified prefix.
+The original failed report, console and stopped dependent queue states are
+retained. The resume runner hash is recorded separately. Inherited environment
+equality across the pause is not established, so the combined observations remain
+diagnostic. Revert and final source-restoration checks still need to pass.
