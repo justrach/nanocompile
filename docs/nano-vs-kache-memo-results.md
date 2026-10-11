@@ -60,23 +60,39 @@ Build-script runs remain the one category where kache is faster. Contracted scri
 3. an additional edit to the shared `version_triple` parser in `crates/proto/src/lib.rs` (shared)
 4. a revert of both edits
 
-Each edit is built with retained caches, then rebuilt with an empty cache at identical paths as a correctness reference. All 18 builds pass artifact, mode, CLI and linked-parser checks. Each scenario is a single sample.
+Each edit is built with retained caches, then rebuilt with an empty cache at identical paths as a correctness reference. Five complete samples (90 builds) pass every artifact, mode, CLI and linked-parser check. All logs are rehashed.
 
-| Scenario | direct (1 / 2) | Nano (1 / 2) | kache (1 / 2) |
+| Scenario | Nano (5 samples) | kache (5 samples) | Nano median | kache median | Nano wins |
+| --- | --- | --- | ---: | ---: | ---: |
+| initial cold | 172.7, 172.1, 170.4, 169.9, 180.7 | 186.8, 186.1, 183.0, 182.9, 192.3 | **172.1 s** | 186.1 s | 5/5 |
+| leaf edit | 76.9, 75.2, 75.3, 75.5, 88.4 | 82.0, 80.8, 80.2, 80.2, 82.0 | **75.5 s** | 80.8 s | 4/5 |
+| shared edit | 120.4, 119.1, 119.8, 118.7, 118.9 | 117.3, 115.8, 117.0, 115.4, 117.8 | 119.1 s | **117.0 s** | 0/5 |
+| revert | 6.6, 6.2, 6.4, 5.9, 6.3 | 13.4, 13.5, 13.5, 13.1, 13.7 | **6.3 s** | 13.5 s | 5/5 |
+
+- **Initial cold and revert:** Nano is about 7% faster on cold builds and twice as fast on the revert, where its bounded manifest history serves 10 variant hits.
+- **Leaf edit:** kache spends 1.5–5.8 s restoring workspace crates that did not change after a workspace edit, matching its documented dependency re-discovery. Nano restores them in under 0.1 s.
+- **Position effect:** in sample 5 the rotation was shifted. Nano built the leaf edit first and lost it, with its final link 13 s slower than in any other position. Whichever implementation builds first after the large reference-cache cleanup pays a host-level penalty, so per-scenario comparisons need more than one rotation.
+
+### The shared edit is still a loss
+
+In all five samples, kache's shared-edit lead comes from one critical-path unit. Medians of the critical-path compiles:
+
+| Unit | direct | kache | Nano |
 | --- | ---: | ---: | ---: |
-| initial cold | 171.771 / 170.857 s | **172.725 / 172.092 s** | 186.753 / 186.115 s |
-| leaf edit | 172.205 / 171.483 s | **76.888 / 75.212 s** | 82.014 / 80.783 s |
-| shared edit | 173.184 / 170.414 s | 120.355 / 119.143 s | **117.344 / 115.841 s** |
-| revert | 178.654 / 170.697 s | **6.607 / 6.216 s** | 13.357 / 13.507 s |
+| `harness-proto` | 3.39 s | 2.75 s | 2.65 s |
+| `harness-adapters` | 14.45 s | 12.22 s | 11.79 s |
+| `harness-engine` | 18.24 s | 18.12 s | 17.98 s |
+| `harness-ui` | 24.59 s | 25.94 s | **29.25 s** |
+| final binary | 65.62 s | 67.64 s | 67.45 s |
 
-- **Leaf edit:** after a workspace change, kache spends 1.5–5.8 s restoring workspace crates that did not change (`harness-ui`, `harness-adapters`, `gpui`). This matches kache's documented dependency re-discovery after workspace edits. Nano restores them in under 0.1 s.
-- **Revert:** Nano serves 10 variant hits from its bounded manifest history.
-- **Shared edit:** in both samples the profiler attributes kache's lead to one critical-path compile. `harness-ui` took 30.24 and 29.25 s under Nano, against 24.6–26.0 s in every other build.
+What was ruled out ([details](../benchmarks/harness-shared-edit-diagnostic.json)):
 
-### Why Nano lost the shared edit
+- **Nano bookkeeping:** probing, storing and graph collection add about 0.3 s to the `harness-ui` miss.
+- **Restored files and their page cache:** recompiling `harness-ui` takes 25.0–25.9 s whether its inputs are Nano-restored clones, byte copies or pre-read.
+- **kache's daemon:** stopping it during Nano builds did not change the result.
+- **Jobserver inheritance and thread priority:** rustc launched through Nano joins Cargo's jobserver and runs at the same priority.
+- **Build position:** shifting the rotation narrowed the gap to 1.1 s but did not remove it.
 
-A [traced reproduction](../benchmarks/harness-shared-edit-diagnostic.json) of a cold build followed by the shared edit, with no kache daemon on the host, took 112.97 s. That is below kache's 115.8–117.3 s. Under the trace, Nano's `harness-ui` miss took 25.57 s, of which rustc was 25.31 s; probing, storing and graph collection add about 0.26 s.
+The slow rustc is compute-bound: samples show ordinary type checking and LLVM work. It does the same user CPU in more wall time, which suggests it gets fewer codegen threads or less CPU. Outside the study, a cloned reproduction with Nano as the direct wrapper shows `harness-ui` at 25.6 s on the first shared edit, and 28.8 s or more on later distinct edits. The cause is not yet identified, and Nano does not yet beat kache on this scenario.
 
-In the runner's rotation, Nano's shared-edit build is the only Nano build that starts immediately after a kache empty-cache reference build. That cleanup deletes the reference store, restores the saved one and restarts kache's private daemon. kache's own builds never follow such a restart. The runner now waits before every timed build, for all three implementations and outside timing, until that daemon has been idle for three seconds, and records the wait. A third sample with this control is running.
-
-Records: [sample 1](../benchmarks/harness-source-edits-memo-kache.json) and [sample 2](../benchmarks/harness-source-edits-memo-kache-2.json); all 36 logs rehashed.
+Records: [sample 1](../benchmarks/harness-source-edits-memo-kache.json), [2](../benchmarks/harness-source-edits-memo-kache-2.json), [3](../benchmarks/harness-source-edits-memo-kache-3.json), [4](../benchmarks/harness-source-edits-memo-kache-4.json), [5](../benchmarks/harness-source-edits-memo-kache-5.json).

@@ -281,8 +281,118 @@
     "restored-file page cache",
     "private kache daemon activity",
     "jobserver inheritance (rustc connects through Nano)",
-    "process priority (all background jobs run at nice 5 under zsh)"
+    "process priority (all background jobs run at nice 5 under zsh)",
+    "thread scheduling class (rustc threads report the same priority whether launched directly or through Nano)"
   ],
   "study_sample_4": "kache daemon stopped during Nano builds: Nano 118.741 s, kache 115.399 s; harness-ui 29.10 s versus 25.66 s.",
-  "open_question": "Every study places Nano first in the shared edit, directly after the leaf scenario reference cleanup. Sample 5 shifts the rotation so kache builds the shared edit first."
+  "open_question": "Every study places Nano first in the shared edit, directly after the leaf scenario reference cleanup. Sample 5 shifts the rotation so kache builds the shared edit first.",
+  "study_sample_5": "Rotation offset 1 (kache builds the shared edit first, Nano third): Nano 118.900 s, kache 117.763 s; harness-ui 27.34 s versus 25.95 s. Nano built the leaf edit first and lost it, 88.401 s versus 81.958 s, with its final link 13 s slower than in every other position. Its revert remained faster (6.258 s versus 13.728 s).",
+  "rustc_samples": "Three 3-second macOS samples of a slow harness-ui rustc show ordinary type checking, trait selection and LLVM work; no time blocked in pipe writes, jobserver reads or I/O.",
+  "host_contention": "Other-process CPU outside the benchmark tree during shared-edit builds: samples 2-4 Nano 723/736/631%, kache 672/698/644%; sample 5 Nano 271%, kache 103%.",
+  "five_sample_summary": {
+    "initial": {
+      "nanocompile": [
+        172.72469662502408,
+        172.09208183304872,
+        170.42738679097965,
+        169.89853095798753,
+        180.66391899995506
+      ],
+      "kache": [
+        186.7528072920395,
+        186.11470024997834,
+        183.04481816699263,
+        182.94487725000363,
+        192.32378737500403
+      ],
+      "direct": [
+        171.77079470804892,
+        170.8569913749816,
+        169.6603092920268,
+        169.31849874998443,
+        177.81093220901676
+      ],
+      "nano_median": 172.09208183304872,
+      "kache_median": 186.11470024997834,
+      "nano_wins": 5
+    },
+    "leaf-edit": {
+      "nanocompile": [
+        76.88838983292226,
+        75.21170120791066,
+        75.31437883304898,
+        75.48514512495603,
+        88.40145000000484
+      ],
+      "kache": [
+        82.01409745798446,
+        80.78329029097222,
+        80.23869200004265,
+        80.15587162505835,
+        81.95824533305131
+      ],
+      "direct": [
+        172.20463862502947,
+        171.4834202498896,
+        167.6200884579448,
+        168.72589220805094,
+        174.3836858329596
+      ],
+      "nano_median": 75.48514512495603,
+      "kache_median": 80.78329029097222,
+      "nano_wins": 4
+    },
+    "shared-edit": {
+      "nanocompile": [
+        120.35460025002249,
+        119.14314795797691,
+        119.83333649998531,
+        118.74104400002398,
+        118.90038445801474
+      ],
+      "kache": [
+        117.34392937505618,
+        115.84149424999487,
+        116.99267249996774,
+        115.39857658406254,
+        117.76281712495256
+      ],
+      "direct": [
+        173.18363112502266,
+        170.41444183303975,
+        168.360396000091,
+        169.06367833400145,
+        175.81423108302988
+      ],
+      "nano_median": 119.14314795797691,
+      "kache_median": 116.99267249996774,
+      "nano_wins": 0
+    },
+    "revert": {
+      "nanocompile": [
+        6.607209624955431,
+        6.216116999974474,
+        6.374433916993439,
+        5.919680000049993,
+        6.2581900000805035
+      ],
+      "kache": [
+        13.35688300000038,
+        13.506568207987584,
+        13.532100416952744,
+        13.145003041950986,
+        13.727810875046998
+      ],
+      "direct": [
+        178.65368975000456,
+        170.69672595802695,
+        170.3718296670122,
+        169.0909458330134,
+        177.58128479192965
+      ],
+      "nano_median": 6.2581900000805035,
+      "kache_median": 13.506568207987584,
+      "nano_wins": 5
+    }
+  }
 }

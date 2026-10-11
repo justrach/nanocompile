@@ -8,6 +8,7 @@
 # Any benchmark run can keep its Cargo timing reports (small report-writing overhead):
 python3 tests/project_comparison.py ... --cargo-timings
 python3 tests/project_pair_comparison.py ... --cargo-timings
+python3 tests/harness_full_source_edits.py ... --cargo-timings
 
 # Full dependency graph for the same command (stable toolchains; no build is run):
 python3 tools/rust_profile.py unit-graph --cwd /path/to/project --output graph.json -- \
@@ -59,7 +60,7 @@ The first diff of a Nano warm build (7.77 s) against a kache warm build (6.53 s)
 5. Use `simulate --scale` to estimate the payoff of a fix before building it.
 6. Implement the fix, then rerun step 1.
 
-Each round of this loop on Harness produced the next change: build-script runs, then Apple selection, then installed-tree memos, then contract parsing.
+Each round of this loop on Harness produced the next change: build-script runs, then Apple selection, then installed-tree memos, then contract parsing. The same loop also explained the source-edit result. `diff` placed kache's whole shared-edit lead on one `harness-ui` compile. `phases` on a traced reproduction then showed Nano adding only 0.26 s to it, which pointed at benchmark ordering rather than Nano (see [the results](nano-vs-kache-memo-results.md#why-nano-lost-the-shared-edit)).
 
 ## Limits
 
