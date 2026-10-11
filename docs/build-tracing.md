@@ -79,6 +79,19 @@ The analyzer lists excluded builds and omits failed compilation, executable-prob
 
 The handoff also lists expensive Nano Rust bypasses in `uncached_work`, with the rejecting reason and a separate support-extension instruction. This keeps missing cache coverage visible even when both tools spend similar time compiling a cold request. Such intervals represent potential reuse only with matching inputs; they do not predict faster empty-cache compilation. Failed samples are excluded from this list too.
 
+## Record unrelated compilation activity
+
+Run the read-only host observer alongside a live benchmark on macOS or Linux:
+
+```sh
+python3 tools/benchmark_host_activity.py --pid "$benchmark_pid" \
+  --output /tmp/new-host-activity.json --interval 1
+```
+
+It excludes the benchmark's descendants and records aggregate CPU observations and counts of known build tools outside that process tree. Pass `--owned-pid "$daemon_pid"` for an independently parented daemon belonging to the benchmark. The output contains no unrelated process IDs, executable paths, command arguments or environments. It never stops processes or removes timing samples. The JSON report identifies the tool source and hashes the adjacent JSONL samples.
+
+Start observation before measured builds, retain all samples, and check the observer's actual coverage window. Attaching it partway through a trial cannot explain earlier outliers. An external compiler observation qualifies the overlapping timings as contended; do not use a contended trial alone for a speed or adoption claim. No observed build tools does not prove an idle host: process-name detection is heuristic, sampling can miss short jobs, other applications can compete for resources, and `ps` CPU percentages have platform-specific semantics. The observer itself adds sampling overhead. A missing initial PID or failed process observation produces an incomplete/error report rather than a clean-host result.
+
 ## Retain producer compiler and linker internals
 
 For a diagnostic run, set `NANOCOMPILE_RETAIN_PRODUCER_JOBS=1` and `NANOCOMPILE_TRACE=1` alongside the applicable producer opt-in. Each fresh private job under `NANOCOMPILE_DIR/producer-jobs` keeps the compiler's raw stdout/stderr, compiler argv/status/timestamps, sealed linker invocation, linker dependency report and final staged products. Retained invocation records include an allowlist of the actual linker-child environment (SDK/deployment selection, locale, PATH, loader paths and `ZERO_AR_DATE`) rather than the entire environment. The observer also copies compiler-owned linker inputs while Rust's scratch files still exist. `owned-inputs.json` records lexical/canonical paths and BLAKE3 digests of independent copies with mode `0600`; the enclosing directories are private. Retention does not grant foreign inputs ownership or relax cache validation.

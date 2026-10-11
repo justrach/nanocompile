@@ -1,0 +1,163 @@
+--- a/src/cache.zig
++++ b/src/cache.zig
+@@ -487,12 +487,14 @@
+ 
+ const DigestJob = struct {
+     path: []const u8,
++    expected: ?[]const u8 = null,
+     hash: [64]u8 = undefined,
+     valid: bool = false,
+ };
+ 
+-fn digestWorker(ctx: *const Context, jobs: []DigestJob, next: *std.atomic.Value(usize)) void {
++fn digestWorker(ctx: *const Context, jobs: []DigestJob, next: *std.atomic.Value(usize), stop: *std.atomic.Value(bool)) void {
+     while (true) {
++        if (stop.load(.monotonic)) return;
+         const index = next.fetchAdd(1, .monotonic);
+         if (index >= jobs.len) return;
+         // Each worker owns its arena; Context.digest only reads shared fields.
+@@ -500,13 +502,26 @@
+         defer arena.deinit();
+         var local = ctx.*;
+         local.a = arena.allocator();
+-        const hash = local.digest(jobs[index].path) catch continue;
++        const hash = local.digest(jobs[index].path) catch {
++            if (jobs[index].expected != null) {
++                stop.store(true, .monotonic);
++                return;
++            }
++            continue;
++        };
++        if (jobs[index].expected) |expected| {
++            if (!std.mem.eql(u8, hash, expected)) {
++                stop.store(true, .monotonic);
++                return;
++            }
++        }
+         @memcpy(&jobs[index].hash, hash);
+         jobs[index].valid = true;
+     }
+ }
+ 
+ fn parallelFileHashes(ctx: *Context, dependencies: []const Dependency, hashes: *std.StringHashMapUnmanaged([]const u8)) !bool {
++    const early_stop = std.mem.eql(u8, ctx.env.get("NANOCOMPILE_HASH_MISMATCH_STOP") orelse "", "1");
+     var paths: std.StringHashMapUnmanaged(void) = .empty;
+     defer paths.deinit(ctx.a);
+     var jobs: std.ArrayList(DigestJob) = .empty;
+@@ -517,18 +532,23 @@
+         if (slot.found_existing) continue;
+         const st = Dir.cwd().statFile(ctx.io, dep.path, .{}) catch return false;
+         size +|= st.size;
+-        try jobs.append(ctx.a, .{ .path = dep.path });
++        try jobs.append(ctx.a, .{ .path = dep.path, .expected = if (early_stop) dep.hash else null });
+     }
+     // Small restores retain their serial path. Large graphs use at most four
+     // workers, leaving the same full hashes and per-restore lifetime intact.
+     if (jobs.items.len < 32 or size < 8 * 1024 * 1024) return true;
+     var next: std.atomic.Value(usize) = .init(0);
++    var stop: std.atomic.Value(bool) = .init(false);
+     var group: std.Io.Group = .init;
+     defer group.cancel(ctx.io);
+     const workers = @min(@as(usize, 8), std.Thread.getCpuCount() catch 1);
+-    for (1..@max(workers, 1)) |_| group.concurrent(ctx.io, digestWorker, .{ ctx, jobs.items, &next }) catch break;
+-    digestWorker(ctx, jobs.items, &next);
++    for (1..@max(workers, 1)) |_| group.concurrent(ctx.io, digestWorker, .{ ctx, jobs.items, &next, &stop }) catch break;
++    digestWorker(ctx, jobs.items, &next, &stop);
+     try group.await(ctx.io);
++    if (stop.load(.monotonic)) {
++        ctx.trace("miss: parallel dependency hash mismatch or unavailable");
++        return false;
++    }
+     for (jobs.items) |job| {
+         if (!job.valid) return false;
+         try hashes.put(ctx.a, job.path, try ctx.a.dupe(u8, &job.hash));
+@@ -618,8 +638,9 @@
+         var file_hashes: std.StringHashMapUnmanaged([]const u8) = .empty;
+         defer file_hashes.deinit(ctx.a);
+         const hash_start = ctx.profileStart();
+-        if (!try parallelFileHashes(ctx, entry.dependencies, &file_hashes)) return null;
++        const hashes_valid = try parallelFileHashes(ctx, entry.dependencies, &file_hashes);
+         ctx.profileEnd("restore.parallel_input_hashes", hash_start);
++        if (!hashes_valid) return null;
+         for (entry.dependencies) |dep| {
+             if (dep.symlink_target != null) {
+                 if (!(symlinkValid(ctx, dep) catch false)) return null;
+@@ -1050,6 +1071,59 @@
+     try std.testing.expectEqualStrings("untouched", try ctx.read(output));
+ }
+ 
++test "early parallel mismatch keeps hit validation and refuses edits before writes" {
++    var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
++    defer arena.deinit();
++    const a = arena.allocator();
++    const io = std.testing.io;
++    var tmp = std.testing.tmpDir(.{});
++    defer tmp.cleanup();
++    const cwd = try Dir.cwd().realPathFileAlloc(io, try std.fs.path.join(a, &.{ ".zig-cache", "tmp", &tmp.sub_path }), a);
++    var env = std.process.Environ.Map.init(a);
++    try env.put("NANOCOMPILE_HASH_MISMATCH_STOP", "1");
++    var ctx: Context = .{ .a = a, .io = io, .env = &env, .root = try std.fs.path.join(a, &.{ cwd, "cache" }), .cwd = cwd };
++    try ctx.prepare();
++    var records: std.ArrayList(Dependency) = .empty;
++    const data = try a.alloc(u8, 256 * 1024);
++    @memset(data, 1);
++    for (0..32) |i| {
++        data[0] = @intCast(i);
++        const name = try std.fmt.allocPrint(a, "input-{d}", .{i});
++        try tmp.dir.writeFile(io, .{ .sub_path = name, .data = data });
++        const path = try std.fs.path.join(a, &.{ cwd, name });
++        try records.append(a, .{ .path = path, .hash = try ctx.digest(path) });
++    }
++    try records.append(a, records.items[3]);
++    const output = try std.fs.path.join(a, &.{ cwd, "output" });
++    const compiled = try a.alloc(u8, 1024 * 1024);
++    @memset(compiled, 42);
++    try tmp.dir.writeFile(io, .{ .sub_path = "output", .data = compiled });
++    const key = "123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0";
++    const output_hash = try ctx.digest(output);
++    try store(&ctx, key, records.items, &.{output}, "", "");
++    try tmp.dir.deleteFile(io, "output");
++    try std.testing.expect(try restore(&ctx, key, &.{output}));
++    try std.testing.expectEqualStrings(output_hash, try ctx.digest(output));
++    const changed = try tmp.dir.openFile(io, "input-17", .{});
++    defer changed.close(io);
++    const old_state = try changed.stat(io);
++    data[0] = 99;
++    try tmp.dir.writeFile(io, .{ .sub_path = "input-17", .data = data });
++    try changed.setTimestamps(io, .{ .modify_timestamp = .{ .new = old_state.mtime } });
++    try std.testing.expectEqual(old_state.mtime.nanoseconds, (try changed.stat(io)).mtime.nanoseconds);
++    try tmp.dir.writeFile(io, .{ .sub_path = "output", .data = "untouched" });
++    try std.testing.expect(!try restore(&ctx, key, &.{output}));
++    try std.testing.expectEqualStrings("untouched", try ctx.read(output));
++    data[0] = 17;
++    try tmp.dir.writeFile(io, .{ .sub_path = "input-17", .data = data });
++    try ctx.atomic(try blobPath(&ctx, output_hash), "corrupt");
++    try std.testing.expect(!try restore(&ctx, key, &.{output}));
++    try std.testing.expectEqualStrings("untouched", try ctx.read(output));
++    try tmp.dir.deleteFile(io, "input-0");
++    try std.testing.expect(!try restore(&ctx, key, &.{output}));
++    try std.testing.expectEqualStrings("untouched", try ctx.read(output));
++}
++
+ test "bounded source variants restore reverts and validate historical blobs" {
+     var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
+     defer arena.deinit();
+--- a/tests/executable_cache.py
++++ b/tests/executable_cache.py
+@@ -23,6 +23,7 @@
+     p.add_argument('--profile', action='store_true', help='verify diagnostic compiler phase events on fully checked producer hits')
+     p.add_argument('--retain-jobs', action='store_true', help='verify retained private compiler/linker diagnostics')
+     p.add_argument('--shared-digests-experiment', action='store_true')
++    p.add_argument('--early-mismatch-experiment', action='store_true')
+     args = p.parse_args()
+     if args.stable_alias_experiment and not (args.thin_lto and args.retain_jobs):
+         p.error("--stable-alias-experiment requires --thin-lto and --retain-jobs")
+@@ -41,6 +42,8 @@
+                and k not in ('RUSTC_WRAPPER', 'RUSTC_WORKSPACE_WRAPPER', 'RUSTC_BOOTSTRAP')}
+         env.update(RUSTUP_TOOLCHAIN='1.97.1', NANOCOMPILE_DIR=str(root / 'cache'),
+                    NANOCOMPILE_TRACE='1', NANOCOMPILE_EXECUTABLE_PRODUCERS='1')
++        if args.early_mismatch_experiment:
++            env['NANOCOMPILE_HASH_MISMATCH_STOP'] = '1'
+         if args.shared_digests_experiment:
+             env['NANOCOMPILE_PRODUCER_SHARED_DIGESTS'] = '1'
+         if args.profile:
