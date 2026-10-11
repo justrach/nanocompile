@@ -537,5 +537,142 @@
         }
       ]
     }
-  }
+  },
+  "kache_idle": {
+    "runs": [
+      {
+        "label": "kache-prime",
+        "pause": 0,
+        "kache_seconds": 114.16,
+        "kache_ui": 25.3
+      },
+      {
+        "label": "kache-back-to-back",
+        "pause": 0,
+        "kache_seconds": 111.33,
+        "kache_ui": 24.96
+      },
+      {
+        "label": "kache-after-240s-idle",
+        "pause": 240,
+        "kache_seconds": 114.63,
+        "kache_ui": 25.25
+      },
+      {
+        "label": "kache-back-to-back-2",
+        "pause": 0,
+        "kache_seconds": 111.41,
+        "kache_ui": 24.53
+      },
+      {
+        "label": "kache-after-240s-idle-2",
+        "pause": 240,
+        "kache_seconds": 114.74,
+        "kache_ui": 25.2
+      }
+    ],
+    "finding": "kache shared edits: 111.3/111.4 s back to back, 114.6/114.7 s after 240 s idle; its harness-ui stays 24.5-25.3 s."
+  },
+  "further_excluded": {
+    "path_remapping": {
+      "runs": [
+        {
+          "label": "remap-prime",
+          "pause": 0,
+          "nano_seconds": 172.9,
+          "nano_ui": 24.33
+        },
+        {
+          "label": "remap-back-to-back",
+          "pause": 0,
+          "nano_seconds": 112.35,
+          "nano_ui": 25.69
+        },
+        {
+          "label": "remap-after-240s-idle",
+          "pause": 240,
+          "nano_seconds": 117.67,
+          "nano_ui": 28.4
+        },
+        {
+          "label": "remap-back-to-back-2",
+          "pause": 0,
+          "nano_seconds": 111.41,
+          "nano_ui": 25.44
+        },
+        {
+          "label": "remap-after-240s-idle-2",
+          "pause": 240,
+          "nano_seconds": 117.46,
+          "nano_ui": 28.61
+        }
+      ],
+      "finding": "Nano with kache-equivalent --remap-path-prefix flags keeps the idle penalty (111.4-112.4 s back to back, 117.5-117.7 s after idle)."
+    },
+    "scheduling": "rustc launched by kache runs at the same priority (PRI 31, nice 0) as under Nano; setting user-initiated QoS in Nano did not propagate to rustc.",
+    "restored_page_prefetch": {
+      "watcher": [
+        {
+          "label": "prime",
+          "pause": 0,
+          "watcher": false,
+          "files_read": 0,
+          "nano_seconds": 117.72,
+          "nano_ui": 28.7
+        },
+        {
+          "label": "idle-watcher",
+          "pause": 240,
+          "watcher": true,
+          "files_read": 1889,
+          "nano_seconds": 115.27,
+          "nano_ui": 27.68
+        },
+        {
+          "label": "idle-plain",
+          "pause": 240,
+          "watcher": false,
+          "files_read": 0,
+          "nano_seconds": 117.37,
+          "nano_ui": 28.53
+        },
+        {
+          "label": "idle-watcher-2",
+          "pause": 240,
+          "watcher": true,
+          "files_read": 1889,
+          "nano_seconds": 115.04,
+          "nano_ui": 27.81
+        }
+      ],
+      "prefetch": [
+        {
+          "label": "prefetch-prime",
+          "pause": 0,
+          "nano_seconds": 171.07,
+          "nano_ui": 24.33
+        },
+        {
+          "label": "prefetch-back-to-back",
+          "pause": 0,
+          "nano_seconds": 116.94,
+          "nano_ui": 28.59
+        },
+        {
+          "label": "prefetch-after-240s-idle",
+          "pause": 240,
+          "nano_seconds": 116.46,
+          "nano_ui": 27.97
+        },
+        {
+          "label": "prefetch-after-240s-idle-2",
+          "pause": 240,
+          "nano_seconds": 116.57,
+          "nano_ui": 28.12
+        }
+      ],
+      "finding": "Reading every restored rlib/rmeta as it appears recovers about 2 s of the 6 s idle penalty (harness-ui 27.7 s); an asynchronous F_RDADVISE hint for the previous manifest's rmeta inputs on each miss (verified to succeed) does not measurably help (116.5-116.9 s). Not adopted."
+    }
+  },
+  "status": "Unresolved. Nano wins the shared edit when its previous build was recent and loses about 2-3 s when several minutes have passed; kache is less sensitive to the gap. The penalty is inside rustc execution of the recompiled crates (same user-CPU work, more wall time), not in Nano bookkeeping."
 }

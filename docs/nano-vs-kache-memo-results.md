@@ -97,6 +97,22 @@ What was ruled out ([details](../benchmarks/harness-shared-edit-diagnostic.json)
 - **Jobserver inheritance and thread priority:** rustc launched through Nano joins Cargo's jobserver and runs at the same priority.
 - **Build position:** shifting the rotation narrowed the gap to 1.1 s but did not remove it.
 
-The slow rustc is compute-bound: samples show ordinary type checking and LLVM work. It does the same user CPU in more wall time, which suggests it gets fewer codegen threads or less CPU. Outside the study, a cloned reproduction with Nano as the direct wrapper shows `harness-ui` at 25.6 s on the first shared edit, and 28.8 s or more on later distinct edits. The cause is not yet identified, and Nano does not yet beat kache on this scenario.
+The slow rustc is compute-bound: samples show ordinary type checking and LLVM work, with the same user CPU over more wall time.
+
+[Alternating pairs](../benchmarks/harness-shared-edit-pairs.json) on distinct shared edits found the pattern. Nano wins every pair in which its own previous build was recent (111–113 s against kache's 114.6–115.6 s). It loses when several minutes have passed since its previous build (117.5–122.4 s against kache's 111.4–113.7 s). Without kache on the host the effect remains: Nano shared edits take 111.7 s back to back and 117–118 s after a 240 s gap, with `harness-ui` at 25.4 s versus 28.2–28.8 s. kache also slows after a gap (111.3 s to 114.6 s) but its `harness-ui` does not.
+
+The fixed rotation of the full study always placed Nano's shared edit furthest from its previous build. The pairs runs give a median of 115.5–115.8 s for Nano against 113.1–114.2 s for kache, with 3 of 6 pairs each.
+
+None of these removed the gap ([details](../benchmarks/harness-shared-edit-diagnostic.json)):
+
+- flushing dirty pages and waiting before builds
+- prewarming each store
+- stopping kache's daemon
+- loading, signature-registering or mapping the proc-macro dylibs
+- kache-style path remapping
+- raising Nano's QoS
+- asynchronous read-ahead of the predicted metadata
+
+Reading every restored rlib and rmeta during the build recovered about a third of it, but not at an acceptable cost. **Nano does not yet beat kache on this scenario.** The mechanism is narrowed to rustc running slower inside Nano's builds after an idle gap, and is not identified.
 
 Records: [sample 1](../benchmarks/harness-source-edits-memo-kache.json), [2](../benchmarks/harness-source-edits-memo-kache-2.json), [3](../benchmarks/harness-source-edits-memo-kache-3.json), [4](../benchmarks/harness-source-edits-memo-kache-4.json), [5](../benchmarks/harness-source-edits-memo-kache-5.json).
