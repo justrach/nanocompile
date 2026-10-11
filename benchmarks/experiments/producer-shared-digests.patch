@@ -1,0 +1,86 @@
+--- a/src/compiler.zig
++++ b/src/compiler.zig
+@@ -892,8 +892,13 @@
+     if (!plan.producer and plan.dep_info != null and (directories.len != 0 or hidden_native or plan.static_companion))
+         try rust_dependencies.collect(ctx, argv, plan.outputs, directories, started, &records, !plan.static_companion, &validated, hidden_native);
+     if (plan.producer) {
++        // Fresh post-compilation digests are shared only across roots in this
++        // entry. Resolver.digest still verifies file state on every reuse.
++        var shared: rust_dependencies.FreshDigests = .{};
++        defer shared.deinit(ctx.a);
++        const reuse = eq(ctx.env.get("NANOCOMPILE_PRODUCER_SHARED_DIGESTS") orelse "", "1");
+         for (plan.dependencies) |path| if (std.mem.endsWith(u8, path, ".rlib") or std.mem.endsWith(u8, path, ".rmeta")) {
+-            try rust_dependencies.collect(ctx, argv, &.{path}, directories, started, &records, false, &validated, false);
++            try rust_dependencies.collectReusingDigests(ctx, argv, &.{path}, directories, started, &records, false, &validated, false, if (reuse) &shared else null);
+         };
+         try records.appendSlice(ctx.a, linker);
+     }
+--- a/src/rust_dependencies.zig
++++ b/src/rust_dependencies.zig
+@@ -139,7 +139,21 @@
+     try std.testing.expect(cachedLocations(&ctx, &.{"/toolchain/bin/rustc"}) == null);
+ }
+ 
++pub const FreshDigests = struct {
++    hashes: std.StringHashMapUnmanaged([]const u8) = .empty,
++    states: std.StringHashMapUnmanaged(std.Io.File.Stat) = .empty,
++
++    pub fn deinit(self: *FreshDigests, a: std.mem.Allocator) void {
++        self.hashes.deinit(a);
++        self.states.deinit(a);
++    }
++};
++
+ pub fn collect(ctx: *cache.Context, argv: []const []const u8, outputs: []const []const u8, before: []const Directory, started: i96, records: *std.ArrayList(cache.Dependency), metadata_only: bool, validated: *const std.StringHashMapUnmanaged(cache.CheckedDigest), hidden_native: bool) !void {
++    return collectReusingDigests(ctx, argv, outputs, before, started, records, metadata_only, validated, hidden_native, null);
++}
++
++pub fn collectReusingDigests(ctx: *cache.Context, argv: []const []const u8, outputs: []const []const u8, before: []const Directory, started: i96, records: *std.ArrayList(cache.Dependency), metadata_only: bool, validated: *const std.StringHashMapUnmanaged(cache.CheckedDigest), hidden_native: bool, reuse: ?*FreshDigests) !void {
+     var artifact: ?[]const u8 = null;
+     for (outputs) |out| if (std.mem.endsWith(u8, out, ".rmeta")) {
+         artifact = out;
+@@ -197,9 +211,22 @@
+         if (!std.mem.eql(u8, checked.hash, after.hash) or !cache.sameFileState(checked.state, after.state)) return error.InputChangedDuringMetadataQuery;
+     }
+     var resolver: metadata.Resolver = .{ .ctx = ctx, .compiler = reader_compiler, .query_env = &query_env, .query_cwd = query_cwd };
+-    defer resolver.roots.deinit(ctx.a);
+-    defer resolver.hashes.deinit(ctx.a);
+-    defer resolver.states.deinit(ctx.a);
++    if (reuse) |shared| {
++        resolver.hashes = shared.hashes;
++        resolver.states = shared.states;
++        shared.hashes = .empty;
++        shared.states = .empty;
++    }
++    defer {
++        resolver.roots.deinit(ctx.a);
++        if (reuse) |shared| {
++            shared.hashes = resolver.hashes;
++            shared.states = resolver.states;
++        } else {
++            resolver.hashes.deinit(ctx.a);
++            resolver.states.deinit(ctx.a);
++        }
++    }
+     // These records were freshly content-validated after compilation. Share
+     // them within this entry construction, never across compilation or hits.
+     var checked = validated.iterator();
+--- a/tests/executable_cache.py
++++ b/tests/executable_cache.py
+@@ -22,6 +22,7 @@
+     p.add_argument('--state', type=Path, help='new directory to retain probe artifacts for diagnosis')
+     p.add_argument('--profile', action='store_true', help='verify diagnostic compiler phase events on fully checked producer hits')
+     p.add_argument('--retain-jobs', action='store_true', help='verify retained private compiler/linker diagnostics')
++    p.add_argument('--shared-digests-experiment', action='store_true')
+     args = p.parse_args()
+     if args.stable_alias_experiment and not (args.thin_lto and args.retain_jobs):
+         p.error("--stable-alias-experiment requires --thin-lto and --retain-jobs")
+@@ -40,6 +41,8 @@
+                and k not in ('RUSTC_WRAPPER', 'RUSTC_WORKSPACE_WRAPPER', 'RUSTC_BOOTSTRAP')}
+         env.update(RUSTUP_TOOLCHAIN='1.97.1', NANOCOMPILE_DIR=str(root / 'cache'),
+                    NANOCOMPILE_TRACE='1', NANOCOMPILE_EXECUTABLE_PRODUCERS='1')
++        if args.shared_digests_experiment:
++            env['NANOCOMPILE_PRODUCER_SHARED_DIGESTS'] = '1'
+         if args.profile:
+             env["NANOCOMPILE_COMPILER_PROFILE"] = "1"
+         if args.thin_lto:

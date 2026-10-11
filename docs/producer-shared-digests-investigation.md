@@ -36,6 +36,17 @@ smoke logs passed digest verification. The fixture has no within-invocation
 mutation race hook. Isolated cold pairs are running; no speed improvement or
 production adoption is established.
 
+The [exact experimental patch](../benchmarks/experiments/producer-shared-digests.patch)
+has SHA-256 `ccba043908e86662c5902fae984078d61e3585db264bb9ac3f9f99ec1e8ee161`.
+It was applied to the frozen eight-worker producer-profile source, not adopted in
+production. The [portable isolated runner](../benchmarks/experiments/harness_producer_shared_digests_cold_pair.py)
+uses the same candidate binary for both controls, toggling only
+`NANOCOMPILE_PRODUCER_SHARED_DIGESTS`. It requires a completed source-edit report
+and existing captured request/dependencies. Empty entry namespaces force actual
+compilation; reader/toolchain memos remain warm in measured pairs. Fresh primes
+and final cold confirmations are retained separately. The executed private runner
+has its own recorded hash; the portable copy changes only import paths.
+
 Require an actual multi-root shared-transitive-input fixture, mutation/revert and
 preserved-mtime replacement checks, failures/corruption/concurrency gates, and an
 isolated replay of the captured final request. Compare both controls using the
