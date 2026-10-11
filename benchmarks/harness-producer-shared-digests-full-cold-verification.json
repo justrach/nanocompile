@@ -1,0 +1,19 @@
+{
+  "verified_build_logs": 8,
+  "completed": true,
+  "verified_builds": 8,
+  "artifact_paths_per_build": [
+    1244,
+    1244,
+    1244,
+    1244,
+    1244,
+    1244,
+    1244,
+    1244
+  ],
+  "all_cold_hits_zero": true,
+  "all_snapshot_inputs_unchanged": true,
+  "report_sha256": "8e8481ecf72bc56769c4062f922c1be3e3997fc12d24a93895268bf3f53c2653",
+  "conclusion": "No repeatable full-build gain established; median lower but mean paired savings negative with large uncertainty. Do not adopt. Original gated kache candidate comparison did not launch."
+}

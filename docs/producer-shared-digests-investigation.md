@@ -53,12 +53,32 @@ postcompile work, not making rustc itself faster. The initial candidate prime's
 the paired timing summary. Metadata/toolchain memos are warm in measured pairs.
 
 The matched eight-build **untraced full Harness cold** baseline/candidate
-comparison is now running with the same experimental runtime, sharing off/on,
+comparison completed with the same experimental runtime, sharing off/on,
 eight Cargo jobs, 29 rewritten wrapper guards and unchanged source snapshot.
-Three cold and three warm rounds against pinned kache are queued behind that
-result; they will start only if the full comparison shows a clear gain and
-passes output/source checks. Independent confirmation and candidate source-edit
-checks remain required. Production remains unchanged.
+The [full samples](../benchmarks/harness-producer-shared-digests-full-cold-paired.json)
+and [verification](../benchmarks/harness-producer-shared-digests-full-cold-verification.json)
+retain all eight verified logs and 1,244 artifact paths/modes per build. All cold
+hit counts are zero and all snapshot inputs remain unchanged.
+
+Baseline median is 198.607469s; candidate median is 194.438621s. The three paired
+savings are +12.855135s, **−33.876616s**, and +4.168847s. Mean paired savings are
+−5.617544s with 14.350310s standard error, despite two of three wins. The lower
+candidate median does not establish a repeatable improvement. No sample is
+excluded. The isolated storage result remains a scoped mechanism observation;
+production adoption is rejected pending stronger full-workload evidence.
+
+The original gated digest-sharing/kache trial did not launch because this result
+failed its clear-gain condition. Its terminal state is retained. A separate
+16-build untraced study now compares the **pre-sharing eight-worker runtime**
+against pinned kache, with three alternating cold pairs and three warm rounds.
+It uses runtime SHA-256
+`0d38bfa35100b87d0a42abfd8ced2744eb28a91bc86883a663c938e998406499`,
+the same source snapshot/toolchain/job count/native contracts, and no digest-sharing
+patch. Its private frozen preparation is
+`/tmp/nano-full-eight-workers-kache-preparation-20261011`.
+This addresses the previous worker experiment directly; it does not relax the
+failed storage candidate's adoption gate. Independent confirmation remains
+required, and production still uses four hash workers.
 
 ## Next hypothesis after the current comparison
 
