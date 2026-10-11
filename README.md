@@ -49,6 +49,8 @@ The [default Rust pipelining comparison](docs/default-pipelining.md) wins five c
 
 Capture full real-project builds and generate a Perfetto timeline, crate/native comparisons and instructions for future variations with the [build tracing tools](docs/build-tracing.md). Diagnostic logs stay private; speed claims use separate untraced benchmarks.
 
+The [full Harness eight-worker comparison](docs/full-eight-workers-kache-comparison.md) still favors kache on warm builds and does not establish a Nano cold advantage. For new default-off experiments, the [runtime-control comparison runner](docs/runtime-toggle-comparisons.md) records each build's exact switch value and can verify activation in an excluded prime.
+
 Large Rust metadata now uses a separate bounded, state-checked snapshot reader; the actual Harness `objc2_app_kit` replay restores byte-identical artifacts. See [scope and checks](docs/large-rust-metadata.md). [Thin-LTO producer support](docs/thin-lto-producer-investigation.md) has an opt-in stable-staging candidate; default builds still refuse it.
 
 The opt-in [stable-alias full Harness candidate](docs/full-harness-stable-alias.md) restores the thin-LTO application: two warm rounds give **17.690 s Nano versus 6.863 s kache**. Artifact, permission, signature and CLI checks pass; Nano still loses, and no repeated cold win or default promotion is claimed.

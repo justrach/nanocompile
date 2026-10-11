@@ -1,4 +1,4 @@
-"""Rotate two nanocompile binaries over clean builds with one stable wrapper path."""
+"""Compare nanocompile binaries or one runtime switch over clean Cargo builds."""
 import argparse
 import datetime
 import hashlib
@@ -15,6 +15,39 @@ from project_comparison import tree_rss
 from benchmark_storage import require_space, save_report, save_failure
 from bindgen_controls import load as bindgen_controls
 from executable_probe import probe_help
+
+
+# Numeric experimental controls only: never accept cache paths or credentials
+# here. Add controls explicitly so a comparison cannot override runner isolation.
+RUNTIME_CONTROLS = {
+    'NANOCOMPILE_PRODUCER_GRAPH_WORKERS': {'0', '4'},
+    'NANOCOMPILE_PRODUCER_SHARED_DIGESTS': {'0', '1'},
+    'NANOCOMPILE_HASH_MISMATCH_STOP': {'0', '1'},
+}
+
+
+def runtime_comparison(parser, toggle, binary_hashes):
+    if toggle is None:
+        return None
+    name, baseline, candidate = toggle
+    allowed = RUNTIME_CONTROLS.get(name)
+    if allowed is None or baseline not in allowed or candidate not in allowed:
+        parser.error('--runtime-toggle requires a supported control and values: ' +
+                     ', '.join(f'{key}={"/".join(sorted(values))}' for key, values in RUNTIME_CONTROLS.items()))
+    if baseline == candidate:
+        parser.error('--runtime-toggle values must differ')
+    if binary_hashes['baseline'] != binary_hashes['candidate']:
+        parser.error('--runtime-toggle requires byte-identical baseline and candidate binaries')
+    return dict(name=name, values=dict(baseline=baseline, candidate=candidate))
+
+
+def build_environment(common, name, phase, control, prime_marker):
+    result = dict(common)
+    if control:
+        result[control['name']] = control['values'][name]
+    if prime_marker and name == 'candidate' and phase == 'prime':
+        result['NANOCOMPILE_TRACE'] = '1'
+    return result
 
 
 def sha(path):
@@ -47,6 +80,10 @@ def main():
     p.add_argument('--bindgen-tools-file', type=Path)
     p.add_argument('--min-free-gib', type=float, default=8)
     p.add_argument('--minimum-cache-units', type=int, default=165)
+    p.add_argument('--runtime-toggle', nargs=3, metavar=('NAME', 'BASELINE', 'CANDIDATE'),
+                   help='compare a supported numeric experiment switch in the same binary; recorded for every build')
+    p.add_argument('--candidate-prime-marker',
+                   help='trace only the excluded candidate prime and require this activation marker in its full log')
     args = p.parse_args()
     if args.probe_help and not args.bin: p.error('--probe-help requires --bin')
     if args.source_date_epoch is not None and args.source_date_epoch < 0: p.error('--source-date-epoch must be nonnegative')
@@ -55,6 +92,11 @@ def main():
         p.error('choose either enable or disable for each compiler control')
     assert args.runs > 0 and args.jobs > 0 and args.minimum_cache_units > 0
     binaries = {name: getattr(args, name).resolve() for name in ('baseline', 'candidate')}
+    binary_hashes = {name: sha(path) for name, path in binaries.items()}
+    control = runtime_comparison(p, args.runtime_toggle, binary_hashes)
+    if args.candidate_prime_marker is not None:
+        if not control or not args.candidate_prime_marker.strip():
+            p.error('--candidate-prime-marker requires --runtime-toggle and a nonempty marker')
     project, root = args.project.resolve(), args.state.resolve()
     require_space(root, args.min_free_gib)
     root.mkdir(mode=0o700, parents=True, exist_ok=False)
@@ -91,12 +133,18 @@ def main():
                      (name.endswith(('.rs', '.toml')) or Path(name).name == 'Cargo.lock')
                      and (project / name).is_file()}
     evidence = {
-        'method': 'rotating two-binary clean Cargo builds; binaries copied to one stable wrapper path between completed builds; identical environment, target path and shared cache; both binaries primed; producer identities retain their distinct executable hashes',
+        'method': ('rotating clean Cargo builds; binary copied to one stable wrapper path between completed builds; '
+                   'fixed target and cache paths; both modes primed; ' +
+                   ('same executable identity, varying only the recorded runtime control' if control else
+                    'same environment, executable identities recorded by SHA-256') +
+                   ('; only the excluded candidate prime enables trace for activation verification' if args.candidate_prime_marker else '')),
+        'runtime_control': control,
+        'candidate_prime_marker': args.candidate_prime_marker,
         'project': str(project), 'commit': subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=project, text=True).strip(),
         'dirty': bool(subprocess.check_output(['git', 'status', '--porcelain'], cwd=project)),
         'rustc': subprocess.check_output(['rustc', '-vV'], env=env, cwd=project, text=True),
         'timestamp': datetime.datetime.now(datetime.timezone.utc).isoformat(),
-        'binary_sha256': {name: sha(path) for name, path in binaries.items()},
+        'binary_sha256': binary_hashes,
         'script_sha256': sha(Path(__file__)), 'jobs': args.jobs, 'runs_per_binary': args.runs,
         'pipelined_companions': env.get('NANOCOMPILE_PIPELINED_COMPANIONS'), 'cold': args.cold, 'compiler_stream': env.get('NANOCOMPILE_STREAM_COMPILER'),
         'build_script_contract_sha256': sha(args.build_script_contract) if args.build_script_contract else None,
@@ -118,6 +166,9 @@ def main():
     own_help = {}
     def build(name, phase):
         nonlocal reference
+        run_env = build_environment(env, name, phase, control, args.candidate_prime_marker)
+        controls = {control['name']: run_env[control['name']]} if control else {}
+        traced = run_env.get('NANOCOMPILE_TRACE') == '1'
         shutil.rmtree(target, ignore_errors=True)
         if args.cold:
             shutil.rmtree(root / 'cache', ignore_errors=True)
@@ -129,7 +180,7 @@ def main():
         log_path = root / f'{len(evidence["builds"]):02d}-{name}.log'
         print(f'Building {name} {phase}', flush=True)
         with log_path.open('w') as log:
-            child = subprocess.Popen(command, cwd=project, env=env, stdout=log,
+            child = subprocess.Popen(command, cwd=project, env=run_env, stdout=log,
                                      stderr=log, start_new_session=True)
             started = time.perf_counter()
             peak = 0
@@ -150,7 +201,8 @@ def main():
         log_record = dict(path=log_path.name, bytes=log_path.stat().st_size, sha256=sha(log_path))
         if child.returncode:
             evidence['builds'].append(dict(implementation=name, phase=phase, seconds=elapsed,
-                                          exit_code=child.returncode, build_log=log_record))
+                                          exit_code=child.returncode, build_log=log_record,
+                                          runtime_controls=controls, trace_enabled=traced))
             evidence['failure'] = dict(type='CompilerFailure', log=log_path.name)
             save()
             raise RuntimeError('Project build failed: ' + str(log_path))
@@ -164,7 +216,7 @@ def main():
         assert artifacts
         modes = {name: oct((target / name).stat().st_mode & 0o777) for name in artifacts}
         own_modes.setdefault(name, modes)
-        help_result = probe_help(final, env) if args.probe_help else {}
+        help_result = probe_help(final, run_env) if args.probe_help else {}
         if args.probe_help: own_help.setdefault(name, help_result.get('cli_help_sha256'))
         if reference is None:
             reference = artifacts
@@ -178,16 +230,22 @@ def main():
         if phase == 'warm':
             assert counts.get('hit', 0) >= args.minimum_cache_units, counts
         row = {'implementation': name, 'phase': phase, 'seconds': elapsed,
+               'runtime_controls': controls, 'trace_enabled': traced,
                'exit_code': child.returncode, 'build_log': log_record, 'artifact_modes': modes,
                'artifact_modes_match_own_reference': modes == own_modes[name],
                **help_result, 'events': counts, 'peak_sampled_process_tree_rss_bytes': peak,
                'artifacts_match_reference': matches_reference, 'reference_mode': 'own' if args.own_artifact_references else 'shared',
                'artifacts_match_first_prime': artifacts == reference, 'artifact_count': len(artifacts), 'artifact_sha256': artifacts}
         evidence['builds'].append(row)
+        if args.candidate_prime_marker:
+            marker_present = args.candidate_prime_marker.encode() in log_path.read_bytes()
+            row['activation_marker_present'] = marker_present
         save()
         print(json.dumps({k: v for k, v in row.items() if k != 'artifact_sha256'}), flush=True)
         assert matches_reference, 'Artifact mismatch: ' + str(log_path)
         assert modes == own_modes[name], 'Artifact mode mismatch'
+        if args.candidate_prime_marker:
+            assert marker_present == traced, 'Activation trace did not match the declared prime-only tracing policy'
         if args.probe_help:
             assert help_result['cli_help_valid'] and help_result['cli_help_sha256'] == own_help[name], 'CLI help mismatch'
     try:
