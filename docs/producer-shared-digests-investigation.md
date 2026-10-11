@@ -69,7 +69,7 @@ production adoption is rejected pending stronger full-workload evidence.
 
 The original gated digest-sharing/kache trial did not launch because this result
 failed its clear-gain condition. Its terminal state is retained. A separate
-16-build untraced study now compares the **pre-sharing eight-worker runtime**
+16-build untraced study completed using the **pre-sharing eight-worker runtime**
 against pinned kache, with three alternating cold pairs and three warm rounds.
 It uses runtime SHA-256
 `0d38bfa35100b87d0a42abfd8ced2744eb28a91bc86883a663c938e998406499`,
@@ -78,7 +78,11 @@ patch. Its private frozen preparation is
 `/tmp/nano-full-eight-workers-kache-preparation-20261011`.
 This addresses the previous worker experiment directly; it does not relax the
 failed storage candidate's adoption gate. Independent confirmation remains
-required, and production still uses four hash workers.
+required, and production still uses four hash workers. The
+[completed comparison](full-eight-workers-kache-comparison.md) records a cold
+median of 189.748s Nano versus 186.549s kache and a warm median of 7.772s versus
+6.529s. Nano wins one of three cold pairs and zero of three warm rounds. This
+experiment does not establish superiority against kache.
 
 ## Next hypothesis after the current comparison
 
@@ -142,14 +146,14 @@ Kache reports reflinked outputs with zero copied bytes for both requests. Nano
 already attempts macOS `clonefile` in `cache.materialize`; this observation does
 not establish a missing clone operation or a copy bottleneck in Nano. Split graph
 collection from output storage if the digest-sharing trial cannot explain the
-measured cost. The private two-root shared-transitive fixture is prepared and
-queued, with exact payload/output comparisons, preserved-mtime replacement,
-corruption/failure, revert and concurrent restore cases; it has not run yet.
+measured cost. The two-root shared-transitive fixture subsequently passed exact payload/output
+comparisons, preserved-mtime replacement, corruption/failure, revert and four
+concurrent restore cases, as recorded in the correctness summary above.
 
 The traced project observations are 127.506s Nano and 121.072s kache. They are
 single diagnostic samples, not repeated untraced speed benchmarks. Kache's own
 fresh shared reference, direct shared reference, reverts and final source
-restoration checks remain pending in this sequence.
+restoration checks subsequently passed in the completed 18-build sequence.
 
 ## Storage checkpoint recovery
 
@@ -162,10 +166,10 @@ and logs were verified and its final CLI/signature preserved before reclaiming
 its target and object caches. Its logs, entries, receipts and captured streams
 remain available.
 
-A private checkpoint runner is executing the six remaining builds at the same
-source, target, cache and capture paths. It validates the recorded runtime,
-toolchain, flags, native contract, bindgen selection and source hashes; rehydrates
-artifact references from completed rows; and skips only the verified prefix.
+A private checkpoint runner completed the six remaining builds at the same
+source, target, cache and capture paths. It validated the recorded runtime,
+toolchain, flags, native contract, bindgen selection and source hashes; rehydrated
+artifact references from completed rows; and skipped only the verified prefix.
 The original failed report, console and stopped dependent queue states are
 retained. The resume runner hash is recorded separately. Inherited environment
 equality across the pause is not established, so the combined observations remain

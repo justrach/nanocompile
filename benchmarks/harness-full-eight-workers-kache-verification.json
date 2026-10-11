@@ -1,0 +1,488 @@
+{
+  "completed": true,
+  "report_sha256": "b8ea26b31742c4f769fc0d6884878561cd23f1e1a1426014097427b40b1210ee",
+  "controls_sha256": "51db97f63a9c0b42bea560b9f5c96d0cae08feacf3b2cb28c8875542dcd28682",
+  "verifier_sha256": "862c139fb3fa35ba7536f377e5667dc3154cea41100b2305df8b1cece1bdc55e",
+  "files_sha256": {
+    "runtime": "0d38bfa35100b87d0a42abfd8ced2744eb28a91bc86883a663c938e998406499",
+    "kache": "0e4ab2b2f651f1c3685fe31b9ad7d0008ce12c44332e5e4842fa5257a0a82cd0",
+    "runner": "db834991f8768e586f50349cfa8026b1bb832372faa15c8da9cd1813db0a4f9f",
+    "contract": "ef9899453f10c9cff108d0c0e4b0bbceb0649d89f4f676dbab7b04bd91e2ddf0"
+  },
+  "snapshot_inputs_verified": 883,
+  "tracked_inputs_verified": 881,
+  "builds": [
+    {
+      "index": 0,
+      "implementation": "direct",
+      "phase": "prime",
+      "seconds": 181.8010387920076,
+      "build_log": {
+        "path": "0-direct-prime.log",
+        "bytes": 1186516,
+        "sha256": "39676fa44025159c3ff5c73ef8a2f819ed8f570041ecddd689df8d912a3485b5"
+      },
+      "events": {},
+      "artifact_counts": {
+        "artifacts": 945,
+        "macro_dylibs": 46,
+        "build_script_executables": 107,
+        "native_objects_and_archives": 115,
+        "final_executable_artifacts": 1,
+        "final_executable_modes": 1
+      },
+      "matches_own_reference": true,
+      "cli_help_valid": true
+    },
+    {
+      "index": 1,
+      "implementation": "nanocompile",
+      "phase": "cold",
+      "seconds": 192.79473962495103,
+      "build_log": {
+        "path": "1-nanocompile-cold.log",
+        "bytes": 1186516,
+        "sha256": "cbf45e5156b2f94d8dd8c295acf3b6b101b56c16742c3165a56089c4e6c77682"
+      },
+      "events": {
+        "miss": 1102,
+        "bypass": 31,
+        "failed": 8,
+        "build_script_miss": 31
+      },
+      "artifact_counts": {
+        "artifacts": 945,
+        "macro_dylibs": 46,
+        "build_script_executables": 137,
+        "native_objects_and_archives": 115,
+        "final_executable_artifacts": 1,
+        "final_executable_modes": 1
+      },
+      "matches_own_reference": true,
+      "cli_help_valid": true
+    },
+    {
+      "index": 2,
+      "implementation": "kache",
+      "phase": "cold",
+      "seconds": 186.54874008300249,
+      "build_log": {
+        "path": "2-kache-cold.log",
+        "bytes": 1186516,
+        "sha256": "4d2065a2c883c4595b69254267d26b3bfd9ec5245e165fe8acad489c82b27625"
+      },
+      "events": {
+        "passthrough": 48,
+        "miss": 1314,
+        "dup": 1,
+        "unknown": 2
+      },
+      "artifact_counts": {
+        "artifacts": 945,
+        "macro_dylibs": 46,
+        "build_script_executables": 107,
+        "native_objects_and_archives": 115,
+        "final_executable_artifacts": 1,
+        "final_executable_modes": 1
+      },
+      "matches_own_reference": true,
+      "cli_help_valid": true
+    },
+    {
+      "index": 3,
+      "implementation": "kache",
+      "phase": "cold",
+      "seconds": 183.64930341602303,
+      "build_log": {
+        "path": "3-kache-cold.log",
+        "bytes": 1186516,
+        "sha256": "1d4a914dc479991c5c15ac444c654425df6aa648c0ff40093e7c54fcb9d8e0d0"
+      },
+      "events": {
+        "passthrough": 48,
+        "miss": 1314,
+        "dup": 1,
+        "unknown": 2
+      },
+      "artifact_counts": {
+        "artifacts": 945,
+        "macro_dylibs": 46,
+        "build_script_executables": 107,
+        "native_objects_and_archives": 115,
+        "final_executable_artifacts": 1,
+        "final_executable_modes": 1
+      },
+      "matches_own_reference": true,
+      "cli_help_valid": true
+    },
+    {
+      "index": 4,
+      "implementation": "nanocompile",
+      "phase": "cold",
+      "seconds": 189.74785741599044,
+      "build_log": {
+        "path": "4-nanocompile-cold.log",
+        "bytes": 1186516,
+        "sha256": "198a10b5b444a5f17617831ea8a6f134e6177f645774be0c08d3e2e247037ff3"
+      },
+      "events": {
+        "miss": 1102,
+        "bypass": 31,
+        "failed": 8,
+        "build_script_miss": 31
+      },
+      "artifact_counts": {
+        "artifacts": 945,
+        "macro_dylibs": 46,
+        "build_script_executables": 137,
+        "native_objects_and_archives": 115,
+        "final_executable_artifacts": 1,
+        "final_executable_modes": 1
+      },
+      "matches_own_reference": true,
+      "cli_help_valid": true
+    },
+    {
+      "index": 5,
+      "implementation": "nanocompile",
+      "phase": "cold",
+      "seconds": 184.7294885420124,
+      "build_log": {
+        "path": "5-nanocompile-cold.log",
+        "bytes": 1186516,
+        "sha256": "9a01e5294c57bccc0ada9ecf2bab1dddc01ec4aabb377a87c194fc01c69459a4"
+      },
+      "events": {
+        "miss": 1102,
+        "bypass": 31,
+        "failed": 8,
+        "build_script_miss": 31
+      },
+      "artifact_counts": {
+        "artifacts": 945,
+        "macro_dylibs": 46,
+        "build_script_executables": 137,
+        "native_objects_and_archives": 115,
+        "final_executable_artifacts": 1,
+        "final_executable_modes": 1
+      },
+      "matches_own_reference": true,
+      "cli_help_valid": true
+    },
+    {
+      "index": 6,
+      "implementation": "kache",
+      "phase": "cold",
+      "seconds": 192.35626600001706,
+      "build_log": {
+        "path": "6-kache-cold.log",
+        "bytes": 1186516,
+        "sha256": "71c4923ae3e123042e7bdaee6bec53975df6b6efdd000fcd5ab6f7b859c43e2f"
+      },
+      "events": {
+        "passthrough": 48,
+        "miss": 1314,
+        "dup": 1,
+        "unknown": 2
+      },
+      "artifact_counts": {
+        "artifacts": 945,
+        "macro_dylibs": 46,
+        "build_script_executables": 107,
+        "native_objects_and_archives": 115,
+        "final_executable_artifacts": 1,
+        "final_executable_modes": 1
+      },
+      "matches_own_reference": true,
+      "cli_help_valid": true
+    },
+    {
+      "index": 7,
+      "implementation": "direct",
+      "phase": "warm",
+      "seconds": 176.69893029198283,
+      "build_log": {
+        "path": "7-direct-warm.log",
+        "bytes": 1186516,
+        "sha256": "3814ba085bf8630773a9aaed892ba8f2d46d737fbd9227a06d89eeef6e669005"
+      },
+      "events": {},
+      "artifact_counts": {
+        "artifacts": 945,
+        "macro_dylibs": 46,
+        "build_script_executables": 107,
+        "native_objects_and_archives": 115,
+        "final_executable_artifacts": 1,
+        "final_executable_modes": 1
+      },
+      "matches_own_reference": true,
+      "cli_help_valid": true
+    },
+    {
+      "index": 8,
+      "implementation": "nanocompile",
+      "phase": "warm",
+      "seconds": 7.874219792021904,
+      "build_log": {
+        "path": "8-nanocompile-warm.log",
+        "bytes": 1186515,
+        "sha256": "ec3f2555b7f737d6788a726f0bf3f57995f5e0c4922603e1810ccd6a13e45e52"
+      },
+      "events": {
+        "miss": 3,
+        "bypass": 34,
+        "failed": 8,
+        "hit": 1099,
+        "build_script_hit": 31
+      },
+      "artifact_counts": {
+        "artifacts": 945,
+        "macro_dylibs": 46,
+        "build_script_executables": 137,
+        "native_objects_and_archives": 115,
+        "final_executable_artifacts": 1,
+        "final_executable_modes": 1
+      },
+      "matches_own_reference": true,
+      "cli_help_valid": true
+    },
+    {
+      "index": 9,
+      "implementation": "kache",
+      "phase": "warm",
+      "seconds": 6.581367459031753,
+      "build_log": {
+        "path": "9-kache-warm.log",
+        "bytes": 1186515,
+        "sha256": "fb51588e183bd4ee6d8a5e1123936fbe970e87b9cc344caf9d2dab4a7b96d787"
+      },
+      "events": {
+        "passthrough": 3,
+        "local_hit": 1237
+      },
+      "artifact_counts": {
+        "artifacts": 945,
+        "macro_dylibs": 46,
+        "build_script_executables": 107,
+        "native_objects_and_archives": 115,
+        "final_executable_artifacts": 1,
+        "final_executable_modes": 1
+      },
+      "matches_own_reference": true,
+      "cli_help_valid": true
+    },
+    {
+      "index": 10,
+      "implementation": "nanocompile",
+      "phase": "warm",
+      "seconds": 7.381328249990474,
+      "build_log": {
+        "path": "10-nanocompile-warm.log",
+        "bytes": 1186515,
+        "sha256": "46fbe1c68050d0d7364bd80613e12ae66c6cd7ebcbf943df2c282c24ccb36f04"
+      },
+      "events": {
+        "miss": 3,
+        "bypass": 34,
+        "failed": 8,
+        "hit": 1099,
+        "build_script_hit": 31
+      },
+      "artifact_counts": {
+        "artifacts": 945,
+        "macro_dylibs": 46,
+        "build_script_executables": 137,
+        "native_objects_and_archives": 115,
+        "final_executable_artifacts": 1,
+        "final_executable_modes": 1
+      },
+      "matches_own_reference": true,
+      "cli_help_valid": true
+    },
+    {
+      "index": 11,
+      "implementation": "kache",
+      "phase": "warm",
+      "seconds": 6.5289664170122705,
+      "build_log": {
+        "path": "11-kache-warm.log",
+        "bytes": 1186515,
+        "sha256": "103a7c473dbe34cb92e0fa2cd65bbabacd1573c179462b61818e107a8f16ad67"
+      },
+      "events": {
+        "passthrough": 3,
+        "local_hit": 1237
+      },
+      "artifact_counts": {
+        "artifacts": 945,
+        "macro_dylibs": 46,
+        "build_script_executables": 107,
+        "native_objects_and_archives": 115,
+        "final_executable_artifacts": 1,
+        "final_executable_modes": 1
+      },
+      "matches_own_reference": true,
+      "cli_help_valid": true
+    },
+    {
+      "index": 12,
+      "implementation": "direct",
+      "phase": "warm",
+      "seconds": 175.75223912496585,
+      "build_log": {
+        "path": "12-direct-warm.log",
+        "bytes": 1186516,
+        "sha256": "3559cbf9d60be29dc332bba979c96ee31a9d2be8c495c4410d9598caf0c5507f"
+      },
+      "events": {},
+      "artifact_counts": {
+        "artifacts": 945,
+        "macro_dylibs": 46,
+        "build_script_executables": 107,
+        "native_objects_and_archives": 115,
+        "final_executable_artifacts": 1,
+        "final_executable_modes": 1
+      },
+      "matches_own_reference": true,
+      "cli_help_valid": true
+    },
+    {
+      "index": 13,
+      "implementation": "kache",
+      "phase": "warm",
+      "seconds": 6.413098499993794,
+      "build_log": {
+        "path": "13-kache-warm.log",
+        "bytes": 1186515,
+        "sha256": "5fcae4bce7a3f3d954edcf210739fa251616b65783eadea10ecd7866f1d10aa1"
+      },
+      "events": {
+        "passthrough": 3,
+        "local_hit": 1237
+      },
+      "artifact_counts": {
+        "artifacts": 945,
+        "macro_dylibs": 46,
+        "build_script_executables": 107,
+        "native_objects_and_archives": 115,
+        "final_executable_artifacts": 1,
+        "final_executable_modes": 1
+      },
+      "matches_own_reference": true,
+      "cli_help_valid": true
+    },
+    {
+      "index": 14,
+      "implementation": "direct",
+      "phase": "warm",
+      "seconds": 180.60474558302667,
+      "build_log": {
+        "path": "14-direct-warm.log",
+        "bytes": 1186516,
+        "sha256": "7395393563b9e7f488ff1650896331f4a5207e75d8b2e4d4632588ad018ec3b9"
+      },
+      "events": {},
+      "artifact_counts": {
+        "artifacts": 945,
+        "macro_dylibs": 46,
+        "build_script_executables": 107,
+        "native_objects_and_archives": 115,
+        "final_executable_artifacts": 1,
+        "final_executable_modes": 1
+      },
+      "matches_own_reference": true,
+      "cli_help_valid": true
+    },
+    {
+      "index": 15,
+      "implementation": "nanocompile",
+      "phase": "warm",
+      "seconds": 7.771688750013709,
+      "build_log": {
+        "path": "15-nanocompile-warm.log",
+        "bytes": 1186515,
+        "sha256": "5dd98b8da87f377564d6693a78b0b5d83d9a6437b64b442b16f306730ac4d080"
+      },
+      "events": {
+        "miss": 3,
+        "bypass": 34,
+        "failed": 8,
+        "hit": 1099,
+        "build_script_hit": 31
+      },
+      "artifact_counts": {
+        "artifacts": 945,
+        "macro_dylibs": 46,
+        "build_script_executables": 137,
+        "native_objects_and_archives": 115,
+        "final_executable_artifacts": 1,
+        "final_executable_modes": 1
+      },
+      "matches_own_reference": true,
+      "cli_help_valid": true
+    }
+  ],
+  "summary": {
+    "cold": {
+      "samples_seconds": {
+        "nanocompile": [
+          192.79473962495103,
+          189.74785741599044,
+          184.7294885420124
+        ],
+        "kache": [
+          186.54874008300249,
+          183.64930341602303,
+          192.35626600001706
+        ]
+      },
+      "median_seconds": {
+        "nanocompile": 189.74785741599044,
+        "kache": 186.54874008300249
+      },
+      "paired_seconds_saved": [
+        -6.2459995419485494,
+        -6.098553999967407,
+        7.6267774580046535
+      ],
+      "nanocompile_wins": 1,
+      "mean_seconds_saved": -1.5725920279704344,
+      "standard_error_seconds_saved": 4.599881674260027
+    },
+    "warm": {
+      "samples_seconds": {
+        "nanocompile": [
+          7.874219792021904,
+          7.381328249990474,
+          7.771688750013709
+        ],
+        "kache": [
+          6.581367459031753,
+          6.5289664170122705,
+          6.413098499993794
+        ]
+      },
+      "median_seconds": {
+        "nanocompile": 7.771688750013709,
+        "kache": 6.5289664170122705
+      },
+      "paired_seconds_saved": [
+        -1.292852332990151,
+        -0.8523618329782039,
+        -1.3585902500199154
+      ],
+      "nanocompile_wins": 0,
+      "mean_seconds_saved": -1.1679348053294234,
+      "standard_error_seconds_saved": 0.15892356033933494
+    }
+  },
+  "limitations": [
+    "Full Harness CLI binary, not the GUI.",
+    "Output hashes compare each tool with its own first cold/prime build; no cross-tool byte equality claim.",
+    "Only final executable permission modes are recorded.",
+    "Three pairs per phase on one host; OS filesystem caches unflushed; R2 unused.",
+    "Warm comparisons pair rotated rounds; no simultaneous builds."
+  ],
+  "public_report": "harness-full-eight-workers-kache-paired.json",
+  "public_report_sha256": "b8ea26b31742c4f769fc0d6884878561cd23f1e1a1426014097427b40b1210ee"
+}
