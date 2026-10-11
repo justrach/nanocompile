@@ -1,0 +1,11 @@
+# Matched cold profile: next variation
+
+The separate matched cold diagnostic sequence completed direct, Nano and kache full Harness CLI builds at 177.321s, 190.928s and 192.870s. These single traced observations do not replace the [repeated untraced comparison](full-eight-workers-kache-comparison.md), which found no cold Nano advantage and a warm Nano loss.
+
+[Verified observations](../benchmarks/harness-cold-gap-matched-profile.json) retain complete-console digests, runtime/toolchain identity, capture coverage and all phases for the selected final Harness, UI, engine and adapters requests. Every capture and all 97 snapshot inputs were verified. Raw captures and full analysis remain private under `/tmp/nano-cold-gap-matched-profile-20261011` and `/tmp/nano-cold-gap-matched-profile-analysis-20261011`.
+
+The final Harness request takes 72.285s Nano versus 68.004s kache, a 4.281s Nano loss despite the overall diagnostic build ordering. Nano records compiler execution 68.677s and postcompile work 3.240s, plus input staging 0.238s and linked-input discovery 0.076s. Kache's nearby final miss service event reports compile time 67.825s, key work 0.024s and storage 0.061s. Service and wrapper intervals differ in scope and are not joined by a shared request ID. They identify hypotheses, not an additive prediction of whole-build savings.
+
+The next diagnostic subdivision separates `save.input_revalidation`, `save.source_discovery_guards`, `save.rust_graphs` and `save.artifacts` inside the existing postcompile marker. Require a real captured final Harness request, direct/cold/restore output checks and unchanged sources before using those stages to select an optimization. An isolated request measurement is mechanism evidence; it cannot establish a full-build gain.
+
+Keep compiler flags and generated sources fixed. Optimize the measured postcompile stage without skipping full content checks, directory guards or mutation/failure handling. The earlier digest-sharing prototype reduced isolated storage but failed its full-build clear-gain gate; do not adopt it on this new broad marker alone. After one targeted change passes correctness, compare it with frozen Nano and kache using repeated untraced cold, hit and real edit/revert trials, followed by independent confirmation. Retain every loss and failed check.

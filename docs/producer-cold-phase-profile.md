@@ -7,6 +7,14 @@ separate input snapshots and staging, actual compiler execution, publication and
 stream forwarding, linked-input discovery, identity rechecks, postcompile storage
 and cleanup. Existing prefix, restore and total markers remain available.
 
+Successful postcompile saves additionally emit `save.input_revalidation`,
+`save.source_discovery_guards`, `save.rust_graphs` and `save.artifacts`.
+These subdivide the containing postcompile stage for ordinary and producer
+requests. Graph collection includes linker-record assembly for producers;
+artifact storage includes variant manifest construction and publication.
+Markers after an early failure can be absent. Profile-off behavior and input
+validation are unchanged.
+
 The whole-build analyzer accepts these stages without a fixed stage allowlist.
 Use its owned request streams and Cargo timeline to attribute work. A marker can
 be absent on an early fallback or failure; absence is not zero cost. Total spans

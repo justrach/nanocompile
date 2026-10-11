@@ -102,7 +102,8 @@ def main():
         assert b'miss: compiling executable producer' in cold.stderr, cold.stderr.decode()
         if args.profile:
             for stage in ('producer.input_snapshot_staging','producer.execution','producer.publication_forwarding',
-                          'producer.linked_inputs','producer.identity_recheck','producer.postcompile_store','producer.cleanup'):
+                          'producer.linked_inputs','producer.identity_recheck','producer.postcompile_store','producer.cleanup',
+                          'save.input_revalidation','save.source_discovery_guards','save.rust_graphs','save.artifacts'):
                 assert ('nanocompile: compiler-phase '+stage+' ns=').encode() in cold.stderr, cold.stderr.decode()
         if args.stable_alias_experiment:
             staging_difference = validate_staging_difference(direct_bytes, executable.read_bytes())

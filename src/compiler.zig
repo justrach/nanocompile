@@ -829,6 +829,7 @@ pub fn execute(ctx: *cache.Context, kind: Kind, argv: []const []const u8) !u8 {
 }
 
 fn save(ctx: *cache.Context, key: []const u8, plan: Plan, argv: []const []const u8, before: []const cache.Dependency, directories: []const rust_dependencies.Directory, started: i96, result: std.process.RunResult, linker: []const cache.Dependency) !void {
+    var phase = ctx.profileStart();
     for (before) |dep| if (!dep.directory) {
         for (plan.outputs) |out| if (eq(dep.path, out)) return error.OverlappingOutput;
     };
@@ -845,6 +846,8 @@ fn save(ctx: *cache.Context, key: []const u8, plan: Plan, argv: []const []const 
             if (!dep.directory) try validated.put(ctx.a, dep.path, digest);
         }
     }
+    ctx.profileEnd("save.input_revalidation", phase);
+    phase = ctx.profileStart();
     var paths: std.ArrayList([]const u8) = .empty;
     for (plan.dependencies) |path| try addUnique(ctx, &paths, path);
     if (plan.dep_info) |path| {
@@ -889,6 +892,8 @@ fn save(ctx: *cache.Context, key: []const u8, plan: Plan, argv: []const []const 
         if (st.mtime.nanoseconds >= started or st.ctime.nanoseconds >= started) return error.DirectoryChangedDuringCompilation;
         try records.append(ctx.a, .{ .path = dir, .hash = try ctx.directoryDigest(dir, false, plan.outputs), .directory = true });
     }
+    ctx.profileEnd("save.source_discovery_guards", phase);
+    phase = ctx.profileStart();
     if (!plan.producer and plan.dep_info != null and (directories.len != 0 or hidden_native or plan.static_companion))
         try rust_dependencies.collect(ctx, argv, plan.outputs, directories, started, &records, !plan.static_companion, &validated, hidden_native);
     if (plan.producer) {
@@ -897,7 +902,10 @@ fn save(ctx: *cache.Context, key: []const u8, plan: Plan, argv: []const []const 
         };
         try records.appendSlice(ctx.a, linker);
     }
+    ctx.profileEnd("save.rust_graphs", phase);
+    phase = ctx.profileStart();
     try cache.storeVariants(ctx, key, records.items, plan.outputs, result.stdout, result.stderr);
+    ctx.profileEnd("save.artifacts", phase);
 }
 
 test "dep-info handles escaped paths and continuations" {
