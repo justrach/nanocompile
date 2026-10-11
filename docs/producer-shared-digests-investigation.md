@@ -60,6 +60,28 @@ result; they will start only if the full comparison shows a clear gain and
 passes output/source checks. Independent confirmation and candidate source-edit
 checks remain required. Production remains unchanged.
 
+## Next hypothesis after the current comparison
+
+The verified revert trace contains two unsuccessful final-request restores
+(0.316204s and 0.217236s) before the successful 0.230984s restore. Each failed
+attempt performs the large parallel input-hash pass before reporting a content
+change. The [retained manifest comparison](../benchmarks/harness-revert-manifest-mismatch-investigation.json)
+finds 17 regular paths with different recorded hashes across three historical
+manifests, including `main.rs` and changed Harness archives. It retains each
+manifest and compiler-stream digest, regular-input counts, current sizes and
+job positions. It does not identify current content equality or map manifests
+to individual historical slots.
+
+After evaluating the current storage candidate, investigate stopping parallel
+hash work when a freshly read hash proves a manifest mismatch. This should only
+shorten a miss: a successful hit must still hash every required input. Join all
+workers and publish no output when validation fails. Compare an explicit off/on
+control; require source/archive edits, preserved-mtime replacements, missing and
+corrupt inputs, failures and concurrent restores. Retain complete hash validation
+on successful hits and repeat the actual edit/revert sequence before adoption.
+No such candidate has run yet, and these overlapping observations do not
+establish projected whole-build savings.
+
 The [exact experimental patch](../benchmarks/experiments/producer-shared-digests.patch)
 has SHA-256 `ccba043908e86662c5902fae984078d61e3585db264bb9ac3f9f99ec1e8ee161`.
 It was applied to the frozen eight-worker producer-profile source, not adopted in

@@ -1,0 +1,347 @@
+{
+  "schema": 1,
+  "diagnostic": true,
+  "capture": "revert final Harness request",
+  "record": "80150-513360753349000.stderr",
+  "record_sha256": "b8f34b1b77da1410168bdad96a40f761bb8e8f12672d7b1fe6cfe9968233ac76",
+  "failed_restore_seconds": [
+    0.316203791,
+    0.217236083
+  ],
+  "successful_restore_seconds": 0.230983875,
+  "different_regular_paths": 17,
+  "entries": [
+    {
+      "entry_key": "5dc9bb7bd7f28b84c42d42f8a32c95777d3131781c9da96ecbafc67714658ba7",
+      "entry_sha256": "cbdcbb499960f03d885a095be38d141a739a091840b89fba5ac830b578d3b354",
+      "regular_records": 3541,
+      "unique_regular_inputs": 1593,
+      "different_inputs": [
+        {
+          "name": "libharness_adapters-5f8910d956bde631.rlib",
+          "job_index": 142,
+          "current_bytes": 32702560,
+          "hash": "cf8815ac79724e5bf3a1c8970306574eff26bc4958a239deeecc390208881eda"
+        },
+        {
+          "name": "libharness_engine-db046b4bd7058952.rlib",
+          "job_index": 143,
+          "current_bytes": 77885376,
+          "hash": "d05d6cafe3725ef866352fab4dced65ff7a40d520e5c72c5da0be9d52d033fdc"
+        },
+        {
+          "name": "libharness_mcp-bdfd773dd5a0027d.rlib",
+          "job_index": 144,
+          "current_bytes": 12547752,
+          "hash": "524acf315b6b83fe25d2cfee9fe285d1e7d985ce640caee48234e7f56c8e24be"
+        },
+        {
+          "name": "libharness_rpc-a70502ad21d37e8a.rlib",
+          "job_index": 145,
+          "current_bytes": 7834840,
+          "hash": "30c60743bbc213874f79f00bfd19a7b82ca3166d1cad329695e7c0bcb6b4a647"
+        },
+        {
+          "name": "libharness_ui-a927e1aeb81d0e27.rlib",
+          "job_index": 146,
+          "current_bytes": 135604864,
+          "hash": "f66675e6e68effd4aa15952959f39b4c0b6432bf21a229b82a713df44ccde285"
+        },
+        {
+          "name": "main.rs",
+          "job_index": 154,
+          "current_bytes": 24548,
+          "hash": "b7d86ebdb1566a1f10259db99c0a2b862cd038480b0362df7e8c8d282dc9b5d0"
+        },
+        {
+          "name": "libharness_proto-dab5207a108c6bd3.rlib",
+          "job_index": 238,
+          "current_bytes": 10160400,
+          "hash": "ffe8720e1877e704e24346447b0dd9d6e66d1d7c9ccb20c875d4c2ed2769dfac"
+        },
+        {
+          "name": "libharness_proto-dab5207a108c6bd3.rmeta",
+          "job_index": 239,
+          "current_bytes": 7969426,
+          "hash": "9c7c744c9f6b314aba7749d574a430aa7e07d22d5446426a284db069a3e93d6d"
+        },
+        {
+          "name": "libharness_rpc-a70502ad21d37e8a.rmeta",
+          "job_index": 448,
+          "current_bytes": 1169622,
+          "hash": "d1515ac2ac19e052ee69dae494d8c3271dc41933d0ceb726ddd491304bba5d99"
+        },
+        {
+          "name": "libharness_sync-8b74d1cb804f604f.rlib",
+          "job_index": 475,
+          "current_bytes": 12911832,
+          "hash": "9b11c04f662500c75f01d5a15ca9e9227d3a8da3bace1bfca649b2ac334a37a6"
+        },
+        {
+          "name": "libharness_sync-8b74d1cb804f604f.rmeta",
+          "job_index": 476,
+          "current_bytes": 2032089,
+          "hash": "56cf5c77c0cd14398f45b553b58c17f6b8f305a43681644920bb87854294153f"
+        },
+        {
+          "name": "libharness_doc-c7ad8ef46bf5d884.rlib",
+          "job_index": 485,
+          "current_bytes": 10941208,
+          "hash": "824b0927119705252fd7ad513cf68ab8729ba90039ce6f1b3f5df6798a7b333c"
+        },
+        {
+          "name": "libharness_doc-c7ad8ef46bf5d884.rmeta",
+          "job_index": 486,
+          "current_bytes": 2875602,
+          "hash": "b87c42dd243dd952e386ac1d4ded8cf5d1435344abab24b277de848e560316a0"
+        },
+        {
+          "name": "libharness_adapters-5f8910d956bde631.rmeta",
+          "job_index": 624,
+          "current_bytes": 6688583,
+          "hash": "f6357147422b0bec646c48246b0120233c7c1005ffba6429a917d574528b323b"
+        },
+        {
+          "name": "libharness_preview-2bf7a1b8ae278ab7.rlib",
+          "job_index": 651,
+          "current_bytes": 18301976,
+          "hash": "c36ea06ab38024c04f764316540229504effcb8ae770191eb49fddb0fd8ac6a2"
+        },
+        {
+          "name": "libharness_preview-2bf7a1b8ae278ab7.rmeta",
+          "job_index": 652,
+          "current_bytes": 1507762,
+          "hash": "426ec7bf7beb990847218fdc3e0dccb0a2f8437b34f897e4cef6b863226ef73a"
+        },
+        {
+          "name": "libharness_engine-db046b4bd7058952.rmeta",
+          "job_index": 1297,
+          "current_bytes": 14735793,
+          "hash": "3219d1a251df76f139f307a00c10b48cd9f18dccdcd811b33ff2f1ff7d981be8"
+        }
+      ]
+    },
+    {
+      "entry_key": "ce8d99fd0aba7d0aeaf5240787b15b077cf78d658d450bed7e56a459ec69c209",
+      "entry_sha256": "7d5d44d56a24fe17734e07d864352f00afc203f89b0eaaa4685e25c37ce24bdb",
+      "regular_records": 3541,
+      "unique_regular_inputs": 1593,
+      "different_inputs": [
+        {
+          "name": "libharness_adapters-5f8910d956bde631.rlib",
+          "job_index": 142,
+          "current_bytes": 32702560,
+          "hash": "cf8815ac79724e5bf3a1c8970306574eff26bc4958a239deeecc390208881eda"
+        },
+        {
+          "name": "libharness_engine-db046b4bd7058952.rlib",
+          "job_index": 143,
+          "current_bytes": 77885376,
+          "hash": "d05d6cafe3725ef866352fab4dced65ff7a40d520e5c72c5da0be9d52d033fdc"
+        },
+        {
+          "name": "libharness_mcp-bdfd773dd5a0027d.rlib",
+          "job_index": 144,
+          "current_bytes": 12547752,
+          "hash": "524acf315b6b83fe25d2cfee9fe285d1e7d985ce640caee48234e7f56c8e24be"
+        },
+        {
+          "name": "libharness_rpc-a70502ad21d37e8a.rlib",
+          "job_index": 145,
+          "current_bytes": 7834840,
+          "hash": "30c60743bbc213874f79f00bfd19a7b82ca3166d1cad329695e7c0bcb6b4a647"
+        },
+        {
+          "name": "libharness_ui-a927e1aeb81d0e27.rlib",
+          "job_index": 146,
+          "current_bytes": 135604864,
+          "hash": "f66675e6e68effd4aa15952959f39b4c0b6432bf21a229b82a713df44ccde285"
+        },
+        {
+          "name": "main.rs",
+          "job_index": 154,
+          "current_bytes": 24548,
+          "hash": "52baa79c7c1c1a750008b502036cd42a44d9122c17b39112d6c1871eae8ffecd"
+        },
+        {
+          "name": "libharness_proto-dab5207a108c6bd3.rlib",
+          "job_index": 238,
+          "current_bytes": 10160400,
+          "hash": "ffe8720e1877e704e24346447b0dd9d6e66d1d7c9ccb20c875d4c2ed2769dfac"
+        },
+        {
+          "name": "libharness_proto-dab5207a108c6bd3.rmeta",
+          "job_index": 239,
+          "current_bytes": 7969426,
+          "hash": "9c7c744c9f6b314aba7749d574a430aa7e07d22d5446426a284db069a3e93d6d"
+        },
+        {
+          "name": "libharness_rpc-a70502ad21d37e8a.rmeta",
+          "job_index": 448,
+          "current_bytes": 1169622,
+          "hash": "d1515ac2ac19e052ee69dae494d8c3271dc41933d0ceb726ddd491304bba5d99"
+        },
+        {
+          "name": "libharness_sync-8b74d1cb804f604f.rlib",
+          "job_index": 475,
+          "current_bytes": 12911832,
+          "hash": "9b11c04f662500c75f01d5a15ca9e9227d3a8da3bace1bfca649b2ac334a37a6"
+        },
+        {
+          "name": "libharness_sync-8b74d1cb804f604f.rmeta",
+          "job_index": 476,
+          "current_bytes": 2032089,
+          "hash": "56cf5c77c0cd14398f45b553b58c17f6b8f305a43681644920bb87854294153f"
+        },
+        {
+          "name": "libharness_doc-c7ad8ef46bf5d884.rlib",
+          "job_index": 485,
+          "current_bytes": 10941208,
+          "hash": "824b0927119705252fd7ad513cf68ab8729ba90039ce6f1b3f5df6798a7b333c"
+        },
+        {
+          "name": "libharness_doc-c7ad8ef46bf5d884.rmeta",
+          "job_index": 486,
+          "current_bytes": 2875602,
+          "hash": "b87c42dd243dd952e386ac1d4ded8cf5d1435344abab24b277de848e560316a0"
+        },
+        {
+          "name": "libharness_adapters-5f8910d956bde631.rmeta",
+          "job_index": 624,
+          "current_bytes": 6688583,
+          "hash": "f6357147422b0bec646c48246b0120233c7c1005ffba6429a917d574528b323b"
+        },
+        {
+          "name": "libharness_preview-2bf7a1b8ae278ab7.rlib",
+          "job_index": 651,
+          "current_bytes": 18301976,
+          "hash": "c36ea06ab38024c04f764316540229504effcb8ae770191eb49fddb0fd8ac6a2"
+        },
+        {
+          "name": "libharness_preview-2bf7a1b8ae278ab7.rmeta",
+          "job_index": 652,
+          "current_bytes": 1507762,
+          "hash": "426ec7bf7beb990847218fdc3e0dccb0a2f8437b34f897e4cef6b863226ef73a"
+        },
+        {
+          "name": "libharness_engine-db046b4bd7058952.rmeta",
+          "job_index": 1297,
+          "current_bytes": 14735793,
+          "hash": "3219d1a251df76f139f307a00c10b48cd9f18dccdcd811b33ff2f1ff7d981be8"
+        }
+      ]
+    },
+    {
+      "entry_key": "3dd458982c48e2840d86d95718dc3d5f66ea9e9a8fbe022820161ed69c3f36e8",
+      "entry_sha256": "2bec0c66f6d0d79c8a1446250b08ef0839a766801c9dd41ae01ca8388750ba92",
+      "regular_records": 3541,
+      "unique_regular_inputs": 1593,
+      "different_inputs": [
+        {
+          "name": "libharness_adapters-5f8910d956bde631.rlib",
+          "job_index": 142,
+          "current_bytes": 32702560,
+          "hash": "64e95346db00766960cae5b887baab53fee4bb5a60089906da900d9b61e3ee16"
+        },
+        {
+          "name": "libharness_engine-db046b4bd7058952.rlib",
+          "job_index": 143,
+          "current_bytes": 77885376,
+          "hash": "76dd78b99f24ce615b255cc6ed558afe6070b4a8aa5b2ecef0f32f6f7da84697"
+        },
+        {
+          "name": "libharness_mcp-bdfd773dd5a0027d.rlib",
+          "job_index": 144,
+          "current_bytes": 12547752,
+          "hash": "776f9cb82f9c7e758eb02b3b99d60d48e06cfd3e1e7822f9c8333380f779fca9"
+        },
+        {
+          "name": "libharness_rpc-a70502ad21d37e8a.rlib",
+          "job_index": 145,
+          "current_bytes": 7834840,
+          "hash": "51f5c982abca6e69980a31db2aee43c590a7006aa6636d1d8e9c312b19dff9e7"
+        },
+        {
+          "name": "libharness_ui-a927e1aeb81d0e27.rlib",
+          "job_index": 146,
+          "current_bytes": 135604864,
+          "hash": "4fe9c10a3eef26a734a7474f77cf86126699c918cf4bc872fa7fd8b41b7236cd"
+        },
+        {
+          "name": "main.rs",
+          "job_index": 154,
+          "current_bytes": 24548,
+          "hash": "b7d86ebdb1566a1f10259db99c0a2b862cd038480b0362df7e8c8d282dc9b5d0"
+        },
+        {
+          "name": "libharness_proto-dab5207a108c6bd3.rlib",
+          "job_index": 238,
+          "current_bytes": 10160400,
+          "hash": "527a5bd3eb677df1211a29e941727b3eed5c8963c5e0014faeddacaaed09d593"
+        },
+        {
+          "name": "libharness_proto-dab5207a108c6bd3.rmeta",
+          "job_index": 239,
+          "current_bytes": 7969426,
+          "hash": "fb4cacd3db7dac4d74089baff3245a3f56fbbd3bbc101cd8ab2f3431f587c704"
+        },
+        {
+          "name": "libharness_rpc-a70502ad21d37e8a.rmeta",
+          "job_index": 448,
+          "current_bytes": 1169622,
+          "hash": "e9b5f1791a4483a993616c0952e0b6898bb30648759795617910c7ccbefe9f8f"
+        },
+        {
+          "name": "libharness_sync-8b74d1cb804f604f.rlib",
+          "job_index": 475,
+          "current_bytes": 12911832,
+          "hash": "ed866476867ebb8248604c8cd7ecb9efc5d9c19a7f54123db07dfc9e49463224"
+        },
+        {
+          "name": "libharness_sync-8b74d1cb804f604f.rmeta",
+          "job_index": 476,
+          "current_bytes": 2032089,
+          "hash": "6be15b50b290df93d3b2462cc6f472a7f32a78929a885f241e8027afbfd98bfe"
+        },
+        {
+          "name": "libharness_doc-c7ad8ef46bf5d884.rlib",
+          "job_index": 485,
+          "current_bytes": 10941208,
+          "hash": "f598970e6d6a10ef3998a12557a5f89b8c8b23d42ecabfe1239894c2e50ceeb1"
+        },
+        {
+          "name": "libharness_doc-c7ad8ef46bf5d884.rmeta",
+          "job_index": 486,
+          "current_bytes": 2875602,
+          "hash": "3e930b7ca547b7bd4268804a833eecac7737757ba7d2ea610a1bcc410ac5e839"
+        },
+        {
+          "name": "libharness_adapters-5f8910d956bde631.rmeta",
+          "job_index": 624,
+          "current_bytes": 6688583,
+          "hash": "89389eedd399c9e3190d22442c717a5e346b09af9a87a421ff4491ae02db2c7b"
+        },
+        {
+          "name": "libharness_preview-2bf7a1b8ae278ab7.rlib",
+          "job_index": 651,
+          "current_bytes": 18301976,
+          "hash": "f000419460fddb2b40c0fc3ddbf1b33a3f2b3421570e5df8aa33e2bdc4a6169b"
+        },
+        {
+          "name": "libharness_preview-2bf7a1b8ae278ab7.rmeta",
+          "job_index": 652,
+          "current_bytes": 1507762,
+          "hash": "e0065bb1c029b697e6aa8caa10212135040475c13449d2965772a5a352a2c841"
+        },
+        {
+          "name": "libharness_engine-db046b4bd7058952.rmeta",
+          "job_index": 1297,
+          "current_bytes": 14735793,
+          "hash": "909bd01580eabbb9b8965ba351a7bcea2d6b94d1cfbef7fc5979b92bab927058"
+        }
+      ]
+    }
+  ],
+  "hypothesis": "Abort parallel validation as soon as a freshly read content hash mismatches the selected manifest; join all workers and publish no output on miss. Successful hits must still content-hash every input. Compare behind an explicit off/on control and require edits, preserved-mtime replacement, corruption, concurrency and full-build confirmation.",
+  "limitations": "Three retained manifests differ in these paths. This does not identify which manifest occupies each historical slot or prove current content equality. Job positions and file sizes are observations, not projected savings. No new candidate or timing experiment has run."
+}
