@@ -238,6 +238,13 @@ def main():
 
     def build(implementation, phase):
         shutil.rmtree(target, ignore_errors=True)
+        # The private kache daemon runs only for kache builds, so its
+        # background work cannot overlap direct or Nano builds. It is
+        # started and allowed to go idle outside timing.
+        if implementation == 'kache' and daemon is None:
+            start_daemon()
+        elif implementation != 'kache':
+            stop_daemon()
         settled = settle()
         require_space(state, args.min_free_gib)
         require_space(output.parent, min(args.min_free_gib, 1))
@@ -395,7 +402,7 @@ def main():
 
     if args.native_clang:
         result['method'] += '; Nano explicitly uses CC=nanocompile clang and native remarks; direct and kache retain their usual native compiler selection. Inline scanner changes debug representation, so every mode must match its own cold Rust, macro, executable and native artifact bytes. RSS includes benchmark parent, private kache daemon and Cargo descendants.'
-    result['method'] += '; before every build (all implementations, outside timing) wait until the private kache daemon is idle (<2% CPU for 3 s, at most 180 s) and record the wait'
+    result['method'] += '; the private kache daemon runs only during kache builds (stopped before direct and Nano builds, started before kache builds, outside timing); before every kache build wait until it is idle (<2% CPU for 3 s, at most 180 s) and record the wait'
     daemon = None
     daemon_log = (state/'daemon.log').open('w')
     def stop_daemon():

@@ -36,5 +36,88 @@
     "prepare_identity": 1.48
   },
   "finding": "Under the trace, Nano adds about 0.26 s to the harness-ui miss (25.57 s total, rustc 25.31 s). The reproduced shared edit took 112.97 s with no kache daemon running. In both study samples, Nano shared-edit builds immediately followed a kache empty-cache reference build whose cleanup restarts the private kache daemon on the restored store; harness-ui then took 29.25-30.24 s. The runner now waits, outside timing and for every implementation, until that daemon is idle.",
-  "limitations": "Single traced diagnostic sample with tracing overhead and without the preceding leaf edit; not a speed comparison."
+  "limitations": "Single traced diagnostic sample with tracing overhead and without the preceding leaf edit; not a speed comparison.",
+  "cold_leaf_shared_reproduction": {
+    "builds": [
+      {
+        "build": "cold",
+        "seconds": 184.13817162497435,
+        "exit_code": 0
+      },
+      {
+        "build": "leaf-edit",
+        "seconds": 77.88568837498315,
+        "exit_code": 0
+      },
+      {
+        "build": "shared-edit",
+        "seconds": 118.00350570806768,
+        "exit_code": 0
+      }
+    ],
+    "harness_ui_shared_edit_ms": {
+      "total": 26998.01,
+      "rustc_execution_streams": 26723.94,
+      "postcompile_store": 231.14
+    }
+  },
+  "controlled_harness_ui_recompiles": {
+    "method": "Same target directory and edits; cargo clean -p harness-ui; harness-ui and dependents recompiled through Nano with an empty cache (miss path) or NANOCOMPILE_DISABLE=1 (bypass), on Nano-restored dependencies or an rsync byte copy of them; traced and untraced.",
+    "traced": [
+      {
+        "label": "restore-all-from-nano-cache",
+        "wall": 6.51,
+        "harness_ui": null
+      },
+      {
+        "label": "restored/nano-miss",
+        "wall": 169.04,
+        "harness_ui": 25.39
+      },
+      {
+        "label": "restored/bypass",
+        "wall": 139.42,
+        "harness_ui": 25.17
+      },
+      {
+        "label": "bytecopy/nano-miss",
+        "wall": 169.9,
+        "harness_ui": 25.44
+      },
+      {
+        "label": "bytecopy/bypass",
+        "wall": 140.6,
+        "harness_ui": 25.12
+      },
+      {
+        "label": "restored/nano-miss-2",
+        "wall": 150.48,
+        "harness_ui": 25.45
+      },
+      {
+        "label": "restored/bypass-2",
+        "wall": 141.22,
+        "harness_ui": 25.05
+      }
+    ],
+    "untraced": [
+      {
+        "label": "restored/nano-miss-notrace",
+        "wall": 150.11,
+        "harness_ui": 25.46
+      },
+      {
+        "label": "restored/bypass-notrace",
+        "wall": 141.3,
+        "harness_ui": 25.23
+      },
+      {
+        "label": "restored/nano-miss-notrace-2",
+        "wall": 150.86,
+        "harness_ui": 25.86
+      }
+    ],
+    "finding": "harness-ui takes 25.0-25.9 s in every condition; Nano miss path adds about 0.3 s over bypass; restored versus byte-copied inputs make no difference. The 29.3 s seen in all three study shared edits is not reproduced outside the study."
+  },
+  "study_sample_3": "A pre-build idle wait for the kache daemon did not change the result (Nano 119.833 s, kache 116.993 s; harness-ui 29.36 s). The edit runner now stops the private kache daemon before direct and Nano builds and runs it only for kache builds."
 }
