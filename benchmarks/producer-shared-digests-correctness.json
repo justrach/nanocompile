@@ -1,0 +1,123 @@
+{
+  "completed": true,
+  "binary_sha256": "7b9d762f4a316d1b9a2381d7cc76414d10d42010c0d5b62c1378338264cc587f",
+  "fixture_sha256": "b9b0e5008ab80ac5351c9b7f5c8328266c97e61496054b1d6d0b415607230629",
+  "report_sha256": "613e34a2c2729645e96e15ed57544979018e28ae35c4ea44130d72d12aab698a",
+  "verified_fixture_streams": 58,
+  "smoke_steps": [
+    {
+      "name": "build",
+      "exit_code": 0,
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "unit",
+      "exit_code": 0,
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "default",
+      "exit_code": 0,
+      "bytes": 99,
+      "sha256": "a8d5cedd186d8481b5437f639da8289b4ae0246aab622f5755bb28897807e9ca"
+    },
+    {
+      "name": "shared-profile",
+      "exit_code": 0,
+      "bytes": 99,
+      "sha256": "a8d5cedd186d8481b5437f639da8289b4ae0246aab622f5755bb28897807e9ca"
+    },
+    {
+      "name": "shared-thin-lto",
+      "exit_code": 0,
+      "bytes": 99,
+      "sha256": "a8d5cedd186d8481b5437f639da8289b4ae0246aab622f5755bb28897807e9ca"
+    }
+  ],
+  "cases": [
+    {
+      "case": "cold-and-hit",
+      "sharing": "0",
+      "artifacts": {
+        "build_script_build-multiroot": {
+          "sha256": "8c43baf2ccddf3a412a67372c3a398ce5e81019073b0635083aafdba723d0324",
+          "mode": "0o755"
+        },
+        "build_script_build-multiroot.d": {
+          "sha256": "8459d5739a6b604f643b8d3d9da974cc2b1829a65b9974476d767b6a2926b387",
+          "mode": "0o644"
+        }
+      },
+      "entries": [
+        "5bf025b1b321315260b3aafadcc967bdd3db042003b55f7aaaa7f1e39436582d"
+      ],
+      "expected_behavior": 3
+    },
+    {
+      "case": "cold-and-hit",
+      "sharing": "1",
+      "artifacts": {
+        "build_script_build-multiroot": {
+          "sha256": "8c43baf2ccddf3a412a67372c3a398ce5e81019073b0635083aafdba723d0324",
+          "mode": "0o755"
+        },
+        "build_script_build-multiroot.d": {
+          "sha256": "8459d5739a6b604f643b8d3d9da974cc2b1829a65b9974476d767b6a2926b387",
+          "mode": "0o644"
+        }
+      },
+      "entries": [
+        "5bf025b1b321315260b3aafadcc967bdd3db042003b55f7aaaa7f1e39436582d"
+      ],
+      "expected_behavior": 3
+    },
+    {
+      "case": "shared-edit-preserved-mtime-replacement",
+      "expected_behavior": 5,
+      "artifacts": {
+        "build_script_build-multiroot": {
+          "sha256": "a00d366db5dc75dcb0046a924aa5b44e0e46a93a69ce9802622b8793d80092c3",
+          "mode": "0o755"
+        },
+        "build_script_build-multiroot.d": {
+          "sha256": "8459d5739a6b604f643b8d3d9da974cc2b1829a65b9974476d767b6a2926b387",
+          "mode": "0o644"
+        }
+      }
+    },
+    {
+      "case": "corrupt-transitive-failure",
+      "exit_code": 1
+    },
+    {
+      "case": "revert",
+      "artifacts": {
+        "build_script_build-multiroot": {
+          "sha256": "8c43baf2ccddf3a412a67372c3a398ce5e81019073b0635083aafdba723d0324",
+          "mode": "0o755"
+        },
+        "build_script_build-multiroot.d": {
+          "sha256": "8459d5739a6b604f643b8d3d9da974cc2b1829a65b9974476d767b6a2926b387",
+          "mode": "0o644"
+        }
+      },
+      "expected_behavior": 3
+    },
+    {
+      "case": "four-concurrent-restores",
+      "artifacts": {
+        "build_script_build-multiroot": {
+          "sha256": "8c43baf2ccddf3a412a67372c3a398ce5e81019073b0635083aafdba723d0324",
+          "mode": "0o755"
+        },
+        "build_script_build-multiroot.d": {
+          "sha256": "8459d5739a6b604f643b8d3d9da974cc2b1829a65b9974476d767b6a2926b387",
+          "mode": "0o644"
+        }
+      }
+    }
+  ],
+  "limitations": "Correctness fixture, not a timing comparison. No within-invocation mutation race hook. Default-off private prototype. Isolated performance pairs running; full Harness/kache and independent confirmation remain required."
+}

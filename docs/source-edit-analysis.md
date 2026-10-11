@@ -31,8 +31,13 @@ the full cold/leaf/shared/revert sequence and fresh-output checks. Update explic
 native-contract `RUSTC_WRAPPER` guards to the resolved state path
 `capture/nanocompile/nanocompile`; the capture frontend transparently invokes the
 selected frozen runtime. Verify coverage rather than assuming those guards still
-match. The current full traced integration session is pending; component capture
-transparency, concurrent streams and parser checks passed.
+match. The full traced integration session completed all 18 builds. Independent
+verification covered 18 consoles, 72,418 captured files and 36 linked-probe
+streams; all four source-preservation/restoration checks passed. See the
+[analysis](../benchmarks/harness-full-app-source-edit-phase-analysis.json) and
+[verification ledger](../benchmarks/harness-full-app-source-edit-phase-verification.json).
+The run resumed after a storage preflight failure; inherited environment equality
+across that pause is unproven. Its timings remain diagnostic.
 
 Future variations should reproduce the largest observed loss, identify its
 actual request/stage, change one cause, and pass artifact, source-edit, revert,

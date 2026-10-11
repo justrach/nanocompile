@@ -1,0 +1,126 @@
+{
+  "completed": true,
+  "report_sha256": "31bd6b4cca472a0b8837af29b0aea21ce413690c85ec142715ad5edd8c2d7f3e",
+  "builds": 18,
+  "logs": {
+    "verified_build_logs": 18
+  },
+  "captures": [
+    {
+      "build": 0,
+      "verified_files": 417,
+      "compiler_records": 0,
+      "cargo_units": 1237
+    },
+    {
+      "build": 1,
+      "verified_files": 4997,
+      "compiler_records": 1145,
+      "cargo_units": 1237
+    },
+    {
+      "build": 2,
+      "verified_files": 5321,
+      "compiler_records": 1226,
+      "cargo_units": 1237
+    },
+    {
+      "build": 3,
+      "verified_files": 417,
+      "compiler_records": 0,
+      "cargo_units": 1237
+    },
+    {
+      "build": 4,
+      "verified_files": 4997,
+      "compiler_records": 1145,
+      "cargo_units": 1237
+    },
+    {
+      "build": 5,
+      "verified_files": 4997,
+      "compiler_records": 1145,
+      "cargo_units": 1237
+    },
+    {
+      "build": 6,
+      "verified_files": 4829,
+      "compiler_records": 1103,
+      "cargo_units": 1237
+    },
+    {
+      "build": 7,
+      "verified_files": 5321,
+      "compiler_records": 1226,
+      "cargo_units": 1237
+    },
+    {
+      "build": 8,
+      "verified_files": 4997,
+      "compiler_records": 1145,
+      "cargo_units": 1237
+    },
+    {
+      "build": 9,
+      "verified_files": 4997,
+      "compiler_records": 1145,
+      "cargo_units": 1237
+    },
+    {
+      "build": 10,
+      "verified_files": 4829,
+      "compiler_records": 1103,
+      "cargo_units": 1237
+    },
+    {
+      "build": 11,
+      "verified_files": 5321,
+      "compiler_records": 1226,
+      "cargo_units": 1237
+    },
+    {
+      "build": 12,
+      "verified_files": 417,
+      "compiler_records": 0,
+      "cargo_units": 1237
+    },
+    {
+      "build": 13,
+      "verified_files": 4829,
+      "compiler_records": 1103,
+      "cargo_units": 1237
+    },
+    {
+      "build": 14,
+      "verified_files": 5321,
+      "compiler_records": 1226,
+      "cargo_units": 1237
+    },
+    {
+      "build": 15,
+      "verified_files": 417,
+      "compiler_records": 0,
+      "cargo_units": 1237
+    },
+    {
+      "build": 16,
+      "verified_files": 4997,
+      "compiler_records": 1145,
+      "cargo_units": 1237
+    },
+    {
+      "build": 17,
+      "verified_files": 4997,
+      "compiler_records": 1145,
+      "cargo_units": 1237
+    }
+  ],
+  "probes": 36,
+  "source_checks": {
+    "original_tracked_sources_unchanged": true,
+    "original_snapshot_inputs_unchanged": true,
+    "snapshot_sources_unchanged_except_declared_edits": true,
+    "snapshot_declared_sources_restored": true
+  },
+  "limitations": "Resumed after storage preflight failure; inherited environment equality across pause not established. Diagnostic timings, not speed trials."
+}

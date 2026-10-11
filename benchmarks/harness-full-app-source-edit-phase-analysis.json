@@ -1,0 +1,503 @@
+{
+  "schema": 1,
+  "completed": true,
+  "integrity": {
+    "verified_build_logs": 18
+  },
+  "diagnostic_trace": true,
+  "compiler_profile": true,
+  "source_checks": {
+    "original_tracked_sources_unchanged": true,
+    "original_snapshot_inputs_unchanged": true,
+    "snapshot_sources_unchanged_except_declared_edits": true,
+    "snapshot_declared_sources_restored": true
+  },
+  "samples": [
+    {
+      "implementation": "direct",
+      "phase": "cold",
+      "scenario": "initial",
+      "seconds": 173.08437558397418,
+      "exit_code": 0,
+      "events": {},
+      "build_log": {
+        "path": "0-direct-cold.log",
+        "bytes": 8050260,
+        "sha256": "ef0b0baa04d99eb84a5141b36461270ddbb6e6999d3f1f24e5ba31d204d5c060"
+      },
+      "index": 0,
+      "checks": {
+        "empty_cache_has_no_hits": true,
+        "cli_help_valid": true
+      }
+    },
+    {
+      "implementation": "nanocompile",
+      "phase": "cold",
+      "scenario": "initial",
+      "seconds": 181.22840625001118,
+      "exit_code": 0,
+      "events": {
+        "miss": 1102,
+        "bypass": 31,
+        "failed": 8,
+        "build_script_miss": 31
+      },
+      "build_log": {
+        "path": "1-nanocompile-cold.log",
+        "bytes": 9170972,
+        "sha256": "e5219a70022c3318b56586165dfe4d3e944ec92b04bd2a209aa3c21af45cb022"
+      },
+      "index": 1,
+      "checks": {
+        "empty_cache_has_no_hits": true,
+        "cli_help_valid": true
+      }
+    },
+    {
+      "implementation": "kache",
+      "phase": "cold",
+      "scenario": "initial",
+      "seconds": 188.36308591702254,
+      "exit_code": 0,
+      "events": {
+        "passthrough": 49,
+        "miss": 1314,
+        "dup": 1,
+        "unknown": 2
+      },
+      "build_log": {
+        "path": "2-kache-cold.log",
+        "bytes": 8108754,
+        "sha256": "9b953f06edd85bf8edd9232c27f46db7a702a3054fc32c1f78ccab95fb0a9675"
+      },
+      "index": 2,
+      "checks": {
+        "empty_cache_has_no_hits": true,
+        "cli_help_valid": true
+      }
+    },
+    {
+      "implementation": "direct",
+      "phase": "edit",
+      "scenario": "leaf-edit",
+      "seconds": 176.15811599994777,
+      "exit_code": 0,
+      "events": {},
+      "build_log": {
+        "path": "3-direct-edit.log",
+        "bytes": 8050260,
+        "sha256": "256820686894db745504292c7e2b9ad060db73b61f7a6316fd4222761fbfc23d"
+      },
+      "index": 3,
+      "checks": {
+        "cli_help_valid": true
+      }
+    },
+    {
+      "implementation": "nanocompile",
+      "phase": "edit",
+      "scenario": "leaf-edit",
+      "seconds": 80.2774900830118,
+      "exit_code": 0,
+      "events": {
+        "miss": 4,
+        "bypass": 35,
+        "failed": 8,
+        "hit": 1098,
+        "build_script_hit": 31
+      },
+      "build_log": {
+        "path": "4-nanocompile-edit.log",
+        "bytes": 9097673,
+        "sha256": "f04f02e5980c177fa57115af13d79d0410c364aea722ac7306cab560b1d6625f"
+      },
+      "index": 4,
+      "checks": {
+        "cli_help_valid": true
+      }
+    },
+    {
+      "implementation": "nanocompile",
+      "phase": "empty-cache-reference",
+      "scenario": "leaf-edit",
+      "seconds": 183.88360195897985,
+      "exit_code": 0,
+      "events": {
+        "bypass": 35,
+        "miss": 1102,
+        "failed": 8,
+        "build_script_miss": 31
+      },
+      "build_log": {
+        "path": "5-nanocompile-empty-cache-reference.log",
+        "bytes": 9171242,
+        "sha256": "2942e91531b51b69f2e0a4e8ff99724e8722e932fdac103e15d91b5241ef25c7"
+      },
+      "index": 5,
+      "checks": {
+        "matches_own_cold_final_executable": true,
+        "matches_own_cold_final_executable_modes": true,
+        "matches_own_cold_native_artifacts": true,
+        "matches_own_cold_artifacts": true,
+        "matches_own_cold_macro_dylibs": true,
+        "matches_own_cold_build_script_executables": true,
+        "empty_cache_has_no_hits": true,
+        "cli_help_valid": true
+      }
+    },
+    {
+      "implementation": "kache",
+      "phase": "edit",
+      "scenario": "leaf-edit",
+      "seconds": 83.70882916700793,
+      "exit_code": 0,
+      "events": {
+        "passthrough": 4,
+        "miss": 1,
+        "unknown": 2,
+        "local_hit": 1236
+      },
+      "build_log": {
+        "path": "6-kache-edit.log",
+        "bytes": 8108754,
+        "sha256": "c031f3fe394d28702d39837f7ad52533a0ed2ff9aad994c43ab03d92e894638a"
+      },
+      "index": 6,
+      "checks": {
+        "cli_help_valid": true
+      }
+    },
+    {
+      "implementation": "kache",
+      "phase": "empty-cache-reference",
+      "scenario": "leaf-edit",
+      "seconds": 189.1966138749849,
+      "exit_code": 0,
+      "events": {
+        "passthrough": 49,
+        "miss": 1314,
+        "dup": 1,
+        "unknown": 2
+      },
+      "build_log": {
+        "path": "7-kache-empty-cache-reference.log",
+        "bytes": 8108754,
+        "sha256": "1b5f97670017aa9895ba7632ee4b084edc8639ced6f19792fd7339f15eb9b152"
+      },
+      "index": 7,
+      "checks": {
+        "matches_own_cold_final_executable": true,
+        "matches_own_cold_final_executable_modes": true,
+        "matches_own_cold_native_artifacts": true,
+        "matches_own_cold_artifacts": true,
+        "matches_own_cold_macro_dylibs": true,
+        "matches_own_cold_build_script_executables": true,
+        "empty_cache_has_no_hits": true,
+        "cli_help_valid": true
+      }
+    },
+    {
+      "implementation": "nanocompile",
+      "phase": "edit",
+      "scenario": "shared-edit",
+      "seconds": 127.50585041701561,
+      "exit_code": 0,
+      "events": {
+        "miss": 13,
+        "bypass": 35,
+        "failed": 8,
+        "hit": 1089,
+        "build_script_hit": 31
+      },
+      "build_log": {
+        "path": "8-nanocompile-edit.log",
+        "bytes": 9098653,
+        "sha256": "dc90e7368098a03f2d87a185afda9441c70932c43acd108bf7cdf991d49382df"
+      },
+      "index": 8,
+      "checks": {
+        "cli_help_valid": true
+      }
+    },
+    {
+      "implementation": "nanocompile",
+      "phase": "empty-cache-reference",
+      "scenario": "shared-edit",
+      "seconds": 183.363581624988,
+      "exit_code": 0,
+      "events": {
+        "bypass": 35,
+        "miss": 1102,
+        "failed": 8,
+        "build_script_miss": 31
+      },
+      "build_log": {
+        "path": "9-nanocompile-empty-cache-reference.log",
+        "bytes": 9171209,
+        "sha256": "bca5a9b936872d6a86653ccb7e4c926a215afba076582edce07347dcc666f6b4"
+      },
+      "index": 9,
+      "checks": {
+        "matches_own_cold_final_executable": true,
+        "matches_own_cold_final_executable_modes": true,
+        "matches_own_cold_native_artifacts": true,
+        "matches_own_cold_artifacts": true,
+        "matches_own_cold_macro_dylibs": true,
+        "matches_own_cold_build_script_executables": true,
+        "empty_cache_has_no_hits": true,
+        "cli_help_valid": true
+      }
+    },
+    {
+      "implementation": "kache",
+      "phase": "edit",
+      "scenario": "shared-edit",
+      "seconds": 121.07231487502577,
+      "exit_code": 0,
+      "events": {
+        "passthrough": 4,
+        "miss": 10,
+        "unknown": 2,
+        "local_hit": 1227
+      },
+      "build_log": {
+        "path": "10-kache-edit.log",
+        "bytes": 8108754,
+        "sha256": "a8046bbe08d041025edf252a038d171bc7565e238922ec3adde2a80eb5bad966"
+      },
+      "index": 10,
+      "checks": {
+        "cli_help_valid": true
+      }
+    },
+    {
+      "implementation": "kache",
+      "phase": "empty-cache-reference",
+      "scenario": "shared-edit",
+      "seconds": 189.81130104197655,
+      "exit_code": 0,
+      "events": {
+        "passthrough": 49,
+        "miss": 1314,
+        "dup": 1,
+        "unknown": 2
+      },
+      "build_log": {
+        "path": "11-kache-empty-cache-reference.log",
+        "bytes": 8108754,
+        "sha256": "6e9e3f85a06870453d138e470773e6d648b728455a6d84ce1eeb73b86cb2066f"
+      },
+      "index": 11,
+      "checks": {
+        "matches_own_cold_final_executable": true,
+        "matches_own_cold_final_executable_modes": true,
+        "matches_own_cold_native_artifacts": true,
+        "matches_own_cold_artifacts": true,
+        "matches_own_cold_macro_dylibs": true,
+        "matches_own_cold_build_script_executables": true,
+        "empty_cache_has_no_hits": true,
+        "cli_help_valid": true
+      }
+    },
+    {
+      "implementation": "direct",
+      "phase": "edit",
+      "scenario": "shared-edit",
+      "seconds": 175.15036858298117,
+      "exit_code": 0,
+      "events": {},
+      "build_log": {
+        "path": "12-direct-edit.log",
+        "bytes": 8050260,
+        "sha256": "cfc14d70432e00666cb9335cc6c23bc184b584c8ace469c1e4de3d2088b90eef"
+      },
+      "index": 12,
+      "checks": {
+        "cli_help_valid": true
+      }
+    },
+    {
+      "implementation": "kache",
+      "phase": "edit",
+      "scenario": "revert",
+      "seconds": 17.662698999978602,
+      "exit_code": 0,
+      "events": {
+        "passthrough": 4,
+        "local_hit": 1237
+      },
+      "build_log": {
+        "path": "13-kache-edit.log",
+        "bytes": 8108800,
+        "sha256": "6000dc6fee9644410f7f38edd79a8406807fc794ba9aceb16f3867136061b1dc"
+      },
+      "index": 13,
+      "checks": {
+        "matches_initial_after_revert": true,
+        "cli_help_valid": true
+      }
+    },
+    {
+      "implementation": "kache",
+      "phase": "empty-cache-reference",
+      "scenario": "revert",
+      "seconds": 188.65178045799257,
+      "exit_code": 0,
+      "events": {
+        "passthrough": 49,
+        "miss": 1314,
+        "dup": 1,
+        "unknown": 2
+      },
+      "build_log": {
+        "path": "14-kache-empty-cache-reference.log",
+        "bytes": 8108754,
+        "sha256": "5462927d182610ca88e66bc4466c4cc6318b0d553168da44fbb4e5dfb4283f04"
+      },
+      "index": 14,
+      "checks": {
+        "matches_own_cold_final_executable": true,
+        "matches_own_cold_final_executable_modes": true,
+        "matches_own_cold_native_artifacts": true,
+        "matches_own_cold_artifacts": true,
+        "matches_own_cold_macro_dylibs": true,
+        "matches_own_cold_build_script_executables": true,
+        "matches_initial_after_revert": true,
+        "empty_cache_has_no_hits": true,
+        "cli_help_valid": true
+      }
+    },
+    {
+      "implementation": "direct",
+      "phase": "edit",
+      "scenario": "revert",
+      "seconds": 175.85656491696136,
+      "exit_code": 0,
+      "events": {},
+      "build_log": {
+        "path": "15-direct-edit.log",
+        "bytes": 8050260,
+        "sha256": "002f759d0c0497e041679490421df1d0670fb417f6d17bf917b126466cc0d39a"
+      },
+      "index": 15,
+      "checks": {
+        "matches_initial_after_revert": true,
+        "cli_help_valid": true
+      }
+    },
+    {
+      "implementation": "nanocompile",
+      "phase": "edit",
+      "scenario": "revert",
+      "seconds": 9.698563416022807,
+      "exit_code": 0,
+      "events": {
+        "miss": 3,
+        "bypass": 35,
+        "failed": 8,
+        "hit": 1099,
+        "build_script_hit": 31,
+        "variant_hit": 10
+      },
+      "build_log": {
+        "path": "16-nanocompile-edit.log",
+        "bytes": 9101480,
+        "sha256": "ce5fdeb9c705261cccd3f702a7499d28848dabb544ee703c452ce8371956f183"
+      },
+      "index": 16,
+      "checks": {
+        "matches_initial_after_revert": true,
+        "cli_help_valid": true
+      }
+    },
+    {
+      "implementation": "nanocompile",
+      "phase": "empty-cache-reference",
+      "scenario": "revert",
+      "seconds": 182.0458118750248,
+      "exit_code": 0,
+      "events": {
+        "bypass": 35,
+        "miss": 1102,
+        "failed": 8,
+        "build_script_miss": 31
+      },
+      "build_log": {
+        "path": "17-nanocompile-empty-cache-reference.log",
+        "bytes": 9171375,
+        "sha256": "84d2a74c74c2947969d5df74d72f592defa4de136fab1cc9b8e216a93213060c"
+      },
+      "index": 17,
+      "checks": {
+        "matches_own_cold_final_executable": true,
+        "matches_own_cold_final_executable_modes": true,
+        "matches_own_cold_native_artifacts": true,
+        "matches_own_cold_artifacts": true,
+        "matches_own_cold_macro_dylibs": true,
+        "matches_own_cold_build_script_executables": true,
+        "matches_initial_after_revert": true,
+        "empty_cache_has_no_hits": true,
+        "cli_help_valid": true
+      }
+    }
+  ],
+  "comparisons": [
+    {
+      "scenario": "initial",
+      "phase": "cold",
+      "timings_seconds": {
+        "direct": 173.08437558397418,
+        "nanocompile": 181.22840625001118,
+        "kache": 188.36308591702254
+      },
+      "comparable": true,
+      "nano_minus_kache_seconds": -7.134679667011369
+    },
+    {
+      "scenario": "leaf-edit",
+      "phase": "edit",
+      "timings_seconds": {
+        "direct": 176.15811599994777,
+        "nanocompile": 80.2774900830118,
+        "kache": 83.70882916700793
+      },
+      "comparable": true,
+      "nano_minus_kache_seconds": -3.4313390839961357
+    },
+    {
+      "scenario": "shared-edit",
+      "phase": "edit",
+      "timings_seconds": {
+        "nanocompile": 127.50585041701561,
+        "kache": 121.07231487502577,
+        "direct": 175.15036858298117
+      },
+      "comparable": true,
+      "nano_minus_kache_seconds": 6.433535541989841
+    },
+    {
+      "scenario": "revert",
+      "phase": "edit",
+      "timings_seconds": {
+        "kache": 17.662698999978602,
+        "direct": 175.85656491696136,
+        "nanocompile": 9.698563416022807
+      },
+      "comparable": true,
+      "nano_minus_kache_seconds": -7.964135583955795
+    }
+  ],
+  "provenance": {
+    "commit": "32b41cb0bff55e3c9cbfab3012acec2b179ad199",
+    "jobs": 8,
+    "nanocompile_sha256": "0d38bfa35100b87d0a42abfd8ced2744eb28a91bc86883a663c938e998406499",
+    "kache_sha256": "0e4ab2b2f651f1c3685fe31b9ad7d0008ce12c44332e5e4842fa5257a0a82cd0",
+    "rustc": "rustc 1.97.1 (8bab26f4f 2026-07-14)\nbinary: rustc\ncommit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452\ncommit-date: 2026-07-14\nhost: aarch64-apple-darwin\nrelease: 1.97.1\nLLVM version: 22.1.6\n",
+    "kache_version": "kache 1.0.0",
+    "source_date_epoch": 1791423832
+  },
+  "report_sha256": "31bd6b4cca472a0b8837af29b0aea21ce413690c85ec142715ad5edd8c2d7f3e",
+  "analyzer_sha256": "b7e3300d7158ffc1737c31beb347f5218ab53f1cf50f39801ac989c6399a5ab8",
+  "limitations": "Resumed after storage preflight failure; inherited environment equality across pause not established. Diagnostic timings, not speed trials. Diagnostic capture adds overhead; these timings are not speed benchmarks. One source-edit sequence; single observations, not repeated medians or a proven speedup. Fresh references are correctness checks. Build logs establish console integrity, not per-request attribution. No compiler critical path or cause is inferred from cache counts."
+}

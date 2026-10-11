@@ -6,8 +6,12 @@ The final executable producer spends 66.419639s executing the compiler,
 3.184994s in postcompile storage, 0.230052s staging input snapshots and
 0.068585s collecting linked inputs. Its total is 69.946907s. These nested
 observations cannot be added to project time or turned into a promised saving.
-The full traced source-edit sequence remains running, and its fresh-output and
-revert gates are pending.
+The full traced source-edit sequence completed all 18 builds, including its
+fresh-output and revert gates. Independent verification checked 18 consoles,
+72,418 captured files and 36 probe streams, with all four source checks passing.
+The [analysis](../benchmarks/harness-full-app-source-edit-phase-analysis.json)
+retains every observation. The shared-edit diagnostic gap is 6.433536s against
+Nano. This resumed session is not an untraced performance comparison.
 
 `compiler.save` collects each direct Rust dependency root separately. Every call
 creates a fresh metadata resolver seeded with the directly validated inputs;
@@ -19,9 +23,18 @@ A private prototype shares only those fresh digest/file-state maps across root
 walks within the same successful entry construction. Each reuse still validates
 file state, each root retains its own metadata classification and directory
 guards, and the maps are discarded after that entry. It is default-off and
-unbuilt; production is unchanged. Initial build/unit/executable smoke validation
-is queued after the current diagnostic sequence. That validation alone will not
-justify adoption.
+built for initial validation; production is unchanged. Build, unit and executable
+smoke checks run before the multi-root fixture and isolated cold pairs. That
+validation alone will not justify adoption.
+
+Initial validation and the actual multi-root fixture have now passed. The
+[verified correctness summary](../benchmarks/producer-shared-digests-correctness.json)
+records equal sealed dependency payloads and output bytes/modes with sharing off
+and on, a shared-transitive edit with preserved mtime, corrupt input failure,
+revert behavior and four concurrent restores. All 58 fixture streams and five
+smoke logs passed digest verification. The fixture has no within-invocation
+mutation race hook. Isolated cold pairs are running; no speed improvement or
+production adoption is established.
 
 Require an actual multi-root shared-transitive-input fixture, mutation/revert and
 preserved-mtime replacement checks, failures/corruption/concurrency gates, and an
@@ -79,4 +92,4 @@ artifact references from completed rows; and skips only the verified prefix.
 The original failed report, console and stopped dependent queue states are
 retained. The resume runner hash is recorded separately. Inherited environment
 equality across the pause is not established, so the combined observations remain
-diagnostic. Revert and final source-restoration checks still need to pass.
+diagnostic. Revert and final source-restoration checks subsequently passed.
