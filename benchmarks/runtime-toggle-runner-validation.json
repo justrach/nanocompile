@@ -852,5 +852,11 @@
     "left/src/lib.rs": "fe34600cca773450da211e86ec873db51b65288d06d5417728135345b7e77f84",
     "right/Cargo.toml": "4362a51826819902c60534f013d347feeda7a3f90aab6fc2af157b0a4c5bf634",
     "right/src/lib.rs": "fe34600cca773450da211e86ec873db51b65288d06d5417728135345b7e77f84"
+  },
+  "warm_trace_rejection": {
+    "runner_sha256": "c3d08b8f747fce657c7972073d1fc9441adaa16801cdfc00c878ae3ae3bb5e92",
+    "exit_code": 2,
+    "state_not_created": true,
+    "reason": "A traced candidate prime cannot populate the untraced warm compilation key; reject before state creation."
   }
 }

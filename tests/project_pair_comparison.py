@@ -50,6 +50,15 @@ def build_environment(common, name, phase, control, prime_marker):
     return result
 
 
+def validate_prime_trace(parser, marker, control, cold):
+    if marker is None:
+        return
+    if not control or not marker.strip():
+        parser.error('--candidate-prime-marker requires --runtime-toggle and a nonempty marker')
+    if not cold:
+        parser.error('--candidate-prime-marker requires --cold: tracing changes the compilation cache key')
+
+
 def sha(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
@@ -94,9 +103,7 @@ def main():
     binaries = {name: getattr(args, name).resolve() for name in ('baseline', 'candidate')}
     binary_hashes = {name: sha(path) for name, path in binaries.items()}
     control = runtime_comparison(p, args.runtime_toggle, binary_hashes)
-    if args.candidate_prime_marker is not None:
-        if not control or not args.candidate_prime_marker.strip():
-            p.error('--candidate-prime-marker requires --runtime-toggle and a nonempty marker')
+    validate_prime_trace(p, args.candidate_prime_marker, control, args.cold)
     project, root = args.project.resolve(), args.state.resolve()
     require_space(root, args.min_free_gib)
     root.mkdir(mode=0o700, parents=True, exist_ok=False)
@@ -139,6 +146,7 @@ def main():
                     'same environment, executable identities recorded by SHA-256') +
                    ('; only the excluded candidate prime enables trace for activation verification' if args.candidate_prime_marker else '')),
         'runtime_control': control,
+        'cache_key_scope': 'full environment; different runtime-control values use distinct compilation keys',
         'candidate_prime_marker': args.candidate_prime_marker,
         'project': str(project), 'commit': subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=project, text=True).strip(),
         'dirty': bool(subprocess.check_output(['git', 'status', '--porcelain'], cwd=project)),

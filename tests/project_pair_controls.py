@@ -4,7 +4,7 @@ import contextlib
 import io
 import unittest
 
-from project_pair_comparison import build_environment, runtime_comparison
+from project_pair_comparison import build_environment, runtime_comparison, validate_prime_trace
 
 
 class RuntimeControlTests(unittest.TestCase):
@@ -54,6 +54,15 @@ class RuntimeControlTests(unittest.TestCase):
         self.assertIsNone(self.parse(None, {'baseline': 'one', 'candidate': 'two'}))
         common = {'NANOCOMPILE_DIR': '/private/cache'}
         self.assertEqual(build_environment(common, 'candidate', 'prime', None, None), common)
+
+    def test_reject_trace_prime_that_would_not_prime_the_warm_key(self):
+        control = self.parse(['NANOCOMPILE_PRODUCER_GRAPH_WORKERS', '0', '4'])
+        parser = argparse.ArgumentParser()
+        validate_prime_trace(parser, 'activation', control, True)
+        validate_prime_trace(parser, None, control, False)
+        with contextlib.redirect_stderr(io.StringIO()), self.assertRaises(SystemExit) as error:
+            validate_prime_trace(parser, 'activation', control, False)
+        self.assertEqual(error.exception.code, 2)
 
 
 if __name__ == '__main__':
