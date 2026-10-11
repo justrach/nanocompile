@@ -12,6 +12,8 @@ Subcommands:
   diff      compare two builds; attribute the wall-time gap by substituting
             unit durations from the other build into a simulated schedule
   phases    aggregate Nano compiler-phase trace lines per request
+  study     summarize every Cargo timing kept by a benchmark report
+  trace     export an observed or simulated schedule for Perfetto
 
 Interval sums overlap and never predict wall time. This tool instead replays
 Cargo's scheduler: a unit becomes ready when all of its dependencies have
@@ -464,6 +466,102 @@ def cmd_phases(args):
     print('Use `diff` on Cargo timings to estimate wall effects.')
 
 
+def category_slot_time(build):
+    totals = collections.defaultdict(float)
+    for unit in build.units.values():
+        totals[category(unit)] += unit['duration']
+    return dict(totals)
+
+
+def attribution(base, other, jobs, spawn):
+    """Wall effect (positive = other faster) of adopting other's durations per category."""
+    match = {i: i for i in base.units} if base.units.keys() == other.units.keys() else {}
+    baseline = simulate(base, jobs, spawn=spawn)['wall']
+    effects = {}
+    for name in sorted({category(u) for u in base.units.values()}):
+        durations = {i: u['duration'] for i, u in base.units.items()}
+        for i, j in match.items():
+            if category(base.units[i]) == name:
+                durations[i] = other.units[j]['duration']
+        effects[name] = baseline - simulate(base, jobs, durations, spawn=spawn)['wall']
+    return effects
+
+
+def cmd_study(args):
+    """Summarize every Cargo timing kept by a benchmark report (--cargo-timings)."""
+    report = json.loads(args.report.read_text())
+    builds = [b for b in report['builds'] if b.get('cargo_timing')]
+    if not builds:
+        raise SystemExit('report has no cargo_timing records; rerun the benchmark with --cargo-timings')
+    loaded = []
+    for b in builds:
+        path = args.state / b['cargo_timing']['path']
+        loaded.append((b, Build(path, args.unit_graph)))
+    groups = collections.defaultdict(list)
+    for b, build in loaded:
+        groups[(b.get('scenario') or b['phase'], b['implementation'])].append((b, build))
+    summary = {}
+    print(f"{'scenario/phase':16} {'implementation':14} {'n':>2} {'wall median':>12}  slot time by category (median)")
+    for (phase, impl), rows in sorted(groups.items()):
+        walls = [b['seconds'] for b, _ in rows]
+        cats = collections.defaultdict(list)
+        for _, build in rows:
+            for name, value in category_slot_time(build).items():
+                cats[name].append(value)
+        summary.setdefault(phase, {})[impl] = dict(builds=len(rows), wall_median=statistics.median(walls),
+                                                   slot_seconds={k: statistics.median(v) for k, v in cats.items()})
+        text = ', '.join(f'{k} {statistics.median(v):.2f}s' for k, v in sorted(cats.items()))
+        print(f'{phase:16} {impl:14} {len(rows):2d} {statistics.median(walls):11.3f}s  {text}')
+    # Pair the candidate with each competitor build of the same phase, in order.
+    effects = collections.defaultdict(lambda: collections.defaultdict(list))
+    for phase in summary:
+        mine = [build for b, build in groups.get((phase, args.candidate), [])]
+        for other_impl in sorted(i for p, i in groups if p == phase and i != args.candidate):
+            theirs = [build for b, build in groups[(phase, other_impl)]]
+            for base, other in zip(mine, theirs):
+                spawn = calibrate(base, args.jobs)
+                for name, value in attribution(base, other, args.jobs, spawn).items():
+                    effects[(phase, other_impl)][name].append(value)
+    if effects:
+        print(f'\nmedian simulated wall effect of adopting the competitor\'s unit durations, per category')
+        print(f'(positive = competitor faster; {args.candidate} is the baseline schedule)')
+        for (phase, other_impl), cats in sorted(effects.items()):
+            text = ', '.join(f'{k} {statistics.median(v):+.3f}s' for k, v in sorted(cats.items()))
+            print(f'{phase:16} vs {other_impl:10} {text}')
+            summary[phase].setdefault('wall_effects', {})[other_impl] = {k: statistics.median(v) for k, v in cats.items()}
+    if args.json:
+        args.json.write_text(json.dumps(dict(report=str(args.report), candidate=args.candidate, jobs=args.jobs,
+                                             summary=summary), indent=2) + '\n')
+
+
+def cmd_trace(args):
+    """Chrome/Perfetto trace of the observed (or simulated) schedule, one lane per job slot."""
+    build = Build(args.timing, args.unit_graph)
+    if args.simulated:
+        spawn = calibrate(build, args.jobs)
+        schedule = simulate(build, args.jobs, spawn=spawn)
+        spans = [(schedule['start'][i], schedule['end'][i], i) for i in build.units]
+    else:
+        spans = [(u['start'], u['start'] + u['duration'], i) for i, u in build.units.items()]
+    path = {s['unit'] for s in critical_path(build, simulate(build, args.jobs, spawn=calibrate(build, args.jobs))
+                                             if args.simulated else observed_schedule(build))}
+    lanes = []  # end time per lane
+    events = []
+    for start, end, i in sorted(spans):
+        lane = next((k for k, busy in enumerate(lanes) if busy <= start + 1e-9), None)
+        if lane is None:
+            lane = len(lanes)
+            lanes.append(end)
+        lanes[lane] = end
+        unit = build.units[i]
+        events.append(dict(name=label(unit), cat=category(unit) + (',critical' if i in path else ''), ph='X',
+                           ts=start * 1e6, dur=max(0.0, end - start) * 1e6, pid=1, tid=lane,
+                           args=dict(unit=i, critical=i in path)))
+    events.append(dict(name='process_name', ph='M', pid=1, args=dict(name=('simulated ' if args.simulated else '') + build.path)))
+    args.output.write_text(json.dumps(dict(traceEvents=events, displayTimeUnit='ms')) + '\n')
+    print(f'{args.output}: {len(build.units)} units on {len(lanes)} lanes, {len(path)} critical-path units')
+
+
 def cmd_unit_graph(args):
     """Write the unit graph for a cargo build command (stable toolchains via RUSTC_BOOTSTRAP)."""
     import os
@@ -509,6 +607,16 @@ def main(argv=None):
     s.add_argument('--request', action='append')
     s.add_argument('--top', type=int, default=12)
     s.set_defaults(run=cmd_phases)
+    s = sub.add_parser('study', parents=[common, sched], help='summarize all Cargo timings kept by a benchmark report')
+    s.add_argument('report', type=Path)
+    s.add_argument('--state', type=Path, required=True, help='benchmark state directory holding the timing reports')
+    s.add_argument('--candidate', default='nanocompile')
+    s.set_defaults(run=cmd_study)
+    s = sub.add_parser('trace', parents=[common, sched], help='Perfetto/Chrome trace of a build schedule')
+    s.add_argument('timing', type=Path)
+    s.add_argument('--output', type=Path, required=True)
+    s.add_argument('--simulated', action='store_true', help='export the simulated schedule instead of the observed one')
+    s.set_defaults(run=cmd_trace)
     s = sub.add_parser('unit-graph', help='record cargo --unit-graph for the same command used with --timings')
     s.add_argument('--output', type=Path, required=True)
     s.add_argument('--cwd', type=Path, default=Path('.'))

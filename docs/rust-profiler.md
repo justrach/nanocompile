@@ -24,6 +24,8 @@ Cargo numbers units the same way in `--timings` and `--unit-graph` for one resol
 | `simulate TIMING --scale REGEX=FACTOR` | What would the wall time be if these units (or a category such as `build-script-run`) were faster? |
 | `diff BASELINE CANDIDATE` | Which unit categories and units explain the wall-time gap between two builds? |
 | `phases CAPTURE...` | Which Nano request kinds and compiler/script phases use the most wrapper time and CPU? |
+| `study REPORT --state DIR` | For a whole benchmark run kept with `--cargo-timings`: median wall time and slot time per category for each implementation and phase, plus the median simulated wall effect per category across all Nano/competitor pairs. |
+| `trace TIMING --output trace.json [--simulated]` | A Chrome/Perfetto trace of the observed or simulated schedule, one lane per job slot, with critical-path units tagged. |
 
 The simulator replays Cargo's list scheduling on `--jobs` slots. A unit becomes ready when every dependency has finished, or, for pipelined library dependencies, has emitted metadata. The ready unit with the most transitive dependents runs first. Cargo's pre-build resolution offset is taken from the report. `--spawn auto` (the default) calibrates a fixed per-unit spawn latency so the simulated baseline matches its observed wall time. The candidate's error under that calibration is printed as a model check.
 
@@ -47,6 +49,17 @@ The first diff of a Nano warm build (7.77 s) against a kache warm build (6.53 s)
 | build-script compiles (107) | +1.57 s | +0.20 s |
 
 `phases` on the same captures attributed the overhead to repeated full input and output re-hashing (`restore.input_validation`, 8.5 s across 1,099 hits) and four live process spawns per linking request for Apple tool selection (`producer.apple_selection`, about 23 ms × 154). Nano also used 25 s of CPU on Rust requests against kache's 12 s. Those findings motivated the [digest and selection memos](digest-memo.md).
+
+## Hill-climbing loop
+
+1. Run the comparison with `--cargo-timings`.
+2. Use `study` to find the category with the largest positive wall effect for the competitor.
+3. Use `diff` on one representative pair to find the units behind it.
+4. Use `phases` on a traced capture to find the Nano stage inside those units.
+5. Use `simulate --scale` to estimate the payoff of a fix before building it.
+6. Implement the fix, then rerun step 1.
+
+Each round of this loop on Harness produced the next change: build-script runs, then Apple selection, then installed-tree memos, then contract parsing.
 
 ## Limits
 

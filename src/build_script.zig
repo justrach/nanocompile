@@ -21,11 +21,23 @@ fn less(_: void, a: []const u8, b: []const u8) bool {
 }
 fn contract(ctx: *cache.Context) !Contract {
     const path = ctx.env.get("NANOCOMPILE_BUILD_SCRIPTS_FILE") orelse return error.NoContract;
-    const parsed = try std.json.parseFromSlice(Spec, ctx.a, try ctx.read(path), .{ .allocate = .alloc_always });
-    if (parsed.value.schema != 1) return error.InvalidContract;
     const name = ctx.env.get("CARGO_PKG_NAME") orelse return error.NoPackage;
+    const bytes = try ctx.read(path);
+    // A listed package's name appears verbatim as a JSON string unless the
+    // writer escaped it. Skip the full parse only when that cannot happen.
+    if (plainName(name) and std.mem.indexOf(u8, bytes, "\\u") == null) {
+        const quoted = try std.fmt.allocPrint(ctx.a, "\"{s}\"", .{name});
+        if (std.mem.indexOf(u8, bytes, quoted) == null) return error.NoContract;
+    }
+    const parsed = try std.json.parseFromSlice(Spec, ctx.a, bytes, .{ .allocate = .alloc_always });
+    if (parsed.value.schema != 1) return error.InvalidContract;
     for (parsed.value.packages) |item| if (eq(item.package, name) and item.inputs.len > 0) return item;
     return error.NoContract;
+}
+fn plainName(name: []const u8) bool {
+    if (name.len == 0) return false;
+    for (name) |ch| if (!std.ascii.isAlphanumeric(ch) and ch != '-' and ch != '_') return false;
+    return true;
 }
 // Execution-only constraints: Cargo's compiler environment need not contain
 // runtime feature selectors. Install a transparent shim, then refuse reuse

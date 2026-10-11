@@ -139,5 +139,60 @@
     }
   },
   "retry_note": "The first declared-scripts attempt (/tmp/nano-declared-kache-paired-20261011) stopped during its first Nano cold build: two concurrent rustc processes received SIGKILL (exit 137) with no Nano error output, no memguard entry and 96% free memory. The same frozen inputs were rerun in a new state directory; the failed attempt is retained privately.",
-  "limitations": "Three cold and three warm pairs per study on one contended machine (load average about 14-25 from unrelated processes); OS file caches unflushed; each implementation compared with its own cold artifacts. Not independent confirmation."
+  "limitations": "Three cold and three warm pairs per study on one contended machine (load average about 14-25 from unrelated processes); OS file caches unflushed; each implementation compared with its own cold artifacts. Not independent confirmation.",
+  "installed_tree_memo_warm_focused": {
+    "report_sha256": "dc4d39ff0c94b22f1c132c422fa3e910393d1b30046c7970545066b5e8808e01",
+    "runtime_sha256": "4f46e52036f7fdf5a174da4ec4e561106db7d94a3bd5cc1e11fcec419d9533d7",
+    "scope": "Untraced warm-focused full Harness comparison: Nano with digest memo, selection memo, declared build scripts and compact lock-free installed-tree memos versus pinned kache 1.0.0; direct prime, one cold prime each, six alternating warm pairs; Cargo timings kept.",
+    "verified_build_logs": 15,
+    "failed_artifact_checks": [],
+    "warm_events": {
+      "nanocompile": {
+        "miss": 3,
+        "bypass": 5,
+        "hit": 1095,
+        "build_script_hit": 138
+      },
+      "kache": {
+        "passthrough": 4,
+        "local_hit": 1237
+      }
+    },
+    "cold_primes_seconds": {
+      "nanocompile": 179.08509516704362,
+      "kache": 190.90593941695988
+    },
+    "warm": {
+      "nanocompile_seconds": [
+        6.657444333075546,
+        6.277717582997866,
+        6.835516541032121,
+        6.421975459088571,
+        6.247241957928054,
+        6.199683084036224
+      ],
+      "kache_seconds": [
+        6.8596693750005215,
+        6.623716917005368,
+        6.728007833939046,
+        6.602102709002793,
+        6.604112082975917,
+        7.07004229107406
+      ],
+      "paired_kache_minus_nano": [
+        0.2022250419249758,
+        0.3459993340075016,
+        -0.10750870709307492,
+        0.18012724991422147,
+        0.35687012504786253,
+        0.8703592070378363
+      ],
+      "nano_median": 6.349846521043219,
+      "kache_median": 6.675862375472207,
+      "nano_pair_wins": 5,
+      "pairs": 6,
+      "mean_saved": 0.3080120418065538,
+      "standard_error": 0.1316899620342964
+    }
+  }
 }

@@ -91,6 +91,34 @@ class ProfileTests(unittest.TestCase):
             spawn = rust_profile.calibrate(build, jobs=1)
             self.assertAlmostEqual(rust_profile.simulate(build, 1, spawn=spawn)['wall'], build.end, places=4)
 
+    def test_trace_exports_lanes_and_critical_path(self):
+        with tempfile.TemporaryDirectory() as directory:
+            html, graph = self.fixture(directory)
+            out = Path(directory) / 'trace.json'
+            with contextlib.redirect_stdout(io.StringIO()):
+                rust_profile.main(['trace', str(html), '--unit-graph', str(graph), '--jobs', '2', '--output', str(out)])
+            events = [e for e in json.loads(out.read_text())['traceEvents'] if e['ph'] == 'X']
+            self.assertEqual(len(events), 4)
+            self.assertEqual({e['name'].split()[0] for e in events if e['args']['critical']}, {'a', 'b', 'c'})
+            for lane in {e['tid'] for e in events}:
+                spans = sorted((e['ts'], e['ts'] + e['dur']) for e in events if e['tid'] == lane)
+                self.assertTrue(all(x[1] <= y[0] + 1e-3 for x, y in zip(spans, spans[1:])))
+
+    def test_study_pairs_competitor_builds(self):
+        with tempfile.TemporaryDirectory() as directory:
+            base, graph = self.fixture(directory, 1.0, '0-nanocompile-warm')
+            other, _ = self.fixture(directory, 0.5, '1-kache-warm')
+            report = Path(directory) / 'report.json'
+            report.write_text(json.dumps(dict(builds=[
+                dict(implementation='nanocompile', phase='warm', seconds=1.75, cargo_timing=dict(path=base.name)),
+                dict(implementation='kache', phase='warm', seconds=1.25, cargo_timing=dict(path=other.name))])))
+            out = Path(directory) / 'study.json'
+            with contextlib.redirect_stdout(io.StringIO()):
+                rust_profile.main(['study', str(report), '--state', directory, '--unit-graph', str(graph), '--jobs', '2', '--json', str(out)])
+            summary = json.loads(out.read_text())['summary']['warm']
+            self.assertEqual(summary['nanocompile']['wall_median'], 1.75)
+            self.assertAlmostEqual(summary['wall_effects']['kache']['library'], 0.5)
+
     def test_rejects_mismatched_unit_graph(self):
         with tempfile.TemporaryDirectory() as directory:
             html, _ = self.fixture(directory)

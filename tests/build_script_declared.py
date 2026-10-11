@@ -111,6 +111,13 @@ def main():
         cargo(142, 'build_script_miss')
         cargo(142, 'build_script_hit')
 
+        # An explicit contract that lists only other packages leaves this one
+        # in declared mode (the contract pre-check skips the full parse).
+        other = root / 'contract.json'
+        other.write_text('{"schema": 1, "packages": [{"package": "some-other-package", "inputs": ["/nonexistent"]}]}')
+        cargo(142, 'build_script_miss', NANOCOMPILE_BUILD_SCRIPTS_FILE=str(other))
+        cargo(142, 'build_script_hit', NANOCOMPILE_BUILD_SCRIPTS_FILE=str(other))
+
         # Disabled mode runs every script live and records nothing new.
         shutil.rmtree(target, ignore_errors=True)
         env = {k: v for k, v in base.items() if k != 'NANOCOMPILE_BUILD_SCRIPT_CACHE'}
