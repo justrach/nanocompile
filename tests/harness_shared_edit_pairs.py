@@ -50,6 +50,8 @@ def main():
     p.add_argument('--build-script-contract', type=Path)
     p.add_argument('--bindgen-tools-file', type=Path)
     p.add_argument('--declared-build-scripts', action='store_true')
+    p.add_argument('--prewarm-stores', action='store_true',
+                   help="before every build (outside timing) read every file of that implementation's own cache store, so each starts with a warm OS cache for its store")
     p.add_argument('--quiesce-seconds', type=float, default=0.0,
                    help='before every build (outside timing, for both implementations) flush dirty pages with sync and wait this long')
     args = p.parse_args()
@@ -109,7 +111,7 @@ def main():
             quiet = quiet + 1 if sample and float(sample) < 2.0 else 0
             time.sleep(1)
 
-    result = dict(method=__doc__.strip(), quiesce_seconds=args.quiesce_seconds, binary_sha256=sha(binary), kache_sha256=sha(kache), project=str(args.project),
+    result = dict(method=__doc__.strip(), quiesce_seconds=args.quiesce_seconds, prewarm_stores=args.prewarm_stores, binary_sha256=sha(binary), kache_sha256=sha(kache), project=str(args.project),
                   jobs=args.jobs, builds=[], completed=False)
 
     def save():
@@ -122,6 +124,15 @@ def main():
         else:
             stop_daemon()
         shutil.rmtree(target, ignore_errors=True)
+        if args.prewarm_stores:
+            store = cache if implementation == 'nanocompile' else kcache
+            warmed = 0
+            for path in store.rglob('*'):
+                if path.is_file() and not path.is_symlink():
+                    with path.open('rb') as handle:
+                        while chunk := handle.read(1 << 22):
+                            warmed += len(chunk)
+            print(f'prewarmed {warmed / 1e9:.1f} GB of {implementation} store', flush=True)
         if args.quiesce_seconds:
             # Writeback from the previous build (either implementation) must
             # not overlap this one: flush, wait, flush again.

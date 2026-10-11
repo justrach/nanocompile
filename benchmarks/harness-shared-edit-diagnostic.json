@@ -285,7 +285,7 @@
     "thread scheduling class (rustc threads report the same priority whether launched directly or through Nano)"
   ],
   "study_sample_4": "kache daemon stopped during Nano builds: Nano 118.741 s, kache 115.399 s; harness-ui 29.10 s versus 25.66 s.",
-  "open_question": "Every study places Nano first in the shared edit, directly after the leaf scenario reference cleanup. Sample 5 shifts the rotation so kache builds the shared edit first.",
+  "open_question": "The study and pairs runs penalize the implementation whose previous build is furthest in the past. Nano is more sensitive to that gap than kache (about +6 s versus about +3 s in the pairs data); the mechanism is not identified. Its effect sits inside rustc execution of harness-ui and the other recompiled crates, not in Nano bookkeeping.",
   "study_sample_5": "Rotation offset 1 (kache builds the shared edit first, Nano third): Nano 118.900 s, kache 117.763 s; harness-ui 27.34 s versus 25.95 s. Nano built the leaf edit first and lost it, 88.401 s versus 81.958 s, with its final link 13 s slower than in every other position. Its revert remained faster (6.258 s versus 13.728 s).",
   "rustc_samples": "Three 3-second macOS samples of a slow harness-ui rustc show ordinary type checking, trait selection and LLVM work; no time blocked in pipe writes, jobserver reads or I/O.",
   "host_contention": "Other-process CPU outside the benchmark tree during shared-edit builds: samples 2-4 Nano 723/736/631%, kache 672/698/644%; sample 5 Nano 271%, kache 103%.",
@@ -398,5 +398,144 @@
   "pairs_run_1": {
     "record": "harness-shared-edit-pairs.json",
     "finding": "Six alternating pairs on distinct shared edits. Nano wins every pair it builds first (113.2/112.2/112.1 s vs 115.6/115.3/114.6 s) and loses every pair it builds second, directly after a kache build (122.4/117.8/118.2 s vs 113.7/111.7/111.4 s). Nano harness-ui takes 28.9-31.6 s only in builds that follow a kache build and 25.6 s otherwise; kache harness-ui is 25.0-25.9 s in every position. Builds that follow the other implementation are slower in both directions, more so for Nano after kache. This points to work left over from the previous build (such as writeback of newly written cache data) rather than Nano code. The pairs runner gained --quiesce-seconds: before every build, for both implementations, sync, wait, sync."
+  },
+  "pairs_run_2_quiesced": {
+    "record": "harness-shared-edit-pairs-quiesced.json",
+    "finding": "sync, 20 s wait and sync before every build: Nano still slow only after kache builds (117.9/118.8 s) and fast after its own (112.0/111.4 s); summary Nano 114.99 s vs kache 113.64 s median, 3/6 pairs."
+  },
+  "pairs_run_3_prewarmed": {
+    "record": "harness-shared-edit-pairs-prewarmed.json",
+    "finding": "Each implementation reads its whole store before its builds: unchanged pattern (Nano 117.5-118.0 s after kache shared builds, 111.6-111.8 s after its own); Nano 115.76 s vs kache 113.06 s median, 3/6 pairs."
+  },
+  "time_since_last_build": {
+    "finding": "Without any kache build, Nano shared edits are fast back to back (111.7 s, harness-ui 25.4 s) and slow after 240 s idle (117-118 s, harness-ui 28.2-28.8 s) in every repetition. Registering signatures, mapping code pages, reading or dlopen-ing the proc-macro dylibs before the build does not remove it; one early fast dlopen result did not reproduce (116.9 and 117.1 s on repetition). Deleting the previous target and waiting 3 minutes, flushing dirty pages, stopping the kache daemon and prewarming stores do not remove it either.",
+    "runs": {
+      "idle": [
+        {
+          "label": "prime",
+          "pause": 0,
+          "nano_seconds": 173.46,
+          "nano_ui": 24.37
+        },
+        {
+          "label": "back-to-back",
+          "pause": 0,
+          "nano_seconds": 111.69,
+          "nano_ui": 25.44
+        },
+        {
+          "label": "after-240s-idle",
+          "pause": 240,
+          "nano_seconds": 118.05,
+          "nano_ui": 28.5
+        }
+      ],
+      "dlopen": [
+        {
+          "label": "prime",
+          "pause": 0,
+          "dylibs_loaded": 0,
+          "nano_seconds": 110.99,
+          "nano_ui": 24.73
+        },
+        {
+          "label": "after-240s-idle-prewarmed",
+          "pause": 240,
+          "dylibs_loaded": 46,
+          "nano_seconds": 111.16,
+          "nano_ui": 24.69
+        },
+        {
+          "label": "after-240s-idle-cold",
+          "pause": 240,
+          "dylibs_loaded": 0,
+          "nano_seconds": 118.18,
+          "nano_ui": 28.84
+        }
+      ],
+      "addfilesigs": [
+        {
+          "label": "prime",
+          "pause": 0,
+          "dylibs_loaded": 0,
+          "nano_seconds": 110.89,
+          "nano_ui": 24.86
+        },
+        {
+          "label": "after-240s-idle-addfilesigs",
+          "pause": 240,
+          "dylibs_loaded": 46,
+          "nano_seconds": 117.59,
+          "nano_ui": 28.65
+        },
+        {
+          "label": "after-240s-idle-cold",
+          "pause": 240,
+          "dylibs_loaded": 0,
+          "nano_seconds": 117.19,
+          "nano_ui": 28.39
+        }
+      ],
+      "mapped": [
+        {
+          "label": "prime",
+          "pause": 0,
+          "dylibs_loaded": 0,
+          "nano_seconds": 111.67,
+          "nano_ui": 25.44
+        },
+        {
+          "label": "after-240s-idle-mapped",
+          "pause": 240,
+          "dylibs_loaded": 46,
+          "nano_seconds": 118.3,
+          "nano_ui": 29.16
+        },
+        {
+          "label": "after-240s-idle-cold",
+          "pause": 240,
+          "dylibs_loaded": 0,
+          "nano_seconds": 117.35,
+          "nano_ui": 28.46
+        }
+      ],
+      "repro": [
+        {
+          "label": "prime",
+          "pause": 0,
+          "dylibs_loaded": 0,
+          "nano_seconds": 172.33,
+          "nano_ui": 24.2
+        },
+        {
+          "label": "idle-dlopen",
+          "pause": 240,
+          "dylibs_loaded": 46,
+          "nano_seconds": 117.12,
+          "nano_ui": 28.42
+        },
+        {
+          "label": "idle-readfiles",
+          "pause": 240,
+          "dylibs_loaded": 46,
+          "nano_seconds": 117.54,
+          "nano_ui": 28.68
+        },
+        {
+          "label": "idle-dlopen-2",
+          "pause": 240,
+          "dylibs_loaded": 46,
+          "nano_seconds": 116.85,
+          "nano_ui": 28.03
+        },
+        {
+          "label": "idle-cold",
+          "pause": 240,
+          "dylibs_loaded": 0,
+          "nano_seconds": 117.06,
+          "nano_ui": 28.2
+        }
+      ]
+    }
   }
 }
