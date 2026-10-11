@@ -63,6 +63,8 @@ def main():
     p.add_argument('--compiler-profile', action='store_true', help='record compiler phases; requires --trace-builds')
     p.add_argument('--no-compiler-stream', action='store_true', help='disable default Rust stream forwarding')
     p.add_argument('--no-pipelined-companions', action='store_true', help='disable default guarded companion membership')
+    p.add_argument('--declared-build-scripts', action='store_true', help="cache every Nano build-script run under Cargo's rerun-if-changed rule")
+    p.add_argument('--cargo-timings', action='store_true', help="keep each build's Cargo --timings report for tools/rust_profile.py")
     p.add_argument("--min-free-gib", type=float, help="free-space gate before each build; default 32 for full binaries, 8 for libraries")
     args = p.parse_args()
     if args.compiler_profile and not args.trace_builds:
@@ -153,6 +155,8 @@ def main():
         env['NANOCOMPILE_PIPELINED_COMPANIONS'] = '1'
     if args.build_script_contract:
         env["NANOCOMPILE_BUILD_SCRIPTS_FILE"] = str(args.build_script_contract.resolve())
+    if args.declared_build_scripts:
+        env['NANOCOMPILE_BUILD_SCRIPT_CACHE'] = 'declared'
     if args.proc_macro_producers:
         env["NANOCOMPILE_PROC_MACRO_PRODUCERS"] = "1"
     if args.executable_producers:
@@ -165,6 +169,8 @@ def main():
                "-p", args.package, "-j", str(args.jobs), "--message-format=json-render-diagnostics"]
     if capture:
         command += ['--timings', '-vv']
+    elif args.cargo_timings:
+        command += ['--timings']
     result = {"compiler_stream": env.get("NANOCOMPILE_STREAM_COMPILER"), "pipelined_companions": env.get("NANOCOMPILE_PIPELINED_COMPANIONS"), "thin_lto_producers":args.thin_lto_producers, "source_date_epoch":args.source_date_epoch, "source_paths":["apps/harness/src/main.rs","crates/proto/src/lib.rs"], "original_project":str(original_project), "source_edits":"existing CLI help description and shared version_triple whitespace behavior; runtime and linked parser result checked; history-cache timed builds compared to empty-cache builds at identical paths", "script_sha256": sha(Path(__file__)), "project": str(project), "commit": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=project, text=True).strip(),
               "dirty": bool(subprocess.check_output(["git", "status", "--porcelain"], cwd=project)),
               "platform": platform.platform(), "jobs": args.jobs, "runs": args.runs,
@@ -269,6 +275,11 @@ def main():
         row['final_executable_artifacts'] = {'release/harness':sha(final_path)} if final_path.is_file() else {}
         row['final_executable_modes'] = {'release/harness':oct(final_path.stat().st_mode & 0o777)} if final_path.is_file() else {}
         row['build_log'] = dict(path=log_path.name,bytes=log_path.stat().st_size,sha256=sha(log_path))
+        timing = target / 'cargo-timings/cargo-timing.html'
+        if args.cargo_timings and timing.is_file():
+            saved = log_path.with_suffix('.timing.html')
+            shutil.copyfile(timing, saved)
+            row['cargo_timing'] = dict(path=saved.name, bytes=saved.stat().st_size, sha256=sha(saved))
         result['builds'].append(row)
         save()
         if capture:

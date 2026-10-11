@@ -24,6 +24,8 @@ RUNTIME_CONTROLS = {
     'NANOCOMPILE_PRODUCER_SHARED_DIGESTS': {'0', '1'},
     'NANOCOMPILE_HASH_MISMATCH_STOP': {'0', '1'},
     'NANOCOMPILE_BLOB_HASH_MODE': {'0', '1', '2'},
+    'NANOCOMPILE_DIGEST_MEMO': {'0', '1'},
+    'NANOCOMPILE_SELECTION_MEMO': {'0', '1'},
 }
 
 
@@ -83,6 +85,7 @@ def main():
     p.add_argument('--no-pipelined-companions', action='store_true', help='disable default guarded companion membership')
     p.add_argument('--bin', help='build and validate this binary instead of the package library')
     p.add_argument('--probe-help', action='store_true')
+    p.add_argument('--cargo-timings', action='store_true', help="keep each build's Cargo --timings report for tools/rust_profile.py")
     p.add_argument('--source-date-epoch', type=int)
     p.add_argument('--thin-lto-producers', action='store_true')
     p.add_argument('--rlib-frameworks', action='store_true')
@@ -135,7 +138,7 @@ def main():
     if args.rlib_frameworks: env['NANOCOMPILE_RLIB_FRAMEWORKS'] = '1'
     if args.staticlib_companions: env['NANOCOMPILE_RUST_STATICLIB'] = '1'
     command = ['cargo', 'build', '--release', *(['--bin', args.bin] if args.bin else ['--lib']), '--locked', '--offline',
-               '-p', args.package, '-j', str(args.jobs)]
+               '-p', args.package, '-j', str(args.jobs), *(['--timings'] if args.cargo_timings else [])]
     tracked = subprocess.check_output(['git', 'ls-files', '-z'], cwd=project).decode().split('\0')
     source_hashes = {name: sha(project / name) for name in tracked if name and
                      (name.endswith(('.rs', '.toml')) or Path(name).name == 'Cargo.lock')
@@ -210,6 +213,11 @@ def main():
             elapsed = time.perf_counter() - started
             ended = time.monotonic()
         log_record = dict(path=log_path.name, bytes=log_path.stat().st_size, sha256=sha(log_path))
+        timing_record = None
+        if args.cargo_timings and (target / 'cargo-timings/cargo-timing.html').is_file():
+            saved = log_path.with_suffix('.timing.html')
+            shutil.copyfile(target / 'cargo-timings/cargo-timing.html', saved)
+            timing_record = dict(path=saved.name, bytes=saved.stat().st_size, sha256=sha(saved))
         if child.returncode:
             evidence['builds'].append(dict(implementation=name, phase=phase, seconds=elapsed,
                                           exit_code=child.returncode, build_log=log_record,
@@ -243,7 +251,7 @@ def main():
         row = {'implementation': name, 'phase': phase, 'seconds': elapsed,
                'started_monotonic': started_monotonic, 'ended_monotonic': ended,
                'runtime_controls': controls, 'trace_enabled': traced,
-               'exit_code': child.returncode, 'build_log': log_record, 'artifact_modes': modes,
+               'exit_code': child.returncode, 'build_log': log_record, 'cargo_timing': timing_record, 'artifact_modes': modes,
                'artifact_modes_match_own_reference': modes == own_modes[name],
                **help_result, 'events': counts, 'peak_sampled_process_tree_rss_bytes': peak,
                'artifacts_match_reference': matches_reference, 'reference_mode': 'own' if args.own_artifact_references else 'shared',

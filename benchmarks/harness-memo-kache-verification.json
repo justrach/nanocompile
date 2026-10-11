@@ -1,0 +1,143 @@
+{
+  "digest_memo": {
+    "report_sha256": "897c855077ccb03211496fffeed471ecd333269be15af54c4b14dc78ed2521a0",
+    "runtime_sha256": "06408a87ce54a2815a34a98f0e320deb2113b1b4c1a976c1d10501cc518a456f",
+    "runner_sha256": "133afc9fdf1983a00e5cfae50be5e78670866356665083decd75883e07fc1cbc",
+    "contract_sha256": "c90d326223a97a21a8f023fb52f388aca717a489a1fecf25ace2881833084b48",
+    "kache_sha256": "0e4ab2b2f651f1c3685fe31b9ad7d0008ce12c44332e5e4842fa5257a0a82cd0",
+    "scope": "Untraced full Harness CLI cold/warm comparison: production Nano plus the stat-validated digest memo versus pinned kache 1.0.0, same design as the frozen eight-worker study (direct prime, three alternating cold pairs with both caches cleared and the kache daemon restarted, three rotated warm rounds).",
+    "verified_build_logs": 16,
+    "failed_artifact_checks": [],
+    "tracked_sources_unchanged": true,
+    "warm_events": {
+      "nanocompile": {
+        "miss": 3,
+        "bypass": 34,
+        "failed": 8,
+        "hit": 1099,
+        "build_script_hit": 31
+      },
+      "kache": {
+        "passthrough": 3,
+        "local_hit": 1237
+      }
+    },
+    "cold": {
+      "nanocompile_seconds": [
+        188.56211395806167,
+        197.24376074993052,
+        189.57854875002522
+      ],
+      "kache_seconds": [
+        202.99396958295256,
+        202.5015076668933,
+        200.3715627079364
+      ],
+      "paired_kache_minus_nano": [
+        14.431855624890886,
+        5.2577469169627875,
+        10.793013957911171
+      ],
+      "nano_median": 189.57854875002522,
+      "kache_median": 202.5015076668933,
+      "nano_pair_wins": 3,
+      "pairs": 3,
+      "mean_saved": 10.160872166588282,
+      "standard_error": 2.6671314228007352
+    },
+    "warm": {
+      "nanocompile_seconds": [
+        7.506315500009805,
+        6.849314916995354,
+        7.917705708066933
+      ],
+      "kache_seconds": [
+        7.162584375008009,
+        6.406364208087325,
+        6.511615916038863
+      ],
+      "paired_kache_minus_nano": [
+        -0.3437311250017956,
+        -0.4429507089080289,
+        -1.4060897920280695
+      ],
+      "nano_median": 7.506315500009805,
+      "kache_median": 6.511615916038863,
+      "nano_pair_wins": 0,
+      "pairs": 3,
+      "mean_saved": -0.7309238753126314,
+      "standard_error": 0.33879585435198784
+    }
+  },
+  "declared_build_scripts": {
+    "report_sha256": "726a05a0bbce1532c734567d2ee8f3f3d34457e050e91a365b9bb46cd2e837a0",
+    "runtime_sha256": "410ee9cb1d6b1d9de36ae553941d67de14eef1cb9e8b4cbcd5b9dc72cb91e97d",
+    "runner_sha256": "d5cd9cdb42fed2762b82f156cc1026af601ae1e4f271eb0ca67ca186221f0145",
+    "contract_sha256": "a8ac816fa43ead12c375e6826033ac94ecbee3e2db9358c9bf591c8b4fa439ff",
+    "kache_sha256": "0e4ab2b2f651f1c3685fe31b9ad7d0008ce12c44332e5e4842fa5257a0a82cd0",
+    "scope": "Untraced full Harness CLI cold/warm comparison: Nano with digest memo, Apple selection memo and Cargo-declared build-script caching versus pinned kache 1.0.0 (build-script caching on), same design as the frozen eight-worker study; Cargo --timings kept for every build.",
+    "verified_build_logs": 16,
+    "failed_artifact_checks": [],
+    "tracked_sources_unchanged": true,
+    "warm_events": {
+      "nanocompile": {
+        "miss": 3,
+        "bypass": 5,
+        "hit": 1095,
+        "build_script_hit": 138
+      },
+      "kache": {
+        "passthrough": 4,
+        "local_hit": 1237
+      }
+    },
+    "cold": {
+      "nanocompile_seconds": [
+        208.32153041707352,
+        188.954537875019,
+        181.96369175007567
+      ],
+      "kache_seconds": [
+        202.26934250001796,
+        190.35114329191856,
+        188.83939533308148
+      ],
+      "paired_kache_minus_nano": [
+        -6.052187917055562,
+        1.396605416899547,
+        6.875703583005816
+      ],
+      "nano_median": 188.954537875019,
+      "kache_median": 190.35114329191856,
+      "nano_pair_wins": 2,
+      "pairs": 3,
+      "mean_saved": 0.7400403609499335,
+      "standard_error": 3.74637170757078
+    },
+    "warm": {
+      "nanocompile_seconds": [
+        6.7254815839696676,
+        6.363008416956291,
+        6.444707166985609
+      ],
+      "kache_seconds": [
+        6.613609459018335,
+        6.408265125006437,
+        6.461692584096454
+      ],
+      "paired_kache_minus_nano": [
+        -0.11187212495133281,
+        0.0452567080501467,
+        0.016985417110845447
+      ],
+      "nano_median": 6.444707166985609,
+      "kache_median": 6.461692584096454,
+      "nano_pair_wins": 2,
+      "pairs": 3,
+      "mean_saved": -0.016543333263446886,
+      "standard_error": 0.048358040925124045
+    }
+  },
+  "retry_note": "The first declared-scripts attempt (/tmp/nano-declared-kache-paired-20261011) stopped during its first Nano cold build: two concurrent rustc processes received SIGKILL (exit 137) with no Nano error output, no memguard entry and 96% free memory. The same frozen inputs were rerun in a new state directory; the failed attempt is retained privately.",
+  "limitations": "Three cold and three warm pairs per study on one contended machine (load average about 14-25 from unrelated processes); OS file caches unflushed; each implementation compared with its own cold artifacts. Not independent confirmation."
+}

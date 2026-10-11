@@ -58,6 +58,21 @@ def main():
         for memo in (root / 'cache' / 'toolchain-files').iterdir():
             memo.write_bytes(b'corrupt')
         assert invoke(private) == changed
+        # Selection memos: recorded, stamp-validated, corruption-tolerant and
+        # equal to live selection. Replacing the selected SDK directory at the
+        # same path changes its inode, so the memo cannot be trusted.
+        memos = root / 'cache' / 'selection-memos'
+        assert memos.is_dir() and any(memos.iterdir())
+        assert invoke(dict(private, NANOCOMPILE_SELECTION_MEMO='0')) == changed
+        for memo in memos.iterdir():
+            memo.write_bytes(b'corrupt')
+        assert invoke(private) == changed
+        sdk.rename(root / 'old SDK')
+        sdk.mkdir()
+        (sdk / 'SDKSettings.json').write_bytes(b'{"Version":"third_"}')
+        replaced = invoke(private)
+        assert replaced['hash'] not in (changed['hash'], selected['hash'])
+        assert invoke(dict(private, NANOCOMPILE_SELECTION_MEMO='0')) == replaced
         invoke({'SDKROOT': str(root / 'missing-sdk')}, success=False)
         invoke({'DEVELOPER_DIR': str(root / 'missing-developer')}, success=False)
         evidence = {'platform': sys.platform, 'selected': first,
@@ -65,7 +80,7 @@ def main():
                     'probe_sha256': hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
                     'stable_warm_identity': True, 'invalid_driver_plan_legacy_fallback': True, 'private_sdk_selection_changes_identity': True,
                     'preserved_mtime_sdk_metadata_change_detected': True,
-                    'corrupt_memos_recomputed': True, 'invalid_selections_rejected': True,
+                    'corrupt_memos_recomputed': True, 'selection_memo_equals_live': True, 'replaced_sdk_invalidates_selection_memo': True, 'invalid_selections_rejected': True,
                     'limits': 'Apple dispatch shim only; experimental producer keys; '
                               'link input contents and negative lookup guards remain separate'}
         if args.output:

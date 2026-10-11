@@ -69,6 +69,8 @@ def main():
     p.add_argument("--kache-no-build-scripts", action="store_true", help="diagnostic ablation: disable only kache build-script execution caching")
     p.add_argument("--compiler-stream", action="store_true", help="experimental immediate Rust compiler stream forwarding")
     p.add_argument("--script-profile", action="store_true", help="diagnostic build-script phase timings; requires execution contract")
+    p.add_argument("--declared-build-scripts", action="store_true", help="cache every Nano build-script run under Cargo's rerun-if-changed rule (NANOCOMPILE_BUILD_SCRIPT_CACHE=declared); explicit contract packages keep their contract")
+    p.add_argument("--cargo-timings", action="store_true", help="keep each build's Cargo --timings report for tools/rust_profile.py; small report-writing overhead")
     p.add_argument("--trace-builds", action="store_true", help="private full compiler logs and Cargo timings; diagnostic overhead, not a benchmark")
     p.add_argument("--compiler-profile", action="store_true", help="diagnostic producer/restore phase timings; requires --trace-builds")
     p.add_argument("--nano-only", action="store_true", help="diagnostic direct prime then Nano cold/warm capture; requires --trace-builds")
@@ -124,6 +126,8 @@ def main():
         env["NANOCOMPILE_BUILD_SCRIPTS_FILE"] = str(args.build_script_contract.resolve())
     if args.pipelined_companions:
         env['NANOCOMPILE_PIPELINED_COMPANIONS'] = '1'
+    if args.declared_build_scripts:
+        env['NANOCOMPILE_BUILD_SCRIPT_CACHE'] = 'declared'
     if args.no_compiler_stream:
         env['NANOCOMPILE_STREAM_COMPILER'] = '0'
     if args.no_pipelined_companions:
@@ -154,13 +158,15 @@ def main():
                "-p", args.package, "-j", str(args.jobs), "--message-format=json-render-diagnostics"]
     if capture:
         command += ["--timings", "-vv"]
+    elif args.cargo_timings:
+        command += ["--timings"]
     result = {"thin_lto_producers": args.thin_lto_producers, "diagnostic_trace": bool(capture) or args.script_profile, "script_profile": args.script_profile, "compiler_stream": env.get("NANOCOMPILE_STREAM_COMPILER"), "pipelined_companions": env.get("NANOCOMPILE_PIPELINED_COMPANIONS"), "script_sha256": sha(Path(__file__)), "project": str(project), "commit": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=project, text=True).strip(),
               "dirty": bool(subprocess.check_output(["git", "status", "--porcelain"], cwd=project)),
               "platform": platform.platform(), "jobs": args.jobs, "runs": args.runs, "cold_runs": args.cold_runs, "cold_only": args.cold_only,
               "rustc": subprocess.check_output(["rustc", "--version", "--verbose"], cwd=project, text=True),
               "nanocompile_sha256": sha(Path(binary)), "kache_sha256": sha(Path(kache)),
               "kache_version": subprocess.check_output([kache, "--version"], text=True).strip(),
-              "build_script_contract_sha256": sha(args.build_script_contract) if args.build_script_contract else None, "kache_build_script_cache": None if args.nano_only else not args.kache_no_build_scripts, "kache_daemon": not args.standalone and not args.nano_only, "native_clang": args.native_clang, "native_artifacts": args.native_artifacts, "portable_cc":args.portable_cc, "nanocompile_proc_macros": args.proc_macros, "nanocompile_proc_macro_producers": args.proc_macro_producers, "nanocompile_executable_producers": args.executable_producers, "command": command,
+              "build_script_contract_sha256": sha(args.build_script_contract) if args.build_script_contract else None, "kache_build_script_cache": None if args.nano_only else not args.kache_no_build_scripts, "kache_daemon": not args.standalone and not args.nano_only, "native_clang": args.native_clang, "native_artifacts": args.native_artifacts, "portable_cc":args.portable_cc, "nanocompile_proc_macros": args.proc_macros, "nanocompile_proc_macro_producers": args.proc_macro_producers, "nanocompile_declared_build_scripts": args.declared_build_scripts, "nanocompile_executable_producers": args.executable_producers, "command": command,
               "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat(), "builds": [],
               "method": "offline clean release package builds; same target path; prime direct build then empty caches; rotate three-way warm measurement order unless cold-only; validate each wrapper against its own cold artifact hashes (kache remaps paths)"}
     result['source_date_epoch'] = env.get('SOURCE_DATE_EPOCH')
@@ -267,6 +273,11 @@ def main():
                "exit_code": proc.returncode, "events": dict(after - before), "rlibs": len(artifacts), "artifacts": artifacts,
                "peak_sampled_process_tree_rss_bytes": peak, "macro_dylibs": macros, "build_script_executables": executables, "compiled_build_script_executables": compiled_executables}
         row['build_log'] = dict(path=log_path.name, bytes=log_path.stat().st_size, sha256=sha(log_path))
+        timing = target / 'cargo-timings/cargo-timing.html'
+        if args.cargo_timings and timing.is_file():
+            saved = state / f"{number}-{implementation}-{phase}.timing.html"
+            shutil.copyfile(timing, saved)
+            row['cargo_timing'] = dict(path=saved.name, bytes=saved.stat().st_size, sha256=sha(saved))
         row['started_monotonic'] = start
         row['ended_monotonic'] = start + seconds
         row['artifact_modes'] = {name: oct((target / name).stat().st_mode & 0o777)

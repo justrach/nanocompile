@@ -24,6 +24,15 @@ const Dir = std.Io.Dir;
 pub const Hash = std.crypto.hash.Blake3;
 pub const CheckedDigest = struct { hash: []const u8, state: std.Io.File.Stat };
 
+// Content digests of large regular files are memoized by path and complete
+// file state. A file's ctime advances on every write, rename, chmod or utimes,
+// so a matching inode/size/mtime/ctime proves the bytes were not rewritten
+// through the filesystem. As in git's racy-index rule, a state is recorded only
+// when both timestamps precede the start of hashing; changes during hashing
+// fail the before/after comparison. NANOCOMPILE_DIGEST_MEMO=0 disables it.
+const memo_min_size = 64 * 1024;
+const memo_version = "nanocompile-digest-memo-v1";
+
 pub fn sameFileState(a: std.Io.File.Stat, b: std.Io.File.Stat) bool {
     return a.inode == b.inode and a.size == b.size and a.kind == b.kind and
         a.mtime.nanoseconds == b.mtime.nanoseconds and a.ctime.nanoseconds == b.ctime.nanoseconds;
@@ -55,6 +64,7 @@ pub const Context = struct {
     compiler_decoder_identity: ?[]const u8 = null,
     compiler_epoch: ?[]const u8 = null,
     rust_locations: ?RustLocations = null,
+    digest_memo: bool = true,
 
     pub fn init(a: std.mem.Allocator, io: std.Io, env: *std.process.Environ.Map) !Context {
         const root = env.get("NANOCOMPILE_DIR") orelse try std.fs.path.join(a, &.{
@@ -62,7 +72,14 @@ pub const Context = struct {
             "nanocompile",
         });
         const cwd = try std.process.currentPathAlloc(io, a);
-        return .{ .a = a, .io = io, .env = env, .root = try std.fs.path.resolve(a, &.{ cwd, root }), .cwd = cwd };
+        return .{
+            .a = a,
+            .io = io,
+            .env = env,
+            .root = try std.fs.path.resolve(a, &.{ cwd, root }),
+            .cwd = cwd,
+            .digest_memo = !std.mem.eql(u8, env.get("NANOCOMPILE_DIGEST_MEMO") orelse "1", "0"),
+        };
     }
 
     pub fn path(self: *Context, parts: []const []const u8) ![]const u8 {
@@ -92,9 +109,70 @@ pub const Context = struct {
     }
 
     pub fn digest(self: *Context, path_: []const u8) ![]const u8 {
+        const started = std.Io.Clock.real.now(self.io).nanoseconds;
         const file = try Dir.cwd().openFile(self.io, path_, .{});
         defer file.close(self.io);
-        if ((try file.stat(self.io)).kind != .file) return error.NotRegularFile;
+        const before = try file.stat(self.io);
+        if (before.kind != .file) return error.NotRegularFile;
+        const memo = if (self.digest_memo and before.size >= memo_min_size) self.memoPath(path_) catch null else null;
+        if (memo) |m| if (self.memoLookup(m.file, m.absolute, before)) |hash| return hash;
+        const hash = try self.streamDigest(file);
+        if (memo) |m| {
+            const after = file.stat(self.io) catch return hash;
+            if (sameFileState(before, after)) self.memoStore(m.file, m.absolute, after, started, hash);
+        }
+        return hash;
+    }
+
+    const MemoLocation = struct { file: []const u8, absolute: []const u8 };
+
+    fn memoPath(self: *Context, path_: []const u8) !MemoLocation {
+        const absolute = try std.fs.path.resolve(self.a, &.{ self.cwd, path_ });
+        var h = Hash.init(.{});
+        field(&h, memo_version);
+        field(&h, absolute);
+        const key = try finish(self.a, &h);
+        return .{ .file = try self.path(&.{ "memo", key[0..2], key }), .absolute = absolute };
+    }
+
+    fn memoLookup(self: *Context, memo: []const u8, absolute: []const u8, state: std.Io.File.Stat) ?[]const u8 {
+        var buffer: [4096 + 512]u8 = undefined;
+        const bytes = Dir.cwd().readFile(self.io, memo, &buffer) catch return null;
+        var lines = std.mem.splitScalar(u8, bytes, '\n');
+        if (!std.mem.eql(u8, lines.next() orelse return null, memo_version)) return null;
+        var numbers: [5]i128 = undefined;
+        for (&numbers) |*n| n.* = std.fmt.parseInt(i128, lines.next() orelse return null, 10) catch return null;
+        const hash = lines.next() orelse return null;
+        if (!validHash(hash) or !std.mem.eql(u8, lines.next() orelse return null, absolute)) return null;
+        if (numbers[0] != state.inode or numbers[1] != state.size or numbers[2] != state.mtime.nanoseconds or
+            numbers[3] != state.ctime.nanoseconds) return null;
+        if (!(state.mtime.nanoseconds < numbers[4] and state.ctime.nanoseconds < numbers[4])) return null;
+        return self.a.dupe(u8, hash) catch null;
+    }
+
+    fn memoStore(self: *Context, memo: []const u8, absolute: []const u8, state: std.Io.File.Stat, started: i96, hash: []const u8) void {
+        if (!self.digest_memo or absolute.len > 4096 or state.kind != .file or state.size < memo_min_size) return;
+        if (!(state.mtime.nanoseconds < started and state.ctime.nanoseconds < started)) return;
+        const bytes = std.fmt.allocPrint(self.a, "{s}\n{d}\n{d}\n{d}\n{d}\n{d}\n{s}\n{s}", .{
+            memo_version, state.inode, state.size, state.mtime.nanoseconds, state.ctime.nanoseconds, started, hash, absolute,
+        }) catch return;
+        self.atomic(memo, bytes) catch {};
+    }
+
+    /// Record a known digest for a file this process just materialized from a
+    /// verified immutable blob. The destination must still be the same inode
+    /// with the clone's size and mtime: any intervening write changes mtime.
+    pub fn memoMaterialized(self: *Context, destination: []const u8, written: std.Io.File.Stat, hash: []const u8) void {
+        if (!self.digest_memo or written.size < memo_min_size) return;
+        const state = Dir.cwd().statFile(self.io, destination, .{}) catch return;
+        if (state.kind != .file or state.inode != written.inode or state.size != written.size or
+            state.mtime.nanoseconds != written.mtime.nanoseconds) return;
+        const started = std.Io.Clock.real.now(self.io).nanoseconds;
+        const memo = self.memoPath(destination) catch return;
+        self.memoStore(memo.file, memo.absolute, state, started, hash);
+    }
+
+    fn streamDigest(self: *Context, file: std.Io.File) ![]const u8 {
         var h = Hash.init(.{});
         var buffer: [64 * 1024]u8 = undefined;
         var reader = file.reader(self.io, &buffer);
@@ -343,6 +421,16 @@ fn blobPath(ctx: *Context, hash: []const u8) ![]const u8 {
 
 // Never hardlink: a later linker, strip, or user write must not mutate the cache.
 pub fn materialize(ctx: *Context, source: []const u8, destination: []const u8, mode: u32) !void {
+    _ = try materializeState(ctx, source, destination, mode);
+}
+
+/// Materialize an immutable verified blob and memoize the destination digest.
+pub fn materializeKnown(ctx: *Context, source: []const u8, destination: []const u8, mode: u32, hash: []const u8) !void {
+    const written = try materializeState(ctx, source, destination, mode);
+    ctx.memoMaterialized(destination, written, hash);
+}
+
+fn materializeState(ctx: *Context, source: []const u8, destination: []const u8, mode: u32) !std.Io.File.Stat {
     try Dir.cwd().createDirPath(ctx.io, std.fs.path.dirname(destination) orelse ".");
     const temp = try std.fmt.allocPrint(ctx.a, "{s}.nano-{d}", .{ destination, c.getpid() });
     defer Dir.cwd().deleteFile(ctx.io, temp) catch {};
@@ -367,14 +455,24 @@ pub fn materialize(ctx: *Context, source: []const u8, destination: []const u8, m
     const file = try Dir.cwd().openFile(ctx.io, temp, .{ .mode = .read_write });
     defer file.close(ctx.io);
     try file.setPermissions(ctx.io, .fromMode(@intCast(mode & 0o777)));
+    const written = try file.stat(ctx.io);
     try Dir.cwd().rename(temp, .cwd(), destination, ctx.io);
+    return written;
 }
 
 pub fn putFile(ctx: *Context, source: []const u8) ![]const u8 {
+    const before = try Dir.cwd().statFile(ctx.io, source, .{});
     const hash = try ctx.digest(source);
     const destination = try blobPath(ctx, hash);
     const existing = ctx.digest(destination) catch "";
-    if (!std.mem.eql(u8, hash, existing)) try materialize(ctx, source, destination, 0o600);
+    if (!std.mem.eql(u8, hash, existing)) {
+        const written = try materializeState(ctx, source, destination, 0o600);
+        // The clone is a snapshot taken inside this unchanged-source window,
+        // so its bytes are the ones hashed above.
+        const after = Dir.cwd().statFile(ctx.io, source, .{}) catch return hash;
+        if (sameFileState(before, after) and written.size == before.size and
+            written.mtime.nanoseconds == before.mtime.nanoseconds) ctx.memoMaterialized(destination, written, hash);
+    }
     return hash;
 }
 
@@ -675,7 +773,7 @@ fn restoreWithSnapshot(ctx: *Context, key: []const u8, allowed_outputs: []const 
     if (!std.mem.eql(u8, try finish(ctx.a, &h), entry.stderr)) return null;
     ctx.profileEnd("restore.stream_validation", phase);
     phase = ctx.profileStart();
-    for (entry.outputs, destinations) |output, destination| try materialize(ctx, try blobPath(ctx, output.hash), destination, output.mode);
+    for (entry.outputs, destinations) |output, destination| try materializeKnown(ctx, try blobPath(ctx, output.hash), destination, output.mode, output.hash);
     ctx.profileEnd("restore.materialization", phase);
     return .{ .stdout = stdout, .stderr = stderr };
 }
@@ -752,7 +850,7 @@ pub fn clear(ctx: *Context) !void {
     try ctx.prepare();
     const lock = try Lock.acquire(ctx, "maintenance", true);
     defer lock.release();
-    for ([_][]const u8{ "entries", "blobs", "xcode", "native-clang", "metadata", "metadata-queries", "producer-jobs", "build-script-receipts", "script-tools" }) |sub| {
+    for ([_][]const u8{ "entries", "blobs", "xcode", "native-clang", "metadata", "metadata-queries", "producer-jobs", "build-script-receipts", "script-tools", "memo", "selection-memos", "build-script-declared" }) |sub| {
         try Dir.cwd().deleteTree(ctx.io, try ctx.path(&.{sub}));
         try Dir.cwd().createDirPath(ctx.io, try ctx.path(&.{sub}));
     }

@@ -1,10 +1,11 @@
 //! Toolchains are fingerprinted by content once. Their identity is memoized
 //! behind inode/size/mtime/ctime checks and directory membership checks.
-//! Source dependencies and stored outputs never use this metadata shortcut.
+//! Large source dependencies and stored outputs use the separate racy-guarded
+//! digest memo in cache.zig; its ctime check covers in-place rewrites.
 const std = @import("std");
 const cache = @import("cache.zig");
 const Dir = std.Io.Dir;
-const Stamp = struct {
+pub const Stamp = struct {
     path: []const u8,
     exists: bool,
     inode: u64 = 0,
@@ -22,7 +23,7 @@ fn rememberEpoch(ctx: *cache.Context, payload: []const u8) !void {
     ctx.compiler_epoch = try cache.finish(ctx.a, &h);
 }
 
-fn stamp(ctx: *cache.Context, path: []const u8) !Stamp {
+pub fn stamp(ctx: *cache.Context, path: []const u8) !Stamp {
     const st = Dir.cwd().statFile(ctx.io, path, .{}) catch |err| switch (err) {
         error.FileNotFound => return .{ .path = path, .exists = false },
         else => return err,
@@ -30,7 +31,7 @@ fn stamp(ctx: *cache.Context, path: []const u8) !Stamp {
     return .{ .path = path, .exists = true, .inode = @intCast(st.inode), .size = st.size, .mtime = st.mtime.nanoseconds, .ctime = st.ctime.nanoseconds, .kind = st.kind };
 }
 
-fn equal(a: Stamp, b: Stamp) bool {
+pub fn equal(a: Stamp, b: Stamp) bool {
     return a.exists == b.exists and a.inode == b.inode and a.size == b.size and a.mtime == b.mtime and a.ctime == b.ctime and a.kind == b.kind;
 }
 
@@ -96,7 +97,7 @@ fn validStamps(ctx: *cache.Context, stamps: []const Stamp, parallel: bool) bool 
         for (stamps) |expected| if (!equal(expected, stamp(ctx, expected.path) catch return false)) return false;
         return true;
     }
-    ctx.trace("toolchain: parallel Zig stamp validation");
+    ctx.trace("toolchain: parallel stamp validation");
     var next = std.atomic.Value(usize).init(0);
     var valid = std.atomic.Value(bool).init(true);
     var group: std.Io.Group = .init;
@@ -524,21 +525,80 @@ fn installedGraph(ctx: *cache.Context, stamps: *std.ArrayList(Stamp), links: *st
         while (try it.next(ctx.io)) |entry| try installedGraph(ctx, stamps, links, seen, try std.fs.path.join(ctx.a, &.{ path, entry.name }));
     }
 }
+// Compact sealed record: one tab-separated line per stamp or link, so large
+// SDK trees parse without building JSON values. Every stamp is still checked.
+const tree_memo_version = "nanocompile-installed-tree-v3";
+
+fn writeTreeMemo(ctx: *cache.Context, path: []const u8, digest: []const u8, stamps: []const Stamp, links: []const InstalledLink) !void {
+    var out: std.ArrayList(u8) = .empty;
+    try out.print(ctx.a, "{s}\n{s}\n{d} {d}\n", .{ tree_memo_version, digest, stamps.len, links.len });
+    for (stamps) |s| {
+        if (std.mem.indexOfAny(u8, s.path, "\t\n") != null) return;
+        try out.print(ctx.a, "S\t{d}\t{d}\t{d}\t{d}\t{d}\t{d}\t{s}\n", .{ @intFromBool(s.exists), @intFromEnum(s.kind), s.inode, s.size, s.mtime, s.ctime, s.path });
+    }
+    for (links) |l| {
+        if (std.mem.indexOfAny(u8, l.path, "\t\n") != null or std.mem.indexOfAny(u8, l.resolved, "\t\n") != null) return;
+        try out.print(ctx.a, "L\t{d}\t{d}\t{d}\t{s}\t{s}\n", .{ l.inode, l.mtime, l.ctime, l.path, l.resolved });
+    }
+    try ctx.atomic(path, try cache.seal(ctx, out.items));
+}
+
+fn readTreeMemo(ctx: *cache.Context, path: []const u8) ?[]const u8 {
+    const bytes = Dir.cwd().readFileAlloc(ctx.io, path, ctx.a, .limited(256 * 1024 * 1024)) catch return null;
+    const payload = cache.unseal(ctx, bytes) catch return null;
+    var lines = std.mem.splitScalar(u8, payload, '\n');
+    if (!std.mem.eql(u8, lines.next() orelse return null, tree_memo_version)) return null;
+    const hash = lines.next() orelse return null;
+    if (!cache.validHash(hash)) return null;
+    var counts = std.mem.splitScalar(u8, lines.next() orelse return null, ' ');
+    const stamp_count = std.fmt.parseInt(usize, counts.next() orelse return null, 10) catch return null;
+    const link_count = std.fmt.parseInt(usize, counts.next() orelse return null, 10) catch return null;
+    if (stamp_count == 0 or stamp_count > 200000 or link_count > 200000) return null;
+    const stamps = ctx.a.alloc(Stamp, stamp_count) catch return null;
+    for (stamps) |*s| {
+        var f = std.mem.splitScalar(u8, lines.next() orelse return null, '\t');
+        if (!std.mem.eql(u8, f.next() orelse return null, "S")) return null;
+        const exists = std.fmt.parseInt(u1, f.next() orelse return null, 10) catch return null;
+        const kind = std.fmt.parseInt(u8, f.next() orelse return null, 10) catch return null;
+        s.* = .{
+            .exists = exists == 1,
+            .kind = std.enums.fromInt(std.Io.File.Kind, kind) orelse return null,
+            .inode = std.fmt.parseInt(u64, f.next() orelse return null, 10) catch return null,
+            .size = std.fmt.parseInt(u64, f.next() orelse return null, 10) catch return null,
+            .mtime = std.fmt.parseInt(i96, f.next() orelse return null, 10) catch return null,
+            .ctime = std.fmt.parseInt(i96, f.next() orelse return null, 10) catch return null,
+            .path = f.rest(),
+        };
+        if (s.path.len == 0) return null;
+    }
+    const links = ctx.a.alloc(InstalledLink, link_count) catch return null;
+    for (links) |*l| {
+        var f = std.mem.splitScalar(u8, lines.next() orelse return null, '\t');
+        if (!std.mem.eql(u8, f.next() orelse return null, "L")) return null;
+        l.inode = std.fmt.parseInt(u64, f.next() orelse return null, 10) catch return null;
+        l.mtime = std.fmt.parseInt(i96, f.next() orelse return null, 10) catch return null;
+        l.ctime = std.fmt.parseInt(i96, f.next() orelse return null, 10) catch return null;
+        l.path = f.next() orelse return null;
+        l.resolved = f.next() orelse return null;
+        if (f.next() != null) return null;
+    }
+    if (!validLinks(ctx, links) or !validStamps(ctx, stamps, true)) return null;
+    return hash;
+}
+
 pub fn installedTreeDigest(ctx: *cache.Context, root: []const u8) ![]const u8 {
-    const TreeMemo = struct { schema: u32 = 2, hash: []const u8, stamps: []const Stamp, links: []const InstalledLink };
     const canonical = try Dir.cwd().realPathFileAlloc(ctx.io, root, ctx.a);
     var h = cache.Hash.init(.{});
-    cache.field(&h, "installed-script-tree-v2");
+    cache.field(&h, "installed-script-tree-v3");
     cache.field(&h, canonical);
     const key = try cache.finish(ctx.a, &h);
     const path = try ctx.path(&.{ "script-tools", key });
+    // Atomic sealed records permit an optimistic read; the lock only makes
+    // concurrent first-use walks share one recomputation.
+    if (readTreeMemo(ctx, path)) |hash| return hash;
     const lock = try cache.Lock.acquire(ctx, try std.fmt.allocPrint(ctx.a, "script-tool-{s}", .{key}), true);
     defer lock.release();
-    if (ctx.read(path)) |bytes| memo: {
-        const payload = cache.unseal(ctx, bytes) catch break :memo;
-        const parsed = std.json.parseFromSlice(TreeMemo, ctx.a, payload, .{ .allocate = .alloc_always }) catch break :memo;
-        if (parsed.value.schema == 2 and cache.validHash(parsed.value.hash) and parsed.value.stamps.len > 0 and validLinks(ctx, parsed.value.links) and validStamps(ctx, parsed.value.stamps, false)) return parsed.value.hash;
-    } else |_| {}
+    if (readTreeMemo(ctx, path)) |hash| return hash;
     var stamps: std.ArrayList(Stamp) = .empty;
     var links: std.ArrayList(InstalledLink) = .empty;
     var seen = std.StringHashMap(void).init(ctx.a);
@@ -569,6 +629,42 @@ pub fn installedTreeDigest(ctx: *cache.Context, root: []const u8) ![]const u8 {
     }
     if (!validLinks(ctx, links.items) or !validStamps(ctx, stamps.items, false)) return error.ToolchainChanged;
     const digest = try cache.finish(ctx.a, &h);
-    try ctx.atomic(path, try cache.seal(ctx, try std.json.Stringify.valueAlloc(ctx.a, TreeMemo{ .hash = digest, .stamps = stamps.items, .links = links.items }, .{})));
+    try writeTreeMemo(ctx, path, digest, stamps.items, links.items);
     return digest;
+}
+
+test "compact installed tree memo detects preserved-mtime edits, links and corruption" {
+    var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer arena.deinit();
+    const a = arena.allocator();
+    const io = std.testing.io;
+    var tmp = std.testing.tmpDir(.{});
+    defer tmp.cleanup();
+    const cwd = try Dir.cwd().realPathFileAlloc(io, try std.fs.path.join(a, &.{ ".zig-cache", "tmp", &tmp.sub_path }), a);
+    var env = std.process.Environ.Map.init(a);
+    var ctx: cache.Context = .{ .a = a, .io = io, .env = &env, .root = try std.fs.path.join(a, &.{ cwd, "cache" }), .cwd = cwd };
+    try ctx.prepare();
+    try tmp.dir.createDirPath(io, "tree/include/sys");
+    for (0..600) |i| try tmp.dir.writeFile(io, .{ .sub_path = try std.fmt.allocPrint(a, "tree/include/sys/h{d}.h", .{i}), .data = "#define X 1\n" });
+    try tmp.dir.symLink(io, "include/sys", "tree/linked", .{ .is_directory = true });
+    const root = try std.fs.path.join(a, &.{ cwd, "tree" });
+    const first = try installedTreeDigest(&ctx, root);
+    try std.testing.expectEqualStrings(first, try installedTreeDigest(&ctx, root));
+    const edited = "tree/include/sys/h7.h";
+    const before = try tmp.dir.statFile(io, edited, .{});
+    try tmp.dir.writeFile(io, .{ .sub_path = edited, .data = "#define X 2\n" });
+    const file = try tmp.dir.openFile(io, edited, .{ .mode = .read_write });
+    try file.setTimestamps(io, .{ .modify_timestamp = .{ .new = .{ .nanoseconds = before.mtime.nanoseconds } } });
+    file.close(io);
+    const second = try installedTreeDigest(&ctx, root);
+    try std.testing.expect(!std.mem.eql(u8, first, second));
+    try tmp.dir.deleteFile(io, "tree/linked");
+    try tmp.dir.symLink(io, "include", "tree/linked", .{ .is_directory = true });
+    const third = try installedTreeDigest(&ctx, root);
+    try std.testing.expect(!std.mem.eql(u8, second, third));
+    var memos = try Dir.cwd().openDir(io, try ctx.path(&.{"script-tools"}), .{ .iterate = true });
+    defer memos.close(io);
+    var it = memos.iterate();
+    while (try it.next(io)) |entry| try memos.writeFile(io, .{ .sub_path = entry.name, .data = "corrupt" });
+    try std.testing.expectEqualStrings(third, try installedTreeDigest(&ctx, root));
 }

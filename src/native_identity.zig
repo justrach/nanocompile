@@ -161,6 +161,73 @@ fn checkedPlan(ctx: *cache.Context, result: std.process.RunResult) !DriverPlan {
     return parsePlan(ctx.a, result.stderr);
 }
 
+// Live selection spawns four processes (driver plan and three xcrun queries).
+// Memoize it like other trusted installed-tool state: keyed by the driver and
+// every environment variable xcrun or the driver consults for selection, and
+// valid only while the xcode-select link, both developer roots, xcrun, every
+// selected tool, the SDK, its parent and the identity files keep their
+// inode/size/mtime/ctime. Stamps changed at or after selection began are never
+// trusted. NANOCOMPILE_SELECTION_MEMO=0 always queries live.
+const SelectionMemo = struct {
+    schema: u32 = 1,
+    started: i96,
+    clang: []const u8,
+    linker: []const u8,
+    sdk: []const u8,
+    resource_dir: []const u8,
+    files: []const []const u8,
+    hash: []const u8,
+    stamps: []const identity.Stamp,
+};
+
+fn selectionEnvironment(name: []const u8) bool {
+    if (std.mem.eql(u8, name, "PATH") or std.mem.eql(u8, name, "HOME")) return true;
+    for ([_][]const u8{ "SDKROOT", "DEVELOPER_DIR", "TOOLCHAINS", "XCODE", "XCRUN", "xcrun", "CCC_", "CLANG", "DYLD_", "LD_", "MACOSX_", "COMPILER_PATH", "CPATH", "LIBRARY_PATH" }) |prefix|
+        if (std.mem.startsWith(u8, name, prefix)) return true;
+    return false;
+}
+
+fn selectionKey(ctx: *cache.Context, domain: []const u8, values: []const []const u8) ![]const u8 {
+    var h = cache.Hash.init(.{});
+    cache.field(&h, domain);
+    for (values) |value| cache.field(&h, value);
+    const names = try ctx.a.dupe([]const u8, ctx.env.keys());
+    std.mem.sort([]const u8, names, {}, struct {
+        fn less(_: void, x: []const u8, y: []const u8) bool {
+            return std.mem.order(u8, x, y) == .lt;
+        }
+    }.less);
+    for (names) |name| if (selectionEnvironment(name)) {
+        cache.field(&h, name);
+        cache.field(&h, ctx.env.get(name).?);
+    };
+    return cache.finish(ctx.a, &h);
+}
+
+fn memoEnabled(ctx: *cache.Context) bool {
+    return !std.mem.eql(u8, ctx.env.get("NANOCOMPILE_SELECTION_MEMO") orelse "1", "0");
+}
+
+fn stampsCurrent(ctx: *cache.Context, stamps: []const identity.Stamp, started: i96) bool {
+    for (stamps) |expected| {
+        if (expected.exists and (expected.ctime >= started or expected.mtime >= started)) return false;
+        const current = identity.stamp(ctx, expected.path) catch return false;
+        if (!identity.equal(expected, current)) return false;
+    }
+    return true;
+}
+
+fn collectStamps(ctx: *cache.Context, paths: []const []const u8) ![]const identity.Stamp {
+    var stamps: std.ArrayList(identity.Stamp) = .empty;
+    outer: for (paths) |path| {
+        for (stamps.items) |existing| if (std.mem.eql(u8, existing.path, path)) continue :outer;
+        try stamps.append(ctx.a, try identity.stamp(ctx, path));
+    }
+    return stamps.items;
+}
+
+const selection_roots = [_][]const u8{ "/var/db/xcode_select_link", "/Library/Developer/CommandLineTools", "/Applications/Xcode.app", "/usr/bin/xcrun" };
+
 pub fn apple(ctx: *cache.Context, driver: []const u8) !Selection {
     if (builtin.os.tag != .macos) return error.UnsupportedNativeSelection;
     for ([_][]const u8{ "CCC_OVERRIDE_OPTIONS", "CCC_ADD_ARGS", "DYLD_INSERT_LIBRARIES", "LD_PRELOAD" }) |key|
@@ -170,6 +237,83 @@ pub fn apple(ctx: *cache.Context, driver: []const u8) !Selection {
     const resolved_driver = try real(ctx, driver);
     if (!std.mem.eql(u8, resolved_driver, "/usr/bin/clang") and
         !std.mem.eql(u8, resolved_driver, "/usr/bin/cc")) return error.UnsupportedNativeSelection;
+    if (!memoEnabled(ctx)) return appleLive(ctx, driver, resolved_driver);
+    const key = try selectionKey(ctx, "apple-native-selection-memo-v1", &.{ driver, resolved_driver });
+    const path = try ctx.path(&.{ "selection-memos", key });
+    if (ctx.read(path)) |bytes| memo: {
+        const payload = cache.unseal(ctx, bytes) catch break :memo;
+        const parsed = std.json.parseFromSlice(SelectionMemo, ctx.a, payload, .{ .allocate = .alloc_always }) catch break :memo;
+        const m = parsed.value;
+        if (m.schema != 1 or !cache.validHash(m.hash) or m.stamps.len < selection_roots.len or !stampsCurrent(ctx, m.stamps, m.started)) break :memo;
+        return .{ .driver = driver, .clang = m.clang, .linker = m.linker, .sdk = m.sdk, .resource_dir = m.resource_dir, .files = m.files, .hash = m.hash };
+    } else |_| {}
+    const started = std.Io.Clock.real.now(ctx.io).nanoseconds;
+    var paths: std.ArrayList([]const u8) = .empty;
+    try paths.appendSlice(ctx.a, &selection_roots);
+    try paths.appendSlice(ctx.a, &.{ driver, resolved_driver });
+    const before = try collectStamps(ctx, paths.items);
+    const selected = try appleLive(ctx, driver, resolved_driver);
+    const bin = std.fs.path.dirname(selected.clang) orelse return selected;
+    const usr = std.fs.path.dirname(bin) orelse return selected;
+    try paths.appendSlice(ctx.a, &.{ selected.clang, selected.linker, selected.sdk, std.fs.path.dirname(selected.sdk) orelse selected.sdk, selected.resource_dir, bin, usr, std.fs.path.dirname(usr) orelse usr });
+    if (ctx.env.get("SDKROOT") == null) {
+        // The default SDK path is commonly a link that a new SDK can retarget.
+        const default_sdk = query(ctx, &.{ "/usr/bin/xcrun", "--sdk", "macosx", "--show-sdk-path" }) catch return selected;
+        try paths.appendSlice(ctx.a, &.{ default_sdk, std.fs.path.dirname(default_sdk) orelse default_sdk });
+    }
+    try paths.appendSlice(ctx.a, selected.files);
+    const stamps = try collectStamps(ctx, paths.items);
+    for (before) |earlier| for (stamps) |later| if (std.mem.eql(u8, earlier.path, later.path) and !identity.equal(earlier, later)) return selected;
+    if (stampsCurrent(ctx, stamps, started)) {
+        const memo: SelectionMemo = .{ .started = started, .clang = selected.clang, .linker = selected.linker, .sdk = selected.sdk, .resource_dir = selected.resource_dir, .files = selected.files, .hash = selected.hash, .stamps = stamps };
+        const bytes = std.json.Stringify.valueAlloc(ctx.a, memo, .{}) catch return selected;
+        ctx.atomic(path, cache.seal(ctx, bytes) catch return selected) catch {};
+    }
+    return selected;
+}
+
+/// Memoized `xcrun --find tool` under the same selection-state contract.
+pub fn xcrunFind(ctx: *cache.Context, tool: []const u8) ![]const u8 {
+    const live = struct {
+        fn find(c: *cache.Context, name: []const u8) ![]const u8 {
+            const result = try std.process.run(c.a, c.io, .{ .argv = &.{ "/usr/bin/xcrun", "--find", name }, .environ_map = c.env });
+            switch (result.term) {
+                .exited => |code| if (code != 0) return error.UnsupportedAppleHelper,
+                else => return error.UnsupportedAppleHelper,
+            }
+            const found = std.mem.trim(u8, result.stdout, "\r\n ");
+            if (!std.fs.path.isAbsolute(found) or std.mem.indexOfScalar(u8, found, '\n') != null) return error.UnsupportedAppleHelper;
+            return found;
+        }
+    }.find;
+    if (builtin.os.tag != .macos or !memoEnabled(ctx)) return live(ctx, tool);
+    const FindMemo = struct { schema: u32 = 1, started: i96, found: []const u8, stamps: []const identity.Stamp };
+    const key = try selectionKey(ctx, "xcrun-find-memo-v1", &.{tool});
+    const path = try ctx.path(&.{ "selection-memos", key });
+    if (ctx.read(path)) |bytes| memo: {
+        const payload = cache.unseal(ctx, bytes) catch break :memo;
+        const parsed = std.json.parseFromSlice(FindMemo, ctx.a, payload, .{ .allocate = .alloc_always }) catch break :memo;
+        const m = parsed.value;
+        if (m.schema != 1 or m.stamps.len < selection_roots.len or !stampsCurrent(ctx, m.stamps, m.started)) break :memo;
+        return m.found;
+    } else |_| {}
+    const started = std.Io.Clock.real.now(ctx.io).nanoseconds;
+    const before = try collectStamps(ctx, &selection_roots);
+    const found = try live(ctx, tool);
+    const dir = std.fs.path.dirname(found) orelse return found;
+    var paths: std.ArrayList([]const u8) = .empty;
+    try paths.appendSlice(ctx.a, &selection_roots);
+    try paths.appendSlice(ctx.a, &.{ found, dir, std.fs.path.dirname(dir) orelse dir });
+    const stamps = try collectStamps(ctx, paths.items);
+    for (before, stamps[0..before.len]) |earlier, later| if (!identity.equal(earlier, later)) return found;
+    if (stampsCurrent(ctx, stamps, started)) {
+        const bytes = std.json.Stringify.valueAlloc(ctx.a, FindMemo{ .started = started, .found = found, .stamps = stamps }, .{}) catch return found;
+        ctx.atomic(path, cache.seal(ctx, bytes) catch return found) catch {};
+    }
+    return found;
+}
+
+fn appleLive(ctx: *cache.Context, driver: []const u8, resolved_driver: []const u8) !Selection {
     var queries = [_]Query{
         .{ .argv = &.{ driver, "-v", "-###", "-x", "c", "/dev/null", "-o", "/dev/null" } },
         .{ .argv = &.{ "/usr/bin/xcrun", "--find", "clang" } },
