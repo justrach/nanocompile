@@ -1,0 +1,117 @@
+--- a/src/cache.zig
++++ b/src/cache.zig
+@@ -107,6 +107,43 @@
+         return finish(self.a, &h);
+     }
+ 
++    // Experimental output-only hashing. The default path is unchanged.
++    // Modes 1 and 2 use the same bounded owned snapshot; mode 2 adds at most
++    // three pool workers to its calling output-validation thread.
++    pub fn digestBlob(self: *Context, path_: []const u8) ![]const u8 {
++        const mode = self.env.get("NANOCOMPILE_BLOB_HASH_MODE") orelse "0";
++        const parallel = std.mem.eql(u8, mode, "2");
++        if (!parallel and !std.mem.eql(u8, mode, "1")) return self.digest(path_);
++        const file = try Dir.cwd().openFile(self.io, path_, .{});
++        defer file.close(self.io);
++        const before = try file.stat(self.io);
++        if (before.kind != .file) return error.NotRegularFile;
++        if (before.size < 32 * 1024 * 1024 or before.size > 256 * 1024 * 1024)
++            return self.digest(path_);
++        const a = std.heap.page_allocator;
++        const bytes = try a.alloc(u8, @intCast(before.size + 1));
++        defer a.free(bytes);
++        var reader = file.reader(self.io, &.{});
++        const n = try reader.interface.readSliceShort(bytes);
++        if (n != before.size or !sameFileState(before, try file.stat(self.io)) or
++            !sameFileState(before, try Dir.cwd().statFile(self.io, path_, .{})))
++            return error.InputChangedDuringHashing;
++        var result: [Hash.digest_length]u8 = undefined;
++        if (parallel) {
++            var threaded = std.Io.Threaded.init(a, .{
++                .async_limit = .limited(3),
++                .concurrent_limit = .limited(3),
++            });
++            defer threaded.deinit();
++            try Hash.hashParallel(bytes[0..n], &result, .{}, a, threaded.io());
++            self.trace("hash: parallel output blob snapshot");
++        } else {
++            Hash.hash(bytes[0..n], &result, .{});
++            self.trace("hash: serial output blob snapshot");
++        }
++        return self.a.dupe(u8, &std.fmt.bytesToHex(result, .lower));
++    }
++
+     pub fn checkedDigest(self: *Context, path_: []const u8) !CheckedDigest {
+         const before = try Dir.cwd().statFile(self.io, path_, .{});
+         const hash = try self.digest(path_);
+@@ -548,7 +585,7 @@
+         local.a = arena.allocator();
+         for (check.entry.outputs) |output| {
+             const path = blobPath(&local, output.hash) catch return;
+-            const hash = local.digest(path) catch return;
++            const hash = local.digestBlob(path) catch return;
+             if (!std.mem.eql(u8, hash, output.hash)) return;
+         }
+         check.valid = true;
+@@ -659,7 +696,7 @@
+         if (!output_check.valid) return null;
+     } else {
+         for (entry.outputs) |output| {
+-            const hash = ctx.digest(try blobPath(ctx, output.hash)) catch return null;
++            const hash = ctx.digestBlob(try blobPath(ctx, output.hash)) catch return null;
+             if (!std.mem.eql(u8, hash, output.hash)) return null;
+         }
+     }
+@@ -1085,3 +1122,52 @@
+     try std.testing.expectEqualStrings("untouched", try ctx.read(output));
+     try std.testing.expect(!try restoreVariants(&ctx, key, &.{input}));
+ }
++
++
++test "parallel output hashing validates odd-length blobs before either restore path writes" {
++    var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
++    defer arena.deinit();
++    const a = arena.allocator();
++    const io = std.testing.io;
++    var tmp = std.testing.tmpDir(.{});
++    defer tmp.cleanup();
++    const cwd = try Dir.cwd().realPathFileAlloc(io, try std.fs.path.join(a, &.{ ".zig-cache", "tmp", &tmp.sub_path }), a);
++    var env = std.process.Environ.Map.init(a);
++    try env.put("NANOCOMPILE_BLOB_HASH_MODE", "2");
++    var ctx: Context = .{ .a = a, .io = io, .env = &env, .root = try std.fs.path.join(a, &.{ cwd, "cache" }), .cwd = cwd };
++    try ctx.prepare();
++    var records: std.ArrayList(Dependency) = .empty;
++    for (0..32) |i| {
++        const name = try std.fmt.allocPrint(a, "input-{d}", .{i});
++        try tmp.dir.writeFile(io, .{ .sub_path = name, .data = name });
++        const path = try std.fs.path.join(a, &.{ cwd, name });
++        try records.append(a, .{ .path = path, .hash = try ctx.digest(path) });
++    }
++    const bytes = try a.alloc(u8, 32 * 1024 * 1024 + 137);
++    for (bytes, 0..) |*byte, i| byte.* = @intCast(i % 251);
++    const output = try std.fs.path.join(a, &.{ cwd, "output" });
++    const key = "abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789";
++    for ([_]usize{ 1, 32 }) |count| {
++        try tmp.dir.writeFile(io, .{ .sub_path = "output", .data = bytes });
++        const expected = try ctx.digest(output);
++        try std.testing.expectEqualStrings(expected, try ctx.digestBlob(output));
++        try store(&ctx, key, records.items[0..count], &.{output}, "", "");
++        try tmp.dir.deleteFile(io, "output");
++        try std.testing.expect(try restore(&ctx, key, &.{output}));
++        try std.testing.expectEqualStrings(expected, try ctx.digest(output));
++        const blob = try blobPath(&ctx, expected);
++        const before = try Dir.cwd().statFile(io, blob, .{});
++        bytes[bytes.len - 1] ^= 1;
++        try ctx.atomic(blob, bytes);
++        const changed = try Dir.cwd().openFile(io, blob, .{});
++        try changed.setTimestamps(io, .{ .modify_timestamp = .{ .new = before.mtime } });
++        changed.close(io);
++        try tmp.dir.writeFile(io, .{ .sub_path = "output", .data = "untouched" });
++        try std.testing.expect(!try restore(&ctx, key, &.{output}));
++        try std.testing.expectEqualStrings("untouched", try ctx.read(output));
++        bytes[bytes.len - 1] ^= 1;
++        try ctx.atomic(blob, bytes);
++        try std.testing.expect(try restore(&ctx, key, &.{output}));
++        try std.testing.expectEqualStrings(expected, try ctx.digest(output));
++    }
++}
