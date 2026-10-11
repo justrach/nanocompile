@@ -26,6 +26,14 @@ Declared inputs are only known after a run. A run is recorded only when every de
 
 A hit validates the recorded input snapshot again, restores into a staging directory beside `OUT_DIR`, re-checks the input stat epoch, then atomically renames the staging directory over the empty `OUT_DIR`. It then replays stdout and stderr.
 
+## Text shims
+
+Every build-script run starts by executing the shim Cargo copied into the build directory. macOS assesses each new Mach-O inode on its first exec. That costs about 25 ms, and about 300 ms per binary when several fresh executables start together after an idle period, as the first build scripts of a build do. This does not depend on binary size: a 16 KB program pays the same as Nano's 2 MB binary.
+
+The shim is therefore a text file, `#!/absolute/path/to/nanocompile`. The kernel runs the already-validated Nano executable as the interpreter, with the script path as `argv[1]`. No shell is involved, so environment variables pass through unchanged, including `DEP_*` names that shells drop. Nano recognizes this mode only when `argv[1]` is a build-script path whose first line names its own executable. It then always runs the recorded real script, and fails with `MissingBuildScriptRecord` rather than re-executing the shim, so it can never recurse. Paths that cannot appear safely on a shebang line (not absolute, containing whitespace, or longer than 400 bytes) keep the binary copy.
+
+On the warm Harness build, this cut build-script-run slot time from about 9.5 s to 6.5 s; kache's is 5.7 s.
+
 ## Limits
 
 These limits are the same as Cargo's own reruns and kache's:

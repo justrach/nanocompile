@@ -654,17 +654,54 @@ pub fn install(ctx: *cache.Context, argv: []const []const u8) !void {
         Dir.cwd().rename(real, .cwd(), path, ctx.io) catch {};
         Dir.cwd().deleteFile(ctx.io, config) catch {};
     }
-    try cache.materialize(ctx, try std.process.executablePathAlloc(ctx.io, ctx.a), path, 0o700);
+    // macOS assesses every new Mach-O inode on its first exec (tens of ms,
+    // hundreds when many start together), and Cargo copies the shim to a new
+    // inode. A text shim naming this already-validated executable as its
+    // interpreter avoids that; unusual paths fall back to a binary copy.
+    const self = try std.process.executablePathAlloc(ctx.io, ctx.a);
+    if (shebangSafe(self)) {
+        try ctx.atomic(path, try std.fmt.allocPrint(ctx.a, "#!{s}\n", .{self}));
+        const shim = try Dir.cwd().openFile(ctx.io, path, .{ .mode = .read_write });
+        defer shim.close(ctx.io);
+        try shim.setPermissions(ctx.io, .fromMode(0o700));
+    } else try cache.materialize(ctx, self, path, 0o700);
     try ctx.atomic(config, try std.json.Stringify.valueAlloc(ctx.a, Launch{ .real = real }, .{}));
+}
+fn shebangSafe(path: []const u8) bool {
+    if (!std.fs.path.isAbsolute(path) or path.len > 400) return false;
+    for (path) |ch| if (ch <= ' ' or ch == 0x7f) return false;
+    return true;
+}
+fn scriptName(path: []const u8) bool {
+    const name = std.fs.path.basename(path);
+    return eq(name, "build-script-build") or std.mem.startsWith(u8, name, "build_script_build-");
 }
 pub fn launch(ctx: *cache.Context, args: []const [:0]const u8) !?u8 {
     if (args.len == 0) return null;
-    const name = std.fs.path.basename(args[0]);
-    if (!eq(name, "build-script-build") and !std.mem.startsWith(u8, name, "build_script_build-")) return null;
-    const path = try std.process.executablePathAlloc(ctx.io, ctx.a);
-    const record = try std.fs.path.join(ctx.a, &.{ std.fs.path.dirname(path).?, "nano-build-script.json" });
-    const parsed = try std.json.parseFromSlice(Launch, ctx.a, try ctx.read(record), .{ .allocate = .alloc_always });
-    return try execute(ctx, parsed.value.real, args[1..]);
+    // Copied binary shim: argv[0] is the script path and the record sits
+    // beside this executable.
+    if (scriptName(args[0])) {
+        const path = try std.process.executablePathAlloc(ctx.io, ctx.a);
+        const record = try std.fs.path.join(ctx.a, &.{ std.fs.path.dirname(path).?, "nano-build-script.json" });
+        const parsed = try std.json.parseFromSlice(Launch, ctx.a, try ctx.read(record), .{ .allocate = .alloc_always });
+        return try execute(ctx, parsed.value.real, args[1..]);
+    }
+    // Text shim: the kernel runs this executable as the interpreter with the
+    // script path as argv[1]. Only a sibling record selects this mode, and the
+    // recorded real script is executed, never argv[1] itself.
+    if (args.len >= 2 and scriptName(args[1])) {
+        const script = try std.fs.path.resolve(ctx.a, &.{ ctx.cwd, args[1] });
+        var head: [512]u8 = undefined;
+        const prefix = Dir.cwd().readFile(ctx.io, script, &head) catch return null;
+        const self = try std.process.executablePathAlloc(ctx.io, ctx.a);
+        const shim = try std.fmt.allocPrint(ctx.a, "#!{s}\n", .{self});
+        if (!std.mem.startsWith(u8, prefix, shim)) return null;
+        // Never fall through: treating our own shim as a compiler would run it again.
+        const record = try std.fs.path.join(ctx.a, &.{ std.fs.path.dirname(script).?, "nano-build-script.json" });
+        const parsed = try std.json.parseFromSlice(Launch, ctx.a, ctx.read(record) catch return error.MissingBuildScriptRecord, .{ .allocate = .alloc_always });
+        return try execute(ctx, parsed.value.real, args[2..]);
+    }
+    return null;
 }
 
 pub fn wantsInstall(ctx: *cache.Context, argv: []const []const u8) bool {

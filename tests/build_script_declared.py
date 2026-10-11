@@ -137,6 +137,17 @@ def main():
         cargo(142, 'build_script_miss', NANOCOMPILE_BUILD_SCRIPTS_FILE=str(other))
         cargo(142, 'build_script_hit', NANOCOMPILE_BUILD_SCRIPTS_FILE=str(other))
 
+        # Installed shims are text files naming Nano as their interpreter, so
+        # no new executable image is created per build. A shim whose record
+        # is missing must fail immediately rather than run itself again.
+        shims = list((target / 'release/build').glob('declared-fixture-*/build-script-build'))
+        assert shims and all(s.read_bytes().startswith(b'#!' + str(binary).encode()) for s in shims), shims
+        orphan = root / 'orphan' / 'build-script-build'
+        orphan.parent.mkdir()
+        orphan.write_bytes(b'#!' + str(binary).encode() + b'\n')
+        orphan.chmod(0o700)
+        q = subprocess.run([str(orphan)], env=base, capture_output=True, timeout=20)
+        assert q.returncode != 0 and b'MissingBuildScriptRecord' in q.stderr, q.stderr
         # Disabled mode runs every script live and records nothing new.
         shutil.rmtree(target, ignore_errors=True)
         env = {k: v for k, v in base.items() if k != 'NANOCOMPILE_BUILD_SCRIPT_CACHE'}
