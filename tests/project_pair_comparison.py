@@ -23,6 +23,7 @@ RUNTIME_CONTROLS = {
     'NANOCOMPILE_PRODUCER_GRAPH_WORKERS': {'0', '4'},
     'NANOCOMPILE_PRODUCER_SHARED_DIGESTS': {'0', '1'},
     'NANOCOMPILE_HASH_MISMATCH_STOP': {'0', '1'},
+    'NANOCOMPILE_BLOB_HASH_MODE': {'0', '1', '2'},
 }
 
 
@@ -190,6 +191,7 @@ def main():
         with log_path.open('w') as log:
             child = subprocess.Popen(command, cwd=project, env=run_env, stdout=log,
                                      stderr=log, start_new_session=True)
+            started_monotonic = time.monotonic()
             started = time.perf_counter()
             peak = 0
             last_sample = 0
@@ -206,6 +208,7 @@ def main():
                 except subprocess.TimeoutExpired:
                     pass
             elapsed = time.perf_counter() - started
+            ended = time.monotonic()
         log_record = dict(path=log_path.name, bytes=log_path.stat().st_size, sha256=sha(log_path))
         if child.returncode:
             evidence['builds'].append(dict(implementation=name, phase=phase, seconds=elapsed,
@@ -238,6 +241,7 @@ def main():
         if phase == 'warm':
             assert counts.get('hit', 0) >= args.minimum_cache_units, counts
         row = {'implementation': name, 'phase': phase, 'seconds': elapsed,
+               'started_monotonic': started_monotonic, 'ended_monotonic': ended,
                'runtime_controls': controls, 'trace_enabled': traced,
                'exit_code': child.returncode, 'build_log': log_record, 'artifact_modes': modes,
                'artifact_modes_match_own_reference': modes == own_modes[name],

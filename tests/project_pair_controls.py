@@ -35,6 +35,15 @@ class RuntimeControlTests(unittest.TestCase):
                                  phase == 'prime' and mode == 'candidate')
         self.assertNotIn('NANOCOMPILE_TRACE', common)
 
+    def test_blob_hash_controls_prime_the_same_keys_they_measure(self):
+        for candidate in ('1', '2'):
+            control = self.parse(['NANOCOMPILE_BLOB_HASH_MODE', '0', candidate])
+            for name in ('baseline', 'candidate'):
+                prime = build_environment({}, name, 'prime', control, None)
+                warm = build_environment({}, name, 'warm', control, None)
+                self.assertEqual(prime, warm)
+                self.assertEqual(warm, {'NANOCOMPILE_BLOB_HASH_MODE': control['values'][name]})
+
     def test_reject_confounded_or_unsafe_interventions(self):
         cases = [
             (['NANOCOMPILE_PRODUCER_GRAPH_WORKERS', '0', '4'], {'baseline': 'one', 'candidate': 'two'}),
@@ -43,6 +52,7 @@ class RuntimeControlTests(unittest.TestCase):
             (['NANOCOMPILE_DIR', '0', '1'], None),
             (['R2_SECRET_ACCESS_KEY', '0', '1'], None),
             (['NANOCOMPILE_UNKNOWN_EXPERIMENT', '0', '1'], None),
+            (['NANOCOMPILE_BLOB_HASH_MODE', '0', '3'], None),
         ]
         for values, hashes in cases:
             with self.subTest(control=values), contextlib.redirect_stderr(io.StringIO()):

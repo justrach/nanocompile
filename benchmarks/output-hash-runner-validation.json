@@ -1,0 +1,239 @@
+{
+  "completed": true,
+  "scope": "Six small Cargo builds validate runtime-control isolation, artifact/mode equality, untraced key priming and build logs. The tiny output does not activate parallel hashing; no speed claim.",
+  "raw_report_sha256": "997ae65a7479560968532e681e869dcb13e19c7524577ad8cfbd56f25bc9a2fd",
+  "verification": {
+    "completed": true,
+    "report_sha256": "997ae65a7479560968532e681e869dcb13e19c7524577ad8cfbd56f25bc9a2fd",
+    "builds_verified": 6,
+    "source_manifest_sha256": "2044be197e73e214071f0a91b5889f7660e09f8e33324c3ba8f2368d1a828dc5",
+    "scope": "Real rustc key separation: both primes miss, four warm builds hit with equal artifacts/modes. Tiny file does not activate parallel hashing; actual request replay separately verifies it."
+  },
+  "runner_sha256": "d413145ba893e7c47be6c37418d60c2c59b86879ad7bbbff8567f70a9ad0145c",
+  "runtime_sha256": {
+    "baseline": "6fb7d4d2e661d2f5f07dadb7838d63e6ffe8703bb7df2ccd8077b6dc14c7c5ea",
+    "candidate": "6fb7d4d2e661d2f5f07dadb7838d63e6ffe8703bb7df2ccd8077b6dc14c7c5ea"
+  },
+  "runtime_control": {
+    "name": "NANOCOMPILE_BLOB_HASH_MODE",
+    "values": {
+      "baseline": "0",
+      "candidate": "2"
+    }
+  },
+  "tracked_source_hashes": {
+    "Cargo.toml": "3eb63f082002ab1d716fc0a1ea423fdbcf62da31fcffeba40d4b42689e8d9572",
+    "src/lib.rs": "23c480d0b0c28869d82fd2399be85df8fdcbc09878393be70e84fd44e8600eb3"
+  },
+  "builds": [
+    {
+      "implementation": "baseline",
+      "phase": "prime",
+      "seconds": 1.0262015420012176,
+      "started_monotonic": 527981.819184625,
+      "ended_monotonic": 527982.845389958,
+      "runtime_controls": {
+        "NANOCOMPILE_BLOB_HASH_MODE": "0"
+      },
+      "trace_enabled": false,
+      "exit_code": 0,
+      "build_log": {
+        "path": "00-baseline.log",
+        "bytes": 195,
+        "sha256": "a24f0ea30236c501b726deb27ca5ae95162f0d46a53247fe55e3ed16c83e3181"
+      },
+      "artifact_modes": {
+        "release/deps/liboutput_hash_runner_fixture-c724c85675ed54f5.rlib": "0o644",
+        "release/liboutput_hash_runner_fixture.rlib": "0o644"
+      },
+      "artifact_modes_match_own_reference": true,
+      "events": {
+        "miss": 1
+      },
+      "peak_sampled_process_tree_rss_bytes": 35454976,
+      "artifacts_match_reference": true,
+      "reference_mode": "shared",
+      "artifacts_match_first_prime": true,
+      "artifact_count": 2,
+      "artifact_sha256": {
+        "release/deps/liboutput_hash_runner_fixture-c724c85675ed54f5.rlib": "a52210a6eeb22b02a9cfcfda7ef7a1a3162d8ca0766abb088e09b1810ddf30a0",
+        "release/liboutput_hash_runner_fixture.rlib": "a52210a6eeb22b02a9cfcfda7ef7a1a3162d8ca0766abb088e09b1810ddf30a0"
+      }
+    },
+    {
+      "implementation": "candidate",
+      "phase": "prime",
+      "seconds": 0.1211494579911232,
+      "started_monotonic": 527982.853996625,
+      "ended_monotonic": 527982.975150791,
+      "runtime_controls": {
+        "NANOCOMPILE_BLOB_HASH_MODE": "2"
+      },
+      "trace_enabled": false,
+      "exit_code": 0,
+      "build_log": {
+        "path": "01-candidate.log",
+        "bytes": 195,
+        "sha256": "a2ad682b536b5c0474b3dd46bda04b22d63c876410be89210fbb48756c051753"
+      },
+      "artifact_modes": {
+        "release/deps/liboutput_hash_runner_fixture-c724c85675ed54f5.rlib": "0o644",
+        "release/liboutput_hash_runner_fixture.rlib": "0o644"
+      },
+      "artifact_modes_match_own_reference": true,
+      "events": {
+        "bypass": 3,
+        "miss": 1
+      },
+      "peak_sampled_process_tree_rss_bytes": 7176192,
+      "artifacts_match_reference": true,
+      "reference_mode": "shared",
+      "artifacts_match_first_prime": true,
+      "artifact_count": 2,
+      "artifact_sha256": {
+        "release/deps/liboutput_hash_runner_fixture-c724c85675ed54f5.rlib": "a52210a6eeb22b02a9cfcfda7ef7a1a3162d8ca0766abb088e09b1810ddf30a0",
+        "release/liboutput_hash_runner_fixture.rlib": "a52210a6eeb22b02a9cfcfda7ef7a1a3162d8ca0766abb088e09b1810ddf30a0"
+      }
+    },
+    {
+      "implementation": "baseline",
+      "phase": "warm",
+      "seconds": 0.08049808302894235,
+      "started_monotonic": 527982.983370916,
+      "ended_monotonic": 527983.063870375,
+      "runtime_controls": {
+        "NANOCOMPILE_BLOB_HASH_MODE": "0"
+      },
+      "trace_enabled": false,
+      "exit_code": 0,
+      "build_log": {
+        "path": "02-baseline.log",
+        "bytes": 195,
+        "sha256": "5cb7349636f40746c0e654b1c010d2e8cc7e0171da5d727f98ca8a995f9e9d8c"
+      },
+      "artifact_modes": {
+        "release/deps/liboutput_hash_runner_fixture-c724c85675ed54f5.rlib": "0o644",
+        "release/liboutput_hash_runner_fixture.rlib": "0o644"
+      },
+      "artifact_modes_match_own_reference": true,
+      "events": {
+        "bypass": 3,
+        "hit": 1
+      },
+      "peak_sampled_process_tree_rss_bytes": 7618560,
+      "artifacts_match_reference": true,
+      "reference_mode": "shared",
+      "artifacts_match_first_prime": true,
+      "artifact_count": 2,
+      "artifact_sha256": {
+        "release/deps/liboutput_hash_runner_fixture-c724c85675ed54f5.rlib": "a52210a6eeb22b02a9cfcfda7ef7a1a3162d8ca0766abb088e09b1810ddf30a0",
+        "release/liboutput_hash_runner_fixture.rlib": "a52210a6eeb22b02a9cfcfda7ef7a1a3162d8ca0766abb088e09b1810ddf30a0"
+      }
+    },
+    {
+      "implementation": "candidate",
+      "phase": "warm",
+      "seconds": 0.07789491699077189,
+      "started_monotonic": 527983.07258775,
+      "ended_monotonic": 527983.1504845,
+      "runtime_controls": {
+        "NANOCOMPILE_BLOB_HASH_MODE": "2"
+      },
+      "trace_enabled": false,
+      "exit_code": 0,
+      "build_log": {
+        "path": "03-candidate.log",
+        "bytes": 195,
+        "sha256": "5cb7349636f40746c0e654b1c010d2e8cc7e0171da5d727f98ca8a995f9e9d8c"
+      },
+      "artifact_modes": {
+        "release/deps/liboutput_hash_runner_fixture-c724c85675ed54f5.rlib": "0o644",
+        "release/liboutput_hash_runner_fixture.rlib": "0o644"
+      },
+      "artifact_modes_match_own_reference": true,
+      "events": {
+        "bypass": 3,
+        "hit": 1
+      },
+      "peak_sampled_process_tree_rss_bytes": 7618560,
+      "artifacts_match_reference": true,
+      "reference_mode": "shared",
+      "artifacts_match_first_prime": true,
+      "artifact_count": 2,
+      "artifact_sha256": {
+        "release/deps/liboutput_hash_runner_fixture-c724c85675ed54f5.rlib": "a52210a6eeb22b02a9cfcfda7ef7a1a3162d8ca0766abb088e09b1810ddf30a0",
+        "release/liboutput_hash_runner_fixture.rlib": "a52210a6eeb22b02a9cfcfda7ef7a1a3162d8ca0766abb088e09b1810ddf30a0"
+      }
+    },
+    {
+      "implementation": "candidate",
+      "phase": "warm",
+      "seconds": 0.07618687499780208,
+      "started_monotonic": 527983.158524166,
+      "ended_monotonic": 527983.234711625,
+      "runtime_controls": {
+        "NANOCOMPILE_BLOB_HASH_MODE": "2"
+      },
+      "trace_enabled": false,
+      "exit_code": 0,
+      "build_log": {
+        "path": "04-candidate.log",
+        "bytes": 195,
+        "sha256": "5cb7349636f40746c0e654b1c010d2e8cc7e0171da5d727f98ca8a995f9e9d8c"
+      },
+      "artifact_modes": {
+        "release/deps/liboutput_hash_runner_fixture-c724c85675ed54f5.rlib": "0o644",
+        "release/liboutput_hash_runner_fixture.rlib": "0o644"
+      },
+      "artifact_modes_match_own_reference": true,
+      "events": {
+        "bypass": 3,
+        "hit": 1
+      },
+      "peak_sampled_process_tree_rss_bytes": 7110656,
+      "artifacts_match_reference": true,
+      "reference_mode": "shared",
+      "artifacts_match_first_prime": true,
+      "artifact_count": 2,
+      "artifact_sha256": {
+        "release/deps/liboutput_hash_runner_fixture-c724c85675ed54f5.rlib": "a52210a6eeb22b02a9cfcfda7ef7a1a3162d8ca0766abb088e09b1810ddf30a0",
+        "release/liboutput_hash_runner_fixture.rlib": "a52210a6eeb22b02a9cfcfda7ef7a1a3162d8ca0766abb088e09b1810ddf30a0"
+      }
+    },
+    {
+      "implementation": "baseline",
+      "phase": "warm",
+      "seconds": 0.07887366693466902,
+      "started_monotonic": 527983.24282525,
+      "ended_monotonic": 527983.32169925,
+      "runtime_controls": {
+        "NANOCOMPILE_BLOB_HASH_MODE": "0"
+      },
+      "trace_enabled": false,
+      "exit_code": 0,
+      "build_log": {
+        "path": "05-baseline.log",
+        "bytes": 195,
+        "sha256": "5cb7349636f40746c0e654b1c010d2e8cc7e0171da5d727f98ca8a995f9e9d8c"
+      },
+      "artifact_modes": {
+        "release/deps/liboutput_hash_runner_fixture-c724c85675ed54f5.rlib": "0o644",
+        "release/liboutput_hash_runner_fixture.rlib": "0o644"
+      },
+      "artifact_modes_match_own_reference": true,
+      "events": {
+        "bypass": 3,
+        "hit": 1
+      },
+      "peak_sampled_process_tree_rss_bytes": 7585792,
+      "artifacts_match_reference": true,
+      "reference_mode": "shared",
+      "artifacts_match_first_prime": true,
+      "artifact_count": 2,
+      "artifact_sha256": {
+        "release/deps/liboutput_hash_runner_fixture-c724c85675ed54f5.rlib": "a52210a6eeb22b02a9cfcfda7ef7a1a3162d8ca0766abb088e09b1810ddf30a0",
+        "release/liboutput_hash_runner_fixture.rlib": "a52210a6eeb22b02a9cfcfda7ef7a1a3162d8ca0766abb088e09b1810ddf30a0"
+      }
+    }
+  ]
+}
