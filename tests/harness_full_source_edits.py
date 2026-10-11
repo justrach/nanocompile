@@ -222,8 +222,23 @@ def main():
     final_references = {}
     mode_references = {}
 
+    def settle():
+        # Outside timing, for every implementation: a restarted private kache
+        # daemon can still be loading or sweeping a restored store. Wait until
+        # it has used under 2% CPU for three consecutive seconds (max 180 s).
+        started = time.monotonic()
+        if daemon is None:
+            return 0.0
+        quiet = 0
+        while quiet < 3 and time.monotonic() - started < 180:
+            sample = subprocess.run(['ps', '-o', '%cpu=', '-p', str(daemon.pid)], capture_output=True, text=True).stdout.strip()
+            quiet = quiet + 1 if sample and float(sample) < 2.0 else 0
+            time.sleep(1)
+        return time.monotonic() - started
+
     def build(implementation, phase):
         shutil.rmtree(target, ignore_errors=True)
+        settled = settle()
         require_space(state, args.min_free_gib)
         require_space(output.parent, min(args.min_free_gib, 1))
         before = nano_events() if implementation == "nanocompile" else kache_events() if implementation == "kache" else collections.Counter()
@@ -275,6 +290,7 @@ def main():
         row['final_executable_artifacts'] = {'release/harness':sha(final_path)} if final_path.is_file() else {}
         row['final_executable_modes'] = {'release/harness':oct(final_path.stat().st_mode & 0o777)} if final_path.is_file() else {}
         row['build_log'] = dict(path=log_path.name,bytes=log_path.stat().st_size,sha256=sha(log_path))
+        row['pre_build_daemon_settle_seconds'] = settled
         timing = target / 'cargo-timings/cargo-timing.html'
         if args.cargo_timings and timing.is_file():
             saved = log_path.with_suffix('.timing.html')
@@ -379,6 +395,7 @@ def main():
 
     if args.native_clang:
         result['method'] += '; Nano explicitly uses CC=nanocompile clang and native remarks; direct and kache retain their usual native compiler selection. Inline scanner changes debug representation, so every mode must match its own cold Rust, macro, executable and native artifact bytes. RSS includes benchmark parent, private kache daemon and Cargo descendants.'
+    result['method'] += '; before every build (all implementations, outside timing) wait until the private kache daemon is idle (<2% CPU for 3 s, at most 180 s) and record the wait'
     daemon = None
     daemon_log = (state/'daemon.log').open('w')
     def stop_daemon():

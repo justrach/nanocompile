@@ -1,0 +1,40 @@
+{
+  "diagnostic": true,
+  "purpose": "Explain kache shared-edit lead: reproduce Nano cold then shared parser edit with per-request capture and compiler phases.",
+  "runtime_sha256": "380646dce7bea1629b20b4e74994531c42062b08bd60380f04f7fed354ee08f7",
+  "builds": [
+    {
+      "build": "cold",
+      "seconds": 174.9390390419867,
+      "exit_code": 0
+    },
+    {
+      "build": "shared-edit",
+      "seconds": 112.97084275004454,
+      "exit_code": 0
+    }
+  ],
+  "unit_seconds": {
+    "0-cold": {
+      "harness-adapters 0.2.108": 14.91,
+      "harness-engine 0.2.108": 18.58,
+      "harness-ui 0.2.108": 24.59
+    },
+    "1-shared-edit": {
+      "harness-adapters 0.2.108": 8.84,
+      "harness-engine 0.2.108": 17.72,
+      "harness-ui 0.2.108": 25.59
+    }
+  },
+  "harness_ui_shared_edit_phases_ms": {
+    "total": 25569.81,
+    "rustc_execution_streams": 25306.85,
+    "postcompile_store": 227.99,
+    "rust_graphs": 180.47,
+    "restore_probe": 24.62,
+    "input_snapshot_staging": 8.56,
+    "prepare_identity": 1.48
+  },
+  "finding": "Under the trace, Nano adds about 0.26 s to the harness-ui miss (25.57 s total, rustc 25.31 s). The reproduced shared edit took 112.97 s with no kache daemon running. In both study samples, Nano shared-edit builds immediately followed a kache empty-cache reference build whose cleanup restarts the private kache daemon on the restored store; harness-ui then took 29.25-30.24 s. The runner now waits, outside timing and for every implementation, until that daemon is idle.",
+  "limitations": "Single traced diagnostic sample with tracing overhead and without the preceding leaf edit; not a speed comparison."
+}
