@@ -1,0 +1,289 @@
+{
+  "completed": true,
+  "raw_report_sha256": "fed5d4a5a2ddba056352d430bd50c17dcd5a0cf8639ab1527bfaa9a0069a750f",
+  "controls_sha256": "572b17b85103f9b93e1e3351b9f04b4a6459720c6081f5eaef6f047c2b9fc93d",
+  "runtime_sha256": "e54426c75a7b4edbbb78b1be82d124d1946ea3ed00e79b9b104e68b9c2119207",
+  "verifier_sha256": "dbf0c1080159ac235b82264dbf87a32395ac95b9cf01ce018b24d72587a17f10",
+  "snapshot_files_verified": 883,
+  "tracked_files_verified": 881,
+  "final_artifacts_rehashed": 1244,
+  "builds": [
+    {
+      "index": 0,
+      "implementation": "baseline",
+      "phase": "prime",
+      "seconds": 188.43743199994788,
+      "build_log": {
+        "path": "00-baseline.log",
+        "bytes": 155704,
+        "sha256": "2344beb9e1e9364c6fabbfdb20e77669860088f0ca3b616f291cf24dc8dadcd4"
+      },
+      "events": {
+        "build_script_miss": 31,
+        "bypass": 31,
+        "miss": 1102,
+        "failed": 8
+      },
+      "artifact_count": 1244,
+      "own_reference_bytes_modes_cli_verified": true
+    },
+    {
+      "index": 1,
+      "implementation": "candidate",
+      "phase": "prime",
+      "seconds": 181.89587945799576,
+      "build_log": {
+        "path": "01-candidate.log",
+        "bytes": 325133,
+        "sha256": "f4226de69b9e7ad8898d38e0509f3bfd2fc9ee8b58dd8e08d6e39e8e86a1e008"
+      },
+      "events": {
+        "build_script_miss": 31,
+        "bypass": 31,
+        "miss": 1102,
+        "failed": 8
+      },
+      "artifact_count": 1244,
+      "own_reference_bytes_modes_cli_verified": true
+    },
+    {
+      "index": 2,
+      "implementation": "baseline",
+      "phase": "cold",
+      "seconds": 188.60261216701474,
+      "build_log": {
+        "path": "02-baseline.log",
+        "bytes": 155704,
+        "sha256": "84b6e45e58d06947e213e0623de022ea9f2fc669e91316234e790578797e3bb9"
+      },
+      "events": {
+        "build_script_miss": 31,
+        "bypass": 31,
+        "miss": 1102,
+        "failed": 8
+      },
+      "artifact_count": 1244,
+      "own_reference_bytes_modes_cli_verified": true
+    },
+    {
+      "index": 3,
+      "implementation": "candidate",
+      "phase": "cold",
+      "seconds": 181.86720058403444,
+      "build_log": {
+        "path": "03-candidate.log",
+        "bytes": 155704,
+        "sha256": "3d21c380b449d3fe060630521fbe684af200a50d204b386025351a120fbc3510"
+      },
+      "events": {
+        "build_script_miss": 31,
+        "bypass": 31,
+        "miss": 1102,
+        "failed": 8
+      },
+      "artifact_count": 1244,
+      "own_reference_bytes_modes_cli_verified": true
+    },
+    {
+      "index": 4,
+      "implementation": "candidate",
+      "phase": "cold",
+      "seconds": 186.54735400003847,
+      "build_log": {
+        "path": "04-candidate.log",
+        "bytes": 155704,
+        "sha256": "d15a98185e0f43796245c6a8fba9929e9f7c4a03b62adfc4ee54b97cfd43c55c"
+      },
+      "events": {
+        "build_script_miss": 31,
+        "bypass": 31,
+        "miss": 1102,
+        "failed": 8
+      },
+      "artifact_count": 1244,
+      "own_reference_bytes_modes_cli_verified": true
+    },
+    {
+      "index": 5,
+      "implementation": "baseline",
+      "phase": "cold",
+      "seconds": 183.27345812501153,
+      "build_log": {
+        "path": "05-baseline.log",
+        "bytes": 155704,
+        "sha256": "f00c6c63cc7f28f62bc2217b1897c1a2d03656dea841f2bb7fc1f2d27a4f971e"
+      },
+      "events": {
+        "build_script_miss": 31,
+        "bypass": 31,
+        "miss": 1102,
+        "failed": 8
+      },
+      "artifact_count": 1244,
+      "own_reference_bytes_modes_cli_verified": true
+    },
+    {
+      "index": 6,
+      "implementation": "baseline",
+      "phase": "cold",
+      "seconds": 189.702738958993,
+      "build_log": {
+        "path": "06-baseline.log",
+        "bytes": 155704,
+        "sha256": "f81fe1f307b85c1841baf1e7641f948b315940772e3a127647465d2b63ddc4fb"
+      },
+      "events": {
+        "build_script_miss": 31,
+        "bypass": 31,
+        "miss": 1102,
+        "failed": 8
+      },
+      "artifact_count": 1244,
+      "own_reference_bytes_modes_cli_verified": true
+    },
+    {
+      "index": 7,
+      "implementation": "candidate",
+      "phase": "cold",
+      "seconds": 179.1400685409899,
+      "build_log": {
+        "path": "07-candidate.log",
+        "bytes": 155704,
+        "sha256": "c1982cd22711d988c876fc08278ff321756435afe3eb62785c5e68149a0f1812"
+      },
+      "events": {
+        "build_script_miss": 31,
+        "bypass": 31,
+        "miss": 1102,
+        "failed": 8
+      },
+      "artifact_count": 1244,
+      "own_reference_bytes_modes_cli_verified": true
+    },
+    {
+      "index": 8,
+      "implementation": "candidate",
+      "phase": "cold",
+      "seconds": 210.37902991601732,
+      "build_log": {
+        "path": "08-candidate.log",
+        "bytes": 155704,
+        "sha256": "761e6013e4b0582406eba62e92486bbf6b8c2660baa6f26f2287cb4282d5e37c"
+      },
+      "events": {
+        "build_script_miss": 31,
+        "bypass": 31,
+        "miss": 1102,
+        "failed": 8
+      },
+      "artifact_count": 1244,
+      "own_reference_bytes_modes_cli_verified": true
+    },
+    {
+      "index": 9,
+      "implementation": "baseline",
+      "phase": "cold",
+      "seconds": 190.98031170899048,
+      "build_log": {
+        "path": "09-baseline.log",
+        "bytes": 155704,
+        "sha256": "2b0394e4325e12a4d413611b83a2b864dea957b324c3ec0dfc3c79e89faa413d"
+      },
+      "events": {
+        "build_script_miss": 31,
+        "bypass": 31,
+        "miss": 1102,
+        "failed": 8
+      },
+      "artifact_count": 1244,
+      "own_reference_bytes_modes_cli_verified": true
+    },
+    {
+      "index": 10,
+      "implementation": "baseline",
+      "phase": "cold",
+      "seconds": 192.1413239170215,
+      "build_log": {
+        "path": "10-baseline.log",
+        "bytes": 155704,
+        "sha256": "b999d64b1197bac8370720a88a36b26f020bcd85cbc1b1f1105186cd407cda5f"
+      },
+      "events": {
+        "build_script_miss": 31,
+        "bypass": 31,
+        "miss": 1102,
+        "failed": 8
+      },
+      "artifact_count": 1244,
+      "own_reference_bytes_modes_cli_verified": true
+    },
+    {
+      "index": 11,
+      "implementation": "candidate",
+      "phase": "cold",
+      "seconds": 190.43731541698799,
+      "build_log": {
+        "path": "11-candidate.log",
+        "bytes": 155704,
+        "sha256": "4a23973063116ac5a1e41a95e751a3bac55c6b1a5d4137e292253d488aee8722"
+      },
+      "events": {
+        "build_script_miss": 31,
+        "bypass": 31,
+        "miss": 1102,
+        "failed": 8
+      },
+      "artifact_count": 1244,
+      "own_reference_bytes_modes_cli_verified": true
+    }
+  ],
+  "summary": {
+    "samples_seconds": {
+      "baseline": [
+        188.60261216701474,
+        183.27345812501153,
+        189.702738958993,
+        190.98031170899048,
+        192.1413239170215
+      ],
+      "candidate": [
+        181.86720058403444,
+        186.54735400003847,
+        179.1400685409899,
+        210.37902991601732,
+        190.43731541698799
+      ]
+    },
+    "medians": {
+      "baseline": 189.702738958993,
+      "candidate": 186.54735400003847
+    },
+    "paired_seconds_saved": [
+      6.735411582980305,
+      -3.2738958750269376,
+      10.562670418003108,
+      -19.398718207026832,
+      1.7040085000335239
+    ],
+    "wins": 3,
+    "mean_seconds_saved": -0.7341047162073664,
+    "standard_error": 5.21619369906857
+  },
+  "report_metadata_correction": {
+    "scope": "Report metadata correction only. Frozen running script and raw report remain unchanged.",
+    "executed_runner_sha256": "939580b6edf4c37058712e8c8d352d6679b104f644cca87511e9847e74f57147",
+    "raw_field": "producer_shared_digests",
+    "raw_value": {
+      "baseline": "0",
+      "candidate": "1"
+    },
+    "actual_control": {
+      "name": "NANOCOMPILE_PRODUCER_GRAPH_WORKERS",
+      "baseline": "0",
+      "candidate": "4"
+    },
+    "digest_sharing": "Earlier experimental producer shared-digest patch absent; not toggled",
+    "method_correction": "Same binary hash and stable wrapper path; only producer graph workers toggled for measured builds. Candidate prime alone traces activation. The inherited distinct-executable-hashes phrase does not describe this experiment."
+  },
+  "limits": "Five cold A/B pairs on one host. Not a kache comparison, warm/source-edit study or independent confirmation."
+}

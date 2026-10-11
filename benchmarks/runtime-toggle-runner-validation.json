@@ -1,0 +1,856 @@
+{
+  "completed": true,
+  "runner_sha256": "1df3044a3fae8514640420c0035f7ae39ed5681fe1bd468cafb03c86f8e9a239",
+  "runtime": "/tmp/nano-producer-parallel-graphs-candidate-20261011/runtime/bin/nanocompile",
+  "runtime_sha256": "e54426c75a7b4edbbb78b1be82d124d1946ea3ed00e79b9b104e68b9c2119207",
+  "scope": "Tiny real Cargo workload validates runner controls, tracing, artifacts and complete logs; no speed claim.",
+  "checks": [
+    {
+      "case": "cold",
+      "exit_code": 0,
+      "builds": 6,
+      "report_sha256": "40190d82314c40685dc7d56f788056697f2109d50ee7d44e4482a22f30384b4d",
+      "console_sha256": "3d2dc9c4816420a83d795d5e7f044ef33d2605214f7c6cd62c3e4196447d4b19",
+      "logs_verified": true,
+      "per_build_controls_verified": true,
+      "trace_policy_verified": true,
+      "own_artifact_bytes_modes_cli_verified": true
+    },
+    {
+      "case": "warm",
+      "exit_code": 0,
+      "builds": 6,
+      "report_sha256": "01eebde526351592ab8a7aeef4a8a5bd553804d033addcf6b5b25371fc71794c",
+      "console_sha256": "4e59a4978de11340d8960e9b3c8492be70e5f8d9cc5a02c81dd99a6d929867e9",
+      "logs_verified": true,
+      "per_build_controls_verified": true,
+      "trace_policy_verified": true,
+      "own_artifact_bytes_modes_cli_verified": true
+    },
+    {
+      "case": "missing-marker",
+      "exit_code": 1,
+      "builds": 2,
+      "report_sha256": "183857c22c228e9aa23d0a6eddb259896bee248b907c8600081ab327158a7939",
+      "console_sha256": "c7ac79ddc27ffab8ed5d96cec75ab4ec854ed60a519f0351b0696e827c141c31",
+      "logs_verified": true,
+      "per_build_controls_verified": true,
+      "trace_policy_verified": true,
+      "own_artifact_bytes_modes_cli_verified": true
+    }
+  ],
+  "validator_sha256": "2ae916edb0ff7d8c7dca43a18c89ac83b1befd003cb2fd97ed13b9571618f4fe",
+  "cases": [
+    {
+      "method": "rotating clean Cargo builds; binary copied to one stable wrapper path between completed builds; fixed target and cache paths; both modes primed; same executable identity, varying only the recorded runtime control; only the excluded candidate prime enables trace for activation verification; compiler cache cleared before every build, including primes; measured pairs alternate order; filesystem caches unflushed",
+      "runtime_control": {
+        "name": "NANOCOMPILE_PRODUCER_GRAPH_WORKERS",
+        "values": {
+          "baseline": "0",
+          "candidate": "4"
+        }
+      },
+      "candidate_prime_marker": "graph: parallel producer roots",
+      "project": "/private/tmp/nano-runtime-toggle-runner-validation-20261011/project",
+      "commit": "2dcd4ea4e7faf93408f7e4a70c2fa2a673f1cd75",
+      "dirty": false,
+      "rustc": "rustc 1.97.1 (8bab26f4f 2026-07-14)\nbinary: rustc\ncommit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452\ncommit-date: 2026-07-14\nhost: aarch64-apple-darwin\nrelease: 1.97.1\nLLVM version: 22.1.6\n",
+      "timestamp": "2026-10-11T04:06:39.583340+00:00",
+      "binary_sha256": {
+        "baseline": "e54426c75a7b4edbbb78b1be82d124d1946ea3ed00e79b9b104e68b9c2119207",
+        "candidate": "e54426c75a7b4edbbb78b1be82d124d1946ea3ed00e79b9b104e68b9c2119207"
+      },
+      "script_sha256": "1df3044a3fae8514640420c0035f7ae39ed5681fe1bd468cafb03c86f8e9a239",
+      "jobs": 2,
+      "runs_per_binary": 2,
+      "pipelined_companions": null,
+      "cold": true,
+      "compiler_stream": null,
+      "build_script_contract_sha256": null,
+      "command": [
+        "cargo",
+        "build",
+        "--release",
+        "--bin",
+        "app",
+        "--locked",
+        "--offline",
+        "-p",
+        "app",
+        "-j",
+        "2"
+      ],
+      "tracked_rust_and_manifest_hashes": {
+        "Cargo.lock": "62dda8901f4c4db668c619880c2c2efb67a85a9dee3ad04d709b0a68acc00394",
+        "Cargo.toml": "b5c67605b943e1014cbee9aa08333bfa32be5eda243b2eaec19838ada2e97404",
+        "app/Cargo.toml": "96aaefa419c2749b2cafc23e28943d7af544ab1e1d8af11915bc12e3b6fecd1e",
+        "app/src/main.rs": "ad0915d409ee386f7ce2aa3b8689ef04932bbe82247fb0cf482e334f914e2364",
+        "left/Cargo.toml": "d78acc9f656ae4bcdd7380cc37771d46f2a6c300b6bbea4704ea94a1c65619d6",
+        "left/src/lib.rs": "fe34600cca773450da211e86ec873db51b65288d06d5417728135345b7e77f84",
+        "right/Cargo.toml": "4362a51826819902c60534f013d347feeda7a3f90aab6fc2af157b0a4c5bf634",
+        "right/src/lib.rs": "fe34600cca773450da211e86ec873db51b65288d06d5417728135345b7e77f84"
+      },
+      "builds": [
+        {
+          "implementation": "baseline",
+          "phase": "prime",
+          "seconds": 1.4721005000174046,
+          "runtime_controls": {
+            "NANOCOMPILE_PRODUCER_GRAPH_WORKERS": "0"
+          },
+          "trace_enabled": false,
+          "exit_code": 0,
+          "build_log": {
+            "path": "00-baseline.log",
+            "bytes": 362,
+            "sha256": "777573d81cedadb433960ba8ad2f7ed982ae34ae55094cfc077987b22dec9b7c"
+          },
+          "artifact_modes": {
+            "release/deps/libleft-47a7c66c5d9f2f84.rlib": "0o644",
+            "release/deps/libright-0d273d2083a85737.rlib": "0o644",
+            "release/app": "0o755"
+          },
+          "artifact_modes_match_own_reference": true,
+          "cli_help_valid": true,
+          "cli_help_exit_code": 0,
+          "cli_help_sha256": "d8b19bcae5bbfb970555b5f42d31f2d1ca8c9653c971df6cfd5c28dabb67a524",
+          "cli_help_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "events": {
+            "miss": 3
+          },
+          "peak_sampled_process_tree_rss_bytes": 39403520,
+          "artifacts_match_reference": true,
+          "reference_mode": "shared",
+          "artifacts_match_first_prime": true,
+          "artifact_count": 3,
+          "artifact_sha256": {
+            "release/deps/libleft-47a7c66c5d9f2f84.rlib": "0fff4f4e7f55b84307ace0eb91a5c797ff46debd0d2bb54919081c547f7490e2",
+            "release/deps/libright-0d273d2083a85737.rlib": "fd1e629217af1cdb9c635e135d6bc57715265f68b446e352f0f1ea5e8cb58e2a",
+            "release/app": "08a38078486ad23b53695c8bab50ce35ce0ed8c72d164aedcdadff133d2fffc2"
+          },
+          "activation_marker_present": false
+        },
+        {
+          "implementation": "candidate",
+          "phase": "prime",
+          "seconds": 1.1601326249656267,
+          "runtime_controls": {
+            "NANOCOMPILE_PRODUCER_GRAPH_WORKERS": "4"
+          },
+          "trace_enabled": true,
+          "exit_code": 0,
+          "build_log": {
+            "path": "01-candidate.log",
+            "bytes": 949,
+            "sha256": "c849dd67f0b6489a0905981d4267286dd17caddc8db2ce87e161df448d44b9c7"
+          },
+          "artifact_modes": {
+            "release/deps/libleft-47a7c66c5d9f2f84.rlib": "0o644",
+            "release/deps/libright-0d273d2083a85737.rlib": "0o644",
+            "release/app": "0o755"
+          },
+          "artifact_modes_match_own_reference": true,
+          "cli_help_valid": true,
+          "cli_help_exit_code": 0,
+          "cli_help_sha256": "d8b19bcae5bbfb970555b5f42d31f2d1ca8c9653c971df6cfd5c28dabb67a524",
+          "cli_help_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "events": {
+            "miss": 3
+          },
+          "peak_sampled_process_tree_rss_bytes": 43106304,
+          "artifacts_match_reference": true,
+          "reference_mode": "shared",
+          "artifacts_match_first_prime": true,
+          "artifact_count": 3,
+          "artifact_sha256": {
+            "release/deps/libleft-47a7c66c5d9f2f84.rlib": "0fff4f4e7f55b84307ace0eb91a5c797ff46debd0d2bb54919081c547f7490e2",
+            "release/deps/libright-0d273d2083a85737.rlib": "fd1e629217af1cdb9c635e135d6bc57715265f68b446e352f0f1ea5e8cb58e2a",
+            "release/app": "08a38078486ad23b53695c8bab50ce35ce0ed8c72d164aedcdadff133d2fffc2"
+          },
+          "activation_marker_present": true
+        },
+        {
+          "implementation": "baseline",
+          "phase": "cold",
+          "seconds": 1.1952031669788994,
+          "runtime_controls": {
+            "NANOCOMPILE_PRODUCER_GRAPH_WORKERS": "0"
+          },
+          "trace_enabled": false,
+          "exit_code": 0,
+          "build_log": {
+            "path": "02-baseline.log",
+            "bytes": 362,
+            "sha256": "4dbbc4f564d0ae72b5f6ccfeb7f86623f3fe9035fa2e3f7804fa70d6ea451d03"
+          },
+          "artifact_modes": {
+            "release/deps/libleft-47a7c66c5d9f2f84.rlib": "0o644",
+            "release/deps/libright-0d273d2083a85737.rlib": "0o644",
+            "release/app": "0o755"
+          },
+          "artifact_modes_match_own_reference": true,
+          "cli_help_valid": true,
+          "cli_help_exit_code": 0,
+          "cli_help_sha256": "d8b19bcae5bbfb970555b5f42d31f2d1ca8c9653c971df6cfd5c28dabb67a524",
+          "cli_help_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "events": {
+            "miss": 3
+          },
+          "peak_sampled_process_tree_rss_bytes": 79249408,
+          "artifacts_match_reference": true,
+          "reference_mode": "shared",
+          "artifacts_match_first_prime": true,
+          "artifact_count": 3,
+          "artifact_sha256": {
+            "release/deps/libleft-47a7c66c5d9f2f84.rlib": "0fff4f4e7f55b84307ace0eb91a5c797ff46debd0d2bb54919081c547f7490e2",
+            "release/deps/libright-0d273d2083a85737.rlib": "fd1e629217af1cdb9c635e135d6bc57715265f68b446e352f0f1ea5e8cb58e2a",
+            "release/app": "08a38078486ad23b53695c8bab50ce35ce0ed8c72d164aedcdadff133d2fffc2"
+          },
+          "activation_marker_present": false
+        },
+        {
+          "implementation": "candidate",
+          "phase": "cold",
+          "seconds": 1.2015862499829382,
+          "runtime_controls": {
+            "NANOCOMPILE_PRODUCER_GRAPH_WORKERS": "4"
+          },
+          "trace_enabled": false,
+          "exit_code": 0,
+          "build_log": {
+            "path": "03-candidate.log",
+            "bytes": 362,
+            "sha256": "2b602f20b00734ca5e2a71ceb6193c37b9ffaabb18751a9722c3646887ec2cd0"
+          },
+          "artifact_modes": {
+            "release/deps/libleft-47a7c66c5d9f2f84.rlib": "0o644",
+            "release/deps/libright-0d273d2083a85737.rlib": "0o644",
+            "release/app": "0o755"
+          },
+          "artifact_modes_match_own_reference": true,
+          "cli_help_valid": true,
+          "cli_help_exit_code": 0,
+          "cli_help_sha256": "d8b19bcae5bbfb970555b5f42d31f2d1ca8c9653c971df6cfd5c28dabb67a524",
+          "cli_help_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "events": {
+            "miss": 3
+          },
+          "peak_sampled_process_tree_rss_bytes": 115884032,
+          "artifacts_match_reference": true,
+          "reference_mode": "shared",
+          "artifacts_match_first_prime": true,
+          "artifact_count": 3,
+          "artifact_sha256": {
+            "release/deps/libleft-47a7c66c5d9f2f84.rlib": "0fff4f4e7f55b84307ace0eb91a5c797ff46debd0d2bb54919081c547f7490e2",
+            "release/deps/libright-0d273d2083a85737.rlib": "fd1e629217af1cdb9c635e135d6bc57715265f68b446e352f0f1ea5e8cb58e2a",
+            "release/app": "08a38078486ad23b53695c8bab50ce35ce0ed8c72d164aedcdadff133d2fffc2"
+          },
+          "activation_marker_present": false
+        },
+        {
+          "implementation": "candidate",
+          "phase": "cold",
+          "seconds": 1.3012331670033745,
+          "runtime_controls": {
+            "NANOCOMPILE_PRODUCER_GRAPH_WORKERS": "4"
+          },
+          "trace_enabled": false,
+          "exit_code": 0,
+          "build_log": {
+            "path": "04-candidate.log",
+            "bytes": 362,
+            "sha256": "7e7acdd7ee3e625ac4cb1bf41a058fc80c65d1cac797caa2c3a57fe4f5b77fd2"
+          },
+          "artifact_modes": {
+            "release/deps/libleft-47a7c66c5d9f2f84.rlib": "0o644",
+            "release/deps/libright-0d273d2083a85737.rlib": "0o644",
+            "release/app": "0o755"
+          },
+          "artifact_modes_match_own_reference": true,
+          "cli_help_valid": true,
+          "cli_help_exit_code": 0,
+          "cli_help_sha256": "d8b19bcae5bbfb970555b5f42d31f2d1ca8c9653c971df6cfd5c28dabb67a524",
+          "cli_help_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "events": {
+            "miss": 3
+          },
+          "peak_sampled_process_tree_rss_bytes": 76972032,
+          "artifacts_match_reference": true,
+          "reference_mode": "shared",
+          "artifacts_match_first_prime": true,
+          "artifact_count": 3,
+          "artifact_sha256": {
+            "release/deps/libleft-47a7c66c5d9f2f84.rlib": "0fff4f4e7f55b84307ace0eb91a5c797ff46debd0d2bb54919081c547f7490e2",
+            "release/deps/libright-0d273d2083a85737.rlib": "fd1e629217af1cdb9c635e135d6bc57715265f68b446e352f0f1ea5e8cb58e2a",
+            "release/app": "08a38078486ad23b53695c8bab50ce35ce0ed8c72d164aedcdadff133d2fffc2"
+          },
+          "activation_marker_present": false
+        },
+        {
+          "implementation": "baseline",
+          "phase": "cold",
+          "seconds": 1.3000492079881951,
+          "runtime_controls": {
+            "NANOCOMPILE_PRODUCER_GRAPH_WORKERS": "0"
+          },
+          "trace_enabled": false,
+          "exit_code": 0,
+          "build_log": {
+            "path": "05-baseline.log",
+            "bytes": 362,
+            "sha256": "31ebe712422ad1fbea1c92cbca2289ca29ebca04d594e292cbe5739495652dcb"
+          },
+          "artifact_modes": {
+            "release/deps/libleft-47a7c66c5d9f2f84.rlib": "0o644",
+            "release/deps/libright-0d273d2083a85737.rlib": "0o644",
+            "release/app": "0o755"
+          },
+          "artifact_modes_match_own_reference": true,
+          "cli_help_valid": true,
+          "cli_help_exit_code": 0,
+          "cli_help_sha256": "d8b19bcae5bbfb970555b5f42d31f2d1ca8c9653c971df6cfd5c28dabb67a524",
+          "cli_help_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "events": {
+            "miss": 3
+          },
+          "peak_sampled_process_tree_rss_bytes": 39059456,
+          "artifacts_match_reference": true,
+          "reference_mode": "shared",
+          "artifacts_match_first_prime": true,
+          "artifact_count": 3,
+          "artifact_sha256": {
+            "release/deps/libleft-47a7c66c5d9f2f84.rlib": "0fff4f4e7f55b84307ace0eb91a5c797ff46debd0d2bb54919081c547f7490e2",
+            "release/deps/libright-0d273d2083a85737.rlib": "fd1e629217af1cdb9c635e135d6bc57715265f68b446e352f0f1ea5e8cb58e2a",
+            "release/app": "08a38078486ad23b53695c8bab50ce35ce0ed8c72d164aedcdadff133d2fffc2"
+          },
+          "activation_marker_present": false
+        }
+      ],
+      "binary_target": "app",
+      "cli_help_probe": true,
+      "source_date_epoch": 1791423832,
+      "thin_lto_producers": false,
+      "rlib_frameworks": false,
+      "staticlib_companions": false,
+      "bindgen_tools": null,
+      "bindgen_tools_file_sha256": null,
+      "minimum_free_space_gib": 1.0,
+      "completed": true,
+      "artifact_sha256": {
+        "release/deps/libleft-47a7c66c5d9f2f84.rlib": "0fff4f4e7f55b84307ace0eb91a5c797ff46debd0d2bb54919081c547f7490e2",
+        "release/deps/libright-0d273d2083a85737.rlib": "fd1e629217af1cdb9c635e135d6bc57715265f68b446e352f0f1ea5e8cb58e2a",
+        "release/app": "08a38078486ad23b53695c8bab50ce35ce0ed8c72d164aedcdadff133d2fffc2"
+      },
+      "own_reference_sha256": {
+        "baseline": {
+          "release/deps/libleft-47a7c66c5d9f2f84.rlib": "0fff4f4e7f55b84307ace0eb91a5c797ff46debd0d2bb54919081c547f7490e2",
+          "release/deps/libright-0d273d2083a85737.rlib": "fd1e629217af1cdb9c635e135d6bc57715265f68b446e352f0f1ea5e8cb58e2a",
+          "release/app": "08a38078486ad23b53695c8bab50ce35ce0ed8c72d164aedcdadff133d2fffc2"
+        },
+        "candidate": {
+          "release/deps/libleft-47a7c66c5d9f2f84.rlib": "0fff4f4e7f55b84307ace0eb91a5c797ff46debd0d2bb54919081c547f7490e2",
+          "release/deps/libright-0d273d2083a85737.rlib": "fd1e629217af1cdb9c635e135d6bc57715265f68b446e352f0f1ea5e8cb58e2a",
+          "release/app": "08a38078486ad23b53695c8bab50ce35ce0ed8c72d164aedcdadff133d2fffc2"
+        }
+      },
+      "cross_binary_artifact_differences": [],
+      "median_seconds": {
+        "baseline": 1.2476261874835473,
+        "candidate": 1.2514097084931564
+      },
+      "paired_seconds_saved": [
+        -0.006383083004038781,
+        -0.0011839590151794255
+      ],
+      "candidate_pair_wins": 0,
+      "paired_summary": {
+        "mean_seconds_saved": -0.003783521009609103,
+        "median_seconds_saved": -0.003783521009609103,
+        "standard_error": 0.0025995619944296773
+      },
+      "tracked_sources_unchanged": true
+    },
+    {
+      "method": "rotating clean Cargo builds; binary copied to one stable wrapper path between completed builds; fixed target and cache paths; both modes primed; same executable identity, varying only the recorded runtime control",
+      "runtime_control": {
+        "name": "NANOCOMPILE_PRODUCER_GRAPH_WORKERS",
+        "values": {
+          "baseline": "0",
+          "candidate": "4"
+        }
+      },
+      "candidate_prime_marker": null,
+      "project": "/private/tmp/nano-runtime-toggle-runner-validation-20261011/project",
+      "commit": "2dcd4ea4e7faf93408f7e4a70c2fa2a673f1cd75",
+      "dirty": false,
+      "rustc": "rustc 1.97.1 (8bab26f4f 2026-07-14)\nbinary: rustc\ncommit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452\ncommit-date: 2026-07-14\nhost: aarch64-apple-darwin\nrelease: 1.97.1\nLLVM version: 22.1.6\n",
+      "timestamp": "2026-10-11T04:06:48.085862+00:00",
+      "binary_sha256": {
+        "baseline": "e54426c75a7b4edbbb78b1be82d124d1946ea3ed00e79b9b104e68b9c2119207",
+        "candidate": "e54426c75a7b4edbbb78b1be82d124d1946ea3ed00e79b9b104e68b9c2119207"
+      },
+      "script_sha256": "1df3044a3fae8514640420c0035f7ae39ed5681fe1bd468cafb03c86f8e9a239",
+      "jobs": 2,
+      "runs_per_binary": 2,
+      "pipelined_companions": null,
+      "cold": false,
+      "compiler_stream": null,
+      "build_script_contract_sha256": null,
+      "command": [
+        "cargo",
+        "build",
+        "--release",
+        "--bin",
+        "app",
+        "--locked",
+        "--offline",
+        "-p",
+        "app",
+        "-j",
+        "2"
+      ],
+      "tracked_rust_and_manifest_hashes": {
+        "Cargo.lock": "62dda8901f4c4db668c619880c2c2efb67a85a9dee3ad04d709b0a68acc00394",
+        "Cargo.toml": "b5c67605b943e1014cbee9aa08333bfa32be5eda243b2eaec19838ada2e97404",
+        "app/Cargo.toml": "96aaefa419c2749b2cafc23e28943d7af544ab1e1d8af11915bc12e3b6fecd1e",
+        "app/src/main.rs": "ad0915d409ee386f7ce2aa3b8689ef04932bbe82247fb0cf482e334f914e2364",
+        "left/Cargo.toml": "d78acc9f656ae4bcdd7380cc37771d46f2a6c300b6bbea4704ea94a1c65619d6",
+        "left/src/lib.rs": "fe34600cca773450da211e86ec873db51b65288d06d5417728135345b7e77f84",
+        "right/Cargo.toml": "4362a51826819902c60534f013d347feeda7a3f90aab6fc2af157b0a4c5bf634",
+        "right/src/lib.rs": "fe34600cca773450da211e86ec873db51b65288d06d5417728135345b7e77f84"
+      },
+      "builds": [
+        {
+          "implementation": "baseline",
+          "phase": "prime",
+          "seconds": 1.2023616249789484,
+          "runtime_controls": {
+            "NANOCOMPILE_PRODUCER_GRAPH_WORKERS": "0"
+          },
+          "trace_enabled": false,
+          "exit_code": 0,
+          "build_log": {
+            "path": "00-baseline.log",
+            "bytes": 362,
+            "sha256": "0ea0c64cc1458db64538bb88f7b44f4ef58b6d131a5a8023fac2e9c787102178"
+          },
+          "artifact_modes": {
+            "release/deps/libleft-47a7c66c5d9f2f84.rlib": "0o644",
+            "release/deps/libright-0d273d2083a85737.rlib": "0o644",
+            "release/app": "0o755"
+          },
+          "artifact_modes_match_own_reference": true,
+          "cli_help_valid": true,
+          "cli_help_exit_code": 0,
+          "cli_help_sha256": "d8b19bcae5bbfb970555b5f42d31f2d1ca8c9653c971df6cfd5c28dabb67a524",
+          "cli_help_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "events": {
+            "miss": 3
+          },
+          "peak_sampled_process_tree_rss_bytes": 113983488,
+          "artifacts_match_reference": true,
+          "reference_mode": "shared",
+          "artifacts_match_first_prime": true,
+          "artifact_count": 3,
+          "artifact_sha256": {
+            "release/deps/libleft-47a7c66c5d9f2f84.rlib": "0fff4f4e7f55b84307ace0eb91a5c797ff46debd0d2bb54919081c547f7490e2",
+            "release/deps/libright-0d273d2083a85737.rlib": "fd1e629217af1cdb9c635e135d6bc57715265f68b446e352f0f1ea5e8cb58e2a",
+            "release/app": "08a38078486ad23b53695c8bab50ce35ce0ed8c72d164aedcdadff133d2fffc2"
+          }
+        },
+        {
+          "implementation": "candidate",
+          "phase": "prime",
+          "seconds": 0.3900380829581991,
+          "runtime_controls": {
+            "NANOCOMPILE_PRODUCER_GRAPH_WORKERS": "4"
+          },
+          "trace_enabled": false,
+          "exit_code": 0,
+          "build_log": {
+            "path": "01-candidate.log",
+            "bytes": 362,
+            "sha256": "b5f5e242474f8379315c0817f6bec8e709a45ac69868e61fe9722688c74d7e7d"
+          },
+          "artifact_modes": {
+            "release/deps/libleft-47a7c66c5d9f2f84.rlib": "0o644",
+            "release/deps/libright-0d273d2083a85737.rlib": "0o644",
+            "release/app": "0o755"
+          },
+          "artifact_modes_match_own_reference": true,
+          "cli_help_valid": true,
+          "cli_help_exit_code": 0,
+          "cli_help_sha256": "d8b19bcae5bbfb970555b5f42d31f2d1ca8c9653c971df6cfd5c28dabb67a524",
+          "cli_help_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "events": {
+            "bypass": 3,
+            "miss": 3
+          },
+          "peak_sampled_process_tree_rss_bytes": 32768,
+          "artifacts_match_reference": true,
+          "reference_mode": "shared",
+          "artifacts_match_first_prime": true,
+          "artifact_count": 3,
+          "artifact_sha256": {
+            "release/deps/libleft-47a7c66c5d9f2f84.rlib": "0fff4f4e7f55b84307ace0eb91a5c797ff46debd0d2bb54919081c547f7490e2",
+            "release/deps/libright-0d273d2083a85737.rlib": "fd1e629217af1cdb9c635e135d6bc57715265f68b446e352f0f1ea5e8cb58e2a",
+            "release/app": "08a38078486ad23b53695c8bab50ce35ce0ed8c72d164aedcdadff133d2fffc2"
+          }
+        },
+        {
+          "implementation": "baseline",
+          "phase": "warm",
+          "seconds": 0.14494170801481232,
+          "runtime_controls": {
+            "NANOCOMPILE_PRODUCER_GRAPH_WORKERS": "0"
+          },
+          "trace_enabled": false,
+          "exit_code": 0,
+          "build_log": {
+            "path": "02-baseline.log",
+            "bytes": 362,
+            "sha256": "4290bbaa8f8d0e2c423d87f21b7ec7899100682400d1a1c3b542959233844954"
+          },
+          "artifact_modes": {
+            "release/deps/libleft-47a7c66c5d9f2f84.rlib": "0o644",
+            "release/deps/libright-0d273d2083a85737.rlib": "0o644",
+            "release/app": "0o755"
+          },
+          "artifact_modes_match_own_reference": true,
+          "cli_help_valid": true,
+          "cli_help_exit_code": 0,
+          "cli_help_sha256": "d8b19bcae5bbfb970555b5f42d31f2d1ca8c9653c971df6cfd5c28dabb67a524",
+          "cli_help_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "events": {
+            "hit": 3,
+            "bypass": 3
+          },
+          "peak_sampled_process_tree_rss_bytes": 7258112,
+          "artifacts_match_reference": true,
+          "reference_mode": "shared",
+          "artifacts_match_first_prime": true,
+          "artifact_count": 3,
+          "artifact_sha256": {
+            "release/deps/libleft-47a7c66c5d9f2f84.rlib": "0fff4f4e7f55b84307ace0eb91a5c797ff46debd0d2bb54919081c547f7490e2",
+            "release/deps/libright-0d273d2083a85737.rlib": "fd1e629217af1cdb9c635e135d6bc57715265f68b446e352f0f1ea5e8cb58e2a",
+            "release/app": "08a38078486ad23b53695c8bab50ce35ce0ed8c72d164aedcdadff133d2fffc2"
+          }
+        },
+        {
+          "implementation": "candidate",
+          "phase": "warm",
+          "seconds": 0.14563466602703556,
+          "runtime_controls": {
+            "NANOCOMPILE_PRODUCER_GRAPH_WORKERS": "4"
+          },
+          "trace_enabled": false,
+          "exit_code": 0,
+          "build_log": {
+            "path": "03-candidate.log",
+            "bytes": 362,
+            "sha256": "974733244d5da6de49e9396bde364ccaa7f93fae66f08c54e6594fade38cf5b2"
+          },
+          "artifact_modes": {
+            "release/deps/libleft-47a7c66c5d9f2f84.rlib": "0o644",
+            "release/deps/libright-0d273d2083a85737.rlib": "0o644",
+            "release/app": "0o755"
+          },
+          "artifact_modes_match_own_reference": true,
+          "cli_help_valid": true,
+          "cli_help_exit_code": 0,
+          "cli_help_sha256": "d8b19bcae5bbfb970555b5f42d31f2d1ca8c9653c971df6cfd5c28dabb67a524",
+          "cli_help_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "events": {
+            "hit": 3,
+            "bypass": 3
+          },
+          "peak_sampled_process_tree_rss_bytes": 7471104,
+          "artifacts_match_reference": true,
+          "reference_mode": "shared",
+          "artifacts_match_first_prime": true,
+          "artifact_count": 3,
+          "artifact_sha256": {
+            "release/deps/libleft-47a7c66c5d9f2f84.rlib": "0fff4f4e7f55b84307ace0eb91a5c797ff46debd0d2bb54919081c547f7490e2",
+            "release/deps/libright-0d273d2083a85737.rlib": "fd1e629217af1cdb9c635e135d6bc57715265f68b446e352f0f1ea5e8cb58e2a",
+            "release/app": "08a38078486ad23b53695c8bab50ce35ce0ed8c72d164aedcdadff133d2fffc2"
+          }
+        },
+        {
+          "implementation": "candidate",
+          "phase": "warm",
+          "seconds": 0.17559983301907778,
+          "runtime_controls": {
+            "NANOCOMPILE_PRODUCER_GRAPH_WORKERS": "4"
+          },
+          "trace_enabled": false,
+          "exit_code": 0,
+          "build_log": {
+            "path": "04-candidate.log",
+            "bytes": 362,
+            "sha256": "008109660cdcaec60533fb1ca0ae1613505305035a4d858f9c3d7f1345aade28"
+          },
+          "artifact_modes": {
+            "release/deps/libleft-47a7c66c5d9f2f84.rlib": "0o644",
+            "release/deps/libright-0d273d2083a85737.rlib": "0o644",
+            "release/app": "0o755"
+          },
+          "artifact_modes_match_own_reference": true,
+          "cli_help_valid": true,
+          "cli_help_exit_code": 0,
+          "cli_help_sha256": "d8b19bcae5bbfb970555b5f42d31f2d1ca8c9653c971df6cfd5c28dabb67a524",
+          "cli_help_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "events": {
+            "hit": 3,
+            "bypass": 3
+          },
+          "peak_sampled_process_tree_rss_bytes": 7618560,
+          "artifacts_match_reference": true,
+          "reference_mode": "shared",
+          "artifacts_match_first_prime": true,
+          "artifact_count": 3,
+          "artifact_sha256": {
+            "release/deps/libleft-47a7c66c5d9f2f84.rlib": "0fff4f4e7f55b84307ace0eb91a5c797ff46debd0d2bb54919081c547f7490e2",
+            "release/deps/libright-0d273d2083a85737.rlib": "fd1e629217af1cdb9c635e135d6bc57715265f68b446e352f0f1ea5e8cb58e2a",
+            "release/app": "08a38078486ad23b53695c8bab50ce35ce0ed8c72d164aedcdadff133d2fffc2"
+          }
+        },
+        {
+          "implementation": "baseline",
+          "phase": "warm",
+          "seconds": 0.14628604095196351,
+          "runtime_controls": {
+            "NANOCOMPILE_PRODUCER_GRAPH_WORKERS": "0"
+          },
+          "trace_enabled": false,
+          "exit_code": 0,
+          "build_log": {
+            "path": "05-baseline.log",
+            "bytes": 362,
+            "sha256": "974733244d5da6de49e9396bde364ccaa7f93fae66f08c54e6594fade38cf5b2"
+          },
+          "artifact_modes": {
+            "release/deps/libleft-47a7c66c5d9f2f84.rlib": "0o644",
+            "release/deps/libright-0d273d2083a85737.rlib": "0o644",
+            "release/app": "0o755"
+          },
+          "artifact_modes_match_own_reference": true,
+          "cli_help_valid": true,
+          "cli_help_exit_code": 0,
+          "cli_help_sha256": "d8b19bcae5bbfb970555b5f42d31f2d1ca8c9653c971df6cfd5c28dabb67a524",
+          "cli_help_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "events": {
+            "hit": 3,
+            "bypass": 3
+          },
+          "peak_sampled_process_tree_rss_bytes": 7667712,
+          "artifacts_match_reference": true,
+          "reference_mode": "shared",
+          "artifacts_match_first_prime": true,
+          "artifact_count": 3,
+          "artifact_sha256": {
+            "release/deps/libleft-47a7c66c5d9f2f84.rlib": "0fff4f4e7f55b84307ace0eb91a5c797ff46debd0d2bb54919081c547f7490e2",
+            "release/deps/libright-0d273d2083a85737.rlib": "fd1e629217af1cdb9c635e135d6bc57715265f68b446e352f0f1ea5e8cb58e2a",
+            "release/app": "08a38078486ad23b53695c8bab50ce35ce0ed8c72d164aedcdadff133d2fffc2"
+          }
+        }
+      ],
+      "binary_target": "app",
+      "cli_help_probe": true,
+      "source_date_epoch": 1791423832,
+      "thin_lto_producers": false,
+      "rlib_frameworks": false,
+      "staticlib_companions": false,
+      "bindgen_tools": null,
+      "bindgen_tools_file_sha256": null,
+      "minimum_free_space_gib": 1.0,
+      "completed": true,
+      "artifact_sha256": {
+        "release/deps/libleft-47a7c66c5d9f2f84.rlib": "0fff4f4e7f55b84307ace0eb91a5c797ff46debd0d2bb54919081c547f7490e2",
+        "release/deps/libright-0d273d2083a85737.rlib": "fd1e629217af1cdb9c635e135d6bc57715265f68b446e352f0f1ea5e8cb58e2a",
+        "release/app": "08a38078486ad23b53695c8bab50ce35ce0ed8c72d164aedcdadff133d2fffc2"
+      },
+      "own_reference_sha256": {
+        "baseline": {
+          "release/deps/libleft-47a7c66c5d9f2f84.rlib": "0fff4f4e7f55b84307ace0eb91a5c797ff46debd0d2bb54919081c547f7490e2",
+          "release/deps/libright-0d273d2083a85737.rlib": "fd1e629217af1cdb9c635e135d6bc57715265f68b446e352f0f1ea5e8cb58e2a",
+          "release/app": "08a38078486ad23b53695c8bab50ce35ce0ed8c72d164aedcdadff133d2fffc2"
+        },
+        "candidate": {
+          "release/deps/libleft-47a7c66c5d9f2f84.rlib": "0fff4f4e7f55b84307ace0eb91a5c797ff46debd0d2bb54919081c547f7490e2",
+          "release/deps/libright-0d273d2083a85737.rlib": "fd1e629217af1cdb9c635e135d6bc57715265f68b446e352f0f1ea5e8cb58e2a",
+          "release/app": "08a38078486ad23b53695c8bab50ce35ce0ed8c72d164aedcdadff133d2fffc2"
+        }
+      },
+      "cross_binary_artifact_differences": [],
+      "median_seconds": {
+        "baseline": 0.14561387448338792,
+        "candidate": 0.16061724952305667
+      },
+      "paired_seconds_saved": [
+        -0.0006929580122232437,
+        -0.029313792067114264
+      ],
+      "candidate_pair_wins": 0,
+      "paired_summary": {
+        "mean_seconds_saved": -0.015003375039668754,
+        "median_seconds_saved": -0.015003375039668754,
+        "standard_error": 0.01431041702744551
+      },
+      "tracked_sources_unchanged": true
+    },
+    {
+      "method": "rotating clean Cargo builds; binary copied to one stable wrapper path between completed builds; fixed target and cache paths; both modes primed; same executable identity, varying only the recorded runtime control; only the excluded candidate prime enables trace for activation verification",
+      "runtime_control": {
+        "name": "NANOCOMPILE_PRODUCER_GRAPH_WORKERS",
+        "values": {
+          "baseline": "0",
+          "candidate": "4"
+        }
+      },
+      "candidate_prime_marker": "unimplemented-experiment-marker",
+      "project": "/private/tmp/nano-runtime-toggle-runner-validation-20261011/project",
+      "commit": "2dcd4ea4e7faf93408f7e4a70c2fa2a673f1cd75",
+      "dirty": false,
+      "rustc": "rustc 1.97.1 (8bab26f4f 2026-07-14)\nbinary: rustc\ncommit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452\ncommit-date: 2026-07-14\nhost: aarch64-apple-darwin\nrelease: 1.97.1\nLLVM version: 22.1.6\n",
+      "timestamp": "2026-10-11T04:06:50.688813+00:00",
+      "binary_sha256": {
+        "baseline": "e54426c75a7b4edbbb78b1be82d124d1946ea3ed00e79b9b104e68b9c2119207",
+        "candidate": "e54426c75a7b4edbbb78b1be82d124d1946ea3ed00e79b9b104e68b9c2119207"
+      },
+      "script_sha256": "1df3044a3fae8514640420c0035f7ae39ed5681fe1bd468cafb03c86f8e9a239",
+      "jobs": 2,
+      "runs_per_binary": 2,
+      "pipelined_companions": null,
+      "cold": true,
+      "compiler_stream": null,
+      "build_script_contract_sha256": null,
+      "command": [
+        "cargo",
+        "build",
+        "--release",
+        "--bin",
+        "app",
+        "--locked",
+        "--offline",
+        "-p",
+        "app",
+        "-j",
+        "2"
+      ],
+      "tracked_rust_and_manifest_hashes": {
+        "Cargo.lock": "62dda8901f4c4db668c619880c2c2efb67a85a9dee3ad04d709b0a68acc00394",
+        "Cargo.toml": "b5c67605b943e1014cbee9aa08333bfa32be5eda243b2eaec19838ada2e97404",
+        "app/Cargo.toml": "96aaefa419c2749b2cafc23e28943d7af544ab1e1d8af11915bc12e3b6fecd1e",
+        "app/src/main.rs": "ad0915d409ee386f7ce2aa3b8689ef04932bbe82247fb0cf482e334f914e2364",
+        "left/Cargo.toml": "d78acc9f656ae4bcdd7380cc37771d46f2a6c300b6bbea4704ea94a1c65619d6",
+        "left/src/lib.rs": "fe34600cca773450da211e86ec873db51b65288d06d5417728135345b7e77f84",
+        "right/Cargo.toml": "4362a51826819902c60534f013d347feeda7a3f90aab6fc2af157b0a4c5bf634",
+        "right/src/lib.rs": "fe34600cca773450da211e86ec873db51b65288d06d5417728135345b7e77f84"
+      },
+      "builds": [
+        {
+          "implementation": "baseline",
+          "phase": "prime",
+          "seconds": 1.1883340409840457,
+          "runtime_controls": {
+            "NANOCOMPILE_PRODUCER_GRAPH_WORKERS": "0"
+          },
+          "trace_enabled": false,
+          "exit_code": 0,
+          "build_log": {
+            "path": "00-baseline.log",
+            "bytes": 362,
+            "sha256": "4dbbc4f564d0ae72b5f6ccfeb7f86623f3fe9035fa2e3f7804fa70d6ea451d03"
+          },
+          "artifact_modes": {
+            "release/deps/libleft-47a7c66c5d9f2f84.rlib": "0o644",
+            "release/deps/libright-0d273d2083a85737.rlib": "0o644",
+            "release/app": "0o755"
+          },
+          "artifact_modes_match_own_reference": true,
+          "cli_help_valid": true,
+          "cli_help_exit_code": 0,
+          "cli_help_sha256": "d8b19bcae5bbfb970555b5f42d31f2d1ca8c9653c971df6cfd5c28dabb67a524",
+          "cli_help_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "events": {
+            "miss": 3
+          },
+          "peak_sampled_process_tree_rss_bytes": 47464448,
+          "artifacts_match_reference": true,
+          "reference_mode": "shared",
+          "artifacts_match_first_prime": true,
+          "artifact_count": 3,
+          "artifact_sha256": {
+            "release/deps/libleft-47a7c66c5d9f2f84.rlib": "0fff4f4e7f55b84307ace0eb91a5c797ff46debd0d2bb54919081c547f7490e2",
+            "release/deps/libright-0d273d2083a85737.rlib": "fd1e629217af1cdb9c635e135d6bc57715265f68b446e352f0f1ea5e8cb58e2a",
+            "release/app": "08a38078486ad23b53695c8bab50ce35ce0ed8c72d164aedcdadff133d2fffc2"
+          },
+          "activation_marker_present": false
+        },
+        {
+          "implementation": "candidate",
+          "phase": "prime",
+          "seconds": 1.1797695000423118,
+          "runtime_controls": {
+            "NANOCOMPILE_PRODUCER_GRAPH_WORKERS": "4"
+          },
+          "trace_enabled": true,
+          "exit_code": 0,
+          "build_log": {
+            "path": "01-candidate.log",
+            "bytes": 949,
+            "sha256": "ee86c61df1e81347db677c3f0d64b3c8f85165707849eb63db228de9119fa80f"
+          },
+          "artifact_modes": {
+            "release/deps/libleft-47a7c66c5d9f2f84.rlib": "0o644",
+            "release/deps/libright-0d273d2083a85737.rlib": "0o644",
+            "release/app": "0o755"
+          },
+          "artifact_modes_match_own_reference": true,
+          "cli_help_valid": true,
+          "cli_help_exit_code": 0,
+          "cli_help_sha256": "d8b19bcae5bbfb970555b5f42d31f2d1ca8c9653c971df6cfd5c28dabb67a524",
+          "cli_help_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "events": {
+            "miss": 3
+          },
+          "peak_sampled_process_tree_rss_bytes": 117817344,
+          "artifacts_match_reference": true,
+          "reference_mode": "shared",
+          "artifacts_match_first_prime": true,
+          "artifact_count": 3,
+          "artifact_sha256": {
+            "release/deps/libleft-47a7c66c5d9f2f84.rlib": "0fff4f4e7f55b84307ace0eb91a5c797ff46debd0d2bb54919081c547f7490e2",
+            "release/deps/libright-0d273d2083a85737.rlib": "fd1e629217af1cdb9c635e135d6bc57715265f68b446e352f0f1ea5e8cb58e2a",
+            "release/app": "08a38078486ad23b53695c8bab50ce35ce0ed8c72d164aedcdadff133d2fffc2"
+          },
+          "activation_marker_present": false
+        }
+      ],
+      "binary_target": "app",
+      "cli_help_probe": true,
+      "source_date_epoch": 1791423832,
+      "thin_lto_producers": false,
+      "rlib_frameworks": false,
+      "staticlib_companions": false,
+      "bindgen_tools": null,
+      "bindgen_tools_file_sha256": null,
+      "minimum_free_space_gib": 1.0,
+      "completed": false,
+      "failure": {
+        "type": "AssertionError",
+        "message": "Activation trace did not match the declared prime-only tracing policy"
+      }
+    }
+  ],
+  "fixture_source_sha256": {
+    "Cargo.lock": "62dda8901f4c4db668c619880c2c2efb67a85a9dee3ad04d709b0a68acc00394",
+    "Cargo.toml": "b5c67605b943e1014cbee9aa08333bfa32be5eda243b2eaec19838ada2e97404",
+    "app/Cargo.toml": "96aaefa419c2749b2cafc23e28943d7af544ab1e1d8af11915bc12e3b6fecd1e",
+    "app/src/main.rs": "ad0915d409ee386f7ce2aa3b8689ef04932bbe82247fb0cf482e334f914e2364",
+    "left/Cargo.toml": "d78acc9f656ae4bcdd7380cc37771d46f2a6c300b6bbea4704ea94a1c65619d6",
+    "left/src/lib.rs": "fe34600cca773450da211e86ec873db51b65288d06d5417728135345b7e77f84",
+    "right/Cargo.toml": "4362a51826819902c60534f013d347feeda7a3f90aab6fc2af157b0a4c5bf634",
+    "right/src/lib.rs": "fe34600cca773450da211e86ec873db51b65288d06d5417728135345b7e77f84"
+  }
+}
