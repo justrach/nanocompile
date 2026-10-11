@@ -14,9 +14,12 @@ import platform
 import shutil
 import signal
 import subprocess
+import sys
 import time
 
 from project_benchmark import sha
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'tools'))
+from build_trace import Capture
 
 
 def tree_rss(pid):
@@ -56,10 +59,14 @@ def main():
     p.add_argument('--compiler-stream', action='store_true')
     p.add_argument('--pipelined-companions', action='store_true')
     p.add_argument('--native-artifacts', action='store_true', help='hash native objects/archives without changing the compiler')
+    p.add_argument('--trace-builds', action='store_true', help='capture complete compiler streams and Cargo timelines; diagnostic overhead')
+    p.add_argument('--compiler-profile', action='store_true', help='record compiler phases; requires --trace-builds')
     p.add_argument('--no-compiler-stream', action='store_true', help='disable default Rust stream forwarding')
     p.add_argument('--no-pipelined-companions', action='store_true', help='disable default guarded companion membership')
     p.add_argument("--min-free-gib", type=float, help="free-space gate before each build; default 32 for full binaries, 8 for libraries")
     args = p.parse_args()
+    if args.compiler_profile and not args.trace_builds:
+        p.error('--compiler-profile requires --trace-builds')
     if args.min_free_gib is None:
         args.min_free_gib = 32
     if not 0 < args.min_free_gib < float("inf"):
@@ -77,6 +84,7 @@ def main():
     project = state / "project"
     require_space(state, args.min_free_gib)
     state.mkdir(parents=True, mode=0o700, exist_ok=False)
+    capture = Capture(state, {'nanocompile': binary, 'kache': kache}) if args.trace_builds else None
     original_tracked = subprocess.check_output(['git', 'ls-files', '-z'], cwd=original_project).decode().split('\0')
     original_hashes = {name: sha(original_project/name) for name in original_tracked if name and
                        (name.endswith(('.rs','.toml')) or Path(name).name == 'Cargo.lock') and (original_project/name).is_file()}
@@ -149,8 +157,14 @@ def main():
         env["NANOCOMPILE_PROC_MACRO_PRODUCERS"] = "1"
     if args.executable_producers:
         env["NANOCOMPILE_EXECUTABLE_PRODUCERS"] = "1"
+    if capture:
+        env['NANOCOMPILE_TRACE'] = '1'
+    if args.compiler_profile:
+        env['NANOCOMPILE_COMPILER_PROFILE'] = '1'
     command = ["cargo", "build", "--release", "--locked", "--offline", "--bin", "harness",
                "-p", args.package, "-j", str(args.jobs), "--message-format=json-render-diagnostics"]
+    if capture:
+        command += ['--timings', '-vv']
     result = {"compiler_stream": env.get("NANOCOMPILE_STREAM_COMPILER"), "pipelined_companions": env.get("NANOCOMPILE_PIPELINED_COMPANIONS"), "thin_lto_producers":args.thin_lto_producers, "source_date_epoch":args.source_date_epoch, "source_paths":["apps/harness/src/main.rs","crates/proto/src/lib.rs"], "original_project":str(original_project), "source_edits":"existing CLI help description and shared version_triple whitespace behavior; runtime and linked parser result checked; history-cache timed builds compared to empty-cache builds at identical paths", "script_sha256": sha(Path(__file__)), "project": str(project), "commit": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=project, text=True).strip(),
               "dirty": bool(subprocess.check_output(["git", "status", "--porcelain"], cwd=project)),
               "platform": platform.platform(), "jobs": args.jobs, "runs": args.runs,
@@ -167,6 +181,10 @@ def main():
     }
     result['snapshot_rust_and_manifest_hashes'] = {name:sha(project/name) for name in original_input_hashes}
     result['staticlib_companions'] = args.staticlib_companions
+    result['diagnostic_trace'] = bool(capture)
+    result['compiler_profile'] = args.compiler_profile
+    if capture:
+        result['method'] += '; compiler/Cargo capture and profiling overhead; diagnostic timings are not speed benchmarks'
     result['rlib_frameworks'] = args.rlib_frameworks
     result['bindgen_tools_file_sha256'] = bindgen_tools_hash
     result['bindgen_tools'] = selected_bindgen_tools
@@ -204,15 +222,21 @@ def main():
         require_space(output.parent, min(args.min_free_gib, 1))
         before = nano_events() if implementation == "nanocompile" else kache_events() if implementation == "kache" else collections.Counter()
         build_env = dict(env)
+        nano_frontend = capture.wrappers['nanocompile'] if capture else binary
         if implementation != "direct":
-            build_env["RUSTC_WRAPPER"] = binary if implementation == "nanocompile" else kache
+            build_env["RUSTC_WRAPPER"] = capture.wrappers[implementation] if capture else binary if implementation == "nanocompile" else kache
         if implementation == "nanocompile" and args.native_clang:
-            build_env['CC'] = binary + ' clang'
-            build_env['CC_KNOWN_WRAPPER_CUSTOM'] = Path(binary).name
+            build_env['CC'] = nano_frontend + ' clang'
+            build_env['CC_KNOWN_WRAPPER_CUSTOM'] = Path(nano_frontend).name
             build_env['NANOCOMPILE_CLANG_REMARKS'] = '1'
         number = len(result["builds"])
         print(f"Starting {implementation} {phase} clean release build {number + 1}", flush=True)
         log_path = state / f"{number}-{implementation}-{phase}.log"
+        event_path = kcache / 'events.jsonl' if implementation == 'kache' else cache / 'events'
+        event_offset = event_path.stat().st_size if event_path.exists() else 0
+        if capture:
+            capture.begin(number, implementation)
+        origin_ns = time.clock_gettime_ns(time.CLOCK_MONOTONIC)
         start = time.monotonic()
         peak = 0
         last_sample = 0
@@ -247,6 +271,8 @@ def main():
         row['build_log'] = dict(path=log_path.name,bytes=log_path.stat().st_size,sha256=sha(log_path))
         result['builds'].append(row)
         save()
+        if capture:
+            capture.finish(row, target, origin_ns, event_path, event_offset, log_path)
         reference_key = (scenario, implementation)
         if reference_key not in references:
             references[reference_key] = artifacts

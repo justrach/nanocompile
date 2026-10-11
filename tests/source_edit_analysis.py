@@ -32,10 +32,13 @@ class SourceEditAnalysis(unittest.TestCase):
             self.assertEqual(result['comparisons'][0]['nano_minus_kache_seconds'], 2)
             self.assertIn('INCOMPLETE', (output / 'next-experiments.md').read_text())
             data['builds'][1]['exit_code'] = 1
+            data['diagnostic_trace'] = True
             report.write_text(json.dumps(data))
             result = analyze(report, state, output)
             self.assertIsNone(result['comparisons'][0]['nano_minus_kache_seconds'])
             self.assertEqual(result['samples'][1]['exit_code'], 1)
+            self.assertTrue(result['diagnostic_trace'])
+            self.assertIn('not speed benchmarks', result['limitations'])
             (state / 'build.log').write_bytes(b'tampered')
             with self.assertRaises(ValueError):
                 analyze(report, state, state / 'must-not-exist')

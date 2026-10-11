@@ -45,6 +45,8 @@ def analyze(report, state, output):
         'snapshot_sources_unchanged_except_declared_edits',
         'snapshot_declared_sources_restored')}
     analysis = dict(schema=1, completed=complete, integrity=integrity,
+        diagnostic_trace=bool(data.get('diagnostic_trace')),
+        compiler_profile=bool(data.get('compiler_profile')),
         source_checks=source_checks, samples=samples, comparisons=comparisons,
         provenance={key: data.get(key) for key in (
             'commit', 'jobs', 'nanocompile_sha256', 'kache_sha256', 'rustc',
@@ -55,6 +57,8 @@ def analyze(report, state, output):
         'medians or a proven speedup. Fresh references are correctness checks. '
         'Build logs establish console integrity, not per-request attribution. '
         'No compiler critical path or cause is inferred from cache counts.')
+    if analysis['diagnostic_trace']:
+        analysis['limitations'] = 'Diagnostic capture adds overhead; these timings are not speed benchmarks. '+analysis['limitations']
     lines = ['# Source-edit observations', '', analysis['limitations'], '',
              'Session: '+('complete' if complete else 'INCOMPLETE; provisional observations'), '',
              '| Case | Phase | Direct (s) | Nano (s) | kache (s) | Nano − kache (s) |',

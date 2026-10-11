@@ -24,6 +24,16 @@ request-level attribution. Console logs alone cannot explain a timing gap.
 Keep traced diagnostic runs separate from untraced speed trials, and preserve
 failed captures. Compiler phase profiling is opt-in and adds overhead.
 
+The actual source-edit runner also accepts `--trace-builds --compiler-profile`.
+Add both flags to the recorded `tests/harness_full_source_edits.py` invocation
+to retain complete compiler arguments, stdout/stderr and Cargo timelines across
+the full cold/leaf/shared/revert sequence and fresh-output checks. Update explicit
+native-contract `RUSTC_WRAPPER` guards to the resolved state path
+`capture/nanocompile/nanocompile`; the capture frontend transparently invokes the
+selected frozen runtime. Verify coverage rather than assuming those guards still
+match. The current full traced integration session is pending; component capture
+transparency, concurrent streams and parser checks passed.
+
 Future variations should reproduce the largest observed loss, identify its
 actual request/stage, change one cause, and pass artifact, source-edit, revert,
 failure, corruption and concurrency gates. Require alternating comparisons
