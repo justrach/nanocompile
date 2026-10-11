@@ -15,6 +15,12 @@ python3 tools/build_trace.py analyze /tmp/build-capture.json --output /tmp/build
 
 Use producer and reported-macro options only when appropriate to your workload's declared inputs. Omit native-clang for ordinary Rust-only comparisons. The state directory must be new. Cache clearing and target deletion affect only that dedicated state directory.
 
+For a focused cache comparison, add `--warm-caches-only`. The runner keeps the direct reference and each cache's cold prime, then alternates Nano/kache warm pairs without repeating direct builds. Reports explicitly record this schedule and contain no direct warm median. This option cannot be combined with `--cold-only` or `--nano-only`.
+
+Build rows include monotonic start/end timestamps for correlation with the host observer below. The comparison also records permission modes for every collected library, macro, build-script executable, native artifact and final executable, and checks repeated outputs against that implementation's first reference.
+
+The [runner validation](../benchmarks/warm-cache-comparison-runner-validation.json) verifies seven real Rust builds: a direct prime, two cold primes and two alternating warm cache pairs. Both caches serve actual hits; all seven logs and capture manifests verify, artifact modes match, and incompatible schedule options are rejected. Fixture timings are not performance evidence.
+
 The capture saves complete Cargo verbose logs, Cargo HTML timings, build-script output/stderr, cache event slices, private daemon logs, and individual compiler-wrapper argv/cwd/stdout/stderr records. Native executable frontends preserve inherited stdin and loader environment; the kache basename retains Cargo native wrapper recognition. Request elapsed time and child CPU usage are recorded with separate files per invocation, avoiding concurrent append races. A stable wrapper and capture environment are used across cold and warm builds; switching log destinations does not change compiler-cache keys.
 
 Open `index.html` to filter comparisons by crate, native file, phase or job type. Load `trace.json` in Perfetto to inspect overlapping Cargo and compiler-request intervals. `analysis.json` includes matching-job medians and kache service stage summaries; `next-experiments.md` generates a concrete brief from observed interval gaps and requires correctness and untraced benchmark gates for future variations.

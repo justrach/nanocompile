@@ -1,0 +1,225 @@
+{
+  "completed": true,
+  "scope": "Tiny fixture verifies scheduling, actual cache hits, artifact modes, trace coverage and invalid flag rejection. No performance conclusion.",
+  "runner_sha256": "133afc9fdf1983a00e5cfae50be5e78670866356665083decd75883e07fc1cbc",
+  "raw_report_sha256": "2ae15618ed7ac5ca4a835818fc68ddbfc3316bafd30eba8e071a1f8f9fa85508",
+  "verification_sha256": "5c615ac44994c9c033079fcd054399344a91a591c696b29bc92d45598c0e4a58",
+  "warm_caches_only": true,
+  "builds": [
+    {
+      "implementation": "direct",
+      "phase": "prime",
+      "seconds": 0.12026737502310425,
+      "started_monotonic": 525260.174856083,
+      "ended_monotonic": 525260.295123458,
+      "exit_code": 0,
+      "events": {},
+      "artifact_modes": {
+        "release/deps/libnano_warm_schedule_check-834a12c5f93fa72e.rlib": "0o644"
+      },
+      "artifacts": {
+        "release/deps/libnano_warm_schedule_check-834a12c5f93fa72e.rlib": "4f05748cb7904c609142937daa02a034d555ca3fdb1777584c5aefe590fbf6e6"
+      },
+      "build_log": {
+        "path": "0-direct-prime.log",
+        "bytes": 3054,
+        "sha256": "cecefbf2b5f68bc1dea1998ad0d4ba7b32ece1819b5daf6ad1fa438c94cdd9fe"
+      }
+    },
+    {
+      "implementation": "nanocompile",
+      "phase": "cold",
+      "seconds": 1.1025119998957962,
+      "started_monotonic": 525260.417039458,
+      "ended_monotonic": 525261.519551458,
+      "exit_code": 0,
+      "events": {
+        "miss": 1
+      },
+      "artifact_modes": {
+        "release/deps/libnano_warm_schedule_check-834a12c5f93fa72e.rlib": "0o644"
+      },
+      "artifacts": {
+        "release/deps/libnano_warm_schedule_check-834a12c5f93fa72e.rlib": "4f05748cb7904c609142937daa02a034d555ca3fdb1777584c5aefe590fbf6e6"
+      },
+      "build_log": {
+        "path": "1-nanocompile-cold.log",
+        "bytes": 4004,
+        "sha256": "391a0596ff6ec6f6592b4c5fe16d6415e4a2349a50833b70d82bb22e5e668e11"
+      }
+    },
+    {
+      "implementation": "kache",
+      "phase": "cold",
+      "seconds": 0.46710108302067965,
+      "started_monotonic": 525261.525932875,
+      "ended_monotonic": 525261.993033958,
+      "exit_code": 0,
+      "events": {
+        "passthrough": 4,
+        "miss": 1
+      },
+      "artifact_modes": {
+        "release/deps/libnano_warm_schedule_check-834a12c5f93fa72e.rlib": "0o644"
+      },
+      "artifacts": {
+        "release/deps/libnano_warm_schedule_check-834a12c5f93fa72e.rlib": "b01dfc539ba818f1bd100bf471ebbbea8cfacdd84a956a36903fd7160c8e128d"
+      },
+      "build_log": {
+        "path": "2-kache-cold.log",
+        "bytes": 3155,
+        "sha256": "27e968301d3e937f91000765545e601e647e08cb263ab1c4089f3510c28ad7e8"
+      }
+    },
+    {
+      "implementation": "nanocompile",
+      "phase": "warm",
+      "seconds": 0.14922441693488508,
+      "started_monotonic": 525261.999900541,
+      "ended_monotonic": 525262.149124958,
+      "exit_code": 0,
+      "events": {
+        "bypass": 4,
+        "hit": 1
+      },
+      "artifact_modes": {
+        "release/deps/libnano_warm_schedule_check-834a12c5f93fa72e.rlib": "0o644"
+      },
+      "artifacts": {
+        "release/deps/libnano_warm_schedule_check-834a12c5f93fa72e.rlib": "4f05748cb7904c609142937daa02a034d555ca3fdb1777584c5aefe590fbf6e6"
+      },
+      "matches_own_cold_artifact_modes": true,
+      "matches_own_cold_artifacts": true,
+      "build_log": {
+        "path": "3-nanocompile-warm.log",
+        "bytes": 3966,
+        "sha256": "a03712721a349f5d0282c0859074023615dbf16b21853ac089e2485484db227d"
+      }
+    },
+    {
+      "implementation": "kache",
+      "phase": "warm",
+      "seconds": 0.16893820802215487,
+      "started_monotonic": 525262.158434958,
+      "ended_monotonic": 525262.327373166,
+      "exit_code": 0,
+      "events": {
+        "passthrough": 4,
+        "local_hit": 1
+      },
+      "artifact_modes": {
+        "release/deps/libnano_warm_schedule_check-834a12c5f93fa72e.rlib": "0o644"
+      },
+      "artifacts": {
+        "release/deps/libnano_warm_schedule_check-834a12c5f93fa72e.rlib": "b01dfc539ba818f1bd100bf471ebbbea8cfacdd84a956a36903fd7160c8e128d"
+      },
+      "matches_own_cold_artifact_modes": true,
+      "matches_own_cold_artifacts": true,
+      "build_log": {
+        "path": "4-kache-warm.log",
+        "bytes": 3155,
+        "sha256": "d3e6420d010ce60320bf1a29686eeff5b55f98aed269abd2ebef3dccf3cf58ba"
+      }
+    },
+    {
+      "implementation": "kache",
+      "phase": "warm",
+      "seconds": 0.16065491701010615,
+      "started_monotonic": 525262.363370666,
+      "ended_monotonic": 525262.524025583,
+      "exit_code": 0,
+      "events": {
+        "passthrough": 4,
+        "local_hit": 1
+      },
+      "artifact_modes": {
+        "release/deps/libnano_warm_schedule_check-834a12c5f93fa72e.rlib": "0o644"
+      },
+      "artifacts": {
+        "release/deps/libnano_warm_schedule_check-834a12c5f93fa72e.rlib": "b01dfc539ba818f1bd100bf471ebbbea8cfacdd84a956a36903fd7160c8e128d"
+      },
+      "matches_own_cold_artifact_modes": true,
+      "matches_own_cold_artifacts": true,
+      "build_log": {
+        "path": "5-kache-warm.log",
+        "bytes": 3155,
+        "sha256": "cac684acc77487c7475d72a7d40746e9f8d7887284bcba7f75f44f2ee8686d97"
+      }
+    },
+    {
+      "implementation": "nanocompile",
+      "phase": "warm",
+      "seconds": 0.15402116591576487,
+      "started_monotonic": 525262.533561625,
+      "ended_monotonic": 525262.687582791,
+      "exit_code": 0,
+      "events": {
+        "bypass": 4,
+        "hit": 1
+      },
+      "artifact_modes": {
+        "release/deps/libnano_warm_schedule_check-834a12c5f93fa72e.rlib": "0o644"
+      },
+      "artifacts": {
+        "release/deps/libnano_warm_schedule_check-834a12c5f93fa72e.rlib": "4f05748cb7904c609142937daa02a034d555ca3fdb1777584c5aefe590fbf6e6"
+      },
+      "matches_own_cold_artifact_modes": true,
+      "matches_own_cold_artifacts": true,
+      "build_log": {
+        "path": "6-nanocompile-warm.log",
+        "bytes": 3965,
+        "sha256": "745b635709213d37a5ccb150355212969667fb1bf2a97581301752c506739ae9"
+      }
+    }
+  ],
+  "logs": {
+    "verified_build_logs": 7
+  },
+  "captures": [
+    {
+      "verified_files": 3,
+      "compiler_records": 0,
+      "cargo_units": 1
+    },
+    {
+      "verified_files": 23,
+      "compiler_records": 5,
+      "cargo_units": 1
+    },
+    {
+      "verified_files": 23,
+      "compiler_records": 5,
+      "cargo_units": 1
+    },
+    {
+      "verified_files": 23,
+      "compiler_records": 5,
+      "cargo_units": 1
+    },
+    {
+      "verified_files": 23,
+      "compiler_records": 5,
+      "cargo_units": 1
+    },
+    {
+      "verified_files": 23,
+      "compiler_records": 5,
+      "cargo_units": 1
+    },
+    {
+      "verified_files": 23,
+      "compiler_records": 5,
+      "cargo_units": 1
+    }
+  ],
+  "invalid_combinations_rejected": [
+    "--warm-caches-only --cold-only",
+    "--warm-caches-only --nano-only"
+  ],
+  "source_manifest_sha256": "4d89f1e936687235ac96ace620da36547060b90f64e71dc6b88664f355ad622c",
+  "analyzer_provenance_verified": {
+    "warm_caches_only": true,
+    "analyzer_sha256": "29d6167cc7fd8010a7524fc680ffd7691806d26b55276d3c50747c73dac02da9",
+    "experiments_sha256": "f8b778c85f9e95db644d1976789f787bcb6ff1fbc590c05a98a89c92352fc16a"
+  }
+}

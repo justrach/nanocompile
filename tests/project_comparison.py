@@ -53,6 +53,7 @@ def main():
     p.add_argument("--jobs", type=int, default=4)
     p.add_argument("--cold-runs", type=int, default=1, help="alternating fresh-cache comparisons; restart private daemon before each pair")
     p.add_argument("--cold-only", action="store_true", help="skip warm builds")
+    p.add_argument("--warm-caches-only", action="store_true", help="alternate Nano/kache warm builds; retain the direct prime but omit repeated direct builds")
     p.add_argument("--native-clang", action="store_true", help="opt Nano into Apple Clang native CAS; validate each mode against its own cold artifacts")
     p.add_argument("--native-artifacts", action="store_true", help="validate native outputs without changing the native compiler")
     p.add_argument("--portable-cc", action="store_true", help="opt Nano into portable compile-only C/C++ caching")
@@ -76,6 +77,8 @@ def main():
     p.add_argument('--no-pipelined-companions', action='store_true', help='disable default guarded companion membership')
     p.add_argument("--min-free-gib", type=float, help="free-space gate before each build; default 32 for full binaries, 8 for libraries")
     args = p.parse_args()
+    if args.warm_caches_only and (args.cold_only or args.nano_only):
+        p.error("--warm-caches-only requires a comparison with both caches and warm builds")
     if args.nano_only and not args.trace_builds:
         p.error("--nano-only requires --trace-builds")
     if args.compiler_profile and not args.trace_builds:
@@ -162,6 +165,9 @@ def main():
               "method": "offline clean release package builds; same target path; prime direct build then empty caches; rotate three-way warm measurement order unless cold-only; validate each wrapper against its own cold artifact hashes (kache remaps paths)"}
     result['source_date_epoch'] = env.get('SOURCE_DATE_EPOCH')
     result['nano_only'] = args.nano_only
+    result['warm_caches_only'] = args.warm_caches_only
+    if args.warm_caches_only:
+        result['method'] = 'offline clean release builds; direct prime then empty-cache Nano/kache builds; alternate Nano/kache warm pairs with no repeated direct builds; validate each wrapper against its own cold artifact hashes (kache remaps paths)'
     if args.nano_only:
         result['method'] = 'offline clean release builds; direct prime then Nano cold/warm diagnostic capture; own-cold artifact/mode checks and source verification; no kache execution or speed comparison'
     result['compiler_profile'] = args.compiler_profile
@@ -203,6 +209,7 @@ def main():
     native_references = {}
     final_references = {}
     mode_references = {}
+    all_mode_references = {}
 
     def build(implementation, phase):
         shutil.rmtree(target, ignore_errors=True)
@@ -260,6 +267,10 @@ def main():
                "exit_code": proc.returncode, "events": dict(after - before), "rlibs": len(artifacts), "artifacts": artifacts,
                "peak_sampled_process_tree_rss_bytes": peak, "macro_dylibs": macros, "build_script_executables": executables, "compiled_build_script_executables": compiled_executables}
         row['build_log'] = dict(path=log_path.name, bytes=log_path.stat().st_size, sha256=sha(log_path))
+        row['started_monotonic'] = start
+        row['ended_monotonic'] = start + seconds
+        row['artifact_modes'] = {name: oct((target / name).stat().st_mode & 0o777)
+                                 for name in {**artifacts, **macros, **executables, **native, **final_artifacts}}
         if args.bin:
             row['final_executable_artifacts'] = final_artifacts
             row['final_executable_modes'] = {str(final_path.relative_to(target)): oct(final_path.stat().st_mode & 0o777)} if final_artifacts else {}
@@ -283,7 +294,9 @@ def main():
             native_references[implementation] = native
             final_references[implementation] = final_artifacts
             mode_references[implementation] = row.get('final_executable_modes', {})
+            all_mode_references[implementation] = row['artifact_modes']
         else:
+            row['matches_own_cold_artifact_modes'] = all_mode_references[implementation] == row['artifact_modes']
             row["matches_own_cold_native_artifacts"] = native_references[implementation] == native
             row["matches_own_cold_artifacts"] = references[implementation] == artifacts
             row["matches_own_cold_macro_dylibs"] = macro_references[implementation] == macros
@@ -301,7 +314,7 @@ def main():
             raise RuntimeError(f"Build failed or produced no libraries; see {log_path}")
         if row.get('cli_help_valid') is False:
             raise RuntimeError(f'Final executable failed explicit --help probe; saved result in {output}')
-        if any(row.get(check) is False for check in ("matches_own_cold_final_executable_modes", "matches_own_cold_final_executable", "matches_own_cold_native_artifacts", "matches_own_cold_artifacts", "matches_direct_artifacts", "matches_own_cold_macro_dylibs", "matches_direct_macro_dylibs", "matches_own_cold_build_script_executables", "matches_direct_build_script_executables")):
+        if any(row.get(check) is False for check in ("matches_own_cold_artifact_modes", "matches_own_cold_final_executable_modes", "matches_own_cold_final_executable", "matches_own_cold_native_artifacts", "matches_own_cold_artifacts", "matches_direct_artifacts", "matches_own_cold_macro_dylibs", "matches_direct_macro_dylibs", "matches_own_cold_build_script_executables", "matches_direct_build_script_executables")):
             raise RuntimeError(f"Artifact validation failed; see {log_path}")
         if phase == "warm" and implementation == "nanocompile" and args.native_clang:
             if (row['events'].get('clang_native_hit', 0) < 20 and not row['events'].get('build_script_hit',0)) or row['events'].get('hit', 0) < 165:
@@ -359,6 +372,8 @@ def main():
                 elif row["events"].get("local_hit", 0) or row["events"].get("remote_hit", 0):
                     raise RuntimeError("kache cold cache was not empty")
         schedule = ["nanocompile"] if args.nano_only else ["direct", "nanocompile", "kache"]
+        if args.warm_caches_only:
+            schedule = ["nanocompile", "kache"]
         if not args.cold_only:
             for iteration in range(args.runs):
                 offset = iteration % len(schedule)

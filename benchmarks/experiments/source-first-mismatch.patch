@@ -1,0 +1,110 @@
+--- a/src/cache.zig
++++ b/src/cache.zig
+@@ -488,6 +488,7 @@
+ const DigestJob = struct {
+     path: []const u8,
+     expected: ?[]const u8 = null,
++    source_hint: bool = false,
+     hash: [64]u8 = undefined,
+     valid: bool = false,
+ };
+@@ -522,6 +523,7 @@
+ 
+ fn parallelFileHashes(ctx: *Context, dependencies: []const Dependency, hashes: *std.StringHashMapUnmanaged([]const u8)) !bool {
+     const early_stop = std.mem.eql(u8, ctx.env.get("NANOCOMPILE_HASH_MISMATCH_STOP") orelse "", "1");
++    const source_first = early_stop and std.mem.eql(u8, ctx.env.get("NANOCOMPILE_HASH_SOURCE_FIRST") orelse "", "1");
+     var paths: std.StringHashMapUnmanaged(void) = .empty;
+     defer paths.deinit(ctx.a);
+     var jobs: std.ArrayList(DigestJob) = .empty;
+@@ -532,11 +534,31 @@
+         if (slot.found_existing) continue;
+         const st = Dir.cwd().statFile(ctx.io, dep.path, .{}) catch return false;
+         size +|= st.size;
+-        try jobs.append(ctx.a, .{ .path = dep.path, .expected = if (early_stop) dep.hash else null });
++        try jobs.append(ctx.a, .{
++            .path = dep.path,
++            .expected = if (early_stop) dep.hash else null,
++            .source_hint = source_first and st.size <= 1024 * 1024 and
++                (std.mem.endsWith(u8, dep.path, ".rs") or std.mem.endsWith(u8, dep.path, ".zig")),
++        });
+     }
+     // Small restores retain their serial path. Large graphs use at most four
+     // workers, leaving the same full hashes and per-restore lifetime intact.
+     if (jobs.items.len < 32 or size < 8 * 1024 * 1024) return true;
++    if (source_first) {
++        // Ordering hint only. Both groups retain their original order and every
++        // input is still freshly hashed on a hit; no timestamp shortcut is used.
++        const ordered = try ctx.a.alloc(DigestJob, jobs.items.len);
++        defer ctx.a.free(ordered);
++        var count: usize = 0;
++        for ([_]bool{ true, false }) |source_hint| {
++            for (jobs.items) |job| if (job.source_hint == source_hint) {
++                ordered[count] = job;
++                count += 1;
++            };
++        }
++        @memcpy(jobs.items, ordered);
++        ctx.trace("hash: small source inputs first");
++    }
+     var next: std.atomic.Value(usize) = .init(0);
+     var stop: std.atomic.Value(bool) = .init(false);
+     var group: std.Io.Group = .init;
+@@ -1081,6 +1103,7 @@
+     const cwd = try Dir.cwd().realPathFileAlloc(io, try std.fs.path.join(a, &.{ ".zig-cache", "tmp", &tmp.sub_path }), a);
+     var env = std.process.Environ.Map.init(a);
+     try env.put("NANOCOMPILE_HASH_MISMATCH_STOP", "1");
++    try env.put("NANOCOMPILE_HASH_SOURCE_FIRST", "1");
+     var ctx: Context = .{ .a = a, .io = io, .env = &env, .root = try std.fs.path.join(a, &.{ cwd, "cache" }), .cwd = cwd };
+     try ctx.prepare();
+     var records: std.ArrayList(Dependency) = .empty;
+@@ -1088,7 +1111,7 @@
+     @memset(data, 1);
+     for (0..32) |i| {
+         data[0] = @intCast(i);
+-        const name = try std.fmt.allocPrint(a, "input-{d}", .{i});
++        const name = try std.fmt.allocPrint(a, "input-{d}{s}", .{ i, if (i == 17) ".rs" else "" });
+         try tmp.dir.writeFile(io, .{ .sub_path = name, .data = data });
+         const path = try std.fs.path.join(a, &.{ cwd, name });
+         try records.append(a, .{ .path = path, .hash = try ctx.digest(path) });
+@@ -1104,18 +1127,18 @@
+     try tmp.dir.deleteFile(io, "output");
+     try std.testing.expect(try restore(&ctx, key, &.{output}));
+     try std.testing.expectEqualStrings(output_hash, try ctx.digest(output));
+-    const changed = try tmp.dir.openFile(io, "input-17", .{});
++    const changed = try tmp.dir.openFile(io, "input-17.rs", .{});
+     defer changed.close(io);
+     const old_state = try changed.stat(io);
+     data[0] = 99;
+-    try tmp.dir.writeFile(io, .{ .sub_path = "input-17", .data = data });
++    try tmp.dir.writeFile(io, .{ .sub_path = "input-17.rs", .data = data });
+     try changed.setTimestamps(io, .{ .modify_timestamp = .{ .new = old_state.mtime } });
+     try std.testing.expectEqual(old_state.mtime.nanoseconds, (try changed.stat(io)).mtime.nanoseconds);
+     try tmp.dir.writeFile(io, .{ .sub_path = "output", .data = "untouched" });
+     try std.testing.expect(!try restore(&ctx, key, &.{output}));
+     try std.testing.expectEqualStrings("untouched", try ctx.read(output));
+     data[0] = 17;
+-    try tmp.dir.writeFile(io, .{ .sub_path = "input-17", .data = data });
++    try tmp.dir.writeFile(io, .{ .sub_path = "input-17.rs", .data = data });
+     try ctx.atomic(try blobPath(&ctx, output_hash), "corrupt");
+     try std.testing.expect(!try restore(&ctx, key, &.{output}));
+     try std.testing.expectEqualStrings("untouched", try ctx.read(output));
+--- a/tests/executable_cache.py
++++ b/tests/executable_cache.py
+@@ -24,6 +24,7 @@
+     p.add_argument('--retain-jobs', action='store_true', help='verify retained private compiler/linker diagnostics')
+     p.add_argument('--shared-digests-experiment', action='store_true')
+     p.add_argument('--early-mismatch-experiment', action='store_true')
++    p.add_argument('--source-first-experiment', action='store_true')
+     args = p.parse_args()
+     if args.stable_alias_experiment and not (args.thin_lto and args.retain_jobs):
+         p.error("--stable-alias-experiment requires --thin-lto and --retain-jobs")
+@@ -44,6 +45,9 @@
+                    NANOCOMPILE_TRACE='1', NANOCOMPILE_EXECUTABLE_PRODUCERS='1')
+         if args.early_mismatch_experiment:
+             env['NANOCOMPILE_HASH_MISMATCH_STOP'] = '1'
++        if args.source_first_experiment:
++            env['NANOCOMPILE_HASH_MISMATCH_STOP'] = '1'
++            env['NANOCOMPILE_HASH_SOURCE_FIRST'] = '1'
+         if args.shared_digests_experiment:
+             env['NANOCOMPILE_PRODUCER_SHARED_DIGESTS'] = '1'
+         if args.profile:
