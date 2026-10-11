@@ -394,5 +394,9 @@
       "kache_median": 13.506568207987584,
       "nano_wins": 5
     }
+  },
+  "pairs_run_1": {
+    "record": "harness-shared-edit-pairs.json",
+    "finding": "Six alternating pairs on distinct shared edits. Nano wins every pair it builds first (113.2/112.2/112.1 s vs 115.6/115.3/114.6 s) and loses every pair it builds second, directly after a kache build (122.4/117.8/118.2 s vs 113.7/111.7/111.4 s). Nano harness-ui takes 28.9-31.6 s only in builds that follow a kache build and 25.6 s otherwise; kache harness-ui is 25.0-25.9 s in every position. Builds that follow the other implementation are slower in both directions, more so for Nano after kache. This points to work left over from the previous build (such as writeback of newly written cache data) rather than Nano code. The pairs runner gained --quiesce-seconds: before every build, for both implementations, sync, wait, sync."
   }
 }

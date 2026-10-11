@@ -50,6 +50,8 @@ def main():
     p.add_argument('--build-script-contract', type=Path)
     p.add_argument('--bindgen-tools-file', type=Path)
     p.add_argument('--declared-build-scripts', action='store_true')
+    p.add_argument('--quiesce-seconds', type=float, default=0.0,
+                   help='before every build (outside timing, for both implementations) flush dirty pages with sync and wait this long')
     args = p.parse_args()
     if not 1 <= args.pairs <= len(VARIANTS):
         p.error(f'--pairs must be between 1 and {len(VARIANTS)}')
@@ -107,7 +109,7 @@ def main():
             quiet = quiet + 1 if sample and float(sample) < 2.0 else 0
             time.sleep(1)
 
-    result = dict(method=__doc__.strip(), binary_sha256=sha(binary), kache_sha256=sha(kache), project=str(args.project),
+    result = dict(method=__doc__.strip(), quiesce_seconds=args.quiesce_seconds, binary_sha256=sha(binary), kache_sha256=sha(kache), project=str(args.project),
                   jobs=args.jobs, builds=[], completed=False)
 
     def save():
@@ -120,6 +122,12 @@ def main():
         else:
             stop_daemon()
         shutil.rmtree(target, ignore_errors=True)
+        if args.quiesce_seconds:
+            # Writeback from the previous build (either implementation) must
+            # not overlap this one: flush, wait, flush again.
+            os.sync()
+            time.sleep(args.quiesce_seconds)
+            os.sync()
         e = dict(env)
         e['RUSTC_WRAPPER'] = binary if implementation == 'nanocompile' else kache
         number = len(result['builds'])

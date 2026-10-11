@@ -1,0 +1,295 @@
+{
+  "method": "Alternating Nano/kache pairs on distinct shared-parser edits of the full Harness CLI.\n\nA focused speed instrument for the shared-edit scenario of\ntests/harness_full_source_edits.py: one cold prime per cache, the leaf CLI\nedit, then N distinct edits to the shared `version_triple` parser. Each edit\nis built by both implementations in alternating order with a clean Cargo\ntarget, so both see the same miss set. The private kache daemon runs only\nfor kache builds and is idle before each. Correctness (artifact equality,\nempty-cache references) is the job of the full source-edit runner; this\nrunner checks the CLI and records Cargo timings for tools/rust_profile.py.",
+  "binary_sha256": "eae73b8acf1c9468918f485100aa76d662605a70021c947ac7d3c68eee1fe075",
+  "kache_sha256": "0e4ab2b2f651f1c3685fe31b9ad7d0008ce12c44332e5e4842fa5257a0a82cd0",
+  "project": "/private/tmp/nano-full-harness-source-edit-phase-20261011/project",
+  "jobs": 8,
+  "builds": [
+    {
+      "implementation": "nanocompile",
+      "scenario": "cold",
+      "seconds": 173.11048145906534,
+      "exit_code": 0,
+      "cli_help_valid": true,
+      "build_log": {
+        "path": "00-nanocompile-cold.log",
+        "sha256": "72d86d1a9ce34d87d33be5f3d089f5146d312f7df36a83902acae2360cb43600"
+      },
+      "cargo_timing": {
+        "path": "00-nanocompile-cold.timing.html",
+        "sha256": "dd4b6c0026f83a8ddd25517302c1cb103b8b7196ebe0d9e87087f4158529d001"
+      }
+    },
+    {
+      "implementation": "kache",
+      "scenario": "cold",
+      "seconds": 182.0876722499961,
+      "exit_code": 0,
+      "cli_help_valid": true,
+      "build_log": {
+        "path": "01-kache-cold.log",
+        "sha256": "56aef01866593652f83305ec49d643bee9594923f18365a700e7164a453e2f2f"
+      },
+      "cargo_timing": {
+        "path": "01-kache-cold.timing.html",
+        "sha256": "03a4a9df3800d68651bda0d1a78adcf32b916344712d5201e1753bb7f8249f20"
+      }
+    },
+    {
+      "implementation": "nanocompile",
+      "scenario": "leaf",
+      "seconds": 86.90181020798627,
+      "exit_code": 0,
+      "cli_help_valid": true,
+      "build_log": {
+        "path": "02-nanocompile-leaf.log",
+        "sha256": "415439316da22e8cc045a85debb7d7ae7c49020e0181c7380a4b4d7df146f2ee"
+      },
+      "cargo_timing": {
+        "path": "02-nanocompile-leaf.timing.html",
+        "sha256": "8856ff2e950b7be411858174c80a843e0551167f303e21dae96dcb5996c6049b"
+      }
+    },
+    {
+      "implementation": "kache",
+      "scenario": "leaf",
+      "seconds": 75.22633166704327,
+      "exit_code": 0,
+      "cli_help_valid": true,
+      "build_log": {
+        "path": "03-kache-leaf.log",
+        "sha256": "648931fe5b4c674264f629813bcb9c7280458fdbec5a748116a9d7e25d5a6bc6"
+      },
+      "cargo_timing": {
+        "path": "03-kache-leaf.timing.html",
+        "sha256": "f5df1145f52bdd327d0e1093691f5ffe241cfd7ce740172aaf82576a36931d94"
+      }
+    },
+    {
+      "implementation": "nanocompile",
+      "scenario": "shared-0",
+      "seconds": 113.22728024993557,
+      "exit_code": 0,
+      "cli_help_valid": true,
+      "build_log": {
+        "path": "04-nanocompile-shared-0.log",
+        "sha256": "e0c48d38961dd825bc31181832d6df43580247da8845c873da87cd553506dfd4"
+      },
+      "cargo_timing": {
+        "path": "04-nanocompile-shared-0.timing.html",
+        "sha256": "6971eb8d4771ff72b651ca7a424de6d661c3cf0341a69ea7912c631bbffc00bc"
+      }
+    },
+    {
+      "implementation": "kache",
+      "scenario": "shared-0",
+      "seconds": 115.64686104096472,
+      "exit_code": 0,
+      "cli_help_valid": true,
+      "build_log": {
+        "path": "05-kache-shared-0.log",
+        "sha256": "ad2cb927d1af4a0363a4ca4dedeb1b740fbfaa68b90ec495fd99462cba8510fe"
+      },
+      "cargo_timing": {
+        "path": "05-kache-shared-0.timing.html",
+        "sha256": "e942c3d32377f0aaba82ed8c3b7405a7611d99c56333d1996829668d21d4fb96"
+      }
+    },
+    {
+      "implementation": "kache",
+      "scenario": "shared-1",
+      "seconds": 113.7130016250303,
+      "exit_code": 0,
+      "cli_help_valid": true,
+      "build_log": {
+        "path": "06-kache-shared-1.log",
+        "sha256": "f666d6396e74e38840110a05aa5ff4bacf4dabdf8e249f4711002a3c00cccba1"
+      },
+      "cargo_timing": {
+        "path": "06-kache-shared-1.timing.html",
+        "sha256": "18e3d92fd27198142b1189e2ee2adb26d69766a273377c4136afd31692e608c7"
+      }
+    },
+    {
+      "implementation": "nanocompile",
+      "scenario": "shared-1",
+      "seconds": 122.35971991589759,
+      "exit_code": 0,
+      "cli_help_valid": true,
+      "build_log": {
+        "path": "07-nanocompile-shared-1.log",
+        "sha256": "da6b45af27e09fb3a98a1901ca078b4b8f44d348d72cba8e19f1ed82cb746b42"
+      },
+      "cargo_timing": {
+        "path": "07-nanocompile-shared-1.timing.html",
+        "sha256": "71506e3e6ce7d7643e6a614855c684347e364ade029011495aa71e3305a209dd"
+      }
+    },
+    {
+      "implementation": "nanocompile",
+      "scenario": "shared-2",
+      "seconds": 112.24249408300966,
+      "exit_code": 0,
+      "cli_help_valid": true,
+      "build_log": {
+        "path": "08-nanocompile-shared-2.log",
+        "sha256": "59c64d7fd238c09ec808c5f492609fe2d8fc05c2d89c1514f45d39911b69fe2a"
+      },
+      "cargo_timing": {
+        "path": "08-nanocompile-shared-2.timing.html",
+        "sha256": "be66bf7615657ece9863b0cb0216f813e9b347bc883175ee0d6cdd7fcc7ec5cc"
+      }
+    },
+    {
+      "implementation": "kache",
+      "scenario": "shared-2",
+      "seconds": 115.25910179200582,
+      "exit_code": 0,
+      "cli_help_valid": true,
+      "build_log": {
+        "path": "09-kache-shared-2.log",
+        "sha256": "6cf6d8ab64fd8894deb8682787ad40f2551654dec9fbcce8558d4ffe707f67dd"
+      },
+      "cargo_timing": {
+        "path": "09-kache-shared-2.timing.html",
+        "sha256": "26c7ec1472fea6b8c9d555605143837061676f1d0efb5ed45a771b6e6db882fd"
+      }
+    },
+    {
+      "implementation": "kache",
+      "scenario": "shared-3",
+      "seconds": 111.7060638749972,
+      "exit_code": 0,
+      "cli_help_valid": true,
+      "build_log": {
+        "path": "10-kache-shared-3.log",
+        "sha256": "698643009637c440337db53a5613a3dddaf2312b130d01790894d18f271fd0fd"
+      },
+      "cargo_timing": {
+        "path": "10-kache-shared-3.timing.html",
+        "sha256": "21529e8ff8b4a35a7623b46a028921443373c7cedc84fb30781a8533d501ed37"
+      }
+    },
+    {
+      "implementation": "nanocompile",
+      "scenario": "shared-3",
+      "seconds": 117.76500799995847,
+      "exit_code": 0,
+      "cli_help_valid": true,
+      "build_log": {
+        "path": "11-nanocompile-shared-3.log",
+        "sha256": "77195a50458c5e01ece86fc2a6b63d88cdaaba443d59816e7d67e4d5e98ac354"
+      },
+      "cargo_timing": {
+        "path": "11-nanocompile-shared-3.timing.html",
+        "sha256": "a372c72cddf99c54d8644a6ee5927bc001bbfd367c9812aa9d2a47a04098addf"
+      }
+    },
+    {
+      "implementation": "nanocompile",
+      "scenario": "shared-4",
+      "seconds": 112.09172129200306,
+      "exit_code": 0,
+      "cli_help_valid": true,
+      "build_log": {
+        "path": "12-nanocompile-shared-4.log",
+        "sha256": "a2fe3122b851a9969e689f5c9994c6ff3c9377955b48529ee87ae53c4d3a7d3a"
+      },
+      "cargo_timing": {
+        "path": "12-nanocompile-shared-4.timing.html",
+        "sha256": "a95c6cfa61dc82d3f6fc48b5ed45134a8ea9deb5af903601842b70eb1f05357a"
+      }
+    },
+    {
+      "implementation": "kache",
+      "scenario": "shared-4",
+      "seconds": 114.59158175007906,
+      "exit_code": 0,
+      "cli_help_valid": true,
+      "build_log": {
+        "path": "13-kache-shared-4.log",
+        "sha256": "c3cef503d508d786f514d393178db67f245dd3498999ac93c7f4627313f38ee0"
+      },
+      "cargo_timing": {
+        "path": "13-kache-shared-4.timing.html",
+        "sha256": "bf8c44e9421b52b6691f6e11a03fbcf406fb08409ee7334f46779d27e3086f54"
+      }
+    },
+    {
+      "implementation": "kache",
+      "scenario": "shared-5",
+      "seconds": 111.39421691698954,
+      "exit_code": 0,
+      "cli_help_valid": true,
+      "build_log": {
+        "path": "14-kache-shared-5.log",
+        "sha256": "be7584115c3d73679fc1eaf5c29c21cef4bda6025b8e1cb18f30a59585b55011"
+      },
+      "cargo_timing": {
+        "path": "14-kache-shared-5.timing.html",
+        "sha256": "c6579896e7f70a5901e9124d3d0e02c9d94140765ee87e235e568dd7cbd90a5a"
+      }
+    },
+    {
+      "implementation": "nanocompile",
+      "scenario": "shared-5",
+      "seconds": 118.19705841608811,
+      "exit_code": 0,
+      "cli_help_valid": true,
+      "build_log": {
+        "path": "15-nanocompile-shared-5.log",
+        "sha256": "b4d54bbcdfce209f78f1b9a305115d77371254d539292776251ef0154a3a4a6a"
+      },
+      "cargo_timing": {
+        "path": "15-nanocompile-shared-5.timing.html",
+        "sha256": "b86a979ffc0f7c2ce2239f224f4ca1f1475212cbc848f47b895a2efc644e7fe5"
+      }
+    }
+  ],
+  "completed": true,
+  "pairs": [
+    {
+      "variant": "trim_start()",
+      "first": "nanocompile",
+      "nanocompile": 113.22728024993557,
+      "kache": 115.64686104096472
+    },
+    {
+      "variant": "trim_end()",
+      "first": "kache",
+      "kache": 113.7130016250303,
+      "nanocompile": 122.35971991589759
+    },
+    {
+      "variant": "trim_matches(' ')",
+      "first": "nanocompile",
+      "nanocompile": 112.24249408300966,
+      "kache": 115.25910179200582
+    },
+    {
+      "variant": "trim_start_matches(' ')",
+      "first": "kache",
+      "kache": 111.7060638749972,
+      "nanocompile": 117.76500799995847
+    },
+    {
+      "variant": "trim_end_matches(' ')",
+      "first": "nanocompile",
+      "nanocompile": 112.09172129200306,
+      "kache": 114.59158175007906
+    },
+    {
+      "variant": "trim_matches('\\t')",
+      "first": "kache",
+      "kache": 111.39421691698954,
+      "nanocompile": 118.19705841608811
+    }
+  ],
+  "summary": {
+    "nanocompile_median": 115.49614412494702,
+    "kache_median": 114.15229168755468,
+    "nano_pair_wins": 3,
+    "mean_saved": -2.2620758261376372,
+    "standard_error": 2.2230374633059005
+  }
+}
