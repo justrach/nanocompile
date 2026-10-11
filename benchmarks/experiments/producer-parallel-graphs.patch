@@ -1,0 +1,91 @@
+diff --git a/src/compiler.zig b/src/compiler.zig
+--- a/src/compiler.zig
++++ b/src/compiler.zig
+@@ -897,9 +897,13 @@
+     if (!plan.producer and plan.dep_info != null and (directories.len != 0 or hidden_native or plan.static_companion))
+         try rust_dependencies.collect(ctx, argv, plan.outputs, directories, started, &records, !plan.static_companion, &validated, hidden_native);
+     if (plan.producer) {
+-        for (plan.dependencies) |path| if (std.mem.endsWith(u8, path, ".rlib") or std.mem.endsWith(u8, path, ".rmeta")) {
+-            try rust_dependencies.collect(ctx, argv, &.{path}, directories, started, &records, false, &validated, false);
+-        };
++        if (eq(ctx.env.get("NANOCOMPILE_PRODUCER_GRAPH_WORKERS") orelse "", "4")) {
++            try rust_dependencies.collectProducerParallel(ctx, argv, plan.dependencies, directories, started, &records, &validated);
++        } else {
++            for (plan.dependencies) |path| if (std.mem.endsWith(u8, path, ".rlib") or std.mem.endsWith(u8, path, ".rmeta")) {
++                try rust_dependencies.collect(ctx, argv, &.{path}, directories, started, &records, false, &validated, false);
++            };
++        }
+         try records.appendSlice(ctx.a, linker);
+     }
+     ctx.profileEnd("save.rust_graphs", phase);
+diff --git a/src/rust_dependencies.zig b/src/rust_dependencies.zig
+--- a/src/rust_dependencies.zig
++++ b/src/rust_dependencies.zig
+@@ -137,6 +137,67 @@
+     _ = env.remove("DYLD_LIBRARY_PATH");
+     try env.put("LD_PRELOAD", "");
+     try std.testing.expect(cachedLocations(&ctx, &.{"/toolchain/bin/rustc"}) == null);
++}
++
++const ProducerGraphJob = struct {
++    path: []const u8,
++    arena: std.heap.ArenaAllocator,
++    records: std.ArrayList(cache.Dependency) = .empty,
++    failure: ?anyerror = null,
++};
++
++fn producerGraphWorker(parent: *const cache.Context, argv: []const []const u8, before: []const Directory, started: i96, validated: *const std.StringHashMapUnmanaged(cache.CheckedDigest), jobs: []ProducerGraphJob, next: *std.atomic.Value(usize)) void {
++    while (true) {
++        const index = next.fetchAdd(1, .monotonic);
++        if (index >= jobs.len) return;
++        const job = &jobs[index];
++        var ctx = parent.*;
++        ctx.a = job.arena.allocator();
++        collect(&ctx, argv, &.{job.path}, before, started, &job.records, false, validated, false) catch |err| {
++            job.failure = err;
++        };
++    }
++}
++
++/// Experimental parallel traversal. Every root retains independent resolver
++/// state and fresh content checks; only read-only validated inputs are shared.
++pub fn collectProducerParallel(ctx: *cache.Context, argv: []const []const u8, inputs: []const []const u8, before: []const Directory, started: i96, records: *std.ArrayList(cache.Dependency), validated: *const std.StringHashMapUnmanaged(cache.CheckedDigest)) !void {
++    var count: usize = 0;
++    for (inputs) |path| if (std.mem.endsWith(u8, path, ".rlib") or std.mem.endsWith(u8, path, ".rmeta")) { count += 1; };
++    if (count < 2) {
++        for (inputs) |path| if (std.mem.endsWith(u8, path, ".rlib") or std.mem.endsWith(u8, path, ".rmeta")) {
++            try collect(ctx, argv, &.{path}, before, started, records, false, validated, false);
++        };
++        return;
++    }
++    ctx.trace("graph: parallel producer roots");
++    const jobs = try ctx.a.alloc(ProducerGraphJob, count);
++    var index: usize = 0;
++    for (inputs) |path| if (std.mem.endsWith(u8, path, ".rlib") or std.mem.endsWith(u8, path, ".rmeta")) {
++        jobs[index] = .{ .path = path, .arena = std.heap.ArenaAllocator.init(std.heap.page_allocator) };
++        index += 1;
++    };
++    defer for (jobs) |*job| job.arena.deinit();
++    var next: std.atomic.Value(usize) = .init(0);
++    var threads: [3]std.Thread = undefined;
++    var spawned: usize = 0;
++    for (0..@min(3, count - 1)) |_| {
++        threads[spawned] = std.Thread.spawn(.{}, producerGraphWorker, .{ ctx, argv, before, started, validated, jobs, &next }) catch break;
++        spawned += 1;
++    }
++    producerGraphWorker(ctx, argv, before, started, validated, jobs, &next);
++    for (threads[0..spawned]) |thread| thread.join();
++    for (jobs) |job| if (job.failure) |err| return err;
++    // Copy owned strings before releasing each worker arena; manifest ordering
++    // remains identical to the sequential traversal.
++    for (jobs) |job| for (job.records.items) |dep| {
++        var copy = dep;
++        copy.path = try ctx.a.dupe(u8, dep.path);
++        copy.hash = try ctx.a.dupe(u8, dep.hash);
++        if (dep.library_prefix) |prefix| copy.library_prefix = try ctx.a.dupe(u8, prefix);
++        if (dep.symlink_target) |target| copy.symlink_target = try ctx.a.dupe(u8, target);
++        try records.append(ctx.a, copy);
++    };
+ }
+ 
+ pub fn collect(ctx: *cache.Context, argv: []const []const u8, outputs: []const []const u8, before: []const Directory, started: i96, records: *std.ArrayList(cache.Dependency), metadata_only: bool, validated: *const std.StringHashMapUnmanaged(cache.CheckedDigest), hidden_native: bool) !void {

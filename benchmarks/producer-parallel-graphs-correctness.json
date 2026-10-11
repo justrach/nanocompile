@@ -1,0 +1,94 @@
+{
+  "completed": true,
+  "verified_streams": 58,
+  "source_files_verified": 95,
+  "runtime_sha256": "e54426c75a7b4edbbb78b1be82d124d1946ea3ed00e79b9b104e68b9c2119207",
+  "fixture_report_sha256": "50768cf42d0141b8da73db30f51f73b18836a4f573ee8ad2d253dc5213db4881",
+  "scope": "Initial real multi-root correctness only; no speed/adoption claim.",
+  "cases": [
+    {
+      "case": "cold-and-hit",
+      "parallel": "0",
+      "artifacts": {
+        "build_script_build-multiroot": {
+          "sha256": "8c43baf2ccddf3a412a67372c3a398ce5e81019073b0635083aafdba723d0324",
+          "mode": "0o755"
+        },
+        "build_script_build-multiroot.d": {
+          "sha256": "8459d5739a6b604f643b8d3d9da974cc2b1829a65b9974476d767b6a2926b387",
+          "mode": "0o644"
+        }
+      },
+      "entries": [
+        "76f7998fe18719e8f4a2655855d4053be06c9fe0c77bec76a4fc7cd6f5ba318f"
+      ],
+      "expected_behavior": 3
+    },
+    {
+      "case": "cold-and-hit",
+      "parallel": "1",
+      "artifacts": {
+        "build_script_build-multiroot": {
+          "sha256": "8c43baf2ccddf3a412a67372c3a398ce5e81019073b0635083aafdba723d0324",
+          "mode": "0o755"
+        },
+        "build_script_build-multiroot.d": {
+          "sha256": "8459d5739a6b604f643b8d3d9da974cc2b1829a65b9974476d767b6a2926b387",
+          "mode": "0o644"
+        }
+      },
+      "entries": [
+        "76f7998fe18719e8f4a2655855d4053be06c9fe0c77bec76a4fc7cd6f5ba318f"
+      ],
+      "expected_behavior": 3
+    },
+    {
+      "case": "shared-edit-preserved-mtime-replacement",
+      "expected_behavior": 5,
+      "artifacts": {
+        "build_script_build-multiroot": {
+          "sha256": "a00d366db5dc75dcb0046a924aa5b44e0e46a93a69ce9802622b8793d80092c3",
+          "mode": "0o755"
+        },
+        "build_script_build-multiroot.d": {
+          "sha256": "8459d5739a6b604f643b8d3d9da974cc2b1829a65b9974476d767b6a2926b387",
+          "mode": "0o644"
+        }
+      }
+    },
+    {
+      "case": "corrupt-transitive-failure",
+      "exit_code": 1
+    },
+    {
+      "case": "revert",
+      "artifacts": {
+        "build_script_build-multiroot": {
+          "sha256": "8c43baf2ccddf3a412a67372c3a398ce5e81019073b0635083aafdba723d0324",
+          "mode": "0o755"
+        },
+        "build_script_build-multiroot.d": {
+          "sha256": "8459d5739a6b604f643b8d3d9da974cc2b1829a65b9974476d767b6a2926b387",
+          "mode": "0o644"
+        }
+      },
+      "expected_behavior": 3
+    },
+    {
+      "case": "four-concurrent-restores",
+      "artifacts": {
+        "build_script_build-multiroot": {
+          "sha256": "8c43baf2ccddf3a412a67372c3a398ce5e81019073b0635083aafdba723d0324",
+          "mode": "0o755"
+        },
+        "build_script_build-multiroot.d": {
+          "sha256": "8459d5739a6b604f643b8d3d9da974cc2b1829a65b9974476d767b6a2926b387",
+          "mode": "0o644"
+        }
+      }
+    }
+  ],
+  "fixture_sha256": "130ca670358ff9f2a5ef83289f712d4d4e62d6635b5c3d6c7ee39341684479f2",
+  "patch_sha256": "12a79a2f3988cac7120e9e54c3bd226819990ac2c80f8ee4322b323e0ed818bf",
+  "limits": "Correctness fixture, not a timing comparison. No within-invocation mutation race hook."
+}
