@@ -277,6 +277,117 @@ pub fn collect(ctx: *cache.Context, argv: []const []const u8, outputs: []const [
     }
 }
 
+/// Producer graphs: every rlib/rmeta the producer links is a graph root.
+/// One resolver and one library listing serve all roots, and each crate
+/// identity is resolved once, so shared transitive dependencies are not
+/// re-inspected per direct dependency. The recorded constraints are the union
+/// a separate collection per root would record; the listing excludes the
+/// producer's own outputs exactly as restore-time validation does.
+pub fn collectMany(ctx: *cache.Context, argv: []const []const u8, roots: []const []const u8, own_outputs: []const []const u8, before: []const Directory, started: i96, records: *std.ArrayList(cache.Dependency), validated: *const std.StringHashMapUnmanaged(cache.CheckedDigest)) !void {
+    if (roots.len == 0) return;
+    var print_args: std.ArrayList([]const u8) = .empty;
+    try print_args.appendSlice(ctx.a, &.{ argv[0], "--print", "sysroot", "--print", "target-libdir" });
+    var i: usize = 1;
+    while (i < argv.len) : (i += 1) {
+        if (std.mem.eql(u8, argv[i], "--target")) {
+            if (i + 1 == argv.len) return error.MissingTarget;
+            try print_args.appendSlice(ctx.a, &.{ "--target", argv[i + 1] });
+            i += 1;
+        } else if (std.mem.startsWith(u8, argv[i], "--target=")) try print_args.append(ctx.a, argv[i]);
+    }
+    const cached = cachedLocations(ctx, argv);
+    const resolved = cached orelse blk: {
+        const sysroot_result = try std.process.run(ctx.a, ctx.io, .{ .argv = print_args.items, .environ_map = ctx.env });
+        if (!success(sysroot_result)) return error.RustSysrootQueryFailed;
+        var locations = std.mem.tokenizeAny(u8, sysroot_result.stdout, "\r\n");
+        const root = locations.next() orelse return error.InvalidSysroot;
+        const libdir = locations.next() orelse return error.InvalidSysroot;
+        if (locations.next() != null or !std.fs.path.isAbsolute(root) or !std.fs.path.isAbsolute(libdir)) return error.InvalidSysroot;
+        break :blk cache.RustLocations{ .compiler = argv[0], .sysroot = root, .target_libdir = libdir };
+    };
+    const sysroot = resolved.target_libdir;
+    var query_env = try ctx.env.clone(ctx.a);
+    try query_env.put("RUSTC_BOOTSTRAP", "1");
+    try query_env.put("RUSTUP_TOOLCHAIN", resolved.sysroot);
+    const reader_compiler = try metadata.readerCompiler(ctx, argv[0]);
+    const query_cwd = try ctx.path(&.{"metadata-queries"});
+    try Dir.cwd().createDirPath(ctx.io, query_cwd);
+    var resolver: metadata.Resolver = .{ .ctx = ctx, .compiler = reader_compiler, .query_env = &query_env, .query_cwd = query_cwd };
+    defer resolver.roots.deinit(ctx.a);
+    defer resolver.hashes.deinit(ctx.a);
+    defer resolver.states.deinit(ctx.a);
+    var checked = validated.iterator();
+    while (checked.next()) |record| {
+        try resolver.hashes.put(ctx.a, record.key_ptr.*, record.value_ptr.hash);
+        try resolver.states.put(ctx.a, record.key_ptr.*, record.value_ptr.state);
+    }
+    var current: std.ArrayList(Directory) = .empty;
+    for (before) |dir| try current.append(ctx.a, .{ .path = dir.path, .names = try ctx.libraryNames(dir.path, own_outputs) });
+    var crates: std.StringHashMapUnmanaged(void) = .empty;
+    var appended: std.StringHashMapUnmanaged(void) = .empty;
+    for (roots) |path| {
+        const graph = (try directGraph(ctx, path)) orelse blk: {
+            const result = try std.process.run(ctx.a, ctx.io, .{ .argv = &.{ reader_compiler, "-Zls=root", path }, .environ_map = &query_env, .cwd = .{ .path = query_cwd } });
+            if (!success(result)) return error.RustMetadataQueryFailed;
+            break :blk DirectGraph{ .names = try parse(ctx.a, result.stdout, reportedMacros(ctx)), .root = try metadata.parse(result.stdout) };
+        };
+        const own_root = graph.root;
+        try resolver.remember(path, own_root);
+        for (graph.names) |crate| {
+            const identity = try std.fmt.allocPrint(ctx.a, "{s}\x00{s}\x00{}\x00{s}", .{ crate.name, crate.hash, crate.proc_macro, own_root.triple });
+            if ((try crates.getOrPut(ctx.a, identity)).found_existing) continue;
+            const name = crate.name;
+            const full_prefix = try std.fmt.allocPrint(ctx.a, "lib{s}", .{name});
+            const builtin_path = try std.fs.path.join(ctx.a, &.{ sysroot, try std.fmt.allocPrint(ctx.a, "lib{s}.rmeta", .{name}) });
+            var primary_found = false;
+            for (current.items) |dir| {
+                for (dir.names) |entry| {
+                    if (!std.mem.startsWith(u8, entry, full_prefix)) continue;
+                    const filename = entry[0 .. std.mem.lastIndexOfScalar(u8, entry, ':') orelse return error.UnsupportedLibraryName];
+                    const input = try std.fs.path.join(ctx.a, &.{ dir.path, filename });
+                    const root = (resolver.inspect(input, false) catch null) orelse continue;
+                    if (root.matches(name, crate.hash, own_root.triple, crate.proc_macro)) primary_found = true;
+                }
+            }
+            if (!primary_found) {
+                if (resolver.inspect(builtin_path, true) catch null) |root|
+                    primary_found = root.matches(name, crate.hash, own_root.triple, crate.proc_macro);
+            }
+            const prefix = if (primary_found) full_prefix else "";
+            var found = false;
+            for (before, current.items) |old, dir| {
+                const old_hash = try cache.prefixDigest(ctx.a, old.names, prefix);
+                const new_hash = try cache.prefixDigest(ctx.a, dir.names, prefix);
+                if (!std.mem.eql(u8, old_hash, new_hash)) return error.LibraryDirectoryChangedDuringCompilation;
+                const directory_key = try std.fmt.allocPrint(ctx.a, "D\x00{s}\x00{s}", .{ dir.path, prefix });
+                if (!(try appended.getOrPut(ctx.a, directory_key)).found_existing)
+                    try records.append(ctx.a, .{ .path = dir.path, .hash = new_hash, .directory = true, .libraries = true, .library_prefix = prefix });
+                for (dir.names) |entry| {
+                    if (!std.mem.startsWith(u8, entry, prefix)) continue;
+                    const filename = entry[0 .. std.mem.lastIndexOfScalar(u8, entry, ':') orelse return error.UnsupportedLibraryName];
+                    const input = try std.fs.path.join(ctx.a, &.{ dir.path, filename });
+                    const exact = try std.fmt.allocPrint(ctx.a, "lib{s}.", .{name});
+                    if (std.mem.startsWith(u8, filename, exact)) found = true;
+                    if (!(try appended.getOrPut(ctx.a, try std.fmt.allocPrint(ctx.a, "F\x00{s}", .{input}))).found_existing) {
+                        const st = try Dir.cwd().statFile(ctx.io, input, .{});
+                        if (st.mtime.nanoseconds >= started or st.ctime.nanoseconds >= started) return error.InputChangedDuringCompilation;
+                        try records.append(ctx.a, .{ .path = input, .hash = try resolver.digest(input) });
+                    }
+                    if (!primary_found and !found) {
+                        if (resolver.inspect(input, false) catch null) |root|
+                            if (root.matches(name, crate.hash, own_root.triple, crate.proc_macro)) {
+                                found = true;
+                            };
+                    }
+                }
+            }
+            if (!found) {
+                _ = Dir.cwd().statFile(ctx.io, builtin_path, .{}) catch return error.UnresolvedRustDependency;
+            }
+        }
+    }
+}
+
 test "Rust metadata rejects incomplete and procedural macro graphs" {
     const prefix = "Crate info:\nproc_macro false\n=External Dependencies=\n";
     const names = try parse(std.testing.allocator, prefix ++ "1 dep-abcd hash 0123456789abcdef0123456789abcdef host_hash None kind Unconditional public\n\n", false);

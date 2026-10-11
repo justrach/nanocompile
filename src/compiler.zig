@@ -897,9 +897,9 @@ fn save(ctx: *cache.Context, key: []const u8, plan: Plan, argv: []const []const 
     if (!plan.producer and plan.dep_info != null and (directories.len != 0 or hidden_native or plan.static_companion))
         try rust_dependencies.collect(ctx, argv, plan.outputs, directories, started, &records, !plan.static_companion, &validated, hidden_native);
     if (plan.producer) {
-        for (plan.dependencies) |path| if (std.mem.endsWith(u8, path, ".rlib") or std.mem.endsWith(u8, path, ".rmeta")) {
-            try rust_dependencies.collect(ctx, argv, &.{path}, directories, started, &records, false, &validated, false);
-        };
+        var roots: std.ArrayList([]const u8) = .empty;
+        for (plan.dependencies) |path| if (std.mem.endsWith(u8, path, ".rlib") or std.mem.endsWith(u8, path, ".rmeta")) try roots.append(ctx.a, path);
+        try rust_dependencies.collectMany(ctx, argv, roots.items, plan.outputs, directories, started, &records, &validated);
         try records.appendSlice(ctx.a, linker);
     }
     ctx.profileEnd("save.rust_graphs", phase);
