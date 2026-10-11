@@ -623,6 +623,7 @@ fn executeProducer(ctx: *cache.Context, plan: Plan, argv: []const []const u8) !u
     if (restored) {
         ctx.trace(if (plan.producer_dylib) "hit: proc-macro producer" else "hit: executable producer");
         ctx.event("hit");
+        if (plan.producer_dylib) @import("code_assessment.zig").prewarm(ctx, plan.outputs);
         return 0;
     }
     phase = ctx.profileStart();
@@ -693,6 +694,7 @@ fn executeProducer(ctx: *cache.Context, plan: Plan, argv: []const []const u8) !u
         return code;
     }
     ctx.event("miss");
+    if (plan.producer_dylib) @import("code_assessment.zig").prewarm(ctx, plan.outputs);
     const linked = linked_inputs: {
         const collect_start = ctx.profileStart();
         defer ctx.profileEnd("producer.linked_inputs", collect_start);
