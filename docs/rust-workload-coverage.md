@@ -42,3 +42,17 @@ A complete Harness source-edit sample (initial cold, leaf edit, shared-parser ed
 Not every pair is a win. `harness-ui` warm lost one pair of four (by 0.12 s), workspace B release warm one of four (by 0.63 s), and the shared edit two of six (by 0.1 s and 0.7 s). All runs are on one busy Mac.
 
 Records: [Harness CLI release](../benchmarks/final-harness-cli-release-kache.json), [Harness CLI dev](../benchmarks/final-harness-cli-dev-kache.json), [`harness-ui`](../benchmarks/final-harness-ui-kache.json), [`harness-adapters`](../benchmarks/final-harness-adapters-kache.json), [source edits](../benchmarks/final-harness-source-edits-kache.json), [shared-edit pairs](../benchmarks/final-harness-shared-edit-pairs.json), [workspace B (summary without paths or crate names)](../benchmarks/workspace-b-kache-comparison.json).
+
+## Re-measurement after the store-path work
+
+Four later changes shortened Nano's work on the critical path of a miss: binary-searched library candidates, parallel BLAKE3 for files of 32 MiB or more, digest reuse within one entry, and reading an rlib's dependency graph directly instead of asking rustc. Together they cut the Harness UI library's store from 229 ms to 144 ms and the final binary's from 382 ms to 265 ms. With that binary, six pairs each:
+
+| Comparison | Nano median | kache median | Nano wins | Losing margins |
+| --- | ---: | ---: | ---: | --- |
+| `harness-ui` warm | 5.60 s | 5.84 s | 5/6 | 0.07 s |
+| workspace B release warm | 3.17 s | 3.64 s | 5/6 | 0.07 s |
+| Harness shared-parser edit | 115.7 s | 116.4 s | 3/6 | 0.2, 1.0, 0.1 s |
+
+The shared-edit run coincided with two macOS background services using a full core each (load around 11): both tools' builds were 3–4 s slower than in the earlier runs and varied by ±2 s. Nano had no frontend stall in any build. The shared edit is almost entirely identical rustc work, so pairs in which kache does not stall are decided by that noise.
+
+Records: [`harness-ui`](../benchmarks/remeasure-harness-ui-kache.json), [shared-edit pairs](../benchmarks/remeasure-harness-shared-edit-pairs.json), [workspace B (summary)](../benchmarks/workspace-b-remeasure.json).
