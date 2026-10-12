@@ -22,6 +22,8 @@ All runs shared one busy machine: unrelated processes kept the load average arou
 | + text build-script shims, cold prime (1 build each) | 174.984 s | 187.569 s | — |
 | + [code-assessment prewarm](code-assessment.md), warm (6 pairs) | **5.772 s** | 5.983 s | **6/6** |
 | + code-assessment prewarm, cold prime (1 build each) | 169.3 s | 182.2 s | — |
+| Replication with code-assessment prewarm, cold (3 pairs) | **168.6 s** | 180.5 s | **3/3** |
+| Replication with code-assessment prewarm, warm (6 pairs) | **5.69 s** | 5.86 s | **6/6** |
 
 In the six-pair warm study, the paired kache-minus-Nano saving is 0.308 s on average, with a standard error of 0.132 s. Every warm build restores all 138 build-script runs. Nano records 1,095 compiler hits, three misses and five bypasses. kache records 1,237 local hits.
 
@@ -121,17 +123,21 @@ The cause was found with the profiler's [wait diagnostics](rust-profiler.md#wait
 
 ### With the code-assessment prewarm
 
-One more complete sample with the [code-assessment prewarm](code-assessment.md), in the default rotation (where Nano's shared edit previously lost every time). All empty-cache references match their timed builds, both implementations reproduce the initial artifacts after the revert, and all 18 logs rehash:
+Two more complete samples with the [code-assessment prewarm](code-assessment.md): sample 6 in the default rotation (where Nano's shared edit previously lost every time), sample 7 with the rotation shifted (where Nano's leaf edit previously lost). In both, all empty-cache references match their timed builds, both implementations reproduce the initial artifacts after the revert, and all 18 logs rehash:
 
-| Scenario | Nano | kache | direct |
-| --- | ---: | ---: | ---: |
-| initial cold | **169.3 s** | 181.0 s | 169.7 s |
-| leaf edit | **73.6 s** | 80.4 s | 167.0 s |
-| shared edit | **111.2 s** | 115.1 s | 168.3 s |
-| revert | **6.2 s** | 12.9 s | 167.3 s |
+| Scenario | Nano (6, 7) | kache (6, 7) | direct (6, 7) | Nano wins |
+| --- | ---: | ---: | ---: | ---: |
+| initial cold | **169.3, 168.8 s** | 181.0, 181.2 s | 169.7, 168.2 s | 2/2 |
+| leaf edit | **73.6, 73.5 s** | 80.4, 80.2 s | 167.0, 167.7 s | 2/2 |
+| shared edit | **111.2, 111.1 s** | 115.1, 115.2 s | 168.3, 167.5 s | 2/2 |
+| revert | **6.2, 6.1 s** | 12.9, 13.0 s | 167.3, 168.3 s | 2/2 |
 
 The six alternating shared-edit pairs ([record](../benchmarks/harness-shared-edit-pairs-code-assessment.json)) give Nano 6 of 6: median 111.4 s against 113.4 s, saving 2.30 s on average (standard error 0.82 s). Nano's `harness-ui` compile took 25.0–25.1 s in every build.
 
-Record: [sample 6](../benchmarks/harness-source-edits-code-assessment-kache.json).
+Records: [sample 6](../benchmarks/harness-source-edits-code-assessment-kache.json), [sample 7](../benchmarks/harness-source-edits-code-assessment-kache-2.json), [cold/warm replication](../benchmarks/harness-cli-code-assessment-coldwarm-kache-paired.json).
+
+### Harness adapters library
+
+The smaller `harness-adapters` library workload, where older sessions showed kache ahead (2.04 s against 2.89 s warm in the hill climb, and 27.01 s against 27.64 s cold), was rerun with the same binary at four Cargo jobs. Nano won all 3 alternating cold pairs (median 24.17 s against 25.29 s) and all 6 warm pairs (0.95 s against 1.59 s). Every warm build matches its own cold artifacts, macro dylibs, build-script executables and native outputs ([record](../benchmarks/harness-adapters-code-assessment-kache-paired.json)).
 
 Records for samples 1–5: [sample 1](../benchmarks/harness-source-edits-memo-kache.json), [2](../benchmarks/harness-source-edits-memo-kache-2.json), [3](../benchmarks/harness-source-edits-memo-kache-3.json), [4](../benchmarks/harness-source-edits-memo-kache-4.json), [5](../benchmarks/harness-source-edits-memo-kache-5.json).
