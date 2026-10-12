@@ -98,9 +98,10 @@ fn unusedCompanion(resolver: *metadata.Resolver, dir: Directory, filename: []con
 
 const DirectGraph = struct { root: metadata.Root, names: []const Crate, bytes: ?[]const u8 = null };
 fn directGraph(ctx: *cache.Context, path: []const u8) !?DirectGraph {
-    if (!std.mem.endsWith(u8, path, ".rmeta")) return null;
+    const rlib = std.mem.endsWith(u8, path, ".rlib");
+    if (!rlib and !std.mem.endsWith(u8, path, ".rmeta")) return null;
     const before = Dir.cwd().statFile(ctx.io, path, .{}) catch return null;
-    const bytes = cache.readMetadata(ctx.io, ctx.a, path) catch return null;
+    const bytes = (if (rlib) rlibMetadata(ctx, path) catch null else cache.readMetadata(ctx.io, ctx.a, path) catch null) orelse return null;
     const graph = @import("rmeta_direct.zig").decode(ctx.a, bytes) catch return null;
     const after = try Dir.cwd().statFile(ctx.io, path, .{});
     if (!cache.sameFileState(before, after)) return error.InputChangedDuringMetadataQuery;
@@ -110,6 +111,77 @@ fn directGraph(ctx: *cache.Context, path: []const u8) !?DirectGraph {
         try names.append(ctx.a, .{ .name = crate.name, .hash = crate.hash, .proc_macro = crate.proc_macro });
     }
     return .{ .root = .{ .name = graph.root.name, .hash = graph.root.hash, .triple = graph.root.triple, .proc_macro = graph.root.proc_macro }, .names = names.items, .bytes = bytes };
+}
+
+/// The metadata inside an rlib's `lib.rmeta` member: raw, or (on Mach-O)
+/// the data of the object section that starts with rustc's metadata magic.
+/// Reads only the archive headers and that member. Any other layout returns
+/// null, and the caller asks rustc instead.
+fn rlibMetadata(ctx: *cache.Context, path: []const u8) !?[]const u8 {
+    const file = try Dir.cwd().openFile(ctx.io, path, .{});
+    defer file.close(ctx.io);
+    const size = (try file.stat(ctx.io)).size;
+    var magic: [8]u8 = undefined;
+    if (try file.readPositionalAll(ctx.io, &magic, 0) != magic.len or !std.mem.eql(u8, &magic, "!<arch>\n")) return null;
+    var offset: u64 = 8;
+    for (0..4) |_| {
+        var header: [60]u8 = undefined;
+        if (offset + header.len > size or try file.readPositionalAll(ctx.io, &header, offset) != header.len) return null;
+        if (!std.mem.eql(u8, header[58..60], "`\n")) return null;
+        const member_size = std.fmt.parseInt(u64, std.mem.trim(u8, header[48..58], " "), 10) catch return null;
+        var data = offset + header.len;
+        var data_size = member_size;
+        var name_buffer: [64]u8 = undefined;
+        var name: []const u8 = std.mem.trimEnd(u8, header[0..16], " ");
+        if (std.mem.startsWith(u8, name, "#1/")) {
+            const length = std.fmt.parseInt(usize, name[3..], 10) catch return null;
+            if (length > name_buffer.len or length > member_size) return null;
+            if (try file.readPositionalAll(ctx.io, name_buffer[0..length], data) != length) return null;
+            name = std.mem.trimEnd(u8, name_buffer[0..length], "\x00");
+            data += length;
+            data_size -= length;
+        }
+        if (std.mem.eql(u8, name, "lib.rmeta") or std.mem.eql(u8, name, "lib.rmeta/")) {
+            if (data + data_size > size or data_size > 512 * 1024 * 1024) return null;
+            const member = try ctx.a.alloc(u8, @intCast(data_size));
+            if (try file.readPositionalAll(ctx.io, member, data) != member.len) return null;
+            return metadataSection(member);
+        }
+        offset = data + data_size;
+        offset += offset % 2;
+    }
+    return null;
+}
+
+fn metadataSection(member: []const u8) ?[]const u8 {
+    const rmeta_magic = "rust\x00\x00\x00";
+    if (std.mem.startsWith(u8, member, rmeta_magic)) return member;
+    if (member.len < 32 or std.mem.readInt(u32, member[0..4], .little) != 0xfeedfacf) return null;
+    const ncmds = std.mem.readInt(u32, member[16..20], .little);
+    var at: usize = 32;
+    for (0..ncmds) |_| {
+        if (at + 8 > member.len) return null;
+        const cmd = std.mem.readInt(u32, member[at..][0..4], .little);
+        const cmdsize = std.mem.readInt(u32, member[at + 4 ..][0..4], .little);
+        if (cmdsize < 8 or at + cmdsize > member.len) return null;
+        if (cmd == 0x19) { // LC_SEGMENT_64
+            if (cmdsize < 72) return null;
+            const nsects = std.mem.readInt(u32, member[at + 64 ..][0..4], .little);
+            var section = at + 72;
+            for (0..nsects) |_| {
+                if (section + 80 > at + cmdsize) return null;
+                const section_size = std.mem.readInt(u64, member[section + 40 ..][0..8], .little);
+                const section_offset = std.mem.readInt(u32, member[section + 48 ..][0..4], .little);
+                if (section_offset + section_size <= member.len) {
+                    const body = member[section_offset..][0..@intCast(section_size)];
+                    if (std.mem.startsWith(u8, body, rmeta_magic)) return body;
+                }
+                section += 80;
+            }
+        }
+        at += cmdsize;
+    }
+    return null;
 }
 
 fn cachedLocations(ctx: *cache.Context, argv: []const []const u8) ?cache.RustLocations {
