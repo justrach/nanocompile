@@ -242,20 +242,40 @@ fn empty(ctx: *cache.Context, root: []const u8) !bool {
     var it = dir.iterate();
     return try it.next(ctx.io) == null;
 }
+/// A recorded output is a plain relative path below OUT_DIR: no empty, `.` or
+/// `..` components.
+fn relativeOutput(name: []const u8) bool {
+    if (name.len == 0 or name[0] == '/') return false;
+    var parts = std.mem.splitScalar(u8, name, '/');
+    while (parts.next()) |part| if (part.len == 0 or eq(part, ".") or eq(part, "..")) return false;
+    return true;
+}
+/// Every regular file below OUT_DIR, including nested directories (such as
+/// generated include trees). Directories are recreated from file paths, so an
+/// empty directory, which would be lost, makes the run uncacheable.
 fn outputs(ctx: *cache.Context, root: []const u8) ![]const []const u8 {
     var paths: std.ArrayList([]const u8) = .empty;
+    var dirs: std.ArrayList([]const u8) = .empty;
     var dir = try Dir.cwd().openDir(ctx.io, root, .{ .iterate = true });
     defer dir.close(ctx.io);
     var walk = try dir.walk(ctx.a);
     defer walk.deinit();
     var size: u64 = 0;
     while (try walk.next(ctx.io)) |entry| {
-        if (entry.kind == .directory) return error.UnsupportedOutput;
+        if (entry.kind == .directory) {
+            try dirs.append(ctx.a, try std.fmt.allocPrint(ctx.a, "{s}/{s}/", .{ root, entry.path }));
+            continue;
+        }
         if (entry.kind != .file or paths.items.len >= 50000) return error.UnsupportedOutput;
         const path = try std.fs.path.join(ctx.a, &.{ root, entry.path });
         size += (try Dir.cwd().statFile(ctx.io, path, .{})).size;
         if (size > 1024 * 1024 * 1024) return error.OutputTooLarge;
         try paths.append(ctx.a, path);
+    }
+    for (dirs.items) |prefix| {
+        for (paths.items) |path| {
+            if (std.mem.startsWith(u8, path, prefix)) break;
+        } else return error.UnsupportedOutput; // Empty directory.
     }
     std.mem.sort([]const u8, paths.items, {}, less);
     return paths.items;
@@ -349,7 +369,13 @@ fn restoreOutputsWith(ctx: *cache.Context, key: []const u8, root: []const u8, pa
     const stage = staging orelse return error.StagingCollision;
     defer Dir.cwd().deleteTree(ctx.io, stage) catch {};
     const destinations = try ctx.a.alloc([]const u8, paths.len);
-    for (paths, destinations) |path, *destination| destination.* = try std.fs.path.join(ctx.a, &.{ stage, std.fs.path.basename(path) });
+    for (paths, destinations) |path, *destination| {
+        if (!std.mem.startsWith(u8, path, root) or path.len <= root.len + 1 or path[root.len] != '/') return error.UnsupportedOutput;
+        const relative = path[root.len + 1 ..];
+        if (!relativeOutput(relative)) return error.UnsupportedOutput;
+        destination.* = try std.fs.path.join(ctx.a, &.{ stage, relative });
+        if (std.fs.path.dirname(relative) != null) try Dir.cwd().createDirPath(ctx.io, std.fs.path.dirname(destination.*).?);
+    }
     const verify_start = profileStart(ctx);
     const streams = (try cache.restoreSnapshotStaged(ctx, key, paths, destinations, before.records)) orelse return false;
     profileEnd(ctx, "restore.validation_materialization", verify_start);
@@ -449,7 +475,7 @@ pub fn execute(ctx: *cache.Context, real: []const u8, args: []const []const u8) 
         for (parsed.value.outputs) |path| {
             if (!std.mem.startsWith(u8, path, try std.fmt.allocPrint(ctx.a, "{s}/", .{root}))) break :restore;
             const name = path[root.len + 1 ..];
-            if (name.len == 0 or eq(name, "..") or eq(name, ".") or std.mem.indexOfScalar(u8, name, '/') != null) break :restore;
+            if (!relativeOutput(name)) break :restore;
         }
         const restore_start = profileStart(ctx);
         const restored = try restoreOutputs(ctx, key, root, parsed.value.outputs, roots.items, before);
@@ -596,7 +622,7 @@ fn executeDeclared(ctx: *cache.Context, real: []const u8, args: []const []const 
         for (outputs_receipt.value.outputs) |path| {
             if (!std.mem.startsWith(u8, path, try std.fmt.allocPrint(ctx.a, "{s}/", .{root}))) break :restore;
             const name = path[root.len + 1 ..];
-            if (name.len == 0 or eq(name, "..") or eq(name, ".") or std.mem.indexOfScalar(u8, name, '/') != null) break :restore;
+            if (!relativeOutput(name)) break :restore;
         }
         phase = profileStart(ctx);
         defer profileEnd(ctx, "declared.restore", phase);
@@ -647,9 +673,10 @@ pub fn install(ctx: *cache.Context, argv: []const []const u8) !void {
         if (eq(arg, "--out-dir") and i + 1 < argv.len) dir = argv[i + 1];
         if (eq(arg, "-C") and i + 1 < argv.len and std.mem.startsWith(u8, argv[i + 1], "extra-filename=")) extra = argv[i + 1][15..];
     }
-    if (!eq(name orelse return, "build_script_build")) return;
+    const crate = name orelse return;
     const parent = dir orelse return;
-    const path = try std.fs.path.resolve(ctx.a, &.{ ctx.cwd, parent, try std.fmt.allocPrint(ctx.a, "build_script_build{s}", .{extra}) });
+    if (!scriptCrate(crate, parent)) return;
+    const path = try std.fs.path.resolve(ctx.a, &.{ ctx.cwd, parent, try std.fmt.allocPrint(ctx.a, "{s}{s}", .{ crate, extra }) });
     const real = try std.fmt.allocPrint(ctx.a, "{s}.nano-real", .{path});
     const config = try std.fs.path.join(ctx.a, &.{ std.fs.path.dirname(path).?, "nano-build-script.json" });
     try Dir.cwd().rename(path, .cwd(), real, ctx.io);
@@ -675,9 +702,18 @@ fn shebangSafe(path: []const u8) bool {
     for (path) |ch| if (ch <= ' ' or ch == 0x7f) return false;
     return true;
 }
+/// Cargo names a build script's crate `build_script_<stem>` after the script's
+/// file stem (`build.rs` or a custom `build = "builder/main.rs"`), and compiles
+/// it into `<target>/<profile>/build/<package>-<hash>/`.
+fn scriptCrate(name: []const u8, out_dir: []const u8) bool {
+    if (name.len <= "build_script_".len or !std.mem.startsWith(u8, name, "build_script_")) return false;
+    const parent = std.fs.path.dirname(std.mem.trimEnd(u8, out_dir, "/")) orelse return false;
+    return eq(std.fs.path.basename(parent), "build");
+}
 fn scriptName(path: []const u8) bool {
     const name = std.fs.path.basename(path);
-    return eq(name, "build-script-build") or std.mem.startsWith(u8, name, "build_script_build-");
+    if (std.mem.startsWith(u8, name, "build-script-")) return name.len > "build-script-".len;
+    return std.mem.startsWith(u8, name, "build_script_") and std.mem.indexOfScalar(u8, name, '-') != null;
 }
 pub fn launch(ctx: *cache.Context, args: []const [:0]const u8) !?u8 {
     if (args.len == 0) return null;
@@ -709,11 +745,15 @@ pub fn launch(ctx: *cache.Context, args: []const [:0]const u8) !?u8 {
 
 pub fn wantsInstall(ctx: *cache.Context, argv: []const []const u8) bool {
     if (ctx.env.get("NANOCOMPILE_BUILD_SCRIPTS_FILE") == null and !declaredMode(ctx)) return false;
-    for (argv, 0..) |arg, i| if (eq(arg, "--crate-name") and i + 1 < argv.len and eq(argv[i + 1], "build_script_build")) {
-        _ = contract(ctx) catch return declaredMode(ctx);
-        return true;
-    };
-    return false;
+    var name: ?[]const u8 = null;
+    var dir: ?[]const u8 = null;
+    for (argv, 0..) |arg, i| {
+        if (eq(arg, "--crate-name") and i + 1 < argv.len) name = argv[i + 1];
+        if (eq(arg, "--out-dir") and i + 1 < argv.len) dir = argv[i + 1];
+    }
+    if (!scriptCrate(name orelse return false, dir orelse return false)) return false;
+    _ = contract(ctx) catch return declaredMode(ctx);
+    return true;
 }
 pub fn installLockName(ctx: *cache.Context, argv: []const []const u8) ![]const u8 {
     var h = cache.Hash.init(.{});

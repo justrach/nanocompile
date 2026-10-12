@@ -266,7 +266,7 @@ def main():
         after = nano_events() if implementation == "nanocompile" else kache_events() if implementation == "kache" else collections.Counter()
         artifacts = {str(path.relative_to(target)): sha(path) for path in sorted((target / profile_dir / "deps").glob("*.rlib"))}
         macros = {str(path.relative_to(target)): sha(path) for path in sorted((target / profile_dir / "deps").glob("*.dylib"))}
-        executables = {str(path.relative_to(target)): sha(path) for path in sorted((target / profile_dir / "build").glob("*/*")) if path.is_file() and (path.name == "build-script-build" or path.name.endswith(".nano-real"))}
+        executables = {str(path.relative_to(target)): sha(path) for path in sorted((target / profile_dir / "build").glob("*/*")) if path.is_file() and ((path.name.startswith("build-script-") and not path.suffix) or path.name.endswith(".nano-real"))}
         compiled_executables = compiled_scripts(target, profile_dir)
         native = {str(path.relative_to(target)): sha(path) for path in sorted(target.rglob('*'))
                   if path.is_file() and path.suffix in ('.o', '.a')} if (args.native_clang or args.portable_cc or args.native_artifacts) else {}

@@ -24,6 +24,7 @@ fn main() {
         "always" => println!("cargo:rerun-if-changed="),
         "outdir" => { fs::write(out.join("gen.txt"), "x").unwrap(); println!("cargo:rerun-if-changed={}", out.join("gen.txt").display()); }
         "nested" => { fs::create_dir_all(out.join("sub")).unwrap(); println!("cargo::rerun-if-changed=data.txt"); }
+        "nested-file" => { fs::create_dir_all(out.join("include/deep")).unwrap(); fs::write(out.join("include/deep/gen.h"), "#define GEN 1\n").unwrap(); println!("cargo::rerun-if-changed=data.txt"); }
         "env-only" => println!("cargo:rerun-if-env-changed=EXTRA"),
         "dir" => println!("cargo:rerun-if-changed=assets"),
         _ => { println!("cargo:rerun-if-changed=data.txt"); println!("cargo:rerun-if-env-changed=EXTRA"); }
@@ -121,7 +122,12 @@ def main():
         preserved_edit(project / 'assets/.git/file', 'three\n')
         cargo(42, 'build_script_hit', SCRIPT_MODE='undeclared')
 
-        # Never cached: always-rerun, inputs under OUT_DIR, nested outputs.
+        # Nested output files (a generated include tree) are cached and restored.
+        cargo(42, 'build_script_miss', SCRIPT_MODE='nested-file')
+        cargo(42, 'build_script_hit', SCRIPT_MODE='nested-file')
+        generated = list((target / 'release/build').glob('declared-fixture-*/out/include/deep/gen.h'))
+        assert generated and generated[0].read_text() == '#define GEN 1\n', generated
+        # Never cached: always-rerun, inputs under OUT_DIR, an empty output directory.
         for mode in ('always', 'outdir', 'nested'):
             cargo(42, 'build_script_miss', SCRIPT_MODE=mode)
             cargo(42, 'build_script_miss', SCRIPT_MODE=mode)
@@ -157,6 +163,15 @@ def main():
         orphan.chmod(0o700)
         q = subprocess.run([str(orphan)], env=base, capture_output=True, timeout=20)
         assert q.returncode != 0 and b'MissingBuildScriptRecord' in q.stderr, q.stderr
+        # A custom build-script path (Cargo's crate build_script_main and
+        # executable build-script-main) is cached the same way.
+        (project / 'builder').mkdir()
+        (project / 'build.rs').rename(project / 'builder/main.rs')
+        (project / 'Cargo.toml').write_text('[package]\nname="declared-fixture"\nversion="0.1.0"\nedition="2021"\nbuild="builder/main.rs"\n')
+        cargo(142, 'build_script_miss')
+        cargo(142, 'build_script_hit')
+        custom = list((target / 'release/build').glob('declared-fixture-*/build-script-main'))
+        assert custom and all(s.read_bytes().startswith(b'#!' + str(binary).encode()) for s in custom), custom
         # Disabled mode runs every script live and records nothing new.
         shutil.rmtree(target, ignore_errors=True)
         env = {k: v for k, v in base.items() if k != 'NANOCOMPILE_BUILD_SCRIPT_CACHE'}

@@ -4,8 +4,8 @@ import hashlib
 
 def compiled_scripts(target, profile='release'):
     hashes = {}
-    for launcher in sorted((target / profile / 'build').glob('*/build-script-build')):
-        if not launcher.is_file():
+    for launcher in sorted((target / profile / 'build').glob('*/build-script-*')):
+        if not launcher.is_file() or launcher.suffix:
             continue
         originals = sorted(launcher.parent.glob('*.nano-real'))
         assert len(originals) <= 1, f'Ambiguous original script executables: {originals}'
