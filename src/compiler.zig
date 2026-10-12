@@ -26,6 +26,12 @@ const Plan = struct {
     /// directory (unpacked debug info or LTO), because its output embeds the
     /// paths of the objects it links (debug map entries, linker UUID).
     in_place: ?[]const u8 = null,
+    /// The command line names a static library (`-l static=NAME`) that rustc
+    /// bundles from the native search directories.
+    bundles_native: bool = false,
+    /// Native search directories were not snapshotted; the stored entry must
+    /// instead prove from the crate's own metadata that it bundles nothing.
+    native_by_metadata: bool = false,
 };
 const Module = struct { name: []const u8, source: []const u8 };
 
@@ -312,7 +318,7 @@ fn rustPlan(ctx: *cache.Context, argv: []const []const u8) !Plan {
     }
     if (dep_info == null) return error.NoDependencyInfo;
     if (producer and (std.mem.indexOfAny(u8, dir, "\r\n\t\"\\") != null or std.mem.indexOfAny(u8, ctx.root, "\r\n\t\"\\") != null or std.mem.indexOf(u8, dir, "//") != null)) return error.UnsupportedProducerPath;
-    return .{ .source = src, .outputs = outputs.items, .dependencies = inputs.items, .dep_info = dep_info, .library_dirs = search_dirs.items, .native_dirs = native_dirs.items, .configuration = configuration, .producer = producer, .producer_dylib = producer_dylib, .thin_lto = thin_lto, .static_companion = static_companion, .linked_output = linked_output, .out_dir = dir, .debug_sidecars = debug_sidecars,
+    return .{ .source = src, .outputs = outputs.items, .dependencies = inputs.items, .dep_info = dep_info, .library_dirs = search_dirs.items, .native_dirs = native_dirs.items, .configuration = configuration, .producer = producer, .producer_dylib = producer_dylib, .thin_lto = thin_lto, .static_companion = static_companion, .linked_output = linked_output, .out_dir = dir, .debug_sidecars = debug_sidecars, .bundles_native = static_libraries.items.len != 0,
         .in_place = if (rust_dylib or (executable and (debug_sidecars != null or fat_lto or thin_lto))) try std.fmt.allocPrint(ctx.a, "{s}{s}.", .{ try absolute(ctx, try std.fs.path.join(ctx.a, &.{ dir, crate })), suffix }) else null };
 }
 
@@ -878,7 +884,19 @@ pub fn execute(ctx: *cache.Context, kind: Kind, argv: []const []const u8) !u8 {
     phase = ctx.profileStart();
     var before: std.ArrayList(cache.Dependency) = .empty;
     try before.appendSlice(ctx.a, dependencyRecords(ctx, plan.dependencies) catch return bypass(ctx, argv, "bypass: cannot fingerprint inputs"));
-    const native = rust_dependencies.nativeSnapshot(ctx, plan.native_dirs) catch |err|
+    // A library compile reads native search directories only to bundle a
+    // static library: one named on the command line, or one a #[link] attribute
+    // (possibly expanded from another crate's macro) names. Cargo passes every
+    // upstream build script's OUT_DIR as -L native=, so snapshotting them all
+    // made each hit rehash hundreds of unrelated C objects. When nothing is
+    // named on the command line and the pinned compiler's metadata can be
+    // read, the snapshot is replaced by a check of the crate's own native
+    // library list at store time: any static entry makes it uncacheable.
+    const native_by_metadata = !plan.bundles_native and plan.native_dirs.len != 0 and ctx.rust_locations != null and
+        for (plan.outputs) |out| {
+            if (std.mem.endsWith(u8, out, ".rmeta")) break true;
+        } else false;
+    const native = if (native_by_metadata) &.{} else rust_dependencies.nativeSnapshot(ctx, plan.native_dirs) catch |err|
         return bypass(ctx, argv, try std.fmt.allocPrint(ctx.a, "bypass: native inputs unavailable ({s})", .{@errorName(err)}));
     try before.appendSlice(ctx.a, native);
     const directories = rust_dependencies.snapshot(ctx, plan.library_dirs, plan.outputs) catch return bypass(ctx, argv, "bypass: cannot enumerate dependency directories");
@@ -918,6 +936,7 @@ pub fn execute(ctx: *cache.Context, kind: Kind, argv: []const []const u8) !u8 {
     ctx.event("miss");
     phase = ctx.profileStart();
     var stored = plan;
+    stored.native_by_metadata = native_by_metadata;
     if (plan.debug_sidecars) |prefix| stored.outputs = withSidecars(ctx, plan.outputs, prefix, started) catch |err| {
         ctx.trace(try std.fmt.allocPrint(ctx.a, "uncached: sidecars unavailable ({s})", .{@errorName(err)}));
         return 0;
@@ -971,7 +990,7 @@ fn save(ctx: *cache.Context, key: []const u8, plan: Plan, argv: []const []const 
         if (st.mtime.nanoseconds >= started or st.ctime.nanoseconds >= started) return error.InputChangedDuringCompilation;
         try records.append(ctx.a, dep);
     }
-    var hidden_native = false;
+    var hidden_native = plan.native_by_metadata;
     var dirs: std.ArrayList([]const u8) = .empty;
     for (paths.items) |dep| {
         const st = try Dir.cwd().statFile(ctx.io, dep, .{});
