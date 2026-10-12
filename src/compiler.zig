@@ -76,6 +76,9 @@ fn rustPlan(ctx: *cache.Context, argv: []const []const u8) !Plan {
     var fat_lto = false;
     var target: ?[]const u8 = null;
     var static_companion = false;
+    // A library that also links a Rust dylib (crate types rlib+dylib, with
+    // or without staticlib) is an in-place producer for the dylib link.
+    var rust_dylib = false;
     var prefer_dynamic = false;
     var i: usize = 1;
     while (i < argv.len) : (i += 1) {
@@ -87,6 +90,10 @@ fn rustPlan(ctx: *cache.Context, argv: []const []const u8) !Plan {
         if (try option(argv, &i, "--crate-type")) |v| {
             var types = std.mem.splitScalar(u8, v, ',');
             while (types.next()) |requested| {
+                if (eq(requested, "dylib") and eq(ctx.env.get("NANOCOMPILE_EXECUTABLE_PRODUCERS") orelse "", "1")) {
+                    rust_dylib = true;
+                    continue;
+                }
                 if (crate_type) |previous| {
                     if (!eq(previous, requested)) {
                         const previous_lib = eq(previous, "lib") or eq(previous, "rlib");
@@ -211,11 +218,12 @@ fn rustPlan(ctx: *cache.Context, argv: []const []const u8) !Plan {
     const ct = crate_type orelse return error.NoCrateType;
     const producer_dylib = eq(ct, "proc-macro") and eq(ctx.env.get("NANOCOMPILE_PROC_MACRO_PRODUCERS") orelse "", "1");
     const executable = eq(ct, "bin") and eq(ctx.env.get("NANOCOMPILE_EXECUTABLE_PRODUCERS") orelse "", "1");
-    const producer = producer_dylib or executable;
+    if (rust_dylib and !(eq(ct, "lib") or eq(ct, "rlib"))) return error.UnsupportedCrateType;
+    const producer = producer_dylib or executable or rust_dylib;
     // Only the measured native-host, non-LTO archive pair is a trial. Its full
     // compiler/stdlib resource identity is required below.
     if (static_companion and (builtin.os.tag != .macos or builtin.cpu.arch != .aarch64 or
-        producer or target != null or producer_unsafe_codegen or thin_lto or
+        (producer and !rust_dylib) or target != null or producer_unsafe_codegen or thin_lto or
         prefer_dynamic or deferred_framework or !eq(emit orelse "", "dep-info,link")))
         return error.UnsupportedStaticlibConfiguration;
     if (!producer and !eq(ct, "rlib") and !eq(ct, "lib")) return error.UnsupportedCrateType;
@@ -224,11 +232,11 @@ fn rustPlan(ctx: *cache.Context, argv: []const []const u8) !Plan {
     // require their existing complete linker-input discovery and passthrough.
     if (deferred_framework and (producer or builtin.os.tag != .macos or target != null)) return error.UnsupportedNativeLibrary;
     if (!producer_dylib and builtin_macro) return error.UntrackedExtern;
-    if (producer_dylib and thin_lto) return error.UnsupportedProducerConfiguration;
+    if ((producer_dylib or rust_dylib) and thin_lto) return error.UnsupportedProducerConfiguration;
     if (fat_lto and (!executable or static_companion)) return error.UnsupportedProducerConfiguration;
     // A binary with unpacked split debug info, or one linked with LTO,
     // compiles in place (see executeProducer).
-    const in_place_debug = executable and eq(split_debug, "unpacked") and emitsDebugInfo(debug_info) and !thin_lto;
+    const in_place_debug = (executable or rust_dylib) and eq(split_debug, "unpacked") and emitsDebugInfo(debug_info) and !thin_lto;
     if (producer and (builtin.os.tag != .macos or (!eq(debug_info, "0") and !in_place_debug) or producer_unsafe_codegen or target != null)) return error.UnsupportedProducerConfiguration;
     if (static_libraries.items.len != 0 and target != null) return error.UnsupportedNativeTarget;
     // Plain static libraries bundle archive members into the rlib. Require a
@@ -296,11 +304,16 @@ fn rustPlan(ctx: *cache.Context, argv: []const []const u8) !Plan {
             try outputs.append(ctx.a, try absolute(ctx, try std.fs.path.join(ctx.a, &.{ dir, try std.fmt.allocPrint(ctx.a, "lib{s}{s}.a", .{ crate, suffix }) })));
         if (eq(e, "dep-info")) dep_info = path;
         if (eq(e, "link")) linked_output = path;
+        if (eq(e, "link") and rust_dylib) {
+            const linked = try absolute(ctx, try std.fs.path.join(ctx.a, &.{ dir, try std.fmt.allocPrint(ctx.a, "lib{s}{s}.dylib", .{ crate, suffix }) }));
+            try outputs.append(ctx.a, linked);
+            linked_output = linked;
+        }
     }
     if (dep_info == null) return error.NoDependencyInfo;
     if (producer and (std.mem.indexOfAny(u8, dir, "\r\n\t\"\\") != null or std.mem.indexOfAny(u8, ctx.root, "\r\n\t\"\\") != null or std.mem.indexOf(u8, dir, "//") != null)) return error.UnsupportedProducerPath;
     return .{ .source = src, .outputs = outputs.items, .dependencies = inputs.items, .dep_info = dep_info, .library_dirs = search_dirs.items, .native_dirs = native_dirs.items, .configuration = configuration, .producer = producer, .producer_dylib = producer_dylib, .thin_lto = thin_lto, .static_companion = static_companion, .linked_output = linked_output, .out_dir = dir, .debug_sidecars = debug_sidecars,
-        .in_place = if (executable and (debug_sidecars != null or fat_lto or thin_lto)) try std.fmt.allocPrint(ctx.a, "{s}{s}.", .{ try absolute(ctx, try std.fs.path.join(ctx.a, &.{ dir, crate })), suffix }) else null };
+        .in_place = if (rust_dylib or (executable and (debug_sidecars != null or fat_lto or thin_lto))) try std.fmt.allocPrint(ctx.a, "{s}{s}.", .{ try absolute(ctx, try std.fs.path.join(ctx.a, &.{ dir, crate })), suffix }) else null };
 }
 
 fn ltoProducer(value: []const u8) bool {
@@ -648,6 +661,8 @@ fn executeProducer(ctx: *cache.Context, plan: Plan, argv: []const []const u8) !u
     const binary = std.process.executablePathAlloc(ctx.io, ctx.a) catch return bypass(ctx, argv, "bypass: producer observer unavailable");
     const base_key = keyFor(ctx, .rust, argv) catch return bypass(ctx, argv, "bypass: producer compiler identity unavailable");
     const compiler_epoch = ctx.compiler_epoch orelse return bypass(ctx, argv, "bypass: producer compiler state unavailable");
+    if (plan.static_companion and ctx.rust_locations == null)
+        return bypass(ctx, argv, "bypass: unsupported staticlib compiler resources");
     ctx.profileEnd("producer.compiler_identity", phase);
     phase = ctx.profileStart();
     const binary_hash = ctx.digest(binary) catch return bypass(ctx, argv, "bypass: producer observer cannot be fingerprinted");
