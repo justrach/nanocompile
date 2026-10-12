@@ -1,5 +1,6 @@
 """Real Cargo checks for NANOCOMPILE_BUILD_SCRIPT_CACHE=declared (Cargo's rerun rule)."""
 import argparse
+import json
 import os
 from pathlib import Path
 import shutil
@@ -136,6 +137,14 @@ def main():
         other.write_text('{"schema": 1, "packages": [{"package": "some-other-package", "inputs": ["/nonexistent"]}]}')
         cargo(142, 'build_script_miss', NANOCOMPILE_BUILD_SCRIPTS_FILE=str(other))
         cargo(142, 'build_script_hit', NANOCOMPILE_BUILD_SCRIPTS_FILE=str(other))
+        # A listed package whose environment is outside its contract (here a
+        # release build against a contract recorded with DEBUG=true) falls back
+        # to declared mode instead of running live.
+        listed = root / 'listed.json'
+        listed.write_text(json.dumps({"schema": 1, "packages": [{"package": "declared-fixture", "inputs": ["."],
+                                                                  "environment": [{"name": "DEBUG", "value": "true"}]}]}))
+        cargo(142, 'build_script_miss', NANOCOMPILE_BUILD_SCRIPTS_FILE=str(listed))
+        cargo(142, 'build_script_hit', NANOCOMPILE_BUILD_SCRIPTS_FILE=str(listed))
 
         # Installed shims are text files naming Nano as their interpreter, so
         # no new executable image is created per build. A shim whose record

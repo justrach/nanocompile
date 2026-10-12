@@ -374,6 +374,9 @@ pub fn execute(ctx: *cache.Context, real: []const u8, args: []const []const u8) 
     ctx.prepare() catch return passthrough(ctx, real, args);
     const item = contract(ctx) catch return if (declaredMode(ctx)) executeDeclared(ctx, real, args) else passthrough(ctx, real, args);
     if (!environmentMatches(ctx, item)) {
+        // Outside its explicit contract (for example a dev-profile build of a
+        // script recorded for release), a script is treated like an unlisted one.
+        if (declaredMode(ctx)) return executeDeclared(ctx, real, args);
         ctx.event("build_script_bypass");
         ctx.trace("build-script environment outside explicit contract");
         return passthrough(ctx, real, args);
