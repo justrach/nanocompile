@@ -246,14 +246,14 @@ advantage or proof that direct metadata decoding improves warm hits.
 The [previous nine-round comparison](docs/selected-decoder-nine-samples.md) and
 sessions favoring kache remain public.
 The [full application capture](docs/full-harness-benchmark.md) exposes a larger
-coverage gap: Nano took 89.0 s warm versus kache's 7.0 s in one diagnostic round.
+coverage gap at the time: Nano took 89.0 s warm versus kache's 7.0 s in one diagnostic round (since closed; see the [current full-app comparison](docs/nano-vs-kache-memo-results.md)).
 Thin-LTO executable and additional build-script work remain uncached by Nano;
 the adapters result does not establish a full-application lead.
 The earlier opt-in [guarded SQLite/full-app comparison](docs/sqlite-execution-candidate.md)
 completes three cold pairs and three warm rounds with exact own-cold artifact checks.
 Cold medians are **180.88 s Nano versus 188.51 s kache** (2/3 Nano wins);
-warm medians are **10.80 versus 6.56 s** (0/3). Nano still trails on warm full-app
-builds, and the cold result needs independent confirmation.
+warm medians are **10.80 versus 6.56 s** (0/3). That earlier version trailed on warm
+full-app builds; the [current full-app comparison](docs/nano-vs-kache-memo-results.md) wins 6/6 warm pairs.
 The opt-in [Rust rlib framework candidate](docs/rlib-framework-candidate.md)
 adds plain native macOS command-line framework metadata caching, with real linked
 edit/revert checks. Its full-app speed benefit is still unmeasured. A separate
