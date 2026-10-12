@@ -639,6 +639,38 @@ fn parallelFileHashes(ctx: *Context, dependencies: []const Dependency, hashes: *
 
 // One additional worker overlaps immutable output verification with complete
 // dependency hashing. Its allocator is private; no output is written until join.
+const Placement = struct { blob: []const u8, destination: []const u8, mode: u32, known: ?[]const u8, failed: bool = false };
+
+/// Clones restored outputs into place. A hit with several files (a library's
+/// rlib, rmeta, dep-info and split-debug objects) uses up to four workers.
+fn place(ctx: *Context, placements: []Placement) !void {
+    var next: std.atomic.Value(usize) = .init(0);
+    if (placements.len >= 4) {
+        var group: std.Io.Group = .init;
+        defer group.cancel(ctx.io);
+        const workers = @min(@as(usize, 4), std.Thread.getCpuCount() catch 1, placements.len);
+        for (1..@max(workers, 1)) |_| group.concurrent(ctx.io, placeWorker, .{ ctx, placements, &next }) catch break;
+        placeWorker(ctx, placements, &next);
+        try group.await(ctx.io);
+    } else placeWorker(ctx, placements, &next);
+    for (placements) |placement| if (placement.failed) return error.MaterializationFailed;
+}
+
+fn placeWorker(ctx: *const Context, placements: []Placement, next: *std.atomic.Value(usize)) void {
+    var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
+    defer arena.deinit();
+    var local = ctx.*;
+    local.a = arena.allocator();
+    while (true) {
+        const i = next.fetchAdd(1, .monotonic);
+        if (i >= placements.len) return;
+        const job = &placements[i];
+        (if (job.known) |hash| materializeKnown(&local, job.blob, job.destination, job.mode, hash) else materialize(&local, job.blob, job.destination, job.mode)) catch {
+            job.failed = true;
+        };
+    }
+}
+
 const OutputCheck = struct {
     entry: *const Entry,
     valid: bool = false,
@@ -787,11 +819,14 @@ fn restoreWithSnapshot(ctx: *Context, key: []const u8, allowed_outputs: []const 
     ctx.profileEnd("restore.stream_validation", phase);
     phase = ctx.profileStart();
     // Staging destinations are renamed by the caller; memoize final paths only.
-    for (entry.outputs[0..allowed_outputs.len], destinations, allowed_outputs) |output, destination, allowed| {
-        const blob = try blobPath(ctx, output.hash);
-        if (std.mem.eql(u8, destination, allowed)) try materializeKnown(ctx, blob, destination, output.mode, output.hash) else try materialize(ctx, blob, destination, output.mode);
-    }
-    for (sidecars) |output| try materializeKnown(ctx, try blobPath(ctx, output.hash), output.path, output.mode, output.hash);
+    // Nothing hashes split-debug objects later (consumers read the rlib), so
+    // their restores skip the digest memo record.
+    const placements = try ctx.a.alloc(Placement, entry.outputs.len);
+    for (entry.outputs[0..allowed_outputs.len], destinations, allowed_outputs, placements[0..allowed_outputs.len]) |output, destination, allowed, *placement|
+        placement.* = .{ .blob = try blobPath(ctx, output.hash), .destination = destination, .mode = output.mode, .known = if (std.mem.eql(u8, destination, allowed)) output.hash else null };
+    for (sidecars, placements[allowed_outputs.len..]) |output, *placement|
+        placement.* = .{ .blob = try blobPath(ctx, output.hash), .destination = output.path, .mode = output.mode, .known = null };
+    try place(ctx, placements);
     ctx.profileEnd("restore.materialization", phase);
     return .{ .stdout = stdout, .stderr = stderr };
 }
