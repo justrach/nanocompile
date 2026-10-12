@@ -1,0 +1,757 @@
+{
+  "workload": "workspace B (754 packages; fat LTO, codegen-units=1, strip in release)",
+  "studies": {
+    "workspace-b-release-warm": {
+      "profile": "release",
+      "jobs": 8,
+      "nanocompile_sha256": "b99b9e537649751ca3add32999da05611224a20e71769a07ce6a197071514b9c",
+      "kache_version": "kache 1.0.0",
+      "completed": true,
+      "summary": {
+        "cold": {
+          "nanocompile_median": 257.275,
+          "kache_median": 262.54,
+          "nano_pair_wins": 1,
+          "pairs": 1
+        },
+        "warm": {
+          "nanocompile_median": 3.2344999999999997,
+          "kache_median": 3.49,
+          "nano_pair_wins": 3,
+          "pairs": 4
+        }
+      },
+      "builds": [
+        {
+          "implementation": "direct",
+          "phase": "prime",
+          "seconds": 256.681,
+          "exit_code": 0,
+          "events": {},
+          "checks": {},
+          "recorded_kache_mismatches": null
+        },
+        {
+          "implementation": "nanocompile",
+          "phase": "cold",
+          "seconds": 257.275,
+          "exit_code": 0,
+          "events": {
+            "miss": 711,
+            "bypass": 17,
+            "build_script_miss": 67,
+            "failed": 5
+          },
+          "checks": {},
+          "recorded_kache_mismatches": null
+        },
+        {
+          "implementation": "kache",
+          "phase": "cold",
+          "seconds": 262.54,
+          "exit_code": 0,
+          "events": {
+            "passthrough": 28,
+            "miss": 776,
+            "unknown": 5
+          },
+          "checks": {},
+          "recorded_kache_mismatches": null
+        },
+        {
+          "implementation": "nanocompile",
+          "phase": "warm",
+          "seconds": 3.323,
+          "exit_code": 0,
+          "events": {
+            "bypass": 4,
+            "hit": 709,
+            "build_script_hit": 67
+          },
+          "checks": {
+            "matches_own_cold_artifact_modes": true,
+            "matches_own_cold_native_artifacts": true,
+            "matches_own_cold_artifacts": true,
+            "matches_own_cold_macro_dylibs": true,
+            "matches_own_cold_build_script_executables": true,
+            "matches_own_cold_final_executable": true,
+            "matches_own_cold_final_executable_modes": true
+          },
+          "recorded_kache_mismatches": null
+        },
+        {
+          "implementation": "kache",
+          "phase": "warm",
+          "seconds": 3.802,
+          "exit_code": 0,
+          "events": {
+            "passthrough": 4,
+            "local_hit": 776
+          },
+          "checks": {
+            "matches_own_cold_artifact_modes": true,
+            "matches_own_cold_native_artifacts": true,
+            "matches_own_cold_artifacts": true,
+            "matches_own_cold_macro_dylibs": true,
+            "matches_own_cold_build_script_executables": true,
+            "matches_own_cold_final_executable": true,
+            "matches_own_cold_final_executable_modes": true
+          },
+          "recorded_kache_mismatches": null
+        },
+        {
+          "implementation": "kache",
+          "phase": "warm",
+          "seconds": 3.542,
+          "exit_code": 0,
+          "events": {
+            "passthrough": 4,
+            "local_hit": 776
+          },
+          "checks": {
+            "matches_own_cold_artifact_modes": true,
+            "matches_own_cold_native_artifacts": true,
+            "matches_own_cold_artifacts": true,
+            "matches_own_cold_macro_dylibs": true,
+            "matches_own_cold_build_script_executables": true,
+            "matches_own_cold_final_executable": true,
+            "matches_own_cold_final_executable_modes": true
+          },
+          "recorded_kache_mismatches": null
+        },
+        {
+          "implementation": "nanocompile",
+          "phase": "warm",
+          "seconds": 3.146,
+          "exit_code": 0,
+          "events": {
+            "bypass": 4,
+            "hit": 709,
+            "build_script_hit": 67
+          },
+          "checks": {
+            "matches_own_cold_artifact_modes": true,
+            "matches_own_cold_native_artifacts": true,
+            "matches_own_cold_artifacts": true,
+            "matches_own_cold_macro_dylibs": true,
+            "matches_own_cold_build_script_executables": true,
+            "matches_own_cold_final_executable": true,
+            "matches_own_cold_final_executable_modes": true
+          },
+          "recorded_kache_mismatches": null
+        },
+        {
+          "implementation": "nanocompile",
+          "phase": "warm",
+          "seconds": 4.065,
+          "exit_code": 0,
+          "events": {
+            "bypass": 4,
+            "hit": 709,
+            "build_script_hit": 67
+          },
+          "checks": {
+            "matches_own_cold_artifact_modes": true,
+            "matches_own_cold_native_artifacts": true,
+            "matches_own_cold_artifacts": true,
+            "matches_own_cold_macro_dylibs": true,
+            "matches_own_cold_build_script_executables": true,
+            "matches_own_cold_final_executable": true,
+            "matches_own_cold_final_executable_modes": true
+          },
+          "recorded_kache_mismatches": null
+        },
+        {
+          "implementation": "kache",
+          "phase": "warm",
+          "seconds": 3.438,
+          "exit_code": 0,
+          "events": {
+            "passthrough": 4,
+            "local_hit": 776
+          },
+          "checks": {
+            "matches_own_cold_artifact_modes": true,
+            "matches_own_cold_native_artifacts": true,
+            "matches_own_cold_artifacts": true,
+            "matches_own_cold_macro_dylibs": true,
+            "matches_own_cold_build_script_executables": true,
+            "matches_own_cold_final_executable": true,
+            "matches_own_cold_final_executable_modes": true
+          },
+          "recorded_kache_mismatches": null
+        },
+        {
+          "implementation": "kache",
+          "phase": "warm",
+          "seconds": 3.371,
+          "exit_code": 0,
+          "events": {
+            "passthrough": 4,
+            "local_hit": 776
+          },
+          "checks": {
+            "matches_own_cold_artifact_modes": true,
+            "matches_own_cold_native_artifacts": true,
+            "matches_own_cold_artifacts": true,
+            "matches_own_cold_macro_dylibs": true,
+            "matches_own_cold_build_script_executables": true,
+            "matches_own_cold_final_executable": true,
+            "matches_own_cold_final_executable_modes": true
+          },
+          "recorded_kache_mismatches": null
+        },
+        {
+          "implementation": "nanocompile",
+          "phase": "warm",
+          "seconds": 3.043,
+          "exit_code": 0,
+          "events": {
+            "bypass": 4,
+            "hit": 709,
+            "build_script_hit": 67
+          },
+          "checks": {
+            "matches_own_cold_artifact_modes": true,
+            "matches_own_cold_native_artifacts": true,
+            "matches_own_cold_artifacts": true,
+            "matches_own_cold_macro_dylibs": true,
+            "matches_own_cold_build_script_executables": true,
+            "matches_own_cold_final_executable": true,
+            "matches_own_cold_final_executable_modes": true
+          },
+          "recorded_kache_mismatches": null
+        }
+      ]
+    },
+    "workspace-b-dev-warm": {
+      "profile": "dev",
+      "jobs": 8,
+      "nanocompile_sha256": "b99b9e537649751ca3add32999da05611224a20e71769a07ce6a197071514b9c",
+      "kache_version": "kache 1.0.0",
+      "completed": true,
+      "summary": {
+        "cold": {
+          "nanocompile_median": 55.868,
+          "kache_median": 74.177,
+          "nano_pair_wins": 1,
+          "pairs": 1
+        },
+        "warm": {
+          "nanocompile_median": 3.326,
+          "kache_median": 3.808,
+          "nano_pair_wins": 4,
+          "pairs": 4
+        }
+      },
+      "builds": [
+        {
+          "implementation": "direct",
+          "phase": "prime",
+          "seconds": 55.168,
+          "exit_code": 0,
+          "events": {},
+          "checks": {},
+          "recorded_kache_mismatches": null
+        },
+        {
+          "implementation": "nanocompile",
+          "phase": "cold",
+          "seconds": 55.868,
+          "exit_code": 0,
+          "events": {
+            "miss": 688,
+            "bypass": 14,
+            "build_script_miss": 62,
+            "failed": 4
+          },
+          "checks": {},
+          "recorded_kache_mismatches": null
+        },
+        {
+          "implementation": "kache",
+          "phase": "cold",
+          "seconds": 74.177,
+          "exit_code": 0,
+          "events": {
+            "passthrough": 24,
+            "miss": 748
+          },
+          "checks": {},
+          "recorded_kache_mismatches": null
+        },
+        {
+          "implementation": "nanocompile",
+          "phase": "warm",
+          "seconds": 3.333,
+          "exit_code": 0,
+          "events": {
+            "bypass": 4,
+            "hit": 686,
+            "build_script_hit": 62
+          },
+          "checks": {
+            "matches_own_cold_artifact_modes": true,
+            "matches_own_cold_native_artifacts": true,
+            "matches_own_cold_artifacts": true,
+            "matches_own_cold_macro_dylibs": true,
+            "matches_own_cold_build_script_executables": true,
+            "matches_own_cold_final_executable": true,
+            "matches_own_cold_final_executable_modes": true
+          },
+          "recorded_kache_mismatches": null
+        },
+        {
+          "implementation": "kache",
+          "phase": "warm",
+          "seconds": 4.082,
+          "exit_code": 0,
+          "events": {
+            "passthrough": 4,
+            "local_hit": 748
+          },
+          "checks": {
+            "matches_own_cold_artifact_modes": false,
+            "matches_own_cold_native_artifacts": false,
+            "matches_own_cold_artifacts": true,
+            "matches_own_cold_macro_dylibs": true,
+            "matches_own_cold_build_script_executables": true,
+            "matches_own_cold_final_executable": true,
+            "matches_own_cold_final_executable_modes": true
+          },
+          "recorded_kache_mismatches": [
+            "matches_own_cold_artifact_modes",
+            "matches_own_cold_native_artifacts"
+          ]
+        },
+        {
+          "implementation": "kache",
+          "phase": "warm",
+          "seconds": 3.874,
+          "exit_code": 0,
+          "events": {
+            "passthrough": 4,
+            "local_hit": 748
+          },
+          "checks": {
+            "matches_own_cold_artifact_modes": false,
+            "matches_own_cold_native_artifacts": false,
+            "matches_own_cold_artifacts": true,
+            "matches_own_cold_macro_dylibs": true,
+            "matches_own_cold_build_script_executables": true,
+            "matches_own_cold_final_executable": true,
+            "matches_own_cold_final_executable_modes": true
+          },
+          "recorded_kache_mismatches": [
+            "matches_own_cold_artifact_modes",
+            "matches_own_cold_native_artifacts"
+          ]
+        },
+        {
+          "implementation": "nanocompile",
+          "phase": "warm",
+          "seconds": 3.268,
+          "exit_code": 0,
+          "events": {
+            "bypass": 4,
+            "hit": 686,
+            "build_script_hit": 62
+          },
+          "checks": {
+            "matches_own_cold_artifact_modes": true,
+            "matches_own_cold_native_artifacts": true,
+            "matches_own_cold_artifacts": true,
+            "matches_own_cold_macro_dylibs": true,
+            "matches_own_cold_build_script_executables": true,
+            "matches_own_cold_final_executable": true,
+            "matches_own_cold_final_executable_modes": true
+          },
+          "recorded_kache_mismatches": null
+        },
+        {
+          "implementation": "nanocompile",
+          "phase": "warm",
+          "seconds": 3.351,
+          "exit_code": 0,
+          "events": {
+            "bypass": 4,
+            "hit": 686,
+            "build_script_hit": 62
+          },
+          "checks": {
+            "matches_own_cold_artifact_modes": true,
+            "matches_own_cold_native_artifacts": true,
+            "matches_own_cold_artifacts": true,
+            "matches_own_cold_macro_dylibs": true,
+            "matches_own_cold_build_script_executables": true,
+            "matches_own_cold_final_executable": true,
+            "matches_own_cold_final_executable_modes": true
+          },
+          "recorded_kache_mismatches": null
+        },
+        {
+          "implementation": "kache",
+          "phase": "warm",
+          "seconds": 3.666,
+          "exit_code": 0,
+          "events": {
+            "passthrough": 4,
+            "local_hit": 748
+          },
+          "checks": {
+            "matches_own_cold_artifact_modes": false,
+            "matches_own_cold_native_artifacts": false,
+            "matches_own_cold_artifacts": true,
+            "matches_own_cold_macro_dylibs": true,
+            "matches_own_cold_build_script_executables": true,
+            "matches_own_cold_final_executable": true,
+            "matches_own_cold_final_executable_modes": true
+          },
+          "recorded_kache_mismatches": [
+            "matches_own_cold_artifact_modes",
+            "matches_own_cold_native_artifacts"
+          ]
+        },
+        {
+          "implementation": "kache",
+          "phase": "warm",
+          "seconds": 3.742,
+          "exit_code": 0,
+          "events": {
+            "passthrough": 4,
+            "local_hit": 748
+          },
+          "checks": {
+            "matches_own_cold_artifact_modes": false,
+            "matches_own_cold_native_artifacts": false,
+            "matches_own_cold_artifacts": true,
+            "matches_own_cold_macro_dylibs": true,
+            "matches_own_cold_build_script_executables": true,
+            "matches_own_cold_final_executable": true,
+            "matches_own_cold_final_executable_modes": true
+          },
+          "recorded_kache_mismatches": [
+            "matches_own_cold_artifact_modes",
+            "matches_own_cold_native_artifacts"
+          ]
+        },
+        {
+          "implementation": "nanocompile",
+          "phase": "warm",
+          "seconds": 3.319,
+          "exit_code": 0,
+          "events": {
+            "bypass": 4,
+            "hit": 686,
+            "build_script_hit": 62
+          },
+          "checks": {
+            "matches_own_cold_artifact_modes": true,
+            "matches_own_cold_native_artifacts": true,
+            "matches_own_cold_artifacts": true,
+            "matches_own_cold_macro_dylibs": true,
+            "matches_own_cold_build_script_executables": true,
+            "matches_own_cold_final_executable": true,
+            "matches_own_cold_final_executable_modes": true
+          },
+          "recorded_kache_mismatches": null
+        }
+      ]
+    },
+    "workspace-b-release-cold": {
+      "profile": "release",
+      "jobs": 8,
+      "nanocompile_sha256": "b99b9e537649751ca3add32999da05611224a20e71769a07ce6a197071514b9c",
+      "kache_version": "kache 1.0.0",
+      "completed": true,
+      "summary": {
+        "cold": {
+          "nanocompile_median": 256.814,
+          "kache_median": 263.202,
+          "nano_pair_wins": 3,
+          "pairs": 3
+        }
+      },
+      "builds": [
+        {
+          "implementation": "direct",
+          "phase": "prime",
+          "seconds": 256.999,
+          "exit_code": 0,
+          "events": {},
+          "checks": {},
+          "recorded_kache_mismatches": null
+        },
+        {
+          "implementation": "nanocompile",
+          "phase": "cold",
+          "seconds": 256.672,
+          "exit_code": 0,
+          "events": {
+            "miss": 711,
+            "bypass": 17,
+            "build_script_miss": 67,
+            "failed": 5
+          },
+          "checks": {
+            "matches_direct_artifacts": true,
+            "matches_direct_macro_dylibs": true,
+            "matches_direct_build_script_executables": true
+          },
+          "recorded_kache_mismatches": null
+        },
+        {
+          "implementation": "kache",
+          "phase": "cold",
+          "seconds": 263.202,
+          "exit_code": 0,
+          "events": {
+            "passthrough": 28,
+            "miss": 776,
+            "unknown": 5
+          },
+          "checks": {},
+          "recorded_kache_mismatches": null
+        },
+        {
+          "implementation": "kache",
+          "phase": "cold",
+          "seconds": 260.757,
+          "exit_code": 0,
+          "events": {
+            "passthrough": 28,
+            "miss": 776,
+            "unknown": 5
+          },
+          "checks": {
+            "matches_own_cold_artifact_modes": true,
+            "matches_own_cold_native_artifacts": true,
+            "matches_own_cold_artifacts": true,
+            "matches_own_cold_macro_dylibs": true,
+            "matches_own_cold_build_script_executables": true,
+            "matches_own_cold_final_executable": true,
+            "matches_own_cold_final_executable_modes": true
+          },
+          "recorded_kache_mismatches": null
+        },
+        {
+          "implementation": "nanocompile",
+          "phase": "cold",
+          "seconds": 258.613,
+          "exit_code": 0,
+          "events": {
+            "miss": 711,
+            "bypass": 17,
+            "build_script_miss": 67,
+            "failed": 5
+          },
+          "checks": {
+            "matches_own_cold_artifact_modes": true,
+            "matches_own_cold_native_artifacts": true,
+            "matches_own_cold_artifacts": true,
+            "matches_own_cold_macro_dylibs": true,
+            "matches_own_cold_build_script_executables": true,
+            "matches_own_cold_final_executable": true,
+            "matches_own_cold_final_executable_modes": true,
+            "matches_direct_artifacts": true,
+            "matches_direct_macro_dylibs": true,
+            "matches_direct_build_script_executables": true
+          },
+          "recorded_kache_mismatches": null
+        },
+        {
+          "implementation": "nanocompile",
+          "phase": "cold",
+          "seconds": 256.814,
+          "exit_code": 0,
+          "events": {
+            "miss": 711,
+            "bypass": 17,
+            "build_script_miss": 67,
+            "failed": 5
+          },
+          "checks": {
+            "matches_own_cold_artifact_modes": true,
+            "matches_own_cold_native_artifacts": true,
+            "matches_own_cold_artifacts": true,
+            "matches_own_cold_macro_dylibs": true,
+            "matches_own_cold_build_script_executables": true,
+            "matches_own_cold_final_executable": true,
+            "matches_own_cold_final_executable_modes": true,
+            "matches_direct_artifacts": true,
+            "matches_direct_macro_dylibs": true,
+            "matches_direct_build_script_executables": true
+          },
+          "recorded_kache_mismatches": null
+        },
+        {
+          "implementation": "kache",
+          "phase": "cold",
+          "seconds": 263.478,
+          "exit_code": 0,
+          "events": {
+            "passthrough": 28,
+            "miss": 776,
+            "unknown": 5
+          },
+          "checks": {
+            "matches_own_cold_artifact_modes": true,
+            "matches_own_cold_native_artifacts": true,
+            "matches_own_cold_artifacts": true,
+            "matches_own_cold_macro_dylibs": true,
+            "matches_own_cold_build_script_executables": true,
+            "matches_own_cold_final_executable": true,
+            "matches_own_cold_final_executable_modes": true
+          },
+          "recorded_kache_mismatches": null
+        }
+      ]
+    },
+    "workspace-b-dev-cold": {
+      "profile": "dev",
+      "jobs": 8,
+      "nanocompile_sha256": "b99b9e537649751ca3add32999da05611224a20e71769a07ce6a197071514b9c",
+      "kache_version": "kache 1.0.0",
+      "completed": true,
+      "summary": {
+        "cold": {
+          "nanocompile_median": 56.264,
+          "kache_median": 71.84,
+          "nano_pair_wins": 3,
+          "pairs": 3
+        }
+      },
+      "builds": [
+        {
+          "implementation": "direct",
+          "phase": "prime",
+          "seconds": 55.533,
+          "exit_code": 0,
+          "events": {},
+          "checks": {},
+          "recorded_kache_mismatches": null
+        },
+        {
+          "implementation": "nanocompile",
+          "phase": "cold",
+          "seconds": 56.264,
+          "exit_code": 0,
+          "events": {
+            "miss": 688,
+            "build_script_miss": 62,
+            "bypass": 14,
+            "failed": 4
+          },
+          "checks": {
+            "matches_direct_artifacts": true,
+            "matches_direct_macro_dylibs": true,
+            "matches_direct_build_script_executables": true
+          },
+          "recorded_kache_mismatches": null
+        },
+        {
+          "implementation": "kache",
+          "phase": "cold",
+          "seconds": 73.766,
+          "exit_code": 0,
+          "events": {
+            "passthrough": 24,
+            "miss": 748
+          },
+          "checks": {},
+          "recorded_kache_mismatches": null
+        },
+        {
+          "implementation": "kache",
+          "phase": "cold",
+          "seconds": 71.84,
+          "exit_code": 0,
+          "events": {
+            "passthrough": 24,
+            "miss": 748
+          },
+          "checks": {
+            "matches_own_cold_artifact_modes": true,
+            "matches_own_cold_native_artifacts": true,
+            "matches_own_cold_artifacts": true,
+            "matches_own_cold_macro_dylibs": true,
+            "matches_own_cold_build_script_executables": true,
+            "matches_own_cold_final_executable": true,
+            "matches_own_cold_final_executable_modes": true
+          },
+          "recorded_kache_mismatches": null
+        },
+        {
+          "implementation": "nanocompile",
+          "phase": "cold",
+          "seconds": 55.993,
+          "exit_code": 0,
+          "events": {
+            "miss": 688,
+            "bypass": 14,
+            "build_script_miss": 62,
+            "failed": 4
+          },
+          "checks": {
+            "matches_own_cold_artifact_modes": true,
+            "matches_own_cold_native_artifacts": true,
+            "matches_own_cold_artifacts": true,
+            "matches_own_cold_macro_dylibs": true,
+            "matches_own_cold_build_script_executables": true,
+            "matches_own_cold_final_executable": true,
+            "matches_own_cold_final_executable_modes": true,
+            "matches_direct_artifacts": true,
+            "matches_direct_macro_dylibs": true,
+            "matches_direct_build_script_executables": true
+          },
+          "recorded_kache_mismatches": null
+        },
+        {
+          "implementation": "nanocompile",
+          "phase": "cold",
+          "seconds": 58.187,
+          "exit_code": 0,
+          "events": {
+            "miss": 688,
+            "bypass": 14,
+            "build_script_miss": 62,
+            "failed": 4
+          },
+          "checks": {
+            "matches_own_cold_artifact_modes": true,
+            "matches_own_cold_native_artifacts": true,
+            "matches_own_cold_artifacts": true,
+            "matches_own_cold_macro_dylibs": true,
+            "matches_own_cold_build_script_executables": true,
+            "matches_own_cold_final_executable": true,
+            "matches_own_cold_final_executable_modes": true,
+            "matches_direct_artifacts": true,
+            "matches_direct_macro_dylibs": true,
+            "matches_direct_build_script_executables": true
+          },
+          "recorded_kache_mismatches": null
+        },
+        {
+          "implementation": "kache",
+          "phase": "cold",
+          "seconds": 70.823,
+          "exit_code": 0,
+          "events": {
+            "passthrough": 24,
+            "miss": 748
+          },
+          "checks": {
+            "matches_own_cold_artifact_modes": true,
+            "matches_own_cold_native_artifacts": true,
+            "matches_own_cold_artifacts": true,
+            "matches_own_cold_macro_dylibs": true,
+            "matches_own_cold_build_script_executables": true,
+            "matches_own_cold_final_executable": true,
+            "matches_own_cold_final_executable_modes": true
+          },
+          "recorded_kache_mismatches": null
+        }
+      ]
+    }
+  }
+}
