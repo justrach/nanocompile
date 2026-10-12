@@ -202,7 +202,18 @@ def main():
         execute('14 second')
         assert b'bypass: UnsupportedProducerConfiguration' in run([str(binary), *rust, '-C', 'debuginfo=2']).stderr
         if args.thin_lto:
-            assert b'bypass: UnsupportedProducerConfiguration' in run([str(binary), *rust, '-C', 'lto=fat']).stderr
+            # Fat LTO links the same way: cached, byte-identical to direct.
+            fat = [*rust, '-C', 'lto=fat']
+            remove()
+            run(fat)
+            fat_reference = hashes()
+            remove()
+            assert b'miss: compiling executable producer' in run([str(binary), *fat]).stderr
+            assert hashes() == fat_reference
+            remove()
+            assert b'hit: executable producer' in run([str(binary), *fat]).stderr
+            assert hashes() == fat_reference
+            execute('14 second')
             macro_env = dict(env, NANOCOMPILE_PROC_MACRO_PRODUCERS='1')
             # Exercise the single proc-macro producer configuration. Appending
             # another type to a bin command instead tests mixed-output refusal.

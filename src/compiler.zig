@@ -22,6 +22,10 @@ const Plan = struct {
     /// Absolute `<out-dir>/<crate><extra-filename>.` prefix of the per-codegen-unit
     /// objects that unpacked split debug info leaves beside a library.
     debug_sidecars: ?[]const u8 = null,
+    /// The same prefix for an executable producer compiled in its real output
+    /// directory (unpacked debug info or LTO), because its output embeds the
+    /// paths of the objects it links (debug map entries, linker UUID).
+    in_place: ?[]const u8 = null,
 };
 const Module = struct { name: []const u8, source: []const u8 };
 
@@ -69,6 +73,7 @@ fn rustPlan(ctx: *cache.Context, argv: []const []const u8) !Plan {
     var debug_info: []const u8 = "0";
     var producer_unsafe_codegen = false;
     var thin_lto = false;
+    var fat_lto = false;
     var target: ?[]const u8 = null;
     var static_companion = false;
     var prefer_dynamic = false;
@@ -153,10 +158,17 @@ fn rustPlan(ctx: *cache.Context, argv: []const []const u8) !Plan {
             const key = v[0..split];
             if (eq(key, "debuginfo")) debug_info = v[@min(split + 1, v.len)..];
             if (eq(key, "prefer-dynamic")) prefer_dynamic = true;
-            if (eq(key, "lto") and eq(v[@min(split + 1, v.len)..], "thin") and
+            // Thin and fat LTO executables (fat: `-C lto`, `lto=fat`, `lto=true`)
+            // share one opt-in and compile in place.
+            if (eq(key, "lto")) {
+                // As in rustc, the last -C lto wins.
+                thin_lto = false;
+                fat_lto = false;
+            }
+            if (eq(key, "lto") and ltoProducer(if (split < v.len) v[split + 1 ..] else "") and
                 eq(ctx.env.get("NANOCOMPILE_THIN_LTO_PRODUCERS") orelse "", "1"))
             {
-                thin_lto = true;
+                if (eq(v[@min(split + 1, v.len)..], "thin")) thin_lto = true else fat_lto = true;
             } else for ([_][]const u8{ "lto", "linker-plugin-lto", "relocation-model" }) |unsupported| {
                 if (eq(key, unsupported)) producer_unsafe_codegen = true;
             }
@@ -213,7 +225,9 @@ fn rustPlan(ctx: *cache.Context, argv: []const []const u8) !Plan {
     if (deferred_framework and (producer or builtin.os.tag != .macos or target != null)) return error.UnsupportedNativeLibrary;
     if (!producer_dylib and builtin_macro) return error.UntrackedExtern;
     if (producer_dylib and thin_lto) return error.UnsupportedProducerConfiguration;
-    // A binary with unpacked split debug info compiles in place (see executeProducer).
+    if (fat_lto and (!executable or static_companion)) return error.UnsupportedProducerConfiguration;
+    // A binary with unpacked split debug info, or one linked with LTO,
+    // compiles in place (see executeProducer).
     const in_place_debug = executable and eq(split_debug, "unpacked") and emitsDebugInfo(debug_info) and !thin_lto;
     if (producer and (builtin.os.tag != .macos or (!eq(debug_info, "0") and !in_place_debug) or producer_unsafe_codegen or target != null)) return error.UnsupportedProducerConfiguration;
     if (static_libraries.items.len != 0 and target != null) return error.UnsupportedNativeTarget;
@@ -285,7 +299,13 @@ fn rustPlan(ctx: *cache.Context, argv: []const []const u8) !Plan {
     }
     if (dep_info == null) return error.NoDependencyInfo;
     if (producer and (std.mem.indexOfAny(u8, dir, "\r\n\t\"\\") != null or std.mem.indexOfAny(u8, ctx.root, "\r\n\t\"\\") != null or std.mem.indexOf(u8, dir, "//") != null)) return error.UnsupportedProducerPath;
-    return .{ .source = src, .outputs = outputs.items, .dependencies = inputs.items, .dep_info = dep_info, .library_dirs = search_dirs.items, .native_dirs = native_dirs.items, .configuration = configuration, .producer = producer, .producer_dylib = producer_dylib, .thin_lto = thin_lto, .static_companion = static_companion, .linked_output = linked_output, .out_dir = dir, .debug_sidecars = debug_sidecars };
+    return .{ .source = src, .outputs = outputs.items, .dependencies = inputs.items, .dep_info = dep_info, .library_dirs = search_dirs.items, .native_dirs = native_dirs.items, .configuration = configuration, .producer = producer, .producer_dylib = producer_dylib, .thin_lto = thin_lto, .static_companion = static_companion, .linked_output = linked_output, .out_dir = dir, .debug_sidecars = debug_sidecars,
+        .in_place = if (executable and (debug_sidecars != null or fat_lto or thin_lto)) try std.fmt.allocPrint(ctx.a, "{s}{s}.", .{ try absolute(ctx, try std.fs.path.join(ctx.a, &.{ dir, crate })), suffix }) else null };
+}
+
+fn ltoProducer(value: []const u8) bool {
+    for ([_][]const u8{ "thin", "fat", "", "y", "yes", "on", "true" }) |accepted| if (eq(value, accepted)) return true;
+    return false;
 }
 
 fn emitsDebugInfo(level: []const u8) bool {
@@ -678,12 +698,12 @@ fn executeProducer(ctx: *cache.Context, plan: Plan, argv: []const []const u8) !u
         job.cleanup(ctx) catch {};
         ctx.profileEnd("producer.cleanup", cleanup_start);
     }
-    if (plan.thin_lto) job.acquireAlias(ctx, key) catch
+    if (plan.thin_lto and plan.in_place == null) job.acquireAlias(ctx, key) catch
         return bypass(ctx, argv, "bypass: exclusive thin-LTO alias unavailable");
     const original = plan.linked_output orelse return bypass(ctx, argv, "bypass: producer needs link output");
     // A debug map names unpacked objects by absolute path, so such a binary is
     // compiled in its real output directory, exactly where a direct build puts it.
-    const in_place: ?@import("producer_job.zig").InPlace = if (plan.debug_sidecars) |prefix| .{
+    const in_place: ?@import("producer_job.zig").InPlace = if (plan.in_place) |prefix| .{
         .dir = std.fs.path.dirname(prefix).?,
         .canonical_dir = Dir.cwd().realPathFileAlloc(ctx.io, std.fs.path.dirname(prefix).?, ctx.a) catch return bypass(ctx, argv, "bypass: producer output directory unavailable"),
         .prefix = std.fs.path.basename(prefix),
