@@ -7,7 +7,7 @@ const deps = @import("link_dependencies.zig");
 const responses = @import("response_files.zig");
 const jobs = @import("producer_job.zig");
 
-pub const Ownership = struct { out: []const u8, canonical_out: []const u8, output: []const u8 };
+pub const Ownership = struct { out: []const u8, canonical_out: []const u8, output: []const u8, in_place: ?jobs.InPlace = null };
 pub const LinkCapture = struct { ownership: Ownership, report: []const u8, inputs: []const jobs.Job.Input };
 
 pub const Config = struct {
@@ -61,10 +61,11 @@ pub fn parseInvocation(ctx: *cache.Context, config: Config, bytes: []const u8) !
         const link = record.link orelse return error.InvalidLinkCapture;
         if (!std.mem.eql(u8, link.ownership.out, expected.out) or
             !std.mem.eql(u8, link.ownership.canonical_out, expected.canonical_out) or
-            !std.mem.eql(u8, link.ownership.output, expected.output)) return error.UnboundLinkCapture;
+            !std.mem.eql(u8, link.ownership.output, expected.output) or
+            !std.mem.eql(u8, try std.json.Stringify.valueAlloc(ctx.a, link.ownership.in_place, .{}), try std.json.Stringify.valueAlloc(ctx.a, expected.in_place, .{}))) return error.UnboundLinkCapture;
         const report = try deps.parseForOutput(ctx.a, link.report, config.format, expected.output);
         if (report.inputs.len != link.inputs.len) return error.InvalidLinkCapture;
-        const job: jobs.Job = .{ .root = "", .out = expected.out, .canonical_out = expected.canonical_out, .capture_id = id };
+        const job: jobs.Job = .{ .root = "", .out = expected.out, .canonical_out = expected.canonical_out, .capture_id = id, .in_place = expected.in_place };
         for (link.inputs, report.inputs) |input, raw| {
             const lexical = try std.fs.path.resolve(ctx.a, &.{ ctx.cwd, raw });
             if (!std.mem.eql(u8, lexical, input.lexical) or !std.fs.path.isAbsolute(input.path)) return error.InvalidLinkCapture;
@@ -79,9 +80,12 @@ pub fn parseInvocation(ctx: *cache.Context, config: Config, bytes: []const u8) !
 fn collectLink(ctx: *cache.Context, config: Config, ownership: Ownership, failed_path: *?[]const u8) !LinkCapture {
     const report = try ctx.read(config.report);
     const parsed = try deps.parseForOutput(ctx.a, report, config.format, ownership.output);
-    const job: jobs.Job = .{ .root = "", .out = ownership.out, .canonical_out = ownership.canonical_out, .capture_id = config.capture_id orelse return error.UnboundLinkCapture };
+    const job: jobs.Job = .{ .root = "", .out = ownership.out, .canonical_out = ownership.canonical_out, .capture_id = config.capture_id orelse return error.UnboundLinkCapture, .in_place = ownership.in_place };
     const resolved = try std.Io.Dir.cwd().realPathFileAlloc(ctx.io, ownership.out, ctx.a);
     if (!std.mem.eql(u8, resolved, ownership.canonical_out)) return error.UnboundLinkCapture;
+    if (ownership.in_place) |place| {
+        if (!std.mem.eql(u8, try std.Io.Dir.cwd().realPathFileAlloc(ctx.io, place.dir, ctx.a), place.canonical_dir)) return error.UnboundLinkCapture;
+    }
     var inputs: std.ArrayList(jobs.Job.Input) = .empty;
     for (parsed.inputs) |path| {
         failed_path.* = path;

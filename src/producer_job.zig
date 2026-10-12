@@ -5,11 +5,18 @@ const std = @import("std");
 const cache = @import("cache.zig");
 const Dir = std.Io.Dir;
 
+/// A producer that compiles in its real output directory (a binary with
+/// unpacked split debug info, whose debug map names its objects by path) owns
+/// only its own `<prefix>*.rcgu.o` objects there and rustc's `rustc*` scratch
+/// directories; every other file in that directory stays a tracked input.
+pub const InPlace = struct { dir: []const u8, canonical_dir: []const u8, prefix: []const u8 };
+
 pub const Job = struct {
     root: []const u8,
     out: []const u8,
     canonical_out: []const u8,
     capture_id: []const u8,
+    in_place: ?InPlace = null,
     alias: ?[]const u8 = null,
     alias_target: ?[]const u8 = null,
 
@@ -95,7 +102,9 @@ pub const Job = struct {
     pub const Input = struct { lexical: []const u8, path: []const u8, owned: bool };
 
     pub fn ownsPaths(self: Job, lexical: []const u8, canonical: []const u8) bool {
-        return within(self.out, lexical) and within(self.canonical_out, canonical);
+        if (within(self.out, lexical) and within(self.canonical_out, canonical)) return true;
+        const place = self.in_place orelse return false;
+        return ownedInPlace(place.dir, place.prefix, lexical) and ownedInPlace(place.canonical_dir, place.prefix, canonical);
     }
 
     pub fn classify(self: Job, ctx: *cache.Context, input: []const u8) !Input {
@@ -111,6 +120,29 @@ pub const Job = struct {
 
 fn within(root: []const u8, path: []const u8) bool {
     return path.len > root.len and std.mem.startsWith(u8, path, root) and path[root.len] == '/';
+}
+
+fn ownedInPlace(dir: []const u8, prefix: []const u8, path: []const u8) bool {
+    if (prefix.len == 0 or !within(dir, path)) return false;
+    const rest = path[dir.len + 1 ..];
+    if (std.mem.indexOfScalar(u8, rest, '/')) |slash| {
+        const scratch = rest[0..slash];
+        return scratch.len > "rustc".len and std.mem.startsWith(u8, scratch, "rustc");
+    }
+    return std.mem.startsWith(u8, rest, prefix) and std.mem.endsWith(u8, rest, ".rcgu.o");
+}
+
+test "in-place producers own only their objects and rustc scratch" {
+    const job: Job = .{ .root = "", .out = "/private/job/out", .canonical_out = "/private/job/out", .capture_id = "id",
+        .in_place = .{ .dir = "/t/deps", .canonical_dir = "/t/deps", .prefix = "app-1a." } };
+    try std.testing.expect(job.ownsPaths("/t/deps/app-1a.app.9f-cgu.0.rcgu.o", "/t/deps/app-1a.app.9f-cgu.0.rcgu.o"));
+    try std.testing.expect(job.ownsPaths("/t/deps/rustcAbC123/symbols.o", "/t/deps/rustcAbC123/symbols.o"));
+    try std.testing.expect(job.ownsPaths("/private/job/out/x.o", "/private/job/out/x.o"));
+    try std.testing.expect(!job.ownsPaths("/t/deps/libdep-2b.rlib", "/t/deps/libdep-2b.rlib"));
+    try std.testing.expect(!job.ownsPaths("/t/deps/other-3c.other.1-cgu.0.rcgu.o", "/t/deps/other-3c.other.1-cgu.0.rcgu.o"));
+    try std.testing.expect(!job.ownsPaths("/t/deps/app-1a.app.9f-cgu.0.rcgu.o", "/elsewhere/app-1a.app.9f-cgu.0.rcgu.o"));
+    try std.testing.expect(!job.ownsPaths("/t/deps/rustc/x.o", "/t/deps/rustc/x.o"));
+    try std.testing.expect(!job.ownsPaths("/t/depsx/app-1a.app.rcgu.o", "/t/depsx/app-1a.app.rcgu.o"));
 }
 
 test "private jobs own only regular inputs beneath both output spellings" {

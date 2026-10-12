@@ -137,7 +137,7 @@ def main():
         inputs = payload['link']['inputs']
         assert any(p['owned'] and p['path'] == str(owned_object.resolve()) for p in inputs), payload
         assert any(not p['owned'] and p['path'] == str(foreign.resolve()) for p in inputs), payload
-        assert payload['link']['ownership'] == ownership
+        assert {k: v for k, v in payload['link']['ownership'].items() if v is not None} == ownership
         owned_object.unlink()
         assert any(p['owned'] for p in inputs)  # durable capture outlives scratch
         converted = subprocess.run([str(binary), 'internal-producer-dependencies', str(config),

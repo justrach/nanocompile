@@ -213,7 +213,9 @@ fn rustPlan(ctx: *cache.Context, argv: []const []const u8) !Plan {
     if (deferred_framework and (producer or builtin.os.tag != .macos or target != null)) return error.UnsupportedNativeLibrary;
     if (!producer_dylib and builtin_macro) return error.UntrackedExtern;
     if (producer_dylib and thin_lto) return error.UnsupportedProducerConfiguration;
-    if (producer and (builtin.os.tag != .macos or !eq(debug_info, "0") or producer_unsafe_codegen or target != null)) return error.UnsupportedProducerConfiguration;
+    // A binary with unpacked split debug info compiles in place (see executeProducer).
+    const in_place_debug = executable and eq(split_debug, "unpacked") and emitsDebugInfo(debug_info) and !thin_lto;
+    if (producer and (builtin.os.tag != .macos or (!eq(debug_info, "0") and !in_place_debug) or producer_unsafe_codegen or target != null)) return error.UnsupportedProducerConfiguration;
     if (static_libraries.items.len != 0 and target != null) return error.UnsupportedNativeTarget;
     // Plain static libraries bundle archive members into the rlib. Require a
     // candidate in explicit native search paths; the complete directory/file
@@ -256,7 +258,7 @@ fn rustPlan(ctx: *cache.Context, argv: []const []const u8) !Plan {
         // the output. A library's are cached as extra outputs. A binary or
         // macro dylib names its objects by absolute path in its debug map, and
         // producers compile in a staging directory, so those stay uncached.
-        if (!eq(split_debug, "unpacked") or producer or !(eq(ct, "lib") or eq(ct, "rlib"))) return error.SplitDebugSidecars;
+        if (!eq(split_debug, "unpacked") or producer_dylib or !(executable or eq(ct, "lib") or eq(ct, "rlib"))) return error.SplitDebugSidecars;
         debug_sidecars = try std.fmt.allocPrint(ctx.a, "{s}{s}.", .{ try absolute(ctx, try std.fs.path.join(ctx.a, &.{ dir, crate })), suffix });
     }
     var outputs: std.ArrayList([]const u8) = .empty;
@@ -656,6 +658,7 @@ fn executeProducer(ctx: *cache.Context, plan: Plan, argv: []const []const u8) !u
     }
     ctx.profileEnd("producer.locks_configuration", phase);
     phase = ctx.profileStart();
+    ctx.output_sidecars = plan.debug_sidecars;
     const restored = cache.restoreVariants(ctx, key, plan.outputs) catch false;
     ctx.profileEnd("producer.restore", phase);
     if (restored) {
@@ -678,14 +681,24 @@ fn executeProducer(ctx: *cache.Context, plan: Plan, argv: []const []const u8) !u
     if (plan.thin_lto) job.acquireAlias(ctx, key) catch
         return bypass(ctx, argv, "bypass: exclusive thin-LTO alias unavailable");
     const original = plan.linked_output orelse return bypass(ctx, argv, "bypass: producer needs link output");
-    const output = try std.fs.path.join(ctx.a, &.{ job.out, std.fs.path.basename(original) });
+    // A debug map names unpacked objects by absolute path, so such a binary is
+    // compiled in its real output directory, exactly where a direct build puts it.
+    const in_place: ?@import("producer_job.zig").InPlace = if (plan.debug_sidecars) |prefix| .{
+        .dir = std.fs.path.dirname(prefix).?,
+        .canonical_dir = Dir.cwd().realPathFileAlloc(ctx.io, std.fs.path.dirname(prefix).?, ctx.a) catch return bypass(ctx, argv, "bypass: producer output directory unavailable"),
+        .prefix = std.fs.path.basename(prefix),
+    } else null;
+    // In place, the linker reports the output as rustc spells it: --out-dir joined with the name.
+    const output = try std.fs.path.join(ctx.a, &.{ if (in_place != null) plan.out_dir.? else job.out, std.fs.path.basename(original) });
     const retain_job = eq(ctx.env.get("NANOCOMPILE_RETAIN_PRODUCER_JOBS") orelse "", "1");
-    const config: observer.Config = .{ .driver = driver, .format = .darwin, .report = try std.fs.path.join(ctx.a, &.{ job.root, "link.deps" }), .invocation = try std.fs.path.join(ctx.a, &.{ job.root, "invocation" }), .capture_id = job.capture_id, .retain_owned_inputs = retain_job, .ownership = .{ .out = job.out, .canonical_out = job.canonical_out, .output = output } };
+    const config: observer.Config = .{ .driver = driver, .format = .darwin, .report = try std.fs.path.join(ctx.a, &.{ job.root, "link.deps" }), .invocation = try std.fs.path.join(ctx.a, &.{ job.root, "invocation" }), .capture_id = job.capture_id, .retain_owned_inputs = retain_job, .ownership = .{ .out = job.out, .canonical_out = job.canonical_out, .output = output, .in_place = in_place } };
     const linker = job.installObserver(ctx, binary, try std.json.Stringify.valueAlloc(ctx.a, config, .{})) catch return bypass(ctx, argv, "bypass: producer observer installation unavailable");
     var command: std.ArrayList([]const u8) = .empty;
     var i: usize = 0;
     while (i < argv.len) : (i += 1) {
-        if (eq(argv[i], "--out-dir")) {
+        if (in_place != null) {
+            try command.append(ctx.a, argv[i]);
+        } else if (eq(argv[i], "--out-dir")) {
             try command.appendSlice(ctx.a, &.{ "--out-dir", job.out });
             i += 1;
         } else if (std.mem.startsWith(u8, argv[i], "--out-dir=")) {
@@ -713,7 +726,7 @@ fn executeProducer(ctx: *cache.Context, plan: Plan, argv: []const []const u8) !u
     result.stdout = try replacePath(ctx, result.stdout, job.out, plan.out_dir.?);
     result.stderr = try replacePath(ctx, result.stderr, job.out, plan.out_dir.?);
     result.stderr = try replacePath(ctx, result.stderr, linker, "cc");
-    for (plan.outputs) |path| {
+    if (in_place == null) for (plan.outputs) |path| {
         const private = try std.fs.path.join(ctx.a, &.{ job.out, std.fs.path.basename(path) });
         const st = Dir.cwd().statFile(ctx.io, private, .{}) catch |err| switch (err) {
             error.FileNotFound => continue,
@@ -722,7 +735,7 @@ fn executeProducer(ctx: *cache.Context, plan: Plan, argv: []const []const u8) !u
         if (plan.dep_info != null and eq(path, plan.dep_info.?))
             try ctx.atomic(private, try replacePath(ctx, try ctx.read(private), job.out, plan.out_dir.?));
         try cache.materialize(ctx, private, path, @intCast(st.permissions.toMode()));
-    }
+    };
     try ctx.out(result.stdout);
     try std.Io.File.stderr().writeStreamingAll(ctx.io, result.stderr);
     ctx.profileEnd("producer.publication_forwarding", phase);
@@ -759,7 +772,12 @@ fn executeProducer(ctx: *cache.Context, plan: Plan, argv: []const []const u8) !u
         if (observer_stat.mtime.nanoseconds >= started or observer_stat.ctime.nanoseconds >= started) return 0;
     }
     phase = ctx.profileStart();
-    save(ctx, key, plan, argv, before.items, directories, started, result, linked) catch |err|
+    var stored = plan;
+    if (plan.debug_sidecars) |prefix| stored.outputs = withSidecars(ctx, plan.outputs, prefix, started) catch |err| {
+        ctx.trace(try std.fmt.allocPrint(ctx.a, "uncached producer: sidecars unavailable ({s})", .{@errorName(err)}));
+        return 0;
+    };
+    save(ctx, key, stored, argv, before.items, directories, started, result, linked) catch |err|
         ctx.trace(try std.fmt.allocPrint(ctx.a, "uncached producer: {s}", .{@errorName(err)}));
     ctx.profileEnd("producer.postcompile_store", phase);
     return 0;

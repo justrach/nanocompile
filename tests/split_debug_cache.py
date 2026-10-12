@@ -65,14 +65,52 @@ def main():
         trace, files = run(plain)
         assert "nanocompile: hit" in trace and not any(n.endswith(".rcgu.o") for n in files), (trace, files)
 
-        # A binary's debug map names its objects by absolute path: stay uncached.
-        binary = rustc("main.rs", "bin", "out", "-C", "debuginfo=2", "-C", "extra-filename=-d4")
-        for producers in ("0", "1"):
-            env["NANOCOMPILE_EXECUTABLE_PRODUCERS"] = producers
-            for _ in range(2):
-                trace, files = run(binary)
-                assert "bypass:" in trace and "hit" not in trace, trace
-        print("PASS: unpacked split-debug sidecars cached and restored, prefix isolation, debug-free caching, binary bypass")
+        # Without executable producers a debug binary stays uncached.
+        (root / "dep.rs").write_text("pub fn value() -> u32 { 41 }\n")
+        (root / "main.rs").write_text("fn main() { println!(\"{}\", dep::value() + 1); }\n")
+        dep = ["rustc", "dep.rs", "--crate-name", "dep", "--crate-type", "lib", "--emit=dep-info,metadata,link",
+               "--out-dir", "deps", "-C", "debuginfo=2", "-C", "split-debuginfo=unpacked", "-C", "extra-filename=-e5"]
+        (root / "deps").mkdir()
+        subprocess.run(dep, cwd=root, check=True, capture_output=True)
+        binary = ["rustc", "main.rs", "--edition=2021", "--crate-name", "app", "--crate-type", "bin", "--emit=dep-info,link",
+                  "--out-dir", "deps", "-C", "debuginfo=2", "-C", "split-debuginfo=unpacked", "-C", "extra-filename=-f6",
+                  "--extern", "dep=" + str(root / "deps/libdep-e5.rlib"), "-L", "dependency=" + str(root / "deps")]
+
+        def build_binary(wrapped):
+            for f in (root / "deps").iterdir():
+                if f.name.startswith("app-f6"):
+                    f.unlink()
+            p = subprocess.run(([BIN] if wrapped else []) + binary, cwd=root, env=env, capture_output=True)
+            assert p.returncode == 0, p.stderr.decode(errors="replace")
+            files = {f.name: digest(f) for f in (root / "deps").iterdir() if f.name.startswith("app-f6")}
+            assert subprocess.check_output([str(root / "deps/app-f6")]).strip() == b"42"
+            return p.stderr.decode(errors="replace"), files
+
+        env["NANOCOMPILE_EXECUTABLE_PRODUCERS"] = "0"
+        assert "bypass:" in build_binary(True)[0]
+        # With producers it compiles in place, so its debug map names the same
+        # objects a direct build keeps, and a hit restores them there.
+        env["NANOCOMPILE_EXECUTABLE_PRODUCERS"] = "1"
+        _, direct_files = build_binary(False)
+        assert any(n.endswith(".rcgu.o") for n in direct_files), direct_files
+        trace, cold_files = build_binary(True)
+        assert "miss: compiling executable producer" in trace and "uncached" not in trace, trace
+        assert cold_files == direct_files, (cold_files, direct_files)
+        trace, warm_files = build_binary(True)
+        assert "hit: executable producer" in trace and warm_files == direct_files, (trace, warm_files)
+        maps = subprocess.check_output(["nm", "-ap", str(root / "deps/app-f6")], text=True)
+        objects = [line.split(" OSO ")[1] for line in maps.splitlines() if " OSO " in line and "app-f6." in line]
+        assert objects and all(Path(o).is_file() and Path(o).parent == (root / "deps").resolve() for o in objects), objects
+        # The dependency rlib beside it is a tracked input, not an owned one.
+        (root / "dep.rs").write_text("pub fn value() -> u32 { 40 }\n")
+        subprocess.run(dep, cwd=root, check=True, capture_output=True)
+        for f in (root / "deps").iterdir():
+            if f.name.startswith("app-f6"):
+                f.unlink()
+        p = subprocess.run([BIN] + binary, cwd=root, env=env, capture_output=True)
+        assert p.returncode == 0 and b"miss: compiling" in p.stderr, p.stderr.decode(errors="replace")
+        assert subprocess.check_output([str(root / "deps/app-f6")]).strip() == b"41"
+        print("PASS: unpacked split-debug sidecars cached and restored, prefix isolation, debug-free caching, in-place debug binaries")
 
 
 if __name__ == "__main__":
