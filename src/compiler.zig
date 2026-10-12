@@ -200,10 +200,10 @@ fn rustPlan(ctx: *cache.Context, argv: []const []const u8) !Plan {
     const producer_dylib = eq(ct, "proc-macro") and eq(ctx.env.get("NANOCOMPILE_PROC_MACRO_PRODUCERS") orelse "", "1");
     const executable = eq(ct, "bin") and eq(ctx.env.get("NANOCOMPILE_EXECUTABLE_PRODUCERS") orelse "", "1");
     const producer = producer_dylib or executable;
-    // Only the measured native-host, zero-debug, non-LTO archive pair is a
-    // trial. Its full compiler/stdlib resource identity is required below.
+    // Only the measured native-host, non-LTO archive pair is a trial. Its full
+    // compiler/stdlib resource identity is required below.
     if (static_companion and (builtin.os.tag != .macos or builtin.cpu.arch != .aarch64 or
-        producer or target != null or !eq(debug_info, "0") or producer_unsafe_codegen or thin_lto or
+        producer or target != null or producer_unsafe_codegen or thin_lto or
         prefer_dynamic or deferred_framework or !eq(emit orelse "", "dep-info,link")))
         return error.UnsupportedStaticlibConfiguration;
     if (!producer and !eq(ct, "rlib") and !eq(ct, "lib")) return error.UnsupportedCrateType;

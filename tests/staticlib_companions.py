@@ -86,7 +86,13 @@ def main():
         env.pop('NANOCOMPILE_RUST_STATICLIB')
         assert run('default-refusal',decision='bypass: UnsupportedCrateType')==direct
         env['NANOCOMPILE_RUST_STATICLIB']='1'
-        for name,extra in [('debug',('-C','debuginfo=1')),('target',('--target','aarch64-apple-darwin')),('dynamic',('-C','prefer-dynamic=no')),('lto',('-C','lto=off'))]:
+        # Debug builds, including Cargo's macOS dev-profile split debug objects.
+        for name,extra in [('debug',('-C','debuginfo=1')),('debug-unpacked',('-C','debuginfo=2','-C','split-debuginfo=unpacked'))]:
+            expected=run(name+'-direct',wrapped=False,extra=extra)
+            assert run(name+'-cold',extra=extra,decision='miss: compiling')==expected
+            assert run(name+'-hit',extra=extra,decision='hit')==expected;probes(41)
+        assert any(name.endswith('.rcgu.o') for name in expected), expected
+        for name,extra in [('target',('--target','aarch64-apple-darwin')),('dynamic',('-C','prefer-dynamic=no')),('lto',('-C','lto=off'))]:
             expected=run(name+'-direct',wrapped=False,extra=extra)
             assert run(name+'-refusal',extra=extra,decision='bypass: UnsupportedStaticlibConfiguration')==expected
         proxy=root/'rustc-proxy';proxy.write_text('#!/bin/sh\nexec '+shlex.quote(rustc)+' "$@"\n');proxy.chmod(0o700)
