@@ -70,6 +70,8 @@ def main():
     p.add_argument("--compiler-stream", action="store_true", help="experimental immediate Rust compiler stream forwarding")
     p.add_argument("--script-profile", action="store_true", help="diagnostic build-script phase timings; requires execution contract")
     p.add_argument("--declared-build-scripts", action="store_true", help="cache every Nano build-script run under Cargo's rerun-if-changed rule (NANOCOMPILE_BUILD_SCRIPT_CACHE=declared); explicit contract packages keep their contract")
+    p.add_argument("--record-kache-mismatches", action="store_true", help="record kache's own-cold artifact mismatches in the report instead of stopping; Nano mismatches still stop the run")
+    p.add_argument("--dev", action="store_true", help="build Cargo's dev profile (target/debug) instead of --release")
     p.add_argument("--cargo-timings", action="store_true", help="keep each build's Cargo --timings report for tools/rust_profile.py; small report-writing overhead")
     p.add_argument("--trace-builds", action="store_true", help="private full compiler logs and Cargo timings; diagnostic overhead, not a benchmark")
     p.add_argument("--compiler-profile", action="store_true", help="diagnostic producer/restore phase timings; requires --trace-builds")
@@ -154,7 +156,8 @@ def main():
     if args.rlib_frameworks:
         env["NANOCOMPILE_RLIB_FRAMEWORKS"] = "1"
     target_options = ["--bin", args.bin] if args.bin else ["--lib"]
-    command = ["cargo", "build", "--release", "--locked", "--offline", *target_options,
+    profile_dir = "debug" if args.dev else "release"
+    command = ["cargo", "build", *([] if args.dev else ["--release"]), "--locked", "--offline", *target_options,
                "-p", args.package, "-j", str(args.jobs), "--message-format=json-render-diagnostics"]
     if capture:
         command += ["--timings", "-vv"]
@@ -261,13 +264,13 @@ def main():
                     pass
         seconds = time.monotonic() - start
         after = nano_events() if implementation == "nanocompile" else kache_events() if implementation == "kache" else collections.Counter()
-        artifacts = {str(path.relative_to(target)): sha(path) for path in sorted((target / "release/deps").glob("*.rlib"))}
-        macros = {str(path.relative_to(target)): sha(path) for path in sorted((target / "release/deps").glob("*.dylib"))}
-        executables = {str(path.relative_to(target)): sha(path) for path in sorted((target / "release/build").glob("*/*")) if path.is_file() and (path.name == "build-script-build" or path.name.endswith(".nano-real"))}
-        compiled_executables = compiled_scripts(target)
+        artifacts = {str(path.relative_to(target)): sha(path) for path in sorted((target / profile_dir / "deps").glob("*.rlib"))}
+        macros = {str(path.relative_to(target)): sha(path) for path in sorted((target / profile_dir / "deps").glob("*.dylib"))}
+        executables = {str(path.relative_to(target)): sha(path) for path in sorted((target / profile_dir / "build").glob("*/*")) if path.is_file() and (path.name == "build-script-build" or path.name.endswith(".nano-real"))}
+        compiled_executables = compiled_scripts(target, profile_dir)
         native = {str(path.relative_to(target)): sha(path) for path in sorted(target.rglob('*'))
                   if path.is_file() and path.suffix in ('.o', '.a')} if (args.native_clang or args.portable_cc or args.native_artifacts) else {}
-        final_path = target / 'release' / (args.bin + ('.exe' if os.name == 'nt' else '')) if args.bin else None
+        final_path = target / profile_dir / (args.bin + ('.exe' if os.name == 'nt' else '')) if args.bin else None
         final_artifacts = {str(final_path.relative_to(target)): sha(final_path)} if final_path and final_path.is_file() else {}
         row = {"native_objects_and_archives": native, "implementation": implementation, "phase": phase, "seconds": seconds,
                "exit_code": proc.returncode, "events": dict(after - before), "rlibs": len(artifacts), "artifacts": artifacts,
@@ -325,7 +328,12 @@ def main():
             raise RuntimeError(f"Build failed or produced no libraries; see {log_path}")
         if row.get('cli_help_valid') is False:
             raise RuntimeError(f'Final executable failed explicit --help probe; saved result in {output}')
-        if any(row.get(check) is False for check in ("matches_own_cold_artifact_modes", "matches_own_cold_final_executable_modes", "matches_own_cold_final_executable", "matches_own_cold_native_artifacts", "matches_own_cold_artifacts", "matches_direct_artifacts", "matches_own_cold_macro_dylibs", "matches_direct_macro_dylibs", "matches_own_cold_build_script_executables", "matches_direct_build_script_executables")):
+        if implementation == "kache" and args.record_kache_mismatches:
+            failed = [check for check, value in row.items() if check.startswith("matches_") and value is False]
+            if failed:
+                row["recorded_mismatches"] = failed
+                save()
+        elif any(row.get(check) is False for check in ("matches_own_cold_artifact_modes", "matches_own_cold_final_executable_modes", "matches_own_cold_final_executable", "matches_own_cold_native_artifacts", "matches_own_cold_artifacts", "matches_direct_artifacts", "matches_own_cold_macro_dylibs", "matches_direct_macro_dylibs", "matches_own_cold_build_script_executables", "matches_direct_build_script_executables")):
             raise RuntimeError(f"Artifact validation failed; see {log_path}")
         if phase == "warm" and implementation == "nanocompile" and args.native_clang:
             if (row['events'].get('clang_native_hit', 0) < 20 and not row['events'].get('build_script_hit',0)) or row['events'].get('hit', 0) < 165:

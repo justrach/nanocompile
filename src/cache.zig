@@ -65,6 +65,9 @@ pub const Context = struct {
     compiler_epoch: ?[]const u8 = null,
     rust_locations: ?RustLocations = null,
     digest_memo: bool = true,
+    /// When set, a restored entry may carry extra outputs beyond the requested
+    /// ones: unpacked split-debug objects named `<prefix><cgu>.rcgu.o`.
+    output_sidecars: ?[]const u8 = null,
 
     pub fn init(a: std.mem.Allocator, io: std.Io, env: *std.process.Environ.Map) !Context {
         const root = env.get("NANOCOMPILE_DIR") orelse try std.fs.path.join(a, &.{
@@ -686,12 +689,22 @@ fn restoreWithSnapshot(ctx: *Context, key: []const u8, allowed_outputs: []const 
     if (destinations.len != allowed_outputs.len) return error.InvalidDestinations;
     const bytes = ctx.read(try ctx.path(&.{ "entries", key })) catch return null;
     const entry = parseEntry(ctx, bytes) catch return null;
-    if (entry.artifact != null or entry.schema != entry_schema or entry.outputs.len != allowed_outputs.len) return null;
+    if (entry.artifact != null or entry.schema != entry_schema or entry.outputs.len < allowed_outputs.len) return null;
+    const sidecars = entry.outputs[allowed_outputs.len..];
+    if (sidecars.len != 0) {
+        // Extra outputs are only restored in place, under this request's own prefix.
+        if (destinations.ptr != allowed_outputs.ptr) return null;
+        const prefix = ctx.output_sidecars orelse return null;
+        for (sidecars) |output| {
+            const rest = if (std.mem.startsWith(u8, output.path, prefix)) output.path[prefix.len..] else return null;
+            if (!std.mem.endsWith(u8, rest, ".rcgu.o") or std.mem.indexOfScalar(u8, rest, '/') != null) return null;
+        }
+    }
     // One crate graph can record many prefixes in the same Cargo directory,
     // and explicit externs can also appear in the transitive graph. Reuse the
     // enumeration and content hashes only within this restore. No metadata
     // shortcut survives a compiler invocation or a before/after input check.
-    for (entry.outputs, allowed_outputs) |output, allowed| if (!std.mem.eql(u8, output.path, allowed)) return null;
+    for (entry.outputs[0..allowed_outputs.len], allowed_outputs) |output, allowed| if (!std.mem.eql(u8, output.path, allowed)) return null;
     ctx.profileEnd("restore.manifest", phase);
     phase = ctx.profileStart();
     var output_check: OutputCheck = .{ .entry = &entry };
@@ -774,10 +787,11 @@ fn restoreWithSnapshot(ctx: *Context, key: []const u8, allowed_outputs: []const 
     ctx.profileEnd("restore.stream_validation", phase);
     phase = ctx.profileStart();
     // Staging destinations are renamed by the caller; memoize final paths only.
-    for (entry.outputs, destinations, allowed_outputs) |output, destination, allowed| {
+    for (entry.outputs[0..allowed_outputs.len], destinations, allowed_outputs) |output, destination, allowed| {
         const blob = try blobPath(ctx, output.hash);
         if (std.mem.eql(u8, destination, allowed)) try materializeKnown(ctx, blob, destination, output.mode, output.hash) else try materialize(ctx, blob, destination, output.mode);
     }
+    for (sidecars) |output| try materializeKnown(ctx, try blobPath(ctx, output.hash), output.path, output.mode, output.hash);
     ctx.profileEnd("restore.materialization", phase);
     return .{ .stdout = stdout, .stderr = stderr };
 }

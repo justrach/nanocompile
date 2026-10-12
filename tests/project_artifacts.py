@@ -2,9 +2,9 @@
 import hashlib
 
 
-def compiled_scripts(target):
+def compiled_scripts(target, profile='release'):
     hashes = {}
-    for launcher in sorted((target / 'release/build').glob('*/build-script-build')):
+    for launcher in sorted((target / profile / 'build').glob('*/build-script-build')):
         if not launcher.is_file():
             continue
         originals = sorted(launcher.parent.glob('*.nano-real'))

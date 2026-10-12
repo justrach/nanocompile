@@ -19,6 +19,9 @@ const Plan = struct {
     static_companion: bool = false,
     linked_output: ?[]const u8 = null,
     out_dir: ?[]const u8 = null,
+    /// Absolute `<out-dir>/<crate><extra-filename>.` prefix of the per-codegen-unit
+    /// objects that unpacked split debug info leaves beside a library.
+    debug_sidecars: ?[]const u8 = null,
 };
 const Module = struct { name: []const u8, source: []const u8 };
 
@@ -247,7 +250,15 @@ fn rustPlan(ctx: *cache.Context, argv: []const []const u8) !Plan {
         for (parsed.value) |input| try addUnique(ctx, &inputs, try std.fs.path.resolve(ctx.a, &.{ std.fs.path.dirname(config).?, input }));
     }
     const dir = out_dir orelse return error.NoOutputDirectory;
-    if (!eq(split_debug, "off") and std.mem.indexOf(u8, emit orelse "", "link") != null) return error.SplitDebugSidecars;
+    var debug_sidecars: ?[]const u8 = null;
+    if (!eq(split_debug, "off") and std.mem.indexOf(u8, emit orelse "", "link") != null and emitsDebugInfo(debug_info)) {
+        // Unpacked split debug info leaves one object per codegen unit beside
+        // the output. A library's are cached as extra outputs. A binary or
+        // macro dylib names its objects by absolute path in its debug map, and
+        // producers compile in a staging directory, so those stay uncached.
+        if (!eq(split_debug, "unpacked") or producer or !(eq(ct, "lib") or eq(ct, "rlib"))) return error.SplitDebugSidecars;
+        debug_sidecars = try std.fmt.allocPrint(ctx.a, "{s}{s}.", .{ try absolute(ctx, try std.fs.path.join(ctx.a, &.{ dir, crate })), suffix });
+    }
     var outputs: std.ArrayList([]const u8) = .empty;
     var dep_info: ?[]const u8 = null;
     var linked_output: ?[]const u8 = null;
@@ -272,7 +283,34 @@ fn rustPlan(ctx: *cache.Context, argv: []const []const u8) !Plan {
     }
     if (dep_info == null) return error.NoDependencyInfo;
     if (producer and (std.mem.indexOfAny(u8, dir, "\r\n\t\"\\") != null or std.mem.indexOfAny(u8, ctx.root, "\r\n\t\"\\") != null or std.mem.indexOf(u8, dir, "//") != null)) return error.UnsupportedProducerPath;
-    return .{ .source = src, .outputs = outputs.items, .dependencies = inputs.items, .dep_info = dep_info, .library_dirs = search_dirs.items, .native_dirs = native_dirs.items, .configuration = configuration, .producer = producer, .producer_dylib = producer_dylib, .thin_lto = thin_lto, .static_companion = static_companion, .linked_output = linked_output, .out_dir = dir };
+    return .{ .source = src, .outputs = outputs.items, .dependencies = inputs.items, .dep_info = dep_info, .library_dirs = search_dirs.items, .native_dirs = native_dirs.items, .configuration = configuration, .producer = producer, .producer_dylib = producer_dylib, .thin_lto = thin_lto, .static_companion = static_companion, .linked_output = linked_output, .out_dir = dir, .debug_sidecars = debug_sidecars };
+}
+
+fn emitsDebugInfo(level: []const u8) bool {
+    for ([_][]const u8{ "0", "none", "false", "n", "no", "off" }) |off| if (eq(level, off)) return false;
+    return true;
+}
+
+/// Sidecar objects this compile wrote (modified at or after `started`).
+fn withSidecars(ctx: *cache.Context, outputs: []const []const u8, prefix: []const u8, started: i96) ![]const []const u8 {
+    const dir_path = std.fs.path.dirname(prefix) orelse return error.InvalidSidecarPrefix;
+    const base = std.fs.path.basename(prefix);
+    var found: std.ArrayList([]const u8) = .empty;
+    var dir = try Dir.cwd().openDir(ctx.io, dir_path, .{ .iterate = true });
+    defer dir.close(ctx.io);
+    var it = dir.iterate();
+    while (try it.next(ctx.io)) |entry| {
+        if (entry.kind != .file or !std.mem.startsWith(u8, entry.name, base) or !std.mem.endsWith(u8, entry.name, ".rcgu.o")) continue;
+        const path = try std.fs.path.join(ctx.a, &.{ dir_path, entry.name });
+        const st = try Dir.cwd().statFile(ctx.io, path, .{});
+        if (st.mtime.nanoseconds < started) continue;
+        try found.append(ctx.a, path);
+    }
+    std.mem.sort([]const u8, found.items, {}, less);
+    var all: std.ArrayList([]const u8) = .empty;
+    try all.appendSlice(ctx.a, outputs);
+    try all.appendSlice(ctx.a, found.items);
+    return all.items;
 }
 
 fn zigPlan(ctx: *cache.Context, argv: []const []const u8) !Plan {
@@ -776,6 +814,7 @@ pub fn execute(ctx: *cache.Context, kind: Kind, argv: []const []const u8) !u8 {
     }
     ctx.profileEnd("compiler.locks_configuration", phase);
     phase = ctx.profileStart();
+    ctx.output_sidecars = plan.debug_sidecars;
     const restored = cache.restoreVariants(ctx, key, plan.outputs) catch false;
     ctx.profileEnd("compiler.restore", phase);
     if (restored) {
@@ -825,7 +864,12 @@ pub fn execute(ctx: *cache.Context, kind: Kind, argv: []const []const u8) !u8 {
     }
     ctx.event("miss");
     phase = ctx.profileStart();
-    save(ctx, key, plan, argv, before.items, directories, started, result, &.{}) catch |err| ctx.trace(try std.fmt.allocPrint(ctx.a, "uncached: {s}", .{@errorName(err)}));
+    var stored = plan;
+    if (plan.debug_sidecars) |prefix| stored.outputs = withSidecars(ctx, plan.outputs, prefix, started) catch |err| {
+        ctx.trace(try std.fmt.allocPrint(ctx.a, "uncached: sidecars unavailable ({s})", .{@errorName(err)}));
+        return 0;
+    };
+    save(ctx, key, stored, argv, before.items, directories, started, result, &.{}) catch |err| ctx.trace(try std.fmt.allocPrint(ctx.a, "uncached: {s}", .{@errorName(err)}));
     ctx.profileEnd("compiler.postcompile_store", phase);
     return 0;
 }
