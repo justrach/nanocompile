@@ -49,6 +49,8 @@ def main():
 
         for label, types, extra, debug in [("rlib+dylib+staticlib", ("rlib", "dylib", "staticlib"), (), False),
                                             ("rlib+dylib", ("rlib", "dylib"), (), False),
+                                            # Cargo adds -C prefer-dynamic for dylib crate types in a workspace build.
+                                            ("prefer-dynamic", ("rlib", "dylib", "staticlib"), ("-C", "prefer-dynamic"), False),
                                             ("dev-profile", ("rlib", "dylib"), ("-C", "debuginfo=2", "-C", "split-debuginfo=unpacked"), True)]:
             dependency(extra)
             args = command(types, extra)

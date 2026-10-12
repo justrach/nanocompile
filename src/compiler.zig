@@ -224,7 +224,7 @@ fn rustPlan(ctx: *cache.Context, argv: []const []const u8) !Plan {
     // compiler/stdlib resource identity is required below.
     if (static_companion and (builtin.os.tag != .macos or builtin.cpu.arch != .aarch64 or
         (producer and !rust_dylib) or target != null or producer_unsafe_codegen or thin_lto or
-        prefer_dynamic or deferred_framework or !eq(emit orelse "", "dep-info,link")))
+        (prefer_dynamic and !rust_dylib) or deferred_framework or !eq(emit orelse "", "dep-info,link")))
         return error.UnsupportedStaticlibConfiguration;
     if (!producer and !eq(ct, "rlib") and !eq(ct, "lib")) return error.UnsupportedCrateType;
     // A plain rlib registers this exact framework name for final linking; it
