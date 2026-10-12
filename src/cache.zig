@@ -1174,7 +1174,36 @@ test "negative linker lookups gate storage and restoration before writes" {
 
 // Names are sorted by libraryNames. Prefix matching deliberately follows rustc's
 // over-inclusive library lookup, including alternate filenames and duplicates.
-pub fn prefixDigest(a: std.mem.Allocator, names: []const []const u8, prefix: []const u8) ![]const u8 {
+/// The entries of a bytewise-sorted name list (as libraryNames returns) that
+/// start with `prefix`: one contiguous run, found by binary search. Scanning
+/// every directory entry for every crate in a dependency graph was quadratic.
+pub fn prefixRange(names: []const []const u8, prefix: []const u8) []const []const u8 {
+    var low: usize = 0;
+    var high: usize = names.len;
+    while (low < high) {
+        const mid = low + (high - low) / 2;
+        if (std.mem.order(u8, names[mid], prefix) == .lt) low = mid + 1 else high = mid;
+    }
+    var end = low;
+    while (end < names.len and std.mem.startsWith(u8, names[end], prefix)) end += 1;
+    return names[low..end];
+}
+
+test "prefix ranges match a full filtered scan" {
+    const names = [_][]const u8{ "liba-1.rlib:file", "libfoo-1.rlib:file", "libfoo-1.rmeta:file", "libfoo_bar-2.rlib:file", "libfoobar-3.rlib:file", "libg-1.rlib:file" };
+    for ([_][]const u8{ "", "lib", "libfoo", "libfoo_", "libfoo-1.rlib:file", "libz", "liba", "a", "m" }) |prefix| {
+        var expected: usize = 0;
+        for (names) |name| {
+            if (std.mem.startsWith(u8, name, prefix)) expected += 1;
+        }
+        const range = prefixRange(&names, prefix);
+        try std.testing.expectEqual(expected, range.len);
+        for (range) |name| try std.testing.expect(std.mem.startsWith(u8, name, prefix));
+    }
+}
+
+pub fn prefixDigest(a: std.mem.Allocator, all_names: []const []const u8, prefix: []const u8) ![]const u8 {
+    const names = prefixRange(all_names, prefix);
     var hash = Hash.init(.{});
     for (names) |name| if (std.mem.startsWith(u8, name, prefix)) field(&hash, name);
     return finish(a, &hash);
@@ -1182,14 +1211,16 @@ pub fn prefixDigest(a: std.mem.Allocator, names: []const []const u8, prefix: []c
 
 // Only a proven metadata-first same-stem regular archive may be absent or
 // appear without changing the candidate set. The metadata name remains guarded.
-pub fn regularMetadataCandidate(names: []const []const u8, prefix: []const u8) bool {
+pub fn regularMetadataCandidate(all_names: []const []const u8, prefix: []const u8) bool {
+    const names = prefixRange(all_names, prefix);
     if (!std.mem.startsWith(u8, prefix, "lib") or prefix.len <= 3) return false;
     for (prefix) |ch| if (!std.ascii.isAlphanumeric(ch) and ch != '_' and ch != '-') return false;
     for (names) |name| if (std.mem.startsWith(u8, name, prefix) and std.mem.eql(u8, name[prefix.len..], ".rmeta:file")) return true;
     return false;
 }
 
-pub fn metadataCompanionDigest(a: std.mem.Allocator, names: []const []const u8, prefix: []const u8) ![]const u8 {
+pub fn metadataCompanionDigest(a: std.mem.Allocator, all_names: []const []const u8, prefix: []const u8) ![]const u8 {
+    const names = prefixRange(all_names, prefix);
     if (!regularMetadataCandidate(names, prefix)) return error.InvalidMetadataCompanion;
     const archive = try std.fmt.allocPrint(a, "{s}.rlib:file", .{prefix});
     var hash = Hash.init(.{});

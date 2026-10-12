@@ -86,7 +86,7 @@ fn unusedCompanion(resolver: *metadata.Resolver, dir: Directory, filename: []con
     const expected = try std.fmt.allocPrint(resolver.ctx.a, "lib{s}.rlib", .{crate.name});
     if (!std.mem.eql(u8, filename, expected)) return false;
     const companion = try std.fmt.allocPrint(resolver.ctx.a, "lib{s}.rmeta", .{crate.name});
-    for (dir.names) |entry| {
+    for (cache.prefixRange(dir.names, companion)) |entry| {
         const name = entry[0 .. std.mem.lastIndexOfScalar(u8, entry, ':') orelse return error.UnsupportedLibraryName];
         if (!std.mem.eql(u8, name, companion)) continue;
         const path = try std.fs.path.join(resolver.ctx.a, &.{ dir.path, companion });
@@ -219,7 +219,7 @@ pub fn collect(ctx: *cache.Context, argv: []const []const u8, outputs: []const [
         const builtin_path = try std.fs.path.join(ctx.a, &.{ sysroot, try std.fmt.allocPrint(ctx.a, "lib{s}.rmeta", .{name}) });
         var primary_found = false;
         for (current.items) |dir| {
-            for (dir.names) |entry| {
+            for (cache.prefixRange(dir.names, full_prefix)) |entry| {
                 if (!std.mem.startsWith(u8, entry, full_prefix)) continue;
                 const filename = entry[0 .. std.mem.lastIndexOfScalar(u8, entry, ':') orelse return error.UnsupportedLibraryName];
                 if (metadata_only and try unusedCompanion(&resolver, dir, filename, crate, own_root.triple)) {
@@ -251,7 +251,7 @@ pub fn collect(ctx: *cache.Context, argv: []const []const u8, outputs: []const [
             const new_hash = if (normalize_companion) try cache.metadataCompanionDigest(ctx.a, dir.names, prefix) else try cache.prefixDigest(ctx.a, dir.names, prefix);
             if (!std.mem.eql(u8, old_hash, new_hash)) return error.LibraryDirectoryChangedDuringCompilation;
             try records.append(ctx.a, .{ .path = dir.path, .hash = new_hash, .directory = true, .libraries = true, .library_prefix = prefix, .metadata_companion = normalize_companion });
-            for (dir.names) |entry| {
+            for (cache.prefixRange(dir.names, prefix)) |entry| {
                 if (!std.mem.startsWith(u8, entry, prefix)) continue;
                 const filename = entry[0 .. std.mem.lastIndexOfScalar(u8, entry, ':') orelse return error.UnsupportedLibraryName];
                 if (metadata_only and primary_found and try unusedCompanion(&resolver, dir, filename, crate, own_root.triple)) continue;
@@ -341,7 +341,7 @@ pub fn collectMany(ctx: *cache.Context, argv: []const []const u8, roots: []const
             const builtin_path = try std.fs.path.join(ctx.a, &.{ sysroot, try std.fmt.allocPrint(ctx.a, "lib{s}.rmeta", .{name}) });
             var primary_found = false;
             for (current.items) |dir| {
-                for (dir.names) |entry| {
+                for (cache.prefixRange(dir.names, full_prefix)) |entry| {
                     if (!std.mem.startsWith(u8, entry, full_prefix)) continue;
                     const filename = entry[0 .. std.mem.lastIndexOfScalar(u8, entry, ':') orelse return error.UnsupportedLibraryName];
                     const input = try std.fs.path.join(ctx.a, &.{ dir.path, filename });
@@ -362,7 +362,7 @@ pub fn collectMany(ctx: *cache.Context, argv: []const []const u8, roots: []const
                 const directory_key = try std.fmt.allocPrint(ctx.a, "D\x00{s}\x00{s}", .{ dir.path, prefix });
                 if (!(try appended.getOrPut(ctx.a, directory_key)).found_existing)
                     try records.append(ctx.a, .{ .path = dir.path, .hash = new_hash, .directory = true, .libraries = true, .library_prefix = prefix });
-                for (dir.names) |entry| {
+                for (cache.prefixRange(dir.names, prefix)) |entry| {
                     if (!std.mem.startsWith(u8, entry, prefix)) continue;
                     const filename = entry[0 .. std.mem.lastIndexOfScalar(u8, entry, ':') orelse return error.UnsupportedLibraryName];
                     const input = try std.fs.path.join(ctx.a, &.{ dir.path, filename });
