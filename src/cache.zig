@@ -175,6 +175,15 @@ pub const Context = struct {
         self.memoStore(memo.file, memo.absolute, state, started, hash);
     }
 
+    /// As memoMaterialized, for a state read from the destination's own open
+    /// descriptor after its last change.
+    pub fn memoKnownState(self: *Context, destination: []const u8, state: std.Io.File.Stat, hash: []const u8) void {
+        if (!self.digest_memo or state.size < memo_min_size or state.kind != .file) return;
+        const started = std.Io.Clock.real.now(self.io).nanoseconds;
+        const memo = self.memoPath(destination) catch return;
+        self.memoStore(memo.file, memo.absolute, state, started, hash);
+    }
+
     fn streamDigest(self: *Context, file: std.Io.File) ![]const u8 {
         var h = Hash.init(.{});
         var buffer: [64 * 1024]u8 = undefined;
@@ -429,11 +438,34 @@ pub fn materialize(ctx: *Context, source: []const u8, destination: []const u8, m
 
 /// Materialize an immutable verified blob and memoize the destination digest.
 pub fn materializeKnown(ctx: *Context, source: []const u8, destination: []const u8, mode: u32, hash: []const u8) !void {
-    const written = try materializeState(ctx, source, destination, mode);
-    ctx.memoMaterialized(destination, written, hash);
+    var direct = false;
+    const written = try materializeInto(ctx, source, destination, mode, &direct);
+    // A direct clone's stat came from the open destination itself, so it is
+    // already the state to record; a renamed temporary is re-checked by path.
+    if (direct) ctx.memoKnownState(destination, written, hash) else ctx.memoMaterialized(destination, written, hash);
 }
 
 fn materializeState(ctx: *Context, source: []const u8, destination: []const u8, mode: u32) !std.Io.File.Stat {
+    var direct = false;
+    return materializeInto(ctx, source, destination, mode, &direct);
+}
+
+fn materializeInto(ctx: *Context, source: []const u8, destination: []const u8, mode: u32, direct: *bool) !std.Io.File.Stat {
+    // A restore usually targets a path that does not exist yet. clonefile
+    // creates it atomically with its full contents, so clone straight into
+    // place: one directory entry created instead of a temporary name, two
+    // speculative unlinks and a rename, in a directory (Cargo's deps) that
+    // every concurrent hit is reading and writing.
+    if (builtin.os.tag == .macos) direct: {
+        const src_z = try ctx.a.dupeSentinel(u8, source, 0);
+        const dst_z = try ctx.a.dupeSentinel(u8, destination, 0);
+        if (c.clonefile(src_z, dst_z, 0) != 0) break :direct; // Exists, or the directory is missing: replace below.
+        const file = try Dir.cwd().openFile(ctx.io, destination, .{});
+        defer file.close(ctx.io);
+        try file.setPermissions(ctx.io, .fromMode(@intCast(mode & 0o777)));
+        direct.* = true;
+        return try file.stat(ctx.io);
+    }
     try Dir.cwd().createDirPath(ctx.io, std.fs.path.dirname(destination) orelse ".");
     const temp = try std.fmt.allocPrint(ctx.a, "{s}.nano-{d}", .{ destination, c.getpid() });
     defer Dir.cwd().deleteFile(ctx.io, temp) catch {};
@@ -593,14 +625,19 @@ const DigestJob = struct {
 };
 
 fn digestWorker(ctx: *const Context, jobs: []DigestJob, next: *std.atomic.Value(usize)) void {
+    // Each worker owns one arena, reset between files: a fresh page-backed
+    // arena per file cost an mmap/munmap pair each, and munmap in a threaded
+    // process shoots down TLBs on every core (hundreds of ms of system time
+    // for a crate with a large dependency graph). Context.digest only reads
+    // shared fields.
+    var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
+    defer arena.deinit();
+    var local = ctx.*;
+    local.a = arena.allocator();
     while (true) {
         const index = next.fetchAdd(1, .monotonic);
         if (index >= jobs.len) return;
-        // Each worker owns its arena; Context.digest only reads shared fields.
-        var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
-        defer arena.deinit();
-        var local = ctx.*;
-        local.a = arena.allocator();
+        _ = arena.reset(.retain_capacity);
         const hash = local.digest(jobs[index].path) catch continue;
         @memcpy(&jobs[index].hash, hash);
         jobs[index].valid = true;
