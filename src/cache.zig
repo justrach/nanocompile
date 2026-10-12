@@ -639,35 +639,14 @@ fn parallelFileHashes(ctx: *Context, dependencies: []const Dependency, hashes: *
 
 // One additional worker overlaps immutable output verification with complete
 // dependency hashing. Its allocator is private; no output is written until join.
-const Placement = struct { blob: []const u8, destination: []const u8, mode: u32, known: ?[]const u8, failed: bool = false };
+const Placement = struct { blob: []const u8, destination: []const u8, mode: u32, known: ?[]const u8 };
 
-/// Clones restored outputs into place. A hit with several files (a library's
-/// rlib, rmeta, dep-info and split-debug objects) uses up to four workers.
+/// Clones restored outputs into place, one at a time. Concurrent placement
+/// measured faster for an isolated hit but slower across a busy warm build,
+/// where every job slot already runs a hit.
 fn place(ctx: *Context, placements: []Placement) !void {
-    var next: std.atomic.Value(usize) = .init(0);
-    if (placements.len >= 4) {
-        var group: std.Io.Group = .init;
-        defer group.cancel(ctx.io);
-        const workers = @min(@as(usize, 4), std.Thread.getCpuCount() catch 1, placements.len);
-        for (1..@max(workers, 1)) |_| group.concurrent(ctx.io, placeWorker, .{ ctx, placements, &next }) catch break;
-        placeWorker(ctx, placements, &next);
-        try group.await(ctx.io);
-    } else placeWorker(ctx, placements, &next);
-    for (placements) |placement| if (placement.failed) return error.MaterializationFailed;
-}
-
-fn placeWorker(ctx: *const Context, placements: []Placement, next: *std.atomic.Value(usize)) void {
-    var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
-    defer arena.deinit();
-    var local = ctx.*;
-    local.a = arena.allocator();
-    while (true) {
-        const i = next.fetchAdd(1, .monotonic);
-        if (i >= placements.len) return;
-        const job = &placements[i];
-        (if (job.known) |hash| materializeKnown(&local, job.blob, job.destination, job.mode, hash) else materialize(&local, job.blob, job.destination, job.mode)) catch {
-            job.failed = true;
-        };
+    for (placements) |job| {
+        if (job.known) |hash| try materializeKnown(ctx, job.blob, job.destination, job.mode, hash) else try materialize(ctx, job.blob, job.destination, job.mode);
     }
 }
 
