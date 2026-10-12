@@ -947,6 +947,9 @@ pub fn execute(ctx: *cache.Context, kind: Kind, argv: []const []const u8) !u8 {
 }
 
 fn save(ctx: *cache.Context, key: []const u8, plan: Plan, argv: []const []const u8, before: []const cache.Dependency, directories: []const rust_dependencies.Directory, started: i96, result: std.process.RunResult, linker: []const cache.Dependency) !void {
+    var entry_digests: std.StringHashMapUnmanaged(cache.CheckedDigest) = .empty;
+    ctx.entry_digests = &entry_digests;
+    defer ctx.entry_digests = null;
     var phase = ctx.profileStart();
     for (before) |dep| if (!dep.directory) {
         for (plan.outputs) |out| if (eq(dep.path, out)) return error.OverlappingOutput;

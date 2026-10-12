@@ -229,6 +229,7 @@ const MaterialJob = struct {
 
     fn run(job: *MaterialJob) void {
         var local = job.source.*;
+        local.entry_digests = null; // Never shared across threads.
         local.a = job.arena.allocator();
         job.hash = material(&local, job.real, job.args, job.item) catch |err| {
             job.failure = err;

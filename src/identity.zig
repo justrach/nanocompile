@@ -148,6 +148,7 @@ fn rustDigestWorker(ctx: *cache.Context, stamps: []const Stamp, jobs: []RustDige
     var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
     defer arena.deinit();
     var local = ctx.*;
+    local.entry_digests = null; // Never shared across threads.
     local.a = arena.allocator();
     while (true) {
         const i = next.fetchAdd(1, .monotonic);

@@ -31,6 +31,7 @@ pub const CheckedDigest = struct { hash: []const u8, state: std.Io.File.Stat };
 // when both timestamps precede the start of hashing; changes during hashing
 // fail the before/after comparison. NANOCOMPILE_DIGEST_MEMO=0 disables it.
 const memo_min_size = 64 * 1024;
+const parallel_digest_min_size = 32 * 1024 * 1024;
 const memo_version = "nanocompile-digest-memo-v1";
 
 pub fn sameFileState(a: std.Io.File.Stat, b: std.Io.File.Stat) bool {
@@ -65,6 +66,11 @@ pub const Context = struct {
     compiler_epoch: ?[]const u8 = null,
     rust_locations: ?RustLocations = null,
     digest_memo: bool = true,
+    /// While one entry is built after compilation, a file hashed earlier in
+    /// that construction (a fresh output classified for consumers, then
+    /// stored as a blob) is not hashed again if its state is unchanged.
+    /// Never set across a compilation or a restore.
+    entry_digests: ?*std.StringHashMapUnmanaged(CheckedDigest) = null,
     /// When set, a restored entry may carry extra outputs beyond the requested
     /// ones: unpacked split-debug objects named `<prefix><cgu>.rcgu.o`.
     output_sidecars: ?[]const u8 = null,
@@ -112,6 +118,16 @@ pub const Context = struct {
     }
 
     pub fn digest(self: *Context, path_: []const u8) ![]const u8 {
+        const known = self.entry_digests orelse return self.digestFile(path_);
+        const before = try Dir.cwd().statFile(self.io, path_, .{});
+        if (known.get(path_)) |previous| if (sameFileState(previous.state, before)) return previous.hash;
+        const hash = try self.digestFile(path_);
+        const after = try Dir.cwd().statFile(self.io, path_, .{});
+        if (sameFileState(before, after)) known.put(self.a, try self.a.dupe(u8, path_), .{ .hash = hash, .state = after }) catch {};
+        return hash;
+    }
+
+    fn digestFile(self: *Context, path_: []const u8) ![]const u8 {
         const started = std.Io.Clock.real.now(self.io).nanoseconds;
         const file = try Dir.cwd().openFile(self.io, path_, .{});
         defer file.close(self.io);
@@ -185,6 +201,17 @@ pub const Context = struct {
     }
 
     fn streamDigest(self: *Context, file: std.Io.File) ![]const u8 {
+        // A large fresh output (a big crate's rlib at the end of a critical
+        // path) cannot use the digest memo. BLAKE3's tree hash over the mapped
+        // file spreads it across cores and yields the same digest.
+        const size = (try file.stat(self.io)).size;
+        if (size >= parallel_digest_min_size and builtin.os.tag != .windows) mapped: {
+            const bytes = std.posix.mmap(null, @intCast(size), .{ .READ = true }, .{ .TYPE = .PRIVATE }, file.handle, 0) catch break :mapped;
+            defer std.posix.munmap(bytes);
+            var digest_bytes: [Hash.digest_length]u8 = undefined;
+            Hash.hashParallel(bytes, &digest_bytes, .{}, std.heap.page_allocator, self.io) catch break :mapped;
+            return self.a.dupe(u8, &std.fmt.bytesToHex(digest_bytes, .lower));
+        }
         var h = Hash.init(.{});
         var buffer: [64 * 1024]u8 = undefined;
         var reader = file.reader(self.io, &buffer);
@@ -633,6 +660,7 @@ fn digestWorker(ctx: *const Context, jobs: []DigestJob, next: *std.atomic.Value(
     var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
     defer arena.deinit();
     var local = ctx.*;
+    local.entry_digests = null; // Never shared across threads.
     local.a = arena.allocator();
     while (true) {
         const index = next.fetchAdd(1, .monotonic);
@@ -694,6 +722,7 @@ const OutputCheck = struct {
         var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
         defer arena.deinit();
         var local = ctx.*;
+        local.entry_digests = null; // Never shared across threads.
         local.a = arena.allocator();
         for (check.entry.outputs) |output| {
             const path = blobPath(&local, output.hash) catch return;
@@ -1187,6 +1216,25 @@ pub fn prefixRange(names: []const []const u8, prefix: []const u8) []const []cons
     var end = low;
     while (end < names.len and std.mem.startsWith(u8, names[end], prefix)) end += 1;
     return names[low..end];
+}
+
+test "parallel digest of a large file equals the streamed digest" {
+    var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer arena.deinit();
+    const a = arena.allocator();
+    const io = std.testing.io;
+    var tmp = std.testing.tmpDir(.{});
+    defer tmp.cleanup();
+    const cwd = try Dir.cwd().realPathFileAlloc(io, try std.fs.path.join(a, &.{ ".zig-cache", "tmp", &tmp.sub_path }), a);
+    var env = std.process.Environ.Map.init(a);
+    var ctx: Context = .{ .a = a, .io = io, .env = &env, .root = try std.fs.path.join(a, &.{ cwd, "cache" }), .cwd = cwd, .digest_memo = false };
+    const bytes = try a.alloc(u8, parallel_digest_min_size + 12345);
+    for (bytes, 0..) |*b, i| b.* = @truncate(i *% 2654435761 >> 7);
+    const path = try std.fs.path.join(a, &.{ cwd, "large.bin" });
+    try Dir.cwd().writeFile(io, .{ .sub_path = path, .data = bytes });
+    var h = Hash.init(.{});
+    h.update(bytes);
+    try std.testing.expectEqualStrings(try finish(a, &h), try ctx.digest(path));
 }
 
 test "prefix ranges match a full filtered scan" {
