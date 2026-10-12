@@ -32,6 +32,7 @@ def main():
                  'two_dynamic': '#[link(name="probe",kind="dylib")] #[link(name="c",kind="dylib")]',
                  'inactive': '#[cfg(any())] #[link(name="probe",kind="static")]',
                  'static': '#[link(name="probe",kind="static")]',
+                 'command_line_static': '#[link(name="c",kind="dylib")] extern "C" {fn abs(x: i32) -> i32;}',
                  'macro_static': 'macro_rules! native { () => { #[link(name="probe",kind="static")] extern "C" {fn value()->u32;} }; } native!();'}
         if mac:
             attrs['framework'] = '#[link(name="probe",kind="dylib")] #[link(name="Foundation",kind="framework")]'
@@ -65,6 +66,9 @@ def main():
                        '--crate-type', 'rlib', '--emit=dep-info,metadata,link', '--out-dir', 'out']
             if case in ('static', 'macro_static'):
                 command += ['-L', 'native=native']
+            if case == 'command_line_static':
+                # A build script's archive named on the command line is a tracked input.
+                command += ['-l', 'static=probe', '-L', 'native=native']
             outputs = [work / 'out' / x for x in ('libprovider.rlib', 'libprovider.rmeta', 'provider.d')]
             def hashes():
                 return {p.name: {'sha256': sha(p), 'mode': p.stat().st_mode & 0o777} for p in outputs}
@@ -93,9 +97,15 @@ def main():
             native(13)
             clear()
             changed = run([str(binary), *command])
-            assert (b'nanocompile: hit' in changed.stderr) == eligible, changed.stderr.decode()
+            bundled = case == 'command_line_static'
+            assert (b'nanocompile: hit' in changed.stderr) == (eligible and not bundled), changed.stderr.decode()
             consume(12 if case == 'inactive' else 13)
-            if eligible:
+            if bundled:
+                # The changed archive is bundled into the new rlib and cached again.
+                clear()
+                assert b'nanocompile: hit' in run([str(binary), *command]).stderr
+                consume(13)
+            elif eligible:
                 assert hashes() == reference
                 stamp = source.stat()
                 # Source bytes remain fully validated even when mtime is preserved.

@@ -192,7 +192,7 @@ pub fn collect(ctx: *cache.Context, argv: []const []const u8, outputs: []const [
     if (native_checked) |checked| {
         if (!std.mem.endsWith(u8, path, ".rmeta")) return error.HiddenNativeLinkInput;
         const bytes = graph.bytes orelse try cache.readMetadata(ctx.io, ctx.a, path);
-        try @import("native_metadata.zig").dynamicOnly(bytes, own_root);
+        try @import("native_metadata.zig").dynamicOnly(bytes, own_root, try staticLibraries(ctx, argv));
         const after = try ctx.checkedDigest(path);
         if (!std.mem.eql(u8, checked.hash, after.hash) or !cache.sameFileState(checked.state, after.state)) return error.InputChangedDuringMetadataQuery;
     }
@@ -405,4 +405,18 @@ test "Rust metadata rejects incomplete and procedural macro graphs" {
 
 pub fn reportedMacros(ctx: *cache.Context) bool {
     return if (ctx.env.get("NANOCOMPILE_PROC_MACROS")) |mode| std.mem.eql(u8, mode, "reported") else false;
+}
+
+/// Names given as `-l static=NAME` (or `-lstatic=NAME`) on the command line.
+fn staticLibraries(ctx: *cache.Context, argv: []const []const u8) ![]const []const u8 {
+    var names: std.ArrayList([]const u8) = .empty;
+    var i: usize = 0;
+    while (i < argv.len) : (i += 1) {
+        const value = if (std.mem.eql(u8, argv[i], "-l") and i + 1 < argv.len) blk: {
+            i += 1;
+            break :blk argv[i];
+        } else if (std.mem.startsWith(u8, argv[i], "-l")) argv[i][2..] else continue;
+        if (std.mem.startsWith(u8, value, "static=")) try names.append(ctx.a, value["static=".len..]);
+    }
+    return names.items;
 }
