@@ -142,17 +142,19 @@ pub fn installedFileDigest(ctx: *cache.Context, path: []const u8) ![]const u8 {
 
 const RustDigestJob = struct { hash: [64]u8 = undefined, err: ?anyerror = null };
 fn rustDigestWorker(ctx: *cache.Context, stamps: []const Stamp, jobs: []RustDigestJob, next: *std.atomic.Value(usize)) void {
+    // Independent allocators keep concurrent memo reads, locks and atomic
+    // writes away from the caller's non-threadsafe arena. One arena per worker,
+    // reset between files, avoids an mmap/munmap pair per file.
+    var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
+    defer arena.deinit();
+    var local = ctx.*;
+    local.a = arena.allocator();
     while (true) {
         const i = next.fetchAdd(1, .monotonic);
         if (i >= stamps.len) return;
         const expected = stamps[i];
         if (!expected.exists or expected.kind != .file) continue;
-        // Independent allocators keep concurrent memo reads, locks and atomic
-        // writes away from the caller's non-threadsafe arena.
-        var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
-        defer arena.deinit();
-        var local = ctx.*;
-        local.a = arena.allocator();
+        _ = arena.reset(.retain_capacity);
         const hash = rustFileDigest(&local, expected) catch |err| {
             jobs[i].err = err;
             continue;
