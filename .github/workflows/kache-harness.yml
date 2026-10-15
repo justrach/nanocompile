@@ -11,6 +11,26 @@ on:
         description: Enable Nano portable C/C++ object caching
         type: boolean
         default: false
+      harness_ref:
+        description: justrach/harness commit or branch to build
+        default: 20c4019201e4b1eee5e04cfbb8dc7bda941b11b9
+      package:
+        description: Cargo package to build (harness-ui covers what Harness CI compiles, minus the final app link)
+        type: choice
+        default: harness-adapters
+        options: [harness-adapters, harness-engine, harness-ui]
+      kache_version:
+        description: kache reference version (1.2.1 is what Harness CI runs)
+        type: choice
+        default: 1.0.0
+        options: [1.0.0, 1.2.1]
+      jobs:
+        description: Cargo jobs
+        default: '4'
+      warm_caches_only:
+        description: Skip repeated uncached direct builds (keeps large packages within the time limit)
+        type: boolean
+        default: false
 permissions:
   contents: read
 jobs:
@@ -20,7 +40,7 @@ jobs:
       matrix:
         os: [ubuntu-24.04, macos-26]
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 45
+    timeout-minutes: 300
     env:
       RUSTUP_TOOLCHAIN: 1.97.1
     steps:
@@ -28,28 +48,39 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           repository: justrach/harness
-          ref: 20c4019201e4b1eee5e04cfbb8dc7bda941b11b9
+          ref: ${{ inputs.harness_ref }}
           path: workload
+      - name: GPUI system dependencies
+        if: runner.os == 'Linux' && inputs.package != 'harness-adapters'
+        run: |
+          # The same Ubuntu packages Harness's own UI CI installs.
+          sudo apt-get update -qq -o Dir::Etc::sourcelist="sources.list.d/ubuntu.sources" -o Dir::Etc::sourceparts="-"
+          sudo apt-get install -y -qq \
+            libxkbcommon-dev libxkbcommon-x11-dev libwayland-dev \
+            libx11-dev libxcb1-dev libx11-xcb-dev \
+            libfontconfig1-dev libfreetype-dev libasound2-dev \
+            libvulkan-dev pkg-config cmake libwebkit2gtk-4.1-dev libjson-glib-dev
       - name: Install pinned compilers and kache
         run: |
           python3 tools/install_zig.py "$RUNNER_TEMP/zig"
           rustup toolchain install 1.97.1 --profile minimal
-          python3 tools/install_kache.py "$RUNNER_TEMP/kache"
+          python3 tools/install_kache.py --version "${{ inputs.kache_version }}" "$RUNNER_TEMP/kache"
       - name: Build nanocompile
         run: zig build -Doptimize=ReleaseFast
       - name: Compare clean release library builds
         run: |
           native_option=""
           if [ "${{ inputs.portable_cc }}" = "true" ]; then native_option="--portable-cc"; fi
+          if [ "${{ inputs.warm_caches_only }}" = "true" ]; then native_option="$native_option --warm-caches-only"; fi
           python3 tests/project_comparison.py zig-out/bin/nanocompile workload \
-            --kache "$RUNNER_TEMP/kache/kache" --package harness-adapters \
-            --state "$RUNNER_TEMP/harness-kache-comparison" --jobs 4 --runs 3 \
+            --kache "$RUNNER_TEMP/kache/kache" --package "${{ inputs.package }}" \
+            --state "$RUNNER_TEMP/harness-kache-comparison" --jobs "${{ inputs.jobs }}" --runs 3 \
             --proc-macros "${{ inputs.proc_macros }}" $native_option \
             --output bench-results/harness-kache.json
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
         with:
-          name: harness-kache-${{ matrix.os }}
+          name: harness-kache-${{ inputs.package }}-${{ inputs.kache_version }}-${{ matrix.os }}
           path: |
             bench-results/
             ${{ runner.temp }}/harness-kache-comparison/*.log
