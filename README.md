@@ -14,7 +14,7 @@
 </p>
 
 <p align="center">
-  <a href="#see-it-in-26-seconds">Demo</a> ·
+  <a href="#see-it-in-action">Demo</a> ·
   <a href="#build-and-use">Build and use</a> ·
   <a href="#xcode-native-cache">Xcode</a> ·
   <a href="examples/turborepo/README.md">Turborepo</a> ·
@@ -22,13 +22,12 @@
   <a href="benchmarks/README.md">Benchmarks</a>
 </p>
 
-## See it in 26 seconds
+## See it in action
 
 <p align="center">
-  <a href="docs/media/nanocompile-demo.mp4"><img src="docs/images/demo-rust-race.gif" alt="Rust race: no cache 33.1 s, nanocompile defaults 10.7 s, kache 1.5 s, nanocompile with opt-ins 0.9 s" width="800"></a>
+  <img src="docs/images/demo-rust-race.gif" alt="Rust race: no cache 33.1 s, nanocompile defaults 10.7 s, kache 1.5 s, nanocompile with opt-ins 0.9 s" width="800">
 </p>
 
-<p align="center"><a href="docs/media/nanocompile-demo.mp4"><strong>▶ Watch the full film</strong></a> (MP4, with sound): Rust, Zig and Xcode, each against its baseline and kache.</p>
 
 <table>
   <tr>
