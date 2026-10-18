@@ -77,8 +77,17 @@ class Contracts(unittest.TestCase):
         if data:
             self.assertEqual(data['schema'], 1)
             self.assertGreaterEqual(data['maintenance_lock_ns'], 0)
+            self.assertGreaterEqual(data['setup_ns'], data['maintenance_lock_ns'])
+            self.assertGreaterEqual(data['total_ns'], data['setup_ns'] +
+                                    sum(row['timings']['total_ns'] for row in data['tasks']))
             for row in data['tasks']:
-                self.assertTrue(all(isinstance(v, int) and v >= 0 for v in row['timings'].values()))
+                timing = row['timings']
+                self.assertTrue(all(isinstance(v, int) and v >= 0 for v in timing.values()))
+                self.assertGreaterEqual(timing['lookup_restore_ns'], sum(timing[name] for name in
+                                        ('lookup_ns', 'restore_ns', 'diagnostic_replay_ns')))
+                self.assertGreaterEqual(timing['total_ns'], sum(timing[name] for name in
+                    ('input_hash_ns', 'tool_identity_ns', 'lock_wait_ns', 'lookup_restore_ns',
+                     'child_ns', 'revalidation_ns', 'storage_ns')))
             encoded = json.dumps(data)
             for private in (str(self.root), sys.executable, 'sensitive-contract-name', 'CONTRACT_ENV', 'runner.py'):
                 self.assertNotIn(private, encoded)
@@ -97,6 +106,10 @@ class Contracts(unittest.TestCase):
         self.assertEqual(row['input_bytes_hashed'], size)
         self.assertEqual(row['revalidation_input_bytes_hashed'], size)
         self.assertEqual(row['stored_output_bytes'], len(b'input bytes\nextra'))
+        self.assertEqual(row['output_bytes'], row['stored_output_bytes'])
+        self.assertGreater(row['timings']['lookup_ns'], 0)
+        self.assertEqual(row['timings']['restore_ns'], 0)
+        self.assertEqual(row['timings']['diagnostic_replay_ns'], 0)
         self.assertEqual(row['child_stdout_bytes'], len(cold.stdout))
         self.assertEqual(row['child_stderr_bytes'], len(cold.stderr))
         for stage in ('input_hash_ns', 'tool_identity_ns', 'lock_wait_ns', 'lookup_restore_ns',
@@ -107,6 +120,9 @@ class Contracts(unittest.TestCase):
         self.assertEqual(report['tasks'][0]['outcome'], 'hit')
         self.assertEqual(report['tasks'][0]['restored_output_bytes'], row['stored_output_bytes'])
         self.assertEqual(report['tasks'][0]['timings']['child_ns'], 0)
+        self.assertEqual(report['tasks'][0]['output_bytes'], row['output_bytes'])
+        for stage in ('lookup_ns', 'restore_ns', 'diagnostic_replay_ns'):
+            self.assertGreater(report['tasks'][0]['timings'][stage], 0, stage)
         self.assertEqual((cold.stdout, cold.stderr), (warm.stdout, warm.stderr))
         self.clean()
         off, _ = self.run_task(report=False)
@@ -214,6 +230,10 @@ class Contracts(unittest.TestCase):
         self.assertEqual((row['outcome'], row['lookup'], row['storage']),
                          ('bypass', 'disabled', 'not_attempted'))
         self.assertFalse(list((self.cache / 'entries').iterdir()))
+        self.assertEqual(row['output_bytes'], len(b'input bytes\nextra'))
+        for stage in ('lookup_ns', 'restore_ns', 'diagnostic_replay_ns', 'lookup_restore_ns'):
+            self.assertEqual(row['timings'][stage], 0)
+        self.assertGreater(row['timings']['child_ns'], 0)
 
     def test_large_input_preserved_mtime_and_environment_changes_miss(self):
         source = self.root / 'source'

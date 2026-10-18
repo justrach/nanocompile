@@ -1,0 +1,94 @@
+name: Pinned executable setup example
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - tools/setup_nanocompile.py
+      - tests/setup_nanocompile.py
+      - .github/workflows/setup-cache.yml
+  pull_request:
+    paths:
+      - tools/setup_nanocompile.py
+      - tests/setup_nanocompile.py
+      - .github/workflows/setup-cache.yml
+permissions:
+  contents: read
+jobs:
+  setup:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, macos-15, windows-2025]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - name: Install verified Zig 0.17.0
+        run: python tools/install_zig.py "$RUNNER_TEMP/zig"
+      - name: Setup contract tests
+        run: python tests/setup_nanocompile.py
+      - name: Exact source, toolchain and host key
+        id: identity
+        run: |
+          revision="$(git rev-parse HEAD)"
+          echo "revision=$revision" >> "$GITHUB_OUTPUT"
+          key="$(python tools/setup_nanocompile.py --revision "$revision" --key-only)"
+          echo "key=$key" >> "$GITHUB_OUTPUT"
+      # Trust boundary: only default-branch push/manual jobs read/write the
+      # shared cache. PRs use disposable local caches, never these actions.
+      # GitHub's server-side PR merge-ref cache scoping is also required:
+      # never change this to pull_request_target or download PR artifacts here.
+      - name: Restore trusted exact-key executable
+        id: executable-cache
+        if: >-
+          (github.event_name == 'push' || github.event_name == 'workflow_dispatch') &&
+          github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+        uses: actions/cache/restore@0400d5f644dc74513175e3cd8d07132dd4860809
+        with:
+          path: ${{ runner.temp }}/nanocompile-setup-cache/${{ steps.identity.outputs.key }}
+          key: trusted-nanocompile-${{ steps.identity.outputs.key }}
+          # Deliberately NO restore-keys and no cross-OS archives.
+      - name: Verify cached executable or build pinned source
+        run: |
+          python tools/setup_nanocompile.py \
+            --revision '${{ steps.identity.outputs.revision }}' \
+            --cache-dir "$RUNNER_TEMP/nanocompile-setup-cache" \
+            --prefix "$RUNNER_TEMP/nanocompile-installed" \
+            --report "$RUNNER_TEMP/nanocompile-setup.json" > "$RUNNER_TEMP/private-setup-output.json"
+      - name: Verify local executable restore without recompilation
+        run: |
+          python - <<'PY'
+          import json, os, subprocess, sys
+          from pathlib import Path
+          root = Path(os.environ['RUNNER_TEMP'])
+          revision = subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip()
+          result = subprocess.run([sys.executable, 'tools/setup_nanocompile.py',
+              '--revision', revision, '--cache-dir', str(root / 'nanocompile-setup-cache'),
+              '--prefix', str(root / 'nanocompile-restored')], capture_output=True, text=True)
+          if result.returncode:
+              raise SystemExit('Verified executable restore failed')
+          report = json.loads(result.stdout)
+          assert report['cache_status'] == 'hit' and report['build_seconds'] == 0
+          original = json.loads((root / 'nanocompile-setup.json').read_text())
+          assert report['sha256'] == original['sha256']
+          print('PASS: compatible byte-identical executable restored without recompilation')
+          PY
+      - name: Save trusted exact-key executable
+        if: >-
+          success() && steps.executable-cache.outputs.cache-hit != 'true' &&
+          (github.event_name == 'push' || github.event_name == 'workflow_dispatch') &&
+          github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+        uses: actions/cache/save@0400d5f644dc74513175e3cd8d07132dd4860809
+        with:
+          path: ${{ runner.temp }}/nanocompile-setup-cache/${{ steps.identity.outputs.key }}
+          key: trusted-nanocompile-${{ steps.identity.outputs.key }}
+      - name: Use the installed executable
+        run: |
+          binary="$RUNNER_TEMP/nanocompile-installed/bin/nanocompile"
+          if [ "$RUNNER_OS" = Windows ]; then binary="$binary.exe"; fi
+          "$binary" --version
+          # For subsequent Cargo commands, set RUSTC_WRAPPER to this absolute
+          # path (append .exe on Windows). Keep compiler artifact caches separate.
