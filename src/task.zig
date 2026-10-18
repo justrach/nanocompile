@@ -4,66 +4,128 @@ const builtin = @import("builtin");
 const cache = @import("cache.zig");
 const identity = @import("identity.zig");
 const Dir = std.Io.Dir;
+const report_variable = "NANOCOMPILE_TASK_REPORT";
 const Task = struct { name: []const u8, cwd: []const u8 = ".", command: []const []const u8, inputs: []const []const u8, outputs: []const []const u8, depends_on: []const []const u8 = &.{}, tool_resources: []const []const u8 = &.{} };
 const Spec = struct { schema: u32 = 1, tasks: []const Task };
+const Timings = struct {
+    input_hash_ns: i96 = 0,
+    tool_identity_ns: i96 = 0,
+    lock_wait_ns: i96 = 0,
+    lookup_restore_ns: i96 = 0,
+    child_ns: i96 = 0,
+    revalidation_ns: i96 = 0,
+    storage_ns: i96 = 0,
+};
+const TaskReport = struct {
+    task_index: usize,
+    outcome: []const u8 = "error",
+    lookup: []const u8 = "not_attempted",
+    storage: []const u8 = "not_attempted",
+    exit_code: ?u8 = null,
+    timings: Timings = .{},
+    input_bytes_hashed: u64 = 0,
+    revalidation_input_bytes_hashed: u64 = 0,
+    restored_output_bytes: ?u64 = null,
+    stored_output_bytes: ?u64 = null,
+    child_stdout_bytes: u64 = 0,
+    child_stderr_bytes: u64 = 0,
+};
+fn now(ctx: *cache.Context, enabled: bool) i96 {
+    return if (enabled) std.Io.Clock.awake.now(ctx.io).nanoseconds else 0;
+}
 fn less(_: void, a: []const u8, b: []const u8) bool {
     return std.mem.order(u8, a, b) == .lt;
 }
-fn records(ctx: *cache.Context, spec_path: []const u8, task: Task) ![]const cache.Dependency {
+fn isReportVariable(name: []const u8) bool {
+    return if (builtin.os.tag == .windows) std.ascii.eqlIgnoreCase(name, report_variable) else std.mem.eql(u8, name, report_variable);
+}
+fn records(ctx: *cache.Context, task: Task, bytes: *u64) ![]const cache.Dependency {
     var result: std.ArrayList(cache.Dependency) = .empty;
-    try result.append(ctx.a, .{ .path = spec_path, .hash = (try ctx.checkedDigest(spec_path)).hash });
     for (task.inputs) |input| {
         const path = try std.fs.path.resolve(ctx.a, &.{ ctx.cwd, input });
-        try result.append(ctx.a, .{ .path = path, .hash = (try ctx.checkedDigest(path)).hash });
+        // Declared inputs always receive complete content hashes, not persistent
+        // metadata memo hits (including inputs larger than the memo threshold).
+        const digest = try ctx.checkedDigest(path);
+        bytes.* +|= digest.state.size;
+        try result.append(ctx.a, .{ .path = path, .hash = digest.hash });
     }
     return result.items;
 }
-fn taskKey(ctx: *cache.Context, task: Task, argv: []const []const u8, deps: []const cache.Dependency) ![]const u8 {
-    var h = cache.Hash.init(.{});
-    cache.field(&h, "nanocompile-declared-task-v1");
-    cache.field(&h, task.name);
-    cache.field(&h, ctx.cwd);
-    cache.field(&h, @tagName(builtin.os.tag));
-    const host = try std.zig.system.resolveTargetQuery(ctx.io, .{});
-    cache.field(&h, @tagName(host.cpu.arch));
-    cache.field(&h, host.cpu.model.name);
-    cache.field(&h, std.mem.asBytes(&host.cpu.features.ints));
-    cache.field(&h, try std.fmt.allocPrint(ctx.a, "{any}", .{host.os}));
-    // Commands name trusted installed tools. All other runtime resources/files
-    // and child tools belong in the explicit input contract.
-    cache.field(&h, try identity.installedFileDigest(ctx, argv[0]));
+fn count(h: *cache.Hash, n: usize) void {
+    var bytes: [8]u8 = undefined;
+    std.mem.writeInt(u64, &bytes, @intCast(n), .little);
+    cache.field(h, &bytes);
+}
+fn sequence(h: *cache.Hash, tag: []const u8, values: []const []const u8) void {
+    cache.field(h, tag);
+    count(h, values.len);
+    for (values) |value| cache.field(h, value);
+}
+const Tools = struct { executable: []const u8, resources: []const []const u8 };
+fn tools(ctx: *cache.Context, task: Task, argv: []const []const u8) !Tools {
+    var resources: std.ArrayList([]const u8) = .empty;
     for (task.tool_resources) |resource| {
         const path = try std.fs.path.resolve(ctx.a, &.{ ctx.cwd, resource });
-        cache.field(&h, try identity.nativeFiles(ctx, &.{path}));
+        try resources.append(ctx.a, try identity.nativeFiles(ctx, &.{path}));
     }
-
-    for (argv) |arg| cache.field(&h, arg);
-    const keys = try ctx.a.dupe([]const u8, ctx.env.keys());
-    std.mem.sort([]const u8, keys, {}, less);
-    for (keys) |name| {
-        cache.field(&h, name);
-        cache.field(&h, ctx.env.get(name).?);
-    }
+    return .{ .executable = try identity.installedFileDigest(ctx, argv[0]), .resources = resources.items };
+}
+fn taskKey(ctx: *cache.Context, task: Task, argv: []const []const u8, deps: []const cache.Dependency, installed: Tools) ![]const u8 {
+    var h = cache.Hash.init(.{});
+    // A new namespace prevents reuse of the old raw-spec-dependent keys.
+    cache.field(&h, "nanocompile-declared-task-v2");
+    sequence(&h, "task", &.{task.name});
+    sequence(&h, "cwd", &.{ctx.cwd});
+    const host = try std.zig.system.resolveTargetQuery(ctx.io, .{});
+    sequence(&h, "host", &.{ @tagName(builtin.os.tag), @tagName(host.cpu.arch), host.cpu.model.name, std.mem.asBytes(&host.cpu.features.ints), try std.fmt.allocPrint(ctx.a, "{any}", .{host.os}) });
+    sequence(&h, "command", task.command);
+    sequence(&h, "selected_command", argv);
+    sequence(&h, "installed_executable", &.{installed.executable});
+    sequence(&h, "tool_resources", task.tool_resources);
+    sequence(&h, "tool_identities", installed.resources);
+    sequence(&h, "depends_on", task.depends_on);
+    sequence(&h, "inputs", task.inputs);
+    cache.field(&h, "input_records");
+    count(&h, deps.len);
     for (deps) |dep| {
         cache.field(&h, dep.path);
         cache.field(&h, dep.hash);
     }
-    for (task.outputs) |out| cache.field(&h, out);
+    sequence(&h, "outputs", task.outputs);
+    const keys = try ctx.a.dupe([]const u8, ctx.env.keys());
+    std.mem.sort([]const u8, keys, {}, less);
+    cache.field(&h, "environment");
+    count(&h, keys.len);
+    for (keys) |name| {
+        cache.field(&h, name);
+        cache.field(&h, ctx.env.get(name).?);
+    }
     return cache.finish(ctx.a, &h);
 }
-fn executeOne(ctx: *cache.Context, spec_path: []const u8, task: Task) !u8 {
-    if (task.command.len == 0 or task.outputs.len == 0 or task.inputs.len == 0) return error.InvalidTask;
+fn outputBytes(ctx: *cache.Context, outputs: []const []const u8) ?u64 {
+    var bytes: u64 = 0;
+    for (outputs) |out| bytes +|= (Dir.cwd().statFile(ctx.io, out, .{}) catch return null).size;
+    return bytes;
+}
+fn executeOne(ctx: *cache.Context, spec_path: []const u8, spec_bytes: []const u8, task: Task, report: *TaskReport, reporting: bool) !u8 {
     var argv = try ctx.a.dupe([]const u8, task.command);
     argv[0] = try identity.selectedExecutable(ctx, argv[0]);
     var outputs: std.ArrayList([]const u8) = .empty;
     for (task.outputs) |out| {
         const path = try std.fs.path.resolve(ctx.a, &.{ ctx.cwd, out });
+        if (std.mem.eql(u8, path, spec_path)) return error.OverlappingOutput;
         for (outputs.items) |existing| if (std.mem.eql(u8, path, existing)) return error.DuplicateOutput;
         try outputs.append(ctx.a, path);
     }
-    const before = try records(ctx, spec_path, task);
+    var phase = now(ctx, reporting);
+    const before = try records(ctx, task, &report.input_bytes_hashed);
+    report.timings.input_hash_ns = now(ctx, reporting) - phase;
     for (before) |input| for (outputs.items) |out| if (std.mem.eql(u8, input.path, out)) return error.OverlappingOutput;
-    const key = try taskKey(ctx, task, argv, before);
+    phase = now(ctx, reporting);
+    const installed = try tools(ctx, task, argv);
+    report.timings.tool_identity_ns = now(ctx, reporting) - phase;
+    const key = try taskKey(ctx, task, argv, before, installed);
+    phase = now(ctx, reporting);
     const flight = try cache.Lock.acquire(ctx, key, true);
     defer flight.release();
     const sorted = try ctx.a.dupe([]const u8, outputs.items);
@@ -75,12 +137,36 @@ fn executeOne(ctx: *cache.Context, spec_path: []const u8, task: Task) !u8 {
         cache.field(&h, out);
         try locks.append(ctx.a, try cache.Lock.acquire(ctx, try std.fmt.allocPrint(ctx.a, "output-{s}", .{try cache.finish(ctx.a, &h)}), true));
     }
+    report.timings.lock_wait_ns = now(ctx, reporting) - phase;
     const disabled = std.mem.eql(u8, ctx.env.get("NANOCOMPILE_DISABLE") orelse "", "1");
-    if (!disabled and (cache.restore(ctx, key, outputs.items) catch false)) {
-        ctx.event("task_hit");
-        return 0;
-    }
+    if (!disabled) {
+        phase = now(ctx, reporting);
+        // Existence distinguishes absence from a rejected/unreadable entry; a
+        // generic false restore result cannot establish corruption's cause.
+        if (reporting) {
+            const entry: ?std.Io.File.Stat = Dir.cwd().statFile(ctx.io, try ctx.path(&.{ "entries", key }), .{}) catch |err| blk: {
+                report.lookup = if (err == error.FileNotFound) "entry_absent" else "entry_unusable";
+                break :blk null;
+            };
+            _ = entry;
+        }
+        const hit = cache.restore(ctx, key, outputs.items) catch false;
+        report.timings.lookup_restore_ns = now(ctx, reporting) - phase;
+        if (hit) {
+            report.lookup = "hit";
+            report.outcome = "hit";
+            report.exit_code = 0;
+            if (reporting) report.restored_output_bytes = outputBytes(ctx, outputs.items);
+            ctx.event("task_hit");
+            return 0;
+        }
+        if (!std.mem.eql(u8, report.lookup, "entry_absent")) report.lookup = "entry_unusable";
+    } else report.lookup = "disabled";
+    phase = now(ctx, reporting);
     const result = try std.process.run(ctx.a, ctx.io, .{ .argv = argv, .cwd = .{ .path = ctx.cwd }, .environ_map = ctx.env });
+    report.timings.child_ns = now(ctx, reporting) - phase;
+    report.child_stdout_bytes = result.stdout.len;
+    report.child_stderr_bytes = result.stderr.len;
     try ctx.out(result.stdout);
     try std.Io.File.stderr().writeStreamingAll(ctx.io, result.stderr);
     const status: u8 = switch (result.term) {
@@ -88,21 +174,98 @@ fn executeOne(ctx: *cache.Context, spec_path: []const u8, task: Task) !u8 {
         .signal => |v| @intCast(@min(255, 128 + @as(u32, @backingInt(v)))),
         else => 1,
     };
+    report.exit_code = status;
     if (status != 0) {
+        report.outcome = "failed";
         ctx.event("task_failed");
         return status;
     }
     if (disabled) {
+        report.outcome = "bypass";
         ctx.event("task_bypass");
         return 0;
     }
+    report.outcome = "miss";
     ctx.event("task_miss");
-    const after = records(ctx, spec_path, task) catch return 0;
-    if (!std.mem.eql(u8, key, try taskKey(ctx, task, argv, after))) return 0;
+    const after = validation: {
+        const validation_start = now(ctx, reporting);
+        defer report.timings.revalidation_ns = now(ctx, reporting) - validation_start;
+        report.storage = "revalidation_failed";
+        // Raw bytes are a race guard, not a cache-key component. Even a harmless
+        // formatting edit during execution must suppress publication.
+        if (!std.mem.eql(u8, spec_bytes, ctx.read(spec_path) catch return 0)) {
+            report.storage = "spec_changed";
+            return 0;
+        }
+        const after = records(ctx, task, &report.revalidation_input_bytes_hashed) catch return 0;
+        const after_tools = tools(ctx, task, argv) catch return 0;
+        if (!std.mem.eql(u8, key, try taskKey(ctx, task, argv, after, after_tools))) {
+            report.storage = "inputs_or_tools_changed";
+            return 0;
+        }
+        // Re-read again after input/tool hashing, not merely immediately after child.
+        if (!std.mem.eql(u8, spec_bytes, ctx.read(spec_path) catch return 0)) {
+            report.storage = "spec_changed";
+            return 0;
+        }
+        break :validation after;
+    };
+    phase = now(ctx, reporting);
+    defer report.timings.storage_ns = now(ctx, reporting) - phase;
+    report.storage = "error";
     try cache.store(ctx, key, after, outputs.items, result.stdout, result.stderr);
+    report.storage = "stored";
+    if (reporting) report.stored_output_bytes = outputBytes(ctx, outputs.items);
     return 0;
 }
+// Resolve existing symlink ancestors even for a destination that does not exist.
+fn canonicalPath(ctx: *cache.Context, path: []const u8) ![]const u8 {
+    return Dir.cwd().realPathFileAlloc(ctx.io, path, ctx.a) catch |err| switch (err) {
+        error.FileNotFound => try std.fs.path.join(ctx.a, &.{ try canonicalPath(ctx, std.fs.path.dirname(path) orelse return err), std.fs.path.basename(path) }),
+        else => return err,
+    };
+}
+fn within(path: []const u8, protected: []const u8) bool {
+    const equal = if (builtin.os.tag == .windows) std.ascii.eqlIgnoreCase(path, protected) else std.mem.eql(u8, path, protected);
+    if (equal) return true;
+    if (path.len <= protected.len) return false;
+    const prefix = if (builtin.os.tag == .windows) std.ascii.eqlIgnoreCase(path[0..protected.len], protected) else std.mem.eql(u8, path[0..protected.len], protected);
+    return prefix and std.fs.path.isSep(path[protected.len]);
+}
+fn writeReport(ctx: *cache.Context, destination: []const u8, spec_path: []const u8, spec: Spec, rows: []const TaskReport, maintenance_lock_ns: i96) !void {
+    const path = try canonicalPath(ctx, try std.fs.path.resolve(ctx.a, &.{ ctx.cwd, destination }));
+    if (within(path, try canonicalPath(ctx, spec_path))) return;
+    // Reports are fresh files only, outside every declared contract resource.
+    // Exclusive creation also refuses preexisting symlinks/hardlinks and makes
+    // report failures observational: never replace task or unrelated files.
+    for (spec.tasks) |task| {
+        var local = ctx.*;
+        local.cwd = try std.fs.path.resolve(ctx.a, &.{ ctx.cwd, task.cwd });
+        for ([_][]const []const u8{ task.inputs, task.outputs, task.tool_resources }) |paths| for (paths) |protected| {
+            if (within(path, try canonicalPath(ctx, try std.fs.path.resolve(ctx.a, &.{ local.cwd, protected })))) return;
+        };
+        if (within(path, try canonicalPath(ctx, try identity.selectedExecutable(&local, task.command[0])))) return;
+    }
+    const bytes = try std.json.Stringify.valueAlloc(ctx.a, .{ .schema = @as(u32, 1), .maintenance_lock_ns = maintenance_lock_ns, .tasks = rows }, .{});
+    const file = try Dir.cwd().createFile(ctx.io, path, .{ .exclusive = true, .permissions = cache.permissions(0o600) });
+    defer file.close(ctx.io);
+    try file.writeStreamingAll(ctx.io, bytes);
+    try file.writeStreamingAll(ctx.io, "\n");
+}
 pub fn execute(ctx: *cache.Context, filename: []const u8) !u8 {
+    // Only this reporting control is excluded, in an invocation-local copy used
+    // by both key construction and children. Never mutate the root environment.
+    const destination = ctx.env.get(report_variable);
+    var environment = std.process.Environ.Map.init(ctx.a);
+    defer environment.deinit();
+    for (ctx.env.keys()) |name| {
+        if (!isReportVariable(name)) try environment.put(name, ctx.env.get(name).?);
+    }
+    var invocation = ctx.*;
+    invocation.env = &environment;
+    invocation.digest_memo = false;
+    invocation.entry_digests = null;
+    const local_ctx = &invocation;
     const spec_path = try std.fs.path.resolve(ctx.a, &.{ ctx.cwd, filename });
     const spec_bytes = try ctx.read(spec_path);
     const parsed = try std.json.parseFromSlice(Spec, ctx.a, spec_bytes, .{ .allocate = .alloc_always });
@@ -116,16 +279,26 @@ pub fn execute(ctx: *cache.Context, filename: []const u8) !u8 {
         for (task.depends_on) |dep| if (!names.contains(dep)) return error.InvalidTaskGraph;
         try names.put(ctx.a, task.name, {});
     }
-    try ctx.prepare();
-    const maintenance = try cache.Lock.acquire(ctx, "maintenance", false);
+    var rows: std.ArrayList(TaskReport) = .empty;
+    var maintenance_lock_ns: i96 = 0;
+    defer if (destination) |path| writeReport(local_ctx, path, spec_path, spec, rows.items, maintenance_lock_ns) catch {};
+    try local_ctx.prepare();
+    const start = now(local_ctx, destination != null);
+    const maintenance = try cache.Lock.acquire(local_ctx, "maintenance", false);
     defer maintenance.release();
-    for (spec.tasks) |task| {
+    maintenance_lock_ns = now(local_ctx, destination != null) - start;
+    for (spec.tasks, 0..) |task, index| {
         // Re-read the contract: changes during an earlier task do not silently
         // execute or cache an already-parsed stale graph.
         if (!std.mem.eql(u8, spec_bytes, try ctx.read(spec_path))) return error.TaskSpecChanged;
-        var local = ctx.*;
+        var local = invocation;
         local.cwd = try std.fs.path.resolve(ctx.a, &.{ ctx.cwd, task.cwd });
-        const status = try executeOne(&local, spec_path, task);
+        var row: TaskReport = .{ .task_index = index };
+        const status = executeOne(&local, spec_path, spec_bytes, task, &row, destination != null) catch |err| {
+            if (destination != null) rows.append(ctx.a, row) catch {};
+            return err;
+        };
+        if (destination != null) rows.append(ctx.a, row) catch {};
         if (status != 0) return status;
     }
     return 0;
