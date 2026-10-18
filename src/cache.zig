@@ -485,14 +485,14 @@ fn putBytes(ctx: *Context, bytes: []const u8) ![]const u8 {
 }
 
 pub fn store(ctx: *Context, key: []const u8, dependencies: []const Dependency, output_paths: []const []const u8, stdout: []const u8, stderr: []const u8) !void {
-    return storeEntry(ctx, key, dependencies, output_paths, stdout, stderr, false);
+    return storeEntry(ctx, key, dependencies, output_paths, stdout, stderr, false, null);
 }
 
 /// Caller holds the command key and maintenance locks. Keep three previous
 /// sealed manifests as ordinary flat entries, so GC and snapshots retain their
 /// blob references without a second index or weaker validation contract.
 pub fn storeVariants(ctx: *Context, key: []const u8, dependencies: []const Dependency, output_paths: []const []const u8, stdout: []const u8, stderr: []const u8) !void {
-    return storeEntry(ctx, key, dependencies, output_paths, stdout, stderr, true);
+    return storeEntry(ctx, key, dependencies, output_paths, stdout, stderr, true, null);
 }
 
 fn variantKey(ctx: *Context, key: []const u8, slot: usize) ![]const u8 {
@@ -503,14 +503,22 @@ fn variantKey(ctx: *Context, key: []const u8, slot: usize) ![]const u8 {
     return finish(ctx.a, &hash);
 }
 
-fn storeEntry(ctx: *Context, key: []const u8, dependencies: []const Dependency, output_paths: []const []const u8, stdout: []const u8, stderr: []const u8, variants: bool) !void {
+/// Caller freshly hashes its complete declared inputs into key and revalidates
+/// after execution. Logical names permit restoreStaged into another checkout;
+/// no dependency or destination from the producing checkout is retained.
+pub fn storeNamedTask(ctx: *Context, key: []const u8, names: []const []const u8, output_paths: []const []const u8, stdout: []const u8, stderr: []const u8) !void {
+    return storeEntry(ctx, key, &.{}, output_paths, stdout, stderr, false, names);
+}
+
+fn storeEntry(ctx: *Context, key: []const u8, dependencies: []const Dependency, output_paths: []const []const u8, stdout: []const u8, stderr: []const u8, variants: bool, output_names: ?[]const []const u8) !void {
+    if (output_names) |names| if (names.len != output_paths.len) return error.InvalidDestinations;
     for (dependencies) |dep| if (dep.missing != null and !try missingValid(ctx, dep)) return error.InvalidMissingDependency;
     for (dependencies) |dep| if (dep.symlink_target != null and !try symlinkValid(ctx, dep)) return error.InvalidSymlinkDependency;
     var outputs: std.ArrayList(Output) = .empty;
-    for (output_paths) |path_| {
+    for (output_paths, 0..) |path_, index| {
         const st = try Dir.cwd().statFile(ctx.io, path_, .{});
         if (st.kind != .file) return error.NotRegularFile;
-        try outputs.append(ctx.a, .{ .path = path_, .hash = try putFile(ctx, path_), .mode = fileMode(st.permissions) });
+        try outputs.append(ctx.a, .{ .path = if (output_names) |names| names[index] else path_, .hash = try putFile(ctx, path_), .mode = fileMode(st.permissions) });
     }
     const entry: Entry = .{
         .dependencies = dependencies,
@@ -667,19 +675,32 @@ pub fn restoreVariants(ctx: *Context, key: []const u8, allowed_outputs: []const 
 }
 
 pub const RestoredStreams = struct { stdout: []const u8, stderr: []const u8 };
+pub const RestoreTimings = struct { lookup_ns: i96 = 0, restore_ns: i96 = 0 };
 
 // Validate against original destinations, then materialize into caller-owned staging paths.
 pub fn restoreStaged(ctx: *Context, key: []const u8, allowed_outputs: []const []const u8, destinations: []const []const u8) !?RestoredStreams {
-    return restoreWithSnapshot(ctx, key, allowed_outputs, destinations, null);
+    return restoreWithSnapshot(ctx, key, allowed_outputs, destinations, null, null);
+}
+
+/// Opt-in task reporting only. Lookup includes manifest/dependency/blob checks;
+/// restore begins at output placement. Failed attempts retain observed costs.
+pub fn restoreStagedTimed(ctx: *Context, key: []const u8, allowed_outputs: []const []const u8, destinations: []const []const u8, timings: ?*RestoreTimings) !?RestoredStreams {
+    return restoreWithSnapshot(ctx, key, allowed_outputs, destinations, null, timings);
 }
 
 /// Caller must have freshly content-hashed every dependency, then revalidate
 /// its invocation-local state before publishing these staging destinations.
 pub fn restoreSnapshotStaged(ctx: *Context, key: []const u8, allowed_outputs: []const []const u8, destinations: []const []const u8, dependencies: []const Dependency) !?RestoredStreams {
-    return restoreWithSnapshot(ctx, key, allowed_outputs, destinations, dependencies);
+    return restoreWithSnapshot(ctx, key, allowed_outputs, destinations, dependencies, null);
 }
 
-fn restoreWithSnapshot(ctx: *Context, key: []const u8, allowed_outputs: []const []const u8, destinations: []const []const u8, snapshot: ?[]const Dependency) !?RestoredStreams {
+fn restoreWithSnapshot(ctx: *Context, key: []const u8, allowed_outputs: []const []const u8, destinations: []const []const u8, snapshot: ?[]const Dependency, timings: ?*RestoreTimings) !?RestoredStreams {
+    var timing_start: i96 = if (timings != null) std.Io.Clock.awake.now(ctx.io).nanoseconds else 0;
+    var materializing = false;
+    defer if (timings) |measured| {
+        const elapsed = std.Io.Clock.awake.now(ctx.io).nanoseconds - timing_start;
+        if (materializing) measured.restore_ns += elapsed else measured.lookup_ns += elapsed;
+    };
     const total = ctx.profileStart();
     defer ctx.profileEnd("restore.total", total);
     var phase = ctx.profileStart();
@@ -773,6 +794,12 @@ fn restoreWithSnapshot(ctx: *Context, key: []const u8, allowed_outputs: []const 
     if (!std.mem.eql(u8, try finish(ctx.a, &h), entry.stderr)) return null;
     ctx.profileEnd("restore.stream_validation", phase);
     phase = ctx.profileStart();
+    if (timings) |measured| {
+        const boundary = std.Io.Clock.awake.now(ctx.io).nanoseconds;
+        measured.lookup_ns += boundary - timing_start;
+        timing_start = boundary;
+        materializing = true;
+    }
     for (entry.outputs, destinations) |output, destination| try materialize(ctx, try blobPath(ctx, output.hash), destination, output.mode);
     ctx.profileEnd("restore.materialization", phase);
     return .{ .stdout = stdout, .stderr = stderr };
