@@ -5,13 +5,23 @@ const cache = @import("cache.zig");
 const identity = @import("identity.zig");
 const Dir = std.Io.Dir;
 const report_variable = "NANOCOMPILE_TASK_REPORT";
-const Task = struct { name: []const u8, cwd: []const u8 = ".", command: []const []const u8, inputs: []const []const u8, outputs: []const []const u8, depends_on: []const []const u8 = &.{}, tool_resources: []const []const u8 = &.{} };
+const Relocatable = struct {
+    // Required assertions, not inferred properties or a filesystem sandbox.
+    path_independent: bool,
+    resources_complete: bool,
+    environment: []const []const u8,
+};
+const Task = struct { name: []const u8, cwd: []const u8 = ".", command: []const []const u8, inputs: []const []const u8, outputs: []const []const u8, depends_on: []const []const u8 = &.{}, tool_resources: []const []const u8 = &.{}, relocatable: ?Relocatable = null };
 const Spec = struct { schema: u32 = 1, tasks: []const Task };
 const Timings = struct {
     input_hash_ns: i96 = 0,
     tool_identity_ns: i96 = 0,
     lock_wait_ns: i96 = 0,
     lookup_restore_ns: i96 = 0,
+    lookup_ns: i96 = 0,
+    restore_ns: i96 = 0,
+    diagnostic_replay_ns: i96 = 0,
+    total_ns: i96 = 0,
     child_ns: i96 = 0,
     revalidation_ns: i96 = 0,
     storage_ns: i96 = 0,
@@ -27,6 +37,7 @@ const TaskReport = struct {
     revalidation_input_bytes_hashed: u64 = 0,
     restored_output_bytes: ?u64 = null,
     stored_output_bytes: ?u64 = null,
+    output_bytes: ?u64 = null,
     child_stdout_bytes: u64 = 0,
     child_stderr_bytes: u64 = 0,
 };
@@ -73,9 +84,10 @@ fn tools(ctx: *cache.Context, task: Task, argv: []const []const u8) !Tools {
 fn taskKey(ctx: *cache.Context, task: Task, argv: []const []const u8, deps: []const cache.Dependency, installed: Tools) ![]const u8 {
     var h = cache.Hash.init(.{});
     // A new namespace prevents reuse of the old raw-spec-dependent keys.
-    cache.field(&h, "nanocompile-declared-task-v2");
+    cache.field(&h, if (task.relocatable != null) "nanocompile-relocatable-task-v1" else "nanocompile-declared-task-v2");
     sequence(&h, "task", &.{task.name});
-    sequence(&h, "cwd", &.{ctx.cwd});
+    sequence(&h, "cwd", &.{if (task.relocatable != null) task.cwd else ctx.cwd});
+    if (task.relocatable) |contract| sequence(&h, "declared_environment", contract.environment);
     const host = try std.zig.system.resolveTargetQuery(ctx.io, .{});
     sequence(&h, "host", &.{ @tagName(builtin.os.tag), @tagName(host.cpu.arch), host.cpu.model.name, std.mem.asBytes(&host.cpu.features.ints), try std.fmt.allocPrint(ctx.a, "{any}", .{host.os}) });
     sequence(&h, "command", task.command);
@@ -87,8 +99,8 @@ fn taskKey(ctx: *cache.Context, task: Task, argv: []const []const u8, deps: []co
     sequence(&h, "inputs", task.inputs);
     cache.field(&h, "input_records");
     count(&h, deps.len);
-    for (deps) |dep| {
-        cache.field(&h, dep.path);
+    for (deps, task.inputs) |dep, input| {
+        cache.field(&h, if (task.relocatable != null) input else dep.path);
         cache.field(&h, dep.hash);
     }
     sequence(&h, "outputs", task.outputs);
@@ -107,7 +119,10 @@ fn outputBytes(ctx: *cache.Context, outputs: []const []const u8) ?u64 {
     for (outputs) |out| bytes +|= (Dir.cwd().statFile(ctx.io, out, .{}) catch return null).size;
     return bytes;
 }
-fn executeOne(ctx: *cache.Context, spec_path: []const u8, spec_bytes: []const u8, task: Task, report: *TaskReport, reporting: bool) !u8 {
+fn executeOne(ctx: *cache.Context, workspace: []const u8, spec_path: []const u8, spec_bytes: []const u8, task: Task, report: *TaskReport, reporting: bool, disabled: bool) !u8 {
+    const task_start = now(ctx, reporting);
+    defer report.timings.total_ns = now(ctx, reporting) - task_start;
+    try validateRelocatable(ctx, workspace, task);
     var argv = try ctx.a.dupe([]const u8, task.command);
     argv[0] = try identity.selectedExecutable(ctx, argv[0]);
     var outputs: std.ArrayList([]const u8) = .empty;
@@ -138,7 +153,6 @@ fn executeOne(ctx: *cache.Context, spec_path: []const u8, spec_bytes: []const u8
         try locks.append(ctx.a, try cache.Lock.acquire(ctx, try std.fmt.allocPrint(ctx.a, "output-{s}", .{try cache.finish(ctx.a, &h)}), true));
     }
     report.timings.lock_wait_ns = now(ctx, reporting) - phase;
-    const disabled = std.mem.eql(u8, ctx.env.get("NANOCOMPILE_DISABLE") orelse "", "1");
     if (!disabled) {
         phase = now(ctx, reporting);
         // Existence distinguishes absence from a rejected/unreadable entry; a
@@ -150,13 +164,35 @@ fn executeOne(ctx: *cache.Context, spec_path: []const u8, spec_bytes: []const u8
             };
             _ = entry;
         }
-        const hit = cache.restore(ctx, key, outputs.items) catch false;
+        var restore_timings: cache.RestoreTimings = .{};
+        // Relocatable keys freshly hash inputs and use logical output names;
+        // strict keys additionally revalidate the entry's absolute dependencies.
+        const streams = cache.restoreStagedTimed(ctx, key, if (task.relocatable != null) task.outputs else outputs.items, outputs.items, if (reporting) &restore_timings else null) catch null;
+        report.timings.lookup_ns = restore_timings.lookup_ns;
+        report.timings.restore_ns = restore_timings.restore_ns;
+        const hit = if (streams) |saved| replayed: {
+            const replay_start = now(ctx, reporting);
+            defer report.timings.diagnostic_replay_ns = now(ctx, reporting) - replay_start;
+            // Preserve each mode's existing diagnostic-write failure behavior.
+            ctx.out(saved.stdout) catch |err| {
+                if (task.relocatable != null) return err;
+                break :replayed false;
+            };
+            std.Io.File.stderr().writeStreamingAll(ctx.io, saved.stderr) catch |err| {
+                if (task.relocatable != null) return err;
+                break :replayed false;
+            };
+            break :replayed true;
+        } else false;
         report.timings.lookup_restore_ns = now(ctx, reporting) - phase;
         if (hit) {
             report.lookup = "hit";
             report.outcome = "hit";
             report.exit_code = 0;
-            if (reporting) report.restored_output_bytes = outputBytes(ctx, outputs.items);
+            if (reporting) {
+                report.restored_output_bytes = outputBytes(ctx, outputs.items);
+                report.output_bytes = report.restored_output_bytes;
+            }
             ctx.event("task_hit");
             return 0;
         }
@@ -180,6 +216,7 @@ fn executeOne(ctx: *cache.Context, spec_path: []const u8, spec_bytes: []const u8
         ctx.event("task_failed");
         return status;
     }
+    if (reporting) report.output_bytes = outputBytes(ctx, outputs.items);
     if (disabled) {
         report.outcome = "bypass";
         ctx.event("task_bypass");
@@ -197,6 +234,7 @@ fn executeOne(ctx: *cache.Context, spec_path: []const u8, spec_bytes: []const u8
             report.storage = "spec_changed";
             return 0;
         }
+        validateRelocatable(ctx, workspace, task) catch return 0;
         const after = records(ctx, task, &report.revalidation_input_bytes_hashed) catch return 0;
         const after_tools = tools(ctx, task, argv) catch return 0;
         if (!std.mem.eql(u8, key, try taskKey(ctx, task, argv, after, after_tools))) {
@@ -213,7 +251,9 @@ fn executeOne(ctx: *cache.Context, spec_path: []const u8, spec_bytes: []const u8
     phase = now(ctx, reporting);
     defer report.timings.storage_ns = now(ctx, reporting) - phase;
     report.storage = "error";
-    try cache.store(ctx, key, after, outputs.items, result.stdout, result.stderr);
+    if (task.relocatable != null) {
+        try cache.storeNamedTask(ctx, key, task.outputs, outputs.items, result.stdout, result.stderr);
+    } else try cache.store(ctx, key, after, outputs.items, result.stdout, result.stderr);
     report.storage = "stored";
     if (reporting) report.stored_output_bytes = outputBytes(ctx, outputs.items);
     return 0;
@@ -232,7 +272,43 @@ fn within(path: []const u8, protected: []const u8) bool {
     const prefix = if (builtin.os.tag == .windows) std.ascii.eqlIgnoreCase(path[0..protected.len], protected) else std.mem.eql(u8, path[0..protected.len], protected);
     return prefix and std.fs.path.isSep(path[protected.len]);
 }
-fn writeReport(ctx: *cache.Context, destination: []const u8, spec_path: []const u8, spec: Spec, rows: []const TaskReport, maintenance_lock_ns: i96) !void {
+fn relativePath(path: []const u8, allow_dot: bool) bool {
+    if (allow_dot and std.mem.eql(u8, path, ".")) return true;
+    if (path.len == 0 or std.fs.path.isAbsolute(path)) return false;
+    var parts = std.mem.splitAny(u8, path, if (builtin.os.tag == .windows) "/\\" else "/");
+    while (parts.next()) |part| {
+        if (part.len == 0 or std.mem.eql(u8, part, ".") or std.mem.eql(u8, part, "..")) return false;
+    }
+    return true;
+}
+fn samePath(a: []const u8, b: []const u8) bool {
+    return if (builtin.os.tag == .windows) std.ascii.eqlIgnoreCase(a, b) else std.mem.eql(u8, a, b);
+}
+fn validateRelocatable(ctx: *cache.Context, workspace: []const u8, task: Task) !void {
+    const contract = task.relocatable orelse return;
+    if (!contract.path_independent or !contract.resources_complete) return error.IncompleteRelocatableContract;
+    if (!relativePath(task.cwd, true)) return error.InvalidRelocatablePath;
+    if (!within(ctx.cwd, workspace) or !samePath(ctx.cwd, try canonicalPath(ctx, ctx.cwd))) return error.InvalidRelocatablePath;
+    for ([_][]const []const u8{ task.inputs, task.outputs }) |paths| for (paths) |path| {
+        if (!relativePath(path, false)) return error.InvalidRelocatablePath;
+        const absolute = try std.fs.path.resolve(ctx.a, &.{ ctx.cwd, path });
+        // Reject symlinked files/ancestors, including links inside the workspace:
+        // link identity and path-sensitive resolution are not this contract.
+        if (!within(absolute, workspace) or !samePath(absolute, try canonicalPath(ctx, absolute))) return error.InvalidRelocatablePath;
+    };
+    // Installed tools remain absolute and installation-sensitive. We relocate
+    // checkout files only, never toolchains/SDKs or arbitrary command arguments.
+    if (!std.fs.path.isAbsolute(task.command[0])) return error.InvalidRelocatableTool;
+    if (within(try canonicalPath(ctx, task.command[0]), workspace)) return error.InvalidRelocatableTool;
+    for (task.tool_resources) |resource| {
+        if (!std.fs.path.isAbsolute(resource) or within(try canonicalPath(ctx, resource), workspace)) return error.InvalidRelocatableTool;
+    }
+    for (contract.environment, 0..) |name, index| {
+        if (name.len == 0 or std.mem.indexOfAny(u8, name, "=\x00") != null or isReportVariable(name)) return error.InvalidRelocatableEnvironment;
+        for (contract.environment[0..index]) |previous| if (samePath(name, previous)) return error.InvalidRelocatableEnvironment;
+    }
+}
+fn writeReport(ctx: *cache.Context, destination: []const u8, spec_path: []const u8, spec: Spec, rows: []const TaskReport, maintenance_lock_ns: i96, setup_ns: i96, total_ns: i96) !void {
     const path = try canonicalPath(ctx, try std.fs.path.resolve(ctx.a, &.{ ctx.cwd, destination }));
     if (within(path, try canonicalPath(ctx, spec_path))) return;
     // Reports are fresh files only, outside every declared contract resource.
@@ -246,8 +322,8 @@ fn writeReport(ctx: *cache.Context, destination: []const u8, spec_path: []const 
         };
         if (within(path, try canonicalPath(ctx, try identity.selectedExecutable(&local, task.command[0])))) return;
     }
-    const bytes = try std.json.Stringify.valueAlloc(ctx.a, .{ .schema = @as(u32, 1), .maintenance_lock_ns = maintenance_lock_ns, .tasks = rows }, .{});
-    const file = try Dir.cwd().createFile(ctx.io, path, .{ .exclusive = true, .permissions = if (builtin.os.tag == .windows) .default_file else .fromMode(0o600) });
+    const bytes = try std.json.Stringify.valueAlloc(ctx.a, .{ .schema = @as(u32, 1), .maintenance_lock_ns = maintenance_lock_ns, .setup_ns = setup_ns, .total_ns = total_ns, .tasks = rows }, .{});
+    const file = try Dir.cwd().createFile(ctx.io, path, .{ .exclusive = true, .permissions = cache.permissions(0o600) });
     defer file.close(ctx.io);
     try file.writeStreamingAll(ctx.io, bytes);
     try file.writeStreamingAll(ctx.io, "\n");
@@ -256,6 +332,7 @@ pub fn execute(ctx: *cache.Context, filename: []const u8) !u8 {
     // Only this reporting control is excluded, in an invocation-local copy used
     // by both key construction and children. Never mutate the root environment.
     const destination = ctx.env.get(report_variable);
+    const invocation_start = now(ctx, destination != null);
     var environment = std.process.Environ.Map.init(ctx.a);
     defer environment.deinit();
     for (ctx.env.keys()) |name| {
@@ -277,22 +354,42 @@ pub fn execute(ctx: *cache.Context, filename: []const u8) !u8 {
         for (task.depends_on) |dep| if (!names.contains(dep)) return error.InvalidTaskGraph;
         try names.put(ctx.a, task.name, {});
     }
+    // Reject incomplete relocation contracts anywhere in the graph before
+    // running any child. Repeat physical path checks at execution/storage.
+    const workspace = try canonicalPath(local_ctx, ctx.cwd);
+    for (spec.tasks) |task| {
+        var local = invocation;
+        local.cwd = try std.fs.path.resolve(ctx.a, &.{ workspace, task.cwd });
+        try validateRelocatable(&local, workspace, task);
+    }
     var rows: std.ArrayList(TaskReport) = .empty;
     var maintenance_lock_ns: i96 = 0;
-    defer if (destination) |path| writeReport(local_ctx, path, spec_path, spec, rows.items, maintenance_lock_ns) catch {};
+    var setup_ns: i96 = 0;
+    defer if (destination) |path| writeReport(local_ctx, path, spec_path, spec, rows.items, maintenance_lock_ns, setup_ns, now(local_ctx, true) - invocation_start) catch {};
     try local_ctx.prepare();
     const start = now(local_ctx, destination != null);
     const maintenance = try cache.Lock.acquire(local_ctx, "maintenance", false);
     defer maintenance.release();
     maintenance_lock_ns = now(local_ctx, destination != null) - start;
+    setup_ns = now(local_ctx, destination != null) - invocation_start;
     for (spec.tasks, 0..) |task, index| {
         // Re-read the contract: changes during an earlier task do not silently
         // execute or cache an already-parsed stale graph.
         if (!std.mem.eql(u8, spec_bytes, try ctx.read(spec_path))) return error.TaskSpecChanged;
         var local = invocation;
-        local.cwd = try std.fs.path.resolve(ctx.a, &.{ ctx.cwd, task.cwd });
+        local.cwd = try std.fs.path.resolve(ctx.a, &.{ if (task.relocatable != null) workspace else ctx.cwd, task.cwd });
+        var declared_environment = std.process.Environ.Map.init(ctx.a);
+        defer declared_environment.deinit();
+        if (task.relocatable) |contract| {
+            for (contract.environment) |name| {
+                if (environment.get(name)) |value| try declared_environment.put(name, value);
+            }
+            // Excluded variables are absent from the child, not merely its key.
+            local.env = &declared_environment;
+        }
         var row: TaskReport = .{ .task_index = index };
-        const status = executeOne(&local, spec_path, spec_bytes, task, &row, destination != null) catch |err| {
+        const disabled = std.mem.eql(u8, environment.get("NANOCOMPILE_DISABLE") orelse "", "1");
+        const status = executeOne(&local, workspace, spec_path, spec_bytes, task, &row, destination != null, disabled) catch |err| {
             if (destination != null) rows.append(ctx.a, row) catch {};
             return err;
         };

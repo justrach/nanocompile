@@ -1,0 +1,78 @@
+name: Opt-in cache savings summary
+on:
+  workflow_dispatch:
+    inputs:
+      publish_summary:
+        description: Upload allowlisted aggregate metrics (artifact metadata identifies this repository/run)
+        type: boolean
+        default: false
+        required: true
+permissions:
+  contents: read
+jobs:
+  measure:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, macos-15, windows-2025]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - name: Install and measure verified Zig setup
+        run: |
+          python - <<'PY'
+          import json, os, subprocess, sys, time
+          from pathlib import Path
+          root = Path(os.environ['RUNNER_TEMP'])
+          start = time.perf_counter()
+          result = subprocess.run([sys.executable, 'tools/install_zig.py', str(root / 'zig')], capture_output=True)
+          if result.returncode:
+              raise SystemExit('Verified toolchain setup failed; private diagnostics are not published')
+          (root / 'toolchain-cost.json').write_text(json.dumps({'setup_seconds': time.perf_counter() - start}))
+          PY
+      - name: Install and measure pinned executable setup
+        run: |
+          python - <<'PY'
+          import json, os, subprocess, sys, time
+          from pathlib import Path
+          root = Path(os.environ['RUNNER_TEMP'])
+          revision = subprocess.run(['git', 'rev-parse', 'HEAD'], check=True, capture_output=True, text=True).stdout.strip()
+          start = time.perf_counter()
+          result = subprocess.run([sys.executable, 'tools/setup_nanocompile.py', '--revision', revision,
+              '--cache-dir', str(root / 'executable-cache'), '--prefix', str(root / 'measured-nano'),
+              '--report', str(root / 'private-executable-setup.json')], capture_output=True)
+          if result.returncode:
+              raise SystemExit('Pinned executable setup failed; private diagnostics are not published')
+          # Do NOT copy setup's cache key, artifact hash, paths or raw report.
+          total = time.perf_counter() - start + json.loads((root / 'toolchain-cost.json').read_text())['setup_seconds']
+          (root / 'setup-cost.json').write_text(json.dumps({'setup_seconds': total}))
+          PY
+      - name: Local repeated-build and matched-pair measurements
+        env:
+          PUBLISH_SUMMARY: ${{ inputs.publish_summary }}
+        run: |
+          binary="$RUNNER_TEMP/measured-nano/bin/nanocompile"
+          if [ "$RUNNER_OS" = "Windows" ]; then binary="$binary.exe"; fi
+          args=()
+          if [ "$PUBLISH_SUMMARY" = "true" ]; then
+            args=(--anonymous-output "$RUNNER_TEMP/savings-anonymous.json")
+          fi
+          python tests/cache_savings.py
+          python tests/cache_savings_integration.py "$binary" \
+            --setup-report "$RUNNER_TEMP/setup-cost.json" \
+            --summary "$RUNNER_TEMP/savings-local.json" "${args[@]}"
+      # Never upload raw setup/task reports, specs, logs, hashes or benchmark directories.
+      # This gate is explicit opt-in. Artifact hosting still associates the file
+      # with this repository/run; the file contents alone omit those identifiers.
+      - name: Upload explicitly requested aggregate metrics only
+        if: ${{ inputs.publish_summary && success() }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: cache-savings-${{ runner.os }}-${{ runner.arch }}
+          path: ${{ runner.temp }}/savings-anonymous.json
+          if-no-files-found: error
+          retention-days: 7
