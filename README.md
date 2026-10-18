@@ -1,25 +1,59 @@
 <p align="center">
-  <img src="docs/images/readme-cache-banner.png" alt="nanocompile — Reuse the build work you've already done. A workshop rat in a coral coat shelves golden build artifacts." width="960">
+  <img src="docs/images/readme-cache-rat-v2.png" alt="A workshop rat in a coral coat shelves golden build artifacts" width="280" height="280">
 </p>
 
 <h1 align="center">nanocompile</h1>
 
-<p align="center">Rust and Zig compiler caching · Xcode native cache · Turborepo task artifacts</p>
+<p align="center">Stop compiling the same code twice. A local compiler cache for Rust, Zig and Xcode, in one small Zig binary.</p>
 
 <p align="center">
   <a href="https://github.com/justrach/nanocompile/actions/workflows/ci.yml"><img src="https://github.com/justrach/nanocompile/actions/workflows/ci.yml/badge.svg" alt="Linux and macOS CI"></a>
-  <a href="build.zig.zon"><img src="https://img.shields.io/badge/Zig-0.17.0-f7a41d" alt="Stable Zig 0.17.0"></a>
+  <a href="build.zig.zon"><img src="https://img.shields.io/badge/built%20in-Zig%200.17.0-f7a41d?logo=zig&logoColor=white" alt="Built in stable Zig 0.17.0"></a>
+  <img src="https://img.shields.io/badge/Rust%20·%20Zig%20·%20Xcode%20·%20Turborepo-555" alt="Rust, Zig, Xcode and Turborepo">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-blue" alt="Apache 2.0 license"></a>
 </p>
 
 <p align="center">
+  <a href="#see-it-in-26-seconds">Demo</a> ·
   <a href="#build-and-use">Build and use</a> ·
-  <a href="examples/turborepo/README.md">Turborepo example</a> ·
   <a href="#xcode-native-cache">Xcode</a> ·
-  <a href="benchmarks/README.md">Benchmarks</a> ·
+  <a href="examples/turborepo/README.md">Turborepo</a> ·
   <a href="#current-eligibility">Supported builds</a> ·
-  <a href="#experimental-r2-testing">R2 snapshots</a>
+  <a href="benchmarks/README.md">Benchmarks</a>
 </p>
+
+## See it in 26 seconds
+
+<p align="center">
+  <a href="docs/media/nanocompile-demo.mp4"><img src="docs/images/demo-rust-race.gif" alt="Rust race: no cache 33.1 s, nanocompile defaults 10.7 s, kache 1.5 s, nanocompile with opt-ins 0.9 s" width="800"></a>
+</p>
+
+<p align="center"><a href="docs/media/nanocompile-demo.mp4"><strong>▶ Watch the full film</strong></a> (MP4, with sound): Rust, Zig and Xcode, each against its baseline and kache.</p>
+
+<table>
+  <tr>
+    <td width="50%"><img src="docs/images/demo-zig.png" alt="Zig: zig build-exe 5.3 s versus nanocompile 8 ms, 693 times faster"></td>
+    <td width="50%"><img src="docs/images/demo-xcode.png" alt="Xcode: xcodebuild 11.5 s, kache 11.4 s, nanocompile xcodebuild 1.6 s, 7.1 times faster"></td>
+  </tr>
+  <tr>
+    <td width="50%"><img src="docs/images/demo-rust.png" alt="Rust: no cache 33.1 s, nanocompile defaults 10.7 s, kache 1.5 s, nanocompile with opt-ins 0.9 s"></td>
+    <td width="50%"><img src="docs/images/demo-board.png" alt="Scoreboard of warm rebuilds versus no cache: Rust 35x versus kache 22x, Zig 693x, Xcode 7.1x versus 1.0x"></td>
+  </tr>
+</table>
+
+Warm rebuilds (cache filled, build output cleared), medians on one Apple M3 Ultra:
+
+| Build | No cache | kache 1.0.0 | nanocompile |
+| --- | --- | --- | --- |
+| Rust, 121 crates, `cargo build --release -j 4` (3 runs each) | 33.1 s | 1.54 s | **0.93 s** with opt-ins · 10.7 s with defaults |
+| Zig, rebuild an unchanged `zig build-exe -O ReleaseFast` binary (5 runs) | 5.28 s | does not cache Zig | **7.6 ms** |
+| Xcode, 48 Swift files, Release, `-jobs 4` (3 runs each) | 11.5 s | 11.4 s, does not cache Swift | **1.62 s** |
+
+What the numbers do and do not say:
+
+- **Rust defaults lose to kache here.** By default, proc macros and binaries run the real compiler. The opt-in row sets `NANOCOMPILE_PROC_MACROS=reported`, `NANOCOMPILE_PROC_MACRO_PRODUCERS=1`, `NANOCOMPILE_EXECUTABLE_PRODUCERS=1`, `NANOCOMPILE_THIN_LTO_PRODUCERS=1`, `NANOCOMPILE_RUST_STATICLIB=1` and `NANOCOMPILE_RLIB_FRAMEWORKS=1`; it beat kache in all 3 alternating runs. The first, cold build is about 10% slower than no cache.
+- **Zig** is compared with raw `zig build-exe` and its own cache, not with `zig build`'s artifact cache. A cold build is a tie (7.05 s vs 7.18 s).
+- **Xcode** speed comes from Apple's own compilation cache, which `nanocompile xcodebuild` switches on and manages. Enabling it by hand measured 1.55 s.
 
 A local, content-addressed compiler cache written in **stable Zig 0.17.0**, for Rust and Zig, with opt-in Apple Clang and Xcode native-cache commands. It adapts kache's shared-blob storage, copy-on-write restoration, and single-flight compilation ideas into a small standalone program.
 
@@ -33,27 +67,7 @@ This implementation targets repeated compilation of unchanged inputs. It is an e
 | Xcode | Use `nanocompile xcodebuild` to manage Apple's native Swift/Clang compilation cache. |
 | Turborepo | Run the [two-package example](examples/turborepo/README.md) with the loopback remote-cache adapter. |
 
-Measured performance and its limits are published with raw samples: [Rust versus kache](benchmarks/harness-hill.md), [Xcode](benchmarks/xcode.md), and [Turborepo with R2 restores](benchmarks/turborepo.md).
-
-The [real Wootin raw Zig benchmark](benchmarks/zig-wootin.md) covers cold compilation, restores and source edits, with a measured 9–11% reduction in restore latency and a preserved-timestamp correctness fix.
-
-The [verified physical Rust identity optimization](docs/rust-physical-memo.md) reduces cold Harness adapters build time by 7.8–9.6% across six alternating production A/B pairs. The earlier default configuration comparison favors kache. The [opt-in execution cache](docs/build-script-cache.md) now has repeated warm Harness leads; cold results remain variable. The [accepted production comparison and streaming experiment](docs/harness-streaming-experiment.md) records all samples: 24.8% lower warm median, but a 1.1% higher cold median in the latest session.
-
-The [latest cold Harness trial](benchmarks/harness-cold.md) cuts Nano build time by 38% using eight Cargo jobs on the test Mac, while kache still wins at equal concurrency. Both attempted cache-core optimizations were rejected after timing and coverage checks.
-
-The [producer profile](docs/producer-phase-profile.md), [restore breakdown](docs/restore-phase-profile.md), and [ordinary-hit profile](docs/library-phase-profile.md) record where warm-hit time goes and link optimization experiments, including rejected candidates.
-
-**Try it today:** Cargo library builds, supported direct Zig invocations, and the runnable Turbo example. Rust proc-macro producers run directly by default. Xcode uses Apple's native cache, and R2 currently transports explicit snapshots. See [supported builds](#current-eligibility) before choosing a workload.
-
-The [default Rust pipelining comparison](docs/default-pipelining.md) wins five cold pairs and three warm rounds against kache on Harness adapters: 7.3% lower cold median and 30.2% lower warm median, with all expected warm hits. The separate execution contract and macro/producer options remain opt-in.
-
-Capture full real-project builds and generate a Perfetto timeline, crate/native comparisons and instructions for future variations with the [build tracing tools](docs/build-tracing.md). Diagnostic logs stay private; speed claims use separate untraced benchmarks.
-
-The [full Harness eight-worker comparison](docs/full-eight-workers-kache-comparison.md) still favors kache on warm builds and does not establish a Nano cold advantage. For new default-off experiments, the [runtime-control comparison runner](docs/runtime-toggle-comparisons.md) records each build's exact switch value and can verify activation in an excluded prime.
-
-Large Rust metadata now uses a separate bounded, state-checked snapshot reader; the actual Harness `objc2_app_kit` replay restores byte-identical artifacts. See [scope and checks](docs/large-rust-metadata.md). [Thin-LTO producer support](docs/thin-lto-producer-investigation.md) has an opt-in stable-staging candidate; default builds still refuse it.
-
-The opt-in [stable-alias full Harness candidate](docs/full-harness-stable-alias.md) restores the thin-LTO application: two warm rounds give **17.690 s Nano versus 6.863 s kache**. Artifact, permission, signature and CLI checks pass; Nano still loses, and no repeated cold win or default promotion is claimed.
+Detailed measurements, including the comparisons kache wins, are in [measurement notes](docs/measurement-notes.md) and [benchmarks](benchmarks/README.md).
 
 ## Build and use
 
