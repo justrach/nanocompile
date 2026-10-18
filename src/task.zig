@@ -5,13 +5,14 @@ const cache = @import("cache.zig");
 const identity = @import("identity.zig");
 const Dir = std.Io.Dir;
 const report_variable = "NANOCOMPILE_TASK_REPORT";
+const HostIdentity = enum { native, platform };
 const Relocatable = struct {
     // Required assertions, not inferred properties or a filesystem sandbox.
     path_independent: bool,
     resources_complete: bool,
     environment: []const []const u8,
 };
-const Task = struct { name: []const u8, cwd: []const u8 = ".", command: []const []const u8, inputs: []const []const u8, outputs: []const []const u8, depends_on: []const []const u8 = &.{}, tool_resources: []const []const u8 = &.{}, relocatable: ?Relocatable = null };
+const Task = struct { name: []const u8, cwd: []const u8 = ".", command: []const []const u8, inputs: []const []const u8, outputs: []const []const u8, depends_on: []const []const u8 = &.{}, tool_resources: []const []const u8 = &.{}, host_identity: HostIdentity = .native, relocatable: ?Relocatable = null };
 const Spec = struct { schema: u32 = 1, tasks: []const Task };
 const Timings = struct {
     input_hash_ns: i96 = 0,
@@ -72,6 +73,70 @@ fn sequence(h: *cache.Hash, tag: []const u8, values: []const []const u8) void {
     count(h, values.len);
     for (values) |value| cache.field(h, value);
 }
+const Host = struct {
+    os: std.Target.Os.Tag,
+    arch: std.Target.Cpu.Arch,
+    abi: std.Target.Abi,
+    model: []const u8,
+    features: []const u8,
+    version: []const u8,
+};
+fn validateHost(mode: HostIdentity, os: std.Target.Os.Tag, arch: std.Target.Cpu.Arch) !void {
+    if (mode == .platform and (os != .linux or arch != .x86_64)) return error.UnsupportedTaskHostIdentity;
+}
+fn hostFields(h: *cache.Hash, mode: HostIdentity, host: Host) void {
+    switch (mode) {
+        // Keep omitted/explicit-native keys identical to the existing domain.
+        .native => sequence(h, "host", &.{ @tagName(host.os), @tagName(host.arch), host.model, host.features, host.version }),
+        // Caller promises the entire task is independent of native CPU/kernel
+        // selection. OS, architecture and ABI still partition portable entries.
+        .platform => sequence(h, "host-platform-v1", &.{ @tagName(host.os), @tagName(host.arch), @tagName(host.abi) }),
+    }
+}
+fn hostDigest(mode: HostIdentity, host: Host) [32]u8 {
+    var h = cache.Hash.init(.{});
+    hostFields(&h, mode, host);
+    var bytes: [32]u8 = undefined;
+    h.final(&bytes);
+    return bytes;
+}
+test "task host identity retains native safeguards and opts into platform reuse" {
+    const original: Host = .{ .os = .linux, .arch = .x86_64, .abi = .musl, .model = "cpu-a", .features = "features-a", .version = "kernel-a" };
+    const native = hostDigest(.native, original);
+    const portable = hostDigest(.platform, original);
+    var prior = cache.Hash.init(.{});
+    sequence(&prior, "host", &.{ "linux", "x86_64", "cpu-a", "features-a", "kernel-a" });
+    var expected: [32]u8 = undefined;
+    prior.final(&expected);
+    try std.testing.expectEqualSlices(u8, &expected, &native);
+    try std.testing.expect(!std.mem.eql(u8, &native, &portable));
+    inline for (.{ "model", "features", "version" }) |field| {
+        var changed = original;
+        @field(changed, field) = "different";
+        try std.testing.expect(!std.mem.eql(u8, &native, &hostDigest(.native, changed)));
+        try std.testing.expectEqualSlices(u8, &portable, &hostDigest(.platform, changed));
+    }
+}
+test "platform task host identity retains OS architecture and ABI partitions" {
+    const original: Host = .{ .os = .linux, .arch = .x86_64, .abi = .musl, .model = "cpu", .features = "features", .version = "kernel" };
+    const digest = hostDigest(.platform, original);
+    var changed = original;
+    changed.os = .macos;
+    try std.testing.expect(!std.mem.eql(u8, &digest, &hostDigest(.platform, changed)));
+    changed = original;
+    changed.arch = .aarch64;
+    try std.testing.expect(!std.mem.eql(u8, &digest, &hostDigest(.platform, changed)));
+    changed = original;
+    changed.abi = .gnu;
+    try std.testing.expect(!std.mem.eql(u8, &digest, &hostDigest(.platform, changed)));
+}
+test "platform task host opt-in rejects unsupported hosts before execution" {
+    try validateHost(.platform, .linux, .x86_64);
+    try std.testing.expectError(error.UnsupportedTaskHostIdentity, validateHost(.platform, .linux, .aarch64));
+    try std.testing.expectError(error.UnsupportedTaskHostIdentity, validateHost(.platform, .macos, .x86_64));
+    try std.testing.expectError(error.UnsupportedTaskHostIdentity, validateHost(.platform, .windows, .x86_64));
+    try validateHost(.native, .macos, .aarch64);
+}
 const Tools = struct { executable: []const u8, resources: []const []const u8 };
 fn tools(ctx: *cache.Context, task: Task, argv: []const []const u8) !Tools {
     var resources: std.ArrayList([]const u8) = .empty;
@@ -89,7 +154,7 @@ fn taskKey(ctx: *cache.Context, task: Task, argv: []const []const u8, deps: []co
     sequence(&h, "cwd", &.{if (task.relocatable != null) task.cwd else ctx.cwd});
     if (task.relocatable) |contract| sequence(&h, "declared_environment", contract.environment);
     const host = try std.zig.system.resolveTargetQuery(ctx.io, .{});
-    sequence(&h, "host", &.{ @tagName(builtin.os.tag), @tagName(host.cpu.arch), host.cpu.model.name, std.mem.asBytes(&host.cpu.features.ints), try std.fmt.allocPrint(ctx.a, "{any}", .{host.os}) });
+    hostFields(&h, task.host_identity, .{ .os = builtin.os.tag, .arch = host.cpu.arch, .abi = host.abi, .model = host.cpu.model.name, .features = std.mem.asBytes(&host.cpu.features.ints), .version = try std.fmt.allocPrint(ctx.a, "{any}", .{host.os}) });
     sequence(&h, "command", task.command);
     sequence(&h, "selected_command", argv);
     sequence(&h, "installed_executable", &.{installed.executable});
@@ -350,6 +415,7 @@ pub fn execute(ctx: *cache.Context, filename: []const u8) !u8 {
     // earlier in this explicit order are accepted; cycles/forward refs refuse.
     var names: std.StringHashMapUnmanaged(void) = .empty;
     for (spec.tasks) |task| {
+        try validateHost(task.host_identity, builtin.os.tag, builtin.cpu.arch);
         if (task.name.len == 0 or names.contains(task.name) or task.command.len == 0 or task.inputs.len == 0 or task.outputs.len == 0) return error.InvalidTaskGraph;
         for (task.depends_on) |dep| if (!names.contains(dep)) return error.InvalidTaskGraph;
         try names.put(ctx.a, task.name, {});

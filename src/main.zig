@@ -196,4 +196,5 @@ test {
     _ = @import("producer_job.zig");
     _ = @import("native_identity.zig");
     _ = @import("producer_dependencies.zig");
+    _ = @import("task.zig");
 }

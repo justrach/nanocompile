@@ -6,6 +6,7 @@ The execution log is an intentional test-only side effect, not a cached output.
 import copy
 import json
 import os
+import platform
 from pathlib import Path
 import subprocess
 import sys
@@ -310,6 +311,48 @@ class Contracts(unittest.TestCase):
             self.save()
             self.run_task(expected=1, report=False)
             self.assertEqual(self.executed(), [])
+
+    def test_explicit_native_identity_keeps_default_cache_key(self):
+        self.run_task()
+        self.spec['tasks'][0]['host_identity'] = 'native'
+        self.save()
+        self.clean()
+        _, report = self.run_task()
+        self.assertEqual(report['tasks'][0]['outcome'], 'hit')
+        self.assertEqual(len(self.executed()), 1)
+
+    def test_platform_identity_requires_explicit_supported_host(self):
+        task = self.spec['tasks'][0]
+        for invalid in ('unknown', True, None):
+            task['host_identity'] = invalid
+            self.save()
+            self.run_task(expected=1, report=False)
+            self.assertEqual(self.executed(), [])
+        task['host_identity'] = 'platform'
+        self.save()
+        if sys.platform != 'linux' or platform.machine().lower() not in ('x86_64', 'amd64'):
+            # A later invalid task must prevent the earlier native one running.
+            self.spec['tasks'].insert(0, self.task('earlier-native'))
+            self.save()
+            self.run_task(expected=1, report=False)
+            self.assertEqual(self.executed(), [])
+            return
+        _, report = self.run_task()
+        self.assertEqual(report['tasks'][0]['outcome'], 'miss')
+        self.clean()
+        _, report = self.run_task()
+        self.assertEqual(report['tasks'][0]['outcome'], 'hit')
+        mutations = [lambda: (self.root / 'source').write_bytes(b'changed input'),
+                     lambda: task['command'].append('fixed-target'),
+                     lambda: task['command'].append('baseline-cpu'),
+                     lambda: self.env.update(CONTRACT_ENV='changed'),
+                     lambda: (self.root / 'resource-a').write_bytes(b'changed tool')]
+        for mutate in mutations:
+            mutate()
+            self.save()
+            self.clean()
+            _, report = self.run_task()
+            self.assertEqual(report['tasks'][0]['outcome'], 'miss')
 
     def test_report_destinations_never_overwrite_or_materialize_missing_output(self):
         self.run_task()
