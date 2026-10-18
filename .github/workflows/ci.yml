@@ -88,3 +88,25 @@ jobs:
         with:
           name: benchmark-${{ matrix.os }}
           path: bench-results/
+  windows-runtime:
+    runs-on: windows-2025
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - name: Install verified Zig 0.17.0
+        run: python tools/install_zig.py "$RUNNER_TEMP/zig"
+      - name: Rust GNU toolchain
+        run: |
+          rustup toolchain install 1.97.1-x86_64-pc-windows-gnu --profile minimal
+          rustup default 1.97.1-x86_64-pc-windows-gnu
+      - name: Windows GNU build and native unit tests
+        run: |
+          zig build -Doptimize=ReleaseFast -Dtarget=x86_64-windows-gnu
+          zig build test -Dtarget=x86_64-windows-gnu
+      - name: Native CLI and Rust cache smoke
+        run: python tests/release_packaging.py --smoke zig-out/bin/nanocompile.exe
+      - name: Windows compiler paths and artifact correctness
+        run: python tests/windows_cache.py zig-out/bin/nanocompile.exe

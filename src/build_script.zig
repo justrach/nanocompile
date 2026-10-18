@@ -1,4 +1,8 @@
-//! Opt-in whole Cargo build-script execution under an explicit input contract.
+//! Opt-in whole Cargo build-script execution. Packages listed in an explicit
+//! input contract use that contract. With NANOCOMPILE_BUILD_SCRIPT_CACHE=declared,
+//! every other script is cached under Cargo's own rerun rule: the paths it
+//! declares with rerun-if-changed (or its package when it declares nothing),
+//! plus its binary, environment, Rust compiler and selected C toolchain.
 const std = @import("std");
 const cache = @import("cache.zig");
 const identity = @import("identity.zig");
@@ -17,11 +21,23 @@ fn less(_: void, a: []const u8, b: []const u8) bool {
 }
 fn contract(ctx: *cache.Context) !Contract {
     const path = ctx.env.get("NANOCOMPILE_BUILD_SCRIPTS_FILE") orelse return error.NoContract;
-    const parsed = try std.json.parseFromSlice(Spec, ctx.a, try ctx.read(path), .{ .allocate = .alloc_always });
-    if (parsed.value.schema != 1) return error.InvalidContract;
     const name = ctx.env.get("CARGO_PKG_NAME") orelse return error.NoPackage;
+    const bytes = try ctx.read(path);
+    // A listed package's name appears verbatim as a JSON string unless the
+    // writer escaped it. Skip the full parse only when that cannot happen.
+    if (plainName(name) and std.mem.indexOf(u8, bytes, "\\u") == null) {
+        const quoted = try std.fmt.allocPrint(ctx.a, "\"{s}\"", .{name});
+        if (std.mem.indexOf(u8, bytes, quoted) == null) return error.NoContract;
+    }
+    const parsed = try std.json.parseFromSlice(Spec, ctx.a, bytes, .{ .allocate = .alloc_always });
+    if (parsed.value.schema != 1) return error.InvalidContract;
     for (parsed.value.packages) |item| if (eq(item.package, name) and item.inputs.len > 0) return item;
     return error.NoContract;
+}
+fn plainName(name: []const u8) bool {
+    if (name.len == 0) return false;
+    for (name) |ch| if (!std.ascii.isAlphanumeric(ch) and ch != '-' and ch != '_') return false;
+    return true;
 }
 // Execution-only constraints: Cargo's compiler environment need not contain
 // runtime feature selectors. Install a transparent shim, then refuse reuse
@@ -37,7 +53,7 @@ fn environmentMatches(ctx: *cache.Context, item: Contract) bool {
     return true;
 }
 
-const Snapshot = struct { records: []const cache.Dependency, epoch: []const u8 };
+const Snapshot = struct { records: []const cache.Dependency, epoch: []const u8, newest: i96 = 0 };
 fn state(h: *cache.Hash, path: []const u8, st: std.Io.File.Stat) void {
     cache.field(h, path);
     cache.field(h, std.mem.asBytes(&st.inode));
@@ -46,8 +62,19 @@ fn state(h: *cache.Hash, path: []const u8, st: std.Io.File.Stat) void {
     cache.field(h, std.mem.asBytes(&st.ctime.nanoseconds));
 }
 fn snapshot(ctx: *cache.Context, roots: []const []const u8) !Snapshot {
+    return snapshotWith(ctx, roots, false, 100000);
+}
+// Declared-mode walks skip VCS metadata and Cargo target directories (marked
+// by CACHEDIR.TAG), as Cargo's package scan does.
+fn pruned(ctx: *cache.Context, entry: Dir.Walker.Entry) bool {
+    for ([_][]const u8{ ".git", ".hg", ".svn", ".jj" }) |name| if (eq(entry.basename, name)) return true;
+    entry.dir.access(ctx.io, std.fmt.allocPrint(ctx.a, "{s}/CACHEDIR.TAG", .{entry.basename}) catch return false, .{}) catch return false;
+    return true;
+}
+fn snapshotWith(ctx: *cache.Context, roots: []const []const u8, prune: bool, limit: usize) !Snapshot {
     var records: std.ArrayList(cache.Dependency) = .empty;
     var epoch = cache.Hash.init(.{});
+    var newest: i96 = 0;
     for (roots) |root| {
         const path = try std.fs.path.resolve(ctx.a, &.{ ctx.cwd, root });
         const st = Dir.cwd().statFile(ctx.io, path, .{ .follow_symlinks = false }) catch |err| switch (err) {
@@ -58,29 +85,39 @@ fn snapshot(ctx: *cache.Context, roots: []const []const u8) !Snapshot {
             else => return err,
         };
         state(&epoch, path, st);
+        newest = @max(newest, @max(st.mtime.nanoseconds, st.ctime.nanoseconds));
         switch (st.kind) {
             .file => try records.append(ctx.a, .{ .path = path, .hash = (try ctx.checkedDigest(path)).hash }),
             .directory => {
                 try records.append(ctx.a, .{ .path = path, .hash = try ctx.nativeDirectoryDigest(path), .directory = true, .all_members = true });
                 var dir = try Dir.cwd().openDir(ctx.io, path, .{ .iterate = true });
                 defer dir.close(ctx.io);
-                var walk = try dir.walk(ctx.a);
+                var walk = try dir.walkSelectively(ctx.a);
                 defer walk.deinit();
                 while (try walk.next(ctx.io)) |entry| {
-                    if (records.items.len > 100000) return error.TooManyInputs;
+                    if (records.items.len > limit) return error.TooManyInputs;
+                    if (prune and entry.kind == .directory and pruned(ctx, entry)) continue;
                     const full = try std.fs.path.join(ctx.a, &.{ path, entry.path });
-                    state(&epoch, full, try Dir.cwd().statFile(ctx.io, full, .{}));
-                    if (entry.kind == .directory) try records.append(ctx.a, .{ .path = full, .hash = try ctx.nativeDirectoryDigest(full), .directory = true, .all_members = true }) else if (entry.kind == .file) try records.append(ctx.a, .{ .path = full, .hash = (try ctx.checkedDigest(full)).hash }) else return error.UnsupportedInputKind;
+                    const entry_state = try Dir.cwd().statFile(ctx.io, full, .{});
+                    state(&epoch, full, entry_state);
+                    newest = @max(newest, @max(entry_state.mtime.nanoseconds, entry_state.ctime.nanoseconds));
+                    if (entry.kind == .directory) {
+                        try records.append(ctx.a, .{ .path = full, .hash = try ctx.nativeDirectoryDigest(full), .directory = true, .all_members = true });
+                        try walk.enter(ctx.io, entry);
+                    } else if (entry.kind == .file) try records.append(ctx.a, .{ .path = full, .hash = (try ctx.checkedDigest(full)).hash }) else return error.UnsupportedInputKind;
                 }
             },
             else => return error.UnsupportedInputKind,
         }
     }
-    return .{ .records = records.items, .epoch = try cache.finish(ctx.a, &epoch) };
+    return .{ .records = records.items, .epoch = try cache.finish(ctx.a, &epoch), .newest = newest };
 }
 // This is an invocation-local guard following full content hashing. No source
 // hash or metadata shortcut is reused across executions.
 fn snapshotEpoch(ctx: *cache.Context, roots: []const []const u8) ![]const u8 {
+    return snapshotEpochWith(ctx, roots, false);
+}
+fn snapshotEpochWith(ctx: *cache.Context, roots: []const []const u8, prune: bool) ![]const u8 {
     var epoch = cache.Hash.init(.{});
     for (roots) |root| {
         const path = try std.fs.path.resolve(ctx.a, &.{ ctx.cwd, root });
@@ -94,12 +131,14 @@ fn snapshotEpoch(ctx: *cache.Context, roots: []const []const u8) ![]const u8 {
             .directory => {
                 var dir = try Dir.cwd().openDir(ctx.io, path, .{ .iterate = true });
                 defer dir.close(ctx.io);
-                var walk = try dir.walk(ctx.a);
+                var walk = try dir.walkSelectively(ctx.a);
                 defer walk.deinit();
                 while (try walk.next(ctx.io)) |entry| {
                     if (entry.kind != .directory and entry.kind != .file) return error.UnsupportedInputKind;
+                    if (prune and entry.kind == .directory and pruned(ctx, entry)) continue;
                     const full = try std.fs.path.join(ctx.a, &.{ path, entry.path });
                     state(&epoch, full, try Dir.cwd().statFile(ctx.io, full, .{ .follow_symlinks = false }));
+                    if (entry.kind == .directory) try walk.enter(ctx.io, entry);
                 }
             },
             else => return error.UnsupportedInputKind,
@@ -156,13 +195,7 @@ fn material(ctx: *cache.Context, real: []const u8, argv: []const []const u8, ite
     profileEnd(ctx, "material.tools", phase);
     phase = profileStart(ctx);
     for (item.apple_tools) |tool| {
-        const result = try std.process.run(ctx.a, ctx.io, .{ .argv = &.{ "/usr/bin/xcrun", "--find", tool }, .environ_map = ctx.env });
-        switch (result.term) {
-            .exited => |code| if (code != 0) return error.UnsupportedAppleHelper,
-            else => return error.UnsupportedAppleHelper,
-        }
-        const path = std.mem.trim(u8, result.stdout, "\r\n ");
-        if (!std.fs.path.isAbsolute(path) or std.mem.indexOfScalar(u8, path, '\n') != null) return error.UnsupportedAppleHelper;
+        const path = try @import("native_identity.zig").xcrunFind(ctx, tool);
         const selected = try Dir.cwd().realPathFileAlloc(ctx.io, path, ctx.a);
         if (!try @import("rust_loader.zig").systemTool(ctx, selected)) return error.UnsupportedAppleHelper;
         cache.field(&h, tool);
@@ -196,6 +229,7 @@ const MaterialJob = struct {
 
     fn run(job: *MaterialJob) void {
         var local = job.source.*;
+        local.entry_digests = null; // Never shared across threads.
         local.a = job.arena.allocator();
         job.hash = material(&local, job.real, job.args, job.item) catch |err| {
             job.failure = err;
@@ -209,20 +243,40 @@ fn empty(ctx: *cache.Context, root: []const u8) !bool {
     var it = dir.iterate();
     return try it.next(ctx.io) == null;
 }
+/// A recorded output is a plain relative path below OUT_DIR: no empty, `.` or
+/// `..` components.
+fn relativeOutput(name: []const u8) bool {
+    if (name.len == 0 or name[0] == '/') return false;
+    var parts = std.mem.splitScalar(u8, name, '/');
+    while (parts.next()) |part| if (part.len == 0 or eq(part, ".") or eq(part, "..")) return false;
+    return true;
+}
+/// Every regular file below OUT_DIR, including nested directories (such as
+/// generated include trees). Directories are recreated from file paths, so an
+/// empty directory, which would be lost, makes the run uncacheable.
 fn outputs(ctx: *cache.Context, root: []const u8) ![]const []const u8 {
     var paths: std.ArrayList([]const u8) = .empty;
+    var dirs: std.ArrayList([]const u8) = .empty;
     var dir = try Dir.cwd().openDir(ctx.io, root, .{ .iterate = true });
     defer dir.close(ctx.io);
     var walk = try dir.walk(ctx.a);
     defer walk.deinit();
     var size: u64 = 0;
     while (try walk.next(ctx.io)) |entry| {
-        if (entry.kind == .directory) return error.UnsupportedOutput;
+        if (entry.kind == .directory) {
+            try dirs.append(ctx.a, try std.fmt.allocPrint(ctx.a, "{s}/{s}/", .{ root, entry.path }));
+            continue;
+        }
         if (entry.kind != .file or paths.items.len >= 50000) return error.UnsupportedOutput;
         const path = try std.fs.path.join(ctx.a, &.{ root, entry.path });
         size += (try Dir.cwd().statFile(ctx.io, path, .{})).size;
         if (size > 1024 * 1024 * 1024) return error.OutputTooLarge;
         try paths.append(ctx.a, path);
+    }
+    for (dirs.items) |prefix| {
+        for (paths.items) |path| {
+            if (std.mem.startsWith(u8, path, prefix)) break;
+        } else return error.UnsupportedOutput; // Empty directory.
     }
     std.mem.sort([]const u8, paths.items, {}, less);
     return paths.items;
@@ -298,6 +352,9 @@ fn passthrough(ctx: *cache.Context, real: []const u8, args: []const []const u8) 
 }
 // A sibling directory keeps restoration and publication on one filesystem.
 fn restoreOutputs(ctx: *cache.Context, key: []const u8, root: []const u8, paths: []const []const u8, roots: []const []const u8, before: Snapshot) !bool {
+    return restoreOutputsWith(ctx, key, root, paths, roots, before, false);
+}
+fn restoreOutputsWith(ctx: *cache.Context, key: []const u8, root: []const u8, paths: []const []const u8, roots: []const []const u8, before: Snapshot, prune: bool) !bool {
     var random: [16]u8 = undefined;
     var staging: ?[]const u8 = null;
     for (0..8) |_| {
@@ -313,13 +370,19 @@ fn restoreOutputs(ctx: *cache.Context, key: []const u8, root: []const u8, paths:
     const stage = staging orelse return error.StagingCollision;
     defer Dir.cwd().deleteTree(ctx.io, stage) catch {};
     const destinations = try ctx.a.alloc([]const u8, paths.len);
-    for (paths, destinations) |path, *destination| destination.* = try std.fs.path.join(ctx.a, &.{ stage, std.fs.path.basename(path) });
+    for (paths, destinations) |path, *destination| {
+        if (!std.mem.startsWith(u8, path, root) or path.len <= root.len + 1 or path[root.len] != '/') return error.UnsupportedOutput;
+        const relative = path[root.len + 1 ..];
+        if (!relativeOutput(relative)) return error.UnsupportedOutput;
+        destination.* = try std.fs.path.join(ctx.a, &.{ stage, relative });
+        if (std.fs.path.dirname(relative) != null) try Dir.cwd().createDirPath(ctx.io, std.fs.path.dirname(destination.*).?);
+    }
     const verify_start = profileStart(ctx);
     const streams = (try cache.restoreSnapshotStaged(ctx, key, paths, destinations, before.records)) orelse return false;
     profileEnd(ctx, "restore.validation_materialization", verify_start);
     const publish_start = profileStart(ctx);
     const epoch_start = profileStart(ctx);
-    if (!eq(before.epoch, try snapshotEpoch(ctx, roots))) return error.InputChangedDuringRestore;
+    if (!eq(before.epoch, try snapshotEpochWith(ctx, roots, prune))) return error.InputChangedDuringRestore;
     profileEnd(ctx, "restore.input_epoch", epoch_start);
     const original = try Dir.cwd().statFile(ctx.io, root, .{});
     var dir = try Dir.cwd().openDir(ctx.io, stage, .{ .iterate = true });
@@ -336,8 +399,11 @@ fn restoreOutputs(ctx: *cache.Context, key: []const u8, root: []const u8, paths:
 }
 pub fn execute(ctx: *cache.Context, real: []const u8, args: []const []const u8) !u8 {
     ctx.prepare() catch return passthrough(ctx, real, args);
-    const item = contract(ctx) catch return passthrough(ctx, real, args);
+    const item = contract(ctx) catch return if (declaredMode(ctx)) executeDeclared(ctx, real, args) else passthrough(ctx, real, args);
     if (!environmentMatches(ctx, item)) {
+        // Outside its explicit contract (for example a dev-profile build of a
+        // script recorded for release), a script is treated like an unlisted one.
+        if (declaredMode(ctx)) return executeDeclared(ctx, real, args);
         ctx.event("build_script_bypass");
         ctx.trace("build-script environment outside explicit contract");
         return passthrough(ctx, real, args);
@@ -410,7 +476,7 @@ pub fn execute(ctx: *cache.Context, real: []const u8, args: []const []const u8) 
         for (parsed.value.outputs) |path| {
             if (!std.mem.startsWith(u8, path, try std.fmt.allocPrint(ctx.a, "{s}/", .{root}))) break :restore;
             const name = path[root.len + 1 ..];
-            if (name.len == 0 or eq(name, "..") or eq(name, ".") or std.mem.indexOfScalar(u8, name, '/') != null) break :restore;
+            if (!relativeOutput(name)) break :restore;
         }
         const restore_start = profileStart(ctx);
         const restored = try restoreOutputs(ctx, key, root, parsed.value.outputs, roots.items, before);
@@ -437,9 +503,169 @@ pub fn execute(ctx: *cache.Context, real: []const u8, args: []const []const u8) 
     ctx.atomic(index, try cache.seal(ctx, try std.json.Stringify.valueAlloc(ctx.a, Receipt{ .outputs = paths }, .{}))) catch |err| ctx.trace(@errorName(err));
     return 0;
 }
+fn declaredMode(ctx: *cache.Context) bool {
+    return eq(ctx.env.get("NANOCOMPILE_BUILD_SCRIPT_CACHE") orelse "", "declared");
+}
+// package_default: the script declared nothing, so its package directory is the
+// input. Only that scan skips VCS metadata and CACHEDIR.TAG target directories;
+// explicitly declared directories are tracked in full.
+const DeclaredReceipt = struct { schema: u32 = 2, inputs: []const []const u8, package_default: bool = false };
+const DeclaredInputs = struct { paths: []const []const u8, package_default: bool };
+const declared_limit = 20000;
+
+// Everything Cargo compares before rerunning a script, plus the tools Cargo
+// does not track: the Rust compiler and the selected C driver and SDK.
+fn declaredMaterial(ctx: *cache.Context, real: []const u8, argv: []const []const u8, root: []const u8) ![]const u8 {
+    var h = cache.Hash.init(.{});
+    cache.field(&h, "nano-build-script-declared-v1");
+    cache.field(&h, root);
+    cache.field(&h, ctx.cwd);
+    cache.field(&h, real);
+    cache.field(&h, try ctx.digest(real));
+    for (argv) |arg| cache.field(&h, arg);
+    const names = try ctx.a.dupe([]const u8, ctx.env.keys());
+    std.mem.sort([]const u8, names, {}, less);
+    for (names) |name| {
+        cache.field(&h, name);
+        cache.field(&h, ctx.env.get(name).?);
+    }
+    if (ctx.env.get("RUSTC")) |rustc| cache.field(&h, try identity.fingerprint(ctx, false, rustc));
+    if (identity.selectedExecutable(ctx, "cc")) |driver| {
+        cache.field(&h, driver);
+        cache.field(&h, try identity.installedFileDigest(ctx, driver));
+        if (@import("builtin").os.tag == .macos) {
+            const selected = @import("native_identity.zig").apple(ctx, driver) catch null;
+            cache.field(&h, if (selected) |s| s.hash else "unsupported-native-selection");
+        }
+    } else |_| cache.field(&h, "no-cc");
+    return cache.finish(ctx.a, &h);
+}
+
+/// Inputs from `cargo:rerun-if-changed` lines, resolved against the package as
+/// Cargo does. No file declaration (and no env declaration) means the package.
+/// Null means the run must not be cached.
+fn declaredInputs(ctx: *cache.Context, stdout: []const u8, manifest: []const u8, root: []const u8) !?DeclaredInputs {
+    var inputs: std.ArrayList([]const u8) = .empty;
+    var env_declared = false;
+    var lines = std.mem.splitScalar(u8, stdout, '\n');
+    while (lines.next()) |raw| {
+        const line = std.mem.trimEnd(u8, raw, "\r");
+        const body = if (std.mem.startsWith(u8, line, "cargo::")) line[7..] else if (std.mem.startsWith(u8, line, "cargo:")) line[6..] else continue;
+        if (std.mem.startsWith(u8, body, "rerun-if-env-changed=")) {
+            env_declared = true;
+        } else if (std.mem.startsWith(u8, body, "rerun-if-changed=")) {
+            const value = body["rerun-if-changed=".len..];
+            if (value.len == 0) return null; // Always rerun.
+            const path = try std.fs.path.resolve(ctx.a, &.{ manifest, value });
+            if (eq(path, root) or std.mem.startsWith(u8, path, try std.fmt.allocPrint(ctx.a, "{s}/", .{root}))) return null;
+            try inputs.append(ctx.a, path);
+        }
+    }
+    const package_default = inputs.items.len == 0 and !env_declared;
+    if (package_default) try inputs.append(ctx.a, try std.fs.path.resolve(ctx.a, &.{manifest}));
+    std.mem.sort([]const u8, inputs.items, {}, less);
+    return .{ .paths = inputs.items, .package_default = package_default };
+}
+
+fn declaredKey(ctx: *cache.Context, base: []const u8, records: []const cache.Dependency) ![]const u8 {
+    var keyed = cache.Hash.init(.{});
+    cache.field(&keyed, base);
+    cache.field(&keyed, try std.json.Stringify.valueAlloc(ctx.a, records, .{}));
+    return cache.finish(ctx.a, &keyed);
+}
+
+fn executeDeclared(ctx: *cache.Context, real: []const u8, args: []const []const u8) !u8 {
+    if (eq(ctx.env.get("NANOCOMPILE_DISABLE") orelse "", "1")) return passthrough(ctx, real, args);
+    if (!nullStdin(ctx)) {
+        ctx.event("build_script_bypass");
+        return passthrough(ctx, real, args);
+    }
+    const requested_root = ctx.env.get("OUT_DIR") orelse return passthrough(ctx, real, args);
+    const manifest = ctx.env.get("CARGO_MANIFEST_DIR") orelse return passthrough(ctx, real, args);
+    if (!std.fs.path.isAbsolute(requested_root) or !std.fs.path.isAbsolute(manifest)) return passthrough(ctx, real, args);
+    const root = try Dir.cwd().realPathFileAlloc(ctx.io, requested_root, ctx.a);
+    const maintenance = try cache.Lock.acquire(ctx, "maintenance", false);
+    defer maintenance.release();
+    var oh = cache.Hash.init(.{});
+    cache.field(&oh, root);
+    const flight = try cache.Lock.acquire(ctx, try std.fmt.allocPrint(ctx.a, "script-out-{s}", .{try cache.finish(ctx.a, &oh)}), true);
+    defer flight.release();
+    if (!try empty(ctx, root)) {
+        ctx.event("build_script_bypass");
+        return replay(ctx, try run(ctx, real, args));
+    }
+    Dir.cwd().access(ctx.io, root, .{ .write = true, .execute = true }) catch {
+        ctx.event("build_script_bypass");
+        return replay(ctx, try run(ctx, real, args));
+    };
+    var phase = profileStart(ctx);
+    const base = declaredMaterial(ctx, real, args, root) catch |err| {
+        ctx.trace(@errorName(err));
+        ctx.event("build_script_bypass");
+        return replay(ctx, try run(ctx, real, args));
+    };
+    profileEnd(ctx, "declared.material", phase);
+    const receipt_path = try ctx.path(&.{ "build-script-declared", base });
+    if (ctx.read(receipt_path)) |bytes| restore: {
+        const parsed = std.json.parseFromSlice(DeclaredReceipt, ctx.a, cache.unseal(ctx, bytes) catch break :restore, .{ .allocate = .alloc_always }) catch break :restore;
+        if (parsed.value.schema != 2 or parsed.value.inputs.len > declared_limit) break :restore;
+        const prune = parsed.value.package_default;
+        phase = profileStart(ctx);
+        const before = snapshotWith(ctx, parsed.value.inputs, prune, declared_limit) catch break :restore;
+        profileEnd(ctx, "declared.input_snapshot", phase);
+        var keyed = cache.Hash.init(.{});
+        cache.field(&keyed, base);
+        cache.field(&keyed, if (prune) "package-default" else "declared");
+        const key = try declaredKey(ctx, try cache.finish(ctx.a, &keyed), before.records);
+        const index = ctx.read(try ctx.path(&.{ "build-script-receipts", key })) catch break :restore;
+        const outputs_receipt = std.json.parseFromSlice(Receipt, ctx.a, cache.unseal(ctx, index) catch break :restore, .{ .allocate = .alloc_always }) catch break :restore;
+        if (outputs_receipt.value.schema != 1 or outputs_receipt.value.outputs.len > 50000) break :restore;
+        for (outputs_receipt.value.outputs) |path| {
+            if (!std.mem.startsWith(u8, path, try std.fmt.allocPrint(ctx.a, "{s}/", .{root}))) break :restore;
+            const name = path[root.len + 1 ..];
+            if (!relativeOutput(name)) break :restore;
+        }
+        phase = profileStart(ctx);
+        defer profileEnd(ctx, "declared.restore", phase);
+        if (try restoreOutputsWith(ctx, key, root, outputs_receipt.value.outputs, parsed.value.inputs, before, prune)) {
+            ctx.event("build_script_hit");
+            return 0;
+        }
+    } else |_| {}
+    const started = std.Io.Clock.real.now(ctx.io).nanoseconds;
+    const result = try run(ctx, real, args);
+    const code = try replay(ctx, result);
+    if (code != 0) {
+        ctx.event("build_script_failed");
+        return code;
+    }
+    ctx.event("build_script_miss");
+    const inputs = (declaredInputs(ctx, result.stdout, manifest, root) catch return 0) orelse return 0;
+    const after = snapshotWith(ctx, inputs.paths, inputs.package_default, declared_limit) catch return 0;
+    // Inputs are only known after the run. Record it only when every declared
+    // input predates the run, so nothing changed while the script read it.
+    if (after.newest >= started) {
+        ctx.trace("build-script declared input changed during execution");
+        return 0;
+    }
+    if (!eq(base, declaredMaterial(ctx, real, args, root) catch return 0)) return 0;
+    const paths = outputs(ctx, root) catch return 0;
+    var keyed = cache.Hash.init(.{});
+    cache.field(&keyed, base);
+    cache.field(&keyed, if (inputs.package_default) "package-default" else "declared");
+    const key = try declaredKey(ctx, try cache.finish(ctx.a, &keyed), after.records);
+    cache.store(ctx, key, after.records, paths, result.stdout, result.stderr) catch |err| {
+        ctx.trace(@errorName(err));
+        return 0;
+    };
+    ctx.atomic(try ctx.path(&.{ "build-script-receipts", key }), try cache.seal(ctx, try std.json.Stringify.valueAlloc(ctx.a, Receipt{ .outputs = paths }, .{}))) catch return 0;
+    ctx.atomic(receipt_path, try cache.seal(ctx, try std.json.Stringify.valueAlloc(ctx.a, DeclaredReceipt{ .inputs = inputs.paths, .package_default = inputs.package_default }, .{}))) catch {};
+    return 0;
+}
+
 // The explicit contract is checked at execution too, including disabled shims.
 pub fn install(ctx: *cache.Context, argv: []const []const u8) !void {
-    _ = contract(ctx) catch return;
+    _ = contract(ctx) catch if (!declaredMode(ctx)) return;
     var name: ?[]const u8 = null;
     var dir: ?[]const u8 = null;
     var extra: []const u8 = "";
@@ -448,9 +674,10 @@ pub fn install(ctx: *cache.Context, argv: []const []const u8) !void {
         if (eq(arg, "--out-dir") and i + 1 < argv.len) dir = argv[i + 1];
         if (eq(arg, "-C") and i + 1 < argv.len and std.mem.startsWith(u8, argv[i + 1], "extra-filename=")) extra = argv[i + 1][15..];
     }
-    if (!eq(name orelse return, "build_script_build")) return;
+    const crate = name orelse return;
     const parent = dir orelse return;
-    const path = try std.fs.path.resolve(ctx.a, &.{ ctx.cwd, parent, try std.fmt.allocPrint(ctx.a, "build_script_build{s}", .{extra}) });
+    if (!scriptCrate(crate, parent)) return;
+    const path = try std.fs.path.resolve(ctx.a, &.{ ctx.cwd, parent, try std.fmt.allocPrint(ctx.a, "{s}{s}", .{ crate, extra }) });
     const real = try std.fmt.allocPrint(ctx.a, "{s}.nano-real", .{path});
     const config = try std.fs.path.join(ctx.a, &.{ std.fs.path.dirname(path).?, "nano-build-script.json" });
     try Dir.cwd().rename(path, .cwd(), real, ctx.io);
@@ -458,26 +685,76 @@ pub fn install(ctx: *cache.Context, argv: []const []const u8) !void {
         Dir.cwd().rename(real, .cwd(), path, ctx.io) catch {};
         Dir.cwd().deleteFile(ctx.io, config) catch {};
     }
-    try cache.materialize(ctx, try std.process.executablePathAlloc(ctx.io, ctx.a), path, 0o700);
+    // macOS assesses every new Mach-O inode on its first exec (tens of ms,
+    // hundreds when many start together), and Cargo copies the shim to a new
+    // inode. A text shim naming this already-validated executable as its
+    // interpreter avoids that; unusual paths fall back to a binary copy.
+    const self = try std.process.executablePathAlloc(ctx.io, ctx.a);
+    if (shebangSafe(self)) {
+        try ctx.atomic(path, try std.fmt.allocPrint(ctx.a, "#!{s}\n", .{self}));
+        const shim = try Dir.cwd().openFile(ctx.io, path, .{ .mode = .read_write });
+        defer shim.close(ctx.io);
+        try shim.setPermissions(ctx.io, .fromMode(0o700));
+    } else try cache.materialize(ctx, self, path, 0o700);
     try ctx.atomic(config, try std.json.Stringify.valueAlloc(ctx.a, Launch{ .real = real }, .{}));
+}
+fn shebangSafe(path: []const u8) bool {
+    if (!std.fs.path.isAbsolute(path) or path.len > 400) return false;
+    for (path) |ch| if (ch <= ' ' or ch == 0x7f) return false;
+    return true;
+}
+/// Cargo names a build script's crate `build_script_<stem>` after the script's
+/// file stem (`build.rs` or a custom `build = "builder/main.rs"`), and compiles
+/// it into `<target>/<profile>/build/<package>-<hash>/`.
+fn scriptCrate(name: []const u8, out_dir: []const u8) bool {
+    if (name.len <= "build_script_".len or !std.mem.startsWith(u8, name, "build_script_")) return false;
+    const parent = std.fs.path.dirname(std.mem.trimEnd(u8, out_dir, "/")) orelse return false;
+    return eq(std.fs.path.basename(parent), "build");
+}
+fn scriptName(path: []const u8) bool {
+    const name = std.fs.path.basename(path);
+    if (std.mem.startsWith(u8, name, "build-script-")) return name.len > "build-script-".len;
+    return std.mem.startsWith(u8, name, "build_script_") and std.mem.indexOfScalar(u8, name, '-') != null;
 }
 pub fn launch(ctx: *cache.Context, args: []const [:0]const u8) !?u8 {
     if (args.len == 0) return null;
-    const name = std.fs.path.basename(args[0]);
-    if (!eq(name, "build-script-build") and !std.mem.startsWith(u8, name, "build_script_build-")) return null;
-    const path = try std.process.executablePathAlloc(ctx.io, ctx.a);
-    const record = try std.fs.path.join(ctx.a, &.{ std.fs.path.dirname(path).?, "nano-build-script.json" });
-    const parsed = try std.json.parseFromSlice(Launch, ctx.a, try ctx.read(record), .{ .allocate = .alloc_always });
-    return try execute(ctx, parsed.value.real, args[1..]);
+    // Copied binary shim: argv[0] is the script path and the record sits
+    // beside this executable.
+    if (scriptName(args[0])) {
+        const path = try std.process.executablePathAlloc(ctx.io, ctx.a);
+        const record = try std.fs.path.join(ctx.a, &.{ std.fs.path.dirname(path).?, "nano-build-script.json" });
+        const parsed = try std.json.parseFromSlice(Launch, ctx.a, try ctx.read(record), .{ .allocate = .alloc_always });
+        return try execute(ctx, parsed.value.real, args[1..]);
+    }
+    // Text shim: the kernel runs this executable as the interpreter with the
+    // script path as argv[1]. Only a sibling record selects this mode, and the
+    // recorded real script is executed, never argv[1] itself.
+    if (args.len >= 2 and scriptName(args[1])) {
+        const script = try std.fs.path.resolve(ctx.a, &.{ ctx.cwd, args[1] });
+        var head: [512]u8 = undefined;
+        const prefix = Dir.cwd().readFile(ctx.io, script, &head) catch return null;
+        const self = try std.process.executablePathAlloc(ctx.io, ctx.a);
+        const shim = try std.fmt.allocPrint(ctx.a, "#!{s}\n", .{self});
+        if (!std.mem.startsWith(u8, prefix, shim)) return null;
+        // Never fall through: treating our own shim as a compiler would run it again.
+        const record = try std.fs.path.join(ctx.a, &.{ std.fs.path.dirname(script).?, "nano-build-script.json" });
+        const parsed = try std.json.parseFromSlice(Launch, ctx.a, ctx.read(record) catch return error.MissingBuildScriptRecord, .{ .allocate = .alloc_always });
+        return try execute(ctx, parsed.value.real, args[2..]);
+    }
+    return null;
 }
 
 pub fn wantsInstall(ctx: *cache.Context, argv: []const []const u8) bool {
-    if (ctx.env.get("NANOCOMPILE_BUILD_SCRIPTS_FILE") == null) return false;
-    for (argv, 0..) |arg, i| if (eq(arg, "--crate-name") and i + 1 < argv.len and eq(argv[i + 1], "build_script_build")) {
-        _ = contract(ctx) catch return false;
-        return true;
-    };
-    return false;
+    if (ctx.env.get("NANOCOMPILE_BUILD_SCRIPTS_FILE") == null and !declaredMode(ctx)) return false;
+    var name: ?[]const u8 = null;
+    var dir: ?[]const u8 = null;
+    for (argv, 0..) |arg, i| {
+        if (eq(arg, "--crate-name") and i + 1 < argv.len) name = argv[i + 1];
+        if (eq(arg, "--out-dir") and i + 1 < argv.len) dir = argv[i + 1];
+    }
+    if (!scriptCrate(name orelse return false, dir orelse return false)) return false;
+    _ = contract(ctx) catch return declaredMode(ctx);
+    return true;
 }
 pub fn installLockName(ctx: *cache.Context, argv: []const []const u8) ![]const u8 {
     var h = cache.Hash.init(.{});
@@ -487,6 +764,7 @@ pub fn installLockName(ctx: *cache.Context, argv: []const []const u8) ![]const u
 }
 
 test "snapshot reuse refuses changed input state before atomic publication" {
+    if (@import("builtin").os.tag == .windows) return error.SkipZigTest; // POSIX directory publication.
     var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
     defer arena.deinit();
     const a = arena.allocator();

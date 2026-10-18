@@ -191,6 +191,7 @@ test "post-compile digest reuse rejects edits before metadata classification" {
 }
 
 pub fn readerCompiler(ctx: *cache.Context, arg: []const u8) ![]const u8 {
+    if (@import("builtin").os.tag == .windows) return @import("identity.zig").selectedExecutable(ctx, arg);
     // Keep the executable basename: canonicalizing a rustup rustc symlink to
     // rustup itself would change proxy dispatch. Relative PATH entries must
     // remain relative to the caller even when diagnostics use a private cwd.

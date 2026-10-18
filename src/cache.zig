@@ -20,9 +20,38 @@ const c = struct {
     const LOCK_UN = 8;
     const FICLONE = 0x40049409;
 };
+const win = struct {
+    const Overlapped = extern struct {
+        internal: usize = 0,
+        internal_high: usize = 0,
+        offset: u32 = 0,
+        offset_high: u32 = 0,
+        event: ?std.os.windows.HANDLE = null,
+    };
+    extern "kernel32" fn LockFileEx(std.os.windows.HANDLE, u32, u32, u32, u32, *Overlapped) callconv(.winapi) std.os.windows.BOOL;
+    extern "kernel32" fn UnlockFileEx(std.os.windows.HANDLE, u32, u32, u32, *Overlapped) callconv(.winapi) std.os.windows.BOOL;
+};
 const Dir = std.Io.Dir;
 pub const Hash = std.crypto.hash.Blake3;
 pub const CheckedDigest = struct { hash: []const u8, state: std.Io.File.Stat };
+
+pub fn permissions(mode: u32) std.Io.File.Permissions {
+    return if (builtin.os.tag == .windows) .default_file else .fromMode(@intCast(mode & 0o777));
+}
+
+pub fn fileMode(value: std.Io.File.Permissions) u32 {
+    return if (builtin.os.tag == .windows) 0o600 else @intCast(value.toMode());
+}
+
+// Content digests of large regular files are memoized by path and complete
+// file state. A file's ctime advances on every write, rename, chmod or utimes,
+// so a matching inode/size/mtime/ctime proves the bytes were not rewritten
+// through the filesystem. As in git's racy-index rule, a state is recorded only
+// when both timestamps precede the start of hashing; changes during hashing
+// fail the before/after comparison. NANOCOMPILE_DIGEST_MEMO=0 disables it.
+const memo_min_size = 64 * 1024;
+const parallel_digest_min_size = 32 * 1024 * 1024;
+const memo_version = "nanocompile-digest-memo-v1";
 
 pub fn sameFileState(a: std.Io.File.Stat, b: std.Io.File.Stat) bool {
     return a.inode == b.inode and a.size == b.size and a.kind == b.kind and
@@ -55,14 +84,35 @@ pub const Context = struct {
     compiler_decoder_identity: ?[]const u8 = null,
     compiler_epoch: ?[]const u8 = null,
     rust_locations: ?RustLocations = null,
+    digest_memo: bool = builtin.os.tag != .windows,
+    /// While one entry is built after compilation, a file hashed earlier in
+    /// that construction (a fresh output classified for consumers, then
+    /// stored as a blob) is not hashed again if its state is unchanged.
+    /// Never set across a compilation or a restore.
+    entry_digests: ?*std.StringHashMapUnmanaged(CheckedDigest) = null,
+    /// When set, a restored entry may carry extra outputs beyond the requested
+    /// ones: unpacked split-debug objects named `<prefix><cgu>.rcgu.o`.
+    output_sidecars: ?[]const u8 = null,
 
     pub fn init(a: std.mem.Allocator, io: std.Io, env: *std.process.Environ.Map) !Context {
         const root = env.get("NANOCOMPILE_DIR") orelse try std.fs.path.join(a, &.{
-            env.get("XDG_CACHE_HOME") orelse try std.fs.path.join(a, &.{ env.get("HOME") orelse return error.NoHome, ".cache" }),
+            if (builtin.os.tag == .windows)
+                env.get("LOCALAPPDATA") orelse try std.fs.path.join(a, &.{ env.get("USERPROFILE") orelse env.get("HOME") orelse return error.NoHome, ".cache" })
+            else
+                env.get("XDG_CACHE_HOME") orelse try std.fs.path.join(a, &.{ env.get("HOME") orelse return error.NoHome, ".cache" }),
             "nanocompile",
         });
         const cwd = try std.process.currentPathAlloc(io, a);
-        return .{ .a = a, .io = io, .env = env, .root = try std.fs.path.resolve(a, &.{ cwd, root }), .cwd = cwd };
+        return .{
+            .a = a,
+            .io = io,
+            .env = env,
+            .root = try std.fs.path.resolve(a, &.{ cwd, root }),
+            .cwd = cwd,
+            // Windows change times are writable by user code; persistent
+            // metadata-only digest reuse cannot use the Unix ctime contract.
+            .digest_memo = builtin.os.tag != .windows and !std.mem.eql(u8, env.get("NANOCOMPILE_DIGEST_MEMO") orelse "1", "0"),
+        };
     }
 
     pub fn path(self: *Context, parts: []const []const u8) ![]const u8 {
@@ -92,9 +142,100 @@ pub const Context = struct {
     }
 
     pub fn digest(self: *Context, path_: []const u8) ![]const u8 {
+        const known = self.entry_digests orelse return self.digestFile(path_);
+        const before = try Dir.cwd().statFile(self.io, path_, .{});
+        if (known.get(path_)) |previous| if (sameFileState(previous.state, before)) return previous.hash;
+        const hash = try self.digestFile(path_);
+        const after = try Dir.cwd().statFile(self.io, path_, .{});
+        if (sameFileState(before, after)) known.put(self.a, try self.a.dupe(u8, path_), .{ .hash = hash, .state = after }) catch {};
+        return hash;
+    }
+
+    fn digestFile(self: *Context, path_: []const u8) ![]const u8 {
+        const started = std.Io.Clock.real.now(self.io).nanoseconds;
         const file = try Dir.cwd().openFile(self.io, path_, .{});
         defer file.close(self.io);
-        if ((try file.stat(self.io)).kind != .file) return error.NotRegularFile;
+        const before = try file.stat(self.io);
+        if (before.kind != .file) return error.NotRegularFile;
+        const memo = if (self.digest_memo and before.size >= memo_min_size) self.memoPath(path_) catch null else null;
+        if (memo) |m| if (self.memoLookup(m.file, m.absolute, before)) |hash| return hash;
+        const hash = try self.streamDigest(file);
+        if (memo) |m| {
+            const after = file.stat(self.io) catch return hash;
+            if (sameFileState(before, after)) self.memoStore(m.file, m.absolute, after, started, hash);
+        }
+        return hash;
+    }
+
+    const MemoLocation = struct { file: []const u8, absolute: []const u8 };
+
+    fn memoPath(self: *Context, path_: []const u8) !MemoLocation {
+        const absolute = try std.fs.path.resolve(self.a, &.{ self.cwd, path_ });
+        var h = Hash.init(.{});
+        field(&h, memo_version);
+        field(&h, absolute);
+        const key = try finish(self.a, &h);
+        return .{ .file = try self.path(&.{ "memo", key[0..2], key }), .absolute = absolute };
+    }
+
+    fn memoLookup(self: *Context, memo: []const u8, absolute: []const u8, state: std.Io.File.Stat) ?[]const u8 {
+        var buffer: [4096 + 512]u8 = undefined;
+        const bytes = Dir.cwd().readFile(self.io, memo, &buffer) catch return null;
+        var lines = std.mem.splitScalar(u8, bytes, '\n');
+        if (!std.mem.eql(u8, lines.next() orelse return null, memo_version)) return null;
+        var numbers: [5]i128 = undefined;
+        for (&numbers) |*n| n.* = std.fmt.parseInt(i128, lines.next() orelse return null, 10) catch return null;
+        const hash = lines.next() orelse return null;
+        if (!validHash(hash) or !std.mem.eql(u8, lines.next() orelse return null, absolute)) return null;
+        if (numbers[0] != state.inode or numbers[1] != state.size or numbers[2] != state.mtime.nanoseconds or
+            numbers[3] != state.ctime.nanoseconds) return null;
+        if (!(state.mtime.nanoseconds < numbers[4] and state.ctime.nanoseconds < numbers[4])) return null;
+        return self.a.dupe(u8, hash) catch null;
+    }
+
+    fn memoStore(self: *Context, memo: []const u8, absolute: []const u8, state: std.Io.File.Stat, started: i96, hash: []const u8) void {
+        if (!self.digest_memo or absolute.len > 4096 or state.kind != .file or state.size < memo_min_size) return;
+        if (!(state.mtime.nanoseconds < started and state.ctime.nanoseconds < started)) return;
+        const bytes = std.fmt.allocPrint(self.a, "{s}\n{d}\n{d}\n{d}\n{d}\n{d}\n{s}\n{s}", .{
+            memo_version, state.inode, state.size, state.mtime.nanoseconds, state.ctime.nanoseconds, started, hash, absolute,
+        }) catch return;
+        self.atomic(memo, bytes) catch {};
+    }
+
+    /// Record a known digest for a file this process just materialized from a
+    /// verified immutable blob. The destination must still be the same inode
+    /// with the clone's size and mtime: any intervening write changes mtime.
+    pub fn memoMaterialized(self: *Context, destination: []const u8, written: std.Io.File.Stat, hash: []const u8) void {
+        if (!self.digest_memo or written.size < memo_min_size) return;
+        const state = Dir.cwd().statFile(self.io, destination, .{}) catch return;
+        if (state.kind != .file or state.inode != written.inode or state.size != written.size or
+            state.mtime.nanoseconds != written.mtime.nanoseconds) return;
+        const started = std.Io.Clock.real.now(self.io).nanoseconds;
+        const memo = self.memoPath(destination) catch return;
+        self.memoStore(memo.file, memo.absolute, state, started, hash);
+    }
+
+    /// As memoMaterialized, for a state read from the destination's own open
+    /// descriptor after its last change.
+    pub fn memoKnownState(self: *Context, destination: []const u8, state: std.Io.File.Stat, hash: []const u8) void {
+        if (!self.digest_memo or state.size < memo_min_size or state.kind != .file) return;
+        const started = std.Io.Clock.real.now(self.io).nanoseconds;
+        const memo = self.memoPath(destination) catch return;
+        self.memoStore(memo.file, memo.absolute, state, started, hash);
+    }
+
+    fn streamDigest(self: *Context, file: std.Io.File) ![]const u8 {
+        // A large fresh output (a big crate's rlib at the end of a critical
+        // path) cannot use the digest memo. BLAKE3's tree hash over the mapped
+        // file spreads it across cores and yields the same digest.
+        const size = (try file.stat(self.io)).size;
+        if (size >= parallel_digest_min_size and builtin.os.tag != .windows) mapped: {
+            const bytes = std.posix.mmap(null, @intCast(size), .{ .READ = true }, .{ .TYPE = .PRIVATE }, file.handle, 0) catch break :mapped;
+            defer std.posix.munmap(bytes);
+            var digest_bytes: [Hash.digest_length]u8 = undefined;
+            Hash.hashParallel(bytes, &digest_bytes, .{}, std.heap.page_allocator, self.io) catch break :mapped;
+            return self.a.dupe(u8, &std.fmt.bytesToHex(digest_bytes, .lower));
+        }
         var h = Hash.init(.{});
         var buffer: [64 * 1024]u8 = undefined;
         var reader = file.reader(self.io, &buffer);
@@ -121,7 +262,8 @@ pub const Context = struct {
         var iterator = dir.iterate();
         var names: std.ArrayList([]const u8) = .empty;
         while (try iterator.next(self.io)) |entry| {
-            if (!std.mem.endsWith(u8, entry.name, ".rlib") and !std.mem.endsWith(u8, entry.name, ".rmeta") and !std.mem.endsWith(u8, entry.name, ".dylib") and !std.mem.endsWith(u8, entry.name, ".so")) continue;
+            if (!std.mem.endsWith(u8, entry.name, ".rlib") and !std.mem.endsWith(u8, entry.name, ".rmeta") and !std.mem.endsWith(u8, entry.name, ".dylib") and !std.mem.endsWith(u8, entry.name, ".so") and
+                !(builtin.os.tag == .windows and std.ascii.endsWithIgnoreCase(entry.name, ".dll"))) continue;
             const full = try std.fs.path.join(self.a, &.{ path_, entry.name });
             var ignored = false;
             for (outputs) |out_| if (std.mem.eql(u8, full, out_)) {
@@ -157,7 +299,8 @@ pub const Context = struct {
         var names: std.ArrayList([]const u8) = .empty;
         while (try iterator.next(self.io)) |entry| {
             if (libraries) {
-                const relevant = std.mem.endsWith(u8, entry.name, ".rlib") or std.mem.endsWith(u8, entry.name, ".rmeta") or std.mem.endsWith(u8, entry.name, ".dylib") or std.mem.endsWith(u8, entry.name, ".so");
+                const relevant = std.mem.endsWith(u8, entry.name, ".rlib") or std.mem.endsWith(u8, entry.name, ".rmeta") or std.mem.endsWith(u8, entry.name, ".dylib") or std.mem.endsWith(u8, entry.name, ".so") or
+                    (builtin.os.tag == .windows and std.ascii.endsWithIgnoreCase(entry.name, ".dll"));
                 if (!relevant) continue;
                 const full = try std.fs.path.join(self.a, &.{ path_, entry.name });
                 var ignored = false;
@@ -182,7 +325,7 @@ pub const Context = struct {
     }
 
     pub fn atomic(self: *Context, path_: []const u8, bytes: []const u8) !void {
-        var file = try Dir.cwd().createFileAtomic(self.io, path_, .{ .make_path = true, .replace = true, .permissions = .fromMode(0o600) });
+        var file = try Dir.cwd().createFileAtomic(self.io, path_, .{ .make_path = true, .replace = true, .permissions = permissions(0o600) });
         defer file.deinit(self.io);
         try file.file.writeStreamingAll(self.io, bytes);
         try file.replace(self.io);
@@ -205,6 +348,15 @@ pub const Context = struct {
 
     pub fn event(self: *Context, name: []const u8) void {
         const path_ = self.path(&.{"events"}) catch return;
+        if (builtin.os.tag == .windows) {
+            const file = Dir.cwd().createFile(self.io, path_, .{ .read = true, .truncate = false }) catch return;
+            defer file.close(self.io);
+            lockWindowsFile(file, self.io, true) catch return;
+            const offset = file.length(self.io) catch return;
+            const line = std.fmt.allocPrint(self.a, "{s}\n", .{name}) catch return;
+            file.writePositionalAll(self.io, line, offset) catch {};
+            return;
+        }
         const z = self.a.dupeSentinel(u8, path_, 0) catch return;
         const fd = c.open(z, c.O_WRONLY | c.O_CREAT | c.O_APPEND | c.O_CLOEXEC, @as(c_uint, 0o600));
         if (fd < 0) return;
@@ -214,9 +366,49 @@ pub const Context = struct {
     }
 };
 
+fn tryFileLock(file: std.Io.File, io: std.Io, exclusive: bool) !bool {
+    if (builtin.os.tag == .windows) {
+        var overlapped: win.Overlapped = .{};
+        // FAIL_IMMEDIATELY plus optional EXCLUSIVE_LOCK, over byte zero.
+        if (win.LockFileEx(file.handle, 1 | @as(u32, if (exclusive) 2 else 0), 0, 1, 0, &overlapped) != .FALSE) return true;
+        return switch (std.os.windows.GetLastError()) {
+            .LOCK_VIOLATION => false,
+            .NOT_SUPPORTED, .CALL_NOT_IMPLEMENTED => error.FileLocksUnsupported,
+            else => |err| std.os.windows.unexpectedError(err),
+        };
+    }
+    return file.tryLock(io, if (exclusive) .exclusive else .shared);
+}
+
+fn unlockFile(file: std.Io.File, io: std.Io) void {
+    if (builtin.os.tag == .windows) {
+        var overlapped: win.Overlapped = .{};
+        _ = win.UnlockFileEx(file.handle, 0, 1, 0, &overlapped);
+        return;
+    }
+    file.unlock(io);
+}
+
+// Wait on real kernel byte-range locks, without requiring async lock support.
+// Contention never grants an unlocked hit; closing the handle releases its lock.
+fn lockWindowsFile(file: std.Io.File, io: std.Io, exclusive: bool) !void {
+    while (!try tryFileLock(file, io, exclusive))
+        try std.Io.sleep(io, .fromMilliseconds(1), .awake);
+}
+
 pub const Lock = struct {
-    fd: c_int,
+    fd: if (builtin.os.tag == .windows) std.Io.File else c_int,
+    io: std.Io = undefined,
     pub fn acquire(ctx: *Context, name: []const u8, exclusive: bool) !Lock {
+        if (builtin.os.tag == .windows) {
+            const file = try Dir.cwd().createFile(ctx.io, try ctx.path(&.{ "locks", name }), .{
+                .read = true,
+                .truncate = false,
+            });
+            errdefer file.close(ctx.io);
+            try lockWindowsFile(file, ctx.io, exclusive);
+            return .{ .fd = file, .io = ctx.io };
+        }
         const z = try ctx.a.dupeSentinel(u8, try ctx.path(&.{ "locks", name }), 0);
         const fd = c.open(z, c.O_RDWR | c.O_CREAT | c.O_CLOEXEC, @as(c_uint, 0o600));
         if (fd < 0) return error.LockOpenFailed;
@@ -225,6 +417,11 @@ pub const Lock = struct {
         return .{ .fd = fd };
     }
     pub fn release(self: Lock) void {
+        if (builtin.os.tag == .windows) {
+            unlockFile(self.fd, self.io);
+            self.fd.close(self.io);
+            return;
+        }
         _ = c.flock(self.fd, c.LOCK_UN);
         _ = c.close(self.fd);
     }
@@ -343,6 +540,58 @@ fn blobPath(ctx: *Context, hash: []const u8) ![]const u8 {
 
 // Never hardlink: a later linker, strip, or user write must not mutate the cache.
 pub fn materialize(ctx: *Context, source: []const u8, destination: []const u8, mode: u32) !void {
+    _ = try materializeState(ctx, source, destination, mode);
+}
+
+/// Materialize an immutable verified blob and memoize the destination digest.
+pub fn materializeKnown(ctx: *Context, source: []const u8, destination: []const u8, mode: u32, hash: []const u8) !void {
+    var direct = false;
+    const written = try materializeInto(ctx, source, destination, mode, &direct);
+    // A direct clone's stat came from the open destination itself, so it is
+    // already the state to record; a renamed temporary is re-checked by path.
+    if (direct) ctx.memoKnownState(destination, written, hash) else ctx.memoMaterialized(destination, written, hash);
+}
+
+fn materializeState(ctx: *Context, source: []const u8, destination: []const u8, mode: u32) !std.Io.File.Stat {
+    var direct = false;
+    return materializeInto(ctx, source, destination, mode, &direct);
+}
+
+fn materializeInto(ctx: *Context, source: []const u8, destination: []const u8, mode: u32, direct: *bool) !std.Io.File.Stat {
+    if (builtin.os.tag == .windows) {
+        // Independent copy into an exclusive temporary, then atomic replace.
+        // Never expose a partially copied output or alias the immutable blob.
+        var atomic = try Dir.cwd().createFileAtomic(ctx.io, destination, .{ .make_path = true, .replace = true });
+        defer atomic.deinit(ctx.io);
+        const source_file = try Dir.cwd().openFile(ctx.io, source, .{});
+        defer source_file.close(ctx.io);
+        var buffer: [64 * 1024]u8 = undefined;
+        var offset: u64 = 0;
+        while (true) {
+            const n = try source_file.readPositionalAll(ctx.io, &buffer, offset);
+            if (n == 0) break;
+            try atomic.file.writeStreamingAll(ctx.io, buffer[0..n]);
+            offset += n;
+        }
+        const written = try atomic.file.stat(ctx.io);
+        try atomic.replace(ctx.io);
+        return written;
+    }
+    // A restore usually targets a path that does not exist yet. clonefile
+    // creates it atomically with its full contents, so clone straight into
+    // place: one directory entry created instead of a temporary name, two
+    // speculative unlinks and a rename, in a directory (Cargo's deps) that
+    // every concurrent hit is reading and writing.
+    if (builtin.os.tag == .macos) direct: {
+        const src_z = try ctx.a.dupeSentinel(u8, source, 0);
+        const dst_z = try ctx.a.dupeSentinel(u8, destination, 0);
+        if (c.clonefile(src_z, dst_z, 0) != 0) break :direct; // Exists, or the directory is missing: replace below.
+        const file = try Dir.cwd().openFile(ctx.io, destination, .{});
+        defer file.close(ctx.io);
+        try file.setPermissions(ctx.io, .fromMode(@intCast(mode & 0o777)));
+        direct.* = true;
+        return try file.stat(ctx.io);
+    }
     try Dir.cwd().createDirPath(ctx.io, std.fs.path.dirname(destination) orelse ".");
     const temp = try std.fmt.allocPrint(ctx.a, "{s}.nano-{d}", .{ destination, c.getpid() });
     defer Dir.cwd().deleteFile(ctx.io, temp) catch {};
@@ -367,14 +616,24 @@ pub fn materialize(ctx: *Context, source: []const u8, destination: []const u8, m
     const file = try Dir.cwd().openFile(ctx.io, temp, .{ .mode = .read_write });
     defer file.close(ctx.io);
     try file.setPermissions(ctx.io, .fromMode(@intCast(mode & 0o777)));
+    const written = try file.stat(ctx.io);
     try Dir.cwd().rename(temp, .cwd(), destination, ctx.io);
+    return written;
 }
 
 pub fn putFile(ctx: *Context, source: []const u8) ![]const u8 {
+    const before = try Dir.cwd().statFile(ctx.io, source, .{});
     const hash = try ctx.digest(source);
     const destination = try blobPath(ctx, hash);
     const existing = ctx.digest(destination) catch "";
-    if (!std.mem.eql(u8, hash, existing)) try materialize(ctx, source, destination, 0o600);
+    if (!std.mem.eql(u8, hash, existing)) {
+        const written = try materializeState(ctx, source, destination, 0o600);
+        // The clone is a snapshot taken inside this unchanged-source window,
+        // so its bytes are the ones hashed above.
+        const after = Dir.cwd().statFile(ctx.io, source, .{}) catch return hash;
+        if (sameFileState(before, after) and written.size == before.size and
+            written.mtime.nanoseconds == before.mtime.nanoseconds) ctx.memoMaterialized(destination, written, hash);
+    }
     return hash;
 }
 
@@ -412,7 +671,7 @@ fn storeEntry(ctx: *Context, key: []const u8, dependencies: []const Dependency, 
     for (output_paths) |path_| {
         const st = try Dir.cwd().statFile(ctx.io, path_, .{});
         if (st.kind != .file) return error.NotRegularFile;
-        try outputs.append(ctx.a, .{ .path = path_, .hash = try putFile(ctx, path_), .mode = @intCast(st.permissions.toMode()) });
+        try outputs.append(ctx.a, .{ .path = path_, .hash = try putFile(ctx, path_), .mode = fileMode(st.permissions) });
     }
     const entry: Entry = .{
         .dependencies = dependencies,
@@ -492,14 +751,20 @@ const DigestJob = struct {
 };
 
 fn digestWorker(ctx: *const Context, jobs: []DigestJob, next: *std.atomic.Value(usize)) void {
+    // Each worker owns one arena, reset between files: a fresh page-backed
+    // arena per file cost an mmap/munmap pair each, and munmap in a threaded
+    // process shoots down TLBs on every core (hundreds of ms of system time
+    // for a crate with a large dependency graph). Context.digest only reads
+    // shared fields.
+    var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
+    defer arena.deinit();
+    var local = ctx.*;
+    local.entry_digests = null; // Never shared across threads.
+    local.a = arena.allocator();
     while (true) {
         const index = next.fetchAdd(1, .monotonic);
         if (index >= jobs.len) return;
-        // Each worker owns its arena; Context.digest only reads shared fields.
-        var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
-        defer arena.deinit();
-        var local = ctx.*;
-        local.a = arena.allocator();
+        _ = arena.reset(.retain_capacity);
         const hash = local.digest(jobs[index].path) catch continue;
         @memcpy(&jobs[index].hash, hash);
         jobs[index].valid = true;
@@ -510,18 +775,22 @@ fn parallelFileHashes(ctx: *Context, dependencies: []const Dependency, hashes: *
     var paths: std.StringHashMapUnmanaged(void) = .empty;
     defer paths.deinit(ctx.a);
     var jobs: std.ArrayList(DigestJob) = .empty;
-    var size: u64 = 0;
     for (dependencies) |dep| {
         if (dep.directory or dep.missing != null or dep.symlink_target != null) continue;
         const slot = try paths.getOrPut(ctx.a, dep.path);
         if (slot.found_existing) continue;
-        const st = Dir.cwd().statFile(ctx.io, dep.path, .{}) catch return false;
-        size +|= st.size;
         try jobs.append(ctx.a, .{ .path = dep.path });
     }
-    // Small restores retain their serial path. Large graphs use at most four
-    // workers, leaving the same full hashes and per-restore lifetime intact.
-    if (jobs.items.len < 32 or size < 8 * 1024 * 1024) return true;
+    // Small restores retain their serial path without preflighting file sizes.
+    // Large graphs use at most four workers, with the same full hashes and
+    // per-restore lifetime intact.
+    if (jobs.items.len < 32) return true;
+    var size: u64 = 0;
+    for (jobs.items) |job| {
+        const st = Dir.cwd().statFile(ctx.io, job.path, .{}) catch return false;
+        size +|= st.size;
+    }
+    if (size < 8 * 1024 * 1024) return true;
     var next: std.atomic.Value(usize) = .init(0);
     var group: std.Io.Group = .init;
     defer group.cancel(ctx.io);
@@ -538,6 +807,17 @@ fn parallelFileHashes(ctx: *Context, dependencies: []const Dependency, hashes: *
 
 // One additional worker overlaps immutable output verification with complete
 // dependency hashing. Its allocator is private; no output is written until join.
+const Placement = struct { blob: []const u8, destination: []const u8, mode: u32, known: ?[]const u8 };
+
+/// Clones restored outputs into place, one at a time. Concurrent placement
+/// measured faster for an isolated hit but slower across a busy warm build,
+/// where every job slot already runs a hit.
+fn place(ctx: *Context, placements: []Placement) !void {
+    for (placements) |job| {
+        if (job.known) |hash| try materializeKnown(ctx, job.blob, job.destination, job.mode, hash) else try materialize(ctx, job.blob, job.destination, job.mode);
+    }
+}
+
 const OutputCheck = struct {
     entry: *const Entry,
     valid: bool = false,
@@ -545,6 +825,7 @@ const OutputCheck = struct {
         var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
         defer arena.deinit();
         var local = ctx.*;
+        local.entry_digests = null; // Never shared across threads.
         local.a = arena.allocator();
         for (check.entry.outputs) |output| {
             const path = blobPath(&local, output.hash) catch return;
@@ -588,12 +869,22 @@ fn restoreWithSnapshot(ctx: *Context, key: []const u8, allowed_outputs: []const 
     if (destinations.len != allowed_outputs.len) return error.InvalidDestinations;
     const bytes = ctx.read(try ctx.path(&.{ "entries", key })) catch return null;
     const entry = parseEntry(ctx, bytes) catch return null;
-    if (entry.artifact != null or entry.schema != entry_schema or entry.outputs.len != allowed_outputs.len) return null;
+    if (entry.artifact != null or entry.schema != entry_schema or entry.outputs.len < allowed_outputs.len) return null;
+    const sidecars = entry.outputs[allowed_outputs.len..];
+    if (sidecars.len != 0) {
+        // Extra outputs are only restored in place, under this request's own prefix.
+        if (destinations.ptr != allowed_outputs.ptr) return null;
+        const prefix = ctx.output_sidecars orelse return null;
+        for (sidecars) |output| {
+            const rest = if (std.mem.startsWith(u8, output.path, prefix)) output.path[prefix.len..] else return null;
+            if (!std.mem.endsWith(u8, rest, ".rcgu.o") or std.mem.indexOfScalar(u8, rest, '/') != null) return null;
+        }
+    }
     // One crate graph can record many prefixes in the same Cargo directory,
     // and explicit externs can also appear in the transitive graph. Reuse the
     // enumeration and content hashes only within this restore. No metadata
     // shortcut survives a compiler invocation or a before/after input check.
-    for (entry.outputs, allowed_outputs) |output, allowed| if (!std.mem.eql(u8, output.path, allowed)) return null;
+    for (entry.outputs[0..allowed_outputs.len], allowed_outputs) |output, allowed| if (!std.mem.eql(u8, output.path, allowed)) return null;
     ctx.profileEnd("restore.manifest", phase);
     phase = ctx.profileStart();
     var output_check: OutputCheck = .{ .entry = &entry };
@@ -675,7 +966,15 @@ fn restoreWithSnapshot(ctx: *Context, key: []const u8, allowed_outputs: []const 
     if (!std.mem.eql(u8, try finish(ctx.a, &h), entry.stderr)) return null;
     ctx.profileEnd("restore.stream_validation", phase);
     phase = ctx.profileStart();
-    for (entry.outputs, destinations) |output, destination| try materialize(ctx, try blobPath(ctx, output.hash), destination, output.mode);
+    // Staging destinations are renamed by the caller; memoize final paths only.
+    // Nothing hashes split-debug objects later (consumers read the rlib), so
+    // their restores skip the digest memo record.
+    const placements = try ctx.a.alloc(Placement, entry.outputs.len);
+    for (entry.outputs[0..allowed_outputs.len], destinations, allowed_outputs, placements[0..allowed_outputs.len]) |output, destination, allowed, *placement|
+        placement.* = .{ .blob = try blobPath(ctx, output.hash), .destination = destination, .mode = output.mode, .known = if (std.mem.eql(u8, destination, allowed)) output.hash else null };
+    for (sidecars, placements[allowed_outputs.len..]) |output, *placement|
+        placement.* = .{ .blob = try blobPath(ctx, output.hash), .destination = output.path, .mode = output.mode, .known = null };
+    try place(ctx, placements);
     ctx.profileEnd("restore.materialization", phase);
     return .{ .stdout = stdout, .stderr = stderr };
 }
@@ -752,7 +1051,7 @@ pub fn clear(ctx: *Context) !void {
     try ctx.prepare();
     const lock = try Lock.acquire(ctx, "maintenance", true);
     defer lock.release();
-    for ([_][]const u8{ "entries", "blobs", "xcode", "native-clang", "metadata", "metadata-queries", "producer-jobs", "build-script-receipts", "script-tools" }) |sub| {
+    for ([_][]const u8{ "entries", "blobs", "xcode", "native-clang", "metadata", "metadata-queries", "producer-jobs", "build-script-receipts", "script-tools", "memo", "selection-memos", "build-script-declared" }) |sub| {
         try Dir.cwd().deleteTree(ctx.io, try ctx.path(&.{sub}));
         try Dir.cwd().createDirPath(ctx.io, try ctx.path(&.{sub}));
     }
@@ -846,7 +1145,70 @@ pub fn gc(ctx: *Context, limit: u64) !void {
             }
         }
     }
-    try ctx.out(try std.fmt.allocPrint(ctx.a, "evicted entries: {d}\nfreed logical bytes: {d}\nremaining logical bytes: {d}\n", .{ evicted, freed, total }));
+    const stale = try pruneMemos(ctx);
+    try ctx.out(try std.fmt.allocPrint(ctx.a, "evicted entries: {d}\nfreed logical bytes: {d}\nremaining logical bytes: {d}\nstale digest memos removed: {d}\n", .{ evicted, freed, total, stale }));
+}
+
+/// Remove digest memo records whose file is gone or no longer matches.
+fn pruneMemos(ctx: *Context) !usize {
+    var memo = Dir.cwd().openDir(ctx.io, try ctx.path(&.{"memo"}), .{ .iterate = true }) catch return 0;
+    defer memo.close(ctx.io);
+    var walk = try memo.walk(ctx.a);
+    defer walk.deinit();
+    var removed: usize = 0;
+    while (try walk.next(ctx.io)) |item| {
+        if (item.kind != .file) continue;
+        var buffer: [4096 + 512]u8 = undefined;
+        const bytes = item.dir.readFile(ctx.io, item.basename, &buffer) catch "";
+        const keep = blk: {
+            var lines = std.mem.splitScalar(u8, bytes, '\n');
+            if (!std.mem.eql(u8, lines.next() orelse break :blk false, memo_version)) break :blk false;
+            for (0..6) |_| _ = lines.next() orelse break :blk false;
+            const absolute = lines.next() orelse break :blk false;
+            const state = Dir.cwd().statFile(ctx.io, absolute, .{}) catch break :blk false;
+            break :blk ctx.memoLookup(try ctx.path(&.{ "memo", item.path }), absolute, state) != null;
+        };
+        if (!keep) {
+            item.dir.deleteFile(ctx.io, item.basename) catch continue;
+            removed += 1;
+        }
+    }
+    return removed;
+}
+
+test "cache locks coordinate independent handles" {
+    var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer arena.deinit();
+    const a = arena.allocator();
+    const io = std.testing.io;
+    var tmp = std.testing.tmpDir(.{});
+    defer tmp.cleanup();
+    const root = try Dir.cwd().realPathFileAlloc(io, try std.fs.path.join(a, &.{ ".zig-cache", "tmp", &tmp.sub_path }), a);
+    var env = std.process.Environ.Map.init(a);
+    var ctx: Context = .{ .a = a, .io = io, .env = &env, .root = root, .cwd = root };
+    try ctx.prepare();
+    const path_ = try ctx.path(&.{ "locks", "probe" });
+    {
+        const shared = try Lock.acquire(&ctx, "probe", false);
+        defer shared.release();
+        const probe = try Dir.cwd().openFile(io, path_, .{ .mode = .read_write });
+        defer probe.close(io);
+        try std.testing.expect(try tryFileLock(probe, io, false));
+        unlockFile(probe, io);
+        try std.testing.expect(!try tryFileLock(probe, io, true));
+    }
+    {
+        const exclusive = try Lock.acquire(&ctx, "probe", true);
+        defer exclusive.release();
+        const probe = try Dir.cwd().openFile(io, path_, .{ .mode = .read_write });
+        defer probe.close(io);
+        try std.testing.expect(!try tryFileLock(probe, io, false));
+        try std.testing.expect(!try tryFileLock(probe, io, true));
+    }
+    const probe = try Dir.cwd().openFile(io, path_, .{ .mode = .read_write });
+    defer probe.close(io);
+    try std.testing.expect(try tryFileLock(probe, io, true));
+    unlockFile(probe, io);
 }
 
 test "hash fields cannot collide through concatenation" {
@@ -979,7 +1341,55 @@ test "negative linker lookups gate storage and restoration before writes" {
 
 // Names are sorted by libraryNames. Prefix matching deliberately follows rustc's
 // over-inclusive library lookup, including alternate filenames and duplicates.
-pub fn prefixDigest(a: std.mem.Allocator, names: []const []const u8, prefix: []const u8) ![]const u8 {
+/// The entries of a bytewise-sorted name list (as libraryNames returns) that
+/// start with `prefix`: one contiguous run, found by binary search. Scanning
+/// every directory entry for every crate in a dependency graph was quadratic.
+pub fn prefixRange(names: []const []const u8, prefix: []const u8) []const []const u8 {
+    var low: usize = 0;
+    var high: usize = names.len;
+    while (low < high) {
+        const mid = low + (high - low) / 2;
+        if (std.mem.order(u8, names[mid], prefix) == .lt) low = mid + 1 else high = mid;
+    }
+    var end = low;
+    while (end < names.len and std.mem.startsWith(u8, names[end], prefix)) end += 1;
+    return names[low..end];
+}
+
+test "parallel digest of a large file equals the streamed digest" {
+    var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer arena.deinit();
+    const a = arena.allocator();
+    const io = std.testing.io;
+    var tmp = std.testing.tmpDir(.{});
+    defer tmp.cleanup();
+    const cwd = try Dir.cwd().realPathFileAlloc(io, try std.fs.path.join(a, &.{ ".zig-cache", "tmp", &tmp.sub_path }), a);
+    var env = std.process.Environ.Map.init(a);
+    var ctx: Context = .{ .a = a, .io = io, .env = &env, .root = try std.fs.path.join(a, &.{ cwd, "cache" }), .cwd = cwd, .digest_memo = false };
+    const bytes = try a.alloc(u8, parallel_digest_min_size + 12345);
+    for (bytes, 0..) |*b, i| b.* = @truncate(i *% 2654435761 >> 7);
+    const path = try std.fs.path.join(a, &.{ cwd, "large.bin" });
+    try Dir.cwd().writeFile(io, .{ .sub_path = path, .data = bytes });
+    var h = Hash.init(.{});
+    h.update(bytes);
+    try std.testing.expectEqualStrings(try finish(a, &h), try ctx.digest(path));
+}
+
+test "prefix ranges match a full filtered scan" {
+    const names = [_][]const u8{ "liba-1.rlib:file", "libfoo-1.rlib:file", "libfoo-1.rmeta:file", "libfoo_bar-2.rlib:file", "libfoobar-3.rlib:file", "libg-1.rlib:file" };
+    for ([_][]const u8{ "", "lib", "libfoo", "libfoo_", "libfoo-1.rlib:file", "libz", "liba", "a", "m" }) |prefix| {
+        var expected: usize = 0;
+        for (names) |name| {
+            if (std.mem.startsWith(u8, name, prefix)) expected += 1;
+        }
+        const range = prefixRange(&names, prefix);
+        try std.testing.expectEqual(expected, range.len);
+        for (range) |name| try std.testing.expect(std.mem.startsWith(u8, name, prefix));
+    }
+}
+
+pub fn prefixDigest(a: std.mem.Allocator, all_names: []const []const u8, prefix: []const u8) ![]const u8 {
+    const names = prefixRange(all_names, prefix);
     var hash = Hash.init(.{});
     for (names) |name| if (std.mem.startsWith(u8, name, prefix)) field(&hash, name);
     return finish(a, &hash);
@@ -987,14 +1397,16 @@ pub fn prefixDigest(a: std.mem.Allocator, names: []const []const u8, prefix: []c
 
 // Only a proven metadata-first same-stem regular archive may be absent or
 // appear without changing the candidate set. The metadata name remains guarded.
-pub fn regularMetadataCandidate(names: []const []const u8, prefix: []const u8) bool {
+pub fn regularMetadataCandidate(all_names: []const []const u8, prefix: []const u8) bool {
+    const names = prefixRange(all_names, prefix);
     if (!std.mem.startsWith(u8, prefix, "lib") or prefix.len <= 3) return false;
     for (prefix) |ch| if (!std.ascii.isAlphanumeric(ch) and ch != '_' and ch != '-') return false;
     for (names) |name| if (std.mem.startsWith(u8, name, prefix) and std.mem.eql(u8, name[prefix.len..], ".rmeta:file")) return true;
     return false;
 }
 
-pub fn metadataCompanionDigest(a: std.mem.Allocator, names: []const []const u8, prefix: []const u8) ![]const u8 {
+pub fn metadataCompanionDigest(a: std.mem.Allocator, all_names: []const []const u8, prefix: []const u8) ![]const u8 {
+    const names = prefixRange(all_names, prefix);
     if (!regularMetadataCandidate(names, prefix)) return error.InvalidMetadataCompanion;
     const archive = try std.fmt.allocPrint(a, "{s}.rlib:file", .{prefix});
     var hash = Hash.init(.{});

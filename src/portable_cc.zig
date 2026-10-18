@@ -238,6 +238,7 @@ pub fn execute(ctx: *cache.Context, args: []const []const u8, cpp: bool) !u8 {
     var original: std.ArrayList([]const u8) = .empty;
     try original.append(ctx.a, tool);
     try original.appendSlice(ctx.a, args);
+    if (builtin.os.tag == .windows) return run(ctx, original.items);
     const work = job(ctx, args, cpp) catch {
         ctx.event("cc_bypass");
         return run(ctx, original.items);

@@ -62,7 +62,10 @@ const Reader = struct {
 
 /// Only ordinary rmeta is accepted. The caller obtains `expected` from rustc's
 /// independent reader for the very same content-checked completed artifact.
-pub fn dynamicOnly(input: []const u8, expected: metadata.Root) Error!void {
+/// A static library is accepted only when the command line named it with
+/// `-l static=NAME`: its archive then comes from the tracked native search
+/// directories, not from an attribute alone.
+pub fn dynamicOnly(input: []const u8, expected: metadata.Root, static_names: []const []const u8) Error!void {
     const end = "rust-end-file";
     if (input.len < 29 or !std.mem.startsWith(u8, input, "rust\x00\x00\x00\x0a") or !std.mem.endsWith(u8, input, end)) return error.UnsupportedNativeMetadata;
     const bytes = input[0 .. input.len - end.len];
@@ -106,13 +109,31 @@ pub fn dynamicOnly(input: []const u8, expected: metadata.Root) Error!void {
     if (count > 128) return error.UnsupportedNativeMetadata;
     var native: Reader = .{ .bytes = bytes[0..root], .pos = position };
     for (0..count) |_| {
-        switch (try native.byte()) {
-            1, 3 => try native.optionBool(), // Dylib / framework.
-            6 => {}, // Unspecified means the compiler's default dynamic kind.
+        const static = switch (try native.byte()) {
+            0 => blk: { // Static { bundle, whole_archive, export_symbols }.
+                try native.optionBool();
+                try native.optionBool();
+                try native.optionBool();
+                break :blk true;
+            },
+            1, 3 => blk: { // Dylib / framework.
+                try native.optionBool();
+                break :blk false;
+            },
+            6 => false, // Unspecified means the compiler's default dynamic kind.
             else => return error.HiddenNativeLinkInput,
+        };
+        const lib_name = try native.symbol();
+        if (static) {
+            const named = lib_name orelse return error.HiddenNativeLinkInput;
+            for (static_names) |allowed| {
+                if (std.mem.eql(u8, allowed, named)) break;
+            } else return error.HiddenNativeLinkInput;
         }
-        _ = try native.symbol();
-        if (try native.boolean()) return error.HiddenNativeLinkInput; // Bundled filename.
+        if (try native.boolean()) { // Bundled filename: only for a named static archive.
+            if (!static) return error.HiddenNativeLinkInput;
+            _ = try native.symbol();
+        }
         if (try native.boolean()) return error.UnsupportedNativeMetadata; // CfgEntry.
         if (try native.boolean()) {
             _ = try native.integer(); // CrateNum.
@@ -125,8 +146,8 @@ pub fn dynamicOnly(input: []const u8, expected: metadata.Root) Error!void {
 
 test "native metadata refuses unknown and truncated formats" {
     const root: metadata.Root = .{ .name = "test", .hash = "00000000000000000000000000000000", .triple = "aarch64-apple-darwin", .proc_macro = false };
-    try std.testing.expectError(error.UnsupportedNativeMetadata, dynamicOnly("", root));
-    try std.testing.expectError(error.UnsupportedNativeMetadata, dynamicOnly("rust\x00\x00\x00\x0a00000000rust-end-file", root));
+    try std.testing.expectError(error.UnsupportedNativeMetadata, dynamicOnly("", root, &.{}));
+    try std.testing.expectError(error.UnsupportedNativeMetadata, dynamicOnly("rust\x00\x00\x00\x0a00000000rust-end-file", root, &.{}));
     var reader: Reader = .{ .bytes = &.{ 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x02 } };
     try std.testing.expectError(error.UnsupportedNativeMetadata, reader.integer());
 }
