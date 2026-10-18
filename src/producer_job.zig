@@ -22,13 +22,13 @@ pub const Job = struct {
             try std.Io.randomSecure(ctx.io, &random);
             const id = try ctx.a.dupe(u8, &std.fmt.bytesToHex(random, .lower));
             const root = try std.fs.path.join(ctx.a, &.{ parent, id });
-            Dir.cwd().createDir(ctx.io, root, .fromMode(0o700)) catch |err| switch (err) {
+            Dir.cwd().createDir(ctx.io, root, cache.permissions(0o700)) catch |err| switch (err) {
                 error.PathAlreadyExists => continue,
                 else => return err,
             };
             errdefer Dir.cwd().deleteTree(ctx.io, root) catch {};
             const out = try std.fs.path.join(ctx.a, &.{ root, "out" });
-            try Dir.cwd().createDir(ctx.io, out, .fromMode(0o700));
+            try Dir.cwd().createDir(ctx.io, out, cache.permissions(0o700));
             return .{ .root = root, .out = out, .capture_id = id, .canonical_out = try Dir.cwd().realPathFileAlloc(ctx.io, out, ctx.a) };
         }
         return error.JobCollision;
@@ -114,6 +114,7 @@ fn within(root: []const u8, path: []const u8) bool {
 }
 
 test "private jobs own only regular inputs beneath both output spellings" {
+    if (@import("builtin").os.tag == .windows) return error.SkipZigTest; // Unix producer symlinks and modes.
     var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
     defer arena.deinit();
     const a = arena.allocator();
@@ -158,6 +159,7 @@ test "private jobs own only regular inputs beneath both output spellings" {
 }
 
 test "stable aliases never adopt foreign jobs and retained cleanup releases spelling" {
+    if (@import("builtin").os.tag == .windows) return error.SkipZigTest; // Unix producer aliases.
     var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
     defer arena.deinit();
     const a = arena.allocator();

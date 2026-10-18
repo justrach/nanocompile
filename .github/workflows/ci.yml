@@ -55,6 +55,7 @@ jobs:
           python3 tests/r2_transport.py
           zig build -Doptimize=ReleaseFast
           zig build test
+          python3 tests/task_contracts.py zig-out/bin/nanocompile
           zig build-exe -OReleaseFast -lc --dep compiler_stream -Mroot=tools/compiler_stream_probe.zig -Mcompiler_stream=src/compiler_stream.zig -femit-bin="$RUNNER_TEMP/compiler-stream-probe"
           python3 tests/compiler_stream.py "$RUNNER_TEMP/compiler-stream-probe"
           NANOCOMPILE_STREAM_COMPILER=1 NANOCOMPILE_PIPELINED_COMPANIONS=1 python3 tests/integration.py zig-out/bin/nanocompile
@@ -88,3 +89,36 @@ jobs:
         with:
           name: benchmark-${{ matrix.os }}
           path: bench-results/
+  windows-runtime:
+    runs-on: windows-2025
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: bash
+    env:
+      RUSTUP_TOOLCHAIN: 1.97.1-x86_64-pc-windows-gnu
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - name: Install verified Zig 0.17.0
+        run: |
+          set -euo pipefail
+          python tools/install_zig.py "$RUNNER_TEMP/zig"
+      - name: Rust GNU toolchain
+        run: |
+          set -euo pipefail
+          rustup toolchain install 1.97.1-x86_64-pc-windows-gnu --profile minimal
+          rustup default 1.97.1-x86_64-pc-windows-gnu
+          rustc --version
+      - name: Windows GNU build and native unit tests
+        run: |
+          set -euo pipefail
+          zig build -Doptimize=ReleaseFast -Dtarget=x86_64-windows-gnu
+          zig build test -Dtarget=x86_64-windows-gnu
+      - name: Native task contracts and cache reports
+        run: |
+          set -euo pipefail
+          python tests/task_contracts.py zig-out/bin/nanocompile.exe
+      - name: Windows Rust cache, concurrent locks and artifacts
+        run: |
+          set -euo pipefail
+          python tests/windows_cache.py zig-out/bin/nanocompile.exe

@@ -98,7 +98,7 @@ fn retainOwned(ctx: *cache.Context, config: Config, inputs: []const jobs.Job.Inp
         !std.mem.eql(u8, std.fs.path.dirname(config.report).?, std.fs.path.dirname(config.invocation) orelse ""))
         return error.InvalidDiagnosticDirectory;
     const folder = try std.fs.path.join(ctx.a, &.{ std.fs.path.dirname(config.report).?, "owned-inputs" });
-    try std.Io.Dir.cwd().createDir(ctx.io, folder, .fromMode(0o700));
+    try std.Io.Dir.cwd().createDir(ctx.io, folder, cache.permissions(0o700));
     const Row = struct { lexical: []const u8, path: []const u8, blake3: []const u8, snapshot: []const u8 };
     var rows: std.ArrayList(Row) = .empty;
     for (inputs) |input| {
@@ -114,6 +114,7 @@ fn retainOwned(ctx: *cache.Context, config: Config, inputs: []const jobs.Job.Inp
 }
 
 test "diagnostic owned snapshots survive compiler cleanup and stay private" {
+    if (@import("builtin").os.tag == .windows) return error.SkipZigTest; // Unix producer permissions.
     var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
     defer arena.deinit();
     const a = arena.allocator();
@@ -246,6 +247,7 @@ test "parent rejects stale, corrupt and incomplete linker captures" {
 }
 
 test "parent binds owned inputs to the report and private directory" {
+    if (@import("builtin").os.tag == .windows) return error.SkipZigTest; // Unix producer paths and Darwin reports.
     var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
     defer arena.deinit();
     const a = arena.allocator();

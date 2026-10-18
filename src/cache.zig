@@ -20,9 +20,28 @@ const c = struct {
     const LOCK_UN = 8;
     const FICLONE = 0x40049409;
 };
+const win = struct {
+    const Overlapped = extern struct {
+        internal: usize = 0,
+        internal_high: usize = 0,
+        offset: u32 = 0,
+        offset_high: u32 = 0,
+        event: ?std.os.windows.HANDLE = null,
+    };
+    extern "kernel32" fn LockFileEx(std.os.windows.HANDLE, u32, u32, u32, u32, *Overlapped) callconv(.winapi) std.os.windows.BOOL;
+    extern "kernel32" fn UnlockFileEx(std.os.windows.HANDLE, u32, u32, u32, *Overlapped) callconv(.winapi) std.os.windows.BOOL;
+};
 const Dir = std.Io.Dir;
 pub const Hash = std.crypto.hash.Blake3;
 pub const CheckedDigest = struct { hash: []const u8, state: std.Io.File.Stat };
+
+pub fn permissions(mode: u32) std.Io.File.Permissions {
+    return if (builtin.os.tag == .windows) .default_file else .fromMode(@intCast(mode & 0o777));
+}
+
+pub fn fileMode(value: std.Io.File.Permissions) u32 {
+    return if (builtin.os.tag == .windows) 0o600 else @intCast(value.toMode());
+}
 
 pub fn sameFileState(a: std.Io.File.Stat, b: std.Io.File.Stat) bool {
     return a.inode == b.inode and a.size == b.size and a.kind == b.kind and
@@ -58,7 +77,10 @@ pub const Context = struct {
 
     pub fn init(a: std.mem.Allocator, io: std.Io, env: *std.process.Environ.Map) !Context {
         const root = env.get("NANOCOMPILE_DIR") orelse try std.fs.path.join(a, &.{
-            env.get("XDG_CACHE_HOME") orelse try std.fs.path.join(a, &.{ env.get("HOME") orelse return error.NoHome, ".cache" }),
+            if (builtin.os.tag == .windows)
+                env.get("LOCALAPPDATA") orelse try std.fs.path.join(a, &.{ env.get("USERPROFILE") orelse env.get("HOME") orelse return error.NoHome, ".cache" })
+            else
+                env.get("XDG_CACHE_HOME") orelse try std.fs.path.join(a, &.{ env.get("HOME") orelse return error.NoHome, ".cache" }),
             "nanocompile",
         });
         const cwd = try std.process.currentPathAlloc(io, a);
@@ -121,7 +143,8 @@ pub const Context = struct {
         var iterator = dir.iterate();
         var names: std.ArrayList([]const u8) = .empty;
         while (try iterator.next(self.io)) |entry| {
-            if (!std.mem.endsWith(u8, entry.name, ".rlib") and !std.mem.endsWith(u8, entry.name, ".rmeta") and !std.mem.endsWith(u8, entry.name, ".dylib") and !std.mem.endsWith(u8, entry.name, ".so")) continue;
+            if (!std.mem.endsWith(u8, entry.name, ".rlib") and !std.mem.endsWith(u8, entry.name, ".rmeta") and !std.mem.endsWith(u8, entry.name, ".dylib") and !std.mem.endsWith(u8, entry.name, ".so") and
+                !(builtin.os.tag == .windows and std.ascii.endsWithIgnoreCase(entry.name, ".dll"))) continue;
             const full = try std.fs.path.join(self.a, &.{ path_, entry.name });
             var ignored = false;
             for (outputs) |out_| if (std.mem.eql(u8, full, out_)) {
@@ -157,7 +180,8 @@ pub const Context = struct {
         var names: std.ArrayList([]const u8) = .empty;
         while (try iterator.next(self.io)) |entry| {
             if (libraries) {
-                const relevant = std.mem.endsWith(u8, entry.name, ".rlib") or std.mem.endsWith(u8, entry.name, ".rmeta") or std.mem.endsWith(u8, entry.name, ".dylib") or std.mem.endsWith(u8, entry.name, ".so");
+                const relevant = std.mem.endsWith(u8, entry.name, ".rlib") or std.mem.endsWith(u8, entry.name, ".rmeta") or std.mem.endsWith(u8, entry.name, ".dylib") or std.mem.endsWith(u8, entry.name, ".so") or
+                    (builtin.os.tag == .windows and std.ascii.endsWithIgnoreCase(entry.name, ".dll"));
                 if (!relevant) continue;
                 const full = try std.fs.path.join(self.a, &.{ path_, entry.name });
                 var ignored = false;
@@ -182,7 +206,7 @@ pub const Context = struct {
     }
 
     pub fn atomic(self: *Context, path_: []const u8, bytes: []const u8) !void {
-        var file = try Dir.cwd().createFileAtomic(self.io, path_, .{ .make_path = true, .replace = true, .permissions = .fromMode(0o600) });
+        var file = try Dir.cwd().createFileAtomic(self.io, path_, .{ .make_path = true, .replace = true, .permissions = permissions(0o600) });
         defer file.deinit(self.io);
         try file.file.writeStreamingAll(self.io, bytes);
         try file.replace(self.io);
@@ -205,6 +229,15 @@ pub const Context = struct {
 
     pub fn event(self: *Context, name: []const u8) void {
         const path_ = self.path(&.{"events"}) catch return;
+        if (builtin.os.tag == .windows) {
+            const file = Dir.cwd().createFile(self.io, path_, .{ .read = true, .truncate = false }) catch return;
+            defer file.close(self.io);
+            lockWindowsFile(file, self.io, true) catch return;
+            const offset = file.length(self.io) catch return;
+            const line = std.fmt.allocPrint(self.a, "{s}\n", .{name}) catch return;
+            file.writePositionalAll(self.io, line, offset) catch {};
+            return;
+        }
         const z = self.a.dupeSentinel(u8, path_, 0) catch return;
         const fd = c.open(z, c.O_WRONLY | c.O_CREAT | c.O_APPEND | c.O_CLOEXEC, @as(c_uint, 0o600));
         if (fd < 0) return;
@@ -214,9 +247,49 @@ pub const Context = struct {
     }
 };
 
+fn tryFileLock(file: std.Io.File, io: std.Io, exclusive: bool) !bool {
+    if (builtin.os.tag == .windows) {
+        var overlapped: win.Overlapped = .{};
+        // FAIL_IMMEDIATELY plus optional EXCLUSIVE_LOCK, over byte zero.
+        if (win.LockFileEx(file.handle, 1 | @as(u32, if (exclusive) 2 else 0), 0, 1, 0, &overlapped) != .FALSE) return true;
+        return switch (std.os.windows.GetLastError()) {
+            .LOCK_VIOLATION => false,
+            .NOT_SUPPORTED, .CALL_NOT_IMPLEMENTED => error.FileLocksUnsupported,
+            else => |err| std.os.windows.unexpectedError(err),
+        };
+    }
+    return file.tryLock(io, if (exclusive) .exclusive else .shared);
+}
+
+fn unlockFile(file: std.Io.File, io: std.Io) void {
+    if (builtin.os.tag == .windows) {
+        var overlapped: win.Overlapped = .{};
+        _ = win.UnlockFileEx(file.handle, 0, 1, 0, &overlapped);
+        return;
+    }
+    file.unlock(io);
+}
+
+// Wait on real kernel byte-range locks, without requiring async lock support.
+// Contention never grants an unlocked hit; closing the handle releases its lock.
+fn lockWindowsFile(file: std.Io.File, io: std.Io, exclusive: bool) !void {
+    while (!try tryFileLock(file, io, exclusive))
+        try std.Io.sleep(io, .fromMilliseconds(1), .awake);
+}
+
 pub const Lock = struct {
-    fd: c_int,
+    fd: if (builtin.os.tag == .windows) std.Io.File else c_int,
+    io: std.Io = undefined,
     pub fn acquire(ctx: *Context, name: []const u8, exclusive: bool) !Lock {
+        if (builtin.os.tag == .windows) {
+            const file = try Dir.cwd().createFile(ctx.io, try ctx.path(&.{ "locks", name }), .{
+                .read = true,
+                .truncate = false,
+            });
+            errdefer file.close(ctx.io);
+            try lockWindowsFile(file, ctx.io, exclusive);
+            return .{ .fd = file, .io = ctx.io };
+        }
         const z = try ctx.a.dupeSentinel(u8, try ctx.path(&.{ "locks", name }), 0);
         const fd = c.open(z, c.O_RDWR | c.O_CREAT | c.O_CLOEXEC, @as(c_uint, 0o600));
         if (fd < 0) return error.LockOpenFailed;
@@ -225,6 +298,11 @@ pub const Lock = struct {
         return .{ .fd = fd };
     }
     pub fn release(self: Lock) void {
+        if (builtin.os.tag == .windows) {
+            unlockFile(self.fd, self.io);
+            self.fd.close(self.io);
+            return;
+        }
         _ = c.flock(self.fd, c.LOCK_UN);
         _ = c.close(self.fd);
     }
@@ -343,6 +421,26 @@ fn blobPath(ctx: *Context, hash: []const u8) ![]const u8 {
 
 // Never hardlink: a later linker, strip, or user write must not mutate the cache.
 pub fn materialize(ctx: *Context, source: []const u8, destination: []const u8, mode: u32) !void {
+    if (builtin.os.tag == .windows) {
+        // Independent copy into an exclusive temporary, then atomic replace.
+        // Never expose partial outputs or alias an immutable cache blob.
+        var atomic = try Dir.cwd().createFileAtomic(ctx.io, destination, .{ .make_path = true, .replace = true });
+        defer atomic.deinit(ctx.io);
+        const source_file = try Dir.cwd().openFile(ctx.io, source, .{});
+        defer source_file.close(ctx.io);
+        var buffer: [64 * 1024]u8 = undefined;
+        var offset: u64 = 0;
+        while (true) {
+            const n = try source_file.readPositionalAll(ctx.io, &buffer, offset);
+            if (n == 0) break;
+            try atomic.file.writeStreamingAll(ctx.io, buffer[0..n]);
+            offset += n;
+        }
+        // No stat is needed: this API returns no file-state memo. In particular,
+        // write-only Windows atomic handles do not grant read-attributes access.
+        try atomic.replace(ctx.io);
+        return;
+    }
     try Dir.cwd().createDirPath(ctx.io, std.fs.path.dirname(destination) orelse ".");
     const temp = try std.fmt.allocPrint(ctx.a, "{s}.nano-{d}", .{ destination, c.getpid() });
     defer Dir.cwd().deleteFile(ctx.io, temp) catch {};
@@ -412,7 +510,7 @@ fn storeEntry(ctx: *Context, key: []const u8, dependencies: []const Dependency, 
     for (output_paths) |path_| {
         const st = try Dir.cwd().statFile(ctx.io, path_, .{});
         if (st.kind != .file) return error.NotRegularFile;
-        try outputs.append(ctx.a, .{ .path = path_, .hash = try putFile(ctx, path_), .mode = @intCast(st.permissions.toMode()) });
+        try outputs.append(ctx.a, .{ .path = path_, .hash = try putFile(ctx, path_), .mode = fileMode(st.permissions) });
     }
     const entry: Entry = .{
         .dependencies = dependencies,
@@ -847,6 +945,69 @@ pub fn gc(ctx: *Context, limit: u64) !void {
         }
     }
     try ctx.out(try std.fmt.allocPrint(ctx.a, "evicted entries: {d}\nfreed logical bytes: {d}\nremaining logical bytes: {d}\n", .{ evicted, freed, total }));
+}
+
+test "cache locks coordinate independent handles" {
+    var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer arena.deinit();
+    const a = arena.allocator();
+    const io = std.testing.io;
+    var tmp = std.testing.tmpDir(.{});
+    defer tmp.cleanup();
+    const root = try Dir.cwd().realPathFileAlloc(io, try std.fs.path.join(a, &.{ ".zig-cache", "tmp", &tmp.sub_path }), a);
+    var env = std.process.Environ.Map.init(a);
+    var ctx: Context = .{ .a = a, .io = io, .env = &env, .root = root, .cwd = root };
+    try ctx.prepare();
+    const path_ = try ctx.path(&.{ "locks", "probe" });
+    {
+        const shared = try Lock.acquire(&ctx, "probe", false);
+        defer shared.release();
+        const probe = try Dir.cwd().openFile(io, path_, .{ .mode = .read_write });
+        defer probe.close(io);
+        try std.testing.expect(try tryFileLock(probe, io, false));
+        unlockFile(probe, io);
+        try std.testing.expect(!try tryFileLock(probe, io, true));
+    }
+    {
+        const exclusive = try Lock.acquire(&ctx, "probe", true);
+        defer exclusive.release();
+        const probe = try Dir.cwd().openFile(io, path_, .{ .mode = .read_write });
+        defer probe.close(io);
+        try std.testing.expect(!try tryFileLock(probe, io, false));
+        try std.testing.expect(!try tryFileLock(probe, io, true));
+    }
+    const probe = try Dir.cwd().openFile(io, path_, .{ .mode = .read_write });
+    defer probe.close(io);
+    try std.testing.expect(try tryFileLock(probe, io, true));
+    unlockFile(probe, io);
+}
+
+test "materialization replaces atomically without sharing mutable bytes" {
+    var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer arena.deinit();
+    const a = arena.allocator();
+    const io = std.testing.io;
+    var tmp = std.testing.tmpDir(.{});
+    defer tmp.cleanup();
+    const root = try Dir.cwd().realPathFileAlloc(io, try std.fs.path.join(a, &.{ ".zig-cache", "tmp", &tmp.sub_path }), a);
+    var env = std.process.Environ.Map.init(a);
+    var ctx: Context = .{ .a = a, .io = io, .env = &env, .root = root, .cwd = root };
+    const source = try std.fs.path.join(a, &.{ root, "source" });
+    const destination = try std.fs.path.join(a, &.{ root, "nested", "output" });
+    const bytes = try a.alloc(u8, 128 * 1024 + 7);
+    @memset(bytes, 'a');
+    bytes[bytes.len - 1] = 'z';
+    try tmp.dir.writeFile(io, .{ .sub_path = "source", .data = bytes });
+    try materialize(&ctx, source, destination, 0o600);
+    try std.testing.expectEqualSlices(u8, bytes, try ctx.read(destination));
+    try Dir.cwd().writeFile(io, .{ .sub_path = destination, .data = "mutated output" });
+    try std.testing.expectEqualSlices(u8, bytes, try ctx.read(source));
+    try materialize(&ctx, source, destination, 0o600);
+    try tmp.dir.writeFile(io, .{ .sub_path = "source", .data = "mutated source" });
+    try std.testing.expectEqualSlices(u8, bytes, try ctx.read(destination));
+    const missing = try std.fs.path.join(a, &.{ root, "missing" });
+    try std.testing.expectError(error.FileNotFound, materialize(&ctx, missing, destination, 0o600));
+    try std.testing.expectEqualSlices(u8, bytes, try ctx.read(destination));
 }
 
 test "hash fields cannot collide through concatenation" {

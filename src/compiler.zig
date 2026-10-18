@@ -389,6 +389,11 @@ pub fn parseDepInfo(a: std.mem.Allocator, bytes: []const u8) ![]const []const u8
     while (i < bytes.len) : (i += 1) {
         const ch = bytes[i];
         if (ch == '\\' and i + 1 < bytes.len) {
+            // rustc emits literal Windows separators, escaping spaces/tabs.
+            if (builtin.os.tag == .windows and bytes[i + 1] != ' ' and bytes[i + 1] != '\t' and bytes[i + 1] != '\n') {
+                if (prerequisites) try token.append(a, ch);
+                continue;
+            }
             i += 1;
             if (bytes[i] == '\n') continue;
             if (prerequisites) try token.append(a, bytes[i]);
@@ -573,6 +578,7 @@ fn replacePath(ctx: *cache.Context, bytes: []const u8, old: []const u8, new: []c
 }
 
 fn executeProducer(ctx: *cache.Context, plan: Plan, argv: []const []const u8) !u8 {
+    if (builtin.os.tag == .windows) return bypass(ctx, argv, "bypass: Windows producer modes unsupported");
     const total = ctx.profileStart();
     defer ctx.profileEnd("producer.total", total);
     var phase = ctx.profileStart();
@@ -764,9 +770,11 @@ pub fn execute(ctx: *cache.Context, kind: Kind, argv: []const []const u8) !u8 {
     for (destinations) |destination| {
         var h = cache.Hash.init(.{});
         cache.field(&h, destination);
-        const name = try std.fmt.allocPrint(ctx.a, "output-{s}", .{try cache.finish(ctx.a, &h)});
+        // Windows aliases (case, junctions, short names) share one writer lock.
+        const name = if (builtin.os.tag == .windows) "windows-outputs" else try std.fmt.allocPrint(ctx.a, "output-{s}", .{try cache.finish(ctx.a, &h)});
         const lock_ = cache.Lock.acquire(ctx, name, true) catch return bypass(ctx, argv, "bypass: output lock unavailable");
         try output_locks.append(ctx.a, lock_);
+        if (builtin.os.tag == .windows) break;
     }
     if (plan.configuration) |config| {
         const current = ctx.digest(config.path) catch return bypass(ctx, argv, "bypass: cannot read extra input declaration");
@@ -916,6 +924,12 @@ test "dep-info handles escaped paths and continuations" {
     try std.testing.expectEqualStrings("src/lib.rs", deps[0]);
     try std.testing.expectEqualStrings("path with spaces.rs", deps[1]);
     try std.testing.expectEqualStrings("other.rs", deps[2]);
+    if (builtin.os.tag == .windows) {
+        const windows = try parseDepInfo(arena.allocator(), "Z:\\output files\\lib.rlib: Z:\\source\\ files\\consumer\\ library.rs \\\n \\\\server\\share\\module.rs\n");
+        try std.testing.expectEqual(@as(usize, 2), windows.len);
+        try std.testing.expectEqualStrings("Z:\\source files\\consumer library.rs", windows[0]);
+        try std.testing.expectEqualStrings("\\\\server\\share\\module.rs", windows[1]);
+    }
 }
 
 test "native link attributes include comments and cfg_attr forms" {
