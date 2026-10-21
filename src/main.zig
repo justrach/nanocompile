@@ -166,7 +166,7 @@ fn dispatch(ctx: *cache.Context, args: []const [:0]const u8) !u8 {
         return 0;
     }
     if (std.mem.eql(u8, command, "doctor")) {
-        try ctx.out(try std.fmt.allocPrint(ctx.a, "cache: {s}\nplatform: {s}\nrestore: copy-on-write clone, falling back to independent copy\n", .{ ctx.root, @tagName(builtin.os.tag) }));
+        try ctx.out(try std.fmt.allocPrint(ctx.a, "cache: {s}\nplatform: {s}\nrestore: copy-on-write clone, then exclusive hardlink for .rlib/.rmeta, then independent copy\n", .{ ctx.root, @tagName(builtin.os.tag) }));
         try ctx.prepare();
         return 0;
     }

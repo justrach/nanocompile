@@ -101,6 +101,11 @@
           "type": "string",
           "enum": ["fixture", "real"],
           "description": "fixture = rust-loop* harness trees. real = pinned crates and public samples. Promote weights real samples."
+        },
+        "cache_tool": {
+          "type": "string",
+          "enum": ["nanocompile", "kache", "none"],
+          "description": "Competing build-cache identity for the nanocompile-vs-kache bakeoff. Tag only; not an occupancy axis."
         }
       }
     },

@@ -87,7 +87,7 @@ USABLE_NOW = (
         "role": "recommendation",
         "title": "Cache eligible rustc invocations",
         "command": ["RUSTC_WRAPPER=nanocompile", "CARGO_INCREMENTAL=0", "cargo", "check"],
-        "verified": "README RUSTC_WRAPPER protocol; incremental compilations are ineligible",
+        "verified": "README RUSTC_WRAPPER protocol; as-shipped forces incremental=0. NANOCOMPILE_ALLOW_INCREMENTAL=1 caches registry/git deps and leaves workspace crates to rustc incremental",
     },
     {
         "id": "rust-analyzer",
@@ -482,7 +482,8 @@ def run_step(step, stamp, target_dir, offline, wrapper, cargo_argv):
     env.pop("CARGO_PROFILE_TEST_CODEGEN_BACKEND", None)
     if wrapper:
         env["RUSTC_WRAPPER"] = str(Path(wrapper).resolve())
-        env["CARGO_INCREMENTAL"] = "0"
+        if env.get("NANOCOMPILE_ALLOW_INCREMENTAL") != "1":
+            env["CARGO_INCREMENTAL"] = "0"
     elif step == VALIDATE:
         env.pop("RUSTC_WRAPPER", None)
         env.pop("RUSTC_WORKSPACE_WRAPPER", None)

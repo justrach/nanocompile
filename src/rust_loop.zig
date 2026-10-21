@@ -50,7 +50,7 @@ const Spec = struct { schema: u32 = 1, tasks: []const Task };
 pub const usable_now = [_]CatalogItem{
     .{ .id = "fast-check", .role = "task", .title = "Skip codegen on the edit path", .command = &.{ "cargo", "check" }, .verified = "cargo check --help; rustc emits metadata only" },
     .{ .id = "validate", .role = "task", .title = "Real rustc test/build gate", .command = &.{ "cargo", "test" }, .verified = "cargo test runs rustc with the default LLVM backend" },
-    .{ .id = "nanocompile-wrapper", .title = "Cache eligible rustc invocations", .command = &.{ "RUSTC_WRAPPER=nanocompile", "CARGO_INCREMENTAL=0", "cargo", "check" }, .verified = "README RUSTC_WRAPPER protocol; incremental compilations are ineligible" },
+    .{ .id = "nanocompile-wrapper", .title = "Cache eligible rustc invocations", .command = &.{ "RUSTC_WRAPPER=nanocompile", "CARGO_INCREMENTAL=0", "cargo", "check" }, .verified = "README RUSTC_WRAPPER protocol; as-shipped forces incremental=0. NANOCOMPILE_ALLOW_INCREMENTAL=1 caches registry/git deps and leaves workspace crates to rustc incremental" },
     .{ .id = "rust-analyzer", .title = "Editor diagnostics from rust-analyzer", .command = &.{"rust-analyzer"}, .verified = "https://rust-analyzer.github.io/", .url = "https://rust-analyzer.github.io/" },
     .{ .id = "bacon", .title = "Persistent cargo check/test watcher", .command = &.{"bacon"}, .verified = "https://github.com/Canop/bacon", .url = "https://github.com/Canop/bacon" },
     .{ .id = "cranelift-dev", .title = "Cranelift codegen for nightly dev builds", .command = &.{ "rustup", "component", "add", "rustc-codegen-cranelift-preview", "--toolchain", "nightly" }, .verified = "https://doc.rust-lang.org/cargo/guide/build-performance.html", .url = "https://github.com/rust-lang/rustc_codegen_cranelift", .nightly = true },
@@ -465,7 +465,8 @@ fn runCargo(ctx: *cache.Context, step: []const u8, stamp: []const u8, target_dir
     _ = environment.swapRemove("CARGO_PROFILE_TEST_CODEGEN_BACKEND");
     if (wrapper) |path| {
         try environment.put("RUSTC_WRAPPER", try resolveUnderCwd(ctx, path));
-        try environment.put("CARGO_INCREMENTAL", "0");
+        if (!eq(ctx.env.get("NANOCOMPILE_ALLOW_INCREMENTAL") orelse "", "1"))
+            try environment.put("CARGO_INCREMENTAL", "0");
     } else if (eq(step, validate)) {
         _ = environment.swapRemove("RUSTC_WRAPPER");
         _ = environment.swapRemove("RUSTC_WORKSPACE_WRAPPER");

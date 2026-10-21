@@ -256,7 +256,9 @@ def _clear_nano_cache(env):
         shutil.rmtree(sccache)
     kache = env.get("KACHE_CACHE_DIR")
     if kache and Path(kache).exists():
-        shutil.rmtree(kache)
+        shutil.rmtree(kache, ignore_errors=True)
+        if Path(kache).exists():
+            shutil.rmtree(kache, ignore_errors=True)
 
 
 def empty_target(target: Path):
@@ -810,7 +812,13 @@ def genome_env(genome, nano, tools, sccache_dir, isolate_cache, kache_dir=None):
         raise ValueError("cannot stack compiler caches: %s" % ", ".join(caches))
     if genome.get("wrapper") and nano:
         extra["RUSTC_WRAPPER"] = str(nano)
-        extra["CARGO_INCREMENTAL"] = "0"
+        if genome.get("incremental"):
+            extra["CARGO_INCREMENTAL"] = "1"
+            extra["NANOCOMPILE_ALLOW_INCREMENTAL"] = "1"
+            extra["NANOCOMPILE_CACHE_DEPS_ONLY"] = "1"
+            extra["NANOCOMPILE_PROC_MACROS"] = "reported"
+        else:
+            extra["CARGO_INCREMENTAL"] = "0"
     elif genome.get("sccache") and tools.get("sccache"):
         extra["RUSTC_WRAPPER"] = tools["sccache"]
         extra["SCCACHE_DIR"] = str(sccache_dir)
@@ -910,7 +918,6 @@ def mutate_genome(genome, tools):
             if next_genome["wrapper"]:
                 next_genome["sccache"] = False
                 next_genome["kache"] = False
-                next_genome["incremental"] = False
         elif gene == "sccache":
             next_genome["sccache"] = not next_genome.get("sccache")
             if next_genome["sccache"]:

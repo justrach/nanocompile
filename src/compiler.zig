@@ -165,7 +165,7 @@ fn rustPlan(ctx: *cache.Context, argv: []const []const u8) !Plan {
                 split_debug = v[@min(split + 1, v.len)..];
                 continue;
             }
-            const safe = [_][]const u8{ "opt-level", "debuginfo", "debug-assertions", "overflow-checks", "panic", "codegen-units", "metadata", "embed-bitcode", "lto", "linker-plugin-lto", "prefer-dynamic", "target-cpu", "target-feature", "strip", "relocation-model", "force-frame-pointers", "symbol-mangling-version" };
+            const safe = [_][]const u8{ "opt-level", "debuginfo", "debug-assertions", "overflow-checks", "panic", "codegen-units", "metadata", "embed-bitcode", "lto", "linker-plugin-lto", "prefer-dynamic", "target-cpu", "target-feature", "strip", "relocation-model", "force-frame-pointers", "symbol-mangling-version", "incremental", "link-arg", "linker" };
             var accepted = false;
             for (safe) |s| if (eq(s, key)) {
                 accepted = true;
@@ -186,6 +186,15 @@ fn rustPlan(ctx: *cache.Context, argv: []const []const u8) !Plan {
             break;
         };
         if (accepted) continue;
+        if (eq(arg, "-Z")) {
+            i += 1;
+            continue;
+        }
+        if (std.mem.startsWith(u8, arg, "-Z")) {
+            // Nightly cargo build/test pass -Z embed-metadata=no and similar.
+            // Hash the full argv so these stay part of the key.
+            continue;
+        }
         if (std.mem.startsWith(u8, arg, "-")) {
             ctx.trace(try std.fmt.allocPrint(ctx.a, "unsupported Rust option: {s}", .{arg}));
             return error.UnsupportedRustOption;
@@ -518,12 +527,104 @@ fn hiddenNativeLink(bytes: []const u8) bool {
     return false;
 }
 
+const PathPrefix = struct { token: []const u8, path: []const u8 };
+
+fn skipEnvName(name: []const u8) bool {
+    if (std.mem.startsWith(u8, name, "NANOCOMPILE_")) return true;
+    for ([_][]const u8{ "TERM", "COLORTERM", "LINES", "COLUMNS", "OLDPWD", "LS_COLORS", "DISPLAY", "SSH_AUTH_SOCK", "SSH_CONNECTION", "SSH_CLIENT", "SSH_TTY", "PS1", "PROMPT_COMMAND", "_" }) |skip| {
+        if (eq(name, skip)) return true;
+    }
+    return false;
+}
+
+fn cargoHome(ctx: *cache.Context) ![]const u8 {
+    if (ctx.env.get("CARGO_HOME")) |value| return value;
+    const home = ctx.env.get("HOME") orelse return error.NoHome;
+    return std.fs.path.join(ctx.a, &.{ home, ".cargo" });
+}
+
+pub fn isRegistryOrGitCrate(ctx: *cache.Context) bool {
+    const manifest = ctx.env.get("CARGO_MANIFEST_DIR") orelse return false;
+    const home = cargoHome(ctx) catch return false;
+    const registry = std.fs.path.join(ctx.a, &.{ home, "registry" }) catch return false;
+    const git = std.fs.path.join(ctx.a, &.{ home, "git" }) catch return false;
+    return std.mem.startsWith(u8, manifest, registry) or std.mem.startsWith(u8, manifest, git);
+}
+
+fn argvHasIncremental(argv: []const []const u8) bool {
+    var i: usize = 0;
+    while (i < argv.len) : (i += 1) {
+        const arg = argv[i];
+        if (eq(arg, "-C") and i + 1 < argv.len) {
+            if (std.mem.startsWith(u8, argv[i + 1], "incremental")) return true;
+        }
+        if (std.mem.startsWith(u8, arg, "-Cincremental") or std.mem.startsWith(u8, arg, "-C incremental")) return true;
+    }
+    return false;
+}
+
+fn shouldCacheDepsOnly(ctx: *cache.Context, argv: []const []const u8) bool {
+    if (eq(ctx.env.get("NANOCOMPILE_CACHE_DEPS_ONLY") orelse "", "1")) return true;
+    if (eq(ctx.env.get("CARGO_INCREMENTAL") orelse "", "1")) return true;
+    return argvHasIncremental(argv);
+}
+
+fn bypassWorkspaceForIncremental(ctx: *cache.Context, argv: []const []const u8) bool {
+    if (ctx.env.get("CARGO_MANIFEST_DIR") == null) return false;
+    if (isRegistryOrGitCrate(ctx)) return false;
+    return shouldCacheDepsOnly(ctx, argv);
+}
+
+fn inferTargetDir(argv: []const []const u8) ?[]const u8 {
+    var i: usize = 0;
+    while (i < argv.len) : (i += 1) {
+        const dir = if (eq(argv[i], "--out-dir") and i + 1 < argv.len)
+            argv[i + 1]
+        else if (std.mem.startsWith(u8, argv[i], "--out-dir="))
+            argv[i]["--out-dir=".len..]
+        else
+            continue;
+        for ([_][]const u8{ "/deps", "/build", "/incremental", "/examples" }) |suffix| {
+            if (std.mem.endsWith(u8, dir, suffix)) return dir[0 .. dir.len - suffix.len];
+        }
+    }
+    return null;
+}
+
+fn pathPrefixes(ctx: *cache.Context, argv: []const []const u8) ![]const PathPrefix {
+    var list: std.ArrayList(PathPrefix) = .empty;
+    if (ctx.env.get("CARGO_TARGET_DIR")) |dir| {
+        if (dir.len > 0) try list.append(ctx.a, .{ .token = "$NANO_TARGET", .path = try ctx.a.dupe(u8, dir) });
+    } else if (inferTargetDir(argv)) |dir| {
+        try list.append(ctx.a, .{ .token = "$NANO_TARGET", .path = try ctx.a.dupe(u8, dir) });
+    }
+    if (ctx.env.get("OUT_DIR")) |dir| if (dir.len > 0)
+        try list.append(ctx.a, .{ .token = "$NANO_OUT", .path = try ctx.a.dupe(u8, dir) });
+    std.mem.sort(PathPrefix, list.items, {}, struct {
+        fn less(_: void, a: PathPrefix, b: PathPrefix) bool {
+            return a.path.len > b.path.len;
+        }
+    }.less);
+    return list.items;
+}
+
+pub fn normalizeCacheText(ctx: *cache.Context, text: []const u8, prefixes: []const PathPrefix) ![]const u8 {
+    var current = text;
+    for (prefixes) |prefix| {
+        if (prefix.path.len == 0) continue;
+        current = try replacePath(ctx, current, prefix.path, prefix.token);
+    }
+    return current;
+}
+
 fn keyFor(ctx: *cache.Context, kind: Kind, argv: []const []const u8) ![]const u8 {
     var hash = cache.Hash.init(.{});
-    cache.field(&hash, "nanocompile-v8");
+    cache.field(&hash, "nanocompile-v9");
+    cache.field(&hash, "path-normalized-target-v1");
     cache.field(&hash, @tagName(kind));
     if (kind == .rust) cache.field(&hash, "native-metadata-eligibility-v1");
-    cache.field(&hash, ctx.cwd);
+    const prefixes = try pathPrefixes(ctx, argv);
+    cache.field(&hash, try normalizeCacheText(ctx, ctx.cwd, prefixes));
     const host = std.zig.system.resolveTargetQuery(ctx.io, .{}) catch |err| {
         ctx.trace(try std.fmt.allocPrint(ctx.a, "host detection failed ({s})", .{@errorName(err)}));
         return err;
@@ -533,15 +634,16 @@ fn keyFor(ctx: *cache.Context, kind: Kind, argv: []const []const u8) ![]const u8
     cache.field(&hash, std.mem.asBytes(&host.cpu.features.ints));
     cache.field(&hash, try std.fmt.allocPrint(ctx.a, "{any}", .{host.os}));
     if (kind == .zig) cache.field(&hash, "zig-private-local-cache-v1");
-    for (argv) |arg| cache.field(&hash, arg);
+    for (argv) |arg| cache.field(&hash, try normalizeCacheText(ctx, arg, prefixes));
     const toolchain = try identity.fingerprint(ctx, kind == .zig, argv[0]);
     ctx.compiler_identity = toolchain;
     cache.field(&hash, toolchain);
     const keys = try ctx.a.dupe([]const u8, ctx.env.keys());
     std.mem.sort([]const u8, keys, {}, less);
     for (keys) |key| {
+        if (skipEnvName(key)) continue;
         cache.field(&hash, key);
-        cache.field(&hash, ctx.env.get(key).?);
+        cache.field(&hash, try normalizeCacheText(ctx, ctx.env.get(key).?, prefixes));
     }
     return cache.finish(ctx.a, &hash);
 }
@@ -743,6 +845,8 @@ pub fn execute(ctx: *cache.Context, kind: Kind, argv: []const []const u8) !u8 {
     defer ctx.profileEnd("compiler.total", total);
     var phase = ctx.profileStart();
     if (ctx.env.get("NANOCOMPILE_DISABLE")) |v| if (eq(v, "1")) return bypass(ctx, argv, "bypass: disabled");
+    if (kind == .rust and bypassWorkspaceForIncremental(ctx, argv))
+        return bypass(ctx, argv, "bypass: workspace crate left to incremental rustc");
     const plan = (if (kind == .rust) rustPlan(ctx, argv) else zigPlan(ctx, argv)) catch |err|
         return bypass(ctx, argv, try std.fmt.allocPrint(ctx.a, "bypass: {s}", .{@errorName(err)}));
     ctx.profileEnd("compiler.plan", phase);
@@ -782,13 +886,18 @@ pub fn execute(ctx: *cache.Context, kind: Kind, argv: []const []const u8) !u8 {
     }
     ctx.profileEnd("compiler.locks_configuration", phase);
     phase = ctx.profileStart();
+    const restore_started = std.Io.Clock.awake.now(ctx.io).nanoseconds;
     const restored = cache.restoreVariants(ctx, key, plan.outputs) catch false;
+    ctx.event(try std.fmt.allocPrint(ctx.a, "restore_ns={d}", .{std.Io.Clock.awake.now(ctx.io).nanoseconds - restore_started}));
     ctx.profileEnd("compiler.restore", phase);
     if (restored) {
         ctx.trace("hit");
         ctx.event("hit");
         return 0;
     }
+    // Hardlinked .rlib/.rmeta stay read-only and share the blob inode. rustc
+    // must replace those paths, not open them for write.
+    for (plan.outputs) |path| Dir.cwd().deleteFile(ctx.io, path) catch {};
     phase = ctx.profileStart();
     var before: std.ArrayList(cache.Dependency) = .empty;
     try before.appendSlice(ctx.a, dependencyRecords(ctx, plan.dependencies) catch return bypass(ctx, argv, "bypass: cannot fingerprint inputs"));
@@ -942,4 +1051,43 @@ test "native link attributes include comments and cfg_attr forms" {
     try std.testing.expect(hiddenNativeLink("const S: &str = r##\"\"/*\"##; #[link(name=\"native\")] extern {}"));
     try std.testing.expect(hiddenNativeLink("const C: char = '\"'; const S: &str=\"/*\"; #[link(name=\"native\")] extern {}"));
     try std.testing.expect(!hiddenNativeLink("const S: &str = \"link(name=foo)\"; pub fn link<'a>(x: &'a str) {}"));
+}
+
+test "path-normalized keys treat sibling target directories as the same command" {
+    var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer arena.deinit();
+    const a = arena.allocator();
+    var env = std.process.Environ.Map.init(a);
+    try env.put("CARGO_TARGET_DIR", "/work/a/target");
+    try env.put("CARGO_HOME", "/home/u/.cargo");
+    var ctx: cache.Context = .{ .a = a, .io = std.testing.io, .env = &env, .root = "/unused", .cwd = "/home/u/.cargo/registry/src/foo" };
+    const argv = [_][]const u8{ "rustc", "--out-dir", "/work/a/target/debug/deps", "--extern", "bar=/work/a/target/debug/deps/libbar.rmeta" };
+    const prefixes = try pathPrefixes(&ctx, &argv);
+    try std.testing.expectEqualStrings("$NANO_TARGET/debug/deps", try normalizeCacheText(&ctx, argv[2], prefixes));
+    try std.testing.expectEqualStrings("bar=$NANO_TARGET/debug/deps/libbar.rmeta", try normalizeCacheText(&ctx, argv[4], prefixes));
+    try env.put("CARGO_TARGET_DIR", "/work/b/target");
+    const sibling = [_][]const u8{ "rustc", "--out-dir", "/work/b/target/debug/deps", "--extern", "bar=/work/b/target/debug/deps/libbar.rmeta" };
+    const sibling_prefixes = try pathPrefixes(&ctx, &sibling);
+    try std.testing.expectEqualStrings(try normalizeCacheText(&ctx, argv[2], prefixes), try normalizeCacheText(&ctx, sibling[2], sibling_prefixes));
+}
+
+test "registry crates stay cacheable while workspace crates yield to incremental" {
+    var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer arena.deinit();
+    const a = arena.allocator();
+    var env = std.process.Environ.Map.init(a);
+    try env.put("CARGO_HOME", "/home/u/.cargo");
+    try env.put("CARGO_MANIFEST_DIR", "/home/u/.cargo/registry/src/foo-1.0.0");
+    try env.put("CARGO_INCREMENTAL", "1");
+    var ctx: cache.Context = .{ .a = a, .io = std.testing.io, .env = &env, .root = "/unused", .cwd = "/home/u/.cargo/registry/src/foo-1.0.0" };
+    try std.testing.expect(isRegistryOrGitCrate(&ctx));
+    try std.testing.expect(!bypassWorkspaceForIncremental(&ctx, &.{"rustc"}));
+    try env.put("CARGO_MANIFEST_DIR", "/work/project");
+    ctx.cwd = "/work/project";
+    try std.testing.expect(!isRegistryOrGitCrate(&ctx));
+    try std.testing.expect(bypassWorkspaceForIncremental(&ctx, &.{"rustc"}));
+    try env.put("CARGO_INCREMENTAL", "0");
+    try std.testing.expect(!bypassWorkspaceForIncremental(&ctx, &.{"rustc"}));
+    try env.put("NANOCOMPILE_CACHE_DEPS_ONLY", "1");
+    try std.testing.expect(bypassWorkspaceForIncremental(&ctx, &.{"rustc"}));
 }

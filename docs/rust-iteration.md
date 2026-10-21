@@ -55,10 +55,13 @@ is `cranelift` or if the cargo command names an experimental compiler. The
 declared-task runner already stops the graph when `fast-check` fails, so a
 broken check never writes a validate stamp.
 
-When `RUSTC_WRAPPER` points at nanocompile, set `CARGO_INCREMENTAL=0`. Incremental
-invocations are [not eligible](../README.md#current-eligibility) and would bypass
-the cache. rustc's own incremental compilation remains useful on a path that
-does **not** use the wrapper.
+As-shipped, `nanocompile rust-loop run --wrapper` still sets `CARGO_INCREMENTAL=0`.
+That remains the documented wrapper protocol. The best config the wrapper now
+allows is `NANOCOMPILE_ALLOW_INCREMENTAL=1` (or `CARGO_INCREMENTAL=1`): registry
+and git dependencies stay cacheable, including `-C incremental=…` on those
+units, and workspace crates pass through so rustc incremental can own the edit
+loop. `NANOCOMPILE_CACHE_DEPS_ONLY=1` forces that split even when incremental
+is off.
 
 ## (a) Steps usable now
 

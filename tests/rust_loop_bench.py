@@ -177,6 +177,23 @@ class RustLoopBench(unittest.TestCase):
         self.assertIn("check", loops[:first_test])
         self.assertIn("build", loops[:first_test])
 
+    def test_wrapper_can_keep_incremental_for_workspace_crates(self):
+        env = BENCH.genome_env(
+            BENCH.default_genome(wrapper=True, incremental=True),
+            "/bin/nano", {}, Path("/tmp/sccache"), Path("/tmp/nano-store"),
+        )
+        self.assertEqual(env["RUSTC_WRAPPER"], "/bin/nano")
+        self.assertEqual(env["CARGO_INCREMENTAL"], "1")
+        self.assertEqual(env["NANOCOMPILE_ALLOW_INCREMENTAL"], "1")
+        self.assertEqual(env["NANOCOMPILE_CACHE_DEPS_ONLY"], "1")
+        self.assertEqual(env["NANOCOMPILE_PROC_MACROS"], "reported")
+        shipped = BENCH.genome_env(
+            BENCH.default_genome(wrapper=True, incremental=False),
+            "/bin/nano", {}, Path("/tmp/sccache"), Path("/tmp/nano-store"),
+        )
+        self.assertEqual(shipped["CARGO_INCREMENTAL"], "0")
+        self.assertNotIn("NANOCOMPILE_ALLOW_INCREMENTAL", shipped)
+
     def test_kache_env_is_exclusive(self):
         env = BENCH.genome_env(
             BENCH.default_genome(kache=True, incremental=True),

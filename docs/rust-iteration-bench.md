@@ -84,6 +84,7 @@ independent first rebuilds, not no-ops of an already-edited workspace.
 | `fast-linker` | `-C link-arg=-fuse-ld=mold` or `lld` on build/test |
 | `sccache` | `RUSTC_WRAPPER=sccache` |
 | `kache` | `RUSTC_WRAPPER=kache` with isolated `KACHE_CACHE_DIR` (local-only, no scheduler) |
+| cache bakeoff | `bench/compare_caches.py` races nanocompile vs kache across every overlapping cache function (not only the wrapper gene). See [nanocompile vs kache](nanocompile-vs-kache.md). |
 | `crate-shape` | `-C codegen-units=256` |
 | `disk-hygiene` | `-C debuginfo=line-tables-only` |
 
