@@ -118,7 +118,7 @@ class Docs(unittest.TestCase):
             "breakdown": [],
         })
         self.assertIn("worktree init", text)
-        self.assertIn("NANOCOMPILE_BUILD_SCRIPT_CACHE", text)
+        self.assertIn("NANOCOMPILE_EXECUTABLE_PRODUCERS", text)
 
 
 if __name__ == "__main__":

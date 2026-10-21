@@ -105,7 +105,9 @@ mkdir -p out
 
 The compiler executable can be selected with `NANOCOMPILE_ZIG` or `NANOCOMPILE_RUSTC`. Cargo supplies its actual rustc executable through the wrapper protocol.
 
-Set `NANOCOMPILE_DIR` to choose a shared cache location. Its default is `$XDG_CACHE_HOME/nanocompile`, or `$HOME/.cache/nanocompile`. `NANOCOMPILE_TRACE=1` prints hit, miss, and bypass decisions. `NANOCOMPILE_DISABLE=1` runs the compiler directly. Cache keys hash the compilation environment after replacing `CARGO_TARGET_DIR` / `OUT_DIR` with stable placeholders and skipping `NANOCOMPILE_*` plus terminal noise, so sibling worktrees can hit registry/git artifacts. `NANOCOMPILE_ALLOW_INCREMENTAL=1` (or `CARGO_INCREMENTAL=1`) caches only crates under `$CARGO_HOME/registry` or `$CARGO_HOME/git` and leaves workspace crates to rustc incremental.
+Set `NANOCOMPILE_DIR` to choose a shared cache location. Its default is `$XDG_CACHE_HOME/nanocompile`, or `$HOME/.cache/nanocompile`. `NANOCOMPILE_TRACE=1` prints hit, miss, and bypass decisions. `NANOCOMPILE_DISABLE=1` runs the compiler directly. Cache keys hash the compilation environment after replacing `CARGO_TARGET_DIR` / `OUT_DIR` with stable placeholders and skipping `NANOCOMPILE_*` plus terminal noise, so sibling worktrees can hit registry/git artifacts. `NANOCOMPILE_ALLOW_INCREMENTAL=1` (or `CARGO_INCREMENTAL=1`) keeps rustc incremental on a miss and still caches workspace rlibs so emptied-target / sibling worktrees can restore them. `NANOCOMPILE_CACHE_DEPS_ONLY=1` is the opt-in that bypasses workspace rlibs.
+
+For a main checkout plus N agent git worktrees, run `nanocompile worktree init`. It writes `.cargo/config.toml` with the general frozen defaults (incremental + reported proc-macros + executable producers, one shared `NANOCOMPILE_DIR`). Each worktree keeps its own `target/`. See [agent-worktrees](docs/agent-worktrees.md).
 
 ```sh
 ./zig-out/bin/nanocompile stats

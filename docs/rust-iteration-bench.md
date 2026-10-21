@@ -125,7 +125,9 @@ The grid is **size** (`small` / `mid` / `large`) × **edit** (`cold` / `noop` /
 `body` / `sig_dep` / `worktree`). Disk use is recorded per elite, not a third
 axis. Crate shape (`proc_macro` / `async_web` / `generic` / `normal`) is
 classify metadata only — a third occupancy axis would vacate the stalled
-size × edit grid.
+size × edit grid. Agent-worktree train/held-out rows live in
+`archive.agent_worktrees` (`split=train|held_out`) and do not occupy cells.
+See [agent-worktrees](agent-worktrees.md).
 
 A genome is the full loop config (`wrapper`, `dev_backend`, `linker`, `sccache`,
 `kache`, `warm_store`, `codegen_units`, `incremental`, `debuginfo`, `fast_check`,

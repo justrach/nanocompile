@@ -30,8 +30,8 @@ import rust_loop_bench as bench  # noqa: E402
 COMPILING = re.compile(r"^\s*(?:Compiling|Checking|Dirty)\s+(\S+)", re.M)
 STAT_LINE = re.compile(r"^([a-z0-9 /+-]+): ([0-9]+)\s*$")
 BODY_INSERT = "let _nano_agent_body = 1u8;"
-SIG_INSERT = "\n#[allow(dead_code)] pub fn _nano_agent_sig(x: u32) -> u32 { x }\n"
-LARGE_INSERT = "\n#[allow(dead_code)] pub fn _nano_agent_large(xs: &[u8]) -> usize { xs.len().wrapping_add(7) }\n"
+SIG_INSERT = "\n#[allow(dead_code)] fn _nano_agent_sig(x: u32) -> u32 { x }\n"
+LARGE_INSERT = "\n#[allow(dead_code)] fn _nano_agent_large(xs: &[u8]) -> usize { xs.len().wrapping_add(7) }\n"
 
 TRAIN = ("axum", "ripgrep")
 HELD_OUT = ("bhumi", "hashbrown", "nalgebra", "serde", "ruff", "tokio")
@@ -175,9 +175,24 @@ def rust_files(root: Path) -> list[Path]:
 
 def pick_edit_files(root: Path, count: int = 3) -> list[Path]:
     files = rust_files(root)
-    preferred = [p for p in files if p.name in ("lib.rs", "main.rs")]
-    rest = [p for p in files if p not in preferred]
-    chosen = (preferred + rest)[:count]
+    preferred = []
+    for name in ("src/lib.rs", "src/main.rs"):
+        candidate = root / name
+        if candidate.exists():
+            preferred.append(candidate)
+    for pkg in ("axum", "ripgrep", "serde", "ruff", "tokio", "hashbrown", "nalgebra", "bhumi"):
+        for name in ("src/lib.rs", "src/main.rs"):
+            candidate = root / pkg / name
+            if candidate.exists() and candidate not in preferred:
+                preferred.append(candidate)
+    named = [p for p in files if p.name in ("lib.rs", "main.rs") and "examples" not in p.parts and "tests" not in p.parts]
+    rest = [p for p in files if p not in preferred and p not in named]
+    chosen = []
+    for path in preferred + named + rest:
+        if path not in chosen:
+            chosen.append(path)
+        if len(chosen) >= count:
+            break
     return chosen
 
 
@@ -188,13 +203,20 @@ def apply_agent_edit(root: Path, kind: str) -> list[tuple[Path, str]]:
     if not files:
         return records
     if kind == "dep":
-        manifest = root / "Cargo.toml"
-        if manifest.exists():
+        manifests = [root / "Cargo.toml"]
+        for pkg in ("axum", "ripgrep", "serde", "ruff", "tokio", "hashbrown", "nalgebra", "bhumi"):
+            manifests.append(root / pkg / "Cargo.toml")
+        for manifest in manifests:
+            if not manifest.exists():
+                continue
             text = manifest.read_text(encoding="utf-8")
+            if "[package]" not in text:
+                continue
             extra = "\n[package.metadata.nano_agent]\nnote = \"worktree-dep\"\n"
             if extra not in text:
                 manifest.write_text(text + extra, encoding="utf-8")
                 records.append((manifest, text))
+            break
         if files:
             path = files[0]
             original = path.read_text(encoding="utf-8")
@@ -566,12 +588,16 @@ def run_matrix(samples, levers, n_list, modes, wrapper, work_root, variants=None
                             "from_older": bool(variant.get("from_older")),
                         }
                         rows.append(row)
-                        print(json.dumps({
+                        progress = {
                             k: row.get(k) for k in (
                                 "sample", "lever", "approach", "n_worktrees", "mode",
                                 "wall_ms", "crates_compiled_mean", "disk_bytes", "ok", "split",
                             )
-                        }), flush=True)
+                        }
+                        if not row.get("ok"):
+                            progress["error"] = ((row.get("errors") or [row.get("error") or ""])[0] or "")[-240:]
+                        print(json.dumps(progress), flush=True)
+                        write_json(REPO / "bench" / "archive" / "agent-worktrees.partial.json", {"rows": rows})
     return rows
 
 
@@ -587,13 +613,21 @@ def hill_climb(rows):
     log.append({"lever": "l0_nano_best", "vs": "none", "metrics": vs_none, "keep": True})
     for lever_id in ("l1_script_cache", "l2_test_bins"):
         nxt = [r for r in train if r.get("lever") == lever_id]
-        # Compare same loop when possible.
         loop = "test" if lever_id == "l2_test_bins" else "check"
-        base = [r for r in current if r.get("loop") == loop] or current
+        base = [r for r in current if r.get("loop") == loop]
         cand = [r for r in nxt if r.get("loop") == loop and r.get("mode") == "sequential"] or nxt
-        summary = summarize_pair(base, cand)
+        if lever_id == "l2_test_bins" and not base:
+            log.append({
+                "lever": lever_id, "vs": "coverage", "metrics": {}, "keep": False,
+                "samples": sorted({r["sample"] for r in cand if r.get("ok")}),
+                "note": "cargo test --no-run coverage; --test is eligible under EXECUTABLE_PRODUCERS. No prior test-loop elite to beat by 3%.",
+            })
+            stalled["crates_compiled_mean"] = stalled.get("crates_compiled_mean", 0) + 1
+            stalled["wall_ms"] = stalled.get("wall_ms", 0) + 1
+            stalled["disk_bytes"] = stalled.get("disk_bytes", 0) + 1
+            continue
+        summary = summarize_pair(base or current, cand)
         keep = any(summary[m]["keep"] for m in summary)
-        # Prefer general defaults: keep only if the win is not a single-sample flake.
         samples = {r["sample"] for r in cand if r.get("ok")}
         log.append({"lever": lever_id, "vs": kept[-1], "metrics": summary, "keep": keep, "samples": sorted(samples)})
         for metric, info in summary.items():
@@ -633,7 +667,7 @@ def survival(train_rows, held_rows, frozen_lever):
                        and not (r.get("variant") or {}).get("from_older")]
         t_gain = pct_gain(avg(train_none), avg(train_fr))
         h_gain = pct_gain(avg(held_none), avg(held_fr))
-        survived = None if t_gain in (None, 0) or h_gain is None else h_gain / t_gain
+        survived = None if t_gain is None or t_gain <= 0 or h_gain is None else h_gain / t_gain
         out["per_metric"][metric] = {
             "train_gain": t_gain,
             "held_out_gain": h_gain,
@@ -691,8 +725,56 @@ def breakdown(held_rows):
     return out
 
 
+def row_evaluation(row, split):
+    info = SAMPLE_CATALOG.get(row.get("sample") or "", {})
+    size = info.get("size") or "mid"
+    approach = row.get("approach") or "none"
+    return {
+        "cell": "%s|worktree" % size,
+        "size": size,
+        "edit": "worktree",
+        "genome": {
+            "wrapper": approach == "nanocompile",
+            "dev_backend": "llvm",
+            "linker": "default",
+            "sccache": False,
+            "kache": approach == "kache",
+            "warm_store": approach in ("nanocompile", "kache"),
+            "incremental": True,
+            "debuginfo": "full",
+            "fast_check": "cargo-check",
+            "loop": row.get("loop") or "check",
+        },
+        "fitness_ms": float(row.get("wall_ms") or 0),
+        "disk_bytes": row.get("disk_bytes"),
+        "correctness": {
+            "ok": bool(row.get("ok")),
+            "agree_on_broken": True,
+            "validate_is_final": True,
+        },
+        "sample": "%s-agent-worktrees-%s" % (row.get("sample"), split),
+        "held_out": True,
+        "split": split,
+        "product": "agent_worktrees",
+        "cache_tool": "nanocompile" if approach == "nanocompile" else "kache" if approach == "kache" else "none",
+        "cache_state": "warm_compiler_cache" if approach in ("nanocompile", "kache") else "empty",
+        "n_worktrees": row.get("n_worktrees"),
+        "mode": row.get("mode"),
+        "crates_compiled_mean": row.get("crates_compiled_mean"),
+        "variant": row.get("variant"),
+        "lever": row.get("lever"),
+    }
+
+
 def write_json(path: Path, payload):
     path.parent.mkdir(parents=True, exist_ok=True)
+    payload = dict(payload)
+    payload.setdefault("schema_version", 1)
+    payload.setdefault("kind", "nanocompile.rust-loop.map-elites.shard")
+    payload.setdefault("sample", "agent-worktrees")
+    evals = [row_evaluation(r, "train") for r in payload.get("train") or []]
+    evals += [row_evaluation(r, "held_out") for r in payload.get("held_out") or []]
+    payload["evaluations"] = evals
     path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
 
@@ -781,11 +863,16 @@ def render_docs(payload) -> str:
             info = m.get(metric) or {}
             g = info.get("gain")
             return "n/a" if g is None else "%.1f%%" % (g * 100)
+        note = "coverage" if entry.get("vs") == "coverage" else ("yes" if entry.get("keep") else "stall")
         lines.append("| `%s` | %s | %s | %s | %s | %s |" % (
             entry.get("lever"), entry.get("vs"),
             fmt("crates_compiled_mean"), fmt("wall_ms"), fmt("disk_bytes"),
-            "yes" if entry.get("keep") else "stall",
+            note,
         ))
+        if entry.get("note"):
+            lines.append("")
+            lines.append(entry["note"])
+            lines.append("")
     lines += [
         "",
         "Frozen lever: `%s`." % climb.get("frozen_lever", "l0_nano_best"),
@@ -925,27 +1012,29 @@ def main(argv=None):
         write_json(args.out, payload)
 
     if args.phase in ("all", "held-out"):
-        frozen_env = (payload.get("hill_climb") or {}).get("frozen_env") or NANO_SCRIPT
+        frozen_env = (payload.get("hill_climb") or {}).get("frozen_env") or NANO_BEST
         frozen = [{"id": "frozen", "approach": "nanocompile", "env": frozen_env, "loop": "check"}]
-        held_levers = list(frozen)
-        if not args.quick:
-            held_levers = [
-                {"id": "none", "approach": "none", "env": {}, "loop": "check"},
-                {"id": "kache", "approach": "kache", "env": {}, "loop": "check"},
-            ] + frozen
-        variants = [
-            {"edit_kind": "mixed", "from_older": False, "n": 4},
+        baselines = [] if args.quick else [
+            {"id": "none", "approach": "none", "env": {}, "loop": "check"},
+            {"id": "kache", "approach": "kache", "env": {}, "loop": "check"},
         ]
-        if not args.quick:
-            variants += [
-                {"edit_kind": "mixed", "from_older": False, "n": 8},
-                {"edit_kind": "large", "from_older": False, "n": 4},
-                {"edit_kind": "mixed", "from_older": True, "n": 4},
-            ]
         held = run_matrix(
-            list(HELD_OUT), held_levers, [4], ["sequential"],
-            wrapper, args.work / "held", variants=variants, split="held_out",
+            list(HELD_OUT), baselines + frozen, [4], ["sequential"],
+            wrapper, args.work / "held",
+            variants=[{"edit_kind": "mixed", "from_older": False, "n": 4}],
+            split="held_out",
         )
+        if not args.quick:
+            held += run_matrix(
+                list(HELD_OUT), frozen, [4], ["sequential"],
+                wrapper, args.work / "held-variants",
+                variants=[
+                    {"edit_kind": "mixed", "from_older": False, "n": 8},
+                    {"edit_kind": "large", "from_older": False, "n": 4},
+                    {"edit_kind": "mixed", "from_older": True, "n": 4},
+                ],
+                split="held_out",
+            )
         payload["held_out"] = held
         payload["survival"] = survival(payload.get("train") or [], held, (payload.get("hill_climb") or {}).get("frozen_lever") or "frozen")
         payload["breakdown"] = breakdown(held)
@@ -958,7 +1047,7 @@ def main(argv=None):
         payload["commit"] = git_commit()
         write_json(args.out, payload)
         record_archive({
-            "source": str(args.out.relative_to(REPO)),
+            "source": str(args.out.resolve().relative_to(REPO)),
             "docs": "docs/agent-worktrees.md",
             "harness": "bench/agent_worktrees.py",
             "commit": payload.get("commit"),

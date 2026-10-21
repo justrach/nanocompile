@@ -23,7 +23,6 @@ pub const general_flags = [_]GeneralFlag{
     .{ .name = "NANOCOMPILE_PROC_MACROS", .value = "reported" },
     .{ .name = "NANOCOMPILE_PROC_MACRO_PRODUCERS", .value = "1" },
     .{ .name = "NANOCOMPILE_EXECUTABLE_PRODUCERS", .value = "1" },
-    .{ .name = "NANOCOMPILE_BUILD_SCRIPT_CACHE", .value = "1" },
 };
 
 pub fn renderConfig(allocator: std.mem.Allocator, wrapper: []const u8, store: []const u8) ![]const u8 {
@@ -120,7 +119,7 @@ test "worktree init renders the general shared-store block" {
     defer arena.deinit();
     const a = arena.allocator();
     const block = try renderConfig(a, "/opt/nanocompile", "/home/user/.cache/nanocompile");
-    try std.testing.expect(std.mem.indexOf(u8, block, "NANOCOMPILE_BUILD_SCRIPT_CACHE") != null);
+    try std.testing.expect(std.mem.indexOf(u8, block, "NANOCOMPILE_BUILD_SCRIPT_CACHE") == null);
     try std.testing.expect(std.mem.indexOf(u8, block, "NANOCOMPILE_EXECUTABLE_PRODUCERS") != null);
     try std.testing.expect(std.mem.indexOf(u8, block, "force = true") != null);
     const merged = try mergeConfig(a, "[build]\njobs = 8\n", block);
