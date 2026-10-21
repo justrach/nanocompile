@@ -597,6 +597,11 @@ def run_cell(step, command, phase, argv, cwd, env, target, warmup, runs, edit_ki
             if not keep_compiler_cache:
                 _clear_nano_cache(env)
         if timed_edit:
+            # Identical body/sig inserts would hit sccache/kache/wrapper after
+            # the first sample. Clear the store unless this genome asks for a
+            # warm_store measurement.
+            if not keep_compiler_cache:
+                _clear_nano_cache(env)
             record = edit_project(cwd, kind)
             if record is None:
                 return None
@@ -1015,11 +1020,14 @@ def evaluation_row(cell, size, edit, genome, summary, correctness, sample, commi
         "n_evals": len(summary.get("samples_ms") or []),
         "non_improving": 0,
         "stopped": False,
-        "held_out": "-held-out" in str(sample) or "-from-" in str(sample),
+        "held_out": (
+            "-held-out" in str(sample) or "-from-" in str(sample)
+            or bool(genome.get("warm_store"))
+        ),
         "fitness_method": "official_first_rebuild",
         "sample_class": "fixture" if str(sample).startswith("rust-loop") else "real",
         "cache_state": (
-            "warm_compiler_cache" if edit in ("cold", "worktree") and genome.get("warm_store")
+            "warm_compiler_cache" if edit in ("cold", "worktree", "body", "sig_dep") and genome.get("warm_store")
             else "empty" if edit in ("cold", "worktree") else None
         ),
     }
@@ -1185,7 +1193,7 @@ def measure_genome(genome, work, driver, nano, tools, base_env, jobs, offline, w
         type("S", (), {"id": "genome", "title": "genome"})(),
         genome.get("loop"), edit, argv, work, env, target, warmup, runs,
         "body" if edit == "body" else "sig" if edit == "sig_dep" else None,
-        keep_compiler_cache=keep_cache if edit == "cold" else False,
+        keep_compiler_cache=keep_cache if edit in ("cold", "body", "sig_dep") else False,
     )
     return summary, None
 
@@ -1279,7 +1287,9 @@ def execute_held_out(args, work, driver, nano, tools, base_env, offline, correct
     for key, elite in cells.items():
         genome = default_genome(**(elite.get("genome") or {}))
         genome["offline"] = offline
-        if getattr(args, "package", None) and not genome.get("package"):
+        # Sample-specific cargo -p must not travel with a held-out genome.
+        genome.pop("package", None)
+        if getattr(args, "package", None):
             genome["package"] = args.package
         edit = elite.get("edit") or key.split("|", 1)[-1]
         target = args.work_root / "targets" / "held-out" / key.replace("|", "-")

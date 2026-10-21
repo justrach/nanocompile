@@ -82,6 +82,26 @@ class RustLoopBench(unittest.TestCase):
         self.assertEqual(seen, [True, False, True, False, True, False])
         self.assertNotIn("_nano_loop_body", lib.read_text(encoding="utf-8"))
 
+    def test_body_clears_compiler_cache_unless_warm_store(self):
+        import tempfile
+        root = Path(tempfile.mkdtemp(prefix="nano-body-cache-"))
+        cache = root / "kache"
+        cache.mkdir()
+        (cache / "hit").write_text("x", encoding="utf-8")
+        lib = root / "lib.rs"
+        lib.write_text("fn mark() { // nano-loop-body\n}\n", encoding="utf-8")
+        env = {"KACHE_CACHE_DIR": str(cache)}
+        original = BENCH.measure_once
+        BENCH.measure_once = lambda *a, **k: {
+            "ms": 1.0, "returncode": 0, "target_bytes": 0, "stderr_tail": "", "stdout_tail": "",
+        }
+        try:
+            step = type("S", (), {"id": "t", "title": "t"})()
+            BENCH.run_cell(step, "check", "body", ["true"], root, env, root / "target", 0, 1, "body")
+        finally:
+            BENCH.measure_once = original
+        self.assertFalse(cache.exists())
+
     def test_cargo_z_flags_precede_subcommand(self):
         argv = BENCH.cargo_argv("test", 0, True, "nightly", ["-Zcodegen-backend", "--no-run"])
         self.assertEqual(argv[:4], ["cargo", "+nightly", "-Zcodegen-backend", "test"])

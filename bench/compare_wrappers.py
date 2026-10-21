@@ -143,7 +143,7 @@ def main(argv=None):
                 "size": size,
                 "incremental": bool(genome.get("incremental")),
                 "cache_state": (
-                    "warm_compiler_cache" if edit in ("cold", "worktree") and genome.get("warm_store")
+                    "warm_compiler_cache" if edit in ("cold", "worktree", "body", "sig_dep") and genome.get("warm_store")
                     else "empty" if edit in ("cold", "worktree") else None
                 ),
                 "skipped": False,

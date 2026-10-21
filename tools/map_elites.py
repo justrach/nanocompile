@@ -166,6 +166,9 @@ def is_fixture_sample(sample):
 def is_held_out(row):
     if bool(row.get("held_out")):
         return True
+    if (row.get("genome") or {}).get("warm_store"):
+        # Warm compiler-store times are a comparison axis, not occupancy.
+        return True
     sample = str(row.get("sample") or "")
     # Cross-tests use either the --held-out suffix or "<tested>-from-<trained>".
     return "-held-out" in sample or "-from-" in sample

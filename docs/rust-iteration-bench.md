@@ -167,31 +167,35 @@ Canonical archive: [`bench/map_elites.json`](../bench/map_elites.json).
 Schema: [`bench/map_elites.schema.json`](../bench/map_elites.schema.json).
 Merge shards from `bench/archive/<sample>.json` with `nanocompile map-elites merge` or `python3 tools/map_elites.py merge`.
 
-Axes: size (`small` / `mid` / `large`) × edit (`cold` / `noop` / `body` / `sig_dep`).
+Axes: size (`small` / `mid` / `large`) × edit (`cold` / `noop` / `body` / `sig_dep` / `worktree`).
 Fitness is median loop wall time in ms (lower is better). Disk is recorded, not an axis.
+Worktree is a sibling checkout + new target dir + shared compiler cache.
 
-| Size \ Edit | cold | noop | body | sig_dep |
-| --- | ---: | ---: | ---: | ---: |
-| small | 43.5 ms (rust-loop, check) | 1.3 ms (rust-loop, graph) | 24.4 ms (rust-loop, check) | 24.8 ms (rust-loop, check) |
-| mid | 441.7 ms (pinned-hashbrown, check) | 3.2 ms (pinned-hashbrown, graph) | 122.7 ms (pinned-hashbrown, check) | 113.2 ms (pinned-hashbrown, check) |
-| large | 3114.8 ms (ripgrep, check) | 30.7 ms (ripgrep, check) | 155.7 ms (ripgrep, check) | 6441.7 ms (ruff-check-line-tables, check) |
+| Size \ Edit | cold | noop | body | sig_dep | worktree |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| small | 37.1 ms (rust-loop-kache-round, check) | 1.3 ms (rust-loop, graph) | 21.7 ms (rust-loop-wrappers, check) | 22.1 ms (rust-loop-wrappers, check) | 36.9 ms (rust-loop-wrappers, check) |
+| mid | 323.8 ms (pinned-hashbrown-kache-round, check) | 3.2 ms (pinned-hashbrown, graph) | 114.0 ms (pinned-hashbrown-kache-round, check) | 113.2 ms (pinned-hashbrown, check) | 336.3 ms (pinned-hashbrown-kache-round, check) |
+| large | 2911.7 ms (ripgrep-wrappers, check) | 30.7 ms (ripgrep, check) | 155.7 ms (ripgrep, check) | 761.2 ms (nalgebra-wrappers, check) | 2754.0 ms (ripgrep-wrappers, check) |
 
 ### Elites
 
 | Cell | Sample | Fitness ms | Method | Cache | Loop | Wrapper | Backend |
 | --- | --- | ---: | --- | --- | --- | --- | --- |
-| small|cold | rust-loop | 43.5 | first-rebuild | empty | check | no | llvm |
+| small|cold | rust-loop-kache-round | 37.1 | first-rebuild | empty | check | no | llvm |
 | small|noop | rust-loop | 1.3 | first-rebuild | — | graph | yes | llvm |
-| small|body | rust-loop | 24.4 | first-rebuild | — | check | no | llvm |
-| small|sig_dep | rust-loop | 24.8 | first-rebuild | — | check | no | llvm |
-| mid|cold | pinned-hashbrown | 441.7 | first-rebuild | empty | check | no | llvm |
+| small|body | rust-loop-wrappers | 21.7 | first-rebuild | — | check | no | llvm |
+| small|sig_dep | rust-loop-wrappers | 22.1 | first-rebuild | — | check | no | llvm |
+| small|worktree | rust-loop-wrappers | 36.9 | first-rebuild | empty | check | no | llvm |
+| mid|cold | pinned-hashbrown-kache-round | 323.8 | first-rebuild | empty | check | no | llvm |
 | mid|noop | pinned-hashbrown | 3.2 | first-rebuild | — | graph | yes | llvm |
-| mid|body | pinned-hashbrown | 122.7 | first-rebuild | — | check | no | llvm |
+| mid|body | pinned-hashbrown-kache-round | 114.0 | first-rebuild | — | check | no | llvm |
 | mid|sig_dep | pinned-hashbrown | 113.2 | first-rebuild | — | check | no | llvm |
-| large|cold | ripgrep | 3114.8 | first-rebuild | empty | check | no | llvm |
+| mid|worktree | pinned-hashbrown-kache-round | 336.3 | first-rebuild | empty | check | no | llvm |
+| large|cold | ripgrep-wrappers | 2911.7 | first-rebuild | empty | check | no | llvm |
 | large|noop | ripgrep | 30.7 | first-rebuild | — | check | no | llvm |
 | large|body | ripgrep | 155.7 | first-rebuild | — | check | no | llvm |
-| large|sig_dep | ruff-check-line-tables | 6441.7 | first-rebuild | — | check | no | llvm |
+| large|sig_dep | nalgebra-wrappers | 761.2 | first-rebuild | — | check | no | llvm |
+| large|worktree | ripgrep-wrappers | 2754.0 | first-rebuild | empty | check | no | llvm |
 
 ### Generalization
 
@@ -325,6 +329,66 @@ Fitness is median loop wall time in ms (lower is better). Disk is recorded, not 
 | ripgrep | large|noop | ruff-from-large | 196.4 | 539.2% | yes |
 | ripgrep | large|body | ruff-from-large | 547.3 | 251.4% | yes |
 | ruff-check-line-tables | large|sig_dep | ruff-from-large | 6519.1 | 1.2% | yes |
+| rust-loop-kache-round | small|cold | rust-loop-from-elites | 39.1 | 5.6% | yes |
+| rust-loop | small|noop | rust-loop-from-elites | 1.2 | -8.0% | yes |
+| rust-loop-wrappers | small|body | rust-loop-from-elites | 22.2 | 2.2% | yes |
+| rust-loop-wrappers | small|sig_dep | rust-loop-from-elites | 60.7 | 174.9% | yes |
+| ripgrep-wrappers | large|cold | rust-loop-from-elites | 49.7 | 34.0% | yes |
+| ripgrep | large|noop | rust-loop-from-elites | 20.0 | 1414.7% | yes |
+| ripgrep | large|body | rust-loop-from-elites | 42.8 | 96.8% | yes |
+| nalgebra-wrappers | large|sig_dep | rust-loop-from-elites | 23.2 | 4.9% | yes |
+| pinned-hashbrown-kache-round | mid|cold | rust-loop-from-elites | 116.5 | 214.3% | yes |
+| pinned-hashbrown | mid|noop | rust-loop-from-elites | 1.3 | -5.2% | yes |
+| pinned-hashbrown-kache-round | mid|body | rust-loop-from-elites | 42.2 | 94.1% | yes |
+| pinned-hashbrown | mid|sig_dep | rust-loop-from-elites | 57.4 | 160.1% | yes |
+| rust-loop-wrappers | small|worktree | rust-loop-from-elites | 84.3 | 128.4% | yes |
+| pinned-hashbrown-kache-round | mid|worktree | rust-loop-from-elites | 49.5 | 34.3% | yes |
+| ripgrep-wrappers | large|worktree | rust-loop-from-elites | 35.9 | -2.6% | yes |
+| rust-loop-kache-round | small|cold | hashbrown-from-elites | 522.6 | 61.4% | yes |
+| rust-loop | small|noop | hashbrown-from-elites | 3.2 | -0.8% | yes |
+| rust-loop-wrappers | small|body | hashbrown-from-elites | 282.2 | 147.6% | yes |
+| rust-loop-wrappers | small|sig_dep | hashbrown-from-elites | 338.2 | 198.7% | yes |
+| ripgrep-wrappers | large|cold | hashbrown-from-elites | 457.9 | 41.4% | yes |
+| ripgrep | large|noop | hashbrown-from-elites | 16.6 | 420.6% | yes |
+| ripgrep | large|body | hashbrown-from-elites | 116.2 | 2.0% | yes |
+| nalgebra-wrappers | large|sig_dep | hashbrown-from-elites | 14.4 | -87.3% | yes |
+| pinned-hashbrown-kache-round | mid|cold | hashbrown-from-elites | 378.8 | 17.0% | yes |
+| pinned-hashbrown | mid|noop | hashbrown-from-elites | 4.9 | 54.2% | yes |
+| pinned-hashbrown-kache-round | mid|body | hashbrown-from-elites | 120.2 | 5.4% | yes |
+| pinned-hashbrown | mid|sig_dep | hashbrown-from-elites | 123.7 | 9.3% | yes |
+| rust-loop-wrappers | small|worktree | hashbrown-from-elites | 430.2 | 27.9% | yes |
+| pinned-hashbrown-kache-round | mid|worktree | hashbrown-from-elites | 561.4 | 66.9% | yes |
+| ripgrep-wrappers | large|worktree | hashbrown-from-elites | 552.1 | 64.1% | yes |
+| rust-loop-kache-round | small|cold | serde-from-elites | 2380.0 | 635.0% | yes |
+| rust-loop | small|noop | serde-from-elites | 10.6 | 230.8% | yes |
+| rust-loop-wrappers | small|body | serde-from-elites | 814.0 | 614.3% | yes |
+| rust-loop-wrappers | small|sig_dep | serde-from-elites | 735.2 | 549.4% | yes |
+| ripgrep-wrappers | large|cold | serde-from-elites | 1800.4 | 456.0% | yes |
+| ripgrep | large|noop | serde-from-elites | 17.1 | 435.9% | yes |
+| ripgrep | large|body | serde-from-elites | 281.0 | 146.6% | yes |
+| nalgebra-wrappers | large|sig_dep | serde-from-elites | 34.0 | -70.0% | yes |
+| pinned-hashbrown-kache-round | mid|cold | serde-from-elites | 1696.0 | 423.8% | yes |
+| pinned-hashbrown | mid|noop | serde-from-elites | 23.3 | 629.5% | yes |
+| pinned-hashbrown-kache-round | mid|body | serde-from-elites | 260.3 | 128.5% | yes |
+| pinned-hashbrown | mid|sig_dep | serde-from-elites | 260.4 | 130.0% | yes |
+| rust-loop-wrappers | small|worktree | serde-from-elites | 1663.5 | 394.6% | yes |
+| pinned-hashbrown-kache-round | mid|worktree | serde-from-elites | 2025.2 | 502.1% | yes |
+| ripgrep-wrappers | large|worktree | serde-from-elites | 2174.3 | 546.5% | yes |
+| rust-loop-kache-round | small|cold | ripgrep-from-elites | 4824.7 | 65.7% | yes |
+| rust-loop | small|noop | ripgrep-from-elites | 569.3 | 1753.2% | yes |
+| rust-loop-wrappers | small|body | ripgrep-from-elites | 390.4 | 150.7% | yes |
+| rust-loop-wrappers | small|sig_dep | ripgrep-from-elites | 505.2 | -33.6% | yes |
+| ripgrep-wrappers | large|cold | ripgrep-from-elites | 3724.8 | 27.9% | yes |
+| ripgrep | large|noop | ripgrep-from-elites | 32.1 | 4.5% | yes |
+| ripgrep | large|body | ripgrep-from-elites | 207.8 | 33.4% | yes |
+| nalgebra-wrappers | large|sig_dep | ripgrep-from-elites | 28.5 | -96.3% | yes |
+| pinned-hashbrown-kache-round | mid|cold | ripgrep-from-elites | 4778.7 | 64.1% | yes |
+| pinned-hashbrown | mid|noop | ripgrep-from-elites | 485.9 | 1481.6% | yes |
+| pinned-hashbrown-kache-round | mid|body | ripgrep-from-elites | 191.7 | 23.1% | yes |
+| pinned-hashbrown | mid|sig_dep | ripgrep-from-elites | 141.8 | -81.4% | yes |
+| rust-loop-wrappers | small|worktree | ripgrep-from-elites | 3346.6 | 21.5% | yes |
+| pinned-hashbrown-kache-round | mid|worktree | ripgrep-from-elites | 4845.2 | 75.9% | yes |
+| ripgrep-wrappers | large|worktree | ripgrep-from-elites | 3084.7 | 12.0% | yes |
 
 ### Promoted defaults
 
@@ -338,13 +402,14 @@ weighted majority on real-sample noop; fixture graph elites do not set the defau
 
 Sample-specific elites:
 
-- `small|cold` `rust-loop`: fixture elite; real samples outvote fixtures; loses the weighted vote for its edit family
+- `small|cold` `rust-loop-kache-round`: fixture elite; real samples outvote fixtures
 - `small|noop` `rust-loop`: fixture elite; real samples outvote fixtures; loses the weighted vote for its edit family
-- `small|body` `rust-loop`: fixture elite; real samples outvote fixtures; loses the weighted vote for its edit family
-- `small|sig_dep` `rust-loop`: fixture elite; real samples outvote fixtures; loses the weighted vote for its edit family
-- `large|sig_dep` `ruff-check-line-tables`: loses the weighted vote for its edit family
-- `mid|cold` `pinned-hashbrown`: loses the weighted vote for its edit family
+- `small|body` `rust-loop-wrappers`: fixture elite; real samples outvote fixtures; loses the weighted vote for its edit family
+- `small|sig_dep` `rust-loop-wrappers`: fixture elite; real samples outvote fixtures; loses the weighted vote for its edit family
+- `large|cold` `ripgrep-wrappers`: loses the weighted vote for its edit family
 - `mid|noop` `pinned-hashbrown`: loses the weighted vote for its edit family
+- `small|worktree` `rust-loop-wrappers`: fixture elite; real samples outvote fixtures; loses the weighted vote for its edit family
+- `large|worktree` `ripgrep-wrappers`: loses the weighted vote for its edit family
 
 <!-- MAP_ELITES_GRID_END -->
 
@@ -392,3 +457,9 @@ on the same sample, keep or revert.
 | 34 | wrapper `CARGO_INCREMENTAL=0` | Should the wrapper stop forcing inc=0? | Unified ruff + prior hashbrown/ripgrep/bhumi | Wrapper body/sig **+88–139%** because it disables incremental. Keep the force (nanocompile cache is ineligible for incremental artifacts). Do **not** promote wrapper for iteration. Graph+wrapper stays a fixture noop gene | keep the force; not an iteration default |
 | 35 | rematch | All four shards, official method | ripgrep 53k LOC is large; ruff 838k LOC / ` -p ruff` is large | **large cold/noop/body → ripgrep** 3115 / 30.7 / 155.7; **large sig → ruff line-tables** 6442. Promoted: `cargo check` LLVM `incremental=true` `debuginfo=full`, no wrapper, no sccache, no sample `package`. **12/12 stalled** | keep |
 | 36 | four-shard cross-test | Unified official first-rebuild | mid elites → ruff `-p ruff`; large elites → hashbrown / ripgrep / bhumi / ruff | Hashbrown body **119 (−2.9%)** transfers; graph noop **+409%** does not. On ruff, hashbrown body **470** matches ruff incremental 484; graph noop **1288** does not transfer. Ripgrep self +3–15%. Same-project ruff sig elite **+1.2%**. **Stop: 12/12 stalled** | keep |
+| 37 | genome | Add kache + worktree + nightly genes | `kache`/`warm_store` exclusive of wrapper/sccache; edit=`worktree`; shape metadata only; clippy/nextest timed loops | kache 1.2.2 installed with nightly + `-fuse-ld=bfd` (rust-lld `rust_eh_personality` failed). wild skipped. sccache+inc **ok=False** on every sample. | keep |
+| 38 | rust-loop | New genes + worktree occupy small | `--map-elites --mutations 4` then `compare_wrappers` | **15/15 cells.** small cold **37.1** (`opt_level_deps=2`); body/sig **21.7/22.1 noinc**; worktree **36.9 noinc**. Graph body/sig <10ms dropped as cache hits. | keep |
+| 39 | hashbrown | Empty-cache cold was inflated | Official `--map-elites` + clear compiler cache on body/sig | mid cold **323.8** (−27% vs 441.7); body **114** (−7%); worktree **336.3**. kache warm worktree **86** / cold **63** tagged held-out. | keep |
+| 40 | kache H2H | Cold vs warm store × inc × every edit | `bench/compare_wrappers.py` on rust-loop, hashbrown, serde_derive, nalgebra, ripgrep | Warm kache **flips worktree/cold** (hashbrown worktree 86 vs 493; ripgrep 546 vs 3173; nalgebra 492 vs 5985). Empty-store incremental **wins body** except nalgebra kache-inc **782 vs 814**. Wrapper empty is last. | keep |
+| 41 | held-out shapes | serde (proc_macro mid), nalgebra (generic large), axum hello-world | classify shape; axum example needs workspace `--package` | serde incremental body **265**; nalgebra occupies **large\|sig 761**. Isolated axum example path-dep failed (0 ok); rerun from workspace root. | keep |
+| 42 | cross-test | Current 15 elites on rust-loop, hashbrown, serde_derive, ripgrep | `--held-out` `current-elites.json`; strip sample `package` on transfer | Ripgrep incremental body **transfers** to hashbrown (+2%). Graph noop transfers small→mid (−0.8%) and **does not** transfer to serde/ripgrep (+400–1700%). Small noinc body **+148%** on hashbrown. kache does not occupy; warm worktree stays comparison-only. **15/15 stalled** | keep |

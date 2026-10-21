@@ -307,6 +307,36 @@ class MapElites(unittest.TestCase):
         self.assertNotIn("mid|body", archive["cells"])
         self.assertTrue(any(row.get("action") == "held_out" for row in archive["history"]))
 
+    def test_warm_store_does_not_occupy(self):
+        tmp = tempfile.TemporaryDirectory(prefix="map-elites ")
+        self.addCleanup(tmp.cleanup)
+        into = Path(tmp.name) / "map_elites.json"
+        into.write_text(json.dumps({
+            "schema_version": 1,
+            "kind": "nanocompile.rust-loop.map-elites",
+            "axes": {"size": ["small", "mid", "large"], "edit": ["cold", "noop", "body", "sig_dep", "worktree"]},
+            "fitness": {"metric": "median_ms", "goal": "min", "min_gain_pct": 3.0, "max_non_improving": 4},
+            "cells": {},
+            "history": [],
+            "generalization": {"samples": [], "elites_tested": [], "matrix": []},
+            "promoted": {"defaults": None, "sample_specific": []},
+        }), encoding="utf-8")
+        shard = Path(tmp.name) / "warm.json"
+        warm = evaluation("mid|body", fitness=10.0, sample="pinned-hashbrown")
+        warm["genome"]["kache"] = True
+        warm["genome"]["warm_store"] = True
+        warm["cache_state"] = "warm_compiler_cache"
+        shard.write_text(json.dumps({
+            "schema_version": 1,
+            "kind": "nanocompile.rust-loop.map-elites.shard",
+            "sample": "pinned-hashbrown",
+            "evaluations": [warm],
+        }), encoding="utf-8")
+        self.tool(["merge", "--into", str(into), str(shard)])
+        archive = json.loads(into.read_text(encoding="utf-8"))
+        self.assertNotIn("mid|body", archive["cells"])
+        self.assertTrue(any(row.get("action") == "held_out" for row in archive["history"]))
+
     def test_stacked_wrappers_rejected(self):
         tmp = tempfile.TemporaryDirectory(prefix="map-elites ")
         self.addCleanup(tmp.cleanup)

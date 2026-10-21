@@ -1,0 +1,62 @@
+{
+  "schema": 1,
+  "sample": "hashbrown-from-elites",
+  "project": "/workspace/examples/pinned-hashbrown",
+  "timestamp": "2026-10-21T10:08:32.619453+00:00",
+  "runs": 2,
+  "warmup": 1,
+  "offline": true,
+  "platform": "Linux x86_64",
+  "driver": "zig",
+  "tools": {
+    "cargo": "/usr/local/cargo/bin/cargo",
+    "rustc": "/usr/local/cargo/bin/rustc",
+    "mold": "/usr/bin/mold",
+    "sccache": "/usr/local/cargo/bin/sccache",
+    "hyperfine": "/usr/local/cargo/bin/hyperfine",
+    "rust_lld": true,
+    "cranelift": true,
+    "nightly": true,
+    "kache": "/usr/local/cargo/bin/kache",
+    "wild": null,
+    "clippy": true,
+    "nextest": true,
+    "tmpfs": true,
+    "nanocompile": "/workspace/zig-out/bin/nanocompile"
+  },
+  "install_notes": [],
+  "correctness": {
+    "broken_edit": true,
+    "fast_failed": true,
+    "validate_failed": true,
+    "validate_is_final": true,
+    "agree_on_broken": true,
+    "graph_fast_failed": true,
+    "graph_validate_stamp_written": false,
+    "notes": ""
+  },
+  "cells": [],
+  "size": {
+    "size": "mid",
+    "crates": 1,
+    "loc": 23176,
+    "shape": "normal",
+    "proc_macros": 0,
+    "async_hits": 0,
+    "generic_hits": 0
+  },
+  "map_elites": {
+    "shard": "bench/archive/hashbrown-from-elites.json",
+    "evaluations": 15,
+    "size": {
+      "size": "mid",
+      "crates": 1,
+      "loc": 23176,
+      "shape": "normal",
+      "proc_macros": 0,
+      "async_hits": 0,
+      "generic_hits": 0
+    },
+    "held_out": 15
+  }
+}
