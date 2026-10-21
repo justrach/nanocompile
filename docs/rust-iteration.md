@@ -36,7 +36,9 @@ Relax as the gate. `python3 tests/rust_loop.py zig-out/bin/nanocompile` exercise
 that contract with a real Cargo crate.
 
 The [example crate](../examples/rust-loop/README.md) is a no-dependency library
-with the same two-task graph.
+with the same two-task graph. Timing and the broken-edit gate live in
+[rust-iteration-bench.md](rust-iteration-bench.md); the stable entrypoint is
+`bench/rust_loop_bench`.
 
 ## Correctness rule
 
