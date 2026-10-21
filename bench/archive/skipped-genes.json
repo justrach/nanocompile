@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "kind": "nanocompile.rust-loop.skipped-genes",
+  "timestamp": "2026-10-21T09:30:00+00:00",
+  "notes": "Genes requested this round that do not build or are not installed on this runner. Re-probe with bench/rust_loop_bench.tool_probe.",
+  "skipped": [
+    {
+      "gene": "linker=wild",
+      "reason": "wild not on PATH; rustc -C link-arg=-fuse-ld=wild would fail to find the linker"
+    }
+  ]
+}

@@ -9,20 +9,20 @@
   ],
   "$defs": {
     "size": { "type": "string", "enum": ["small", "mid", "large"] },
-    "edit": { "type": "string", "enum": ["cold", "noop", "body", "sig_dep"] },
+    "edit": { "type": "string", "enum": ["cold", "noop", "body", "sig_dep", "worktree"] },
     "cellKey": {
       "type": "string",
-      "pattern": "^(small|mid|large)\\|(cold|noop|body|sig_dep)$",
+      "pattern": "^(small|mid|large)\\|(cold|noop|body|sig_dep|worktree)$",
       "description": "size|edit, for example small|body"
     },
     "backend": { "type": "string", "enum": ["llvm", "cranelift"] },
-    "linker": { "type": "string", "enum": ["default", "mold", "lld"] },
-    "debuginfo": { "type": "string", "enum": ["full", "line-tables-only", "none"] },
+    "linker": { "type": "string", "enum": ["default", "mold", "lld", "wild"] },
+    "debuginfo": { "type": "string", "enum": ["full", "line-tables-only", "none", "split-unpacked", "split-packed"] },
     "fastCheck": { "type": "string", "enum": ["cargo-check", "none"] },
     "loop": {
       "type": "string",
-      "enum": ["check", "graph", "test", "build"],
-      "description": "Iteration command whose wall time is fitness. build is the cranelift-dev gene (codegen). validate (cargo test + LLVM rustc) is not a gene and always runs for the correctness gate."
+      "enum": ["check", "graph", "test", "build", "clippy", "nextest"],
+      "description": "Iteration command whose wall time is fitness. build is the cranelift-dev gene (codegen). clippy/nextest are timed loops only. validate (cargo test + LLVM rustc) is not a gene and always runs for the correctness gate."
     },
     "genome": {
       "type": "object",
@@ -32,6 +32,13 @@
         "dev_backend": { "$ref": "#/$defs/backend" },
         "linker": { "$ref": "#/$defs/linker" },
         "sccache": { "type": "boolean" },
+        "kache": { "type": "boolean", "description": "RUSTC_WRAPPER=kache. Do not stack with wrapper or sccache." },
+        "warm_store": { "type": "boolean", "description": "Keep the compiler cache across emptied target/ or a sibling worktree." },
+        "opt_level_deps": { "type": ["integer", "string", "null"], "description": "profile.dev.package.* opt-level" },
+        "share_generics": { "type": "boolean" },
+        "frontend_threads": { "type": ["integer", "null"] },
+        "hint_mostly_unused": { "type": "boolean" },
+        "target_tmpfs": { "type": "boolean" },
         "codegen_units": { "type": ["integer", "null"], "minimum": 1, "maximum": 256 },
         "incremental": { "type": "boolean" },
         "debuginfo": { "$ref": "#/$defs/debuginfo" },
@@ -140,7 +147,7 @@
           "required": ["size", "edit"],
           "properties": {
             "size": { "type": "array", "prefixItems": [{ "const": "small" }, { "const": "mid" }, { "const": "large" }], "items": false },
-            "edit": { "type": "array", "prefixItems": [{ "const": "cold" }, { "const": "noop" }, { "const": "body" }, { "const": "sig_dep" }], "items": false }
+            "edit": { "type": "array", "prefixItems": [{ "const": "cold" }, { "const": "noop" }, { "const": "body" }, { "const": "sig_dep" }, { "const": "worktree" }], "items": false }
           }
         },
         "size_rules": { "type": "object" },

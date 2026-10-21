@@ -8,12 +8,12 @@ pub const schema: u32 = 1;
 pub const kind = "nanocompile.rust-loop.map-elites";
 pub const shard_kind = "nanocompile.rust-loop.map-elites.shard";
 const sizes = [_][]const u8{ "small", "mid", "large" };
-const edits = [_][]const u8{ "cold", "noop", "body", "sig_dep" };
+const edits = [_][]const u8{ "cold", "noop", "body", "sig_dep", "worktree" };
 const backends = [_][]const u8{ "llvm", "cranelift" };
-const linkers = [_][]const u8{ "default", "mold", "lld" };
-const debug_levels = [_][]const u8{ "full", "line-tables-only", "none" };
+const linkers = [_][]const u8{ "default", "mold", "lld", "wild" };
+const debug_levels = [_][]const u8{ "full", "line-tables-only", "none", "split-unpacked", "split-packed" };
 const fast_checks = [_][]const u8{ "cargo-check", "none" };
-const loops = [_][]const u8{ "check", "graph", "test", "build" };
+const loops = [_][]const u8{ "check", "graph", "test", "build", "clippy", "nextest" };
 const actions = [_][]const u8{ "seed", "replace", "reject", "held_out", "promote", "stop" };
 
 fn eq(a: []const u8, b: []const u8) bool {
@@ -88,6 +88,7 @@ pub fn splitKey(key: []const u8) !struct { size: []const u8, edit: []const u8 } 
 test "map-elites cell keys" {
     _ = try splitKey("small|body");
     _ = try splitKey("large|sig_dep");
+    _ = try splitKey("mid|worktree");
     try std.testing.expectError(error.UnknownMapElitesCell, splitKey("tiny|body"));
     try std.testing.expectError(error.InvalidMapElitesCell, splitKey("nobody"));
 }
@@ -107,10 +108,11 @@ fn genomeOk(genome: std.json.ObjectMap) !void {
     }
     const wrapper = if (get(genome, "wrapper")) |v| try asBool(v) else false;
     const sccache = if (get(genome, "sccache")) |v| try asBool(v) else false;
-    if (wrapper and sccache) return error.StackedWrappers;
+    const kache = if (get(genome, "kache")) |v| try asBool(v) else false;
+    if ((wrapper and sccache) or (wrapper and kache) or (sccache and kache)) return error.StackedWrappers;
     const loop = if (get(genome, "loop")) |v| try asString(v) else "check";
     const backend = if (get(genome, "dev_backend")) |v| try asString(v) else "llvm";
-    if (eq(loop, "test") and eq(backend, "cranelift")) return error.CraneliftValidate;
+    if ((eq(loop, "test") or eq(loop, "nextest")) and eq(backend, "cranelift")) return error.CraneliftValidate;
     if (get(genome, "codegen_units")) |units| switch (units) {
         .null => {},
         .integer => |n| if (n < 1 or n > 256) return error.InvalidCodegenUnits,
@@ -126,6 +128,10 @@ test "map-elites genome rejects stacked wrappers and cranelift test" {
         \\{"wrapper":true,"sccache":true,"dev_backend":"llvm","linker":"default","incremental":true,"debuginfo":"full","fast_check":"cargo-check","loop":"check"}
     , .{});
     try std.testing.expectError(error.StackedWrappers, genomeOk(try asObject(stacked.value)));
+    const kache_stack = try std.json.parseFromSlice(std.json.Value, a,
+        \\{"wrapper":false,"sccache":true,"kache":true,"dev_backend":"llvm","linker":"default","incremental":true,"debuginfo":"full","fast_check":"cargo-check","loop":"check"}
+    , .{});
+    try std.testing.expectError(error.StackedWrappers, genomeOk(try asObject(kache_stack.value)));
     const cranelift = try std.json.parseFromSlice(std.json.Value, a,
         \\{"wrapper":false,"sccache":false,"dev_backend":"cranelift","linker":"default","incremental":true,"debuginfo":"full","fast_check":"none","loop":"test"}
     , .{});
@@ -260,7 +266,7 @@ fn writeJson(ctx: *cache.Context, path: []const u8, value: std.json.Value) !void
 
 fn emptyArchive(ctx: *cache.Context) !std.json.Value {
     const bytes =
-        \\{"schema_version":1,"kind":"nanocompile.rust-loop.map-elites","axes":{"size":["small","mid","large"],"edit":["cold","noop","body","sig_dep"]},"fitness":{"metric":"median_ms","goal":"min","min_gain_pct":3.0,"max_non_improving":4},"cells":{},"history":[],"generalization":{"samples":[],"elites_tested":[],"matrix":[]},"promoted":{"defaults":null,"sample_specific":[]}}
+        \\{"schema_version":1,"kind":"nanocompile.rust-loop.map-elites","axes":{"size":["small","mid","large"],"edit":["cold","noop","body","sig_dep","worktree"]},"fitness":{"metric":"median_ms","goal":"min","min_gain_pct":3.0,"max_non_improving":4},"cells":{},"history":[],"generalization":{"samples":[],"elites_tested":[],"matrix":[]},"promoted":{"defaults":null,"sample_specific":[]}}
     ;
     return (try std.json.parseFromSlice(std.json.Value, ctx.a, bytes, .{ .allocate = .alloc_always })).value;
 }
@@ -436,7 +442,7 @@ fn renderGrid(ctx: *cache.Context, archive: std.json.ObjectMap) ![]const u8 {
     var out: std.ArrayList(u8) = .empty;
     try out.appendSlice(ctx.a, "## MAP-Elites grid\n\n");
     try out.appendSlice(ctx.a, "Canonical archive: [`bench/map_elites.json`](../bench/map_elites.json).\n\n");
-    try out.appendSlice(ctx.a, "| Size \\ Edit | cold | noop | body | sig_dep |\n| --- | ---: | ---: | ---: | ---: |\n");
+    try out.appendSlice(ctx.a, "| Size \\ Edit | cold | noop | body | sig_dep | worktree |\n| --- | ---: | ---: | ---: | ---: | ---: |\n");
     const cells = try asObject(get(archive, "cells") orelse return error.MissingCells);
     for (sizes) |size| {
         try out.appendSlice(ctx.a, try std.fmt.allocPrint(ctx.a, "| {s}", .{size}));

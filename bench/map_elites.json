@@ -12,13 +12,19 @@
       "cold",
       "noop",
       "body",
-      "sig_dep"
+      "sig_dep",
+      "worktree"
     ]
   },
   "size_rules": {
     "small": "Rust LOC < 2000",
     "mid": "Rust LOC >= 2000 and < 50000 and workspace crates <= 20",
-    "large": "otherwise"
+    "large": "otherwise",
+    "sample_class": "fixture = rust-loop* harness trees; real = pinned crates and public mid/large samples",
+    "fitness_method": "official_first_rebuild (rust_loop_bench) vs restore_rebuild_mean_of_medians (PR #11). Do not compare fitness_ms across methods.",
+    "cache_state": "empty = cleared target and compiler cache; warm_compiler_cache = sccache/nanocompile/kache retained across emptied target/ or a sibling worktree",
+    "shape": "recorded on classify (normal / proc_macro / async_web / generic). Not an occupancy axis: a third axis would vacate the stalled size×edit grid.",
+    "worktree": "edit=worktree is a sibling checkout with a new CARGO_TARGET_DIR and a shared compiler cache. That is kache's advertised hit."
   },
   "design_notes": [
     "Two axes (size x edit) yield 12 cells. Disk usage is a recorded metric, not a third axis: a disk tertile would triple the grid and leave most cells empty while four agents are still seeding.",
@@ -26,14 +32,18 @@
     "validate is not a gene. It is always cargo test with default LLVM rustc. A genome that fails the correctness gate (fast path and rustc must agree on broken edits; validate is the final signal) cannot occupy a cell.",
     "Replace an elite only when the new median is at least fitness.min_gain_pct faster (default 3%) and correctness.ok is true. Seed an empty cell with the first passing evaluation.",
     "Stop a cell after fitness.max_non_improving consecutive non-improving tries. Hill-climb restarts may re-seed a stopped cell with a new genome family.",
-    "Do not stack RUSTC_WRAPPER=nanocompile with sccache. Cranelift is a dev-backend gene only; rust-loop run strips it from validate.",
+    "Do not stack RUSTC_WRAPPER=nanocompile with sccache or kache. Compiler caches are mutually exclusive. Cranelift is a dev-backend gene only; rust-loop run strips it from validate.",
     "Other agents write bench/archive/<sample>.json shards. Merge with `nanocompile map-elites merge` or `python3 tools/map_elites.py merge`.",
     "Size is by Rust LOC: small < 2000, mid 2000..50000 and <=20 crates. rust-loop-medium (202 LOC) is small; do not let it occupy mid.",
     "fitness_method is recorded per elite. official_first_rebuild supersedes restore_rebuild_mean_of_medians so the grid unifies on this harness. Do not compare raw ms across methods when reading older shards.",
     "cache_state=warm_compiler_cache means sccache/nanocompile survived an emptied target/. It is not true empty-cache cold and does not set the iteration default.",
     "package_scope=touched (cargo check -p hub) fails the sig_dep correctness gate unless dependents_agree_on_broken. Fallback elite is workspace check.",
     "Promote weights real samples (midsize, pinned-*) over rust-loop fixtures. Fixture cells stay sample-specific when real elites exist.",
-    "Held-out rows (held_out=true, sample contains -held-out, or sample contains -from-) never occupy a cell. Cross-tests must use those names so a faster transfer cannot steal the trained-on elite."
+    "Held-out rows (held_out=true, sample contains -held-out, or sample contains -from-) never occupy a cell. Cross-tests must use those names so a faster transfer cannot steal the trained-on elite.",
+    "worktree is a fifth edit, not a third occupancy axis. Shape (proc_macro / async_web / generic / normal) is classify metadata only.",
+    "kache is RUSTC_WRAPPER=kache with an isolated KACHE_CACHE_DIR. Tag cache_state=empty for an honestly cold store and warm_compiler_cache when warm_store=true (including sibling worktrees).",
+    "loop=clippy and loop=nextest are timed iteration genes only. The correctness gate stays cargo test + LLVM rustc.",
+    "Additional genes that actually run here: linker (default/lld/mold; wild skipped if missing), debuginfo including split-unpacked/split-packed, codegen-units, profile.dev.package.* opt-level, -Zshare-generics, -Zthreads, -Zhint-mostly-unused, Cranelift, CARGO_INCREMENTAL on/off, target-dir on tmpfs (/dev/shm)."
   ],
   "fitness": {
     "metric": "median_ms",

@@ -1,0 +1,13 @@
+{
+  "wrapper": false,
+  "dev_backend": "llvm",
+  "linker": "default",
+  "sccache": false,
+  "kache": false,
+  "codegen_units": null,
+  "incremental": true,
+  "debuginfo": "split-unpacked",
+  "fast_check": "cargo-check",
+  "loop": "check",
+  "offline": true
+}

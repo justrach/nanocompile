@@ -42,6 +42,7 @@ DEFAULT_STEPS = (
     "cranelift-dev",
     "fast-linker",
     "sccache",
+    "kache",
     "crate-shape",
     "disk-hygiene",
 )
@@ -97,7 +98,8 @@ def spread(values):
 
 def cargo_env(base, target, extra=None):
     env = {k: v for k, v in base.items()
-           if k not in ("RUSTC_WRAPPER", "RUSTC_WORKSPACE_WRAPPER")
+           if k not in ("RUSTC_WRAPPER", "RUSTC_WORKSPACE_WRAPPER", "SCCACHE_DIR",
+                        "KACHE_CACHE_DIR", "KACHE_LOCAL_ONLY", "KACHE_SCHEDULER")
            and not k.startswith("CARGO_PROFILE_")
            and k != "CARGO_ENCODED_RUSTFLAGS"
            and (k == "NANOCOMPILE_DIR" or not k.startswith("NANOCOMPILE_"))}
@@ -252,6 +254,9 @@ def _clear_nano_cache(env):
     sccache = env.get("SCCACHE_DIR")
     if sccache and Path(sccache).exists():
         shutil.rmtree(sccache)
+    kache = env.get("KACHE_CACHE_DIR")
+    if kache and Path(kache).exists():
+        shutil.rmtree(kache)
 
 
 def empty_target(target: Path):
@@ -325,6 +330,17 @@ def available_steps(args, tools):
             skip=None if tools["sccache"] else "sccache not installed",
         ),
         StepPlan(
+            "kache", "RUSTC_WRAPPER=kache (isolated KACHE_CACHE_DIR, local-only)",
+            list(args.commands),
+            extra_env={
+                "RUSTC_WRAPPER": tools["kache"],
+                "KACHE_CACHE_DIR": str(args.work / "kache"),
+                "KACHE_LOCAL_ONLY": "1",
+                "KACHE_SCHEDULER": "0",
+            } if tools.get("kache") else {},
+            skip=None if tools.get("kache") else "kache not installed",
+        ),
+        StepPlan(
             "crate-shape", "explicit -C codegen-units=256",
             [c for c in args.commands if c in ("build", "test", "check")],
             extra_env={"RUSTFLAGS": "-C codegen-units=256"},
@@ -369,6 +385,25 @@ def cargo_argv(command, jobs, offline, toolchain=None, extra_flags=None, package
     if command == "test":
         argv.extend(["--", "--test-threads", "1"])
     return argv
+
+
+def cargo_loop_argv(loop, jobs, offline, toolchain=None, extra_flags=None, package=None):
+    """Timed loop command. clippy/nextest are loops, never the validate gate."""
+    if loop == "nextest":
+        argv = ["cargo"]
+        if toolchain:
+            argv = ["cargo", "+" + toolchain]
+        argv.append("nextest")
+        argv.append("run")
+        if package:
+            argv.extend(["-p", package])
+        if jobs:
+            argv.extend(["-j", str(jobs)])
+        if offline:
+            argv.append("--offline")
+        return argv
+    command = {"clippy": "clippy", "build": "build", "test": "test", "check": "check"}.get(loop, "check")
+    return cargo_argv(command, jobs, offline, toolchain, extra_flags, package)
 
 
 def prepare_graph(work, driver, target, wrapper, offline, package=None):
@@ -468,6 +503,11 @@ def tool_probe():
         "rust_lld": bool(rust_lld),
         "cranelift": cranelift,
         "nightly": nightly,
+        "kache": which("kache"),
+        "wild": which("wild"),
+        "clippy": which("cargo") is not None and run(["cargo", "clippy", "--version"]).returncode == 0,
+        "nextest": which("cargo-nextest") is not None or run(["cargo", "nextest", "--version"]).returncode == 0,
+        "tmpfs": Path("/dev/shm").is_dir(),
     }
 
 
@@ -542,18 +582,20 @@ def run_correctness(work, driver, nanocompile, offline, jobs, tools_env, package
         restore_edit(record)
 
 
-def run_cell(step, command, phase, argv, cwd, env, target, warmup, runs, edit_kind=None):
+def run_cell(step, command, phase, argv, cwd, env, target, warmup, runs, edit_kind=None,
+             keep_compiler_cache=False):
     samples = []
-    reset = phase in ("cold",)
+    reset_target = phase in ("cold", "worktree")
     timed_edit = phase in ("edit_body", "edit_sig", "body", "sig_dep")
     kind = edit_kind or (
         "body" if "body" in str(phase) else "sig" if phase in ("edit_sig", "sig_dep") else None
     )
 
     def one_sample():
-        if reset:
+        if reset_target:
             empty_target(target)
-            _clear_nano_cache(env)
+            if not keep_compiler_cache:
+                _clear_nano_cache(env)
         if timed_edit:
             record = edit_project(cwd, kind)
             if record is None:
@@ -709,6 +751,7 @@ STEP_GENOMES = {
     "cranelift-dev": {"dev_backend": "cranelift", "loop": "build"},
     "fast-linker": {"linker": "mold", "loop": "test"},
     "sccache": {"sccache": True, "loop": "check"},
+    "kache": {"kache": True, "loop": "check"},
     "crate-shape": {"codegen_units": 256, "loop": "check"},
     "disk-hygiene": {"debuginfo": "line-tables-only", "loop": "test"},
 }
@@ -720,6 +763,8 @@ def default_genome(**overrides):
         "dev_backend": "llvm",
         "linker": "default",
         "sccache": False,
+        "kache": False,
+        "warm_store": False,
         "codegen_units": None,
         "incremental": True,
         "debuginfo": "full",
@@ -727,8 +772,15 @@ def default_genome(**overrides):
         "loop": "check",
         "jobs": None,
         "offline": False,
+        "opt_level_deps": None,
+        "share_generics": False,
+        "frontend_threads": None,
+        "hint_mostly_unused": False,
+        "target_tmpfs": False,
     }
-    genome.update({k: v for k, v in overrides.items() if v is not None or k == "codegen_units"})
+    genome.update({k: v for k, v in overrides.items() if v is not None or k in (
+        "codegen_units", "opt_level_deps", "frontend_threads",
+    )})
     return genome
 
 
@@ -745,15 +797,23 @@ def git_commit():
     return result.stdout.decode().strip()
 
 
-def genome_env(genome, nano, tools, sccache_dir, isolate_cache):
+def genome_env(genome, nano, tools, sccache_dir, isolate_cache, kache_dir=None):
     extra = {}
     rustflags = []
+    caches = [name for name in ("wrapper", "sccache", "kache") if genome.get(name)]
+    if len(caches) > 1:
+        raise ValueError("cannot stack compiler caches: %s" % ", ".join(caches))
     if genome.get("wrapper") and nano:
         extra["RUSTC_WRAPPER"] = str(nano)
         extra["CARGO_INCREMENTAL"] = "0"
     elif genome.get("sccache") and tools.get("sccache"):
         extra["RUSTC_WRAPPER"] = tools["sccache"]
         extra["SCCACHE_DIR"] = str(sccache_dir)
+    elif genome.get("kache") and tools.get("kache"):
+        extra["RUSTC_WRAPPER"] = tools["kache"]
+        extra["KACHE_CACHE_DIR"] = str(kache_dir or (Path(str(sccache_dir) + ".kache")))
+        extra["KACHE_LOCAL_ONLY"] = "1"
+        extra["KACHE_SCHEDULER"] = "0"
     if genome.get("incremental") is False:
         extra["CARGO_INCREMENTAL"] = "0"
     elif genome.get("incremental") and "CARGO_INCREMENTAL" not in extra:
@@ -767,6 +827,8 @@ def genome_env(genome, nano, tools, sccache_dir, isolate_cache):
         rustflags.append("-C link-arg=-fuse-ld=mold")
     elif linker == "lld":
         rustflags.append("-C link-arg=-fuse-ld=lld")
+    elif linker == "wild":
+        rustflags.append("-C link-arg=-fuse-ld=wild")
     if genome.get("codegen_units"):
         rustflags.append("-C codegen-units=%s" % genome["codegen_units"])
     debuginfo = genome.get("debuginfo") or "full"
@@ -774,6 +836,16 @@ def genome_env(genome, nano, tools, sccache_dir, isolate_cache):
         rustflags.append("-C debuginfo=line-tables-only")
     elif debuginfo == "none":
         rustflags.append("-C debuginfo=0")
+    elif debuginfo == "split-unpacked":
+        rustflags.append("-C split-debuginfo=unpacked")
+    elif debuginfo == "split-packed":
+        rustflags.append("-C split-debuginfo=packed")
+    if genome.get("share_generics"):
+        rustflags.append("-Zshare-generics=y")
+    if genome.get("frontend_threads"):
+        rustflags.append("-Zthreads=%s" % genome["frontend_threads"])
+    if genome.get("hint_mostly_unused"):
+        rustflags.append("-Zhint-mostly-unused")
     if rustflags:
         extra["RUSTFLAGS"] = " ".join(rustflags)
     if isolate_cache:
@@ -795,9 +867,17 @@ def genome_argv(genome, command, jobs, offline, nano, spec):
         command = "check"
     toolchain = None
     extra_flags = None
-    if genome.get("dev_backend") == "cranelift":
+    nightly = genome.get("dev_backend") == "cranelift" or genome.get("share_generics") or genome.get("frontend_threads") or genome.get("hint_mostly_unused")
+    if nightly:
         toolchain = "nightly"
+    if genome.get("dev_backend") == "cranelift":
         extra_flags = ["-Zcodegen-backend"]
+    kind = genome.get("loop") or command or "check"
+    if kind in ("clippy", "nextest", "build", "test", "check"):
+        return cargo_loop_argv(
+            kind, jobs or genome.get("jobs"), offline or genome.get("offline"),
+            toolchain, extra_flags, cargo_package(genome),
+        )
     return cargo_argv(
         command, jobs or genome.get("jobs"), offline or genome.get("offline"),
         toolchain, extra_flags, cargo_package(genome),
@@ -808,42 +888,77 @@ def mutate_genome(genome, tools):
     import copy
     import random
     next_genome = copy.deepcopy(genome)
-    genes = ["wrapper", "linker", "incremental", "debuginfo", "codegen_units", "loop", "sccache"]
+    genes = ["wrapper", "linker", "incremental", "debuginfo", "codegen_units", "loop", "opt_level_deps"]
+    if tools.get("sccache"):
+        genes.append("sccache")
+    if tools.get("kache"):
+        genes.append("kache")
     if tools.get("cranelift"):
         genes.append("dev_backend")
+    if tools.get("nightly"):
+        genes.extend(["share_generics", "frontend_threads", "hint_mostly_unused"])
+    if tools.get("tmpfs"):
+        genes.append("target_tmpfs")
     for gene in random.sample(genes, k=min(2, len(genes))):
         if gene == "wrapper":
             next_genome["wrapper"] = not next_genome.get("wrapper")
             if next_genome["wrapper"]:
                 next_genome["sccache"] = False
+                next_genome["kache"] = False
                 next_genome["incremental"] = False
         elif gene == "sccache":
             next_genome["sccache"] = not next_genome.get("sccache")
             if next_genome["sccache"]:
                 next_genome["wrapper"] = False
+                next_genome["kache"] = False
+        elif gene == "kache":
+            next_genome["kache"] = not next_genome.get("kache")
+            if next_genome["kache"]:
+                next_genome["wrapper"] = False
+                next_genome["sccache"] = False
         elif gene == "incremental":
             next_genome["incremental"] = not next_genome.get("incremental")
         elif gene == "linker":
-            order = ["default", "mold", "lld"]
-            next_genome["linker"] = order[(order.index(next_genome.get("linker") or "default") + 1) % 3]
+            order = ["default", "mold", "lld"] + (["wild"] if tools.get("wild") else [])
+            current = next_genome.get("linker") or "default"
+            next_genome["linker"] = order[(order.index(current) + 1) % len(order)] if current in order else "default"
         elif gene == "debuginfo":
-            order = ["full", "line-tables-only", "none"]
-            next_genome["debuginfo"] = order[(order.index(next_genome.get("debuginfo") or "full") + 1) % 3]
+            order = ["full", "line-tables-only", "none", "split-unpacked", "split-packed"]
+            current = next_genome.get("debuginfo") or "full"
+            next_genome["debuginfo"] = order[(order.index(current) + 1) % len(order)] if current in order else "full"
         elif gene == "codegen_units":
             order = [None, 16, 256]
             current = next_genome.get("codegen_units")
             next_genome["codegen_units"] = order[(order.index(current) + 1) % 3] if current in order else 256
         elif gene == "loop":
             order = ["check", "graph", "test", "build"]
+            if tools.get("clippy"):
+                order.append("clippy")
+            if tools.get("nextest"):
+                order.append("nextest")
             current = next_genome.get("loop") or "check"
             nxt = order[(order.index(current) + 1) % len(order)] if current in order else "check"
-            if nxt == "test":
+            if nxt in ("test", "nextest"):
                 next_genome["dev_backend"] = "llvm"
             next_genome["loop"] = nxt
         elif gene == "dev_backend":
             next_genome["dev_backend"] = "llvm" if next_genome.get("dev_backend") == "cranelift" else "cranelift"
-            if next_genome.get("loop") == "test":
+            if next_genome.get("loop") in ("test", "nextest"):
                 next_genome["dev_backend"] = "llvm"
+        elif gene == "opt_level_deps":
+            order = [None, 1, 2, 3]
+            current = next_genome.get("opt_level_deps")
+            next_genome["opt_level_deps"] = order[(order.index(current) + 1) % len(order)] if current in order else 2
+        elif gene == "share_generics":
+            next_genome["share_generics"] = not next_genome.get("share_generics")
+        elif gene == "frontend_threads":
+            order = [None, 4, 8]
+            current = next_genome.get("frontend_threads")
+            next_genome["frontend_threads"] = order[(order.index(current) + 1) % len(order)] if current in order else 8
+        elif gene == "hint_mostly_unused":
+            next_genome["hint_mostly_unused"] = not next_genome.get("hint_mostly_unused")
+        elif gene == "target_tmpfs":
+            next_genome["target_tmpfs"] = not next_genome.get("target_tmpfs")
     return next_genome
 
 
@@ -854,12 +969,25 @@ def seed_genomes(nano, tools):
         default_genome(),
         default_genome(wrapper=True, incremental=False) if nano else None,
         default_genome(sccache=True) if tools.get("sccache") else None,
+        default_genome(sccache=True, incremental=False) if tools.get("sccache") else None,
+        default_genome(kache=True) if tools.get("kache") else None,
+        default_genome(kache=True, incremental=False) if tools.get("kache") else None,
+        default_genome(kache=True, warm_store=True) if tools.get("kache") else None,
         default_genome(codegen_units=256),
         default_genome(incremental=False),
         default_genome(debuginfo="line-tables-only"),
+        default_genome(debuginfo="split-unpacked"),
+        default_genome(opt_level_deps=2),
+        default_genome(target_tmpfs=True) if tools.get("tmpfs") else None,
+        default_genome(share_generics=True) if tools.get("nightly") else None,
+        default_genome(frontend_threads=8) if tools.get("nightly") else None,
+        default_genome(hint_mostly_unused=True) if tools.get("nightly") else None,
         default_genome(dev_backend="cranelift", loop="build") if tools.get("cranelift") else None,
         default_genome(loop="graph", wrapper=True, incremental=False) if nano else None,
-        default_genome(linker="mold", loop="test") if tools.get("mold") else default_genome(linker="lld", loop="test"),
+        default_genome(linker="mold", loop="build") if tools.get("mold") else default_genome(linker="lld", loop="build"),
+        default_genome(linker="wild", loop="build") if tools.get("wild") else None,
+        default_genome(loop="clippy") if tools.get("clippy") else None,
+        default_genome(loop="nextest") if tools.get("nextest") else None,
         default_genome(debuginfo="line-tables-only", loop="test"),
         default_genome(wrapper=True, incremental=False, debuginfo="line-tables-only", loop="graph") if nano else None,
     ]
@@ -891,7 +1019,8 @@ def evaluation_row(cell, size, edit, genome, summary, correctness, sample, commi
         "fitness_method": "official_first_rebuild",
         "sample_class": "fixture" if str(sample).startswith("rust-loop") else "real",
         "cache_state": (
-            "empty" if edit == "cold" else None
+            "warm_compiler_cache" if edit in ("cold", "worktree") and genome.get("warm_store")
+            else "empty" if edit in ("cold", "worktree") else None
         ),
     }
 
@@ -939,10 +1068,58 @@ def shard_from_report(report, size):
     return evaluations
 
 
+OPT_DEPS_MARK = "# nano-loop-opt-deps"
+
+
+def apply_dep_opt_level(work, level):
+    cargo_dir = work / ".cargo"
+    cargo_dir.mkdir(exist_ok=True)
+    config = cargo_dir / "config.toml"
+    existing = config.read_text(encoding="utf-8") if config.is_file() else ""
+    if OPT_DEPS_MARK in existing:
+        kept = []
+        skip = False
+        for line in existing.splitlines(True):
+            if line.startswith(OPT_DEPS_MARK) or line.startswith('[profile.dev.package."*"]'):
+                skip = True
+                continue
+            if skip and line.strip().startswith("opt-level"):
+                continue
+            if skip and not line.strip():
+                skip = False
+                continue
+            skip = False
+            kept.append(line)
+        existing = "".join(kept)
+    if level is None:
+        if existing.strip():
+            config.write_text(existing, encoding="utf-8")
+        elif config.is_file():
+            config.unlink()
+        return
+    block = '%s\n[profile.dev.package."*"]\nopt-level = %s\n' % (OPT_DEPS_MARK, json.dumps(level))
+    config.write_text(existing.rstrip() + ("\n" if existing.strip() else "") + block, encoding="utf-8")
+
+
 def measure_genome(genome, work, driver, nano, tools, base_env, jobs, offline, warmup, runs, edit, work_root, target):
     isolate = work_root / "nano-cache"
-    extra = genome_env(genome, nano, tools, Path(str(target) + ".sccache"), isolate)
+    cache_dir = Path(str(target) + ".sccache")
+    kache_dir = Path(str(target) + ".kache")
+    if genome.get("target_tmpfs") and Path("/dev/shm").is_dir():
+        shm = Path("/dev/shm/nano-rust-loop") / target.name
+        shm.mkdir(parents=True, exist_ok=True)
+        target = shm
+    if genome.get("kache") and not tools.get("kache"):
+        return None, "kache not installed"
+    if genome.get("sccache") and not tools.get("sccache"):
+        return None, "sccache not installed"
+    if genome.get("loop") == "nextest" and not tools.get("nextest"):
+        return None, "cargo-nextest not installed"
+    if genome.get("loop") == "clippy" and not tools.get("clippy"):
+        return None, "clippy not installed"
+    extra = genome_env(genome, nano, tools, cache_dir, isolate, kache_dir)
     env = cargo_env(base_env, target, extra)
+    apply_dep_opt_level(work, genome.get("opt_level_deps"))
     if genome.get("loop") == "test":
         env.pop("CARGO_PROFILE_DEV_CODEGEN_BACKEND", None)
         env.pop("CARGO_PROFILE_TEST_CODEGEN_BACKEND", None)
@@ -957,8 +1134,16 @@ def measure_genome(genome, work, driver, nano, tools, base_env, jobs, offline, w
     argv = genome_argv(genome, "check", jobs, offline, nano, spec)
     if argv is None:
         return None, "cannot build argv for genome"
+    keep_cache = bool(genome.get("warm_store"))
     if edit == "cold":
         empty_target(target)
+        if keep_cache:
+            populate = Path(str(target) + ".populate")
+            empty_target(populate)
+            measure_once(argv, work, env, populate)
+            empty_target(target)
+        else:
+            _clear_nano_cache(env)
         if (work / ".nanocompile-loop").exists():
             shutil.rmtree(work / ".nanocompile-loop")
     elif edit in ("body", "sig_dep"):
@@ -966,10 +1151,41 @@ def measure_genome(genome, work, driver, nano, tools, base_env, jobs, offline, w
         if probe is None:
             return None, "no safe edit site"
         restore_edit(probe)
+    elif edit == "worktree":
+        sibling = work_root / "worktree-b"
+        if sibling.exists():
+            shutil.rmtree(sibling)
+        copy_project(work, sibling)
+        apply_dep_opt_level(sibling, genome.get("opt_level_deps"))
+        sibling_target = work_root / "targets" / "worktree" / target.name
+        if genome.get("target_tmpfs") and Path("/dev/shm").is_dir():
+            sibling_target = Path("/dev/shm/nano-rust-loop") / ("worktree-" + target.name)
+        empty_target(sibling_target)
+        if keep_cache:
+            # Populate the shared store from the original tree first.
+            measure_once(argv, work, env, target)
+        else:
+            _clear_nano_cache(env)
+        sib_env = cargo_env(base_env, sibling_target, extra)
+        if genome.get("loop") == "graph":
+            spec, err = prepare_graph(
+                sibling, driver, sibling_target, nano, offline or genome.get("offline"),
+                cargo_package(genome),
+            )
+            if spec is None:
+                return None, err or "worktree graph spec failed"
+            argv = genome_argv(genome, "check", jobs, offline, nano, spec)
+        summary = run_cell(
+            type("S", (), {"id": "genome", "title": "genome"})(),
+            genome.get("loop"), "worktree", argv, sibling, sib_env, sibling_target, warmup, runs,
+            keep_compiler_cache=keep_cache,
+        )
+        return summary, None
     summary = run_cell(
         type("S", (), {"id": "genome", "title": "genome"})(),
         genome.get("loop"), edit, argv, work, env, target, warmup, runs,
         "body" if edit == "body" else "sig" if edit == "sig_dep" else None,
+        keep_compiler_cache=keep_cache if edit == "cold" else False,
     )
     return summary, None
 
@@ -982,10 +1198,15 @@ def execute_map_elites(args, work, driver, nano, tools, base_env, offline, corre
     seeds = seed_genomes(nano, tools)
     if args.genome:
         seeds = [default_genome(**json.loads(Path(args.genome).read_text(encoding="utf-8")))]
-    edits = ("cold", "noop", "body", "sig_dep")
+    edits = ("cold", "noop", "body", "sig_dep", "worktree")
     elites = {}
 
     def record(row):
+        genome = row.get("genome") or {}
+        if genome.get("loop") == "graph" and row.get("edit") in ("body", "sig_dep") and (
+            row.get("fitness_ms") or 0
+        ) < 10:
+            return
         evaluations.append(row)
         write_shard(destination, sample, evaluations, commit)
         elite = elites.get(row["cell"])

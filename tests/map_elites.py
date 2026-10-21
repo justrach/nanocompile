@@ -65,7 +65,7 @@ class MapElites(unittest.TestCase):
         self.assertEqual(data["schema_version"], 1)
         self.assertEqual(data["kind"], "nanocompile.rust-loop.map-elites")
         self.assertEqual(data["axes"]["size"], ["small", "mid", "large"])
-        self.assertEqual(data["axes"]["edit"], ["cold", "noop", "body", "sig_dep"])
+        self.assertEqual(data["axes"]["edit"], ["cold", "noop", "body", "sig_dep", "worktree"])
 
     def test_merge_keeps_faster_correct_elite(self):
         tmp = tempfile.TemporaryDirectory(prefix="map-elites ")
@@ -95,9 +95,12 @@ class MapElites(unittest.TestCase):
     def test_classify_example_is_small(self):
         listed = json.loads(self.tool(["classify", str(ROOT / "examples" / "rust-loop")]).stdout)
         self.assertEqual(listed["size"], "small")
+        self.assertEqual(listed["shape"], "normal")
         medium = json.loads(self.tool(["classify", str(ROOT / "examples" / "rust-loop-medium")]).stdout)
         self.assertEqual(medium["size"], "small")
         self.assertLess(medium["loc"], 2000)
+        self.assertIn("proc_macros", listed)
+        self.assertIn("async_hits", listed)
 
     def test_classify_pinned_hashbrown_is_mid(self):
         pinned = ROOT / "examples" / "pinned-hashbrown"
@@ -105,6 +108,8 @@ class MapElites(unittest.TestCase):
         self.assertEqual(listed["size"], "mid")
         self.assertGreaterEqual(listed["loc"], 2000)
         self.assertLess(listed["loc"], 50000)
+        # A serde_derive lock entry is not enough to call a crate proc-macro-heavy.
+        self.assertEqual(listed["shape"], "normal")
 
     def test_cranelift_build_genome_ok_test_rejected(self):
         tmp = tempfile.TemporaryDirectory(prefix="map-elites ")
@@ -137,7 +142,7 @@ class MapElites(unittest.TestCase):
         into.write_text(json.dumps({
             "schema_version": 1,
             "kind": "nanocompile.rust-loop.map-elites",
-            "axes": {"size": ["small", "mid", "large"], "edit": ["cold", "noop", "body", "sig_dep"]},
+            "axes": {"size": ["small", "mid", "large"], "edit": ["cold", "noop", "body", "sig_dep", "worktree"]},
             "fitness": {"metric": "median_ms", "goal": "min", "min_gain_pct": 3.0, "max_non_improving": 4},
             "cells": {},
             "history": [],
@@ -184,7 +189,7 @@ class MapElites(unittest.TestCase):
         into.write_text(json.dumps({
             "schema_version": 1,
             "kind": "nanocompile.rust-loop.map-elites",
-            "axes": {"size": ["small", "mid", "large"], "edit": ["cold", "noop", "body", "sig_dep"]},
+            "axes": {"size": ["small", "mid", "large"], "edit": ["cold", "noop", "body", "sig_dep", "worktree"]},
             "fitness": {"metric": "median_ms", "goal": "min", "min_gain_pct": 3.0, "max_non_improving": 4},
             "cells": {"small|body": fixture, "large|body": real},
             "history": [],
@@ -209,7 +214,7 @@ class MapElites(unittest.TestCase):
         into.write_text(json.dumps({
             "schema_version": 1,
             "kind": "nanocompile.rust-loop.map-elites",
-            "axes": {"size": ["small", "mid", "large"], "edit": ["cold", "noop", "body", "sig_dep"]},
+            "axes": {"size": ["small", "mid", "large"], "edit": ["cold", "noop", "body", "sig_dep", "worktree"]},
             "fitness": {"metric": "median_ms", "goal": "min", "min_gain_pct": 3.0, "max_non_improving": 4},
             "cells": {"mid|cold": empty},
             "history": [],
@@ -243,7 +248,7 @@ class MapElites(unittest.TestCase):
         into.write_text(json.dumps({
             "schema_version": 1,
             "kind": "nanocompile.rust-loop.map-elites",
-            "axes": {"size": ["small", "mid", "large"], "edit": ["cold", "noop", "body", "sig_dep"]},
+            "axes": {"size": ["small", "mid", "large"], "edit": ["cold", "noop", "body", "sig_dep", "worktree"]},
             "fitness": {"metric": "median_ms", "goal": "min", "min_gain_pct": 3.0, "max_non_improving": 4},
             "cells": {"large|sig_dep": restore},
             "history": [],
@@ -276,7 +281,7 @@ class MapElites(unittest.TestCase):
         into.write_text(json.dumps({
             "schema_version": 1,
             "kind": "nanocompile.rust-loop.map-elites",
-            "axes": {"size": ["small", "mid", "large"], "edit": ["cold", "noop", "body", "sig_dep"]},
+            "axes": {"size": ["small", "mid", "large"], "edit": ["cold", "noop", "body", "sig_dep", "worktree"]},
             "fitness": {"metric": "median_ms", "goal": "min", "min_gain_pct": 3.0, "max_non_improving": 4},
             "cells": {"mid|cold": elite},
             "history": [],
@@ -315,6 +320,10 @@ class MapElites(unittest.TestCase):
         data = json.loads(bad.read_text(encoding="utf-8"))
         data["evaluations"][0]["genome"]["wrapper"] = True
         data["evaluations"][0]["genome"]["sccache"] = True
+        bad.write_text(json.dumps(data), encoding="utf-8")
+        self.tool(["validate", str(bad)], expected=2)
+        data["evaluations"][0]["genome"]["wrapper"] = False
+        data["evaluations"][0]["genome"]["kache"] = True
         bad.write_text(json.dumps(data), encoding="utf-8")
         self.tool(["validate", str(bad)], expected=2)
 

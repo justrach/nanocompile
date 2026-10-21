@@ -157,6 +157,79 @@ class RustLoopBench(unittest.TestCase):
         self.assertIn("check", loops[:first_test])
         self.assertIn("build", loops[:first_test])
 
+    def test_kache_env_is_exclusive(self):
+        env = BENCH.genome_env(
+            BENCH.default_genome(kache=True, incremental=True),
+            None, {"kache": "/usr/bin/kache"}, Path("/tmp/sccache"), None,
+            Path("/tmp/kache-store"),
+        )
+        self.assertEqual(env["RUSTC_WRAPPER"], "/usr/bin/kache")
+        self.assertEqual(env["KACHE_CACHE_DIR"], "/tmp/kache-store")
+        self.assertEqual(env["KACHE_LOCAL_ONLY"], "1")
+        self.assertEqual(env["KACHE_SCHEDULER"], "0")
+        self.assertEqual(env["CARGO_INCREMENTAL"], "1")
+        with self.assertRaises(ValueError):
+            BENCH.genome_env(
+                BENCH.default_genome(kache=True, sccache=True),
+                None, {"kache": "/usr/bin/kache", "sccache": "/usr/bin/sccache"},
+                Path("/tmp/sccache"), None, Path("/tmp/kache-store"),
+            )
+        with self.assertRaises(ValueError):
+            BENCH.genome_env(
+                BENCH.default_genome(kache=True, wrapper=True),
+                "/bin/nano", {"kache": "/usr/bin/kache"},
+                Path("/tmp/sccache"), None, Path("/tmp/kache-store"),
+            )
+
+    def test_cargo_loop_argv_nextest_and_clippy(self):
+        nextest = BENCH.cargo_loop_argv("nextest", 4, True, package="ruff")
+        self.assertEqual(nextest[:3], ["cargo", "nextest", "run"])
+        self.assertIn("-p", nextest)
+        self.assertEqual(nextest[nextest.index("-p") + 1], "ruff")
+        self.assertIn("--offline", nextest)
+        clippy = BENCH.cargo_loop_argv("clippy", None, False)
+        self.assertEqual(clippy[:2], ["cargo", "clippy"])
+        nightly = BENCH.genome_argv(
+            BENCH.default_genome(share_generics=True, loop="check"),
+            "check", None, False, None, None,
+        )
+        self.assertEqual(nightly[:3], ["cargo", "+nightly", "check"])
+
+    def test_worktree_and_warm_store_cache_state(self):
+        cold_empty = BENCH.evaluation_row(
+            "mid|worktree", "mid", "worktree",
+            BENCH.default_genome(kache=True),
+            {"median_ms": 1.0, "stdev_ms": 0.0, "target_bytes": 1, "samples_ms": [1.0]},
+            {"agree_on_broken": True, "validate_is_final": True},
+            "pinned-hashbrown", "deadbeef",
+        )
+        self.assertEqual(cold_empty["cache_state"], "empty")
+        warm = BENCH.evaluation_row(
+            "mid|worktree", "mid", "worktree",
+            BENCH.default_genome(kache=True, warm_store=True),
+            {"median_ms": 1.0, "stdev_ms": 0.0, "target_bytes": 1, "samples_ms": [1.0]},
+            {"agree_on_broken": True, "validate_is_final": True},
+            "pinned-hashbrown", "deadbeef",
+        )
+        self.assertEqual(warm["cache_state"], "warm_compiler_cache")
+        noop = BENCH.evaluation_row(
+            "mid|noop", "mid", "noop",
+            BENCH.default_genome(kache=True, warm_store=True),
+            {"median_ms": 1.0, "stdev_ms": 0.0, "target_bytes": 1, "samples_ms": [1.0]},
+            {"agree_on_broken": True, "validate_is_final": True},
+            "pinned-hashbrown", "deadbeef",
+        )
+        self.assertIsNone(noop["cache_state"])
+
+    def test_clear_kache_dir(self):
+        import tempfile
+        root = Path(tempfile.mkdtemp(prefix="nano-kache-"))
+        cache = root / "kache"
+        cache.mkdir()
+        (cache / "hit").write_text("x", encoding="utf-8")
+        BENCH._clear_nano_cache({"KACHE_CACHE_DIR": str(cache)})
+        self.assertFalse(cache.exists())
+
 
 class NightlyPair(unittest.TestCase):
     def test_pair_argv_isolates_backend_from_runner(self):

@@ -64,6 +64,7 @@ Phases, in order, per step × command:
 | `noop` | unchanged sources, retained target |
 | `edit_body` | insert a no-op into a function body (`// nano-loop-body` or the first `fn`) |
 | `edit_sig` | add `_nano_loop_sig: ()` (`// nano-loop-sig` or the first `fn`) |
+| `worktree` | sibling checkout + new `CARGO_TARGET_DIR`; compiler cache shared when `warm_store` |
 
 Each cell records sample wall times, median, population stdev, min/max, and
 `target/` byte size. Incremental edits are applied, timed, and reverted **per
@@ -82,6 +83,7 @@ independent first rebuilds, not no-ops of an already-edited workspace.
 | `cranelift-dev` | `cargo +nightly -Zcodegen-backend` plus `RUSTFLAGS=-Zcodegen-backend=cranelift` (no `CARGO_PROFILE_*` / no `cargo-features` in the user's manifest) |
 | `fast-linker` | `-C link-arg=-fuse-ld=mold` or `lld` on build/test |
 | `sccache` | `RUSTC_WRAPPER=sccache` |
+| `kache` | `RUSTC_WRAPPER=kache` with isolated `KACHE_CACHE_DIR` (local-only, no scheduler) |
 | `crate-shape` | `-C codegen-units=256` |
 | `disk-hygiene` | `-C debuginfo=line-tables-only` |
 
@@ -119,15 +121,21 @@ python3 tools/map_elites.py render --into docs/rust-iteration-bench.md
 ```
 
 The grid is **size** (`small` / `mid` / `large`) × **edit** (`cold` / `noop` /
-`body` / `sig_dep`). Disk use is recorded per elite, not a third axis — a disk
-tertile would make 36 cells and leave most empty while four agents are seeding.
+`body` / `sig_dep` / `worktree`). Disk use is recorded per elite, not a third
+axis. Crate shape (`proc_macro` / `async_web` / `generic` / `normal`) is
+classify metadata only — a third occupancy axis would vacate the stalled
+size × edit grid.
 
 A genome is the full loop config (`wrapper`, `dev_backend`, `linker`, `sccache`,
-`codegen_units`, `incremental`, `debuginfo`, `fast_check`, `loop`, `jobs`,
-`offline`). `loop` is `check`, `graph`, `test`, or `build`. `build` is the
-cranelift-dev gene because `cargo check` skips codegen. `validate` is **not**
-a gene: it is always `cargo test` with LLVM rustc. Merge replaces a cell only
-when the new median is ≥3% faster and `correctness.ok` is true.
+`kache`, `warm_store`, `codegen_units`, `incremental`, `debuginfo`, `fast_check`,
+`loop`, `jobs`, `offline`, plus optional `opt_level_deps`, `share_generics`,
+`frontend_threads`, `hint_mostly_unused`, `target_tmpfs`). `loop` is `check`,
+`graph`, `test`, `build`, `clippy`, or `nextest`. `build` is the cranelift-dev
+gene because `cargo check` skips codegen. `clippy` / `nextest` are timed loops
+only. `validate` is **not** a gene: it is always `cargo test` with LLVM rustc.
+Compiler caches (`wrapper` / `sccache` / `kache`) are mutually exclusive.
+Merge replaces a cell only when the new median is ≥3% faster and
+`correctness.ok` is true.
 
 Size is by Rust LOC, not crate-count tricks: `small` is LOC < 2000,
 `mid` is 2000 ≤ LOC < 50000 and ≤20 crates, else `large`. The three-crate
@@ -142,8 +150,10 @@ Each elite records `fitness_method` and, for cold cells, `cache_state`.
 `official_first_rebuild` is this harness. `restore_rebuild_mean_of_medians`
 is the PR #11 protocol (restore+rebuild before every timed edit, then mean
 of the two project medians). Do not compare raw ms across methods.
-`warm_compiler_cache` means sccache/nanocompile stayed populated after
-`target/` was emptied — not a true empty-cache cold.
+`warm_compiler_cache` means sccache/nanocompile/kache stayed populated after
+`target/` was emptied, or a sibling worktree reused that store — not a true
+empty-cache cold. Head-to-head wrapper compares live in
+[`bench/compare_wrappers.py`](../bench/compare_wrappers.py).
 
 `package_scope=touched` (`cargo check -p` the hub crate) cannot occupy
 `sig_dep` unless `correctness.dependents_agree_on_broken` is true. Promote

@@ -26,13 +26,14 @@ SCHEMA = 1
 KIND = "nanocompile.rust-loop.map-elites"
 SHARD_KIND = KIND + ".shard"
 SIZES = ("small", "mid", "large")
-EDITS = ("cold", "noop", "body", "sig_dep")
+EDITS = ("cold", "noop", "body", "sig_dep", "worktree")
 BACKENDS = ("llvm", "cranelift")
-LINKERS = ("default", "mold", "lld")
-DEBUGINFO = ("full", "line-tables-only", "none")
+LINKERS = ("default", "mold", "lld", "wild")
+DEBUGINFO = ("full", "line-tables-only", "none", "split-unpacked", "split-packed")
 FAST_CHECK = ("cargo-check", "none")
-LOOPS = ("check", "graph", "test", "build")
+LOOPS = ("check", "graph", "test", "build", "clippy", "nextest")
 PACKAGE_SCOPES = ("workspace", "touched")
+SHAPES = ("normal", "proc_macro", "async_web", "generic")
 FITNESS_METHODS = ("official_first_rebuild", "restore_rebuild_mean_of_medians")
 CACHE_STATES = ("empty", "warm_compiler_cache")
 SAMPLE_CLASSES = ("fixture", "real")
@@ -53,7 +54,9 @@ EMPTY = {
         "large": "otherwise",
         "sample_class": "fixture = rust-loop* harness trees; real = pinned crates and public mid/large samples",
         "fitness_method": "official_first_rebuild (rust_loop_bench) vs restore_rebuild_mean_of_medians (PR #11). Do not compare fitness_ms across methods.",
-        "cache_state": "empty = cleared target and compiler cache; warm_compiler_cache = sccache/nanocompile retained across emptied target/",
+        "cache_state": "empty = cleared target and compiler cache; warm_compiler_cache = sccache/nanocompile/kache retained across emptied target/ or a sibling worktree",
+        "shape": "recorded on classify (normal / proc_macro / async_web / generic). Not an occupancy axis: a third axis would vacate the stalled size×edit grid.",
+        "worktree": "edit=worktree is a sibling checkout with a new CARGO_TARGET_DIR and a shared compiler cache. That is kache's advertised hit.",
     },
     "fitness": {
         "metric": "median_ms",
@@ -135,10 +138,11 @@ def genome_ok(genome):
     ):
         if key in genome and genome[key] is not None and genome[key] not in allowed:
             fail("genome.%s must be one of %s" % (key, ", ".join(allowed)))
-    if genome.get("wrapper") and genome.get("sccache"):
-        fail("genome cannot stack nanocompile wrapper with sccache")
-    if genome.get("loop") == "test" and genome.get("dev_backend") == "cranelift":
-        fail("genome.loop=test cannot use cranelift; validate is LLVM rustc")
+    caches = [name for name in ("wrapper", "sccache", "kache") if genome.get(name)]
+    if len(caches) > 1:
+        fail("genome cannot stack compiler caches (%s)" % ", ".join(caches))
+    if genome.get("loop") in ("test", "nextest") and genome.get("dev_backend") == "cranelift":
+        fail("genome.loop=%s cannot use cranelift; validate is LLVM rustc" % genome.get("loop"))
     units = genome.get("codegen_units")
     if units is not None and (not isinstance(units, int) or units < 1 or units > 256):
         fail("genome.codegen_units must be null or 1..256")
@@ -252,7 +256,9 @@ def annotate_row(row, shard=None):
             row["fitness_method"] = "official_first_rebuild"
     genome = row.get("genome") or {}
     if not row.get("cache_state"):
-        if row.get("edit") == "cold" and (genome.get("sccache") or genome.get("wrapper")):
+        if row.get("edit") in ("cold", "worktree") and (
+            genome.get("sccache") or genome.get("wrapper") or genome.get("kache") or genome.get("warm_store")
+        ):
             spread = row.get("spread_ms")
             fitness = row.get("fitness_ms") or 0
             # Two-sample wrapper/sccache colds with a huge spread are a miss
@@ -535,7 +541,41 @@ def classify(root: Path):
         size = "mid"
     else:
         size = "large"
-    return {"size": size, "crates": crates, "loc": loc}
+    proc_macros = 0
+    deps = 0
+    lock = root / "Cargo.lock"
+    lock_text = lock.read_text(encoding="utf-8") if lock.is_file() else ""
+    for path in root.rglob("Cargo.toml"):
+        if any(part in {"target", ".git"} for part in path.parts):
+            continue
+        try:
+            body = path.read_text(encoding="utf-8")
+        except OSError:
+            continue
+        if "proc-macro" in body.replace("_", "-"):
+            proc_macros += 1
+        deps += body.count("\n")
+    haystack = lock_text + "\n" + text
+    async_hits = sum(1 for name in ("tokio", "hyper", "axum", "warp") if name in haystack)
+    generic_hits = sum(1 for name in ("nalgebra", "ndarray", "polars", "typenum") if name in haystack)
+    # serde_derive-in-lock is too common to mean "proc-macro-heavy".
+    if "proc-macro = true" in text or proc_macros >= 2:
+        shape = "proc_macro"
+    elif async_hits >= 2:
+        shape = "async_web"
+    elif generic_hits >= 1:
+        shape = "generic"
+    else:
+        shape = "normal"
+    return {
+        "size": size,
+        "crates": crates,
+        "loc": loc,
+        "shape": shape,
+        "proc_macros": proc_macros,
+        "async_hits": async_hits,
+        "generic_hits": generic_hits,
+    }
 
 
 def render(archive):
@@ -547,11 +587,12 @@ def render(archive):
         "Merge shards from `bench/archive/<sample>.json` with "
         "`nanocompile map-elites merge` or `python3 tools/map_elites.py merge`.",
         "",
-        "Axes: size (`small` / `mid` / `large`) × edit (`cold` / `noop` / `body` / `sig_dep`).",
+        "Axes: size (`small` / `mid` / `large`) × edit (`cold` / `noop` / `body` / `sig_dep` / `worktree`).",
         "Fitness is median loop wall time in ms (lower is better). Disk is recorded, not an axis.",
+        "Worktree is a sibling checkout + new target dir + shared compiler cache.",
         "",
-        "| Size \\ Edit | cold | noop | body | sig_dep |",
-        "| --- | ---: | ---: | ---: | ---: |",
+        "| Size \\ Edit | cold | noop | body | sig_dep | worktree |",
+        "| --- | ---: | ---: | ---: | ---: | ---: |",
     ]
     cells = archive.get("cells") or {}
     for size in SIZES:
@@ -675,6 +716,7 @@ def promote(archive):
             genome.get("debuginfo") or "full",
             bool(genome.get("incremental")),
             bool(genome.get("sccache")),
+            bool(genome.get("kache")),
             package_scope(genome),
         )
 

@@ -59,7 +59,9 @@ A shard is schema 1, kind `nanocompile.rust-loop.map-elites.shard`:
 Cell key is `size|edit`. Size buckets: `small` / `mid` / `large` (see
 `size_rules` in the archive). `small` is Rust LOC < 2000; `mid` is
 2000 ≤ LOC < 50000 and ≤20 crates. Edit types: `cold`, `noop`, `body`,
-`sig_dep`. On a one-crate sample, `sig_dep` is a local signature change.
+`sig_dep`, `worktree`. On a one-crate sample, `sig_dep` is a local signature
+change. `worktree` is a sibling checkout with a new `CARGO_TARGET_DIR` and a
+shared compiler cache (kache's advertised hit).
 `loop=build` is allowed and is the cranelift-dev gene. `loop=test` cannot
 use `dev_backend=cranelift`. Record `fitness_method` and `cache_state` on
 every evaluation. `package_scope=touched` needs
