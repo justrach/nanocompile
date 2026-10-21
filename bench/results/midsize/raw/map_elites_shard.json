@@ -1,0 +1,2216 @@
+{
+  "schema": 1,
+  "format": "nanocompile.map_elites.shard",
+  "canonical": false,
+  "shard": "midsize",
+  "size_bucket": "midsize",
+  "generated_at": "2026-10-21T03:18:36.449411+00:00",
+  "updated_at": "2026-10-21T03:30:33.827204+00:00",
+  "commit": "2348d3b550f59c3946d72cf0e10f5e2d8219a01c",
+  "host": {
+    "sysname": "Linux",
+    "machine": "x86_64",
+    "nproc": 4,
+    "rustc": "rustc 1.99.1 (58cf8f9c3 2026-10-13)",
+    "nightly": "rustc 1.101.0-nightly (19833af72 2026-10-20)",
+    "mold": "mold 3.0.0 (8de38c35a2df16a25f7ff87ac3ad07156a925beb; compatible with GNU ld)",
+    "sccache": "sccache 0.18.0",
+    "hyperfine": "hyperfine 2.0.0",
+    "nanocompile": "/workspace/zig-out/bin/nanocompile"
+  },
+  "samples": {
+    "ripgrep": {
+      "name": "ripgrep-15.2.0",
+      "tag": "15.2.0",
+      "sha": "e89fff89ac9af12e8d4ce9d5fd07beb408ca730f"
+    },
+    "tokio": {
+      "name": "tokio-1.54.0",
+      "tag": "tokio-1.54.0",
+      "sha": "66d34e45c9c850ed72bc61f2ad107368217f040d"
+    }
+  },
+  "axes": {
+    "size_bucket": [
+      "tiny",
+      "small",
+      "midsize",
+      "large",
+      "own"
+    ],
+    "edit_type": [
+      "cold",
+      "noop",
+      "fn_body",
+      "signature"
+    ]
+  },
+  "genome_keys": [
+    "command",
+    "incremental",
+    "wrapper",
+    "linker",
+    "codegen_backend",
+    "codegen_units",
+    "debuginfo",
+    "quiet",
+    "package_scope",
+    "jobs",
+    "toolchain",
+    "offline"
+  ],
+  "fitness": {
+    "metric": "median_wall_ms",
+    "lower_is_better": true,
+    "aggregation": "mean_of_per_sample_medians",
+    "correctness_gate": "fast-check and rust_loop validate must both fail on a broken edit; validate refuses cranelift",
+    "win_pct": 3.0,
+    "stop_after_sub3": 4
+  },
+  "cells": {
+    "midsize|cold": {
+      "key": "midsize|cold",
+      "size_bucket": "midsize",
+      "edit_type": "cold",
+      "elite": {
+        "genome": {
+          "command": "check",
+          "incremental": false,
+          "wrapper": "sccache",
+          "linker": null,
+          "codegen_backend": null,
+          "codegen_units": null,
+          "debuginfo": null,
+          "quiet": false,
+          "package_scope": null,
+          "jobs": 3,
+          "toolchain": "stable",
+          "offline": true
+        },
+        "genome_id": "d19d7776a17c",
+        "fitness_ms": 1387.3198349999143,
+        "spread_ms": 24.53562450006075,
+        "samples_ms": {
+          "ripgrep": [
+            1487.0670729999347,
+            1464.098882999906
+          ],
+          "tokio": [
+            1336.6438460000154,
+            1261.469537999801
+          ]
+        },
+        "disk_bytes": 196497613,
+        "correctness": {
+          "ripgrep": {
+            "agree_on_broken": true,
+            "fast_failed": true,
+            "validate_failed": true,
+            "validate_refuses_cranelift": true,
+            "validate_stamp_written": false,
+            "passed": true
+          },
+          "tokio": {
+            "agree_on_broken": true,
+            "fast_failed": true,
+            "validate_failed": true,
+            "validate_refuses_cranelift": true,
+            "validate_stamp_written": false,
+            "passed": true
+          }
+        },
+        "sample": "ripgrep-15.2.0,tokio-1.54.0",
+        "commit": "2348d3b550f59c3946d72cf0e10f5e2d8219a01c",
+        "timestamp": "2026-10-21T03:26:17.978379+00:00",
+        "per_sample": {
+          "ripgrep": {
+            "ok": true,
+            "samples_ms": [
+              1487.0670729999347,
+              1464.098882999906
+            ],
+            "returncodes": [
+              0,
+              0
+            ],
+            "median_ms": 1475.5829779999203,
+            "spread_ms": 11.48409500001435,
+            "min_ms": 1464.098882999906,
+            "max_ms": 1487.0670729999347,
+            "target_bytes": 116910502
+          },
+          "tokio": {
+            "ok": true,
+            "samples_ms": [
+              1336.6438460000154,
+              1261.469537999801
+            ],
+            "returncodes": [
+              0,
+              0
+            ],
+            "median_ms": 1299.0566919999083,
+            "spread_ms": 37.58715400010715,
+            "min_ms": 1261.469537999801,
+            "max_ms": 1336.6438460000154,
+            "target_bytes": 79587111
+          }
+        }
+      },
+      "eval_history": [
+        {
+          "source": "seed",
+          "genome_id": "2054967f4a91",
+          "genome": {
+            "command": "check",
+            "incremental": true,
+            "wrapper": null,
+            "linker": null,
+            "codegen_backend": null,
+            "codegen_units": null,
+            "debuginfo": null,
+            "quiet": false,
+            "package_scope": null,
+            "jobs": 3,
+            "toolchain": "stable",
+            "offline": true
+          },
+          "fitness_ms": 4466.951885250011,
+          "spread_ms": 68.27845025003398,
+          "disk_bytes": 297598070,
+          "ok": true,
+          "correctness_passed": true,
+          "decision": "replace",
+          "reason": "empty-cell",
+          "timestamp": "2026-10-21T03:19:18.446958+00:00"
+        },
+        {
+          "source": "seed",
+          "genome_id": "e1fc6d6984ce",
+          "genome": {
+            "command": "check",
+            "incremental": false,
+            "wrapper": "nanocompile",
+            "linker": null,
+            "codegen_backend": null,
+            "codegen_units": null,
+            "debuginfo": null,
+            "quiet": false,
+            "package_scope": null,
+            "jobs": 3,
+            "toolchain": "stable",
+            "offline": true
+          },
+          "fitness_ms": 3388.4382534999986,
+          "spread_ms": 1234.8629835000224,
+          "disk_bytes": 196497613,
+          "ok": true,
+          "correctness_passed": true,
+          "decision": "replace",
+          "reason": "win",
+          "timestamp": "2026-10-21T03:19:45.862931+00:00"
+        },
+        {
+          "source": "seed",
+          "genome_id": "de2f5ef2bcb2",
+          "genome": {
+            "command": "check",
+            "incremental": true,
+            "wrapper": "sccache",
+            "linker": null,
+            "codegen_backend": null,
+            "codegen_units": null,
+            "debuginfo": null,
+            "quiet": false,
+            "package_scope": null,
+            "jobs": 3,
+            "toolchain": "stable",
+            "offline": true
+          },
+          "fitness_ms": null,
+          "spread_ms": null,
+          "disk_bytes": 510,
+          "ok": false,
+          "correctness_passed": true,
+          "decision": "keep-elite",
+          "reason": "gate-or-fail",
+          "timestamp": "2026-10-21T03:20:10.795180+00:00"
+        },
+        {
+          "source": "seed",
+          "genome_id": "9c4191fb7234",
+          "genome": {
+            "command": "check",
+            "incremental": true,
+            "wrapper": null,
+            "linker": null,
+            "codegen_backend": null,
+            "codegen_units": null,
+            "debuginfo": "line-tables-only",
+            "quiet": false,
+            "package_scope": null,
+            "jobs": 3,
+            "toolchain": "stable",
+            "offline": true
+          },
+          "fitness_ms": 4284.54157675003,
+          "spread_ms": 59.05531474996906,
+          "disk_bytes": 304071399,
+          "ok": true,
+          "correctness_passed": true,
+          "decision": "keep-elite",
+          "reason": "lt-3pct",
+          "timestamp": "2026-10-21T03:20:49.138968+00:00"
+        },
+        {
+          "source": "seed",
+          "genome_id": "c570adbdc4a4",
+          "genome": {
+            "command": "build",
+            "incremental": true,
+            "wrapper": null,
+            "linker": null,
+            "codegen_backend": null,
+            "codegen_units": null,
+            "debuginfo": null,
+            "quiet": false,
+            "package_scope": null,
+            "jobs": 3,
+            "toolchain": "stable",
+            "offline": true
+          },
+          "fitness_ms": 7632.7343150000215,
+          "spread_ms": 25.31546949998642,
+          "disk_bytes": 829392911,
+          "ok": true,
+          "correctness_passed": true,
+          "decision": "keep-elite",
+          "reason": "lt-3pct",
+          "timestamp": "2026-10-21T03:22:25.020681+00:00"
+        },
+        {
+          "source": "seed",
+          "genome_id": "8ccc42ff9b3d",
+          "genome": {
+            "command": "build",
+            "incremental": true,
+            "wrapper": null,
+            "linker": "mold",
+            "codegen_backend": null,
+            "codegen_units": null,
+            "debuginfo": null,
+            "quiet": false,
+            "package_scope": null,
+            "jobs": 3,
+            "toolchain": "stable",
+            "offline": true
+          },
+          "fitness_ms": 7769.0952650000045,
+          "spread_ms": 113.62969149999412,
+          "disk_bytes": 836091175,
+          "ok": true,
+          "correctness_passed": true,
+          "decision": "keep-elite",
+          "reason": "lt-3pct",
+          "timestamp": "2026-10-21T03:22:56.756084+00:00"
+        },
+        {
+          "source": "seed",
+          "genome_id": "cadbbe38ed17",
+          "genome": {
+            "command": "build",
+            "incremental": true,
+            "wrapper": null,
+            "linker": "lld",
+            "codegen_backend": null,
+            "codegen_units": null,
+            "debuginfo": null,
+            "quiet": false,
+            "package_scope": null,
+            "jobs": 3,
+            "toolchain": "stable",
+            "offline": true
+          },
+          "fitness_ms": 7651.371323749998,
+          "spread_ms": 150.8074317499961,
+          "disk_bytes": 829395331,
+          "ok": true,
+          "correctness_passed": true,
+          "decision": "keep-elite",
+          "reason": "lt-3pct",
+          "timestamp": "2026-10-21T03:23:27.902188+00:00"
+        },
+        {
+          "source": "seed",
+          "genome_id": "fe005f2a0ed7",
+          "genome": {
+            "command": "build",
+            "incremental": true,
+            "wrapper": null,
+            "linker": null,
+            "codegen_backend": null,
+            "codegen_units": null,
+            "debuginfo": "line-tables-only",
+            "quiet": false,
+            "package_scope": null,
+            "jobs": 3,
+            "toolchain": "stable",
+            "offline": true
+          },
+          "fitness_ms": 6953.901042000012,
+          "spread_ms": 49.688903999964396,
+          "disk_bytes": 599415633,
+          "ok": true,
+          "correctness_passed": true,
+          "decision": "keep-elite",
+          "reason": "lt-3pct",
+          "timestamp": "2026-10-21T03:23:55.837154+00:00"
+        },
+        {
+          "source": "seed",
+          "genome_id": "8e40641cc0c9",
+          "genome": {
+            "command": "build",
+            "incremental": true,
+            "wrapper": null,
+            "linker": null,
+            "codegen_backend": "cranelift",
+            "codegen_units": null,
+            "debuginfo": null,
+            "quiet": false,
+            "package_scope": null,
+            "jobs": 3,
+            "toolchain": "nightly",
+            "offline": true
+          },
+          "fitness_ms": 7120.199317750007,
+          "spread_ms": 394.99894825002,
+          "disk_bytes": 489949462,
+          "ok": true,
+          "correctness_passed": true,
+          "decision": "keep-elite",
+          "reason": "lt-3pct",
+          "timestamp": "2026-10-21T03:24:24.453438+00:00"
+        },
+        {
+          "source": "seed",
+          "genome_id": "e0effe5b8597",
+          "genome": {
+            "command": "build",
+            "incremental": true,
+            "wrapper": null,
+            "linker": "mold",
+            "codegen_backend": null,
+            "codegen_units": null,
+            "debuginfo": "line-tables-only",
+            "quiet": false,
+            "package_scope": null,
+            "jobs": 3,
+            "toolchain": "stable",
+            "offline": true
+          },
+          "fitness_ms": 7231.815860250009,
+          "spread_ms": 164.1944462500362,
+          "disk_bytes": 606118336,
+          "ok": true,
+          "correctness_passed": true,
+          "decision": "keep-elite",
+          "reason": "lt-3pct",
+          "timestamp": "2026-10-21T03:24:53.944140+00:00"
+        },
+        {
+          "source": "mutate",
+          "genome_id": "11441967e218",
+          "genome": {
+            "command": "check",
+            "incremental": false,
+            "wrapper": "nanocompile",
+            "linker": null,
+            "codegen_backend": null,
+            "codegen_units": null,
+            "debuginfo": null,
+            "quiet": true,
+            "package_scope": null,
+            "jobs": 3,
+            "toolchain": "stable",
+            "offline": true
+          },
+          "fitness_ms": 3302.262744499984,
+          "spread_ms": 1102.2218684999814,
+          "disk_bytes": 196497613,
+          "ok": true,
+          "correctness_passed": true,
+          "decision": "keep-elite",
+          "reason": "lt-3pct",
+          "timestamp": "2026-10-21T03:25:37.034250+00:00"
+        },
+        {
+          "source": "mutate",
+          "genome_id": "d19d7776a17c",
+          "genome": {
+            "command": "check",
+            "incremental": false,
+            "wrapper": "sccache",
+            "linker": null,
+            "codegen_backend": null,
+            "codegen_units": null,
+            "debuginfo": null,
+            "quiet": false,
+            "package_scope": null,
+            "jobs": 3,
+            "toolchain": "stable",
+            "offline": true
+          },
+          "fitness_ms": 2988.078279999996,
+          "spread_ms": 1719.2296170000247,
+          "disk_bytes": 196497613,
+          "ok": true,
+          "correctness_passed": true,
+          "decision": "keep-elite",
+          "reason": "within-noise",
+          "timestamp": "2026-10-21T03:25:49.029648+00:00"
+        },
+        {
+          "source": "mutate",
+          "genome_id": "5b2cfb5315ff",
+          "genome": {
+            "command": "build",
+            "incremental": false,
+            "wrapper": "nanocompile",
+            "linker": null,
+            "codegen_backend": "cranelift",
+            "codegen_units": null,
+            "debuginfo": null,
+            "quiet": false,
+            "package_scope": null,
+            "jobs": 3,
+            "toolchain": "nightly",
+            "offline": true
+          },
+          "fitness_ms": 5812.26520125,
+          "spread_ms": 88.71556424986693,
+          "disk_bytes": 285540312,
+          "ok": true,
+          "correctness_passed": true,
+          "decision": "keep-elite",
+          "reason": "lt-3pct",
+          "timestamp": "2026-10-21T03:26:12.340211+00:00"
+        },
+        {
+          "source": "mutate",
+          "genome_id": "d19d7776a17c",
+          "genome": {
+            "command": "check",
+            "incremental": false,
+            "wrapper": "sccache",
+            "linker": null,
+            "codegen_backend": null,
+            "codegen_units": null,
+            "debuginfo": null,
+            "quiet": false,
+            "package_scope": null,
+            "jobs": 3,
+            "toolchain": "stable",
+            "offline": true
+          },
+          "fitness_ms": 1387.3198349999143,
+          "spread_ms": 24.53562450006075,
+          "disk_bytes": 196497613,
+          "ok": true,
+          "correctness_passed": true,
+          "decision": "replace",
+          "reason": "win",
+          "timestamp": "2026-10-21T03:26:17.978379+00:00"
+        },
+        {
+          "source": "mutate",
+          "genome_id": "95b29ca67d66",
+          "genome": {
+            "command": "check",
+            "incremental": false,
+            "wrapper": null,
+            "linker": null,
+            "codegen_backend": null,
+            "codegen_units": null,
+            "debuginfo": null,
+            "quiet": false,
+            "package_scope": null,
+            "jobs": 3,
+            "toolchain": "stable",
+            "offline": true
+          },
+          "fitness_ms": 3938.8285164999957,
+          "spread_ms": 76.43390800006955,
+          "disk_bytes": 196497609,
+          "ok": true,
+          "correctness_passed": true,
+          "decision": "keep-elite",
+          "reason": "lt-3pct",
+          "timestamp": "2026-10-21T03:26:33.800458+00:00"
+        },
+        {
+          "source": "mutate",
+          "genome_id": "2c19b182d8e6",
+          "genome": {
+            "command": "check",
+            "incremental": false,
+            "wrapper": "sccache",
+            "linker": null,
+            "codegen_backend": null,
+            "codegen_units": null,
+            "debuginfo": null,
+            "quiet": false,
+            "package_scope": null,
+            "jobs": 4,
+            "toolchain": "stable",
+            "offline": true
+          },
+          "fitness_ms": 3025.355257499996,
+          "spread_ms": 1743.7906970000085,
+          "disk_bytes": 196497613,
+          "ok": true,
+          "correctness_passed": true,
+          "decision": "keep-elite",
+          "reason": "lt-3pct",
+          "timestamp": "2026-10-21T03:26:45.947682+00:00"
+        },
+        {
+          "source": "mutate",
+          "genome_id": "de2f5ef2bcb2",
+          "genome": {
+            "command": "check",
+            "incremental": true,
+            "wrapper": "sccache",
+            "linker": null,
+            "codegen_backend": null,
+            "codegen_units": null,
+            "debuginfo": null,
+            "quiet": false,
+            "package_scope": null,
+            "jobs": 3,
+            "toolchain": "stable",
+            "offline": true
+          },
+          "fitness_ms": null,
+          "spread_ms": null,
+          "disk_bytes": 510,
+          "ok": false,
+          "correctness_passed": true,
+          "decision": "keep-elite",
+          "reason": "gate-or-fail",
+          "timestamp": "2026-10-21T03:26:46.008539+00:00"
+        },
+        {
+          "source": "mutate",
+          "genome_id": "ac03987bb5d6",
+          "genome": {
+            "command": "build",
+            "incremental": false,
+            "wrapper": "sccache",
+            "linker": null,
+            "codegen_backend": null,
+            "codegen_units": null,
+            "debuginfo": null,
+            "quiet": true,
+            "package_scope": null,
+            "jobs": 3,
+            "toolchain": "stable",
+            "offline": true
+          },
+          "fitness_ms": 4615.516709749954,
+          "spread_ms": 2757.0638182500034,
+          "disk_bytes": 507213755,
+          "ok": true,
+          "correctness_passed": true,
+          "decision": "keep-elite",
+          "reason": "lt-3pct",
+          "timestamp": "2026-10-21T03:27:04.537533+00:00"
+        }
+      ],
+      "consecutive_sub3": 4,
+      "stopped": true,
+      "stop_reason": "4 consecutive tries under 3% / noise"
+    },
+    "midsize|noop": {
+      "key": "midsize|noop",
+      "size_bucket": "midsize",
+      "edit_type": "noop",
+      "elite": {
+        "genome": {
+          "command": "check",
+          "incremental": false,
+          "wrapper": "nanocompile",
+          "linker": null,
+          "codegen_backend": null,
+          "codegen_units": null,
+          "debuginfo": null,
+          "quiet": false,
+          "package_scope": null,
+          "jobs": 3,
+          "toolchain": "stable",
+          "offline": true
+        },
+        "genome_id": "e1fc6d6984ce",
+        "fitness_ms": 31.221453999933146,
+        "spread_ms": 0.837486664043877,
+        "samples_ms": {
+          "ripgrep": [
+            24.494333999996343,
+            25.764066999954593,
+            26.614574999939578
+          ],
+          "tokio": [
+            36.6788409999117,
+            37.78695300002255,
+            35.823553000000175
+          ]
+        },
+        "disk_bytes": 196497613,
+        "correctness": {
+          "ripgrep": {
+            "agree_on_broken": true,
+            "fast_failed": true,
+            "validate_failed": true,
+            "validate_refuses_cranelift": true,
+            "validate_stamp_written": false,
+            "passed": true
+          },
+          "tokio": {
+            "agree_on_broken": true,
+            "fast_failed": true,
+            "validate_failed": true,
+            "validate_refuses_cranelift": true,
+            "validate_stamp_written": false,
+            "passed": true
+          }
+        },
+        "sample": "ripgrep-15.2.0,tokio-1.54.0",
+        "commit": "2348d3b550f59c3946d72cf0e10f5e2d8219a01c",
+        "timestamp": "2026-10-21T03:19:46.188562+00:00",
+        "per_sample": {
+          "ripgrep": {
+            "ok": true,
+            "samples_ms": [
+              24.494333999996343,
+              25.764066999954593,
+              26.614574999939578
+            ],
+            "returncodes": [
+              0,
+              0,
+              0
+            ],
+            "median_ms": 25.764066999954593,
+            "spread_ms": 0.8712065482269546,
+            "min_ms": 24.494333999996343,
+            "max_ms": 26.614574999939578,
+            "target_bytes": 116910502
+          },
+          "tokio": {
+            "ok": true,
+            "samples_ms": [
+              36.6788409999117,
+              37.78695300002255,
+              35.823553000000175
+            ],
+            "returncodes": [
+              0,
+              0,
+              0
+            ],
+            "median_ms": 36.6788409999117,
+            "spread_ms": 0.8037667798607994,
+            "min_ms": 35.823553000000175,
+            "max_ms": 37.78695300002255,
+            "target_bytes": 79587111
+          }
+        }
+      },
+      "eval_history": [
+        {
+          "source": "seed",
+          "genome_id": "2054967f4a91",
+          "genome": {
+            "command": "check",
+            "incremental": true,
+            "wrapper": null,
+            "linker": null,
+            "codegen_backend": null,
+            "codegen_units": null,
+            "debuginfo": null,
+            "quiet": false,
+            "package_scope": null,
+            "jobs": 3,
+            "toolchain": "stable",
+            "offline": true
+          },
+          "fitness_ms": 33.15245350006535,
+          "spread_ms": 1.7809589373846615,
+          "disk_bytes": 297598070,
+          "ok": true,
+          "correctness_passed": true,
+          "decision": "replace",
+          "reason": "empty-cell",
+          "timestamp": "2026-10-21T03:19:18.808839+00:00"
+        },
+        {
+          "source": "seed",
+          "genome_id": "e1fc6d6984ce",
+          "genome": {
+            "command": "check",
+            "incremental": false,
+            "wrapper": "nanocompile",
+            "linker": null,
+            "codegen_backend": null,
+            "codegen_units": null,
+            "debuginfo": null,
+            "quiet": false,
+            "package_scope": null,
+            "jobs": 3,
+            "toolchain": "stable",
+            "offline": true
+          },
+          "fitness_ms": 31.221453999933146,
+          "spread_ms": 0.837486664043877,
+          "disk_bytes": 196497613,
+          "ok": true,
+          "correctness_passed": true,
+          "decision": "replace",
+          "reason": "win",
+          "timestamp": "2026-10-21T03:19:46.188562+00:00"
+        },
+        {
+          "source": "seed",
+          "genome_id": "de2f5ef2bcb2",
+          "genome": {
+            "command": "check",
+            "incremental": true,
+            "wrapper": "sccache",
+            "linker": null,
+            "codegen_backend": null,
+            "codegen_units": null,
+            "debuginfo": null,
+            "quiet": false,
+            "package_scope": null,
+            "jobs": 3,
+            "toolchain": "stable",
+            "offline": true
+          },
+          "fitness_ms": null,
+          "spread_ms": null,
+          "disk_bytes": 0,
+          "ok": false,
+          "correctness_passed": true,
+          "decision": "keep-elite",
+          "reason": "gate-or-fail",
+          "timestamp": "2026-10-21T03:20:10.742678+00:00"
+        },
+        {
+          "source": "seed",
+          "genome_id": "c570adbdc4a4",
+          "genome": {
+            "command": "build",
+            "incremental": true,
+            "wrapper": null,
+            "linker": null,
+            "codegen_backend": null,
+            "codegen_units": null,
+            "debuginfo": null,
+            "quiet": false,
+            "package_scope": null,
+            "jobs": 3,
+            "toolchain": "stable",
+            "offline": true
+          },
+          "fitness_ms": 45.36904800005459,
+          "spread_ms": 8.064659556090245,
+          "disk_bytes": 829392911,
+          "ok": true,
+          "correctness_passed": true,
+          "decision": "keep-elite",
+          "reason": "lt-3pct",
+          "timestamp": "2026-10-21T03:22:25.520334+00:00"
+        },
+        {
+          "source": "seed",
+          "genome_id": "8ccc42ff9b3d",
+          "genome": {
+            "command": "build",
+            "incremental": true,
+            "wrapper": null,
+            "linker": "mold",
+            "codegen_backend": null,
+            "codegen_units": null,
+            "debuginfo": null,
+            "quiet": false,
+            "package_scope": null,
+            "jobs": 3,
+            "toolchain": "stable",
+            "offline": true
+          },
+          "fitness_ms": 35.74745100002019,
+          "spread_ms": 1.1278431915801295,
+          "disk_bytes": 836091175,
+          "ok": true,
+          "correctness_passed": true,
+          "decision": "keep-elite",
+          "reason": "lt-3pct",
+          "timestamp": "2026-10-21T03:22:57.155970+00:00"
+        },
+        {
+          "source": "seed",
+          "genome_id": "8e40641cc0c9",
+          "genome": {
+            "command": "build",
+            "incremental": true,
+            "wrapper": null,
+            "linker": null,
+            "codegen_backend": "cranelift",
+            "codegen_units": null,
+            "debuginfo": null,
+            "quiet": false,
+            "package_scope": null,
+            "jobs": 3,
+            "toolchain": "nightly",
+            "offline": true
+          },
+          "fitness_ms": 43.554057499989085,
+          "spread_ms": 3.3284791316393134,
+          "disk_bytes": 489949462,
+          "ok": true,
+          "correctness_passed": true,
+          "decision": "keep-elite",
+          "reason": "lt-3pct",
+          "timestamp": "2026-10-21T03:24:24.906858+00:00"
+        },
+        {
+          "source": "seed",
+          "genome_id": "fbaf743fec88",
+          "genome": {
+            "command": "graph",
+            "incremental": true,
+            "wrapper": null,
+            "linker": null,
+            "codegen_backend": null,
+            "codegen_units": null,
+            "debuginfo": null,
+            "quiet": false,
+            "package_scope": null,
+            "jobs": 3,
+            "toolchain": "stable",
+            "offline": true
+          },
+          "fitness_ms": null,
+          "spread_ms": 0.08822517065924114,
+          "disk_bytes": 706817832,
+          "ok": false,
+          "correctness_passed": true,
+          "decision": "keep-elite",
+          "reason": "gate-or-fail",
+          "timestamp": "2026-10-21T03:25:22.591994+00:00"
+        },
+        {
+          "source": "mutate",
+          "genome_id": "3273e033ff4f",
+          "genome": {
+            "command": "build",
+            "incremental": false,
+            "wrapper": "nanocompile",
+            "linker": null,
+            "codegen_backend": null,
+            "codegen_units": 16,
+            "debuginfo": null,
+            "quiet": false,
+            "package_scope": null,
+            "jobs": 3,
+            "toolchain": "stable",
+            "offline": true
+          },
+          "fitness_ms": 35.15603499988629,
+          "spread_ms": 0.8200402023160143,
+          "disk_bytes": 520708847,
+          "ok": true,
+          "correctness_passed": true,
+          "decision": "keep-elite",
+          "reason": "lt-3pct",
+          "timestamp": "2026-10-21T03:27:19.984784+00:00"
+        },
+        {
+          "source": "mutate",
+          "genome_id": "e1fc6d6984ce",
+          "genome": {
+            "command": "check",
+            "incremental": false,
+            "wrapper": "nanocompile",
+            "linker": null,
+            "codegen_backend": null,
+            "codegen_units": null,
+            "debuginfo": null,
+            "quiet": false,
+            "package_scope": null,
+            "jobs": 3,
+            "toolchain": "stable",
+            "offline": true
+          },
+          "fitness_ms": 32.74564950004333,
+          "spread_ms": 0.8808194776722916,
+          "disk_bytes": 196497613,
+          "ok": true,
+          "correctness_passed": true,
+          "decision": "keep-elite",
+          "reason": "lt-3pct",
+          "timestamp": "2026-10-21T03:27:23.280345+00:00"
+        },
+        {
+          "source": "mutate",
+          "genome_id": "11441967e218",
+          "genome": {
+            "command": "check",
+            "incremental": false,
+            "wrapper": "nanocompile",
+            "linker": null,
+            "codegen_backend": null,
+            "codegen_units": null,
+            "debuginfo": null,
+            "quiet": true,
+            "package_scope": null,
+            "jobs": 3,
+            "toolchain": "stable",
+            "offline": true
+          },
+          "fitness_ms": 33.10443199995916,
+          "spread_ms": 0.9169687107804315,
+          "disk_bytes": 196497613,
+          "ok": true,
+          "correctness_passed": true,
+          "decision": "keep-elite",
+          "reason": "lt-3pct",
+          "timestamp": "2026-10-21T03:27:23.621862+00:00"
+        },
+        {
+          "source": "mutate",
+          "genome_id": "744eb5b6823e",
+          "genome": {
+            "command": "build",
+            "incremental": false,
+            "wrapper": "nanocompile",
+            "linker": null,
+            "codegen_backend": null,
+            "codegen_units": null,
+            "debuginfo": null,
+            "quiet": false,
+            "package_scope": null,
+            "jobs": 3,
+            "toolchain": "nightly",
+            "offline": true
+          },
+          "fitness_ms": 35.63417949999348,
+          "spread_ms": 1.6874917850048532,
+          "disk_bytes": 378874212,
+          "ok": true,
+          "correctness_passed": true,
+          "decision": "keep-elite",
+          "reason": "lt-3pct",
+          "timestamp": "2026-10-21T03:27:37.698345+00:00"
+        }
+      ],
+      "consecutive_sub3": 4,
+      "stopped": true,
+      "stop_reason": "4 consecutive tries under 3% / noise"
+    },
+    "midsize|fn_body": {
+      "key": "midsize|fn_body",
+      "size_bucket": "midsize",
+      "edit_type": "fn_body",
+      "elite": {
+        "genome": {
+          "command": "check",
+          "incremental": true,
+          "wrapper": null,
+          "linker": null,
+          "codegen_backend": null,
+          "codegen_units": null,
+          "debuginfo": "line-tables-only",
+          "quiet": false,
+          "package_scope": null,
+          "jobs": 3,
+          "toolchain": "stable",
+          "offline": true
+        },
+        "genome_id": "9c4191fb7234",
+        "fitness_ms": 121.93916600006105,
+        "spread_ms": 4.545792332077087,
+        "samples_ms": {
+          "ripgrep": [
+            181.0556230000202,
+            163.62210700003743,
+            163.07894800002032
+          ],
+          "tokio": [
+            81.12594600004286,
+            79.30806399997437,
+            80.25622500008467
+          ]
+        },
+        "disk_bytes": 314162647,
+        "correctness": {
+          "ripgrep": {
+            "agree_on_broken": true,
+            "fast_failed": true,
+            "validate_failed": true,
+            "validate_refuses_cranelift": true,
+            "validate_stamp_written": false,
+            "passed": true
+          },
+          "tokio": {
+            "agree_on_broken": true,
+            "fast_failed": true,
+            "validate_failed": true,
+            "validate_refuses_cranelift": true,
+            "validate_stamp_written": false,
+            "passed": true
+          }
+        },
+        "sample": "ripgrep-15.2.0,tokio-1.54.0",
+        "commit": "2348d3b550f59c3946d72cf0e10f5e2d8219a01c",
+        "timestamp": "2026-10-21T03:20:21.425557+00:00",
+        "per_sample": {
+          "ripgrep": {
+            "ok": true,
+            "samples_ms": [
+              181.0556230000202,
+              163.62210700003743,
+              163.07894800002032
+            ],
+            "returncodes": [
+              0,
+              0,
+              0
+            ],
+            "median_ms": 163.62210700003743,
+            "spread_ms": 8.349207187089855,
+            "min_ms": 163.07894800002032,
+            "max_ms": 181.0556230000202,
+            "target_bytes": 156895365
+          },
+          "tokio": {
+            "ok": true,
+            "samples_ms": [
+              81.12594600004286,
+              79.30806399997437,
+              80.25622500008467
+            ],
+            "returncodes": [
+              0,
+              0,
+              0
+            ],
+            "median_ms": 80.25622500008467,
+            "spread_ms": 0.7423774770643206,
+            "min_ms": 79.30806399997437,
+            "max_ms": 81.12594600004286,
+            "target_bytes": 157267282
+          }
+        }
+      },
+      "eval_history": [
+        {
+          "source": "seed",
+          "genome_id": "2054967f4a91",
+          "genome": {
+            "command": "check",
+            "incremental": true,
+            "wrapper": null,
+            "linker": null,
+            "codegen_backend": null,
+            "codegen_units": null,
+            "debuginfo": null,
+            "quiet": false,
+            "package_scope": null,
+            "jobs": 3,
+            "toolchain": "stable",
+            "offline": true
+          },
+          "fitness_ms": 127.39468350008565,
+          "spread_ms": 5.134050246534238,
+          "disk_bytes": 307689306,
+          "ok": true,
+          "correctness_passed": true,
+          "decision": "replace",
+          "reason": "empty-cell",
+          "timestamp": "2026-10-21T03:19:20.806045+00:00"
+        },
+        {
+          "source": "seed",
+          "genome_id": "e1fc6d6984ce",
+          "genome": {
+            "command": "check",
+            "incremental": false,
+            "wrapper": "nanocompile",
+            "linker": null,
+            "codegen_backend": null,
+            "codegen_units": null,
+            "debuginfo": null,
+            "quiet": false,
+            "package_scope": null,
+            "jobs": 3,
+            "toolchain": "stable",
+            "offline": true
+          },
+          "fitness_ms": 254.7870304999833,
+          "spread_ms": 8.383732714042884,
+          "disk_bytes": 196497614,
+          "ok": true,
+          "correctness_passed": true,
+          "decision": "keep-elite",
+          "reason": "lt-3pct",
+          "timestamp": "2026-10-21T03:19:49.905159+00:00"
+        },
+        {
+          "source": "seed",
+          "genome_id": "de2f5ef2bcb2",
+          "genome": {
+            "command": "check",
+            "incremental": true,
+            "wrapper": "sccache",
+            "linker": null,
+            "codegen_backend": null,
+            "codegen_units": null,
+            "debuginfo": null,
+            "quiet": false,
+            "package_scope": null,
+            "jobs": 3,
+            "toolchain": "stable",
+            "offline": true
+          },
+          "fitness_ms": null,
+          "spread_ms": null,
+          "disk_bytes": 0,
+          "ok": false,
+          "correctness_passed": true,
+          "decision": "keep-elite",
+          "reason": "gate-or-fail",
+          "timestamp": "2026-10-21T03:20:10.687411+00:00"
+        },
+        {
+          "source": "seed",
+          "genome_id": "9c4191fb7234",
+          "genome": {
+            "command": "check",
+            "incremental": true,
+            "wrapper": null,
+            "linker": null,
+            "codegen_backend": null,
+            "codegen_units": null,
+            "debuginfo": "line-tables-only",
+            "quiet": false,
+            "package_scope": null,
+            "jobs": 3,
+            "toolchain": "stable",
+            "offline": true
+          },
+          "fitness_ms": 121.93916600006105,
+          "spread_ms": 4.545792332077087,
+          "disk_bytes": 314162647,
+          "ok": true,
+          "correctness_passed": true,
+          "decision": "replace",
+          "reason": "win",
+          "timestamp": "2026-10-21T03:20:21.425557+00:00"
+        },
+        {
+          "source": "seed",
+          "genome_id": "85a87b3d4d4a",
+          "genome": {
+            "command": "check",
+            "incremental": true,
+            "wrapper": null,
+            "linker": null,
+            "codegen_backend": null,
+            "codegen_units": null,
+            "debuginfo": null,
+            "quiet": false,
+            "package_scope": "touched",
+            "jobs": 3,
+            "toolchain": "stable",
+            "offline": true
+          },
+          "fitness_ms": 130.2240905000076,
+          "spread_ms": 2.450470344740248,
+          "disk_bytes": 300660715,
+          "ok": true,
+          "correctness_passed": true,
+          "decision": "keep-elite",
+          "reason": "lt-3pct",
+          "timestamp": "2026-10-21T03:20:59.509601+00:00"
+        },
+        {
+          "source": "seed",
+          "genome_id": "56ed8a8713d3",
+          "genome": {
+            "command": "check",
+            "incremental": true,
+            "wrapper": null,
+            "linker": null,
+            "codegen_backend": null,
+            "codegen_units": null,
+            "debuginfo": null,
+            "quiet": true,
+            "package_scope": null,
+            "jobs": 3,
+            "toolchain": "stable",
+            "offline": true
+          },
+          "fitness_ms": 127.90828150002653,
+          "spread_ms": 3.8985108281118017,
+          "disk_bytes": 307689310,
+          "ok": true,
+          "correctness_passed": true,
+          "decision": "keep-elite",
+          "reason": "lt-3pct",
+          "timestamp": "2026-10-21T03:21:22.105882+00:00"
+        },
+        {
+          "source": "seed",
+          "genome_id": "95b29ca67d66",
+          "genome": {
+            "command": "check",
+            "incremental": false,
+            "wrapper": null,
+            "linker": null,
+            "codegen_backend": null,
+            "codegen_units": null,
+            "debuginfo": null,
+            "quiet": false,
+            "package_scope": null,
+            "jobs": 3,
+            "toolchain": "stable",
+            "offline": true
+          },
+          "fitness_ms": 237.60070399998767,
+          "spread_ms": 10.267779263197792,
+          "disk_bytes": 196497609,
+          "ok": true,
+          "correctness_passed": true,
+          "decision": "keep-elite",
+          "reason": "lt-3pct",
+          "timestamp": "2026-10-21T03:21:43.642533+00:00"
+        },
+        {
+          "source": "seed",
+          "genome_id": "b023a71c2a15",
+          "genome": {
+            "command": "check",
+            "incremental": true,
+            "wrapper": null,
+            "linker": null,
+            "codegen_backend": null,
+            "codegen_units": 256,
+            "debuginfo": null,
+            "quiet": false,
+            "package_scope": null,
+            "jobs": 3,
+            "toolchain": "stable",
+            "offline": true
+          },
+          "fitness_ms": 122.7862205000747,
+          "spread_ms": 7.422126735870493,
+          "disk_bytes": 308227870,
+          "ok": true,
+          "correctness_passed": true,
+          "decision": "keep-elite",
+          "reason": "lt-3pct",
+          "timestamp": "2026-10-21T03:21:54.352290+00:00"
+        },
+        {
+          "source": "seed",
+          "genome_id": "fbaf743fec88",
+          "genome": {
+            "command": "graph",
+            "incremental": true,
+            "wrapper": null,
+            "linker": null,
+            "codegen_backend": null,
+            "codegen_units": null,
+            "debuginfo": null,
+            "quiet": false,
+            "package_scope": null,
+            "jobs": 3,
+            "toolchain": "stable",
+            "offline": true
+          },
+          "fitness_ms": null,
+          "spread_ms": 0.363935671586479,
+          "disk_bytes": 706817832,
+          "ok": false,
+          "correctness_passed": true,
+          "decision": "keep-elite",
+          "reason": "gate-or-fail",
+          "timestamp": "2026-10-21T03:25:23.786814+00:00"
+        },
+        {
+          "source": "mutate",
+          "genome_id": "48ece07e0780",
+          "genome": {
+            "command": "check",
+            "incremental": false,
+            "wrapper": null,
+            "linker": null,
+            "codegen_backend": null,
+            "codegen_units": null,
+            "debuginfo": "line-tables-only",
+            "quiet": true,
+            "package_scope": null,
+            "jobs": 3,
+            "toolchain": "stable",
+            "offline": true
+          },
+          "fitness_ms": 240.40767899998627,
+          "spread_ms": 13.036451668538453,
+          "disk_bytes": 201689878,
+          "ok": true,
+          "correctness_passed": true,
+          "decision": "keep-elite",
+          "reason": "lt-3pct",
+          "timestamp": "2026-10-21T03:27:49.729870+00:00"
+        },
+        {
+          "source": "mutate",
+          "genome_id": "0d9eaddad091",
+          "genome": {
+            "command": "build",
+            "incremental": true,
+            "wrapper": null,
+            "linker": "lld",
+            "codegen_backend": null,
+            "codegen_units": null,
+            "debuginfo": "line-tables-only",
+            "quiet": false,
+            "package_scope": null,
+            "jobs": 3,
+            "toolchain": "stable",
+            "offline": true
+          },
+          "fitness_ms": 274.7730760000877,
+          "spread_ms": 6.583086662676796,
+          "disk_bytes": 638212881,
+          "ok": true,
+          "correctness_passed": true,
+          "decision": "keep-elite",
+          "reason": "lt-3pct",
+          "timestamp": "2026-10-21T03:28:07.060621+00:00"
+        },
+        {
+          "source": "mutate",
+          "genome_id": "03de0f036379",
+          "genome": {
+            "command": "check",
+            "incremental": true,
+            "wrapper": null,
+            "linker": null,
+            "codegen_backend": null,
+            "codegen_units": null,
+            "debuginfo": "line-tables-only",
+            "quiet": false,
+            "package_scope": null,
+            "jobs": 2,
+            "toolchain": "stable",
+            "offline": true
+          },
+          "fitness_ms": 136.08814199994868,
+          "spread_ms": 7.253347548925254,
+          "disk_bytes": 314162659,
+          "ok": true,
+          "correctness_passed": true,
+          "decision": "keep-elite",
+          "reason": "lt-3pct",
+          "timestamp": "2026-10-21T03:28:20.180746+00:00"
+        },
+        {
+          "source": "mutate",
+          "genome_id": "435da9b47059",
+          "genome": {
+            "command": "check",
+            "incremental": true,
+            "wrapper": null,
+            "linker": null,
+            "codegen_backend": null,
+            "codegen_units": 1,
+            "debuginfo": "line-tables-only",
+            "quiet": false,
+            "package_scope": null,
+            "jobs": 3,
+            "toolchain": "stable",
+            "offline": true
+          },
+          "fitness_ms": 128.0749500000411,
+          "spread_ms": 2.96630724070289,
+          "disk_bytes": 312264493,
+          "ok": true,
+          "correctness_passed": true,
+          "decision": "keep-elite",
+          "reason": "lt-3pct",
+          "timestamp": "2026-10-21T03:28:31.969424+00:00"
+        }
+      ],
+      "consecutive_sub3": 4,
+      "stopped": true,
+      "stop_reason": "4 consecutive tries under 3% / noise"
+    },
+    "midsize|signature": {
+      "key": "midsize|signature",
+      "size_bucket": "midsize",
+      "edit_type": "signature",
+      "elite": {
+        "genome": {
+          "command": "check",
+          "incremental": true,
+          "wrapper": null,
+          "linker": null,
+          "codegen_backend": null,
+          "codegen_units": null,
+          "debuginfo": null,
+          "quiet": false,
+          "package_scope": "touched",
+          "jobs": 3,
+          "toolchain": "stable",
+          "offline": true
+        },
+        "genome_id": "85a87b3d4d4a",
+        "fitness_ms": 529.7661290000519,
+        "spread_ms": 14.392192180814373,
+        "samples_ms": {
+          "ripgrep": [
+            86.34426399999029,
+            84.12985200004641,
+            80.34954499999003
+          ],
+          "tokio": [
+            975.4024060000575,
+            965.2460820000215,
+            1025.4374139999527
+          ]
+        },
+        "disk_bytes": 432613103,
+        "correctness": {
+          "ripgrep": {
+            "agree_on_broken": true,
+            "fast_failed": true,
+            "validate_failed": true,
+            "validate_refuses_cranelift": true,
+            "validate_stamp_written": false,
+            "passed": true
+          },
+          "tokio": {
+            "agree_on_broken": true,
+            "fast_failed": true,
+            "validate_failed": true,
+            "validate_refuses_cranelift": true,
+            "validate_stamp_written": false,
+            "passed": true
+          }
+        },
+        "sample": "ripgrep-15.2.0,tokio-1.54.0",
+        "commit": "2348d3b550f59c3946d72cf0e10f5e2d8219a01c",
+        "timestamp": "2026-10-21T03:21:11.570323+00:00",
+        "per_sample": {
+          "ripgrep": {
+            "ok": true,
+            "samples_ms": [
+              86.34426399999029,
+              84.12985200004641,
+              80.34954499999003
+            ],
+            "returncodes": [
+              0,
+              0,
+              0
+            ],
+            "median_ms": 84.12985200004641,
+            "spread_ms": 2.4750083593379557,
+            "min_ms": 80.34954499999003,
+            "max_ms": 86.34426399999029,
+            "target_bytes": 167138865
+          },
+          "tokio": {
+            "ok": true,
+            "samples_ms": [
+              975.4024060000575,
+              965.2460820000215,
+              1025.4374139999527
+            ],
+            "returncodes": [
+              0,
+              0,
+              0
+            ],
+            "median_ms": 975.4024060000575,
+            "spread_ms": 26.30937600229079,
+            "min_ms": 965.2460820000215,
+            "max_ms": 1025.4374139999527,
+            "target_bytes": 265474238
+          }
+        }
+      },
+      "eval_history": [
+        {
+          "source": "seed",
+          "genome_id": "2054967f4a91",
+          "genome": {
+            "command": "check",
+            "incremental": true,
+            "wrapper": null,
+            "linker": null,
+            "codegen_backend": null,
+            "codegen_units": null,
+            "debuginfo": null,
+            "quiet": false,
+            "package_scope": null,
+            "jobs": 3,
+            "toolchain": "stable",
+            "offline": true
+          },
+          "fitness_ms": 777.3346029999857,
+          "spread_ms": 29.68029670051343,
+          "disk_bytes": 381212375,
+          "ok": true,
+          "correctness_passed": true,
+          "decision": "replace",
+          "reason": "empty-cell",
+          "timestamp": "2026-10-21T03:19:32.269907+00:00"
+        },
+        {
+          "source": "seed",
+          "genome_id": "e1fc6d6984ce",
+          "genome": {
+            "command": "check",
+            "incremental": false,
+            "wrapper": "nanocompile",
+            "linker": null,
+            "codegen_backend": null,
+            "codegen_units": null,
+            "debuginfo": null,
+            "quiet": false,
+            "package_scope": null,
+            "jobs": 3,
+            "toolchain": "stable",
+            "offline": true
+          },
+          "fitness_ms": 1416.437644000041,
+          "spread_ms": 17.469956214341764,
+          "disk_bytes": 196497666,
+          "ok": true,
+          "correctness_passed": true,
+          "decision": "keep-elite",
+          "reason": "lt-3pct",
+          "timestamp": "2026-10-21T03:20:10.620738+00:00"
+        },
+        {
+          "source": "seed",
+          "genome_id": "de2f5ef2bcb2",
+          "genome": {
+            "command": "check",
+            "incremental": true,
+            "wrapper": "sccache",
+            "linker": null,
+            "codegen_backend": null,
+            "codegen_units": null,
+            "debuginfo": null,
+            "quiet": false,
+            "package_scope": null,
+            "jobs": 3,
+            "toolchain": "stable",
+            "offline": true
+          },
+          "fitness_ms": null,
+          "spread_ms": null,
+          "disk_bytes": 0,
+          "ok": false,
+          "correctness_passed": true,
+          "decision": "keep-elite",
+          "reason": "gate-or-fail",
+          "timestamp": "2026-10-21T03:20:10.715816+00:00"
+        },
+        {
+          "source": "seed",
+          "genome_id": "9c4191fb7234",
+          "genome": {
+            "command": "check",
+            "incremental": true,
+            "wrapper": null,
+            "linker": null,
+            "codegen_backend": null,
+            "codegen_units": null,
+            "debuginfo": "line-tables-only",
+            "quiet": false,
+            "package_scope": null,
+            "jobs": 3,
+            "toolchain": "stable",
+            "offline": true
+          },
+          "fitness_ms": 711.9701940000027,
+          "spread_ms": 35.03030663863862,
+          "disk_bytes": 387685714,
+          "ok": true,
+          "correctness_passed": true,
+          "decision": "replace",
+          "reason": "win",
+          "timestamp": "2026-10-21T03:20:31.893557+00:00"
+        },
+        {
+          "source": "seed",
+          "genome_id": "85a87b3d4d4a",
+          "genome": {
+            "command": "check",
+            "incremental": true,
+            "wrapper": null,
+            "linker": null,
+            "codegen_backend": null,
+            "codegen_units": null,
+            "debuginfo": null,
+            "quiet": false,
+            "package_scope": "touched",
+            "jobs": 3,
+            "toolchain": "stable",
+            "offline": true
+          },
+          "fitness_ms": 529.7661290000519,
+          "spread_ms": 14.392192180814373,
+          "disk_bytes": 432613103,
+          "ok": true,
+          "correctness_passed": true,
+          "decision": "replace",
+          "reason": "win",
+          "timestamp": "2026-10-21T03:21:11.570323+00:00"
+        },
+        {
+          "source": "seed",
+          "genome_id": "56ed8a8713d3",
+          "genome": {
+            "command": "check",
+            "incremental": true,
+            "wrapper": null,
+            "linker": null,
+            "codegen_backend": null,
+            "codegen_units": null,
+            "debuginfo": null,
+            "quiet": true,
+            "package_scope": null,
+            "jobs": 3,
+            "toolchain": "stable",
+            "offline": true
+          },
+          "fitness_ms": 716.0089035000965,
+          "spread_ms": 40.83723769317799,
+          "disk_bytes": 381212372,
+          "ok": true,
+          "correctness_passed": true,
+          "decision": "keep-elite",
+          "reason": "lt-3pct",
+          "timestamp": "2026-10-21T03:21:32.689116+00:00"
+        },
+        {
+          "source": "mutate",
+          "genome_id": "a5e5c6edeb8e",
+          "genome": {
+            "command": "build",
+            "incremental": false,
+            "wrapper": "nanocompile",
+            "linker": null,
+            "codegen_backend": "cranelift",
+            "codegen_units": null,
+            "debuginfo": null,
+            "quiet": false,
+            "package_scope": "touched",
+            "jobs": 3,
+            "toolchain": "nightly",
+            "offline": true
+          },
+          "fitness_ms": 1931.8773264999436,
+          "spread_ms": 38.50065290596768,
+          "disk_bytes": 112750346,
+          "ok": true,
+          "correctness_passed": true,
+          "decision": "keep-elite",
+          "reason": "lt-3pct",
+          "timestamp": "2026-10-21T03:29:07.082509+00:00"
+        },
+        {
+          "source": "mutate",
+          "genome_id": "2054967f4a91",
+          "genome": {
+            "command": "check",
+            "incremental": true,
+            "wrapper": null,
+            "linker": null,
+            "codegen_backend": null,
+            "codegen_units": null,
+            "debuginfo": null,
+            "quiet": false,
+            "package_scope": null,
+            "jobs": 3,
+            "toolchain": "stable",
+            "offline": true
+          },
+          "fitness_ms": 752.646948499887,
+          "spread_ms": 27.251017921720397,
+          "disk_bytes": 381212376,
+          "ok": true,
+          "correctness_passed": true,
+          "decision": "keep-elite",
+          "reason": "lt-3pct",
+          "timestamp": "2026-10-21T03:29:19.566000+00:00"
+        },
+        {
+          "source": "mutate",
+          "genome_id": "bb6417e377c1",
+          "genome": {
+            "command": "check",
+            "incremental": true,
+            "wrapper": null,
+            "linker": null,
+            "codegen_backend": null,
+            "codegen_units": null,
+            "debuginfo": null,
+            "quiet": true,
+            "package_scope": "touched",
+            "jobs": 3,
+            "toolchain": "stable",
+            "offline": true
+          },
+          "fitness_ms": 560.4455224998901,
+          "spread_ms": 14.369557723757946,
+          "disk_bytes": 203266855,
+          "ok": true,
+          "correctness_passed": true,
+          "decision": "keep-elite",
+          "reason": "lt-3pct",
+          "timestamp": "2026-10-21T03:29:34.298818+00:00"
+        },
+        {
+          "source": "mutate",
+          "genome_id": "80f5a066a39a",
+          "genome": {
+            "command": "check",
+            "incremental": true,
+            "wrapper": null,
+            "linker": null,
+            "codegen_backend": null,
+            "codegen_units": 256,
+            "debuginfo": null,
+            "quiet": true,
+            "package_scope": "touched",
+            "jobs": 3,
+            "toolchain": "stable",
+            "offline": true
+          },
+          "fitness_ms": 542.1095875000219,
+          "spread_ms": 11.901534200670623,
+          "disk_bytes": 203748358,
+          "ok": true,
+          "correctness_passed": true,
+          "decision": "keep-elite",
+          "reason": "lt-3pct",
+          "timestamp": "2026-10-21T03:29:49.067488+00:00"
+        }
+      ],
+      "consecutive_sub3": 4,
+      "stopped": true,
+      "stop_reason": "4 consecutive tries under 3% / noise"
+    }
+  },
+  "cross_tests": [
+    {
+      "source": "/tmp/midsize-scratch/origin/bench/map_elites.json:c72d8c4c039f",
+      "origin_cell": null,
+      "origin_sample": null,
+      "origin_fitness_ms": null,
+      "held_out_edit_type": "fn_body",
+      "held_out": {
+        "genome": {
+          "command": "check",
+          "incremental": false,
+          "wrapper": false,
+          "linker": null,
+          "codegen_backend": null,
+          "codegen_units": null,
+          "debuginfo": "full",
+          "quiet": false,
+          "package_scope": null,
+          "jobs": null,
+          "toolchain": "stable",
+          "offline": true
+        },
+        "genome_id": "c72d8c4c039f",
+        "edit_type": "fn_body",
+        "fitness_ms": 241.90318150010626,
+        "spread_ms": 6.392544054225139,
+        "disk_bytes": 196497610,
+        "ok": true,
+        "correctness_passed": true,
+        "correctness": {
+          "ripgrep": {
+            "agree_on_broken": true,
+            "fast_failed": true,
+            "validate_failed": true,
+            "validate_refuses_cranelift": true,
+            "validate_stamp_written": false,
+            "passed": true
+          },
+          "tokio": {
+            "agree_on_broken": true,
+            "fast_failed": true,
+            "validate_failed": true,
+            "validate_refuses_cranelift": true,
+            "validate_stamp_written": false,
+            "passed": true
+          }
+        },
+        "per_sample": {
+          "ripgrep": {
+            "ok": true,
+            "samples_ms": [
+              371.85053999996853,
+              377.9640669999935,
+              372.25633000002745
+            ],
+            "returncodes": [
+              0,
+              0,
+              0
+            ],
+            "median_ms": 372.25633000002745,
+            "spread_ms": 2.7912191594547204,
+            "min_ms": 371.85053999996853,
+            "max_ms": 377.9640669999935,
+            "target_bytes": 116910501,
+            "stderr_tail": ""
+          },
+          "tokio": {
+            "ok": true,
+            "samples_ms": [
+              132.37999200009654,
+              111.55003300018507,
+              110.8280029998241
+            ],
+            "returncodes": [
+              0,
+              0,
+              0
+            ],
+            "median_ms": 111.55003300018507,
+            "spread_ms": 9.993868948995559,
+            "min_ms": 110.8280029998241,
+            "max_ms": 132.37999200009654,
+            "target_bytes": 79587109,
+            "stderr_tail": ""
+          }
+        },
+        "sample": "ripgrep-15.2.0,tokio-1.54.0",
+        "commit": "2348d3b550f59c3946d72cf0e10f5e2d8219a01c",
+        "timestamp": "2026-10-21T03:30:00.503150+00:00"
+      },
+      "timestamp": "2026-10-21T03:30:00.503170+00:00"
+    },
+    {
+      "source": "/tmp/midsize-scratch/origin/bench/map_elites.json:17d748579e78",
+      "origin_cell": null,
+      "origin_sample": null,
+      "origin_fitness_ms": null,
+      "held_out_edit_type": "fn_body",
+      "held_out": {
+        "genome": {
+          "command": "check",
+          "incremental": false,
+          "wrapper": true,
+          "linker": null,
+          "codegen_backend": null,
+          "codegen_units": null,
+          "debuginfo": "full",
+          "quiet": false,
+          "package_scope": null,
+          "jobs": null,
+          "toolchain": "stable",
+          "offline": true
+        },
+        "genome_id": "17d748579e78",
+        "edit_type": "fn_body",
+        "fitness_ms": 232.73054200001297,
+        "spread_ms": 3.3257654014868576,
+        "disk_bytes": 196497610,
+        "ok": true,
+        "correctness_passed": true,
+        "correctness": {
+          "ripgrep": {
+            "agree_on_broken": true,
+            "fast_failed": true,
+            "validate_failed": true,
+            "validate_refuses_cranelift": true,
+            "validate_stamp_written": false,
+            "passed": true
+          },
+          "tokio": {
+            "agree_on_broken": true,
+            "fast_failed": true,
+            "validate_failed": true,
+            "validate_refuses_cranelift": true,
+            "validate_stamp_written": false,
+            "passed": true
+          }
+        },
+        "per_sample": {
+          "ripgrep": {
+            "ok": true,
+            "samples_ms": [
+              369.9123609999333,
+              364.8555409999972,
+              356.8759909999244
+            ],
+            "returncodes": [
+              0,
+              0,
+              0
+            ],
+            "median_ms": 364.8555409999972,
+            "spread_ms": 5.366476078319175,
+            "min_ms": 356.8759909999244,
+            "max_ms": 369.9123609999333,
+            "target_bytes": 116910501,
+            "stderr_tail": ""
+          },
+          "tokio": {
+            "ok": true,
+            "samples_ms": [
+              103.1902289998925,
+              100.60554300002877,
+              100.34202800011371
+            ],
+            "returncodes": [
+              0,
+              0,
+              0
+            ],
+            "median_ms": 100.60554300002877,
+            "spread_ms": 1.285054724654541,
+            "min_ms": 100.34202800011371,
+            "max_ms": 103.1902289998925,
+            "target_bytes": 79587109,
+            "stderr_tail": ""
+          }
+        },
+        "sample": "ripgrep-15.2.0,tokio-1.54.0",
+        "commit": "2348d3b550f59c3946d72cf0e10f5e2d8219a01c",
+        "timestamp": "2026-10-21T03:30:11.425531+00:00"
+      },
+      "timestamp": "2026-10-21T03:30:11.425553+00:00"
+    },
+    {
+      "source": "/tmp/midsize-scratch/origin/bench/map_elites.json:51f8917d5888",
+      "origin_cell": null,
+      "origin_sample": null,
+      "origin_fitness_ms": null,
+      "held_out_edit_type": "fn_body",
+      "held_out": {
+        "genome": {
+          "command": "check",
+          "incremental": false,
+          "wrapper": false,
+          "linker": null,
+          "codegen_backend": null,
+          "codegen_units": null,
+          "debuginfo": "line-tables-only",
+          "quiet": false,
+          "package_scope": null,
+          "jobs": null,
+          "toolchain": "stable",
+          "offline": true
+        },
+        "genome_id": "51f8917d5888",
+        "edit_type": "fn_body",
+        "fitness_ms": 244.26976250015286,
+        "spread_ms": 14.750393144583821,
+        "disk_bytes": 201689879,
+        "ok": true,
+        "correctness_passed": true,
+        "correctness": {
+          "ripgrep": {
+            "agree_on_broken": true,
+            "fast_failed": true,
+            "validate_failed": true,
+            "validate_refuses_cranelift": true,
+            "validate_stamp_written": false,
+            "passed": true
+          },
+          "tokio": {
+            "agree_on_broken": true,
+            "fast_failed": true,
+            "validate_failed": true,
+            "validate_refuses_cranelift": true,
+            "validate_stamp_written": false,
+            "passed": true
+          }
+        },
+        "per_sample": {
+          "ripgrep": {
+            "ok": true,
+            "samples_ms": [
+              371.16232499988655,
+              381.70389300012175,
+              432.1528349998971
+            ],
+            "returncodes": [
+              0,
+              0,
+              0
+            ],
+            "median_ms": 381.70389300012175,
+            "spread_ms": 26.616750604880515,
+            "min_ms": 371.16232499988655,
+            "max_ms": 432.1528349998971,
+            "target_bytes": 117830553,
+            "stderr_tail": ""
+          },
+          "tokio": {
+            "ok": true,
+            "samples_ms": [
+              104.61679900004128,
+              106.83563200018398,
+              111.53457700015679
+            ],
+            "returncodes": [
+              0,
+              0,
+              0
+            ],
+            "median_ms": 106.83563200018398,
+            "spread_ms": 2.884035684287129,
+            "min_ms": 104.61679900004128,
+            "max_ms": 111.53457700015679,
+            "target_bytes": 83859326,
+            "stderr_tail": ""
+          }
+        },
+        "sample": "ripgrep-15.2.0,tokio-1.54.0",
+        "commit": "2348d3b550f59c3946d72cf0e10f5e2d8219a01c",
+        "timestamp": "2026-10-21T03:30:22.877037+00:00"
+      },
+      "timestamp": "2026-10-21T03:30:22.877096+00:00"
+    },
+    {
+      "source": "/tmp/midsize-scratch/origin/bench/map_elites.json:d817fa374ba7",
+      "origin_cell": null,
+      "origin_sample": null,
+      "origin_fitness_ms": null,
+      "held_out_edit_type": "fn_body",
+      "held_out": {
+        "genome": {
+          "command": "check",
+          "incremental": true,
+          "wrapper": false,
+          "linker": null,
+          "codegen_backend": null,
+          "codegen_units": null,
+          "debuginfo": "full",
+          "quiet": false,
+          "package_scope": null,
+          "jobs": null,
+          "toolchain": "stable",
+          "offline": true
+        },
+        "genome_id": "d817fa374ba7",
+        "edit_type": "fn_body",
+        "fitness_ms": 129.67964550011857,
+        "spread_ms": 6.179062583727559,
+        "disk_bytes": 307689296,
+        "ok": true,
+        "correctness_passed": true,
+        "correctness": {
+          "ripgrep": {
+            "agree_on_broken": true,
+            "fast_failed": true,
+            "validate_failed": true,
+            "validate_refuses_cranelift": true,
+            "validate_stamp_written": false,
+            "passed": true
+          },
+          "tokio": {
+            "agree_on_broken": true,
+            "fast_failed": true,
+            "validate_failed": true,
+            "validate_refuses_cranelift": true,
+            "validate_stamp_written": false,
+            "passed": true
+          }
+        },
+        "per_sample": {
+          "ripgrep": {
+            "ok": true,
+            "samples_ms": [
+              175.41979200018432,
+              169.56706600012694,
+              195.70695799984605
+            ],
+            "returncodes": [
+              0,
+              0,
+              0
+            ],
+            "median_ms": 175.41979200018432,
+            "spread_ms": 11.200781022800538,
+            "min_ms": 169.56706600012694,
+            "max_ms": 195.70695799984605,
+            "target_bytes": 155510586,
+            "stderr_tail": ""
+          },
+          "tokio": {
+            "ok": true,
+            "samples_ms": [
+              83.93949900005282,
+              84.2099489998418,
+              81.63082400005806
+            ],
+            "returncodes": [
+              0,
+              0,
+              0
+            ],
+            "median_ms": 83.93949900005282,
+            "spread_ms": 1.1573441446545805,
+            "min_ms": 81.63082400005806,
+            "max_ms": 84.2099489998418,
+            "target_bytes": 152178710,
+            "stderr_tail": ""
+          }
+        },
+        "sample": "ripgrep-15.2.0,tokio-1.54.0",
+        "commit": "2348d3b550f59c3946d72cf0e10f5e2d8219a01c",
+        "timestamp": "2026-10-21T03:30:33.700444+00:00"
+      },
+      "timestamp": "2026-10-21T03:30:33.700465+00:00"
+    }
+  ],
+  "notes": [
+    "cross-test pass found 4 new elites; origin=['bench/map_elites.json']",
+    "saw origin bench/map_elites.json; shard kept requested fields plus origin keys"
+  ],
+  "canonical_axes": {
+    "size": [
+      "small",
+      "mid",
+      "large"
+    ],
+    "edit": [
+      "cold",
+      "noop",
+      "body",
+      "sig_dep"
+    ]
+  },
+  "canonical_fitness": {
+    "metric": "median_ms",
+    "goal": "min",
+    "min_gain_pct": 3.0,
+    "max_non_improving": 4
+  },
+  "canonical_present": true
+}

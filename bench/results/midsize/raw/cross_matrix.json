@@ -1,0 +1,328 @@
+[
+  {
+    "genome_from": "small|cold",
+    "trained_on": "rust-loop",
+    "tested_on": "midsize",
+    "cell": "large|cold",
+    "fitness_ms": 3908.885816999941,
+    "spread_ms": 48.04283350006244,
+    "disk_bytes": 196497609,
+    "correctness_ok": true,
+    "delta_vs_local_elite_pct": 181.75808623108043,
+    "ok": true,
+    "skip_reason": null,
+    "per_sample": {
+      "ripgrep": {
+        "ok": true,
+        "samples_ms": [
+          3066.7097240000203,
+          2965.7238509998933
+        ],
+        "returncodes": [
+          0,
+          0
+        ],
+        "median_ms": 3016.216787499957,
+        "spread_ms": 50.49293650006348,
+        "min_ms": 2965.7238509998933,
+        "max_ms": 3066.7097240000203,
+        "target_bytes": 116910500
+      },
+      "tokio": {
+        "ok": true,
+        "samples_ms": [
+          4847.147576999987,
+          4755.962115999864
+        ],
+        "returncodes": [
+          0,
+          0
+        ],
+        "median_ms": 4801.554846499926,
+        "spread_ms": 45.59273050006141,
+        "min_ms": 4755.962115999864,
+        "max_ms": 4847.147576999987,
+        "target_bytes": 79587109
+      }
+    }
+  },
+  {
+    "genome_from": "small|noop",
+    "trained_on": "rust-loop",
+    "tested_on": "midsize",
+    "cell": "large|noop",
+    "fitness_ms": 0.0,
+    "spread_ms": null,
+    "disk_bytes": 0,
+    "correctness_ok": false,
+    "delta_vs_local_elite_pct": null,
+    "ok": false,
+    "skip_reason": "skipped-graph-on-large",
+    "per_sample": {}
+  },
+  {
+    "genome_from": "small|body",
+    "trained_on": "rust-loop",
+    "tested_on": "midsize",
+    "cell": "large|body",
+    "fitness_ms": 245.90918599994893,
+    "spread_ms": 5.279721964173199,
+    "disk_bytes": 201689878,
+    "correctness_ok": true,
+    "delta_vs_local_elite_pct": 101.66546489240858,
+    "ok": true,
+    "skip_reason": null,
+    "per_sample": {
+      "ripgrep": {
+        "ok": true,
+        "samples_ms": [
+          388.84560199994667,
+          407.36109299996315,
+          385.05911599986575
+        ],
+        "returncodes": [
+          0,
+          0,
+          0
+        ],
+        "median_ms": 388.84560199994667,
+        "spread_ms": 9.744166695535068,
+        "min_ms": 385.05911599986575,
+        "max_ms": 407.36109299996315,
+        "target_bytes": 117830552
+      },
+      "tokio": {
+        "ok": true,
+        "samples_ms": [
+          104.27496499983135,
+          102.31266100004177,
+          102.9727699999512
+        ],
+        "returncodes": [
+          0,
+          0,
+          0
+        ],
+        "median_ms": 102.9727699999512,
+        "spread_ms": 0.8152772328113304,
+        "min_ms": 102.31266100004177,
+        "max_ms": 104.27496499983135,
+        "target_bytes": 83859326
+      }
+    }
+  },
+  {
+    "genome_from": "small|sig_dep",
+    "trained_on": "rust-loop",
+    "tested_on": "midsize",
+    "cell": "large|sig_dep",
+    "fitness_ms": 1560.9420870000577,
+    "spread_ms": 51.28091865396217,
+    "disk_bytes": 196497661,
+    "correctness_ok": true,
+    "delta_vs_local_elite_pct": 194.64739279318943,
+    "ok": true,
+    "skip_reason": null,
+    "per_sample": {
+      "ripgrep": {
+        "ok": true,
+        "samples_ms": [
+          670.0154440000006,
+          670.2755260000686,
+          657.2253770000316
+        ],
+        "returncodes": [
+          0,
+          0,
+          0
+        ],
+        "median_ms": 670.0154440000006,
+        "spread_ms": 6.091522756472685,
+        "min_ms": 657.2253770000316,
+        "max_ms": 670.2755260000686,
+        "target_bytes": 116910526
+      },
+      "tokio": {
+        "ok": true,
+        "samples_ms": [
+          2369.8245880000286,
+          2602.760483999873,
+          2451.8687300001147
+        ],
+        "returncodes": [
+          0,
+          0,
+          0
+        ],
+        "median_ms": 2451.8687300001147,
+        "spread_ms": 96.47031455145165,
+        "min_ms": 2369.8245880000286,
+        "max_ms": 2602.760483999873,
+        "target_bytes": 79587135
+      }
+    }
+  },
+  {
+    "genome_from": "mid|cold",
+    "trained_on": "rust-loop-medium",
+    "tested_on": "midsize",
+    "cell": "large|cold",
+    "fitness_ms": 4211.840735250007,
+    "spread_ms": 77.11390874999324,
+    "disk_bytes": 196497609,
+    "correctness_ok": true,
+    "delta_vs_local_elite_pct": 203.59551049381972,
+    "ok": true,
+    "skip_reason": null,
+    "per_sample": {
+      "ripgrep": {
+        "ok": true,
+        "samples_ms": [
+          3185.1852500001314,
+          3176.007954999932
+        ],
+        "returncodes": [
+          0,
+          0
+        ],
+        "median_ms": 3180.5966025000316,
+        "spread_ms": 4.588647500099796,
+        "min_ms": 3176.007954999932,
+        "max_ms": 3185.1852500001314,
+        "target_bytes": 116910500
+      },
+      "tokio": {
+        "ok": true,
+        "samples_ms": [
+          5392.724037999869,
+          5093.445698000096
+        ],
+        "returncodes": [
+          0,
+          0
+        ],
+        "median_ms": 5243.084867999983,
+        "spread_ms": 149.6391699998867,
+        "min_ms": 5093.445698000096,
+        "max_ms": 5392.724037999869,
+        "target_bytes": 79587109
+      }
+    }
+  },
+  {
+    "genome_from": "mid|noop",
+    "trained_on": "rust-loop-medium",
+    "tested_on": "midsize",
+    "cell": "large|noop",
+    "fitness_ms": 0.0,
+    "spread_ms": null,
+    "disk_bytes": 0,
+    "correctness_ok": false,
+    "delta_vs_local_elite_pct": null,
+    "ok": false,
+    "skip_reason": "skipped-graph-on-large",
+    "per_sample": {}
+  },
+  {
+    "genome_from": "mid|body",
+    "trained_on": "rust-loop-medium",
+    "tested_on": "midsize",
+    "cell": "large|body",
+    "fitness_ms": 134.18279649988563,
+    "spread_ms": 14.315681745855233,
+    "disk_bytes": 381149562,
+    "correctness_ok": true,
+    "delta_vs_local_elite_pct": 10.040769427452412,
+    "ok": true,
+    "skip_reason": null,
+    "per_sample": {
+      "ripgrep": {
+        "ok": true,
+        "samples_ms": [
+          235.7098859999951,
+          180.5208240000411,
+          182.9588389998662
+        ],
+        "returncodes": [
+          0,
+          0,
+          0
+        ],
+        "median_ms": 182.9588389998662,
+        "spread_ms": 25.461189291381295,
+        "min_ms": 180.5208240000411,
+        "max_ms": 235.7098859999951,
+        "target_bytes": 164489407
+      },
+      "tokio": {
+        "ok": true,
+        "samples_ms": [
+          85.40675399990505,
+          89.09875399990597,
+          81.33651599996483
+        ],
+        "returncodes": [
+          0,
+          0,
+          0
+        ],
+        "median_ms": 85.40675399990505,
+        "spread_ms": 3.170174200329171,
+        "min_ms": 81.33651599996483,
+        "max_ms": 89.09875399990597,
+        "target_bytes": 216660155
+      }
+    }
+  },
+  {
+    "genome_from": "mid|sig_dep",
+    "trained_on": "rust-loop-medium",
+    "tested_on": "midsize",
+    "cell": "large|sig_dep",
+    "fitness_ms": 1659.058936499946,
+    "spread_ms": 99.06621833282419,
+    "disk_bytes": 196497662,
+    "correctness_ok": true,
+    "delta_vs_local_elite_pct": 213.16817850009872,
+    "ok": true,
+    "skip_reason": null,
+    "per_sample": {
+      "ripgrep": {
+        "ok": true,
+        "samples_ms": [
+          690.1086660000146,
+          696.0640539998622,
+          757.5156319999223
+        ],
+        "returncodes": [
+          0,
+          0,
+          0
+        ],
+        "median_ms": 696.0640539998622,
+        "spread_ms": 30.469405694234997,
+        "min_ms": 690.1086660000146,
+        "max_ms": 757.5156319999223,
+        "target_bytes": 116910527
+      },
+      "tokio": {
+        "ok": true,
+        "samples_ms": [
+          2510.3933839998263,
+          2622.0538190000298,
+          2908.4924639998917
+        ],
+        "returncodes": [
+          0,
+          0,
+          0
+        ],
+        "median_ms": 2622.0538190000298,
+        "spread_ms": 167.66303097141338,
+        "min_ms": 2510.3933839998263,
+        "max_ms": 2908.4924639998917,
+        "target_bytes": 79587135
+      }
+    }
+  }
+]

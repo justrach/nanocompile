@@ -1,0 +1,2506 @@
+{
+  "schema_version": 1,
+  "kind": "nanocompile.rust-loop.map-elites.shard",
+  "sample": "midsize",
+  "commit": "afdf578121ef0527fd6481eb576a44a9a5651c6f",
+  "timestamp": "2026-10-21T03:36:35.510419+00:00",
+  "size_bucket_note": "User-facing shard name is midsize (ripgrep 15.2.0 + tokio 1.54.0). tools/map_elites.py classify reports large for both (ripgrep 9 crates / 53030 LOC, tokio 5 crates / 188515 LOC).",
+  "classified": {
+    "ripgrep-15.2.0": {
+      "size": "large",
+      "crates": 9,
+      "loc": 53030,
+      "tag": "15.2.0",
+      "sha": "e89fff89ac9af12e8d4ce9d5fd07beb408ca730f"
+    },
+    "tokio-1.54.0": {
+      "size": "large",
+      "crates": 5,
+      "loc": 188515,
+      "tag": "tokio-1.54.0",
+      "sha": "66d34e45c9c850ed72bc61f2ad107368217f040d"
+    }
+  },
+  "host": {
+    "sysname": "Linux",
+    "machine": "x86_64",
+    "nproc": 4,
+    "rustc": "rustc 1.99.1 (58cf8f9c3 2026-10-13)",
+    "nightly": "rustc 1.101.0-nightly (19833af72 2026-10-20)",
+    "mold": "mold 3.0.0 (8de38c35a2df16a25f7ff87ac3ad07156a925beb; compatible with GNU ld)",
+    "sccache": "sccache 0.18.0",
+    "hyperfine": "hyperfine 2.0.0",
+    "nanocompile": "/workspace/zig-out/bin/nanocompile"
+  },
+  "fitness": {
+    "metric": "median_ms",
+    "goal": "min",
+    "aggregation": "mean_of_per_sample_medians",
+    "min_gain_pct": 3.0,
+    "max_non_improving": 4
+  },
+  "evaluations": [
+    {
+      "cell": "large|cold",
+      "size": "large",
+      "edit": "cold",
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": true,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": null,
+        "quiet": false,
+        "command_build": false
+      },
+      "fitness_ms": 1387.3198349999143,
+      "spread_ms": 24.53562450006075,
+      "disk_bytes": 196497613,
+      "correctness": {
+        "ok": true,
+        "agree_on_broken": true,
+        "validate_is_final": true
+      },
+      "sample": "midsize",
+      "commit": "2348d3b550f59c3946d72cf0e10f5e2d8219a01c",
+      "timestamp": "2026-10-21T03:26:17.978379+00:00",
+      "n_evals": 18,
+      "non_improving": 4,
+      "stopped": true,
+      "projects": [
+        "ripgrep-15.2.0",
+        "tokio-1.54.0"
+      ],
+      "per_sample": {
+        "ripgrep": {
+          "ok": true,
+          "samples_ms": [
+            1487.0670729999347,
+            1464.098882999906
+          ],
+          "returncodes": [
+            0,
+            0
+          ],
+          "median_ms": 1475.5829779999203,
+          "spread_ms": 11.48409500001435,
+          "min_ms": 1464.098882999906,
+          "max_ms": 1487.0670729999347,
+          "target_bytes": 116910502
+        },
+        "tokio": {
+          "ok": true,
+          "samples_ms": [
+            1336.6438460000154,
+            1261.469537999801
+          ],
+          "returncodes": [
+            0,
+            0
+          ],
+          "median_ms": 1299.0566919999083,
+          "spread_ms": 37.58715400010715,
+          "min_ms": 1261.469537999801,
+          "max_ms": 1336.6438460000154,
+          "target_bytes": 79587111
+        }
+      },
+      "classified": {
+        "ripgrep": {
+          "size": "large",
+          "crates": 9,
+          "loc": 53030
+        },
+        "tokio": {
+          "size": "large",
+          "crates": 5,
+          "loc": 188515
+        }
+      }
+    },
+    {
+      "cell": "large|noop",
+      "size": "large",
+      "edit": "noop",
+      "genome": {
+        "wrapper": true,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": null,
+        "quiet": false,
+        "command_build": false
+      },
+      "fitness_ms": 31.221453999933146,
+      "spread_ms": 0.837486664043877,
+      "disk_bytes": 196497613,
+      "correctness": {
+        "ok": true,
+        "agree_on_broken": true,
+        "validate_is_final": true
+      },
+      "sample": "midsize",
+      "commit": "2348d3b550f59c3946d72cf0e10f5e2d8219a01c",
+      "timestamp": "2026-10-21T03:19:46.188562+00:00",
+      "n_evals": 11,
+      "non_improving": 4,
+      "stopped": true,
+      "projects": [
+        "ripgrep-15.2.0",
+        "tokio-1.54.0"
+      ],
+      "per_sample": {
+        "ripgrep": {
+          "ok": true,
+          "samples_ms": [
+            24.494333999996343,
+            25.764066999954593,
+            26.614574999939578
+          ],
+          "returncodes": [
+            0,
+            0,
+            0
+          ],
+          "median_ms": 25.764066999954593,
+          "spread_ms": 0.8712065482269546,
+          "min_ms": 24.494333999996343,
+          "max_ms": 26.614574999939578,
+          "target_bytes": 116910502
+        },
+        "tokio": {
+          "ok": true,
+          "samples_ms": [
+            36.6788409999117,
+            37.78695300002255,
+            35.823553000000175
+          ],
+          "returncodes": [
+            0,
+            0,
+            0
+          ],
+          "median_ms": 36.6788409999117,
+          "spread_ms": 0.8037667798607994,
+          "min_ms": 35.823553000000175,
+          "max_ms": 37.78695300002255,
+          "target_bytes": 79587111
+        }
+      },
+      "classified": {
+        "ripgrep": {
+          "size": "large",
+          "crates": 9,
+          "loc": 53030
+        },
+        "tokio": {
+          "size": "large",
+          "crates": 5,
+          "loc": 188515
+        }
+      }
+    },
+    {
+      "cell": "large|body",
+      "size": "large",
+      "edit": "body",
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "line-tables-only",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": null,
+        "quiet": false,
+        "command_build": false
+      },
+      "fitness_ms": 121.93916600006105,
+      "spread_ms": 4.545792332077087,
+      "disk_bytes": 314162647,
+      "correctness": {
+        "ok": true,
+        "agree_on_broken": true,
+        "validate_is_final": true
+      },
+      "sample": "midsize",
+      "commit": "2348d3b550f59c3946d72cf0e10f5e2d8219a01c",
+      "timestamp": "2026-10-21T03:20:21.425557+00:00",
+      "n_evals": 13,
+      "non_improving": 4,
+      "stopped": true,
+      "projects": [
+        "ripgrep-15.2.0",
+        "tokio-1.54.0"
+      ],
+      "per_sample": {
+        "ripgrep": {
+          "ok": true,
+          "samples_ms": [
+            181.0556230000202,
+            163.62210700003743,
+            163.07894800002032
+          ],
+          "returncodes": [
+            0,
+            0,
+            0
+          ],
+          "median_ms": 163.62210700003743,
+          "spread_ms": 8.349207187089855,
+          "min_ms": 163.07894800002032,
+          "max_ms": 181.0556230000202,
+          "target_bytes": 156895365
+        },
+        "tokio": {
+          "ok": true,
+          "samples_ms": [
+            81.12594600004286,
+            79.30806399997437,
+            80.25622500008467
+          ],
+          "returncodes": [
+            0,
+            0,
+            0
+          ],
+          "median_ms": 80.25622500008467,
+          "spread_ms": 0.7423774770643206,
+          "min_ms": 79.30806399997437,
+          "max_ms": 81.12594600004286,
+          "target_bytes": 157267282
+        }
+      },
+      "classified": {
+        "ripgrep": {
+          "size": "large",
+          "crates": 9,
+          "loc": 53030
+        },
+        "tokio": {
+          "size": "large",
+          "crates": 5,
+          "loc": 188515
+        }
+      }
+    },
+    {
+      "cell": "large|sig_dep",
+      "size": "large",
+      "edit": "sig_dep",
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": "touched",
+        "quiet": false,
+        "command_build": false
+      },
+      "fitness_ms": 529.7661290000519,
+      "spread_ms": 14.392192180814373,
+      "disk_bytes": 432613103,
+      "correctness": {
+        "ok": true,
+        "agree_on_broken": true,
+        "validate_is_final": true
+      },
+      "sample": "midsize",
+      "commit": "2348d3b550f59c3946d72cf0e10f5e2d8219a01c",
+      "timestamp": "2026-10-21T03:21:11.570323+00:00",
+      "n_evals": 10,
+      "non_improving": 4,
+      "stopped": true,
+      "projects": [
+        "ripgrep-15.2.0",
+        "tokio-1.54.0"
+      ],
+      "per_sample": {
+        "ripgrep": {
+          "ok": true,
+          "samples_ms": [
+            86.34426399999029,
+            84.12985200004641,
+            80.34954499999003
+          ],
+          "returncodes": [
+            0,
+            0,
+            0
+          ],
+          "median_ms": 84.12985200004641,
+          "spread_ms": 2.4750083593379557,
+          "min_ms": 80.34954499999003,
+          "max_ms": 86.34426399999029,
+          "target_bytes": 167138865
+        },
+        "tokio": {
+          "ok": true,
+          "samples_ms": [
+            975.4024060000575,
+            965.2460820000215,
+            1025.4374139999527
+          ],
+          "returncodes": [
+            0,
+            0,
+            0
+          ],
+          "median_ms": 975.4024060000575,
+          "spread_ms": 26.30937600229079,
+          "min_ms": 965.2460820000215,
+          "max_ms": 1025.4374139999527,
+          "target_bytes": 265474238
+        }
+      },
+      "classified": {
+        "ripgrep": {
+          "size": "large",
+          "crates": 9,
+          "loc": 53030
+        },
+        "tokio": {
+          "size": "large",
+          "crates": 5,
+          "loc": 188515
+        }
+      }
+    },
+    {
+      "cell": "large|cold",
+      "size": "large",
+      "edit": "cold",
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": null,
+        "quiet": false,
+        "command_build": false
+      },
+      "fitness_ms": 3908.885816999941,
+      "spread_ms": 48.04283350006244,
+      "disk_bytes": 196497609,
+      "correctness": {
+        "ok": true,
+        "agree_on_broken": true,
+        "validate_is_final": true
+      },
+      "sample": "midsize-held-out-from-rust-loop",
+      "commit": "afdf578121ef0527fd6481eb576a44a9a5651c6f",
+      "timestamp": "2026-10-21T03:35:21.667183+00:00",
+      "n_evals": 3,
+      "non_improving": 0,
+      "stopped": false,
+      "held_out": true,
+      "trained_on": "rust-loop",
+      "trained_cell": "small|cold"
+    },
+    {
+      "cell": "large|body",
+      "size": "large",
+      "edit": "body",
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "line-tables-only",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": null,
+        "quiet": false,
+        "command_build": false
+      },
+      "fitness_ms": 245.90918599994893,
+      "spread_ms": 5.279721964173199,
+      "disk_bytes": 201689878,
+      "correctness": {
+        "ok": true,
+        "agree_on_broken": true,
+        "validate_is_final": true
+      },
+      "sample": "midsize-held-out-from-rust-loop",
+      "commit": "afdf578121ef0527fd6481eb576a44a9a5651c6f",
+      "timestamp": "2026-10-21T03:35:28.308808+00:00",
+      "n_evals": 3,
+      "non_improving": 0,
+      "stopped": false,
+      "held_out": true,
+      "trained_on": "rust-loop",
+      "trained_cell": "small|body"
+    },
+    {
+      "cell": "large|sig_dep",
+      "size": "large",
+      "edit": "sig_dep",
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": null,
+        "quiet": false,
+        "command_build": false
+      },
+      "fitness_ms": 1560.9420870000577,
+      "spread_ms": 51.28091865396217,
+      "disk_bytes": 196497661,
+      "correctness": {
+        "ok": true,
+        "agree_on_broken": true,
+        "validate_is_final": true
+      },
+      "sample": "midsize-held-out-from-rust-loop",
+      "commit": "afdf578121ef0527fd6481eb576a44a9a5651c6f",
+      "timestamp": "2026-10-21T03:35:51.489632+00:00",
+      "n_evals": 3,
+      "non_improving": 0,
+      "stopped": false,
+      "held_out": true,
+      "trained_on": "rust-loop",
+      "trained_cell": "small|sig_dep"
+    },
+    {
+      "cell": "large|cold",
+      "size": "large",
+      "edit": "cold",
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": null,
+        "quiet": false,
+        "command_build": false
+      },
+      "fitness_ms": 4211.840735250007,
+      "spread_ms": 77.11390874999324,
+      "disk_bytes": 196497609,
+      "correctness": {
+        "ok": true,
+        "agree_on_broken": true,
+        "validate_is_final": true
+      },
+      "sample": "midsize-held-out-from-rust-loop-medium",
+      "commit": "afdf578121ef0527fd6481eb576a44a9a5651c6f",
+      "timestamp": "2026-10-21T03:36:08.421057+00:00",
+      "n_evals": 3,
+      "non_improving": 0,
+      "stopped": false,
+      "held_out": true,
+      "trained_on": "rust-loop-medium",
+      "trained_cell": "mid|cold"
+    },
+    {
+      "cell": "large|body",
+      "size": "large",
+      "edit": "body",
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": null,
+        "quiet": false,
+        "command_build": false
+      },
+      "fitness_ms": 134.18279649988563,
+      "spread_ms": 14.315681745855233,
+      "disk_bytes": 381149562,
+      "correctness": {
+        "ok": true,
+        "agree_on_broken": true,
+        "validate_is_final": true
+      },
+      "sample": "midsize-held-out-from-rust-loop-medium",
+      "commit": "afdf578121ef0527fd6481eb576a44a9a5651c6f",
+      "timestamp": "2026-10-21T03:36:11.970974+00:00",
+      "n_evals": 3,
+      "non_improving": 0,
+      "stopped": false,
+      "held_out": true,
+      "trained_on": "rust-loop-medium",
+      "trained_cell": "mid|body"
+    },
+    {
+      "cell": "large|sig_dep",
+      "size": "large",
+      "edit": "sig_dep",
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": null,
+        "quiet": false,
+        "command_build": false
+      },
+      "fitness_ms": 1659.058936499946,
+      "spread_ms": 99.06621833282419,
+      "disk_bytes": 196497662,
+      "correctness": {
+        "ok": true,
+        "agree_on_broken": true,
+        "validate_is_final": true
+      },
+      "sample": "midsize-held-out-from-rust-loop-medium",
+      "commit": "afdf578121ef0527fd6481eb576a44a9a5651c6f",
+      "timestamp": "2026-10-21T03:36:35.510348+00:00",
+      "n_evals": 3,
+      "non_improving": 0,
+      "stopped": false,
+      "held_out": true,
+      "trained_on": "rust-loop-medium",
+      "trained_cell": "mid|sig_dep"
+    }
+  ],
+  "history": [
+    {
+      "timestamp": "2026-10-21T03:19:18.446958+00:00",
+      "sample": "midsize",
+      "cell": "large|cold",
+      "action": "seed",
+      "fitness_ms": 4466.951885250011,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": null,
+        "quiet": false,
+        "command_build": false
+      },
+      "reason": "empty-cell"
+    },
+    {
+      "timestamp": "2026-10-21T03:19:45.862931+00:00",
+      "sample": "midsize",
+      "cell": "large|cold",
+      "action": "replace",
+      "fitness_ms": 3388.4382534999986,
+      "genome": {
+        "wrapper": true,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": null,
+        "quiet": false,
+        "command_build": false
+      },
+      "reason": "win"
+    },
+    {
+      "timestamp": "2026-10-21T03:20:10.795180+00:00",
+      "sample": "midsize",
+      "cell": "large|cold",
+      "action": "seed",
+      "fitness_ms": null,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": true,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": null,
+        "quiet": false,
+        "command_build": false
+      },
+      "reason": "gate-or-fail"
+    },
+    {
+      "timestamp": "2026-10-21T03:20:49.138968+00:00",
+      "sample": "midsize",
+      "cell": "large|cold",
+      "action": "seed",
+      "fitness_ms": 4284.54157675003,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "line-tables-only",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": null,
+        "quiet": false,
+        "command_build": false
+      },
+      "reason": "lt-3pct"
+    },
+    {
+      "timestamp": "2026-10-21T03:22:25.020681+00:00",
+      "sample": "midsize",
+      "cell": "large|cold",
+      "action": "seed",
+      "fitness_ms": 7632.7343150000215,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "full",
+        "fast_check": "none",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": null,
+        "quiet": false,
+        "command_build": true
+      },
+      "reason": "lt-3pct"
+    },
+    {
+      "timestamp": "2026-10-21T03:22:56.756084+00:00",
+      "sample": "midsize",
+      "cell": "large|cold",
+      "action": "seed",
+      "fitness_ms": 7769.0952650000045,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "mold",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "full",
+        "fast_check": "none",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": null,
+        "quiet": false,
+        "command_build": true
+      },
+      "reason": "lt-3pct"
+    },
+    {
+      "timestamp": "2026-10-21T03:23:27.902188+00:00",
+      "sample": "midsize",
+      "cell": "large|cold",
+      "action": "seed",
+      "fitness_ms": 7651.371323749998,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "lld",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "full",
+        "fast_check": "none",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": null,
+        "quiet": false,
+        "command_build": true
+      },
+      "reason": "lt-3pct"
+    },
+    {
+      "timestamp": "2026-10-21T03:23:55.837154+00:00",
+      "sample": "midsize",
+      "cell": "large|cold",
+      "action": "seed",
+      "fitness_ms": 6953.901042000012,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "line-tables-only",
+        "fast_check": "none",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": null,
+        "quiet": false,
+        "command_build": true
+      },
+      "reason": "lt-3pct"
+    },
+    {
+      "timestamp": "2026-10-21T03:24:24.453438+00:00",
+      "sample": "midsize",
+      "cell": "large|cold",
+      "action": "seed",
+      "fitness_ms": 7120.199317750007,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "cranelift",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "full",
+        "fast_check": "none",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": null,
+        "quiet": false,
+        "command_build": true
+      },
+      "reason": "lt-3pct"
+    },
+    {
+      "timestamp": "2026-10-21T03:24:53.944140+00:00",
+      "sample": "midsize",
+      "cell": "large|cold",
+      "action": "seed",
+      "fitness_ms": 7231.815860250009,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "mold",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "line-tables-only",
+        "fast_check": "none",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": null,
+        "quiet": false,
+        "command_build": true
+      },
+      "reason": "lt-3pct"
+    },
+    {
+      "timestamp": "2026-10-21T03:25:37.034250+00:00",
+      "sample": "midsize",
+      "cell": "large|cold",
+      "action": "reject",
+      "fitness_ms": 3302.262744499984,
+      "genome": {
+        "wrapper": true,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": null,
+        "quiet": true,
+        "command_build": false
+      },
+      "reason": "lt-3pct"
+    },
+    {
+      "timestamp": "2026-10-21T03:25:49.029648+00:00",
+      "sample": "midsize",
+      "cell": "large|cold",
+      "action": "reject",
+      "fitness_ms": 2988.078279999996,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": true,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": null,
+        "quiet": false,
+        "command_build": false
+      },
+      "reason": "within-noise"
+    },
+    {
+      "timestamp": "2026-10-21T03:26:12.340211+00:00",
+      "sample": "midsize",
+      "cell": "large|cold",
+      "action": "reject",
+      "fitness_ms": 5812.26520125,
+      "genome": {
+        "wrapper": true,
+        "dev_backend": "cranelift",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "none",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": null,
+        "quiet": false,
+        "command_build": true
+      },
+      "reason": "lt-3pct"
+    },
+    {
+      "timestamp": "2026-10-21T03:26:17.978379+00:00",
+      "sample": "midsize",
+      "cell": "large|cold",
+      "action": "replace",
+      "fitness_ms": 1387.3198349999143,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": true,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": null,
+        "quiet": false,
+        "command_build": false
+      },
+      "reason": "win"
+    },
+    {
+      "timestamp": "2026-10-21T03:26:33.800458+00:00",
+      "sample": "midsize",
+      "cell": "large|cold",
+      "action": "reject",
+      "fitness_ms": 3938.8285164999957,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": null,
+        "quiet": false,
+        "command_build": false
+      },
+      "reason": "lt-3pct"
+    },
+    {
+      "timestamp": "2026-10-21T03:26:45.947682+00:00",
+      "sample": "midsize",
+      "cell": "large|cold",
+      "action": "reject",
+      "fitness_ms": 3025.355257499996,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": true,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 4,
+        "offline": true,
+        "package_scope": null,
+        "quiet": false,
+        "command_build": false
+      },
+      "reason": "lt-3pct"
+    },
+    {
+      "timestamp": "2026-10-21T03:26:46.008539+00:00",
+      "sample": "midsize",
+      "cell": "large|cold",
+      "action": "reject",
+      "fitness_ms": null,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": true,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": null,
+        "quiet": false,
+        "command_build": false
+      },
+      "reason": "gate-or-fail"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:04.537533+00:00",
+      "sample": "midsize",
+      "cell": "large|cold",
+      "action": "reject",
+      "fitness_ms": 4615.516709749954,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": true,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "none",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": null,
+        "quiet": true,
+        "command_build": true
+      },
+      "reason": "lt-3pct"
+    },
+    {
+      "timestamp": "2026-10-21T03:32:48.613531+00:00",
+      "sample": "midsize",
+      "cell": "large|cold",
+      "action": "stop",
+      "fitness_ms": 1387.3198349999143,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": true,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": null,
+        "quiet": false,
+        "command_build": false
+      },
+      "reason": "4 consecutive tries under 3% / noise"
+    },
+    {
+      "timestamp": "2026-10-21T03:19:18.808839+00:00",
+      "sample": "midsize",
+      "cell": "large|noop",
+      "action": "seed",
+      "fitness_ms": 33.15245350006535,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": null,
+        "quiet": false,
+        "command_build": false
+      },
+      "reason": "empty-cell"
+    },
+    {
+      "timestamp": "2026-10-21T03:19:46.188562+00:00",
+      "sample": "midsize",
+      "cell": "large|noop",
+      "action": "replace",
+      "fitness_ms": 31.221453999933146,
+      "genome": {
+        "wrapper": true,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": null,
+        "quiet": false,
+        "command_build": false
+      },
+      "reason": "win"
+    },
+    {
+      "timestamp": "2026-10-21T03:20:10.742678+00:00",
+      "sample": "midsize",
+      "cell": "large|noop",
+      "action": "seed",
+      "fitness_ms": null,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": true,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": null,
+        "quiet": false,
+        "command_build": false
+      },
+      "reason": "gate-or-fail"
+    },
+    {
+      "timestamp": "2026-10-21T03:22:25.520334+00:00",
+      "sample": "midsize",
+      "cell": "large|noop",
+      "action": "seed",
+      "fitness_ms": 45.36904800005459,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "full",
+        "fast_check": "none",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": null,
+        "quiet": false,
+        "command_build": true
+      },
+      "reason": "lt-3pct"
+    },
+    {
+      "timestamp": "2026-10-21T03:22:57.155970+00:00",
+      "sample": "midsize",
+      "cell": "large|noop",
+      "action": "seed",
+      "fitness_ms": 35.74745100002019,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "mold",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "full",
+        "fast_check": "none",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": null,
+        "quiet": false,
+        "command_build": true
+      },
+      "reason": "lt-3pct"
+    },
+    {
+      "timestamp": "2026-10-21T03:24:24.906858+00:00",
+      "sample": "midsize",
+      "cell": "large|noop",
+      "action": "seed",
+      "fitness_ms": 43.554057499989085,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "cranelift",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "full",
+        "fast_check": "none",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": null,
+        "quiet": false,
+        "command_build": true
+      },
+      "reason": "lt-3pct"
+    },
+    {
+      "timestamp": "2026-10-21T03:25:22.591994+00:00",
+      "sample": "midsize",
+      "cell": "large|noop",
+      "action": "seed",
+      "fitness_ms": null,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "graph",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": null,
+        "quiet": false,
+        "command_build": false
+      },
+      "reason": "gate-or-fail"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:19.984784+00:00",
+      "sample": "midsize",
+      "cell": "large|noop",
+      "action": "reject",
+      "fitness_ms": 35.15603499988629,
+      "genome": {
+        "wrapper": true,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": 16,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "none",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": null,
+        "quiet": false,
+        "command_build": true
+      },
+      "reason": "lt-3pct"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:23.280345+00:00",
+      "sample": "midsize",
+      "cell": "large|noop",
+      "action": "reject",
+      "fitness_ms": 32.74564950004333,
+      "genome": {
+        "wrapper": true,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": null,
+        "quiet": false,
+        "command_build": false
+      },
+      "reason": "lt-3pct"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:23.621862+00:00",
+      "sample": "midsize",
+      "cell": "large|noop",
+      "action": "reject",
+      "fitness_ms": 33.10443199995916,
+      "genome": {
+        "wrapper": true,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": null,
+        "quiet": true,
+        "command_build": false
+      },
+      "reason": "lt-3pct"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:37.698345+00:00",
+      "sample": "midsize",
+      "cell": "large|noop",
+      "action": "reject",
+      "fitness_ms": 35.63417949999348,
+      "genome": {
+        "wrapper": true,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "none",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": null,
+        "quiet": false,
+        "command_build": true
+      },
+      "reason": "lt-3pct"
+    },
+    {
+      "timestamp": "2026-10-21T03:32:48.613531+00:00",
+      "sample": "midsize",
+      "cell": "large|noop",
+      "action": "stop",
+      "fitness_ms": 31.221453999933146,
+      "genome": {
+        "wrapper": true,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": null,
+        "quiet": false,
+        "command_build": false
+      },
+      "reason": "4 consecutive tries under 3% / noise"
+    },
+    {
+      "timestamp": "2026-10-21T03:19:20.806045+00:00",
+      "sample": "midsize",
+      "cell": "large|body",
+      "action": "seed",
+      "fitness_ms": 127.39468350008565,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": null,
+        "quiet": false,
+        "command_build": false
+      },
+      "reason": "empty-cell"
+    },
+    {
+      "timestamp": "2026-10-21T03:19:49.905159+00:00",
+      "sample": "midsize",
+      "cell": "large|body",
+      "action": "seed",
+      "fitness_ms": 254.7870304999833,
+      "genome": {
+        "wrapper": true,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": null,
+        "quiet": false,
+        "command_build": false
+      },
+      "reason": "lt-3pct"
+    },
+    {
+      "timestamp": "2026-10-21T03:20:10.687411+00:00",
+      "sample": "midsize",
+      "cell": "large|body",
+      "action": "seed",
+      "fitness_ms": null,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": true,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": null,
+        "quiet": false,
+        "command_build": false
+      },
+      "reason": "gate-or-fail"
+    },
+    {
+      "timestamp": "2026-10-21T03:20:21.425557+00:00",
+      "sample": "midsize",
+      "cell": "large|body",
+      "action": "replace",
+      "fitness_ms": 121.93916600006105,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "line-tables-only",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": null,
+        "quiet": false,
+        "command_build": false
+      },
+      "reason": "win"
+    },
+    {
+      "timestamp": "2026-10-21T03:20:59.509601+00:00",
+      "sample": "midsize",
+      "cell": "large|body",
+      "action": "seed",
+      "fitness_ms": 130.2240905000076,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": "touched",
+        "quiet": false,
+        "command_build": false
+      },
+      "reason": "lt-3pct"
+    },
+    {
+      "timestamp": "2026-10-21T03:21:22.105882+00:00",
+      "sample": "midsize",
+      "cell": "large|body",
+      "action": "seed",
+      "fitness_ms": 127.90828150002653,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": null,
+        "quiet": true,
+        "command_build": false
+      },
+      "reason": "lt-3pct"
+    },
+    {
+      "timestamp": "2026-10-21T03:21:43.642533+00:00",
+      "sample": "midsize",
+      "cell": "large|body",
+      "action": "seed",
+      "fitness_ms": 237.60070399998767,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": null,
+        "quiet": false,
+        "command_build": false
+      },
+      "reason": "lt-3pct"
+    },
+    {
+      "timestamp": "2026-10-21T03:21:54.352290+00:00",
+      "sample": "midsize",
+      "cell": "large|body",
+      "action": "seed",
+      "fitness_ms": 122.7862205000747,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": 256,
+        "incremental": true,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": null,
+        "quiet": false,
+        "command_build": false
+      },
+      "reason": "lt-3pct"
+    },
+    {
+      "timestamp": "2026-10-21T03:25:23.786814+00:00",
+      "sample": "midsize",
+      "cell": "large|body",
+      "action": "seed",
+      "fitness_ms": null,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "graph",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": null,
+        "quiet": false,
+        "command_build": false
+      },
+      "reason": "gate-or-fail"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:49.729870+00:00",
+      "sample": "midsize",
+      "cell": "large|body",
+      "action": "reject",
+      "fitness_ms": 240.40767899998627,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "line-tables-only",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": null,
+        "quiet": true,
+        "command_build": false
+      },
+      "reason": "lt-3pct"
+    },
+    {
+      "timestamp": "2026-10-21T03:28:07.060621+00:00",
+      "sample": "midsize",
+      "cell": "large|body",
+      "action": "reject",
+      "fitness_ms": 274.7730760000877,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "lld",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "line-tables-only",
+        "fast_check": "none",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": null,
+        "quiet": false,
+        "command_build": true
+      },
+      "reason": "lt-3pct"
+    },
+    {
+      "timestamp": "2026-10-21T03:28:20.180746+00:00",
+      "sample": "midsize",
+      "cell": "large|body",
+      "action": "reject",
+      "fitness_ms": 136.08814199994868,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "line-tables-only",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 2,
+        "offline": true,
+        "package_scope": null,
+        "quiet": false,
+        "command_build": false
+      },
+      "reason": "lt-3pct"
+    },
+    {
+      "timestamp": "2026-10-21T03:28:31.969424+00:00",
+      "sample": "midsize",
+      "cell": "large|body",
+      "action": "reject",
+      "fitness_ms": 128.0749500000411,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": 1,
+        "incremental": true,
+        "debuginfo": "line-tables-only",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": null,
+        "quiet": false,
+        "command_build": false
+      },
+      "reason": "lt-3pct"
+    },
+    {
+      "timestamp": "2026-10-21T03:32:48.613531+00:00",
+      "sample": "midsize",
+      "cell": "large|body",
+      "action": "stop",
+      "fitness_ms": 121.93916600006105,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "line-tables-only",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": null,
+        "quiet": false,
+        "command_build": false
+      },
+      "reason": "4 consecutive tries under 3% / noise"
+    },
+    {
+      "timestamp": "2026-10-21T03:19:32.269907+00:00",
+      "sample": "midsize",
+      "cell": "large|sig_dep",
+      "action": "seed",
+      "fitness_ms": 777.3346029999857,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": null,
+        "quiet": false,
+        "command_build": false
+      },
+      "reason": "empty-cell"
+    },
+    {
+      "timestamp": "2026-10-21T03:20:10.620738+00:00",
+      "sample": "midsize",
+      "cell": "large|sig_dep",
+      "action": "seed",
+      "fitness_ms": 1416.437644000041,
+      "genome": {
+        "wrapper": true,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": null,
+        "quiet": false,
+        "command_build": false
+      },
+      "reason": "lt-3pct"
+    },
+    {
+      "timestamp": "2026-10-21T03:20:10.715816+00:00",
+      "sample": "midsize",
+      "cell": "large|sig_dep",
+      "action": "seed",
+      "fitness_ms": null,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": true,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": null,
+        "quiet": false,
+        "command_build": false
+      },
+      "reason": "gate-or-fail"
+    },
+    {
+      "timestamp": "2026-10-21T03:20:31.893557+00:00",
+      "sample": "midsize",
+      "cell": "large|sig_dep",
+      "action": "replace",
+      "fitness_ms": 711.9701940000027,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "line-tables-only",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": null,
+        "quiet": false,
+        "command_build": false
+      },
+      "reason": "win"
+    },
+    {
+      "timestamp": "2026-10-21T03:21:11.570323+00:00",
+      "sample": "midsize",
+      "cell": "large|sig_dep",
+      "action": "replace",
+      "fitness_ms": 529.7661290000519,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": "touched",
+        "quiet": false,
+        "command_build": false
+      },
+      "reason": "win"
+    },
+    {
+      "timestamp": "2026-10-21T03:21:32.689116+00:00",
+      "sample": "midsize",
+      "cell": "large|sig_dep",
+      "action": "seed",
+      "fitness_ms": 716.0089035000965,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": null,
+        "quiet": true,
+        "command_build": false
+      },
+      "reason": "lt-3pct"
+    },
+    {
+      "timestamp": "2026-10-21T03:29:07.082509+00:00",
+      "sample": "midsize",
+      "cell": "large|sig_dep",
+      "action": "reject",
+      "fitness_ms": 1931.8773264999436,
+      "genome": {
+        "wrapper": true,
+        "dev_backend": "cranelift",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "none",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": "touched",
+        "quiet": false,
+        "command_build": true
+      },
+      "reason": "lt-3pct"
+    },
+    {
+      "timestamp": "2026-10-21T03:29:19.566000+00:00",
+      "sample": "midsize",
+      "cell": "large|sig_dep",
+      "action": "reject",
+      "fitness_ms": 752.646948499887,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": null,
+        "quiet": false,
+        "command_build": false
+      },
+      "reason": "lt-3pct"
+    },
+    {
+      "timestamp": "2026-10-21T03:29:34.298818+00:00",
+      "sample": "midsize",
+      "cell": "large|sig_dep",
+      "action": "reject",
+      "fitness_ms": 560.4455224998901,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": "touched",
+        "quiet": true,
+        "command_build": false
+      },
+      "reason": "lt-3pct"
+    },
+    {
+      "timestamp": "2026-10-21T03:29:49.067488+00:00",
+      "sample": "midsize",
+      "cell": "large|sig_dep",
+      "action": "reject",
+      "fitness_ms": 542.1095875000219,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": 256,
+        "incremental": true,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": "touched",
+        "quiet": true,
+        "command_build": false
+      },
+      "reason": "lt-3pct"
+    },
+    {
+      "timestamp": "2026-10-21T03:32:48.613531+00:00",
+      "sample": "midsize",
+      "cell": "large|sig_dep",
+      "action": "stop",
+      "fitness_ms": 529.7661290000519,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": "touched",
+        "quiet": false,
+        "command_build": false
+      },
+      "reason": "4 consecutive tries under 3% / noise"
+    },
+    {
+      "timestamp": "2026-10-21T03:35:21.667191+00:00",
+      "sample": "midsize",
+      "cell": "large|cold",
+      "action": "held_out",
+      "fitness_ms": 3908.885816999941,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": null,
+        "quiet": false,
+        "command_build": false
+      },
+      "reason": "cross-test small|cold elite on ripgrep+tokio"
+    },
+    {
+      "timestamp": "2026-10-21T03:35:21.667268+00:00",
+      "sample": "midsize",
+      "cell": "large|noop",
+      "action": "held_out",
+      "fitness_ms": null,
+      "genome": {
+        "wrapper": true,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "graph",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": null,
+        "quiet": false,
+        "command_build": false
+      },
+      "reason": "cross-test small|noop elite on ripgrep+tokio (failed or skipped)"
+    },
+    {
+      "timestamp": "2026-10-21T03:35:28.308813+00:00",
+      "sample": "midsize",
+      "cell": "large|body",
+      "action": "held_out",
+      "fitness_ms": 245.90918599994893,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "line-tables-only",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": null,
+        "quiet": false,
+        "command_build": false
+      },
+      "reason": "cross-test small|body elite on ripgrep+tokio"
+    },
+    {
+      "timestamp": "2026-10-21T03:35:51.489640+00:00",
+      "sample": "midsize",
+      "cell": "large|sig_dep",
+      "action": "held_out",
+      "fitness_ms": 1560.9420870000577,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": null,
+        "quiet": false,
+        "command_build": false
+      },
+      "reason": "cross-test small|sig_dep elite on ripgrep+tokio"
+    },
+    {
+      "timestamp": "2026-10-21T03:36:08.421071+00:00",
+      "sample": "midsize",
+      "cell": "large|cold",
+      "action": "held_out",
+      "fitness_ms": 4211.840735250007,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": null,
+        "quiet": false,
+        "command_build": false
+      },
+      "reason": "cross-test mid|cold elite on ripgrep+tokio"
+    },
+    {
+      "timestamp": "2026-10-21T03:36:08.421169+00:00",
+      "sample": "midsize",
+      "cell": "large|noop",
+      "action": "held_out",
+      "fitness_ms": null,
+      "genome": {
+        "wrapper": true,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "graph",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": null,
+        "quiet": false,
+        "command_build": false
+      },
+      "reason": "cross-test mid|noop elite on ripgrep+tokio (failed or skipped)"
+    },
+    {
+      "timestamp": "2026-10-21T03:36:11.970980+00:00",
+      "sample": "midsize",
+      "cell": "large|body",
+      "action": "held_out",
+      "fitness_ms": 134.18279649988563,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": null,
+        "quiet": false,
+        "command_build": false
+      },
+      "reason": "cross-test mid|body elite on ripgrep+tokio"
+    },
+    {
+      "timestamp": "2026-10-21T03:36:35.510358+00:00",
+      "sample": "midsize",
+      "cell": "large|sig_dep",
+      "action": "held_out",
+      "fitness_ms": 1659.058936499946,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": null,
+        "quiet": false,
+        "command_build": false
+      },
+      "reason": "cross-test mid|sig_dep elite on ripgrep+tokio"
+    }
+  ],
+  "generalization": {
+    "samples": [
+      "ripgrep-15.2.0",
+      "tokio-1.54.0"
+    ],
+    "elites_tested": [
+      "small|cold",
+      "small|noop",
+      "small|body",
+      "small|sig_dep",
+      "mid|cold",
+      "mid|noop",
+      "mid|body",
+      "mid|sig_dep"
+    ],
+    "matrix": [
+      {
+        "genome_from": "small|cold",
+        "trained_on": "rust-loop",
+        "tested_on": "midsize",
+        "cell": "large|cold",
+        "fitness_ms": 3908.885816999941,
+        "spread_ms": 48.04283350006244,
+        "disk_bytes": 196497609,
+        "correctness_ok": true,
+        "delta_vs_local_elite_pct": 181.75808623108043,
+        "ok": true,
+        "skip_reason": null,
+        "per_sample": {
+          "ripgrep": {
+            "ok": true,
+            "samples_ms": [
+              3066.7097240000203,
+              2965.7238509998933
+            ],
+            "returncodes": [
+              0,
+              0
+            ],
+            "median_ms": 3016.216787499957,
+            "spread_ms": 50.49293650006348,
+            "min_ms": 2965.7238509998933,
+            "max_ms": 3066.7097240000203,
+            "target_bytes": 116910500
+          },
+          "tokio": {
+            "ok": true,
+            "samples_ms": [
+              4847.147576999987,
+              4755.962115999864
+            ],
+            "returncodes": [
+              0,
+              0
+            ],
+            "median_ms": 4801.554846499926,
+            "spread_ms": 45.59273050006141,
+            "min_ms": 4755.962115999864,
+            "max_ms": 4847.147576999987,
+            "target_bytes": 79587109
+          }
+        }
+      },
+      {
+        "genome_from": "small|noop",
+        "trained_on": "rust-loop",
+        "tested_on": "midsize",
+        "cell": "large|noop",
+        "fitness_ms": 0.0,
+        "spread_ms": null,
+        "disk_bytes": 0,
+        "correctness_ok": false,
+        "delta_vs_local_elite_pct": null,
+        "ok": false,
+        "skip_reason": "skipped-graph-on-large",
+        "per_sample": {}
+      },
+      {
+        "genome_from": "small|body",
+        "trained_on": "rust-loop",
+        "tested_on": "midsize",
+        "cell": "large|body",
+        "fitness_ms": 245.90918599994893,
+        "spread_ms": 5.279721964173199,
+        "disk_bytes": 201689878,
+        "correctness_ok": true,
+        "delta_vs_local_elite_pct": 101.66546489240858,
+        "ok": true,
+        "skip_reason": null,
+        "per_sample": {
+          "ripgrep": {
+            "ok": true,
+            "samples_ms": [
+              388.84560199994667,
+              407.36109299996315,
+              385.05911599986575
+            ],
+            "returncodes": [
+              0,
+              0,
+              0
+            ],
+            "median_ms": 388.84560199994667,
+            "spread_ms": 9.744166695535068,
+            "min_ms": 385.05911599986575,
+            "max_ms": 407.36109299996315,
+            "target_bytes": 117830552
+          },
+          "tokio": {
+            "ok": true,
+            "samples_ms": [
+              104.27496499983135,
+              102.31266100004177,
+              102.9727699999512
+            ],
+            "returncodes": [
+              0,
+              0,
+              0
+            ],
+            "median_ms": 102.9727699999512,
+            "spread_ms": 0.8152772328113304,
+            "min_ms": 102.31266100004177,
+            "max_ms": 104.27496499983135,
+            "target_bytes": 83859326
+          }
+        }
+      },
+      {
+        "genome_from": "small|sig_dep",
+        "trained_on": "rust-loop",
+        "tested_on": "midsize",
+        "cell": "large|sig_dep",
+        "fitness_ms": 1560.9420870000577,
+        "spread_ms": 51.28091865396217,
+        "disk_bytes": 196497661,
+        "correctness_ok": true,
+        "delta_vs_local_elite_pct": 194.64739279318943,
+        "ok": true,
+        "skip_reason": null,
+        "per_sample": {
+          "ripgrep": {
+            "ok": true,
+            "samples_ms": [
+              670.0154440000006,
+              670.2755260000686,
+              657.2253770000316
+            ],
+            "returncodes": [
+              0,
+              0,
+              0
+            ],
+            "median_ms": 670.0154440000006,
+            "spread_ms": 6.091522756472685,
+            "min_ms": 657.2253770000316,
+            "max_ms": 670.2755260000686,
+            "target_bytes": 116910526
+          },
+          "tokio": {
+            "ok": true,
+            "samples_ms": [
+              2369.8245880000286,
+              2602.760483999873,
+              2451.8687300001147
+            ],
+            "returncodes": [
+              0,
+              0,
+              0
+            ],
+            "median_ms": 2451.8687300001147,
+            "spread_ms": 96.47031455145165,
+            "min_ms": 2369.8245880000286,
+            "max_ms": 2602.760483999873,
+            "target_bytes": 79587135
+          }
+        }
+      },
+      {
+        "genome_from": "mid|cold",
+        "trained_on": "rust-loop-medium",
+        "tested_on": "midsize",
+        "cell": "large|cold",
+        "fitness_ms": 4211.840735250007,
+        "spread_ms": 77.11390874999324,
+        "disk_bytes": 196497609,
+        "correctness_ok": true,
+        "delta_vs_local_elite_pct": 203.59551049381972,
+        "ok": true,
+        "skip_reason": null,
+        "per_sample": {
+          "ripgrep": {
+            "ok": true,
+            "samples_ms": [
+              3185.1852500001314,
+              3176.007954999932
+            ],
+            "returncodes": [
+              0,
+              0
+            ],
+            "median_ms": 3180.5966025000316,
+            "spread_ms": 4.588647500099796,
+            "min_ms": 3176.007954999932,
+            "max_ms": 3185.1852500001314,
+            "target_bytes": 116910500
+          },
+          "tokio": {
+            "ok": true,
+            "samples_ms": [
+              5392.724037999869,
+              5093.445698000096
+            ],
+            "returncodes": [
+              0,
+              0
+            ],
+            "median_ms": 5243.084867999983,
+            "spread_ms": 149.6391699998867,
+            "min_ms": 5093.445698000096,
+            "max_ms": 5392.724037999869,
+            "target_bytes": 79587109
+          }
+        }
+      },
+      {
+        "genome_from": "mid|noop",
+        "trained_on": "rust-loop-medium",
+        "tested_on": "midsize",
+        "cell": "large|noop",
+        "fitness_ms": 0.0,
+        "spread_ms": null,
+        "disk_bytes": 0,
+        "correctness_ok": false,
+        "delta_vs_local_elite_pct": null,
+        "ok": false,
+        "skip_reason": "skipped-graph-on-large",
+        "per_sample": {}
+      },
+      {
+        "genome_from": "mid|body",
+        "trained_on": "rust-loop-medium",
+        "tested_on": "midsize",
+        "cell": "large|body",
+        "fitness_ms": 134.18279649988563,
+        "spread_ms": 14.315681745855233,
+        "disk_bytes": 381149562,
+        "correctness_ok": true,
+        "delta_vs_local_elite_pct": 10.040769427452412,
+        "ok": true,
+        "skip_reason": null,
+        "per_sample": {
+          "ripgrep": {
+            "ok": true,
+            "samples_ms": [
+              235.7098859999951,
+              180.5208240000411,
+              182.9588389998662
+            ],
+            "returncodes": [
+              0,
+              0,
+              0
+            ],
+            "median_ms": 182.9588389998662,
+            "spread_ms": 25.461189291381295,
+            "min_ms": 180.5208240000411,
+            "max_ms": 235.7098859999951,
+            "target_bytes": 164489407
+          },
+          "tokio": {
+            "ok": true,
+            "samples_ms": [
+              85.40675399990505,
+              89.09875399990597,
+              81.33651599996483
+            ],
+            "returncodes": [
+              0,
+              0,
+              0
+            ],
+            "median_ms": 85.40675399990505,
+            "spread_ms": 3.170174200329171,
+            "min_ms": 81.33651599996483,
+            "max_ms": 89.09875399990597,
+            "target_bytes": 216660155
+          }
+        }
+      },
+      {
+        "genome_from": "mid|sig_dep",
+        "trained_on": "rust-loop-medium",
+        "tested_on": "midsize",
+        "cell": "large|sig_dep",
+        "fitness_ms": 1659.058936499946,
+        "spread_ms": 99.06621833282419,
+        "disk_bytes": 196497662,
+        "correctness_ok": true,
+        "delta_vs_local_elite_pct": 213.16817850009872,
+        "ok": true,
+        "skip_reason": null,
+        "per_sample": {
+          "ripgrep": {
+            "ok": true,
+            "samples_ms": [
+              690.1086660000146,
+              696.0640539998622,
+              757.5156319999223
+            ],
+            "returncodes": [
+              0,
+              0,
+              0
+            ],
+            "median_ms": 696.0640539998622,
+            "spread_ms": 30.469405694234997,
+            "min_ms": 690.1086660000146,
+            "max_ms": 757.5156319999223,
+            "target_bytes": 116910527
+          },
+          "tokio": {
+            "ok": true,
+            "samples_ms": [
+              2510.3933839998263,
+              2622.0538190000298,
+              2908.4924639998917
+            ],
+            "returncodes": [
+              0,
+              0,
+              0
+            ],
+            "median_ms": 2622.0538190000298,
+            "spread_ms": 167.66303097141338,
+            "min_ms": 2510.3933839998263,
+            "max_ms": 2908.4924639998917,
+            "target_bytes": 79587135
+          }
+        }
+      }
+    ]
+  }
+}

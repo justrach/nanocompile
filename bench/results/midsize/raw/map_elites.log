@@ -1,0 +1,112 @@
+SEED
+EVAL seed 2054967f4a91 check None None None cold
+  fitness 4466.951885250011 ok True empty-cell
+EVAL seed 2054967f4a91 check None None None noop
+  fitness 33.15245350006535 ok True empty-cell
+EVAL seed 2054967f4a91 check None None None fn_body
+  fitness 127.39468350008565 ok True empty-cell
+EVAL seed 2054967f4a91 check None None None signature
+  fitness 777.3346029999857 ok True empty-cell
+EVAL seed e1fc6d6984ce check nanocompile None None cold
+  fitness 3388.4382534999986 ok True win
+EVAL seed e1fc6d6984ce check nanocompile None None noop
+  fitness 31.221453999933146 ok True win
+EVAL seed e1fc6d6984ce check nanocompile None None fn_body
+  fitness 254.7870304999833 ok True lt-3pct
+EVAL seed e1fc6d6984ce check nanocompile None None signature
+  fitness 1416.437644000041 ok True lt-3pct
+EVAL seed de2f5ef2bcb2 check sccache None None fn_body
+  fitness None ok False gate-or-fail
+EVAL seed de2f5ef2bcb2 check sccache None None signature
+  fitness None ok False gate-or-fail
+EVAL seed de2f5ef2bcb2 check sccache None None noop
+  fitness None ok False gate-or-fail
+EVAL seed de2f5ef2bcb2 check sccache None None cold
+  fitness None ok False gate-or-fail
+EVAL seed 9c4191fb7234 check None None None fn_body
+  fitness 121.93916600006105 ok True win
+EVAL seed 9c4191fb7234 check None None None signature
+  fitness 711.9701940000027 ok True win
+EVAL seed 9c4191fb7234 check None None None cold
+  fitness 4284.54157675003 ok True lt-3pct
+EVAL seed 85a87b3d4d4a check None None None fn_body
+  fitness 130.2240905000076 ok True lt-3pct
+EVAL seed 85a87b3d4d4a check None None None signature
+  fitness 529.7661290000519 ok True win
+EVAL seed 56ed8a8713d3 check None None None fn_body
+  fitness 127.90828150002653 ok True lt-3pct
+EVAL seed 56ed8a8713d3 check None None None signature
+  fitness 716.0089035000965 ok True lt-3pct
+EVAL seed 95b29ca67d66 check None None None fn_body
+  fitness 237.60070399998767 ok True lt-3pct
+EVAL seed b023a71c2a15 check None None None fn_body
+  fitness 122.7862205000747 ok True lt-3pct
+EVAL seed c570adbdc4a4 build None None None cold
+  fitness 7632.7343150000215 ok True lt-3pct
+EVAL seed c570adbdc4a4 build None None None noop
+  fitness 45.36904800005459 ok True lt-3pct
+EVAL seed 8ccc42ff9b3d build None mold None cold
+  fitness 7769.0952650000045 ok True lt-3pct
+EVAL seed 8ccc42ff9b3d build None mold None noop
+  fitness 35.74745100002019 ok True lt-3pct
+EVAL seed cadbbe38ed17 build None lld None cold
+  fitness 7651.371323749998 ok True lt-3pct
+EVAL seed fe005f2a0ed7 build None None None cold
+  fitness 6953.901042000012 ok True lt-3pct
+EVAL seed 8e40641cc0c9 build None None cranelift cold
+  fitness 7120.199317750007 ok True lt-3pct
+EVAL seed 8e40641cc0c9 build None None cranelift noop
+  fitness 43.554057499989085 ok True lt-3pct
+EVAL seed e0effe5b8597 build None mold None cold
+  fitness 7231.815860250009 ok True lt-3pct
+EVAL seed fbaf743fec88 graph None None None noop
+  fitness None ok False gate-or-fail
+EVAL seed fbaf743fec88 graph None None None fn_body
+  fitness None ok False gate-or-fail
+MUTATE
+EVAL mutate cold 11441967e218 {'command': 'check', 'incremental': False, 'wrapper': 'nanocompile', 'linker': None, 'codegen_backend': None, 'codegen_units': None, 'debuginfo': None, 'quiet': True, 'package_scope': None, 'jobs': 3, 'toolchain': 'stable', 'offline': True}
+  fitness 3302.262744499984 lt-3pct streak 1
+EVAL mutate cold d19d7776a17c {'command': 'check', 'incremental': False, 'wrapper': 'sccache', 'linker': None, 'codegen_backend': None, 'codegen_units': None, 'debuginfo': None, 'quiet': False, 'package_scope': None, 'jobs': 3, 'toolchain': 'stable', 'offline': True}
+  fitness 2988.078279999996 within-noise streak 2
+EVAL mutate cold 5b2cfb5315ff {'command': 'build', 'incremental': False, 'wrapper': 'nanocompile', 'linker': None, 'codegen_backend': 'cranelift', 'codegen_units': None, 'debuginfo': None, 'quiet': False, 'package_scope': None, 'jobs': 3, 'toolchain': 'nightly', 'offline': True}
+  fitness 5812.26520125 lt-3pct streak 3
+EVAL mutate cold d19d7776a17c {'command': 'check', 'incremental': False, 'wrapper': 'sccache', 'linker': None, 'codegen_backend': None, 'codegen_units': None, 'debuginfo': None, 'quiet': False, 'package_scope': None, 'jobs': 3, 'toolchain': 'stable', 'offline': True}
+  fitness 1387.3198349999143 win streak 0
+EVAL mutate cold 95b29ca67d66 {'command': 'check', 'incremental': False, 'wrapper': None, 'linker': None, 'codegen_backend': None, 'codegen_units': None, 'debuginfo': None, 'quiet': False, 'package_scope': None, 'jobs': 3, 'toolchain': 'stable', 'offline': True}
+  fitness 3938.8285164999957 lt-3pct streak 1
+EVAL mutate cold 2c19b182d8e6 {'command': 'check', 'incremental': False, 'wrapper': 'sccache', 'linker': None, 'codegen_backend': None, 'codegen_units': None, 'debuginfo': None, 'quiet': False, 'package_scope': None, 'jobs': 4, 'toolchain': 'stable', 'offline': True}
+  fitness 3025.355257499996 lt-3pct streak 2
+EVAL mutate cold de2f5ef2bcb2 {'command': 'check', 'incremental': True, 'wrapper': 'sccache', 'linker': None, 'codegen_backend': None, 'codegen_units': None, 'debuginfo': None, 'quiet': False, 'package_scope': None, 'jobs': 3, 'toolchain': 'stable', 'offline': True}
+  fitness None gate-or-fail streak 3
+EVAL mutate cold ac03987bb5d6 {'command': 'build', 'incremental': False, 'wrapper': 'sccache', 'linker': None, 'codegen_backend': None, 'codegen_units': None, 'debuginfo': None, 'quiet': True, 'package_scope': None, 'jobs': 3, 'toolchain': 'stable', 'offline': True}
+  fitness 4615.516709749954 lt-3pct streak 4
+EVAL mutate noop 3273e033ff4f {'command': 'build', 'incremental': False, 'wrapper': 'nanocompile', 'linker': None, 'codegen_backend': None, 'codegen_units': 16, 'debuginfo': None, 'quiet': False, 'package_scope': None, 'jobs': 3, 'toolchain': 'stable', 'offline': True}
+  fitness 35.15603499988629 lt-3pct streak 1
+EVAL mutate noop e1fc6d6984ce {'command': 'check', 'incremental': False, 'wrapper': 'nanocompile', 'linker': None, 'codegen_backend': None, 'codegen_units': None, 'debuginfo': None, 'quiet': False, 'package_scope': None, 'jobs': 3, 'toolchain': 'stable', 'offline': True}
+  fitness 32.74564950004333 lt-3pct streak 2
+EVAL mutate noop 11441967e218 {'command': 'check', 'incremental': False, 'wrapper': 'nanocompile', 'linker': None, 'codegen_backend': None, 'codegen_units': None, 'debuginfo': None, 'quiet': True, 'package_scope': None, 'jobs': 3, 'toolchain': 'stable', 'offline': True}
+  fitness 33.10443199995916 lt-3pct streak 3
+EVAL mutate noop 744eb5b6823e {'command': 'build', 'incremental': False, 'wrapper': 'nanocompile', 'linker': None, 'codegen_backend': None, 'codegen_units': None, 'debuginfo': None, 'quiet': False, 'package_scope': None, 'jobs': 3, 'toolchain': 'nightly', 'offline': True}
+  fitness 35.63417949999348 lt-3pct streak 4
+EVAL mutate fn_body 48ece07e0780 {'command': 'check', 'incremental': False, 'wrapper': None, 'linker': None, 'codegen_backend': None, 'codegen_units': None, 'debuginfo': 'line-tables-only', 'quiet': True, 'package_scope': None, 'jobs': 3, 'toolchain': 'stable', 'offline': True}
+  fitness 240.40767899998627 lt-3pct streak 1
+EVAL mutate fn_body 0d9eaddad091 {'command': 'build', 'incremental': True, 'wrapper': None, 'linker': 'lld', 'codegen_backend': None, 'codegen_units': None, 'debuginfo': 'line-tables-only', 'quiet': False, 'package_scope': None, 'jobs': 3, 'toolchain': 'stable', 'offline': True}
+  fitness 274.7730760000877 lt-3pct streak 2
+EVAL mutate fn_body 03de0f036379 {'command': 'check', 'incremental': True, 'wrapper': None, 'linker': None, 'codegen_backend': None, 'codegen_units': None, 'debuginfo': 'line-tables-only', 'quiet': False, 'package_scope': None, 'jobs': 2, 'toolchain': 'stable', 'offline': True}
+  fitness 136.08814199994868 lt-3pct streak 3
+EVAL mutate fn_body 435da9b47059 {'command': 'check', 'incremental': True, 'wrapper': None, 'linker': None, 'codegen_backend': None, 'codegen_units': 1, 'debuginfo': 'line-tables-only', 'quiet': False, 'package_scope': None, 'jobs': 3, 'toolchain': 'stable', 'offline': True}
+  fitness 128.0749500000411 lt-3pct streak 4
+EVAL mutate signature a5e5c6edeb8e {'command': 'build', 'incremental': False, 'wrapper': 'nanocompile', 'linker': None, 'codegen_backend': 'cranelift', 'codegen_units': None, 'debuginfo': None, 'quiet': False, 'package_scope': 'touched', 'jobs': 3, 'toolchain': 'nightly', 'offline': True}
+  fitness 1931.8773264999436 lt-3pct streak 1
+EVAL mutate signature 2054967f4a91 {'command': 'check', 'incremental': True, 'wrapper': None, 'linker': None, 'codegen_backend': None, 'codegen_units': None, 'debuginfo': None, 'quiet': False, 'package_scope': None, 'jobs': 3, 'toolchain': 'stable', 'offline': True}
+  fitness 752.646948499887 lt-3pct streak 2
+EVAL mutate signature bb6417e377c1 {'command': 'check', 'incremental': True, 'wrapper': None, 'linker': None, 'codegen_backend': None, 'codegen_units': None, 'debuginfo': None, 'quiet': True, 'package_scope': 'touched', 'jobs': 3, 'toolchain': 'stable', 'offline': True}
+  fitness 560.4455224998901 lt-3pct streak 3
+EVAL mutate signature 80f5a066a39a {'command': 'check', 'incremental': True, 'wrapper': None, 'linker': None, 'codegen_backend': None, 'codegen_units': 256, 'debuginfo': None, 'quiet': True, 'package_scope': 'touched', 'jobs': 3, 'toolchain': 'stable', 'offline': True}
+  fitness 542.1095875000219 lt-3pct streak 4
+CROSS
+CROSS /tmp/midsize-scratch/origin/bench/map_elites.json:c72d8c4c039f fn_body
+CROSS /tmp/midsize-scratch/origin/bench/map_elites.json:17d748579e78 fn_body
+CROSS /tmp/midsize-scratch/origin/bench/map_elites.json:51f8917d5888 fn_body
+CROSS /tmp/midsize-scratch/origin/bench/map_elites.json:d817fa374ba7 fn_body
+DONE /workspace/bench/archive/midsize.json
