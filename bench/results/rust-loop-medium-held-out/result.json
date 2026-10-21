@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "sample": "rust-loop-medium",
+  "project": "/workspace/examples/rust-loop-medium",
+  "timestamp": "2026-10-21T03:28:18.287047+00:00",
+  "runs": 3,
+  "warmup": 1,
+  "offline": true,
+  "platform": "Linux x86_64",
+  "driver": "zig",
+  "tools": {
+    "cargo": "/usr/local/cargo/bin/cargo",
+    "rustc": "/usr/local/cargo/bin/rustc",
+    "mold": "/usr/bin/mold",
+    "sccache": "/usr/local/cargo/bin/sccache",
+    "hyperfine": "/usr/local/cargo/bin/hyperfine",
+    "rust_lld": true,
+    "cranelift": true,
+    "nightly": true,
+    "nanocompile": "/workspace/zig-out/bin/nanocompile"
+  },
+  "install_notes": [
+    "installed or confirmed nightly",
+    "cranelift-preview: ok"
+  ],
+  "correctness": {
+    "broken_edit": true,
+    "fast_failed": true,
+    "validate_failed": true,
+    "validate_is_final": true,
+    "agree_on_broken": true,
+    "graph_fast_failed": true,
+    "graph_validate_stamp_written": false,
+    "notes": ""
+  },
+  "cells": [],
+  "size": {
+    "size": "mid",
+    "crates": 3,
+    "loc": 203
+  },
+  "map_elites": {
+    "shard": "bench/archive/rust-loop-medium-held-out.json",
+    "evaluations": 7,
+    "size": {
+      "size": "mid",
+      "crates": 3,
+      "loc": 203
+    },
+    "held_out": 7
+  }
+}

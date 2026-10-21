@@ -185,6 +185,10 @@ fn checkDocument(root: std.json.Value) ![]const u8 {
             if (get(row, "action")) |action| {
                 if (!inList(try asString(action), &actions)) return error.InvalidHistoryAction;
             }
+            if (get(row, "cell")) |cell| {
+                const key = try asString(cell);
+                if (std.mem.indexOfScalar(u8, key, '|') != null) _ = try splitKey(key);
+            }
         }
     }
     return "archive";

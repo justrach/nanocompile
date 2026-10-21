@@ -215,7 +215,7 @@ def check_archive(data, path):
     for index, row in enumerate(history):
         if not isinstance(row, dict) or row.get("action") not in ACTIONS:
             fail("%s: history[%d] needs a known action" % (path, index))
-        if "cell" in row:
+        if "cell" in row and row["cell"] and "|" in str(row["cell"]):
             split_key(row["cell"])
     return "archive"
 
@@ -445,11 +445,18 @@ def render(archive):
     lines.append("### Promoted defaults")
     lines.append("")
     defaults = promoted.get("defaults")
-    if defaults and defaults.get("genome"):
-        lines.append("Promoted genome: `%s`" % json.dumps(defaults["genome"], sort_keys=True))
-        lines.append("")
-        if defaults.get("reason"):
-            lines.append(defaults["reason"])
+    if defaults and (defaults.get("genome") or defaults.get("iteration") or defaults.get("noop")):
+        iteration = (defaults.get("iteration") or {}).get("genome") or defaults.get("genome")
+        noop = (defaults.get("noop") or {}).get("genome")
+        if iteration:
+            lines.append("Iteration default (cold/body/sig_dep): `%s`" % json.dumps(iteration, sort_keys=True))
+            lines.append("")
+            lines.append((defaults.get("iteration") or {}).get("reason") or defaults.get("reason") or "")
+            lines.append("")
+        if noop:
+            lines.append("No-op default: `%s`" % json.dumps(noop, sort_keys=True))
+            lines.append("")
+            lines.append((defaults.get("noop") or {}).get("reason") or "")
             lines.append("")
     else:
         lines.append("No genome has been promoted to nanocompile defaults yet.")
@@ -489,53 +496,66 @@ def promote(archive):
     matrix = (archive.get("generalization") or {}).get("matrix") or []
     if not cells:
         return archive
-    # Score each occupied elite by mean held-out fitness (and in-sample as fallback).
-    scores = {}
-    for key, elite in cells.items():
-        held = [row["fitness_ms"] for row in matrix
-                if row.get("genome_from") == key and row.get("correctness_ok")
-                and row.get("fitness_ms") is not None]
-        scores[key] = {
-            "elite": elite,
-            "held_out": held,
-            "mean": (sum(held) / len(held)) if held else elite["fitness_ms"],
-            "held_n": len(held),
-        }
-    # A default candidate must have at least one held-out pass, or be the only sample.
-    samples = {elite.get("sample") for elite in cells.values()}
-    ranked = sorted(scores.values(), key=lambda row: (row["mean"], -row["held_n"]))
-    defaults = None
+    # Do not promote the lowest raw ms (noop graph always wins that). Vote by
+    # edit family: iteration (cold/body/sig_dep) vs warm no-op.
+    def signature(genome):
+        genome = genome or {}
+        return (
+            genome.get("loop"),
+            bool(genome.get("wrapper")),
+            genome.get("linker") or "default",
+            genome.get("dev_backend") or "llvm",
+        )
+
+    def majority(rows):
+        counts = {}
+        for row in rows:
+            key = signature(row.get("genome"))
+            counts[key] = counts.get(key, 0) + 1
+        if not counts:
+            return None
+        return max(counts.items(), key=lambda item: item[1])[0]
+
+    incremental = [row for row in cells.values() if row.get("edit") in ("cold", "body", "sig_dep")]
+    noops = [row for row in cells.values() if row.get("edit") == "noop"]
+    inc_sig = majority(incremental)
+    noop_sig = majority(noops)
+    inc_genome = next((row.get("genome") for row in incremental if signature(row.get("genome")) == inc_sig), None)
+    noop_genome = next((row.get("genome") for row in noops if signature(row.get("genome")) == noop_sig), None)
+    defaults = {
+        "iteration": {
+            "genome": inc_genome,
+            "reason": "majority elite on cold/body/sig_dep across occupied size buckets; do not use graph wall time as the edit-loop default",
+            "edits": ["cold", "body", "sig_dep"],
+        } if inc_genome else None,
+        "noop": {
+            "genome": noop_genome,
+            "reason": "majority elite on noop: declared graph plus nanocompile task cache",
+            "edits": ["noop"],
+        } if noop_genome else None,
+    }
+    # Keep a single "defaults.genome" pointing at the iteration config so older
+    # readers still see one promoted genome. Graph-for-noop is recorded beside it.
+    defaults["genome"] = inc_genome
     specific = []
-    if ranked:
-        best = ranked[0]
-        if best["held_n"] > 0 or len(samples) <= 1:
-            defaults = {
-                "genome": best["elite"].get("genome"),
-                "from_cell": best["elite"].get("cell"),
-                "trained_on": best["elite"].get("sample"),
-                "reason": "lowest mean held-out (or in-sample) fitness among correctness-passing elites",
-                "mean_ms": best["mean"],
-                "held_out_n": best["held_n"],
-            }
-    for key, row in scores.items():
-        elite = row["elite"]
-        if defaults and elite.get("genome") == defaults.get("genome"):
+    for key, elite in cells.items():
+        if signature(elite.get("genome")) in {inc_sig, noop_sig}:
             continue
-        if row["held_n"] == 0 and len(samples) > 1:
-            specific.append({
-                "sample": elite.get("sample"),
-                "cell": key,
-                "genome": elite.get("genome"),
-                "reason": "no held-out win; treat as sample-specific",
-            })
+        specific.append({
+            "sample": elite.get("sample"),
+            "cell": key,
+            "genome": elite.get("genome"),
+            "reason": "loses the majority vote for its edit family",
+        })
+    _ = matrix
     archive["promoted"] = {"defaults": defaults, "sample_specific": specific}
-    if defaults:
+    if inc_genome:
         note(archive, "promote", {
-            "cell": defaults.get("from_cell"),
-            "sample": defaults.get("trained_on"),
-            "fitness_ms": defaults.get("mean_ms"),
-            "genome": defaults.get("genome"),
-        }, defaults["reason"])
+            "cell": "iteration",
+            "sample": "majority",
+            "fitness_ms": None,
+            "genome": inc_genome,
+        }, defaults["iteration"]["reason"])
     return archive
 
 

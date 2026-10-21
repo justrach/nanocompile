@@ -1,0 +1,1204 @@
+{
+  "schema": 1,
+  "sample": "rust-loop-steps",
+  "project": "/workspace/examples/rust-loop",
+  "timestamp": "2026-10-21T03:28:03.336220+00:00",
+  "runs": 3,
+  "warmup": 1,
+  "offline": true,
+  "platform": "Linux x86_64",
+  "driver": "zig",
+  "tools": {
+    "cargo": "/usr/local/cargo/bin/cargo",
+    "rustc": "/usr/local/cargo/bin/rustc",
+    "mold": "/usr/bin/mold",
+    "sccache": "/usr/local/cargo/bin/sccache",
+    "hyperfine": "/usr/local/cargo/bin/hyperfine",
+    "rust_lld": true,
+    "cranelift": true,
+    "nightly": true,
+    "nanocompile": "/workspace/zig-out/bin/nanocompile"
+  },
+  "install_notes": [
+    "installed or confirmed nightly",
+    "cranelift-preview: ok"
+  ],
+  "correctness": {
+    "broken_edit": true,
+    "fast_failed": true,
+    "validate_failed": true,
+    "validate_is_final": true,
+    "agree_on_broken": true,
+    "graph_fast_failed": true,
+    "graph_validate_stamp_written": false,
+    "notes": ""
+  },
+  "cells": [
+    {
+      "samples_ms": [
+        44.96364599981462,
+        45.747695000045496,
+        46.159670000179176
+      ],
+      "median_ms": 45.747695000045496,
+      "mean_ms": 45.62367033334643,
+      "stdev_ms": 0.49608799006115295,
+      "min_ms": 44.96364599981462,
+      "max_ms": 46.159670000179176,
+      "target_bytes": 35325,
+      "target_bytes_median": 35325,
+      "returncodes": [
+        0,
+        0,
+        0
+      ],
+      "ok": true,
+      "step": "baseline",
+      "title": "plain cargo",
+      "command": "check",
+      "phase": "cold",
+      "skipped": false,
+      "skip_reason": null
+    },
+    {
+      "samples_ms": [
+        10.070876000099815,
+        10.167514999920968,
+        9.91270699978486
+      ],
+      "median_ms": 10.070876000099815,
+      "mean_ms": 10.050365999935215,
+      "stdev_ms": 0.10503102498279492,
+      "min_ms": 9.91270699978486,
+      "max_ms": 10.167514999920968,
+      "target_bytes": 35325,
+      "target_bytes_median": 35325,
+      "returncodes": [
+        0,
+        0,
+        0
+      ],
+      "ok": true,
+      "step": "baseline",
+      "title": "plain cargo",
+      "command": "check",
+      "phase": "noop",
+      "skipped": false,
+      "skip_reason": null
+    },
+    {
+      "samples_ms": [
+        26.063450000037847
+      ],
+      "median_ms": 26.063450000037847,
+      "mean_ms": 26.063450000037847,
+      "stdev_ms": 0.0,
+      "min_ms": 26.063450000037847,
+      "max_ms": 26.063450000037847,
+      "target_bytes": 35715,
+      "target_bytes_median": 35715,
+      "returncodes": [
+        0
+      ],
+      "ok": true,
+      "step": "baseline",
+      "title": "plain cargo",
+      "command": "check",
+      "phase": "edit_body",
+      "skipped": false,
+      "skip_reason": null
+    },
+    {
+      "samples_ms": [
+        24.840631000188296
+      ],
+      "median_ms": 24.840631000188296,
+      "mean_ms": 24.840631000188296,
+      "stdev_ms": 0.0,
+      "min_ms": 24.840631000188296,
+      "max_ms": 24.840631000188296,
+      "target_bytes": 35713,
+      "target_bytes_median": 35713,
+      "returncodes": [
+        0
+      ],
+      "ok": true,
+      "step": "baseline",
+      "title": "plain cargo",
+      "command": "check",
+      "phase": "edit_sig",
+      "skipped": false,
+      "skip_reason": null
+    },
+    {
+      "samples_ms": [
+        170.67975700001625,
+        172.26860499977192,
+        167.8020900003503
+      ],
+      "median_ms": 170.67975700001625,
+      "mean_ms": 170.2501506667128,
+      "stdev_ms": 1.8485778788437022,
+      "min_ms": 167.8020900003503,
+      "max_ms": 172.26860499977192,
+      "target_bytes": 7082315,
+      "target_bytes_median": 7082315,
+      "returncodes": [
+        0,
+        0,
+        0
+      ],
+      "ok": true,
+      "step": "baseline",
+      "title": "plain cargo",
+      "command": "test",
+      "phase": "cold",
+      "skipped": false,
+      "skip_reason": null
+    },
+    {
+      "samples_ms": [
+        22.17697900005078,
+        21.164539999972476,
+        22.234072999708587
+      ],
+      "median_ms": 22.17697900005078,
+      "mean_ms": 21.85853066657728,
+      "stdev_ms": 0.4912787499306731,
+      "min_ms": 21.164539999972476,
+      "max_ms": 22.234072999708587,
+      "target_bytes": 7082315,
+      "target_bytes_median": 7082315,
+      "returncodes": [
+        0,
+        0,
+        0
+      ],
+      "ok": true,
+      "step": "baseline",
+      "title": "plain cargo",
+      "command": "test",
+      "phase": "noop",
+      "skipped": false,
+      "skip_reason": null
+    },
+    {
+      "samples_ms": [
+        133.35306699991634
+      ],
+      "median_ms": 133.35306699991634,
+      "mean_ms": 133.35306699991634,
+      "stdev_ms": 0.0,
+      "min_ms": 133.35306699991634,
+      "max_ms": 133.35306699991634,
+      "target_bytes": 7081086,
+      "target_bytes_median": 7081086,
+      "returncodes": [
+        0
+      ],
+      "ok": true,
+      "step": "baseline",
+      "title": "plain cargo",
+      "command": "test",
+      "phase": "edit_body",
+      "skipped": false,
+      "skip_reason": null
+    },
+    {
+      "samples_ms": [
+        133.70842299991637
+      ],
+      "median_ms": 133.70842299991637,
+      "mean_ms": 133.70842299991637,
+      "stdev_ms": 0.0,
+      "min_ms": 133.70842299991637,
+      "max_ms": 133.70842299991637,
+      "target_bytes": 7081161,
+      "target_bytes_median": 7081161,
+      "returncodes": [
+        0
+      ],
+      "ok": true,
+      "step": "baseline",
+      "title": "plain cargo",
+      "command": "test",
+      "phase": "edit_sig",
+      "skipped": false,
+      "skip_reason": null
+    },
+    {
+      "samples_ms": [
+        130.9966449998683,
+        133.35925100000168,
+        131.2960740001472
+      ],
+      "median_ms": 131.2960740001472,
+      "mean_ms": 131.88399000000572,
+      "stdev_ms": 1.0503049383024599,
+      "min_ms": 130.9966449998683,
+      "max_ms": 133.35925100000168,
+      "target_bytes": 7022,
+      "target_bytes_median": 7022,
+      "returncodes": [
+        0,
+        0,
+        0
+      ],
+      "ok": true,
+      "step": "nanocompile-wrapper",
+      "title": "RUSTC_WRAPPER=nanocompile, CARGO_INCREMENTAL=0",
+      "command": "check",
+      "phase": "cold",
+      "skipped": false,
+      "skip_reason": null
+    },
+    {
+      "samples_ms": [
+        10.342023999783123,
+        9.452783000142517,
+        9.838629999649129
+      ],
+      "median_ms": 9.838629999649129,
+      "mean_ms": 9.87781233319159,
+      "stdev_ms": 0.3640868305837959,
+      "min_ms": 9.452783000142517,
+      "max_ms": 10.342023999783123,
+      "target_bytes": 7022,
+      "target_bytes_median": 7022,
+      "returncodes": [
+        0,
+        0,
+        0
+      ],
+      "ok": true,
+      "step": "nanocompile-wrapper",
+      "title": "RUSTC_WRAPPER=nanocompile, CARGO_INCREMENTAL=0",
+      "command": "check",
+      "phase": "noop",
+      "skipped": false,
+      "skip_reason": null
+    },
+    {
+      "samples_ms": [
+        46.662795999964146
+      ],
+      "median_ms": 46.662795999964146,
+      "mean_ms": 46.662795999964146,
+      "stdev_ms": 0.0,
+      "min_ms": 46.662795999964146,
+      "max_ms": 46.662795999964146,
+      "target_bytes": 7076,
+      "target_bytes_median": 7076,
+      "returncodes": [
+        0
+      ],
+      "ok": true,
+      "step": "nanocompile-wrapper",
+      "title": "RUSTC_WRAPPER=nanocompile, CARGO_INCREMENTAL=0",
+      "command": "check",
+      "phase": "edit_body",
+      "skipped": false,
+      "skip_reason": null
+    },
+    {
+      "samples_ms": [
+        40.09429899997485
+      ],
+      "median_ms": 40.09429899997485,
+      "mean_ms": 40.09429899997485,
+      "stdev_ms": 0.0,
+      "min_ms": 40.09429899997485,
+      "max_ms": 40.09429899997485,
+      "target_bytes": 7086,
+      "target_bytes_median": 7086,
+      "returncodes": [
+        0
+      ],
+      "ok": true,
+      "step": "nanocompile-wrapper",
+      "title": "RUSTC_WRAPPER=nanocompile, CARGO_INCREMENTAL=0",
+      "command": "check",
+      "phase": "edit_sig",
+      "skipped": false,
+      "skip_reason": null
+    },
+    {
+      "samples_ms": [
+        166.96554600002855,
+        185.26720099998784,
+        181.95200900026975
+      ],
+      "median_ms": 181.95200900026975,
+      "mean_ms": 178.06158533342872,
+      "stdev_ms": 7.961959187914379,
+      "min_ms": 166.96554600002855,
+      "max_ms": 185.26720099998784,
+      "target_bytes": 6321295,
+      "target_bytes_median": 6321295,
+      "returncodes": [
+        0,
+        0,
+        0
+      ],
+      "ok": true,
+      "step": "nanocompile-wrapper",
+      "title": "RUSTC_WRAPPER=nanocompile, CARGO_INCREMENTAL=0",
+      "command": "test",
+      "phase": "cold",
+      "skipped": false,
+      "skip_reason": null
+    },
+    {
+      "samples_ms": [
+        22.208773999864206,
+        21.244688000024325,
+        21.438536000005115
+      ],
+      "median_ms": 21.438536000005115,
+      "mean_ms": 21.63066599996455,
+      "stdev_ms": 0.41637395566575713,
+      "min_ms": 21.244688000024325,
+      "max_ms": 22.208773999864206,
+      "target_bytes": 6321295,
+      "target_bytes_median": 6321295,
+      "returncodes": [
+        0,
+        0,
+        0
+      ],
+      "ok": true,
+      "step": "nanocompile-wrapper",
+      "title": "RUSTC_WRAPPER=nanocompile, CARGO_INCREMENTAL=0",
+      "command": "test",
+      "phase": "noop",
+      "skipped": false,
+      "skip_reason": null
+    },
+    {
+      "samples_ms": [
+        138.4729960000186
+      ],
+      "median_ms": 138.4729960000186,
+      "mean_ms": 138.4729960000186,
+      "stdev_ms": 0.0,
+      "min_ms": 138.4729960000186,
+      "max_ms": 138.4729960000186,
+      "target_bytes": 6321403,
+      "target_bytes_median": 6321403,
+      "returncodes": [
+        0
+      ],
+      "ok": true,
+      "step": "nanocompile-wrapper",
+      "title": "RUSTC_WRAPPER=nanocompile, CARGO_INCREMENTAL=0",
+      "command": "test",
+      "phase": "edit_body",
+      "skipped": false,
+      "skip_reason": null
+    },
+    {
+      "samples_ms": [
+        140.87742499987144
+      ],
+      "median_ms": 140.87742499987144,
+      "mean_ms": 140.87742499987144,
+      "stdev_ms": 0.0,
+      "min_ms": 140.87742499987144,
+      "max_ms": 140.87742499987144,
+      "target_bytes": 6321423,
+      "target_bytes_median": 6321423,
+      "returncodes": [
+        0
+      ],
+      "ok": true,
+      "step": "nanocompile-wrapper",
+      "title": "RUSTC_WRAPPER=nanocompile, CARGO_INCREMENTAL=0",
+      "command": "test",
+      "phase": "edit_sig",
+      "skipped": false,
+      "skip_reason": null
+    },
+    {
+      "samples_ms": [
+        45.24645600031363,
+        44.87643999982538,
+        44.501071000013326
+      ],
+      "median_ms": 44.87643999982538,
+      "mean_ms": 44.874655666717445,
+      "stdev_ms": 0.30430476779225857,
+      "min_ms": 44.501071000013326,
+      "max_ms": 45.24645600031363,
+      "target_bytes": 35329,
+      "target_bytes_median": 35329,
+      "returncodes": [
+        0,
+        0,
+        0
+      ],
+      "ok": true,
+      "step": "fast-check",
+      "title": "cargo check only (skip codegen)",
+      "command": "check",
+      "phase": "cold",
+      "skipped": false,
+      "skip_reason": null
+    },
+    {
+      "samples_ms": [
+        10.682659999929456,
+        9.858172999884118,
+        9.982833000321989
+      ],
+      "median_ms": 9.982833000321989,
+      "mean_ms": 10.174555333378521,
+      "stdev_ms": 0.362870769517579,
+      "min_ms": 9.858172999884118,
+      "max_ms": 10.682659999929456,
+      "target_bytes": 35329,
+      "target_bytes_median": 35329,
+      "returncodes": [
+        0,
+        0,
+        0
+      ],
+      "ok": true,
+      "step": "fast-check",
+      "title": "cargo check only (skip codegen)",
+      "command": "check",
+      "phase": "noop",
+      "skipped": false,
+      "skip_reason": null
+    },
+    {
+      "samples_ms": [
+        25.535514000239345
+      ],
+      "median_ms": 25.535514000239345,
+      "mean_ms": 25.535514000239345,
+      "stdev_ms": 0.0,
+      "min_ms": 25.535514000239345,
+      "max_ms": 25.535514000239345,
+      "target_bytes": 35719,
+      "target_bytes_median": 35719,
+      "returncodes": [
+        0
+      ],
+      "ok": true,
+      "step": "fast-check",
+      "title": "cargo check only (skip codegen)",
+      "command": "check",
+      "phase": "edit_body",
+      "skipped": false,
+      "skip_reason": null
+    },
+    {
+      "samples_ms": [
+        25.226540000403475
+      ],
+      "median_ms": 25.226540000403475,
+      "mean_ms": 25.226540000403475,
+      "stdev_ms": 0.0,
+      "min_ms": 25.226540000403475,
+      "max_ms": 25.226540000403475,
+      "target_bytes": 35717,
+      "target_bytes_median": 35717,
+      "returncodes": [
+        0
+      ],
+      "ok": true,
+      "step": "fast-check",
+      "title": "cargo check only (skip codegen)",
+      "command": "check",
+      "phase": "edit_sig",
+      "skipped": false,
+      "skip_reason": null
+    },
+    {
+      "samples_ms": [
+        291.6571550003937,
+        294.54749500018806,
+        297.53812099988863
+      ],
+      "median_ms": 294.54749500018806,
+      "mean_ms": 294.5809236668235,
+      "stdev_ms": 2.401010673115062,
+      "min_ms": 291.6571550003937,
+      "max_ms": 297.53812099988863,
+      "target_bytes": 6327249,
+      "target_bytes_median": 6327249,
+      "returncodes": [
+        0,
+        0,
+        0
+      ],
+      "ok": true,
+      "step": "validate-graph",
+      "title": "declared fast-check then cargo test",
+      "command": "graph",
+      "phase": "cold",
+      "skipped": false,
+      "skip_reason": null
+    },
+    {
+      "samples_ms": [
+        1.3265299999147828,
+        1.503284000136773,
+        1.3565689996539732
+      ],
+      "median_ms": 1.3565689996539732,
+      "mean_ms": 1.395460999901843,
+      "stdev_ms": 0.07722234094301583,
+      "min_ms": 1.3265299999147828,
+      "max_ms": 1.503284000136773,
+      "target_bytes": 6327249,
+      "target_bytes_median": 6327249,
+      "returncodes": [
+        0,
+        0,
+        0
+      ],
+      "ok": true,
+      "step": "validate-graph",
+      "title": "declared fast-check then cargo test",
+      "command": "graph",
+      "phase": "noop",
+      "skipped": false,
+      "skip_reason": null
+    },
+    {
+      "samples_ms": [
+        189.32308300009026
+      ],
+      "median_ms": 189.32308300009026,
+      "mean_ms": 189.32308300009026,
+      "stdev_ms": 0.0,
+      "min_ms": 189.32308300009026,
+      "max_ms": 189.32308300009026,
+      "target_bytes": 6327411,
+      "target_bytes_median": 6327411,
+      "returncodes": [
+        0
+      ],
+      "ok": true,
+      "step": "validate-graph",
+      "title": "declared fast-check then cargo test",
+      "command": "graph",
+      "phase": "edit_body",
+      "skipped": false,
+      "skip_reason": null
+    },
+    {
+      "samples_ms": [
+        183.5459459998674
+      ],
+      "median_ms": 183.5459459998674,
+      "mean_ms": 183.5459459998674,
+      "stdev_ms": 0.0,
+      "min_ms": 183.5459459998674,
+      "max_ms": 183.5459459998674,
+      "target_bytes": 6327441,
+      "target_bytes_median": 6327441,
+      "returncodes": [
+        0
+      ],
+      "ok": true,
+      "step": "validate-graph",
+      "title": "declared fast-check then cargo test",
+      "command": "graph",
+      "phase": "edit_sig",
+      "skipped": false,
+      "skip_reason": null
+    },
+    {
+      "samples_ms": [
+        119.5758809999461,
+        119.02410700031396,
+        118.62062199998036
+      ],
+      "median_ms": 119.02410700031396,
+      "mean_ms": 119.0735366667468,
+      "stdev_ms": 0.3915460025732447,
+      "min_ms": 118.62062199998036,
+      "max_ms": 119.5758809999461,
+      "target_bytes": 7156508,
+      "target_bytes_median": 7156508,
+      "returncodes": [
+        0,
+        0,
+        0
+      ],
+      "ok": true,
+      "step": "fast-linker",
+      "title": "mold or lld via -C link-arg",
+      "command": "test",
+      "phase": "cold",
+      "skipped": false,
+      "skip_reason": null
+    },
+    {
+      "samples_ms": [
+        21.47517399998833,
+        21.856942999875173,
+        21.37049900011334
+      ],
+      "median_ms": 21.47517399998833,
+      "mean_ms": 21.567538666658947,
+      "stdev_ms": 0.20905400412804537,
+      "min_ms": 21.37049900011334,
+      "max_ms": 21.856942999875173,
+      "target_bytes": 7156508,
+      "target_bytes_median": 7156508,
+      "returncodes": [
+        0,
+        0,
+        0
+      ],
+      "ok": true,
+      "step": "fast-linker",
+      "title": "mold or lld via -C link-arg",
+      "command": "test",
+      "phase": "noop",
+      "skipped": false,
+      "skip_reason": null
+    },
+    {
+      "samples_ms": [
+        78.29479699967123
+      ],
+      "median_ms": 78.29479699967123,
+      "mean_ms": 78.29479699967123,
+      "stdev_ms": 0.0,
+      "min_ms": 78.29479699967123,
+      "max_ms": 78.29479699967123,
+      "target_bytes": 7155278,
+      "target_bytes_median": 7155278,
+      "returncodes": [
+        0
+      ],
+      "ok": true,
+      "step": "fast-linker",
+      "title": "mold or lld via -C link-arg",
+      "command": "test",
+      "phase": "edit_body",
+      "skipped": false,
+      "skip_reason": null
+    },
+    {
+      "samples_ms": [
+        77.85374500008402
+      ],
+      "median_ms": 77.85374500008402,
+      "mean_ms": 77.85374500008402,
+      "stdev_ms": 0.0,
+      "min_ms": 77.85374500008402,
+      "max_ms": 77.85374500008402,
+      "target_bytes": 7155353,
+      "target_bytes_median": 7155353,
+      "returncodes": [
+        0
+      ],
+      "ok": true,
+      "step": "fast-linker",
+      "title": "mold or lld via -C link-arg",
+      "command": "test",
+      "phase": "edit_sig",
+      "skipped": false,
+      "skip_reason": null
+    },
+    {
+      "samples_ms": [
+        53.19749699992826,
+        53.35780999985218,
+        54.320313000062015
+      ],
+      "median_ms": 53.35780999985218,
+      "mean_ms": 53.625206666614154,
+      "stdev_ms": 0.4958525826531175,
+      "min_ms": 53.19749699992826,
+      "max_ms": 54.320313000062015,
+      "target_bytes": 35323,
+      "target_bytes_median": 35323,
+      "returncodes": [
+        0,
+        0,
+        0
+      ],
+      "ok": true,
+      "step": "sccache",
+      "title": "RUSTC_WRAPPER=sccache",
+      "command": "check",
+      "phase": "cold",
+      "skipped": false,
+      "skip_reason": null
+    },
+    {
+      "samples_ms": [
+        9.57879799989314,
+        9.816620000037801,
+        9.388747000230069
+      ],
+      "median_ms": 9.57879799989314,
+      "mean_ms": 9.594721666720337,
+      "stdev_ms": 0.1750409444768749,
+      "min_ms": 9.388747000230069,
+      "max_ms": 9.816620000037801,
+      "target_bytes": 35323,
+      "target_bytes_median": 35323,
+      "returncodes": [
+        0,
+        0,
+        0
+      ],
+      "ok": true,
+      "step": "sccache",
+      "title": "RUSTC_WRAPPER=sccache",
+      "command": "check",
+      "phase": "noop",
+      "skipped": false,
+      "skip_reason": null
+    },
+    {
+      "samples_ms": [
+        28.23563199990531
+      ],
+      "median_ms": 28.23563199990531,
+      "mean_ms": 28.23563199990531,
+      "stdev_ms": 0.0,
+      "min_ms": 28.23563199990531,
+      "max_ms": 28.23563199990531,
+      "target_bytes": 35713,
+      "target_bytes_median": 35713,
+      "returncodes": [
+        0
+      ],
+      "ok": true,
+      "step": "sccache",
+      "title": "RUSTC_WRAPPER=sccache",
+      "command": "check",
+      "phase": "edit_body",
+      "skipped": false,
+      "skip_reason": null
+    },
+    {
+      "samples_ms": [
+        27.94343999994453
+      ],
+      "median_ms": 27.94343999994453,
+      "mean_ms": 27.94343999994453,
+      "stdev_ms": 0.0,
+      "min_ms": 27.94343999994453,
+      "max_ms": 27.94343999994453,
+      "target_bytes": 35711,
+      "target_bytes_median": 35711,
+      "returncodes": [
+        0
+      ],
+      "ok": true,
+      "step": "sccache",
+      "title": "RUSTC_WRAPPER=sccache",
+      "command": "check",
+      "phase": "edit_sig",
+      "skipped": false,
+      "skip_reason": null
+    },
+    {
+      "samples_ms": [
+        180.53713000017524,
+        177.79199400001744,
+        176.0613450001074
+      ],
+      "median_ms": 177.79199400001744,
+      "mean_ms": 178.13015633343335,
+      "stdev_ms": 1.842810926187501,
+      "min_ms": 176.0613450001074,
+      "max_ms": 180.53713000017524,
+      "target_bytes": 7082310,
+      "target_bytes_median": 7082310,
+      "returncodes": [
+        0,
+        0,
+        0
+      ],
+      "ok": true,
+      "step": "sccache",
+      "title": "RUSTC_WRAPPER=sccache",
+      "command": "test",
+      "phase": "cold",
+      "skipped": false,
+      "skip_reason": null
+    },
+    {
+      "samples_ms": [
+        21.97492699997383,
+        21.42263699988689,
+        22.612289999869972
+      ],
+      "median_ms": 21.97492699997383,
+      "mean_ms": 22.0032846665769,
+      "stdev_ms": 0.4860875662083699,
+      "min_ms": 21.42263699988689,
+      "max_ms": 22.612289999869972,
+      "target_bytes": 7082310,
+      "target_bytes_median": 7082310,
+      "returncodes": [
+        0,
+        0,
+        0
+      ],
+      "ok": true,
+      "step": "sccache",
+      "title": "RUSTC_WRAPPER=sccache",
+      "command": "test",
+      "phase": "noop",
+      "skipped": false,
+      "skip_reason": null
+    },
+    {
+      "samples_ms": [
+        135.41550000036295
+      ],
+      "median_ms": 135.41550000036295,
+      "mean_ms": 135.41550000036295,
+      "stdev_ms": 0.0,
+      "min_ms": 135.41550000036295,
+      "max_ms": 135.41550000036295,
+      "target_bytes": 7081081,
+      "target_bytes_median": 7081081,
+      "returncodes": [
+        0
+      ],
+      "ok": true,
+      "step": "sccache",
+      "title": "RUSTC_WRAPPER=sccache",
+      "command": "test",
+      "phase": "edit_body",
+      "skipped": false,
+      "skip_reason": null
+    },
+    {
+      "samples_ms": [
+        133.4006000001864
+      ],
+      "median_ms": 133.4006000001864,
+      "mean_ms": 133.4006000001864,
+      "stdev_ms": 0.0,
+      "min_ms": 133.4006000001864,
+      "max_ms": 133.4006000001864,
+      "target_bytes": 7081156,
+      "target_bytes_median": 7081156,
+      "returncodes": [
+        0
+      ],
+      "ok": true,
+      "step": "sccache",
+      "title": "RUSTC_WRAPPER=sccache",
+      "command": "test",
+      "phase": "edit_sig",
+      "skipped": false,
+      "skip_reason": null
+    },
+    {
+      "samples_ms": [
+        46.24523299980865,
+        44.61392799976238,
+        44.5631049997246
+      ],
+      "median_ms": 44.61392799976238,
+      "mean_ms": 45.14075533309855,
+      "stdev_ms": 0.7812592107315214,
+      "min_ms": 44.5631049997246,
+      "max_ms": 46.24523299980865,
+      "target_bytes": 35354,
+      "target_bytes_median": 35354,
+      "returncodes": [
+        0,
+        0,
+        0
+      ],
+      "ok": true,
+      "step": "crate-shape",
+      "title": "explicit -C codegen-units=256",
+      "command": "check",
+      "phase": "cold",
+      "skipped": false,
+      "skip_reason": null
+    },
+    {
+      "samples_ms": [
+        9.831303000282787,
+        10.113443000136613,
+        10.238047000257211
+      ],
+      "median_ms": 10.113443000136613,
+      "mean_ms": 10.060931000225537,
+      "stdev_ms": 0.17015346598447362,
+      "min_ms": 9.831303000282787,
+      "max_ms": 10.238047000257211,
+      "target_bytes": 35354,
+      "target_bytes_median": 35354,
+      "returncodes": [
+        0,
+        0,
+        0
+      ],
+      "ok": true,
+      "step": "crate-shape",
+      "title": "explicit -C codegen-units=256",
+      "command": "check",
+      "phase": "noop",
+      "skipped": false,
+      "skip_reason": null
+    },
+    {
+      "samples_ms": [
+        25.15832400013096
+      ],
+      "median_ms": 25.15832400013096,
+      "mean_ms": 25.15832400013096,
+      "stdev_ms": 0.0,
+      "min_ms": 25.15832400013096,
+      "max_ms": 25.15832400013096,
+      "target_bytes": 35744,
+      "target_bytes_median": 35744,
+      "returncodes": [
+        0
+      ],
+      "ok": true,
+      "step": "crate-shape",
+      "title": "explicit -C codegen-units=256",
+      "command": "check",
+      "phase": "edit_body",
+      "skipped": false,
+      "skip_reason": null
+    },
+    {
+      "samples_ms": [
+        25.80235100003847
+      ],
+      "median_ms": 25.80235100003847,
+      "mean_ms": 25.80235100003847,
+      "stdev_ms": 0.0,
+      "min_ms": 25.80235100003847,
+      "max_ms": 25.80235100003847,
+      "target_bytes": 35742,
+      "target_bytes_median": 35742,
+      "returncodes": [
+        0
+      ],
+      "ok": true,
+      "step": "crate-shape",
+      "title": "explicit -C codegen-units=256",
+      "command": "check",
+      "phase": "edit_sig",
+      "skipped": false,
+      "skip_reason": null
+    },
+    {
+      "samples_ms": [
+        170.98300899988317,
+        165.73929800006226,
+        170.73704299991732
+      ],
+      "median_ms": 170.73704299991732,
+      "mean_ms": 169.15311666662092,
+      "stdev_ms": 2.4160219693252007,
+      "min_ms": 165.73929800006226,
+      "max_ms": 170.98300899988317,
+      "target_bytes": 7082377,
+      "target_bytes_median": 7082377,
+      "returncodes": [
+        0,
+        0,
+        0
+      ],
+      "ok": true,
+      "step": "crate-shape",
+      "title": "explicit -C codegen-units=256",
+      "command": "test",
+      "phase": "cold",
+      "skipped": false,
+      "skip_reason": null
+    },
+    {
+      "samples_ms": [
+        22.252791000028083,
+        22.409367999898677,
+        20.937587000389613
+      ],
+      "median_ms": 22.252791000028083,
+      "mean_ms": 21.866582000105456,
+      "stdev_ms": 0.6600014501725993,
+      "min_ms": 20.937587000389613,
+      "max_ms": 22.409367999898677,
+      "target_bytes": 7082377,
+      "target_bytes_median": 7082377,
+      "returncodes": [
+        0,
+        0,
+        0
+      ],
+      "ok": true,
+      "step": "crate-shape",
+      "title": "explicit -C codegen-units=256",
+      "command": "test",
+      "phase": "noop",
+      "skipped": false,
+      "skip_reason": null
+    },
+    {
+      "samples_ms": [
+        130.95006699995793
+      ],
+      "median_ms": 130.95006699995793,
+      "mean_ms": 130.95006699995793,
+      "stdev_ms": 0.0,
+      "min_ms": 130.95006699995793,
+      "max_ms": 130.95006699995793,
+      "target_bytes": 7081148,
+      "target_bytes_median": 7081148,
+      "returncodes": [
+        0
+      ],
+      "ok": true,
+      "step": "crate-shape",
+      "title": "explicit -C codegen-units=256",
+      "command": "test",
+      "phase": "edit_body",
+      "skipped": false,
+      "skip_reason": null
+    },
+    {
+      "samples_ms": [
+        133.91310699989845
+      ],
+      "median_ms": 133.91310699989845,
+      "mean_ms": 133.91310699989845,
+      "stdev_ms": 0.0,
+      "min_ms": 133.91310699989845,
+      "max_ms": 133.91310699989845,
+      "target_bytes": 7081223,
+      "target_bytes_median": 7081223,
+      "returncodes": [
+        0
+      ],
+      "ok": true,
+      "step": "crate-shape",
+      "title": "explicit -C codegen-units=256",
+      "command": "test",
+      "phase": "edit_sig",
+      "skipped": false,
+      "skip_reason": null
+    },
+    {
+      "samples_ms": [
+        164.54096799998297,
+        164.21107700034554,
+        163.80061100016974
+      ],
+      "median_ms": 164.21107700034554,
+      "mean_ms": 164.18421866683275,
+      "stdev_ms": 0.3028455594880279,
+      "min_ms": 163.80061100016974,
+      "max_ms": 164.54096799998297,
+      "target_bytes": 6956185,
+      "target_bytes_median": 6956184,
+      "returncodes": [
+        0,
+        0,
+        0
+      ],
+      "ok": true,
+      "step": "disk-hygiene",
+      "title": "line-tables-only debuginfo",
+      "command": "test",
+      "phase": "cold",
+      "skipped": false,
+      "skip_reason": null
+    },
+    {
+      "samples_ms": [
+        21.949453000161157,
+        21.255559000110225,
+        23.22877899996456
+      ],
+      "median_ms": 21.949453000161157,
+      "mean_ms": 22.144597000078647,
+      "stdev_ms": 0.8172964282658344,
+      "min_ms": 21.255559000110225,
+      "max_ms": 23.22877899996456,
+      "target_bytes": 6956185,
+      "target_bytes_median": 6956185,
+      "returncodes": [
+        0,
+        0,
+        0
+      ],
+      "ok": true,
+      "step": "disk-hygiene",
+      "title": "line-tables-only debuginfo",
+      "command": "test",
+      "phase": "noop",
+      "skipped": false,
+      "skip_reason": null
+    },
+    {
+      "samples_ms": [
+        134.90124999998443
+      ],
+      "median_ms": 134.90124999998443,
+      "mean_ms": 134.90124999998443,
+      "stdev_ms": 0.0,
+      "min_ms": 134.90124999998443,
+      "max_ms": 134.90124999998443,
+      "target_bytes": 6954955,
+      "target_bytes_median": 6954955,
+      "returncodes": [
+        0
+      ],
+      "ok": true,
+      "step": "disk-hygiene",
+      "title": "line-tables-only debuginfo",
+      "command": "test",
+      "phase": "edit_body",
+      "skipped": false,
+      "skip_reason": null
+    },
+    {
+      "samples_ms": [
+        135.134909000044
+      ],
+      "median_ms": 135.134909000044,
+      "mean_ms": 135.134909000044,
+      "stdev_ms": 0.0,
+      "min_ms": 135.134909000044,
+      "max_ms": 135.134909000044,
+      "target_bytes": 6955030,
+      "target_bytes_median": 6955030,
+      "returncodes": [
+        0
+      ],
+      "ok": true,
+      "step": "disk-hygiene",
+      "title": "line-tables-only debuginfo",
+      "command": "test",
+      "phase": "edit_sig",
+      "skipped": false,
+      "skip_reason": null
+    }
+  ],
+  "size": {
+    "size": "small",
+    "crates": 1,
+    "loc": 26
+  },
+  "map_elites": {
+    "shard": "bench/archive/rust-loop-steps.json",
+    "evaluations": "from-steps",
+    "size": {
+      "size": "small",
+      "crates": 1,
+      "loc": 26
+    }
+  }
+}
