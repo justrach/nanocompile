@@ -57,11 +57,11 @@ broken check never writes a validate stamp.
 
 As-shipped, `nanocompile rust-loop run --wrapper` still sets `CARGO_INCREMENTAL=0`.
 That remains the documented wrapper protocol. The best config the wrapper now
-allows is `NANOCOMPILE_ALLOW_INCREMENTAL=1` (or `CARGO_INCREMENTAL=1`): registry
-and git dependencies stay cacheable, including `-C incremental=…` on those
-units, and workspace crates pass through so rustc incremental can own the edit
-loop. `NANOCOMPILE_CACHE_DEPS_ONLY=1` forces that split even when incremental
-is off.
+allows is `NANOCOMPILE_ALLOW_INCREMENTAL=1` (or `CARGO_INCREMENTAL=1`): rustc
+incremental still runs on a miss, and workspace rlibs stay in the store so
+emptied-target / sibling worktrees can restore them. `NANOCOMPILE_CACHE_DEPS_ONLY=1`
+is the opt-in that bypasses workspace rlibs. See
+[nanocompile vs kache](nanocompile-vs-kache.md).
 
 ## (a) Steps usable now
 

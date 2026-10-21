@@ -36,6 +36,19 @@ const Dir = std.Io.Dir;
 pub const Hash = std.crypto.hash.Blake3;
 pub const CheckedDigest = struct { hash: []const u8, state: std.Io.File.Stat };
 
+fn replaceAll(a: std.mem.Allocator, bytes: []const u8, old: []const u8, new: []const u8) ![]const u8 {
+    if (old.len == 0 or std.mem.indexOf(u8, bytes, old) == null) return bytes;
+    var out: std.ArrayList(u8) = .empty;
+    var cursor: usize = 0;
+    while (std.mem.indexOfPos(u8, bytes, cursor, old)) |at| {
+        try out.appendSlice(a, bytes[cursor..at]);
+        try out.appendSlice(a, new);
+        cursor = at + old.len;
+    }
+    try out.appendSlice(a, bytes[cursor..]);
+    return out.items;
+}
+
 pub fn permissions(mode: u32) std.Io.File.Permissions {
     return if (builtin.os.tag == .windows) .default_file else .fromMode(@intCast(mode & 0o777));
 }
@@ -64,6 +77,7 @@ pub fn readMetadata(io: std.Io, a: std.mem.Allocator, path: []const u8) ![]const
 }
 
 pub const RustLocations = struct { compiler: []const u8, sysroot: []const u8, target_libdir: []const u8, fallback_verified: bool = false };
+pub const PathRewrite = struct { token: []const u8, path: []const u8 };
 
 pub const Context = struct {
     a: std.mem.Allocator,
@@ -75,6 +89,7 @@ pub const Context = struct {
     compiler_decoder_identity: ?[]const u8 = null,
     compiler_epoch: ?[]const u8 = null,
     rust_locations: ?RustLocations = null,
+    rewrites: []const PathRewrite = &.{},
 
     pub fn init(a: std.mem.Allocator, io: std.Io, env: *std.process.Environ.Map) !Context {
         const root = env.get("NANOCOMPILE_DIR") orelse try std.fs.path.join(a, &.{
@@ -93,6 +108,30 @@ pub const Context = struct {
         try all.append(self.a, self.root);
         try all.appendSlice(self.a, parts);
         return std.fs.path.join(self.a, all.items);
+    }
+
+    pub fn logicalPath(self: *Context, text: []const u8) ![]const u8 {
+        const ordered = try self.a.dupe(PathRewrite, self.rewrites);
+        std.mem.sort(PathRewrite, ordered, {}, struct {
+            fn less(_: void, a: PathRewrite, b: PathRewrite) bool {
+                return a.path.len > b.path.len;
+            }
+        }.less);
+        var current = text;
+        for (ordered) |rewrite| {
+            if (rewrite.path.len == 0) continue;
+            current = try replaceAll(self.a, current, rewrite.path, rewrite.token);
+        }
+        return current;
+    }
+
+    pub fn physicalPath(self: *Context, text: []const u8) ![]const u8 {
+        var current = text;
+        for (self.rewrites) |rewrite| {
+            if (rewrite.token.len == 0) continue;
+            current = try replaceAll(self.a, current, rewrite.token, rewrite.path);
+        }
+        return current;
     }
 
     pub fn prepare(self: *Context) !void {
@@ -423,7 +462,8 @@ fn blobPath(ctx: *Context, hash: []const u8) ![]const u8 {
 pub const MaterializeMethod = enum { reflink, hardlink, copy };
 
 fn immutableArtifact(path: []const u8) bool {
-    return std.mem.endsWith(u8, path, ".rlib") or std.mem.endsWith(u8, path, ".rmeta");
+    return std.mem.endsWith(u8, path, ".rlib") or std.mem.endsWith(u8, path, ".rmeta") or
+        std.mem.endsWith(u8, path, ".dylib") or std.mem.endsWith(u8, path, ".so");
 }
 
 fn makeReadOnly(ctx: *Context, path: []const u8) void {
@@ -438,7 +478,7 @@ pub fn materialize(ctx: *Context, source: []const u8, destination: []const u8, m
     _ = try materializeWith(ctx, source, destination, mode, false);
 }
 
-/// Restore into a build tree. Immutable .rlib/.rmeta may share the blob inode.
+/// Restore into a build tree. Immutable .rlib/.rmeta/.so/.dylib may share the blob inode.
 pub fn materializeRestore(ctx: *Context, source: []const u8, destination: []const u8, mode: u32) !MaterializeMethod {
     const method = try materializeWith(ctx, source, destination, mode, immutableArtifact(destination));
     ctx.event(switch (method) {
@@ -555,14 +595,21 @@ fn storeEntry(ctx: *Context, key: []const u8, dependencies: []const Dependency, 
     if (output_names) |names| if (names.len != output_paths.len) return error.InvalidDestinations;
     for (dependencies) |dep| if (dep.missing != null and !try missingValid(ctx, dep)) return error.InvalidMissingDependency;
     for (dependencies) |dep| if (dep.symlink_target != null and !try symlinkValid(ctx, dep)) return error.InvalidSymlinkDependency;
+    var logical_deps: std.ArrayList(Dependency) = .empty;
+    for (dependencies) |dep| {
+        var next = dep;
+        next.path = try ctx.logicalPath(dep.path);
+        try logical_deps.append(ctx.a, next);
+    }
     var outputs: std.ArrayList(Output) = .empty;
     for (output_paths, 0..) |path_, index| {
         const st = try Dir.cwd().statFile(ctx.io, path_, .{});
         if (st.kind != .file) return error.NotRegularFile;
-        try outputs.append(ctx.a, .{ .path = if (output_names) |names| names[index] else path_, .hash = try putFile(ctx, path_), .mode = fileMode(st.permissions) });
+        const recorded = if (output_names) |names| names[index] else try ctx.logicalPath(path_);
+        try outputs.append(ctx.a, .{ .path = recorded, .hash = try putFile(ctx, path_), .mode = fileMode(st.permissions) });
     }
     const entry: Entry = .{
-        .dependencies = dependencies,
+        .dependencies = logical_deps.items,
         .outputs = outputs.items,
         .stdout = try putBytes(ctx, stdout),
         .stderr = try putBytes(ctx, stderr),
@@ -660,11 +707,12 @@ fn parallelFileHashes(ctx: *Context, dependencies: []const Dependency, hashes: *
     var size: u64 = 0;
     for (dependencies) |dep| {
         if (dep.directory or dep.missing != null or dep.symlink_target != null) continue;
-        const slot = try paths.getOrPut(ctx.a, dep.path);
+        const resolved = ctx.physicalPath(dep.path) catch return false;
+        const slot = try paths.getOrPut(ctx.a, resolved);
         if (slot.found_existing) continue;
-        const st = Dir.cwd().statFile(ctx.io, dep.path, .{}) catch return false;
+        const st = Dir.cwd().statFile(ctx.io, resolved, .{}) catch return false;
         size +|= st.size;
-        try jobs.append(ctx.a, .{ .path = dep.path });
+        try jobs.append(ctx.a, .{ .path = resolved });
     }
     // Small restores retain their serial path. Large graphs use at most four
     // workers, leaving the same full hashes and per-restore lifetime intact.
@@ -753,7 +801,10 @@ fn restoreWithSnapshot(ctx: *Context, key: []const u8, allowed_outputs: []const 
     // and explicit externs can also appear in the transitive graph. Reuse the
     // enumeration and content hashes only within this restore. No metadata
     // shortcut survives a compiler invocation or a before/after input check.
-    for (entry.outputs, allowed_outputs) |output, allowed| if (!std.mem.eql(u8, output.path, allowed)) return null;
+    for (entry.outputs, allowed_outputs) |output, allowed| {
+        const allowed_logical = try ctx.logicalPath(allowed);
+        if (!std.mem.eql(u8, output.path, allowed) and !std.mem.eql(u8, output.path, allowed_logical)) return null;
+    }
     ctx.profileEnd("restore.manifest", phase);
     phase = ctx.profileStart();
     var output_check: OutputCheck = .{ .entry = &entry };
@@ -781,28 +832,30 @@ fn restoreWithSnapshot(ctx: *Context, key: []const u8, allowed_outputs: []const 
         if (!try parallelFileHashes(ctx, entry.dependencies, &file_hashes)) return null;
         ctx.profileEnd("restore.parallel_input_hashes", hash_start);
         for (entry.dependencies) |dep| {
-            if (dep.symlink_target != null) {
-                if (!(symlinkValid(ctx, dep) catch false)) return null;
+            var resolved = dep;
+            resolved.path = try ctx.physicalPath(dep.path);
+            if (resolved.symlink_target != null) {
+                if (!(symlinkValid(ctx, resolved) catch false)) return null;
                 continue;
             }
-            if (dep.missing != null) {
-                if (!(missingValid(ctx, dep) catch false)) {
+            if (resolved.missing != null) {
+                if (!(missingValid(ctx, resolved) catch false)) {
                     ctx.trace("miss: negative lookup changed or unavailable");
                     return null;
                 }
                 continue;
             }
-            const hash = if (dep.library_prefix) |prefix| blk: {
-                const slot = try library_names.getOrPut(ctx.a, dep.path);
-                if (!slot.found_existing) slot.value_ptr.* = ctx.libraryNames(dep.path, allowed_outputs) catch return null;
-                break :blk if (dep.metadata_companion) metadataCompanionDigest(ctx.a, slot.value_ptr.*, prefix) catch return null else try prefixDigest(ctx.a, slot.value_ptr.*, prefix);
-            } else if (dep.all_members)
-                ctx.nativeDirectoryDigest(dep.path) catch return null
-            else if (dep.directory)
-                ctx.directoryDigest(dep.path, dep.libraries, allowed_outputs) catch return null
+            const hash = if (resolved.library_prefix) |prefix| blk: {
+                const slot = try library_names.getOrPut(ctx.a, resolved.path);
+                if (!slot.found_existing) slot.value_ptr.* = ctx.libraryNames(resolved.path, allowed_outputs) catch return null;
+                break :blk if (resolved.metadata_companion) metadataCompanionDigest(ctx.a, slot.value_ptr.*, prefix) catch return null else try prefixDigest(ctx.a, slot.value_ptr.*, prefix);
+            } else if (resolved.all_members)
+                ctx.nativeDirectoryDigest(resolved.path) catch return null
+            else if (resolved.directory)
+                ctx.directoryDigest(resolved.path, resolved.libraries, allowed_outputs) catch return null
             else blk: {
-                const slot = try file_hashes.getOrPut(ctx.a, dep.path);
-                if (!slot.found_existing) slot.value_ptr.* = ctx.digest(dep.path) catch return null;
+                const slot = try file_hashes.getOrPut(ctx.a, resolved.path);
+                if (!slot.found_existing) slot.value_ptr.* = ctx.digest(resolved.path) catch return null;
                 break :blk slot.value_ptr.*;
             };
             if (!std.mem.eql(u8, hash, dep.hash)) {
@@ -1113,6 +1166,44 @@ test "immutable rlib restore hardlinks when clone is unavailable" {
         const dst_st = try Dir.cwd().statFile(io, destination, .{});
         try std.testing.expectEqual(src_st.inode, dst_st.inode);
     }
+    try std.testing.expect(immutableArtifact("libmacro.so"));
+    try std.testing.expect(immutableArtifact("libmacro.dylib"));
+    try std.testing.expect(!immutableArtifact("app"));
+}
+
+test "logical output paths restore into a sibling target directory" {
+    if (builtin.os.tag == .windows) return;
+    var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer arena.deinit();
+    const a = arena.allocator();
+    const io = std.testing.io;
+    var tmp = std.testing.tmpDir(.{});
+    defer tmp.cleanup();
+    const root = try Dir.cwd().realPathFileAlloc(io, try std.fs.path.join(a, &.{ ".zig-cache", "tmp", &tmp.sub_path }), a);
+    var env = std.process.Environ.Map.init(a);
+    const first = try std.fs.path.join(a, &.{ root, "first" });
+    const second = try std.fs.path.join(a, &.{ root, "second" });
+    try env.put("CARGO_TARGET_DIR", first);
+    var ctx: Context = .{
+        .a = a,
+        .io = io,
+        .env = &env,
+        .root = root,
+        .cwd = root,
+        .rewrites = &.{.{ .token = "$NANO_TARGET", .path = first }},
+    };
+    try ctx.prepare();
+    const source = try std.fs.path.join(a, &.{ first, "libcrate.rlib" });
+    try Dir.cwd().createDirPath(io, first);
+    try tmp.dir.writeFile(io, .{ .sub_path = "first/libcrate.rlib", .data = "crate-bytes" });
+    try tmp.dir.writeFile(io, .{ .sub_path = "input.rs", .data = "fn main() {}" });
+    const input = try std.fs.path.join(a, &.{ root, "input.rs" });
+    try storeVariants(&ctx, "sibling-key", &.{.{ .path = input, .hash = try ctx.digest(input) }}, &.{source}, "", "");
+    try env.put("CARGO_TARGET_DIR", second);
+    ctx.rewrites = &.{.{ .token = "$NANO_TARGET", .path = second }};
+    const dest = try std.fs.path.join(a, &.{ second, "libcrate.rlib" });
+    try std.testing.expect(try restoreVariants(&ctx, "sibling-key", &.{dest}));
+    try std.testing.expectEqualSlices(u8, "crate-bytes", try ctx.read(dest));
 }
 
 test "hash fields cannot collide through concatenation" {

@@ -815,8 +815,9 @@ def genome_env(genome, nano, tools, sccache_dir, isolate_cache, kache_dir=None):
         if genome.get("incremental"):
             extra["CARGO_INCREMENTAL"] = "1"
             extra["NANOCOMPILE_ALLOW_INCREMENTAL"] = "1"
-            extra["NANOCOMPILE_CACHE_DEPS_ONLY"] = "1"
             extra["NANOCOMPILE_PROC_MACROS"] = "reported"
+            extra["NANOCOMPILE_PROC_MACRO_PRODUCERS"] = "1"
+            extra["NANOCOMPILE_EXECUTABLE_PRODUCERS"] = "1"
         else:
             extra["CARGO_INCREMENTAL"] = "0"
     elif genome.get("sccache") and tools.get("sccache"):

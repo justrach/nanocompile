@@ -185,8 +185,10 @@ class RustLoopBench(unittest.TestCase):
         self.assertEqual(env["RUSTC_WRAPPER"], "/bin/nano")
         self.assertEqual(env["CARGO_INCREMENTAL"], "1")
         self.assertEqual(env["NANOCOMPILE_ALLOW_INCREMENTAL"], "1")
-        self.assertEqual(env["NANOCOMPILE_CACHE_DEPS_ONLY"], "1")
+        self.assertNotIn("NANOCOMPILE_CACHE_DEPS_ONLY", env)
         self.assertEqual(env["NANOCOMPILE_PROC_MACROS"], "reported")
+        self.assertEqual(env["NANOCOMPILE_PROC_MACRO_PRODUCERS"], "1")
+        self.assertEqual(env["NANOCOMPILE_EXECUTABLE_PRODUCERS"], "1")
         shipped = BENCH.genome_env(
             BENCH.default_genome(wrapper=True, incremental=False),
             "/bin/nano", {}, Path("/tmp/sccache"), Path("/tmp/nano-store"),

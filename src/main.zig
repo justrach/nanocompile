@@ -31,6 +31,8 @@ const help =
     \\  NANOCOMPILE_TRACE=1   print cache decisions to stderr
     \\  NANOCOMPILE_DISABLE=1 run the compiler without caching
     \\  NANOCOMPILE_PROC_MACROS=reported  opt into compiler-reported macro inputs
+    \\  NANOCOMPILE_PROC_MACRO_PRODUCERS=1  cache proc-macro .so/.dylib (Linux reported path; Darwin observer when debuginfo=0)
+    \\  NANOCOMPILE_EXECUTABLE_PRODUCERS=1  cache host binaries / test harnesses
     \\  NANOCOMPILE_EXTRA_INPUTS_FILE    JSON array declaring additional files
     \\  NANOCOMPILE_ZIG       Zig executable (default: zig)
     \\  NANOCOMPILE_RUSTC     rustc executable (default: rustc)
@@ -166,7 +168,7 @@ fn dispatch(ctx: *cache.Context, args: []const [:0]const u8) !u8 {
         return 0;
     }
     if (std.mem.eql(u8, command, "doctor")) {
-        try ctx.out(try std.fmt.allocPrint(ctx.a, "cache: {s}\nplatform: {s}\nrestore: copy-on-write clone, then exclusive hardlink for .rlib/.rmeta, then independent copy\n", .{ ctx.root, @tagName(builtin.os.tag) }));
+        try ctx.out(try std.fmt.allocPrint(ctx.a, "cache: {s}\nplatform: {s}\nrestore: copy-on-write clone, then exclusive hardlink for .rlib/.rmeta/.so/.dylib, then independent copy\n", .{ ctx.root, @tagName(builtin.os.tag) }));
         try ctx.prepare();
         return 0;
     }

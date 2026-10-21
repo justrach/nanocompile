@@ -134,7 +134,7 @@ test "installation locations refuse alternate selection and loader environments"
         try std.testing.expect(cachedLocations(&ctx, argv) == null);
     try env.put("DYLD_LIBRARY_PATH", "");
     try std.testing.expect(cachedLocations(&ctx, &.{"/toolchain/bin/rustc"}) == null);
-    _ = env.remove("DYLD_LIBRARY_PATH");
+    _ = env.swapRemove("DYLD_LIBRARY_PATH");
     try env.put("LD_PRELOAD", "");
     try std.testing.expect(cachedLocations(&ctx, &.{"/toolchain/bin/rustc"}) == null);
 }

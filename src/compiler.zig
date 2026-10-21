@@ -15,6 +15,7 @@ const Plan = struct {
     configuration: ?cache.Dependency = null,
     producer: bool = false,
     producer_dylib: bool = false,
+    executable: bool = false,
     thin_lto: bool = false,
     static_companion: bool = false,
     linked_output: ?[]const u8 = null,
@@ -24,6 +25,19 @@ const Module = struct { name: []const u8, source: []const u8 };
 
 fn eq(a: []const u8, b: []const u8) bool {
     return std.mem.eql(u8, a, b);
+}
+
+fn rustLinkedSuffix(producer_dylib: bool) []const u8 {
+    if (!producer_dylib) return ".rlib";
+    return switch (builtin.os.tag) {
+        .macos => ".dylib",
+        .windows => ".dll",
+        else => ".so",
+    };
+}
+
+fn observerProducerEligible(debug_info: []const u8, producer_unsafe_codegen: bool, target: ?[]const u8) bool {
+    return builtin.os.tag == .macos and eq(debug_info, "0") and !producer_unsafe_codegen and target == null;
 }
 
 fn absolute(ctx: *cache.Context, path: []const u8) ![]const u8 {
@@ -205,20 +219,24 @@ fn rustPlan(ctx: *cache.Context, argv: []const []const u8) !Plan {
     const ct = crate_type orelse return error.NoCrateType;
     const producer_dylib = eq(ct, "proc-macro") and eq(ctx.env.get("NANOCOMPILE_PROC_MACRO_PRODUCERS") orelse "", "1");
     const executable = eq(ct, "bin") and eq(ctx.env.get("NANOCOMPILE_EXECUTABLE_PRODUCERS") orelse "", "1");
-    const producer = producer_dylib or executable;
+    // Darwin observer stays for the measured zero-debug macOS path. Linux (and
+    // debug cargo check/dev builds) cache the same .so/.dylib/bin through the
+    // ordinary rustc-dep-info store: reported inputs, no linker observer.
+    const producer = (producer_dylib or executable) and observerProducerEligible(debug_info, producer_unsafe_codegen, target);
     // Only the measured native-host, zero-debug, non-LTO archive pair is a
     // trial. Its full compiler/stdlib resource identity is required below.
     if (static_companion and (builtin.os.tag != .macos or builtin.cpu.arch != .aarch64 or
-        producer or target != null or !eq(debug_info, "0") or producer_unsafe_codegen or thin_lto or
+        producer or producer_dylib or executable or target != null or !eq(debug_info, "0") or producer_unsafe_codegen or thin_lto or
         prefer_dynamic or deferred_framework or !eq(emit orelse "", "dep-info,link")))
         return error.UnsupportedStaticlibConfiguration;
-    if (!producer and !eq(ct, "rlib") and !eq(ct, "lib")) return error.UnsupportedCrateType;
+    if (!producer_dylib and !executable and !eq(ct, "rlib") and !eq(ct, "lib")) return error.UnsupportedCrateType;
     // A plain rlib registers this exact framework name for final linking; it
     // does not resolve or bundle the framework. Producer/final links still
     // require their existing complete linker-input discovery and passthrough.
-    if (deferred_framework and (producer or builtin.os.tag != .macos or target != null)) return error.UnsupportedNativeLibrary;
+    if (deferred_framework and (producer or producer_dylib or executable or builtin.os.tag != .macos or target != null)) return error.UnsupportedNativeLibrary;
     if (!producer_dylib and builtin_macro) return error.UntrackedExtern;
-    if (producer_dylib and thin_lto) return error.UnsupportedProducerConfiguration;
+    if (producer and producer_dylib and thin_lto) return error.UnsupportedProducerConfiguration;
+    if ((producer_dylib or executable) and target != null) return error.UnsupportedProducerConfiguration;
     if (producer and (builtin.os.tag != .macos or !eq(debug_info, "0") or producer_unsafe_codegen or target != null)) return error.UnsupportedProducerConfiguration;
     if (static_libraries.items.len != 0 and target != null) return error.UnsupportedNativeTarget;
     // Plain static libraries bundle archive members into the rlib. Require a
@@ -268,7 +286,7 @@ fn rustPlan(ctx: *cache.Context, argv: []const []const u8) !Plan {
         else if (eq(e, "metadata"))
             try std.fmt.allocPrint(ctx.a, "lib{s}{s}.rmeta", .{ crate, suffix })
         else if (eq(e, "link"))
-            if (executable) try std.fmt.allocPrint(ctx.a, "{s}{s}", .{ crate, suffix }) else try std.fmt.allocPrint(ctx.a, "lib{s}{s}{s}", .{ crate, suffix, if (producer_dylib) ".dylib" else ".rlib" })
+            if (executable) try std.fmt.allocPrint(ctx.a, "{s}{s}", .{ crate, suffix }) else try std.fmt.allocPrint(ctx.a, "lib{s}{s}{s}", .{ crate, suffix, rustLinkedSuffix(producer_dylib) })
         else
             return error.UnsupportedEmission;
         const path = try absolute(ctx, try std.fs.path.join(ctx.a, &.{ dir, filename }));
@@ -281,7 +299,7 @@ fn rustPlan(ctx: *cache.Context, argv: []const []const u8) !Plan {
     }
     if (dep_info == null) return error.NoDependencyInfo;
     if (producer and (std.mem.indexOfAny(u8, dir, "\r\n\t\"\\") != null or std.mem.indexOfAny(u8, ctx.root, "\r\n\t\"\\") != null or std.mem.indexOf(u8, dir, "//") != null)) return error.UnsupportedProducerPath;
-    return .{ .source = src, .outputs = outputs.items, .dependencies = inputs.items, .dep_info = dep_info, .library_dirs = search_dirs.items, .native_dirs = native_dirs.items, .configuration = configuration, .producer = producer, .producer_dylib = producer_dylib, .thin_lto = thin_lto, .static_companion = static_companion, .linked_output = linked_output, .out_dir = dir };
+    return .{ .source = src, .outputs = outputs.items, .dependencies = inputs.items, .dep_info = dep_info, .library_dirs = search_dirs.items, .native_dirs = native_dirs.items, .configuration = configuration, .producer = producer, .producer_dylib = producer_dylib, .executable = executable, .thin_lto = thin_lto, .static_companion = static_companion, .linked_output = linked_output, .out_dir = dir };
 }
 
 fn zigPlan(ctx: *cache.Context, argv: []const []const u8) !Plan {
@@ -527,7 +545,7 @@ fn hiddenNativeLink(bytes: []const u8) bool {
     return false;
 }
 
-const PathPrefix = struct { token: []const u8, path: []const u8 };
+const PathPrefix = cache.PathRewrite;
 
 fn skipEnvName(name: []const u8) bool {
     if (std.mem.startsWith(u8, name, "NANOCOMPILE_")) return true;
@@ -551,28 +569,36 @@ pub fn isRegistryOrGitCrate(ctx: *cache.Context) bool {
     return std.mem.startsWith(u8, manifest, registry) or std.mem.startsWith(u8, manifest, git);
 }
 
-fn argvHasIncremental(argv: []const []const u8) bool {
-    var i: usize = 0;
-    while (i < argv.len) : (i += 1) {
-        const arg = argv[i];
-        if (eq(arg, "-C") and i + 1 < argv.len) {
-            if (std.mem.startsWith(u8, argv[i + 1], "incremental")) return true;
-        }
-        if (std.mem.startsWith(u8, arg, "-Cincremental") or std.mem.startsWith(u8, arg, "-C incremental")) return true;
-    }
-    return false;
+fn shouldCacheDepsOnly(ctx: *cache.Context) bool {
+    // Opt-in only. CARGO_INCREMENTAL=1 still caches workspace rlibs so
+    // emptied-target / sibling worktrees can restore them; rustc incremental
+    // owns the miss path.
+    return eq(ctx.env.get("NANOCOMPILE_CACHE_DEPS_ONLY") orelse "", "1");
 }
 
-fn shouldCacheDepsOnly(ctx: *cache.Context, argv: []const []const u8) bool {
-    if (eq(ctx.env.get("NANOCOMPILE_CACHE_DEPS_ONLY") orelse "", "1")) return true;
-    if (eq(ctx.env.get("CARGO_INCREMENTAL") orelse "", "1")) return true;
-    return argvHasIncremental(argv);
+fn argvCrateType(argv: []const []const u8) ?[]const u8 {
+    var i: usize = 0;
+    while (i < argv.len) : (i += 1) {
+        if (eq(argv[i], "--crate-type") and i + 1 < argv.len) return argv[i + 1];
+        if (std.mem.startsWith(u8, argv[i], "--crate-type=")) return argv[i]["--crate-type=".len..];
+    }
+    return null;
+}
+
+fn cacheableProducerCrate(ctx: *cache.Context, argv: []const []const u8) bool {
+    const ct = argvCrateType(argv) orelse return false;
+    if (eq(ct, "proc-macro") and eq(ctx.env.get("NANOCOMPILE_PROC_MACRO_PRODUCERS") orelse "", "1")) return true;
+    if (eq(ct, "bin") and eq(ctx.env.get("NANOCOMPILE_EXECUTABLE_PRODUCERS") orelse "", "1")) return true;
+    return false;
 }
 
 fn bypassWorkspaceForIncremental(ctx: *cache.Context, argv: []const []const u8) bool {
     if (ctx.env.get("CARGO_MANIFEST_DIR") == null) return false;
     if (isRegistryOrGitCrate(ctx)) return false;
-    return shouldCacheDepsOnly(ctx, argv);
+    // Workspace macros/bins are restorable artifacts. Leave ordinary workspace
+    // rlibs to rustc incremental; emptied-target still needs the .so/bin.
+    if (cacheableProducerCrate(ctx, argv)) return false;
+    return shouldCacheDepsOnly(ctx);
 }
 
 fn inferTargetDir(argv: []const []const u8) ?[]const u8 {
@@ -591,12 +617,20 @@ fn inferTargetDir(argv: []const []const u8) ?[]const u8 {
     return null;
 }
 
+fn addTargetPrefix(ctx: *cache.Context, list: *std.ArrayList(PathPrefix), dir: []const u8) !void {
+    if (dir.len == 0) return;
+    const copied = try ctx.a.dupe(u8, dir);
+    try list.append(ctx.a, .{ .token = "$NANO_TARGET", .path = copied });
+    const real = Dir.cwd().realPathFileAlloc(ctx.io, dir, ctx.a) catch return;
+    if (!eq(real, copied)) try list.append(ctx.a, .{ .token = "$NANO_TARGET", .path = real });
+}
+
 fn pathPrefixes(ctx: *cache.Context, argv: []const []const u8) ![]const PathPrefix {
     var list: std.ArrayList(PathPrefix) = .empty;
     if (ctx.env.get("CARGO_TARGET_DIR")) |dir| {
-        if (dir.len > 0) try list.append(ctx.a, .{ .token = "$NANO_TARGET", .path = try ctx.a.dupe(u8, dir) });
+        try addTargetPrefix(ctx, &list, dir);
     } else if (inferTargetDir(argv)) |dir| {
-        try list.append(ctx.a, .{ .token = "$NANO_TARGET", .path = try ctx.a.dupe(u8, dir) });
+        try addTargetPrefix(ctx, &list, dir);
     }
     if (ctx.env.get("OUT_DIR")) |dir| if (dir.len > 0)
         try list.append(ctx.a, .{ .token = "$NANO_OUT", .path = try ctx.a.dupe(u8, dir) });
@@ -849,6 +883,7 @@ pub fn execute(ctx: *cache.Context, kind: Kind, argv: []const []const u8) !u8 {
         return bypass(ctx, argv, "bypass: workspace crate left to incremental rustc");
     const plan = (if (kind == .rust) rustPlan(ctx, argv) else zigPlan(ctx, argv)) catch |err|
         return bypass(ctx, argv, try std.fmt.allocPrint(ctx.a, "bypass: {s}", .{@errorName(err)}));
+    ctx.rewrites = try pathPrefixes(ctx, argv);
     ctx.profileEnd("compiler.plan", phase);
     phase = ctx.profileStart();
     if (plan.producer) return executeProducer(ctx, plan, argv);
@@ -996,7 +1031,7 @@ fn save(ctx: *cache.Context, key: []const u8, plan: Plan, argv: []const []const 
         // Dependencies discovered after rustc finishes must predate its start.
         // ctime also catches writes followed by restoring the old mtime.
         if (st.mtime.nanoseconds >= started or st.ctime.nanoseconds >= started) return error.InputChangedDuringCompilation;
-        if (!plan.producer and plan.dep_info != null and std.mem.endsWith(u8, dep, ".rs") and hiddenNativeLink(try ctx.read(dep))) hidden_native = true;
+        if (!plan.producer and !plan.producer_dylib and !plan.executable and plan.dep_info != null and std.mem.endsWith(u8, dep, ".rs") and hiddenNativeLink(try ctx.read(dep))) hidden_native = true;
         const digest = if (validated.get(dep)) |checked| checked else try ctx.checkedDigest(dep);
         if (!cache.sameFileState(st, digest.state)) return error.InputChangedDuringCompilation;
         try validated.put(ctx.a, dep, digest);
@@ -1011,8 +1046,17 @@ fn save(ctx: *cache.Context, key: []const u8, plan: Plan, argv: []const []const 
     }
     ctx.profileEnd("save.source_discovery_guards", phase);
     phase = ctx.profileStart();
-    if (!plan.producer and plan.dep_info != null and (directories.len != 0 or hidden_native or plan.static_companion))
-        try rust_dependencies.collect(ctx, argv, plan.outputs, directories, started, &records, !plan.static_companion, &validated, hidden_native);
+    if ((plan.producer_dylib or plan.executable) and hidden_native) return error.UnsupportedProducerNative;
+    if (!plan.producer and !plan.producer_dylib and !plan.executable and plan.dep_info != null and (directories.len != 0 or hidden_native or plan.static_companion))
+        rust_dependencies.collect(ctx, argv, plan.outputs, directories, started, &records, !plan.static_companion, &validated, hidden_native) catch |err| switch (err) {
+            error.UnresolvedRustDependency, error.UnsupportedRustMetadata => {
+                // Incremental cargo check writes rmeta under build/*/out and
+                // can omit the usual -L dependency graph. dep-info + externs
+                // are already in records; store rather than drop the unit.
+                ctx.trace(try std.fmt.allocPrint(ctx.a, "graph skipped: {s}", .{@errorName(err)}));
+            },
+            else => return err,
+        };
     if (plan.producer) {
         for (plan.dependencies) |path| if (std.mem.endsWith(u8, path, ".rlib") or std.mem.endsWith(u8, path, ".rmeta")) {
             try rust_dependencies.collect(ctx, argv, &.{path}, directories, started, &records, false, &validated, false);
@@ -1071,7 +1115,7 @@ test "path-normalized keys treat sibling target directories as the same command"
     try std.testing.expectEqualStrings(try normalizeCacheText(&ctx, argv[2], prefixes), try normalizeCacheText(&ctx, sibling[2], sibling_prefixes));
 }
 
-test "registry crates stay cacheable while workspace crates yield to incremental" {
+test "workspace crates stay cacheable unless deps-only is explicit" {
     var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
     defer arena.deinit();
     const a = arena.allocator();
@@ -1085,9 +1129,60 @@ test "registry crates stay cacheable while workspace crates yield to incremental
     try env.put("CARGO_MANIFEST_DIR", "/work/project");
     ctx.cwd = "/work/project";
     try std.testing.expect(!isRegistryOrGitCrate(&ctx));
-    try std.testing.expect(bypassWorkspaceForIncremental(&ctx, &.{"rustc"}));
-    try env.put("CARGO_INCREMENTAL", "0");
     try std.testing.expect(!bypassWorkspaceForIncremental(&ctx, &.{"rustc"}));
     try env.put("NANOCOMPILE_CACHE_DEPS_ONLY", "1");
     try std.testing.expect(bypassWorkspaceForIncremental(&ctx, &.{"rustc"}));
+    try env.put("NANOCOMPILE_PROC_MACRO_PRODUCERS", "1");
+    try std.testing.expect(!bypassWorkspaceForIncremental(&ctx, &.{ "rustc", "--crate-type", "proc-macro" }));
+    try std.testing.expect(bypassWorkspaceForIncremental(&ctx, &.{ "rustc", "--crate-type", "lib" }));
+    try env.put("NANOCOMPILE_EXECUTABLE_PRODUCERS", "1");
+    try std.testing.expect(!bypassWorkspaceForIncremental(&ctx, &.{ "rustc", "--crate-type", "bin" }));
+}
+
+test "reported proc-macro artifacts are eligible without the Darwin observer" {
+    var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer arena.deinit();
+    const a = arena.allocator();
+    var env = std.process.Environ.Map.init(a);
+    try env.put("NANOCOMPILE_PROC_MACRO_PRODUCERS", "1");
+    var ctx: cache.Context = .{ .a = a, .io = std.testing.io, .env = &env, .root = "/cache", .cwd = "/work" };
+    const argv = [_][]const u8{
+        "rustc", "lib.rs", "--crate-name", "foo", "--crate-type", "proc-macro",
+        "--emit", "dep-info,link", "--out-dir", "/tmp/out", "--extern", "proc_macro",
+        "-C", "debuginfo=2", "-C", "extra-filename=-abc",
+    };
+    const plan = try rustPlan(&ctx, &argv);
+    try std.testing.expect(!plan.producer);
+    try std.testing.expect(plan.producer_dylib);
+    try std.testing.expectEqualStrings(if (builtin.os.tag == .macos) ".dylib" else if (builtin.os.tag == .windows) ".dll" else ".so", rustLinkedSuffix(true));
+    var found_so = false;
+    for (plan.outputs) |path| {
+        if (std.mem.endsWith(u8, path, rustLinkedSuffix(true))) found_so = true;
+    }
+    try std.testing.expect(found_so);
+    try env.put("NANOCOMPILE_PROC_MACRO_PRODUCERS", "0");
+    try std.testing.expectError(error.UntrackedExtern, rustPlan(&ctx, &argv));
+}
+
+test "reported executable artifacts are eligible on the host" {
+    var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer arena.deinit();
+    const a = arena.allocator();
+    var env = std.process.Environ.Map.init(a);
+    try env.put("NANOCOMPILE_EXECUTABLE_PRODUCERS", "1");
+    var ctx: cache.Context = .{ .a = a, .io = std.testing.io, .env = &env, .root = "/cache", .cwd = "/work" };
+    const argv = [_][]const u8{
+        "rustc", "main.rs", "--crate-name", "app", "--crate-type", "bin",
+        "--emit", "dep-info,link", "--out-dir", "/tmp/out",
+        "-C", "debuginfo=2", "-C", "extra-filename=-abc",
+    };
+    const plan = try rustPlan(&ctx, &argv);
+    try std.testing.expect(!plan.producer);
+    try std.testing.expect(!plan.producer_dylib);
+    try std.testing.expect(plan.executable);
+    var found_bin = false;
+    for (plan.outputs) |path| {
+        if (std.mem.endsWith(u8, path, "app-abc")) found_bin = true;
+    }
+    try std.testing.expect(found_bin);
 }
