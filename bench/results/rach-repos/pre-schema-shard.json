@@ -1,0 +1,2337 @@
+{
+  "schema": 1,
+  "kind": "map_elites_shard",
+  "id": "rach-repos",
+  "sample": "rach-repos",
+  "schema_source": "specified-fallback",
+  "schema_ref": "Rach-specified fallback (canonical not on branch yet)",
+  "axes": {
+    "size_bucket": [
+      "small",
+      "medium",
+      "large"
+    ],
+    "edit_type": [
+      "fn_body",
+      "signature_depended",
+      "noop",
+      "cold"
+    ]
+  },
+  "fitness": {
+    "metric": "median_wall_ms",
+    "sense": "min",
+    "hard_gate": "broken edit must fail cargo check and cargo test under real rustc"
+  },
+  "created_at": "2026-10-21T03:18:32.603194+00:00",
+  "updated_at": "2026-10-21T03:26:10.450601+00:00",
+  "host": {
+    "nproc": 4,
+    "uname": "Linux cursor 6.12.94+ #1 SMP PREEMPT_DYNAMIC Mon Oct 19 22:12:29 UTC 2026 x86_64 x86_64 x86_64 GNU/Linux",
+    "rustc": "rustc 1.97.1 (8bab26f4f 2026-07-14)",
+    "nightly": "rustc 1.101.0-nightly (19833af72 2026-10-20)",
+    "mold": "mold 3.0.0 (8de38c35a2df16a25f7ff87ac3ad07156a925beb; compatible with GNU ld)",
+    "sccache": "sccache 0.18.0",
+    "nanocompile": true
+  },
+  "projects": {
+    "bhumi": {
+      "commit": "355545d6b8ec2e35b9976ae8e2977c76fa303f1d",
+      "size_bucket": "small",
+      "package": "bhumi",
+      "loc": 1323,
+      "notes": "Published LLM client (cdylib + pyo3).",
+      "depended_note": "openai::OpenAIResponse::get_text is called from src/lib.rs"
+    },
+    "emergentDB": {
+      "commit": "1205db48e7bdee8db49fa3c705e209dd1f4efde0",
+      "size_bucket": "medium",
+      "package": "grep-core",
+      "loc": 19734,
+      "notes": "vector-core needs rocksdb; grep-core is the Linux-buildable crate.",
+      "depended_note": "compress_gzip is used by HostedIndexBuilder inside grep-core"
+    },
+    "codegraff2": {
+      "commit": "e5610ede9cf38ac3bd71d5f984fa8936f21539d3",
+      "size_bucket": "large",
+      "package": "forge_domain",
+      "loc": 164315,
+      "notes": "Workspace coding agent; default-members = forge_domain.",
+      "depended_note": "json_repair lives in forge_json_repair, a workspace dep of forge_domain"
+    }
+  },
+  "cells": {
+    "medium|fn_body": {
+      "size_bucket": "medium",
+      "edit_type": "fn_body",
+      "elite": {
+        "genome": {
+          "command": "graph",
+          "wrapper": "nanocompile",
+          "incremental": false,
+          "linker": null,
+          "codegen_backend": "llvm",
+          "codegen_units": null,
+          "debuginfo": null,
+          "jobs": 4,
+          "toolchain": "stable"
+        },
+        "fitness_ms": 5.61,
+        "spread_ms": 0.63,
+        "disk_bytes": 664400888,
+        "correctness": true,
+        "sample": "emergentDB",
+        "commit": "1205db48e7bdee8db49fa3c705e209dd1f4efde0",
+        "timestamp": "2026-10-21T03:22:51.747430+00:00",
+        "label": "validate-graph",
+        "min_ms": 5.06,
+        "max_ms": 6.54
+      },
+      "history": [
+        {
+          "ok": true,
+          "label": "baseline",
+          "sample": "emergentDB",
+          "edit_type": "fn_body",
+          "fitness_ms": 338.81,
+          "spread_ms": 29.13,
+          "min_ms": 327.6,
+          "max_ms": 409.35,
+          "mean_ms": 353.43,
+          "samples_ms": [
+            338.81,
+            327.6,
+            338.17,
+            353.23,
+            409.35
+          ],
+          "disk_bytes": 157542603,
+          "genome": {
+            "command": "check",
+            "wrapper": null,
+            "incremental": true,
+            "linker": null,
+            "codegen_backend": "llvm",
+            "codegen_units": null,
+            "debuginfo": null,
+            "jobs": 4,
+            "toolchain": "stable"
+          },
+          "timestamp": "2026-10-21T03:18:53.260135+00:00",
+          "commit": "1205db48e7bdee8db49fa3c705e209dd1f4efde0",
+          "correctness": true,
+          "correctness_detail": {
+            "agree_fail": true,
+            "validate_refuses_cranelift": true
+          },
+          "kept": true,
+          "note": "seed"
+        },
+        {
+          "ok": true,
+          "label": "plain-noinc",
+          "sample": "emergentDB",
+          "edit_type": "fn_body",
+          "fitness_ms": 769.72,
+          "spread_ms": 26.99,
+          "min_ms": 753.86,
+          "max_ms": 829.22,
+          "mean_ms": 784.02,
+          "samples_ms": [
+            753.86,
+            768.06,
+            769.72,
+            829.22,
+            799.25
+          ],
+          "disk_bytes": 131622631,
+          "genome": {
+            "command": "check",
+            "wrapper": null,
+            "incremental": false,
+            "linker": null,
+            "codegen_backend": "llvm",
+            "codegen_units": null,
+            "debuginfo": null,
+            "jobs": 4,
+            "toolchain": "stable"
+          },
+          "timestamp": "2026-10-21T03:19:03.587871+00:00",
+          "commit": "1205db48e7bdee8db49fa3c705e209dd1f4efde0",
+          "correctness": true,
+          "correctness_detail": {
+            "agree_fail": true,
+            "validate_refuses_cranelift": true
+          },
+          "delta_pct": -127.18,
+          "noise_pct": 8.6,
+          "kept": false,
+          "note": "reject"
+        },
+        {
+          "ok": true,
+          "label": "nanocompile-wrapper",
+          "sample": "emergentDB",
+          "edit_type": "fn_body",
+          "fitness_ms": 817.51,
+          "spread_ms": 27.39,
+          "min_ms": 766.69,
+          "max_ms": 848.09,
+          "mean_ms": 814.97,
+          "samples_ms": [
+            817.51,
+            810.37,
+            848.09,
+            766.69,
+            832.2
+          ],
+          "disk_bytes": 131623977,
+          "genome": {
+            "command": "check",
+            "wrapper": "nanocompile",
+            "incremental": false,
+            "linker": null,
+            "codegen_backend": "llvm",
+            "codegen_units": null,
+            "debuginfo": null,
+            "jobs": 4,
+            "toolchain": "stable"
+          },
+          "timestamp": "2026-10-21T03:19:14.561554+00:00",
+          "commit": "1205db48e7bdee8db49fa3c705e209dd1f4efde0",
+          "correctness": true,
+          "correctness_detail": {
+            "agree_fail": true,
+            "validate_refuses_cranelift": true
+          },
+          "delta_pct": -141.29,
+          "noise_pct": 8.6,
+          "kept": false,
+          "note": "reject"
+        },
+        {
+          "ok": true,
+          "label": "sccache",
+          "sample": "emergentDB",
+          "edit_type": "fn_body",
+          "fitness_ms": 244.05,
+          "spread_ms": 6.75,
+          "min_ms": 233.06,
+          "max_ms": 253.26,
+          "mean_ms": 242.91,
+          "samples_ms": [
+            253.26,
+            238.83,
+            233.06,
+            245.35,
+            244.05
+          ],
+          "disk_bytes": 131621960,
+          "genome": {
+            "command": "check",
+            "wrapper": "sccache",
+            "incremental": false,
+            "linker": null,
+            "codegen_backend": "llvm",
+            "codegen_units": null,
+            "debuginfo": null,
+            "jobs": 4,
+            "toolchain": "stable"
+          },
+          "timestamp": "2026-10-21T03:19:23.515476+00:00",
+          "commit": "1205db48e7bdee8db49fa3c705e209dd1f4efde0",
+          "correctness": true,
+          "correctness_detail": {
+            "agree_fail": true,
+            "validate_refuses_cranelift": true
+          },
+          "delta_pct": 27.97,
+          "noise_pct": 8.6,
+          "kept": true,
+          "note": "replace"
+        },
+        {
+          "ok": true,
+          "label": "fast-check",
+          "sample": "emergentDB",
+          "edit_type": "fn_body",
+          "fitness_ms": 841.82,
+          "spread_ms": 23.14,
+          "min_ms": 798.36,
+          "max_ms": 868.7,
+          "mean_ms": 836.17,
+          "samples_ms": [
+            844.86,
+            798.36,
+            868.7,
+            841.82,
+            827.09
+          ],
+          "disk_bytes": 131622465,
+          "genome": {
+            "command": "check",
+            "wrapper": "nanocompile",
+            "incremental": false,
+            "linker": null,
+            "codegen_backend": "llvm",
+            "codegen_units": null,
+            "debuginfo": null,
+            "jobs": 4,
+            "toolchain": "stable"
+          },
+          "timestamp": "2026-10-21T03:19:34.742168+00:00",
+          "commit": "1205db48e7bdee8db49fa3c705e209dd1f4efde0",
+          "correctness": true,
+          "correctness_detail": {
+            "agree_fail": true,
+            "validate_refuses_cranelift": true
+          },
+          "delta_pct": -244.94,
+          "noise_pct": 3.0,
+          "kept": false,
+          "note": "reject"
+        },
+        {
+          "ok": true,
+          "label": "disk-hygiene",
+          "sample": "emergentDB",
+          "edit_type": "fn_body",
+          "fitness_ms": 313.93,
+          "spread_ms": 4.15,
+          "min_ms": 308.39,
+          "max_ms": 320.23,
+          "mean_ms": 314.57,
+          "samples_ms": [
+            317.89,
+            312.43,
+            313.93,
+            308.39,
+            320.23
+          ],
+          "disk_bytes": 166673641,
+          "genome": {
+            "command": "check",
+            "wrapper": null,
+            "incremental": true,
+            "linker": null,
+            "codegen_backend": "llvm",
+            "codegen_units": null,
+            "debuginfo": "line-tables-only",
+            "jobs": 4,
+            "toolchain": "stable"
+          },
+          "timestamp": "2026-10-21T03:19:42.948011+00:00",
+          "commit": "1205db48e7bdee8db49fa3c705e209dd1f4efde0",
+          "correctness": true,
+          "correctness_detail": {
+            "agree_fail": true,
+            "validate_refuses_cranelift": true
+          },
+          "delta_pct": -28.63,
+          "noise_pct": 3.0,
+          "kept": false,
+          "note": "reject"
+        },
+        {
+          "ok": true,
+          "label": "crate-shape-256",
+          "sample": "emergentDB",
+          "edit_type": "fn_body",
+          "fitness_ms": 343.05,
+          "spread_ms": 28.16,
+          "min_ms": 318.64,
+          "max_ms": 397.77,
+          "mean_ms": 347.33,
+          "samples_ms": [
+            397.77,
+            353.2,
+            343.05,
+            324.01,
+            318.64
+          ],
+          "disk_bytes": 158214416,
+          "genome": {
+            "command": "check",
+            "wrapper": null,
+            "incremental": true,
+            "linker": null,
+            "codegen_backend": "llvm",
+            "codegen_units": 256,
+            "debuginfo": null,
+            "jobs": 4,
+            "toolchain": "stable"
+          },
+          "timestamp": "2026-10-21T03:19:50.927277+00:00",
+          "commit": "1205db48e7bdee8db49fa3c705e209dd1f4efde0",
+          "correctness": true,
+          "correctness_detail": {
+            "agree_fail": true,
+            "validate_refuses_cranelift": true
+          },
+          "delta_pct": -40.57,
+          "noise_pct": 3.0,
+          "kept": false,
+          "note": "reject"
+        },
+        {
+          "ok": true,
+          "label": "crate-shape-16",
+          "sample": "emergentDB",
+          "edit_type": "fn_body",
+          "fitness_ms": 319.9,
+          "spread_ms": 16.89,
+          "min_ms": 317.01,
+          "max_ms": 361.02,
+          "mean_ms": 327.33,
+          "samples_ms": [
+            361.02,
+            317.01,
+            318.27,
+            319.9,
+            320.44
+          ],
+          "disk_bytes": 157721835,
+          "genome": {
+            "command": "check",
+            "wrapper": null,
+            "incremental": true,
+            "linker": null,
+            "codegen_backend": "llvm",
+            "codegen_units": 16,
+            "debuginfo": null,
+            "jobs": 4,
+            "toolchain": "stable"
+          },
+          "timestamp": "2026-10-21T03:22:19.590778+00:00",
+          "commit": "1205db48e7bdee8db49fa3c705e209dd1f4efde0",
+          "phase": "seed",
+          "correctness": true,
+          "correctness_detail": {
+            "agree_fail": true,
+            "validate_refuses_cranelift": true
+          },
+          "delta_pct": -31.08,
+          "noise_pct": 3.0,
+          "kept": false,
+          "note": "reject"
+        },
+        {
+          "ok": false,
+          "error": "      \n\nerror: could not compile `crossbeam-utils` (build script) due to 1 previous error\nerror: linking with `cc` failed: exit status: 1\n  |\n  = note:  \"cc\" \"-m64\" \"/tmp/rach-targets/mapelites/grep-core/mold-fn_body/debug/build/libc-44d9ea0a1a2e1cd7/rustcXrEec3/symbols.o\" \"<3 object files omitted>\" \"-Wl,--as-needed\" \"-Wl,-Bstatic\" \"<sysroot>/lib/rustlib/x86_64-unknown-linux-gnu/lib/{libstd-*,libpanic_unwind-*,libobject-*,libmemchr-*,libaddr2line-*,libgimli-*,libcfg_if-*,librustc_demangle-*,libstd_detect-*,libhashbrown-*,librustc_std_workspace_alloc-*,libminiz_oxide-*,libadler2-*,libunwind-*,liblibc-*,librustc_std_workspace_core-*,liballoc-*,libcore-*,libcompiler_builtins-*}.rlib\" \"-Wl,-Bdynamic\" \"-lgcc_s\" \"-lutil\" \"-lrt\" \"-lpthread\" \"-lm\" \"-ldl\" \"-lc\" \"-L\" \"/tmp/rach-targets/mapelites/grep-core/mold-fn_body/debug/build/libc-44d9ea0a1a2e1cd7/rustcXrEec3/raw-dylibs\" \"-B<sysroot>/lib/rustlib/x86_64-unknown-linux-gnu/bin/gcc-ld\" \"-fuse-ld=lld\" \"-Wl,--eh-frame-hdr\" \"-Wl,-z,noexecstack\" \"-L\" \"<sysroot>/lib/rustlib/x86_64-unknown-linux-gnu/lib\" \"-o\" \"/tmp/rach-targets/mapelites/grep-core/mold-fn_body/debug/build/libc-44d9ea0a1a2e1cd7/build_script_build-44d9ea0a1a2e1cd7\" \"-Wl,--gc-sections\" \"-pie\" \"-Wl,-z,relro,-z,now\" \"-nodefaultlibs\" \"-fuse-ld=mold\"\n  = note: some arguments are omitted. use `--verbose` to show all linker arguments\n  = note: cc: error: invalid linker name in argument '-fuse-ld=mold'\n          \n\nerror: could not compile `libc` (build script) due to 1 previous error\n",
+          "label": "mold",
+          "sample": "emergentDB",
+          "edit_type": "fn_body",
+          "returncode": 101,
+          "fitness_ms": null,
+          "timestamp": "2026-10-21T03:22:19.856460+00:00",
+          "phase": "seed",
+          "correctness": true,
+          "correctness_detail": {
+            "agree_fail": true,
+            "validate_refuses_cranelift": true
+          },
+          "kept": false,
+          "note": "failed eval or correctness gate"
+        },
+        {
+          "ok": true,
+          "label": "lld",
+          "sample": "emergentDB",
+          "edit_type": "fn_body",
+          "fitness_ms": 485.73,
+          "spread_ms": 14.63,
+          "min_ms": 476.37,
+          "max_ms": 514.84,
+          "mean_ms": 493.57,
+          "samples_ms": [
+            506.72,
+            514.84,
+            476.37,
+            484.18,
+            485.73
+          ],
+          "disk_bytes": 362085792,
+          "genome": {
+            "command": "build",
+            "wrapper": null,
+            "incremental": true,
+            "linker": "lld",
+            "codegen_backend": "llvm",
+            "codegen_units": null,
+            "debuginfo": null,
+            "jobs": 4,
+            "toolchain": "stable"
+          },
+          "timestamp": "2026-10-21T03:22:31.493964+00:00",
+          "commit": "1205db48e7bdee8db49fa3c705e209dd1f4efde0",
+          "phase": "seed",
+          "correctness": true,
+          "correctness_detail": {
+            "agree_fail": true,
+            "validate_refuses_cranelift": true
+          },
+          "delta_pct": -99.03,
+          "noise_pct": 3.0,
+          "kept": false,
+          "note": "reject"
+        },
+        {
+          "ok": false,
+          "error": " [\"serde\"] }\n   | ^^^^^^\n   |\n   = note: `cargo::unused_workspace_dependencies` is set to `warn` by default\nhelp: consider removing the workspace dependency `chrono`\nwarning: unused field `rust-version` in `workspace.package`\n  --> Cargo.toml:17:1\n   |\n17 | rust-version = \"1.85\"\n   | ^^^^^^^^^^^^\n   |\n   = note: `cargo::unused_workspace_package_fields` is set to `warn` by default\nhelp: consider removing the field `workspace.package.rust-version`\nwarning: unused field `authors` in `workspace.package`\n  --> Cargo.toml:19:1\n   |\n19 | authors = [\"EmergentDB Team\"]\n   | ^^^^^^^\n   |\nhelp: consider removing the field `workspace.package.authors`\nwarning: unused field `description` in `workspace.package`\n  --> Cargo.toml:20:1\n   |\n20 | description = \"EmergentDB - A self-optimizing vector database using MAP-Elites quality-diversity\"\n   | ^^^^^^^^^^^\n   |\nhelp: consider removing the field `workspace.package.description`\nerror: failed to run `rustc` to learn about target-specific information\n\nCaused by:\n  process didn't exit successfully: `/usr/local/rustup/toolchains/nightly-x86_64-unknown-linux-gnu/bin/rustc - --crate-name ___ --print=file-names -Zcodegen-backend --crate-type bin --crate-type rlib --crate-type dylib --crate-type cdylib --crate-type staticlib --crate-type proc-macro --print=sysroot --print=split-debuginfo --print=crate-name --print=cfg -Wwarnings` (exit status: 1)\n  --- stderr\n  error: unstable option `codegen-backend` requires a string (`-Z codegen-backend=<value>`)\n\n",
+          "label": "cranelift-dev",
+          "sample": "emergentDB",
+          "edit_type": "fn_body",
+          "returncode": 101,
+          "fitness_ms": null,
+          "timestamp": "2026-10-21T03:22:31.705984+00:00",
+          "phase": "seed",
+          "correctness": true,
+          "correctness_detail": {
+            "agree_fail": true,
+            "validate_refuses_cranelift": true
+          },
+          "kept": false,
+          "note": "failed eval or correctness gate"
+        },
+        {
+          "ok": true,
+          "label": "validate-graph",
+          "sample": "emergentDB",
+          "edit_type": "fn_body",
+          "fitness_ms": 5.61,
+          "spread_ms": 0.63,
+          "min_ms": 5.06,
+          "max_ms": 6.54,
+          "mean_ms": 5.75,
+          "samples_ms": [
+            6.44,
+            5.11,
+            5.06,
+            5.61,
+            6.54
+          ],
+          "disk_bytes": 664400888,
+          "genome": {
+            "command": "graph",
+            "wrapper": "nanocompile",
+            "incremental": false,
+            "linker": null,
+            "codegen_backend": "llvm",
+            "codegen_units": null,
+            "debuginfo": null,
+            "jobs": 4,
+            "toolchain": "stable"
+          },
+          "timestamp": "2026-10-21T03:22:51.747430+00:00",
+          "commit": "1205db48e7bdee8db49fa3c705e209dd1f4efde0",
+          "phase": "seed",
+          "correctness": true,
+          "correctness_detail": {
+            "agree_fail": true,
+            "validate_refuses_cranelift": true
+          },
+          "delta_pct": 97.7,
+          "noise_pct": 3.0,
+          "kept": true,
+          "note": "replace"
+        },
+        {
+          "ok": true,
+          "label": "mut-command=build,wrapper=nanocompile,noinc",
+          "sample": "emergentDB",
+          "edit_type": "fn_body",
+          "fitness_ms": 1651.99,
+          "spread_ms": 14.78,
+          "min_ms": 1642.72,
+          "max_ms": 1685.92,
+          "mean_ms": 1657.71,
+          "samples_ms": [
+            1656.27,
+            1642.72,
+            1651.66,
+            1651.99,
+            1685.92
+          ],
+          "disk_bytes": 277321880,
+          "genome": {
+            "command": "build",
+            "wrapper": "nanocompile",
+            "incremental": false,
+            "linker": null,
+            "codegen_backend": "llvm",
+            "codegen_units": null,
+            "debuginfo": null,
+            "jobs": 4,
+            "toolchain": "stable"
+          },
+          "timestamp": "2026-10-21T03:23:09.645472+00:00",
+          "commit": "1205db48e7bdee8db49fa3c705e209dd1f4efde0",
+          "phase": "mutate",
+          "correctness": true,
+          "correctness_detail": {
+            "agree_fail": true,
+            "validate_refuses_cranelift": true
+          },
+          "delta_pct": -29347.24,
+          "noise_pct": 11.23,
+          "kept": false,
+          "note": "reject"
+        },
+        {
+          "ok": false,
+          "error": "note: `cargo::unused_workspace_dependencies` is set to `warn` by default\nhelp: consider removing the workspace dependency `chrono`\nwarning: unused field `rust-version` in `workspace.package`\n  --> Cargo.toml:17:1\n   |\n17 | rust-version = \"1.85\"\n   | ^^^^^^^^^^^^\n   |\n   = note: `cargo::unused_workspace_package_fields` is set to `warn` by default\nhelp: consider removing the field `workspace.package.rust-version`\nwarning: unused field `authors` in `workspace.package`\n  --> Cargo.toml:19:1\n   |\n19 | authors = [\"EmergentDB Team\"]\n   | ^^^^^^^\n   |\nhelp: consider removing the field `workspace.package.authors`\nwarning: unused field `description` in `workspace.package`\n  --> Cargo.toml:20:1\n   |\n20 | description = \"EmergentDB - A self-optimizing vector database using MAP-Elites quality-diversity\"\n   | ^^^^^^^^^^^\n   |\nhelp: consider removing the field `workspace.package.description`\nerror: failed to run `rustc` to learn about target-specific information\n\nCaused by:\n  process didn't exit successfully: `/workspace/zig-out/bin/nanocompile /usr/local/rustup/toolchains/nightly-x86_64-unknown-linux-gnu/bin/rustc - --crate-name ___ --print=file-names -Zcodegen-backend --crate-type bin --crate-type rlib --crate-type dylib --crate-type cdylib --crate-type staticlib --crate-type proc-macro --print=sysroot --print=split-debuginfo --print=crate-name --print=cfg -Wwarnings` (exit status: 1)\n  --- stderr\n  error: unstable option `codegen-backend` requires a string (`-Z codegen-backend=<value>`)\n\n",
+          "label": "mut-command=build,wrapper=nanocompile,noinc,codegen_backend=cranelift",
+          "sample": "emergentDB",
+          "edit_type": "fn_body",
+          "returncode": 101,
+          "fitness_ms": null,
+          "timestamp": "2026-10-21T03:23:09.701787+00:00",
+          "phase": "mutate",
+          "correctness": true,
+          "correctness_detail": {
+            "agree_fail": true,
+            "validate_refuses_cranelift": true
+          },
+          "kept": false,
+          "note": "failed eval or correctness gate"
+        },
+        {
+          "ok": false,
+          "error": "\"cc\" \"-m64\" \"/tmp/rach-targets/mapelites/grep-core/mut-command=graph,wrapper=nanocompile,noinc,linker=mold-fn_body/debug/build/libc-66f0cde8f054fedb/rustcrfAdUP/symbols.o\" \"<2 object files omitted>\" \"-Wl,--as-needed\" \"-Wl,-Bstatic\" \"<sysroot>/lib/rustlib/x86_64-unknown-linux-gnu/lib/{libstd-*,libpanic_unwind-*,libobject-*,libmemchr-*,libaddr2line-*,libgimli-*,libcfg_if-*,librustc_demangle-*,libstd_detect-*,libhashbrown-*,librustc_std_workspace_alloc-*,libminiz_oxide-*,libadler2-*,libunwind-*,liblibc-*,librustc_std_workspace_core-*,liballoc-*,libcore-*,libcompiler_builtins-*}.rlib\" \"-Wl,-Bdynamic\" \"-lgcc_s\" \"-lutil\" \"-lrt\" \"-lpthread\" \"-lm\" \"-ldl\" \"-lc\" \"-L\" \"/tmp/rach-targets/mapelites/grep-core/mut-command=graph,wrapper=nanocompile,noinc,linker=mold-fn_body/debug/build/libc-66f0cde8f054fedb/rustcrfAdUP/raw-dylibs\" \"-B<sysroot>/lib/rustlib/x86_64-unknown-linux-gnu/bin/gcc-ld\" \"-fuse-ld=lld\" \"-Wl,--eh-frame-hdr\" \"-Wl,-z,noexecstack\" \"-L\" \"<sysroot>/lib/rustlib/x86_64-unknown-linux-gnu/lib\" \"-o\" \"/tmp/rach-targets/mapelites/grep-core/mut-command=graph,wrapper=nanocompile,noinc,linker=mold-fn_body/debug/build/libc-66f0cde8f054fedb/build_script_build-66f0cde8f054fedb\" \"-Wl,--gc-sections\" \"-pie\" \"-Wl,-z,relro,-z,now\" \"-nodefaultlibs\" \"-fuse-ld=mold\"\n  = note: some arguments are omitted. use `--verbose` to show all linker arguments\n  = note: cc: error: invalid linker name in argument '-fuse-ld=mold'\n          \n\nerror: could not compile `libc` (build script) due to 1 previous error\n",
+          "label": "mut-command=graph,wrapper=nanocompile,noinc,linker=mold",
+          "sample": "emergentDB",
+          "edit_type": "fn_body",
+          "returncode": 101,
+          "fitness_ms": null,
+          "timestamp": "2026-10-21T03:23:10.149900+00:00",
+          "phase": "mutate",
+          "correctness": true,
+          "correctness_detail": {
+            "agree_fail": true,
+            "validate_refuses_cranelift": true
+          },
+          "kept": false,
+          "note": "failed eval or correctness gate"
+        },
+        {
+          "ok": true,
+          "label": "mut-check,wrapper=nanocompile,noinc",
+          "sample": "emergentDB",
+          "edit_type": "fn_body",
+          "fitness_ms": 840.01,
+          "spread_ms": 49.27,
+          "min_ms": 767.33,
+          "max_ms": 912.0,
+          "mean_ms": 840.38,
+          "samples_ms": [
+            870.16,
+            912.0,
+            767.33,
+            840.01,
+            812.39
+          ],
+          "disk_bytes": 131626671,
+          "genome": {
+            "command": "check",
+            "wrapper": "nanocompile",
+            "incremental": false,
+            "linker": null,
+            "codegen_backend": "llvm",
+            "codegen_units": null,
+            "debuginfo": null,
+            "jobs": 4,
+            "toolchain": "stable"
+          },
+          "timestamp": "2026-10-21T03:23:21.265630+00:00",
+          "commit": "1205db48e7bdee8db49fa3c705e209dd1f4efde0",
+          "phase": "mutate",
+          "correctness": true,
+          "correctness_detail": {
+            "agree_fail": true,
+            "validate_refuses_cranelift": true
+          },
+          "delta_pct": -14873.44,
+          "noise_pct": 11.23,
+          "kept": false,
+          "note": "reject"
+        },
+        {
+          "ok": false,
+          "error": "note: `cargo::unused_workspace_dependencies` is set to `warn` by default\nhelp: consider removing the workspace dependency `chrono`\nwarning: unused field `rust-version` in `workspace.package`\n  --> Cargo.toml:17:1\n   |\n17 | rust-version = \"1.85\"\n   | ^^^^^^^^^^^^\n   |\n   = note: `cargo::unused_workspace_package_fields` is set to `warn` by default\nhelp: consider removing the field `workspace.package.rust-version`\nwarning: unused field `authors` in `workspace.package`\n  --> Cargo.toml:19:1\n   |\n19 | authors = [\"EmergentDB Team\"]\n   | ^^^^^^^\n   |\nhelp: consider removing the field `workspace.package.authors`\nwarning: unused field `description` in `workspace.package`\n  --> Cargo.toml:20:1\n   |\n20 | description = \"EmergentDB - A self-optimizing vector database using MAP-Elites quality-diversity\"\n   | ^^^^^^^^^^^\n   |\nhelp: consider removing the field `workspace.package.description`\nerror: failed to run `rustc` to learn about target-specific information\n\nCaused by:\n  process didn't exit successfully: `/workspace/zig-out/bin/nanocompile /usr/local/rustup/toolchains/nightly-x86_64-unknown-linux-gnu/bin/rustc - --crate-name ___ --print=file-names -Zcodegen-backend --crate-type bin --crate-type rlib --crate-type dylib --crate-type cdylib --crate-type staticlib --crate-type proc-macro --print=sysroot --print=split-debuginfo --print=crate-name --print=cfg -Wwarnings` (exit status: 1)\n  --- stderr\n  error: unstable option `codegen-backend` requires a string (`-Z codegen-backend=<value>`)\n\n",
+          "label": "mut-command=build,wrapper=nanocompile,noinc,codegen_backend=cranelift",
+          "sample": "emergentDB",
+          "edit_type": "fn_body",
+          "returncode": 101,
+          "fitness_ms": null,
+          "timestamp": "2026-10-21T03:23:21.321212+00:00",
+          "phase": "mutate",
+          "correctness": true,
+          "correctness_detail": {
+            "agree_fail": true,
+            "validate_refuses_cranelift": true
+          },
+          "kept": false,
+          "note": "failed eval or correctness gate"
+        }
+      ],
+      "consecutive_misses": 3,
+      "stopped": true
+    },
+    "medium|signature_depended": {
+      "size_bucket": "medium",
+      "edit_type": "signature_depended",
+      "elite": {
+        "genome": {
+          "command": "check",
+          "wrapper": "sccache",
+          "incremental": false,
+          "linker": null,
+          "codegen_backend": "llvm",
+          "codegen_units": null,
+          "debuginfo": null,
+          "jobs": 4,
+          "toolchain": "stable"
+        },
+        "fitness_ms": 214.91,
+        "spread_ms": 9.49,
+        "disk_bytes": 131623787,
+        "correctness": true,
+        "sample": "emergentDB",
+        "commit": "1205db48e7bdee8db49fa3c705e209dd1f4efde0",
+        "timestamp": "2026-10-21T03:20:26.330442+00:00",
+        "label": "sccache",
+        "min_ms": 209.57,
+        "max_ms": 234.61
+      },
+      "history": [
+        {
+          "ok": true,
+          "label": "baseline",
+          "sample": "emergentDB",
+          "edit_type": "signature_depended",
+          "fitness_ms": 310.08,
+          "spread_ms": 5.21,
+          "min_ms": 297.45,
+          "max_ms": 311.98,
+          "mean_ms": 307.2,
+          "samples_ms": [
+            311.98,
+            306.33,
+            297.45,
+            310.16,
+            310.08
+          ],
+          "disk_bytes": 157559768,
+          "genome": {
+            "command": "check",
+            "wrapper": null,
+            "incremental": true,
+            "linker": null,
+            "codegen_backend": "llvm",
+            "codegen_units": null,
+            "debuginfo": null,
+            "jobs": 4,
+            "toolchain": "stable"
+          },
+          "timestamp": "2026-10-21T03:19:58.363754+00:00",
+          "commit": "1205db48e7bdee8db49fa3c705e209dd1f4efde0",
+          "correctness": true,
+          "correctness_detail": {
+            "agree_fail": true,
+            "validate_refuses_cranelift": true
+          },
+          "kept": true,
+          "note": "seed"
+        },
+        {
+          "ok": true,
+          "label": "plain-noinc",
+          "sample": "emergentDB",
+          "edit_type": "signature_depended",
+          "fitness_ms": 757.53,
+          "spread_ms": 3.96,
+          "min_ms": 754.98,
+          "max_ms": 764.08,
+          "mean_ms": 759.29,
+          "samples_ms": [
+            757.53,
+            763.98,
+            764.08,
+            754.98,
+            755.86
+          ],
+          "disk_bytes": 131624458,
+          "genome": {
+            "command": "check",
+            "wrapper": null,
+            "incremental": false,
+            "linker": null,
+            "codegen_backend": "llvm",
+            "codegen_units": null,
+            "debuginfo": null,
+            "jobs": 4,
+            "toolchain": "stable"
+          },
+          "timestamp": "2026-10-21T03:20:08.146251+00:00",
+          "commit": "1205db48e7bdee8db49fa3c705e209dd1f4efde0",
+          "correctness": true,
+          "correctness_detail": {
+            "agree_fail": true,
+            "validate_refuses_cranelift": true
+          },
+          "delta_pct": -144.3,
+          "noise_pct": 3.0,
+          "kept": false,
+          "note": "reject"
+        },
+        {
+          "ok": true,
+          "label": "nanocompile-wrapper",
+          "sample": "emergentDB",
+          "edit_type": "signature_depended",
+          "fitness_ms": 806.31,
+          "spread_ms": 33.36,
+          "min_ms": 756.79,
+          "max_ms": 855.03,
+          "mean_ms": 802.45,
+          "samples_ms": [
+            814.98,
+            779.16,
+            806.31,
+            855.03,
+            756.79
+          ],
+          "disk_bytes": 131625808,
+          "genome": {
+            "command": "check",
+            "wrapper": "nanocompile",
+            "incremental": false,
+            "linker": null,
+            "codegen_backend": "llvm",
+            "codegen_units": null,
+            "debuginfo": null,
+            "jobs": 4,
+            "toolchain": "stable"
+          },
+          "timestamp": "2026-10-21T03:20:18.583771+00:00",
+          "commit": "1205db48e7bdee8db49fa3c705e209dd1f4efde0",
+          "correctness": true,
+          "correctness_detail": {
+            "agree_fail": true,
+            "validate_refuses_cranelift": true
+          },
+          "delta_pct": -160.03,
+          "noise_pct": 3.0,
+          "kept": false,
+          "note": "reject"
+        },
+        {
+          "ok": true,
+          "label": "sccache",
+          "sample": "emergentDB",
+          "edit_type": "signature_depended",
+          "fitness_ms": 214.91,
+          "spread_ms": 9.49,
+          "min_ms": 209.57,
+          "max_ms": 234.61,
+          "mean_ms": 218.91,
+          "samples_ms": [
+            210.75,
+            209.57,
+            224.71,
+            234.61,
+            214.91
+          ],
+          "disk_bytes": 131623787,
+          "genome": {
+            "command": "check",
+            "wrapper": "sccache",
+            "incremental": false,
+            "linker": null,
+            "codegen_backend": "llvm",
+            "codegen_units": null,
+            "debuginfo": null,
+            "jobs": 4,
+            "toolchain": "stable"
+          },
+          "timestamp": "2026-10-21T03:20:26.330442+00:00",
+          "commit": "1205db48e7bdee8db49fa3c705e209dd1f4efde0",
+          "correctness": true,
+          "correctness_detail": {
+            "agree_fail": true,
+            "validate_refuses_cranelift": true
+          },
+          "delta_pct": 30.69,
+          "noise_pct": 3.0,
+          "kept": true,
+          "note": "replace"
+        },
+        {
+          "ok": true,
+          "label": "fast-check",
+          "sample": "emergentDB",
+          "edit_type": "signature_depended",
+          "fitness_ms": 774.72,
+          "spread_ms": 15.86,
+          "min_ms": 762.91,
+          "max_ms": 807.21,
+          "mean_ms": 779.92,
+          "samples_ms": [
+            762.91,
+            807.21,
+            767.81,
+            774.72,
+            786.97
+          ],
+          "disk_bytes": 131624292,
+          "genome": {
+            "command": "check",
+            "wrapper": "nanocompile",
+            "incremental": false,
+            "linker": null,
+            "codegen_backend": "llvm",
+            "codegen_units": null,
+            "debuginfo": null,
+            "jobs": 4,
+            "toolchain": "stable"
+          },
+          "timestamp": "2026-10-21T03:20:36.698370+00:00",
+          "commit": "1205db48e7bdee8db49fa3c705e209dd1f4efde0",
+          "correctness": true,
+          "correctness_detail": {
+            "agree_fail": true,
+            "validate_refuses_cranelift": true
+          },
+          "delta_pct": -260.49,
+          "noise_pct": 4.42,
+          "kept": false,
+          "note": "reject"
+        },
+        {
+          "ok": true,
+          "label": "disk-hygiene",
+          "sample": "emergentDB",
+          "edit_type": "signature_depended",
+          "fitness_ms": 312.74,
+          "spread_ms": 35.29,
+          "min_ms": 299.5,
+          "max_ms": 393.45,
+          "mean_ms": 323.82,
+          "samples_ms": [
+            299.5,
+            300.38,
+            312.74,
+            393.45,
+            313.0
+          ],
+          "disk_bytes": 166690806,
+          "genome": {
+            "command": "check",
+            "wrapper": null,
+            "incremental": true,
+            "linker": null,
+            "codegen_backend": "llvm",
+            "codegen_units": null,
+            "debuginfo": "line-tables-only",
+            "jobs": 4,
+            "toolchain": "stable"
+          },
+          "timestamp": "2026-10-21T03:20:44.473516+00:00",
+          "commit": "1205db48e7bdee8db49fa3c705e209dd1f4efde0",
+          "correctness": true,
+          "correctness_detail": {
+            "agree_fail": true,
+            "validate_refuses_cranelift": true
+          },
+          "delta_pct": -45.52,
+          "noise_pct": 4.42,
+          "kept": false,
+          "note": "reject"
+        },
+        {
+          "ok": true,
+          "label": "crate-shape-256",
+          "sample": "emergentDB",
+          "edit_type": "signature_depended",
+          "fitness_ms": 313.93,
+          "spread_ms": 3.02,
+          "min_ms": 308.27,
+          "max_ms": 316.75,
+          "mean_ms": 313.44,
+          "samples_ms": [
+            316.75,
+            313.93,
+            315.96,
+            312.31,
+            308.27
+          ],
+          "disk_bytes": 158231581,
+          "genome": {
+            "command": "check",
+            "wrapper": null,
+            "incremental": true,
+            "linker": null,
+            "codegen_backend": "llvm",
+            "codegen_units": 256,
+            "debuginfo": null,
+            "jobs": 4,
+            "toolchain": "stable"
+          },
+          "timestamp": "2026-10-21T03:20:52.329086+00:00",
+          "commit": "1205db48e7bdee8db49fa3c705e209dd1f4efde0",
+          "correctness": true,
+          "correctness_detail": {
+            "agree_fail": true,
+            "validate_refuses_cranelift": true
+          },
+          "delta_pct": -46.08,
+          "noise_pct": 4.42,
+          "kept": false,
+          "note": "reject"
+        },
+        {
+          "ok": true,
+          "label": "crate-shape-16",
+          "sample": "emergentDB",
+          "edit_type": "signature_depended",
+          "fitness_ms": 327.44,
+          "spread_ms": 11.13,
+          "min_ms": 322.65,
+          "max_ms": 351.84,
+          "mean_ms": 332.91,
+          "samples_ms": [
+            323.54,
+            351.84,
+            327.44,
+            339.11,
+            322.65
+          ],
+          "disk_bytes": 157739000,
+          "genome": {
+            "command": "check",
+            "wrapper": null,
+            "incremental": true,
+            "linker": null,
+            "codegen_backend": "llvm",
+            "codegen_units": 16,
+            "debuginfo": null,
+            "jobs": 4,
+            "toolchain": "stable"
+          },
+          "timestamp": "2026-10-21T03:23:29.171762+00:00",
+          "commit": "1205db48e7bdee8db49fa3c705e209dd1f4efde0",
+          "phase": "seed",
+          "correctness": true,
+          "correctness_detail": {
+            "agree_fail": true,
+            "validate_refuses_cranelift": true
+          },
+          "delta_pct": -52.36,
+          "noise_pct": 4.42,
+          "kept": false,
+          "note": "reject"
+        },
+        {
+          "ok": true,
+          "label": "mut-check,wrapper=nanocompile,noinc",
+          "sample": "emergentDB",
+          "edit_type": "signature_depended",
+          "fitness_ms": 853.58,
+          "spread_ms": 75.05,
+          "min_ms": 806.18,
+          "max_ms": 1009.82,
+          "mean_ms": 875.95,
+          "samples_ms": [
+            1009.82,
+            899.81,
+            853.58,
+            810.34,
+            806.18
+          ],
+          "disk_bytes": 131628498,
+          "genome": {
+            "command": "check",
+            "wrapper": "nanocompile",
+            "incremental": false,
+            "linker": null,
+            "codegen_backend": "llvm",
+            "codegen_units": null,
+            "debuginfo": null,
+            "jobs": 4,
+            "toolchain": "stable"
+          },
+          "timestamp": "2026-10-21T03:23:40.769969+00:00",
+          "commit": "1205db48e7bdee8db49fa3c705e209dd1f4efde0",
+          "phase": "mutate",
+          "correctness": true,
+          "correctness_detail": {
+            "agree_fail": true,
+            "validate_refuses_cranelift": true
+          },
+          "delta_pct": -297.18,
+          "noise_pct": 4.42,
+          "kept": false,
+          "note": "reject"
+        },
+        {
+          "ok": true,
+          "label": "mut-check,wrapper=sccache,noinc",
+          "sample": "emergentDB",
+          "edit_type": "signature_depended",
+          "fitness_ms": 221.33,
+          "spread_ms": 19.38,
+          "min_ms": 215.48,
+          "max_ms": 266.78,
+          "mean_ms": 228.49,
+          "samples_ms": [
+            266.78,
+            221.33,
+            223.14,
+            215.48,
+            215.72
+          ],
+          "disk_bytes": 131627825,
+          "genome": {
+            "command": "check",
+            "wrapper": "sccache",
+            "incremental": false,
+            "linker": null,
+            "codegen_backend": "llvm",
+            "codegen_units": null,
+            "debuginfo": null,
+            "jobs": 4,
+            "toolchain": "stable"
+          },
+          "timestamp": "2026-10-21T03:23:48.867839+00:00",
+          "commit": "1205db48e7bdee8db49fa3c705e209dd1f4efde0",
+          "phase": "mutate",
+          "correctness": true,
+          "correctness_detail": {
+            "agree_fail": true,
+            "validate_refuses_cranelift": true
+          },
+          "delta_pct": -2.99,
+          "noise_pct": 4.42,
+          "kept": false,
+          "note": "reject"
+        }
+      ],
+      "consecutive_misses": 3,
+      "stopped": true
+    },
+    "medium|noop": {
+      "size_bucket": "medium",
+      "edit_type": "noop",
+      "elite": {
+        "genome": {
+          "command": "check",
+          "wrapper": null,
+          "incremental": true,
+          "linker": null,
+          "codegen_backend": "llvm",
+          "codegen_units": null,
+          "debuginfo": null,
+          "jobs": 4,
+          "toolchain": "stable"
+        },
+        "fitness_ms": 86.9,
+        "spread_ms": 1.26,
+        "disk_bytes": 144598451,
+        "correctness": true,
+        "sample": "emergentDB",
+        "commit": "1205db48e7bdee8db49fa3c705e209dd1f4efde0",
+        "timestamp": "2026-10-21T03:20:58.286100+00:00",
+        "label": "baseline",
+        "min_ms": 84.27,
+        "max_ms": 87.93
+      },
+      "history": [
+        {
+          "ok": true,
+          "label": "baseline",
+          "sample": "emergentDB",
+          "edit_type": "noop",
+          "fitness_ms": 86.9,
+          "spread_ms": 1.26,
+          "min_ms": 84.27,
+          "max_ms": 87.93,
+          "mean_ms": 86.46,
+          "samples_ms": [
+            87.21,
+            87.93,
+            86.9,
+            85.99,
+            84.27
+          ],
+          "disk_bytes": 144598451,
+          "genome": {
+            "command": "check",
+            "wrapper": null,
+            "incremental": true,
+            "linker": null,
+            "codegen_backend": "llvm",
+            "codegen_units": null,
+            "debuginfo": null,
+            "jobs": 4,
+            "toolchain": "stable"
+          },
+          "timestamp": "2026-10-21T03:20:58.286100+00:00",
+          "commit": "1205db48e7bdee8db49fa3c705e209dd1f4efde0",
+          "correctness": true,
+          "correctness_detail": {
+            "agree_fail": true,
+            "validate_refuses_cranelift": true
+          },
+          "kept": true,
+          "note": "seed"
+        },
+        {
+          "ok": true,
+          "label": "plain-noinc",
+          "sample": "emergentDB",
+          "edit_type": "noop",
+          "fitness_ms": 88.66,
+          "spread_ms": 1.41,
+          "min_ms": 86.63,
+          "max_ms": 90.69,
+          "mean_ms": 88.52,
+          "samples_ms": [
+            87.44,
+            88.66,
+            89.19,
+            86.63,
+            90.69
+          ],
+          "disk_bytes": 131622127,
+          "genome": {
+            "command": "check",
+            "wrapper": null,
+            "incremental": false,
+            "linker": null,
+            "codegen_backend": "llvm",
+            "codegen_units": null,
+            "debuginfo": null,
+            "jobs": 4,
+            "toolchain": "stable"
+          },
+          "timestamp": "2026-10-21T03:21:04.320261+00:00",
+          "commit": "1205db48e7bdee8db49fa3c705e209dd1f4efde0",
+          "correctness": true,
+          "correctness_detail": {
+            "agree_fail": true,
+            "validate_refuses_cranelift": true
+          },
+          "delta_pct": -2.03,
+          "noise_pct": 3.0,
+          "kept": false,
+          "note": "reject"
+        },
+        {
+          "ok": true,
+          "label": "nanocompile-wrapper",
+          "sample": "emergentDB",
+          "edit_type": "noop",
+          "fitness_ms": 84.38,
+          "spread_ms": 1.86,
+          "min_ms": 81.07,
+          "max_ms": 86.71,
+          "mean_ms": 84.29,
+          "samples_ms": [
+            85.31,
+            84.38,
+            84.01,
+            81.07,
+            86.71
+          ],
+          "disk_bytes": 131623473,
+          "genome": {
+            "command": "check",
+            "wrapper": "nanocompile",
+            "incremental": false,
+            "linker": null,
+            "codegen_backend": "llvm",
+            "codegen_units": null,
+            "debuginfo": null,
+            "jobs": 4,
+            "toolchain": "stable"
+          },
+          "timestamp": "2026-10-21T03:21:10.538371+00:00",
+          "commit": "1205db48e7bdee8db49fa3c705e209dd1f4efde0",
+          "correctness": true,
+          "correctness_detail": {
+            "agree_fail": true,
+            "validate_refuses_cranelift": true
+          },
+          "delta_pct": 2.9,
+          "noise_pct": 3.0,
+          "kept": false,
+          "note": "reject"
+        },
+        {
+          "ok": true,
+          "label": "sccache",
+          "sample": "emergentDB",
+          "edit_type": "noop",
+          "fitness_ms": 88.16,
+          "spread_ms": 4.43,
+          "min_ms": 83.26,
+          "max_ms": 95.48,
+          "mean_ms": 87.97,
+          "samples_ms": [
+            89.24,
+            88.16,
+            83.72,
+            83.26,
+            95.48
+          ],
+          "disk_bytes": 131621456,
+          "genome": {
+            "command": "check",
+            "wrapper": "sccache",
+            "incremental": false,
+            "linker": null,
+            "codegen_backend": "llvm",
+            "codegen_units": null,
+            "debuginfo": null,
+            "jobs": 4,
+            "toolchain": "stable"
+          },
+          "timestamp": "2026-10-21T03:21:16.873822+00:00",
+          "commit": "1205db48e7bdee8db49fa3c705e209dd1f4efde0",
+          "correctness": true,
+          "correctness_detail": {
+            "agree_fail": true,
+            "validate_refuses_cranelift": true
+          },
+          "delta_pct": -1.45,
+          "noise_pct": 3.0,
+          "kept": false,
+          "note": "reject"
+        },
+        {
+          "ok": true,
+          "label": "fast-check",
+          "sample": "emergentDB",
+          "edit_type": "noop",
+          "fitness_ms": 87.99,
+          "spread_ms": 1.75,
+          "min_ms": 85.51,
+          "max_ms": 90.68,
+          "mean_ms": 87.77,
+          "samples_ms": [
+            90.68,
+            86.52,
+            88.13,
+            87.99,
+            85.51
+          ],
+          "disk_bytes": 131621961,
+          "genome": {
+            "command": "check",
+            "wrapper": "nanocompile",
+            "incremental": false,
+            "linker": null,
+            "codegen_backend": "llvm",
+            "codegen_units": null,
+            "debuginfo": null,
+            "jobs": 4,
+            "toolchain": "stable"
+          },
+          "timestamp": "2026-10-21T03:23:55.176081+00:00",
+          "commit": "1205db48e7bdee8db49fa3c705e209dd1f4efde0",
+          "phase": "seed",
+          "correctness": true,
+          "correctness_detail": {
+            "agree_fail": true,
+            "validate_refuses_cranelift": true
+          },
+          "delta_pct": -1.25,
+          "noise_pct": 3.0,
+          "kept": false,
+          "note": "reject"
+        },
+        {
+          "ok": true,
+          "label": "disk-hygiene",
+          "sample": "emergentDB",
+          "edit_type": "noop",
+          "fitness_ms": 93.24,
+          "spread_ms": 2.92,
+          "min_ms": 91.15,
+          "max_ms": 99.38,
+          "mean_ms": 94.25,
+          "samples_ms": [
+            93.24,
+            99.38,
+            95.38,
+            91.15,
+            92.13
+          ],
+          "disk_bytes": 153729489,
+          "genome": {
+            "command": "check",
+            "wrapper": null,
+            "incremental": true,
+            "linker": null,
+            "codegen_backend": "llvm",
+            "codegen_units": null,
+            "debuginfo": "line-tables-only",
+            "jobs": 4,
+            "toolchain": "stable"
+          },
+          "timestamp": "2026-10-21T03:24:02.423198+00:00",
+          "commit": "1205db48e7bdee8db49fa3c705e209dd1f4efde0",
+          "phase": "seed",
+          "correctness": true,
+          "correctness_detail": {
+            "agree_fail": true,
+            "validate_refuses_cranelift": true
+          },
+          "delta_pct": -7.3,
+          "noise_pct": 3.0,
+          "kept": false,
+          "note": "reject"
+        },
+        {
+          "ok": true,
+          "label": "crate-shape-256",
+          "sample": "emergentDB",
+          "edit_type": "noop",
+          "fitness_ms": 85.33,
+          "spread_ms": 3.91,
+          "min_ms": 80.94,
+          "max_ms": 91.56,
+          "mean_ms": 85.89,
+          "samples_ms": [
+            91.56,
+            88.92,
+            85.33,
+            82.71,
+            80.94
+          ],
+          "disk_bytes": 145270264,
+          "genome": {
+            "command": "check",
+            "wrapper": null,
+            "incremental": true,
+            "linker": null,
+            "codegen_backend": "llvm",
+            "codegen_units": 256,
+            "debuginfo": null,
+            "jobs": 4,
+            "toolchain": "stable"
+          },
+          "timestamp": "2026-10-21T03:24:09.208870+00:00",
+          "commit": "1205db48e7bdee8db49fa3c705e209dd1f4efde0",
+          "phase": "seed",
+          "correctness": true,
+          "correctness_detail": {
+            "agree_fail": true,
+            "validate_refuses_cranelift": true
+          },
+          "delta_pct": 1.81,
+          "noise_pct": 3.0,
+          "kept": false,
+          "note": "reject"
+        },
+        {
+          "ok": true,
+          "label": "crate-shape-16",
+          "sample": "emergentDB",
+          "edit_type": "noop",
+          "fitness_ms": 95.63,
+          "spread_ms": 12.48,
+          "min_ms": 90.79,
+          "max_ms": 124.76,
+          "mean_ms": 100.96,
+          "samples_ms": [
+            124.76,
+            92.0,
+            90.79,
+            101.6,
+            95.63
+          ],
+          "disk_bytes": 144777683,
+          "genome": {
+            "command": "check",
+            "wrapper": null,
+            "incremental": true,
+            "linker": null,
+            "codegen_backend": "llvm",
+            "codegen_units": 16,
+            "debuginfo": null,
+            "jobs": 4,
+            "toolchain": "stable"
+          },
+          "timestamp": "2026-10-21T03:24:15.791651+00:00",
+          "commit": "1205db48e7bdee8db49fa3c705e209dd1f4efde0",
+          "phase": "seed",
+          "correctness": true,
+          "correctness_detail": {
+            "agree_fail": true,
+            "validate_refuses_cranelift": true
+          },
+          "delta_pct": -10.05,
+          "noise_pct": 3.0,
+          "kept": false,
+          "note": "reject"
+        },
+        {
+          "ok": false,
+          "error": "note: `cargo::unused_workspace_dependencies` is set to `warn` by default\nhelp: consider removing the workspace dependency `chrono`\nwarning: unused field `rust-version` in `workspace.package`\n  --> Cargo.toml:17:1\n   |\n17 | rust-version = \"1.85\"\n   | ^^^^^^^^^^^^\n   |\n   = note: `cargo::unused_workspace_package_fields` is set to `warn` by default\nhelp: consider removing the field `workspace.package.rust-version`\nwarning: unused field `authors` in `workspace.package`\n  --> Cargo.toml:19:1\n   |\n19 | authors = [\"EmergentDB Team\"]\n   | ^^^^^^^\n   |\nhelp: consider removing the field `workspace.package.authors`\nwarning: unused field `description` in `workspace.package`\n  --> Cargo.toml:20:1\n   |\n20 | description = \"EmergentDB - A self-optimizing vector database using MAP-Elites quality-diversity\"\n   | ^^^^^^^^^^^\n   |\nhelp: consider removing the field `workspace.package.description`\nerror: failed to run `rustc` to learn about target-specific information\n\nCaused by:\n  process didn't exit successfully: `/workspace/zig-out/bin/nanocompile /usr/local/rustup/toolchains/nightly-x86_64-unknown-linux-gnu/bin/rustc - --crate-name ___ --print=file-names -Zcodegen-backend --crate-type bin --crate-type rlib --crate-type dylib --crate-type cdylib --crate-type staticlib --crate-type proc-macro --print=sysroot --print=split-debuginfo --print=crate-name --print=cfg -Wwarnings` (exit status: 1)\n  --- stderr\n  error: unstable option `codegen-backend` requires a string (`-Z codegen-backend=<value>`)\n\n",
+          "label": "mut-command=build,wrapper=nanocompile,noinc,codegen_backend=cranelift",
+          "sample": "emergentDB",
+          "edit_type": "noop",
+          "returncode": 101,
+          "fitness_ms": null,
+          "timestamp": "2026-10-21T03:24:15.846962+00:00",
+          "phase": "mutate",
+          "correctness": true,
+          "correctness_detail": {
+            "agree_fail": true,
+            "validate_refuses_cranelift": true
+          },
+          "kept": false,
+          "note": "failed eval or correctness gate"
+        },
+        {
+          "ok": true,
+          "label": "mut-check",
+          "sample": "emergentDB",
+          "edit_type": "noop",
+          "fitness_ms": 88.65,
+          "spread_ms": 4.24,
+          "min_ms": 85.54,
+          "max_ms": 96.26,
+          "mean_ms": 90.94,
+          "samples_ms": [
+            88.65,
+            85.54,
+            88.61,
+            96.26,
+            95.62
+          ],
+          "disk_bytes": 144598619,
+          "genome": {
+            "command": "check",
+            "wrapper": null,
+            "incremental": true,
+            "linker": null,
+            "codegen_backend": "llvm",
+            "codegen_units": null,
+            "debuginfo": null,
+            "jobs": 4,
+            "toolchain": "stable"
+          },
+          "timestamp": "2026-10-21T03:24:22.439160+00:00",
+          "commit": "1205db48e7bdee8db49fa3c705e209dd1f4efde0",
+          "phase": "mutate",
+          "correctness": true,
+          "correctness_detail": {
+            "agree_fail": true,
+            "validate_refuses_cranelift": true
+          },
+          "delta_pct": -2.01,
+          "noise_pct": 3.0,
+          "kept": false,
+          "note": "reject"
+        },
+        {
+          "ok": false,
+          "error": " [\"serde\"] }\n   | ^^^^^^\n   |\n   = note: `cargo::unused_workspace_dependencies` is set to `warn` by default\nhelp: consider removing the workspace dependency `chrono`\nwarning: unused field `rust-version` in `workspace.package`\n  --> Cargo.toml:17:1\n   |\n17 | rust-version = \"1.85\"\n   | ^^^^^^^^^^^^\n   |\n   = note: `cargo::unused_workspace_package_fields` is set to `warn` by default\nhelp: consider removing the field `workspace.package.rust-version`\nwarning: unused field `authors` in `workspace.package`\n  --> Cargo.toml:19:1\n   |\n19 | authors = [\"EmergentDB Team\"]\n   | ^^^^^^^\n   |\nhelp: consider removing the field `workspace.package.authors`\nwarning: unused field `description` in `workspace.package`\n  --> Cargo.toml:20:1\n   |\n20 | description = \"EmergentDB - A self-optimizing vector database using MAP-Elites quality-diversity\"\n   | ^^^^^^^^^^^\n   |\nhelp: consider removing the field `workspace.package.description`\nerror: failed to run `rustc` to learn about target-specific information\n\nCaused by:\n  process didn't exit successfully: `/usr/local/rustup/toolchains/nightly-x86_64-unknown-linux-gnu/bin/rustc - --crate-name ___ --print=file-names -Zcodegen-backend --crate-type bin --crate-type rlib --crate-type dylib --crate-type cdylib --crate-type staticlib --crate-type proc-macro --print=sysroot --print=split-debuginfo --print=crate-name --print=cfg -Wwarnings` (exit status: 1)\n  --- stderr\n  error: unstable option `codegen-backend` requires a string (`-Z codegen-backend=<value>`)\n\n",
+          "label": "mut-command=build,codegen_backend=cranelift",
+          "sample": "emergentDB",
+          "edit_type": "noop",
+          "returncode": 101,
+          "fitness_ms": null,
+          "timestamp": "2026-10-21T03:24:22.484318+00:00",
+          "phase": "mutate",
+          "correctness": true,
+          "correctness_detail": {
+            "agree_fail": true,
+            "validate_refuses_cranelift": true
+          },
+          "kept": false,
+          "note": "failed eval or correctness gate"
+        },
+        {
+          "ok": false,
+          "error": "   = note: `cargo::unused_workspace_dependencies` is set to `warn` by default\nhelp: consider removing the workspace dependency `chrono`\nwarning: unused field `rust-version` in `workspace.package`\n  --> Cargo.toml:17:1\n   |\n17 | rust-version = \"1.85\"\n   | ^^^^^^^^^^^^\n   |\n   = note: `cargo::unused_workspace_package_fields` is set to `warn` by default\nhelp: consider removing the field `workspace.package.rust-version`\nwarning: unused field `authors` in `workspace.package`\n  --> Cargo.toml:19:1\n   |\n19 | authors = [\"EmergentDB Team\"]\n   | ^^^^^^^\n   |\nhelp: consider removing the field `workspace.package.authors`\nwarning: unused field `description` in `workspace.package`\n  --> Cargo.toml:20:1\n   |\n20 | description = \"EmergentDB - A self-optimizing vector database using MAP-Elites quality-diversity\"\n   | ^^^^^^^^^^^\n   |\nhelp: consider removing the field `workspace.package.description`\nerror: failed to run `rustc` to learn about target-specific information\n\nCaused by:\n  process didn't exit successfully: `/usr/local/rustup/toolchains/nightly-x86_64-unknown-linux-gnu/bin/rustc - --crate-name ___ --print=file-names -Zcodegen-backend -C debuginfo=line-tables-only --crate-type bin --crate-type rlib --crate-type dylib --crate-type cdylib --crate-type staticlib --crate-type proc-macro --print=sysroot --print=split-debuginfo --print=crate-name --print=cfg -Wwarnings` (exit status: 1)\n  --- stderr\n  error: unstable option `codegen-backend` requires a string (`-Z codegen-backend=<value>`)\n\n",
+          "label": "mut-command=build,codegen_backend=cranelift,debuginfo=line-tables-only",
+          "sample": "emergentDB",
+          "edit_type": "noop",
+          "returncode": 101,
+          "fitness_ms": null,
+          "timestamp": "2026-10-21T03:24:22.521139+00:00",
+          "phase": "mutate",
+          "correctness": true,
+          "correctness_detail": {
+            "agree_fail": true,
+            "validate_refuses_cranelift": true
+          },
+          "kept": false,
+          "note": "failed eval or correctness gate"
+        },
+        {
+          "ok": true,
+          "label": "mut-command=build",
+          "sample": "emergentDB",
+          "edit_type": "noop",
+          "fitness_ms": 97.05,
+          "spread_ms": 1.02,
+          "min_ms": 95.68,
+          "max_ms": 98.88,
+          "mean_ms": 97.12,
+          "samples_ms": [
+            97.1,
+            98.88,
+            97.05,
+            96.9,
+            95.68
+          ],
+          "disk_bytes": 335856623,
+          "genome": {
+            "command": "build",
+            "wrapper": null,
+            "incremental": true,
+            "linker": null,
+            "codegen_backend": "llvm",
+            "codegen_units": null,
+            "debuginfo": null,
+            "jobs": 4,
+            "toolchain": "stable"
+          },
+          "timestamp": "2026-10-21T03:24:32.186810+00:00",
+          "commit": "1205db48e7bdee8db49fa3c705e209dd1f4efde0",
+          "phase": "mutate",
+          "correctness": true,
+          "correctness_detail": {
+            "agree_fail": true,
+            "validate_refuses_cranelift": true
+          },
+          "delta_pct": -11.68,
+          "noise_pct": 3.0,
+          "kept": false,
+          "note": "reject"
+        },
+        {
+          "ok": true,
+          "label": "mut-command=build,linker=lld",
+          "sample": "emergentDB",
+          "edit_type": "noop",
+          "fitness_ms": 91.68,
+          "spread_ms": 5.86,
+          "min_ms": 84.24,
+          "max_ms": 100.39,
+          "mean_ms": 90.58,
+          "samples_ms": [
+            91.76,
+            91.68,
+            100.39,
+            84.86,
+            84.24
+          ],
+          "disk_bytes": 335861277,
+          "genome": {
+            "command": "build",
+            "wrapper": null,
+            "incremental": true,
+            "linker": "lld",
+            "codegen_backend": "llvm",
+            "codegen_units": null,
+            "debuginfo": null,
+            "jobs": 4,
+            "toolchain": "stable"
+          },
+          "timestamp": "2026-10-21T03:24:41.716763+00:00",
+          "commit": "1205db48e7bdee8db49fa3c705e209dd1f4efde0",
+          "phase": "mutate",
+          "correctness": true,
+          "correctness_detail": {
+            "agree_fail": true,
+            "validate_refuses_cranelift": true
+          },
+          "delta_pct": -5.5,
+          "noise_pct": 3.0,
+          "kept": false,
+          "note": "reject"
+        }
+      ],
+      "consecutive_misses": 3,
+      "stopped": true
+    },
+    "small|fn_body": {
+      "size_bucket": "small",
+      "edit_type": "fn_body",
+      "elite": {
+        "genome": {
+          "command": "check",
+          "wrapper": null,
+          "incremental": true,
+          "linker": null,
+          "codegen_backend": "llvm",
+          "codegen_units": null,
+          "debuginfo": null,
+          "jobs": 4,
+          "toolchain": "stable"
+        },
+        "fitness_ms": 213.69,
+        "spread_ms": 6.32,
+        "disk_bytes": 305603983,
+        "correctness": true,
+        "sample": "bhumi",
+        "commit": "355545d6b8ec2e35b9976ae8e2977c76fa303f1d",
+        "timestamp": "2026-10-21T03:25:14.472757+00:00",
+        "label": "baseline",
+        "min_ms": 210.04,
+        "max_ms": 227.74
+      },
+      "history": [
+        {
+          "ok": true,
+          "label": "baseline",
+          "sample": "bhumi",
+          "edit_type": "fn_body",
+          "fitness_ms": 213.69,
+          "spread_ms": 6.32,
+          "min_ms": 210.04,
+          "max_ms": 227.74,
+          "mean_ms": 216.7,
+          "samples_ms": [
+            213.69,
+            210.04,
+            212.59,
+            219.41,
+            227.74
+          ],
+          "disk_bytes": 305603983,
+          "genome": {
+            "command": "check",
+            "wrapper": null,
+            "incremental": true,
+            "linker": null,
+            "codegen_backend": "llvm",
+            "codegen_units": null,
+            "debuginfo": null,
+            "jobs": 4,
+            "toolchain": "stable"
+          },
+          "timestamp": "2026-10-21T03:25:14.472757+00:00",
+          "commit": "355545d6b8ec2e35b9976ae8e2977c76fa303f1d",
+          "phase": "seed",
+          "correctness": true,
+          "correctness_detail": {
+            "agree_fail": true,
+            "validate_refuses_cranelift": true
+          },
+          "kept": true,
+          "note": "seed"
+        },
+        {
+          "ok": true,
+          "label": "plain-noinc",
+          "sample": "bhumi",
+          "edit_type": "fn_body",
+          "fitness_ms": 429.02,
+          "spread_ms": 43.29,
+          "min_ms": 410.17,
+          "max_ms": 526.4,
+          "mean_ms": 449.54,
+          "samples_ms": [
+            467.01,
+            526.4,
+            429.02,
+            410.17,
+            415.12
+          ],
+          "disk_bytes": 292455652,
+          "genome": {
+            "command": "check",
+            "wrapper": null,
+            "incremental": false,
+            "linker": null,
+            "codegen_backend": "llvm",
+            "codegen_units": null,
+            "debuginfo": null,
+            "jobs": 4,
+            "toolchain": "stable"
+          },
+          "timestamp": "2026-10-21T03:25:27.587818+00:00",
+          "commit": "355545d6b8ec2e35b9976ae8e2977c76fa303f1d",
+          "phase": "seed",
+          "correctness": true,
+          "correctness_detail": {
+            "agree_fail": true,
+            "validate_refuses_cranelift": true
+          },
+          "delta_pct": -100.77,
+          "noise_pct": 3.0,
+          "kept": false,
+          "note": "reject"
+        },
+        {
+          "ok": true,
+          "label": "nanocompile-wrapper",
+          "sample": "bhumi",
+          "edit_type": "fn_body",
+          "fitness_ms": 418.35,
+          "spread_ms": 12.76,
+          "min_ms": 394.4,
+          "max_ms": 429.51,
+          "mean_ms": 415.75,
+          "samples_ms": [
+            409.6,
+            429.51,
+            394.4,
+            418.35,
+            426.88
+          ],
+          "disk_bytes": 292458304,
+          "genome": {
+            "command": "check",
+            "wrapper": "nanocompile",
+            "incremental": false,
+            "linker": null,
+            "codegen_backend": "llvm",
+            "codegen_units": null,
+            "debuginfo": null,
+            "jobs": 4,
+            "toolchain": "stable"
+          },
+          "timestamp": "2026-10-21T03:25:41.546226+00:00",
+          "commit": "355545d6b8ec2e35b9976ae8e2977c76fa303f1d",
+          "phase": "seed",
+          "correctness": true,
+          "correctness_detail": {
+            "agree_fail": true,
+            "validate_refuses_cranelift": true
+          },
+          "delta_pct": -95.77,
+          "noise_pct": 3.0,
+          "kept": false,
+          "note": "reject"
+        },
+        {
+          "ok": true,
+          "label": "sccache",
+          "sample": "bhumi",
+          "edit_type": "fn_body",
+          "fitness_ms": 424.38,
+          "spread_ms": 37.64,
+          "min_ms": 393.69,
+          "max_ms": 499.59,
+          "mean_ms": 434.91,
+          "samples_ms": [
+            393.69,
+            424.38,
+            499.59,
+            450.89,
+            406.01
+          ],
+          "disk_bytes": 292454348,
+          "genome": {
+            "command": "check",
+            "wrapper": "sccache",
+            "incremental": false,
+            "linker": null,
+            "codegen_backend": "llvm",
+            "codegen_units": null,
+            "debuginfo": null,
+            "jobs": 4,
+            "toolchain": "stable"
+          },
+          "timestamp": "2026-10-21T03:25:56.858326+00:00",
+          "commit": "355545d6b8ec2e35b9976ae8e2977c76fa303f1d",
+          "phase": "seed",
+          "correctness": true,
+          "correctness_detail": {
+            "agree_fail": true,
+            "validate_refuses_cranelift": true
+          },
+          "delta_pct": -98.6,
+          "noise_pct": 3.0,
+          "kept": false,
+          "note": "reject"
+        },
+        {
+          "ok": true,
+          "label": "fast-check",
+          "sample": "bhumi",
+          "edit_type": "fn_body",
+          "fitness_ms": 409.15,
+          "spread_ms": 10.73,
+          "min_ms": 401.71,
+          "max_ms": 432.48,
+          "mean_ms": 411.9,
+          "samples_ms": [
+            405.72,
+            401.71,
+            409.15,
+            410.44,
+            432.48
+          ],
+          "disk_bytes": 292455352,
+          "genome": {
+            "command": "check",
+            "wrapper": "nanocompile",
+            "incremental": false,
+            "linker": null,
+            "codegen_backend": "llvm",
+            "codegen_units": null,
+            "debuginfo": null,
+            "jobs": 4,
+            "toolchain": "stable"
+          },
+          "timestamp": "2026-10-21T03:26:10.449544+00:00",
+          "commit": "355545d6b8ec2e35b9976ae8e2977c76fa303f1d",
+          "phase": "seed",
+          "correctness": true,
+          "correctness_detail": {
+            "agree_fail": true,
+            "validate_refuses_cranelift": true
+          },
+          "delta_pct": -91.47,
+          "noise_pct": 3.0,
+          "kept": false,
+          "note": "reject"
+        }
+      ],
+      "consecutive_misses": 0,
+      "stopped": false
+    }
+  },
+  "cross_test": [
+    {
+      "timestamp": "2026-10-21T03:21:16.877343+00:00",
+      "note": "no other sample elites on branch yet",
+      "checked_paths": [
+        "/workspace/bench/archive/rach-repos.json"
+      ]
+    },
+    {
+      "timestamp": "2026-10-21T03:24:41.720933+00:00",
+      "note": "no other sample elites on branch yet",
+      "checked_paths": [
+        "/workspace/bench/archive/rach-repos.json"
+      ]
+    }
+  ],
+  "failures": [
+    {
+      "cell": "medium|fn_body",
+      "label": "mold",
+      "error": "      \n\nerror: could not compile `crossbeam-utils` (build script) due to 1 previous error\nerror: linking with `cc` failed: exit status: 1\n  |\n  = note:  \"cc\" \"-m64\" \"/tmp/rach-targets/mapelites/grep-core/mold-fn_body/debug/build/libc-44d9ea0a1a2e1cd7/rustcXrEec3/symbols.o\" \"<3 object files omitted>\" \"-Wl,--as-needed\" \"-Wl,-Bstatic\" \"<sysroot>/lib/rustlib/x86_64-unknown-linux-gnu/lib/{libstd-*,libpanic_unwind-*,libobject-*,libmemchr-*,libaddr2line-*,libgimli-*,libcfg_if-*,librustc_demangle-*,libstd_detect-*,libhashbrown-*,librustc_std_workspace_alloc-*,libminiz_oxide-*,libadler2-*,libunwind-*,liblibc-*,librustc_std_workspace_core-*,liballoc-*,libcore-*,libcompiler_builtins-*}.rlib\" \"-Wl,-Bdynamic\" \"-lgcc_s\" \"-lutil\" \"-lrt\" \"-lpthread\" \"-lm\" \"-ldl\" \"-lc\" \"-L\" \"/tmp/rach-targets/mapelites/grep-core/mold-fn_body/debug/build/libc-44d9ea0a1a2e1cd7/rustcXrEec3/raw-dylibs\" \"-B<sysroot>/lib/rustlib/x86_64-unknown-linux-gnu/bin/gcc-ld\" \"-fuse-ld=lld\" \"-Wl,--eh-frame-hdr\" \"-Wl,-z,noexecstack\" \"-L\" \"<sysroot>/lib/rustlib/x86_64-unknown-linux-gnu/lib\" \"-o\" \"/tmp/rach-targets/mapelites/grep-core/mold-fn_body/debug/build/libc-44d9ea0a1a2e1cd7/build_script_build-44d9ea0a1a2e1cd7\" \"-Wl,--gc-sections\" \"-pie\" \"-Wl,-z,relro,-z,now\" \"-nodefaultlibs\" \"-fuse-ld=mold\"\n  = note: some arguments are omitted. use `--verbose` to show all linker arguments\n  = note: cc: error: invalid linker name in argument '-fuse-ld=mold'\n          \n\nerror: could not compile `libc` (build script) due to 1 previous error\n",
+      "sample": "emergentDB"
+    },
+    {
+      "cell": "medium|fn_body",
+      "label": "cranelift-dev",
+      "error": " [\"serde\"] }\n   | ^^^^^^\n   |\n   = note: `cargo::unused_workspace_dependencies` is set to `warn` by default\nhelp: consider removing the workspace dependency `chrono`\nwarning: unused field `rust-version` in `workspace.package`\n  --> Cargo.toml:17:1\n   |\n17 | rust-version = \"1.85\"\n   | ^^^^^^^^^^^^\n   |\n   = note: `cargo::unused_workspace_package_fields` is set to `warn` by default\nhelp: consider removing the field `workspace.package.rust-version`\nwarning: unused field `authors` in `workspace.package`\n  --> Cargo.toml:19:1\n   |\n19 | authors = [\"EmergentDB Team\"]\n   | ^^^^^^^\n   |\nhelp: consider removing the field `workspace.package.authors`\nwarning: unused field `description` in `workspace.package`\n  --> Cargo.toml:20:1\n   |\n20 | description = \"EmergentDB - A self-optimizing vector database using MAP-Elites quality-diversity\"\n   | ^^^^^^^^^^^\n   |\nhelp: consider removing the field `workspace.package.description`\nerror: failed to run `rustc` to learn about target-specific information\n\nCaused by:\n  process didn't exit successfully: `/usr/local/rustup/toolchains/nightly-x86_64-unknown-linux-gnu/bin/rustc - --crate-name ___ --print=file-names -Zcodegen-backend --crate-type bin --crate-type rlib --crate-type dylib --crate-type cdylib --crate-type staticlib --crate-type proc-macro --print=sysroot --print=split-debuginfo --print=crate-name --print=cfg -Wwarnings` (exit status: 1)\n  --- stderr\n  error: unstable option `codegen-backend` requires a string (`-Z codegen-backend=<value>`)\n\n",
+      "sample": "emergentDB"
+    },
+    {
+      "cell": "medium|fn_body",
+      "label": "mut-command=build,wrapper=nanocompile,noinc,codegen_backend=cranelift",
+      "error": "note: `cargo::unused_workspace_dependencies` is set to `warn` by default\nhelp: consider removing the workspace dependency `chrono`\nwarning: unused field `rust-version` in `workspace.package`\n  --> Cargo.toml:17:1\n   |\n17 | rust-version = \"1.85\"\n   | ^^^^^^^^^^^^\n   |\n   = note: `cargo::unused_workspace_package_fields` is set to `warn` by default\nhelp: consider removing the field `workspace.package.rust-version`\nwarning: unused field `authors` in `workspace.package`\n  --> Cargo.toml:19:1\n   |\n19 | authors = [\"EmergentDB Team\"]\n   | ^^^^^^^\n   |\nhelp: consider removing the field `workspace.package.authors`\nwarning: unused field `description` in `workspace.package`\n  --> Cargo.toml:20:1\n   |\n20 | description = \"EmergentDB - A self-optimizing vector database using MAP-Elites quality-diversity\"\n   | ^^^^^^^^^^^\n   |\nhelp: consider removing the field `workspace.package.description`\nerror: failed to run `rustc` to learn about target-specific information\n\nCaused by:\n  process didn't exit successfully: `/workspace/zig-out/bin/nanocompile /usr/local/rustup/toolchains/nightly-x86_64-unknown-linux-gnu/bin/rustc - --crate-name ___ --print=file-names -Zcodegen-backend --crate-type bin --crate-type rlib --crate-type dylib --crate-type cdylib --crate-type staticlib --crate-type proc-macro --print=sysroot --print=split-debuginfo --print=crate-name --print=cfg -Wwarnings` (exit status: 1)\n  --- stderr\n  error: unstable option `codegen-backend` requires a string (`-Z codegen-backend=<value>`)\n\n",
+      "sample": "emergentDB"
+    },
+    {
+      "cell": "medium|fn_body",
+      "label": "mut-command=graph,wrapper=nanocompile,noinc,linker=mold",
+      "error": "\"cc\" \"-m64\" \"/tmp/rach-targets/mapelites/grep-core/mut-command=graph,wrapper=nanocompile,noinc,linker=mold-fn_body/debug/build/libc-66f0cde8f054fedb/rustcrfAdUP/symbols.o\" \"<2 object files omitted>\" \"-Wl,--as-needed\" \"-Wl,-Bstatic\" \"<sysroot>/lib/rustlib/x86_64-unknown-linux-gnu/lib/{libstd-*,libpanic_unwind-*,libobject-*,libmemchr-*,libaddr2line-*,libgimli-*,libcfg_if-*,librustc_demangle-*,libstd_detect-*,libhashbrown-*,librustc_std_workspace_alloc-*,libminiz_oxide-*,libadler2-*,libunwind-*,liblibc-*,librustc_std_workspace_core-*,liballoc-*,libcore-*,libcompiler_builtins-*}.rlib\" \"-Wl,-Bdynamic\" \"-lgcc_s\" \"-lutil\" \"-lrt\" \"-lpthread\" \"-lm\" \"-ldl\" \"-lc\" \"-L\" \"/tmp/rach-targets/mapelites/grep-core/mut-command=graph,wrapper=nanocompile,noinc,linker=mold-fn_body/debug/build/libc-66f0cde8f054fedb/rustcrfAdUP/raw-dylibs\" \"-B<sysroot>/lib/rustlib/x86_64-unknown-linux-gnu/bin/gcc-ld\" \"-fuse-ld=lld\" \"-Wl,--eh-frame-hdr\" \"-Wl,-z,noexecstack\" \"-L\" \"<sysroot>/lib/rustlib/x86_64-unknown-linux-gnu/lib\" \"-o\" \"/tmp/rach-targets/mapelites/grep-core/mut-command=graph,wrapper=nanocompile,noinc,linker=mold-fn_body/debug/build/libc-66f0cde8f054fedb/build_script_build-66f0cde8f054fedb\" \"-Wl,--gc-sections\" \"-pie\" \"-Wl,-z,relro,-z,now\" \"-nodefaultlibs\" \"-fuse-ld=mold\"\n  = note: some arguments are omitted. use `--verbose` to show all linker arguments\n  = note: cc: error: invalid linker name in argument '-fuse-ld=mold'\n          \n\nerror: could not compile `libc` (build script) due to 1 previous error\n",
+      "sample": "emergentDB"
+    },
+    {
+      "cell": "medium|fn_body",
+      "label": "mut-command=build,wrapper=nanocompile,noinc,codegen_backend=cranelift",
+      "error": "note: `cargo::unused_workspace_dependencies` is set to `warn` by default\nhelp: consider removing the workspace dependency `chrono`\nwarning: unused field `rust-version` in `workspace.package`\n  --> Cargo.toml:17:1\n   |\n17 | rust-version = \"1.85\"\n   | ^^^^^^^^^^^^\n   |\n   = note: `cargo::unused_workspace_package_fields` is set to `warn` by default\nhelp: consider removing the field `workspace.package.rust-version`\nwarning: unused field `authors` in `workspace.package`\n  --> Cargo.toml:19:1\n   |\n19 | authors = [\"EmergentDB Team\"]\n   | ^^^^^^^\n   |\nhelp: consider removing the field `workspace.package.authors`\nwarning: unused field `description` in `workspace.package`\n  --> Cargo.toml:20:1\n   |\n20 | description = \"EmergentDB - A self-optimizing vector database using MAP-Elites quality-diversity\"\n   | ^^^^^^^^^^^\n   |\nhelp: consider removing the field `workspace.package.description`\nerror: failed to run `rustc` to learn about target-specific information\n\nCaused by:\n  process didn't exit successfully: `/workspace/zig-out/bin/nanocompile /usr/local/rustup/toolchains/nightly-x86_64-unknown-linux-gnu/bin/rustc - --crate-name ___ --print=file-names -Zcodegen-backend --crate-type bin --crate-type rlib --crate-type dylib --crate-type cdylib --crate-type staticlib --crate-type proc-macro --print=sysroot --print=split-debuginfo --print=crate-name --print=cfg -Wwarnings` (exit status: 1)\n  --- stderr\n  error: unstable option `codegen-backend` requires a string (`-Z codegen-backend=<value>`)\n\n",
+      "sample": "emergentDB"
+    },
+    {
+      "cell": "medium|noop",
+      "label": "mut-command=build,wrapper=nanocompile,noinc,codegen_backend=cranelift",
+      "error": "note: `cargo::unused_workspace_dependencies` is set to `warn` by default\nhelp: consider removing the workspace dependency `chrono`\nwarning: unused field `rust-version` in `workspace.package`\n  --> Cargo.toml:17:1\n   |\n17 | rust-version = \"1.85\"\n   | ^^^^^^^^^^^^\n   |\n   = note: `cargo::unused_workspace_package_fields` is set to `warn` by default\nhelp: consider removing the field `workspace.package.rust-version`\nwarning: unused field `authors` in `workspace.package`\n  --> Cargo.toml:19:1\n   |\n19 | authors = [\"EmergentDB Team\"]\n   | ^^^^^^^\n   |\nhelp: consider removing the field `workspace.package.authors`\nwarning: unused field `description` in `workspace.package`\n  --> Cargo.toml:20:1\n   |\n20 | description = \"EmergentDB - A self-optimizing vector database using MAP-Elites quality-diversity\"\n   | ^^^^^^^^^^^\n   |\nhelp: consider removing the field `workspace.package.description`\nerror: failed to run `rustc` to learn about target-specific information\n\nCaused by:\n  process didn't exit successfully: `/workspace/zig-out/bin/nanocompile /usr/local/rustup/toolchains/nightly-x86_64-unknown-linux-gnu/bin/rustc - --crate-name ___ --print=file-names -Zcodegen-backend --crate-type bin --crate-type rlib --crate-type dylib --crate-type cdylib --crate-type staticlib --crate-type proc-macro --print=sysroot --print=split-debuginfo --print=crate-name --print=cfg -Wwarnings` (exit status: 1)\n  --- stderr\n  error: unstable option `codegen-backend` requires a string (`-Z codegen-backend=<value>`)\n\n",
+      "sample": "emergentDB"
+    },
+    {
+      "cell": "medium|noop",
+      "label": "mut-command=build,codegen_backend=cranelift",
+      "error": " [\"serde\"] }\n   | ^^^^^^\n   |\n   = note: `cargo::unused_workspace_dependencies` is set to `warn` by default\nhelp: consider removing the workspace dependency `chrono`\nwarning: unused field `rust-version` in `workspace.package`\n  --> Cargo.toml:17:1\n   |\n17 | rust-version = \"1.85\"\n   | ^^^^^^^^^^^^\n   |\n   = note: `cargo::unused_workspace_package_fields` is set to `warn` by default\nhelp: consider removing the field `workspace.package.rust-version`\nwarning: unused field `authors` in `workspace.package`\n  --> Cargo.toml:19:1\n   |\n19 | authors = [\"EmergentDB Team\"]\n   | ^^^^^^^\n   |\nhelp: consider removing the field `workspace.package.authors`\nwarning: unused field `description` in `workspace.package`\n  --> Cargo.toml:20:1\n   |\n20 | description = \"EmergentDB - A self-optimizing vector database using MAP-Elites quality-diversity\"\n   | ^^^^^^^^^^^\n   |\nhelp: consider removing the field `workspace.package.description`\nerror: failed to run `rustc` to learn about target-specific information\n\nCaused by:\n  process didn't exit successfully: `/usr/local/rustup/toolchains/nightly-x86_64-unknown-linux-gnu/bin/rustc - --crate-name ___ --print=file-names -Zcodegen-backend --crate-type bin --crate-type rlib --crate-type dylib --crate-type cdylib --crate-type staticlib --crate-type proc-macro --print=sysroot --print=split-debuginfo --print=crate-name --print=cfg -Wwarnings` (exit status: 1)\n  --- stderr\n  error: unstable option `codegen-backend` requires a string (`-Z codegen-backend=<value>`)\n\n",
+      "sample": "emergentDB"
+    },
+    {
+      "cell": "medium|noop",
+      "label": "mut-command=build,codegen_backend=cranelift,debuginfo=line-tables-only",
+      "error": "   = note: `cargo::unused_workspace_dependencies` is set to `warn` by default\nhelp: consider removing the workspace dependency `chrono`\nwarning: unused field `rust-version` in `workspace.package`\n  --> Cargo.toml:17:1\n   |\n17 | rust-version = \"1.85\"\n   | ^^^^^^^^^^^^\n   |\n   = note: `cargo::unused_workspace_package_fields` is set to `warn` by default\nhelp: consider removing the field `workspace.package.rust-version`\nwarning: unused field `authors` in `workspace.package`\n  --> Cargo.toml:19:1\n   |\n19 | authors = [\"EmergentDB Team\"]\n   | ^^^^^^^\n   |\nhelp: consider removing the field `workspace.package.authors`\nwarning: unused field `description` in `workspace.package`\n  --> Cargo.toml:20:1\n   |\n20 | description = \"EmergentDB - A self-optimizing vector database using MAP-Elites quality-diversity\"\n   | ^^^^^^^^^^^\n   |\nhelp: consider removing the field `workspace.package.description`\nerror: failed to run `rustc` to learn about target-specific information\n\nCaused by:\n  process didn't exit successfully: `/usr/local/rustup/toolchains/nightly-x86_64-unknown-linux-gnu/bin/rustc - --crate-name ___ --print=file-names -Zcodegen-backend -C debuginfo=line-tables-only --crate-type bin --crate-type rlib --crate-type dylib --crate-type cdylib --crate-type staticlib --crate-type proc-macro --print=sysroot --print=split-debuginfo --print=crate-name --print=cfg -Wwarnings` (exit status: 1)\n  --- stderr\n  error: unstable option `codegen-backend` requires a string (`-Z codegen-backend=<value>`)\n\n",
+      "sample": "emergentDB"
+    }
+  ],
+  "hillclimb_log": [
+    {
+      "cell": "medium|fn_body",
+      "label": "baseline",
+      "kept": true,
+      "note": "seed",
+      "fitness_ms": 338.81,
+      "delta_pct": null,
+      "timestamp": "2026-10-21T03:18:53.260135+00:00"
+    },
+    {
+      "cell": "medium|fn_body",
+      "label": "plain-noinc",
+      "kept": false,
+      "note": "reject",
+      "fitness_ms": 769.72,
+      "delta_pct": -127.18,
+      "timestamp": "2026-10-21T03:19:03.587871+00:00"
+    },
+    {
+      "cell": "medium|fn_body",
+      "label": "nanocompile-wrapper",
+      "kept": false,
+      "note": "reject",
+      "fitness_ms": 817.51,
+      "delta_pct": -141.29,
+      "timestamp": "2026-10-21T03:19:14.561554+00:00"
+    },
+    {
+      "cell": "medium|fn_body",
+      "label": "sccache",
+      "kept": true,
+      "note": "replace",
+      "fitness_ms": 244.05,
+      "delta_pct": 27.97,
+      "timestamp": "2026-10-21T03:19:23.515476+00:00"
+    },
+    {
+      "cell": "medium|fn_body",
+      "label": "fast-check",
+      "kept": false,
+      "note": "reject",
+      "fitness_ms": 841.82,
+      "delta_pct": -244.94,
+      "timestamp": "2026-10-21T03:19:34.742168+00:00"
+    },
+    {
+      "cell": "medium|fn_body",
+      "label": "disk-hygiene",
+      "kept": false,
+      "note": "reject",
+      "fitness_ms": 313.93,
+      "delta_pct": -28.63,
+      "timestamp": "2026-10-21T03:19:42.948011+00:00"
+    },
+    {
+      "cell": "medium|fn_body",
+      "label": "crate-shape-256",
+      "kept": false,
+      "note": "reject",
+      "fitness_ms": 343.05,
+      "delta_pct": -40.57,
+      "timestamp": "2026-10-21T03:19:50.927277+00:00"
+    },
+    {
+      "cell": "medium|signature_depended",
+      "label": "baseline",
+      "kept": true,
+      "note": "seed",
+      "fitness_ms": 310.08,
+      "delta_pct": null,
+      "timestamp": "2026-10-21T03:19:58.363754+00:00"
+    },
+    {
+      "cell": "medium|signature_depended",
+      "label": "plain-noinc",
+      "kept": false,
+      "note": "reject",
+      "fitness_ms": 757.53,
+      "delta_pct": -144.3,
+      "timestamp": "2026-10-21T03:20:08.146251+00:00"
+    },
+    {
+      "cell": "medium|signature_depended",
+      "label": "nanocompile-wrapper",
+      "kept": false,
+      "note": "reject",
+      "fitness_ms": 806.31,
+      "delta_pct": -160.03,
+      "timestamp": "2026-10-21T03:20:18.583771+00:00"
+    },
+    {
+      "cell": "medium|signature_depended",
+      "label": "sccache",
+      "kept": true,
+      "note": "replace",
+      "fitness_ms": 214.91,
+      "delta_pct": 30.69,
+      "timestamp": "2026-10-21T03:20:26.330442+00:00"
+    },
+    {
+      "cell": "medium|signature_depended",
+      "label": "fast-check",
+      "kept": false,
+      "note": "reject",
+      "fitness_ms": 774.72,
+      "delta_pct": -260.49,
+      "timestamp": "2026-10-21T03:20:36.698370+00:00"
+    },
+    {
+      "cell": "medium|signature_depended",
+      "label": "disk-hygiene",
+      "kept": false,
+      "note": "reject",
+      "fitness_ms": 312.74,
+      "delta_pct": -45.52,
+      "timestamp": "2026-10-21T03:20:44.473516+00:00"
+    },
+    {
+      "cell": "medium|signature_depended",
+      "label": "crate-shape-256",
+      "kept": false,
+      "note": "reject",
+      "fitness_ms": 313.93,
+      "delta_pct": -46.08,
+      "timestamp": "2026-10-21T03:20:52.329086+00:00"
+    },
+    {
+      "cell": "medium|noop",
+      "label": "baseline",
+      "kept": true,
+      "note": "seed",
+      "fitness_ms": 86.9,
+      "delta_pct": null,
+      "timestamp": "2026-10-21T03:20:58.286100+00:00"
+    },
+    {
+      "cell": "medium|noop",
+      "label": "plain-noinc",
+      "kept": false,
+      "note": "reject",
+      "fitness_ms": 88.66,
+      "delta_pct": -2.03,
+      "timestamp": "2026-10-21T03:21:04.320261+00:00"
+    },
+    {
+      "cell": "medium|noop",
+      "label": "nanocompile-wrapper",
+      "kept": false,
+      "note": "reject",
+      "fitness_ms": 84.38,
+      "delta_pct": 2.9,
+      "timestamp": "2026-10-21T03:21:10.538371+00:00"
+    },
+    {
+      "cell": "medium|noop",
+      "label": "sccache",
+      "kept": false,
+      "note": "reject",
+      "fitness_ms": 88.16,
+      "delta_pct": -1.45,
+      "timestamp": "2026-10-21T03:21:16.873822+00:00"
+    },
+    {
+      "cell": "medium|fn_body",
+      "label": "crate-shape-16",
+      "kept": false,
+      "note": "reject",
+      "fitness_ms": 319.9,
+      "delta_pct": -31.08,
+      "timestamp": "2026-10-21T03:22:19.590778+00:00"
+    },
+    {
+      "cell": "medium|fn_body",
+      "label": "lld",
+      "kept": false,
+      "note": "reject",
+      "fitness_ms": 485.73,
+      "delta_pct": -99.03,
+      "timestamp": "2026-10-21T03:22:31.493964+00:00"
+    },
+    {
+      "cell": "medium|fn_body",
+      "label": "validate-graph",
+      "kept": true,
+      "note": "replace",
+      "fitness_ms": 5.61,
+      "delta_pct": 97.7,
+      "timestamp": "2026-10-21T03:22:51.747430+00:00"
+    },
+    {
+      "cell": "medium|fn_body",
+      "label": "mut-command=build,wrapper=nanocompile,noinc",
+      "kept": false,
+      "note": "reject",
+      "fitness_ms": 1651.99,
+      "delta_pct": -29347.24,
+      "timestamp": "2026-10-21T03:23:09.645472+00:00"
+    },
+    {
+      "cell": "medium|fn_body",
+      "label": "mut-check,wrapper=nanocompile,noinc",
+      "kept": false,
+      "note": "reject",
+      "fitness_ms": 840.01,
+      "delta_pct": -14873.44,
+      "timestamp": "2026-10-21T03:23:21.265630+00:00"
+    },
+    {
+      "cell": "medium|signature_depended",
+      "label": "crate-shape-16",
+      "kept": false,
+      "note": "reject",
+      "fitness_ms": 327.44,
+      "delta_pct": -52.36,
+      "timestamp": "2026-10-21T03:23:29.171762+00:00"
+    },
+    {
+      "cell": "medium|signature_depended",
+      "label": "mut-check,wrapper=nanocompile,noinc",
+      "kept": false,
+      "note": "reject",
+      "fitness_ms": 853.58,
+      "delta_pct": -297.18,
+      "timestamp": "2026-10-21T03:23:40.769969+00:00"
+    },
+    {
+      "cell": "medium|signature_depended",
+      "label": "mut-check,wrapper=sccache,noinc",
+      "kept": false,
+      "note": "reject",
+      "fitness_ms": 221.33,
+      "delta_pct": -2.99,
+      "timestamp": "2026-10-21T03:23:48.867839+00:00"
+    },
+    {
+      "cell": "medium|noop",
+      "label": "fast-check",
+      "kept": false,
+      "note": "reject",
+      "fitness_ms": 87.99,
+      "delta_pct": -1.25,
+      "timestamp": "2026-10-21T03:23:55.176081+00:00"
+    },
+    {
+      "cell": "medium|noop",
+      "label": "disk-hygiene",
+      "kept": false,
+      "note": "reject",
+      "fitness_ms": 93.24,
+      "delta_pct": -7.3,
+      "timestamp": "2026-10-21T03:24:02.423198+00:00"
+    },
+    {
+      "cell": "medium|noop",
+      "label": "crate-shape-256",
+      "kept": false,
+      "note": "reject",
+      "fitness_ms": 85.33,
+      "delta_pct": 1.81,
+      "timestamp": "2026-10-21T03:24:09.208870+00:00"
+    },
+    {
+      "cell": "medium|noop",
+      "label": "crate-shape-16",
+      "kept": false,
+      "note": "reject",
+      "fitness_ms": 95.63,
+      "delta_pct": -10.05,
+      "timestamp": "2026-10-21T03:24:15.791651+00:00"
+    },
+    {
+      "cell": "medium|noop",
+      "label": "mut-check",
+      "kept": false,
+      "note": "reject",
+      "fitness_ms": 88.65,
+      "delta_pct": -2.01,
+      "timestamp": "2026-10-21T03:24:22.439160+00:00"
+    },
+    {
+      "cell": "medium|noop",
+      "label": "mut-command=build",
+      "kept": false,
+      "note": "reject",
+      "fitness_ms": 97.05,
+      "delta_pct": -11.68,
+      "timestamp": "2026-10-21T03:24:32.186810+00:00"
+    },
+    {
+      "cell": "medium|noop",
+      "label": "mut-command=build,linker=lld",
+      "kept": false,
+      "note": "reject",
+      "fitness_ms": 91.68,
+      "delta_pct": -5.5,
+      "timestamp": "2026-10-21T03:24:41.716763+00:00"
+    },
+    {
+      "cell": "small|fn_body",
+      "label": "baseline",
+      "kept": true,
+      "note": "seed",
+      "fitness_ms": 213.69,
+      "delta_pct": null,
+      "timestamp": "2026-10-21T03:25:14.472757+00:00"
+    },
+    {
+      "cell": "small|fn_body",
+      "label": "plain-noinc",
+      "kept": false,
+      "note": "reject",
+      "fitness_ms": 429.02,
+      "delta_pct": -100.77,
+      "timestamp": "2026-10-21T03:25:27.587818+00:00"
+    },
+    {
+      "cell": "small|fn_body",
+      "label": "nanocompile-wrapper",
+      "kept": false,
+      "note": "reject",
+      "fitness_ms": 418.35,
+      "delta_pct": -95.77,
+      "timestamp": "2026-10-21T03:25:41.546226+00:00"
+    },
+    {
+      "cell": "small|fn_body",
+      "label": "sccache",
+      "kept": false,
+      "note": "reject",
+      "fitness_ms": 424.38,
+      "delta_pct": -98.6,
+      "timestamp": "2026-10-21T03:25:56.858326+00:00"
+    },
+    {
+      "cell": "small|fn_body",
+      "label": "fast-check",
+      "kept": false,
+      "note": "reject",
+      "fitness_ms": 409.15,
+      "delta_pct": -91.47,
+      "timestamp": "2026-10-21T03:26:10.449544+00:00"
+    }
+  ],
+  "probe": {
+    "grep-core/correctness": {
+      "sample": "emergentDB",
+      "warm_ok": true,
+      "check_broken_rc": 101,
+      "test_broken_rc": 101,
+      "agree_fail": true,
+      "validate_refuses_cranelift": true,
+      "check_tail": "^^^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_is_short_pattern`\n    |\n    = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default\n\nwarning: unused variable: `query`\n   --> crates/grep-core/src/hybrid.rs:215:27\n    |\n215 |     fn embed_query(&self, query: &str) -> Option<Vec<f32>> {\n    |                           ^^^^^ help: if this is intentional, prefix it with an underscore: `_query`\n\nFor more information about this error, try `rustc --explain E0308`.\nerror: could not compile `grep-core` (lib) due to 1 previous error; 2 warnings emitted\n",
+      "test_tail": "able: `query`\n   --> crates/grep-core/src/hybrid.rs:215:27\n    |\n215 |     fn embed_query(&self, query: &str) -> Option<Vec<f32>> {\n    |                           ^^^^^ help: if this is intentional, prefix it with an underscore: `_query`\n\nFor more information about this error, try `rustc --explain E0308`.\nerror: could not compile `grep-core` (lib test) due to 1 previous error; 2 warnings emitted\n",
+      "timestamp": "2026-10-21T03:18:45.242514+00:00"
+    },
+    "bhumi/correctness": {
+      "sample": "bhumi",
+      "warm_ok": true,
+      "check_broken_rc": 101,
+      "test_broken_rc": 101,
+      "agree_fail": true,
+      "validate_refuses_cranelift": true,
+      "check_tail": "^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_response_tx`\n    |\n    = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default\n\nwarning: unused variable: `stream_request_rx`\n   --> src/lib.rs:141:13\n    |\n141 |         let stream_request_rx = Arc::new(tokio::sync::Mutex::new(stream...\n    |             ^^^^^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_stream_request_rx`\n\nFor more information about this error, try `rustc --explain E0308`.\nerror: could not compile `bhumi` (lib) due to 1 previous error; 3 warnings emitted\n",
+      "test_tail": "m_request_rx`\n   --> src/lib.rs:141:13\n    |\n141 |         let stream_request_rx = Arc::new(tokio::sync::Mutex::new(stream...\n    |             ^^^^^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_stream_request_rx`\n\nFor more information about this error, try `rustc --explain E0308`.\nerror: could not compile `bhumi` (lib test) due to 1 previous error; 3 warnings emitted\n",
+      "timestamp": "2026-10-21T03:25:02.839274+00:00"
+    }
+  }
+}
