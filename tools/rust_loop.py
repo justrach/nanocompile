@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 """Declared-task helper for a Rust edit-check-validate loop.
 
+The native driver is `nanocompile rust-loop`. This script remains a
+compatibility fallback (catalog + spec + run) for environments that have
+not rebuilt the binary yet.
+
 Python 3.9+, standard library only. Generates and checks schema-1
 specifications for `nanocompile task`, and runs the per-step stamp
 wrapper those tasks invoke.

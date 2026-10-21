@@ -24,16 +24,17 @@ runs real `cargo test` / rustc after `fast-check`.
 
 ```sh
 zig build -Doptimize=ReleaseFast
-python3 tools/rust_loop.py spec --manifest path/to/Cargo.toml \
+./zig-out/bin/nanocompile rust-loop spec --manifest path/to/Cargo.toml \
   --write nanocompile.tasks.json --wrapper "$PWD/zig-out/bin/nanocompile"
-python3 tools/rust_loop.py check-spec nanocompile.tasks.json
+./zig-out/bin/nanocompile rust-loop check-spec nanocompile.tasks.json
 ./zig-out/bin/nanocompile task nanocompile.tasks.json
 ```
 
-The helper only writes schema 1. It refuses a specification that omits
-`validate`, places it before `fast-check`, or invokes cranelift, rustd, Lust or
-Relax as the gate. `python3 tests/rust_loop.py zig-out/bin/nanocompile` exercises
-that contract with a real Cargo crate.
+The native `nanocompile rust-loop` driver writes schema 1. It refuses a
+specification that omits `validate`, places it before `fast-check`, or invokes
+cranelift, rustd, Lust or Relax as the gate.
+`python3 tests/rust_loop.py zig-out/bin/nanocompile` exercises that contract
+with a real Cargo crate. `tools/rust_loop.py` remains a compatibility fallback.
 
 The [example crate](../examples/rust-loop/README.md) is a no-dependency library
 with the same two-task graph. Timing and the broken-edit gate live in
@@ -48,7 +49,7 @@ with the same two-task graph. Timing and the broken-edit gate live in
 | Cranelift / mold / a hot-reloader | A faster or more incremental **development** artifact | That LLVM rustc would accept or emit the same code |
 | rustd / Relax / Lust | An experimental compiler accepted a subset or skipped a check | That rustc would build it |
 
-`tools/rust_loop.py run --step validate` exits if `CARGO_PROFILE_*_CODEGEN_BACKEND`
+`nanocompile rust-loop run --step validate` exits if `CARGO_PROFILE_*_CODEGEN_BACKEND`
 is `cranelift` or if the cargo command names an experimental compiler. The
 declared-task runner already stops the graph when `fast-check` fails, so a
 broken check never writes a validate stamp.
@@ -60,7 +61,7 @@ does **not** use the wrapper.
 
 ## (a) Steps usable now
 
-Each row is a real command or flag. `python3 tools/rust_loop.py verify-flags`
+Each row is a real command or flag. `nanocompile rust-loop verify-flags`
 confirms the rustc `-C` names, `cargo check` / `cargo test`, and a `rust-lld`
 binary in the current sysroot.
 
@@ -301,7 +302,7 @@ The helper does not infer Cargo build-script reads, proc-macro file access,
 or `target/` membership. Those remain the [declared-task](declared-tasks.md)
 limitations. `target/` is a work directory, like Zig's cache in the
 [layering check](task-cache-layering.md): it changes work performed, not the
-stamp's meaning. Rerun `tools/rust_loop.py spec` after adding a source file
+stamp's meaning. Rerun `nanocompile rust-loop spec` after adding a source file
 so membership stays in the contract.
 
 This is not a rustc substitute, a bacon replacement, or a claim that the

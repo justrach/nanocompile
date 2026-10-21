@@ -144,9 +144,9 @@ and the [example crate](examples/rust-loop/README.md). Ideas and attribution:
 [Charlie Marsh, 21 Oct 2026](https://x.com/charliermarsh/status/2112711387285758250).
 
 ```sh
-python3 tools/rust_loop.py spec --manifest path/to/Cargo.toml \
+"$nano_wrapper" rust-loop spec --manifest path/to/Cargo.toml \
   --write nanocompile.tasks.json --wrapper "$nano_wrapper"
-python3 tools/rust_loop.py check-spec nanocompile.tasks.json
+"$nano_wrapper" rust-loop check-spec nanocompile.tasks.json
 "$nano_wrapper" task nanocompile.tasks.json
 ```
 

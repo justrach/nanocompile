@@ -9,6 +9,7 @@ Stable CLI (do not rename flags other agents already use):
         --output DIR --name SAMPLE
         --steps LIST --commands LIST
         --offline --skip-install --self-test
+        --genome FILE --map-elites --emit-archive FILE
 
 Schema 1 JSON + markdown go to --output (default bench/results/<sample>/).
 See docs/rust-iteration-bench.md.
@@ -543,8 +544,15 @@ def execute(args):
     if fetch.returncode != 0 and args.offline:
         offline = False
     correctness = run_correctness(work, driver, nano, offline, args.jobs, base_env)
+    size_info = classify_project(project)
+    args.work_root = work_root
+    map_elites_meta = None
+    if getattr(args, "map_elites", False) or getattr(args, "genome", None):
+        dest, evs = execute_map_elites(args, work, driver, nano, tools, base_env, offline, correctness, size_info["size"])
+        map_elites_meta = {"shard": str(dest), "evaluations": len(evs), "size": size_info}
     cells = []
-    for step in available_steps(argparse.Namespace(
+    skip_steps = bool(getattr(args, "map_elites", False) or getattr(args, "genome", None))
+    for step in [] if skip_steps else available_steps(argparse.Namespace(
             commands=args.commands, steps=args.steps, work=work_root), tools):
         if step.skip:
             cells.append({
@@ -606,11 +614,325 @@ def execute(args):
         "install_notes": install_notes,
         "correctness": correctness,
         "cells": cells,
+        "size": size_info,
+        "map_elites": map_elites_meta,
     }
+    if getattr(args, "emit_archive", None) or map_elites_meta:
+        shard_path = Path(args.emit_archive) if getattr(args, "emit_archive", None) else (
+            Path(map_elites_meta["shard"]) if map_elites_meta else (REPO / "bench" / "archive" / ("%s.json" % sample))
+        )
+        if not map_elites_meta:
+            write_shard(shard_path, sample, shard_from_report(report, size_info["size"]), git_commit())
+            report["map_elites"] = {"shard": str(shard_path), "evaluations": "from-steps", "size": size_info}
     (output / "result.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
     (output / "result.md").write_text(markdown_table(report), encoding="utf-8")
     shutil.rmtree(work_root, ignore_errors=True)
     return report
+
+
+EDIT_FROM_PHASE = {"cold": "cold", "noop": "noop", "edit_body": "body", "edit_sig": "sig_dep"}
+STEP_GENOMES = {
+    "baseline": {"loop": "check"},
+    "nanocompile-wrapper": {"wrapper": True, "incremental": False, "loop": "check"},
+    "fast-check": {"fast_check": "cargo-check", "loop": "check"},
+    "validate-graph": {"wrapper": True, "incremental": False, "loop": "graph"},
+    "cranelift-dev": {"dev_backend": "cranelift", "loop": "check"},
+    "fast-linker": {"linker": "mold", "loop": "test"},
+    "sccache": {"sccache": True, "loop": "check"},
+    "crate-shape": {"codegen_units": 256, "loop": "check"},
+    "disk-hygiene": {"debuginfo": "line-tables-only", "loop": "test"},
+}
+
+
+def default_genome(**overrides):
+    genome = {
+        "wrapper": False,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": False,
+        "codegen_units": None,
+        "incremental": True,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": None,
+        "offline": False,
+    }
+    genome.update({k: v for k, v in overrides.items() if v is not None or k == "codegen_units"})
+    return genome
+
+
+def classify_project(root: Path):
+    sys.path.insert(0, str(REPO / "tools"))
+    import map_elites
+    return map_elites.classify(root)
+
+
+def git_commit():
+    result = run(["git", "-C", str(REPO), "rev-parse", "HEAD"])
+    if result.returncode != 0:
+        return None
+    return result.stdout.decode().strip()
+
+
+def genome_env(genome, nano, tools, sccache_dir, isolate_cache):
+    extra = {}
+    rustflags = []
+    if genome.get("wrapper") and nano:
+        extra["RUSTC_WRAPPER"] = str(nano)
+        extra["CARGO_INCREMENTAL"] = "0"
+    elif genome.get("sccache") and tools.get("sccache"):
+        extra["RUSTC_WRAPPER"] = tools["sccache"]
+        extra["SCCACHE_DIR"] = str(sccache_dir)
+    if genome.get("incremental") is False:
+        extra["CARGO_INCREMENTAL"] = "0"
+    elif genome.get("incremental") and "CARGO_INCREMENTAL" not in extra:
+        extra["CARGO_INCREMENTAL"] = "1"
+    if genome.get("dev_backend") == "cranelift":
+        extra["CARGO_PROFILE_DEV_CODEGEN_BACKEND"] = "cranelift"
+    linker = genome.get("linker") or "default"
+    if linker == "mold":
+        rustflags.append("-C link-arg=-fuse-ld=mold")
+    elif linker == "lld":
+        rustflags.append("-C link-arg=-fuse-ld=lld")
+    if genome.get("codegen_units"):
+        rustflags.append("-C codegen-units=%s" % genome["codegen_units"])
+    debuginfo = genome.get("debuginfo") or "full"
+    if debuginfo == "line-tables-only":
+        rustflags.append("-C debuginfo=line-tables-only")
+    elif debuginfo == "none":
+        rustflags.append("-C debuginfo=0")
+    if rustflags:
+        extra["RUSTFLAGS"] = " ".join(rustflags)
+    if isolate_cache:
+        extra["NANOCOMPILE_DIR"] = str(isolate_cache)
+    return extra
+
+
+def genome_argv(genome, command, jobs, offline, nano, spec):
+    kind = genome.get("loop") or "check"
+    if kind == "graph":
+        if not nano or spec is None:
+            return None
+        return [str(nano), "task", str(spec)]
+    if kind == "test":
+        command = "test"
+    elif kind == "check":
+        command = "check"
+    return cargo_argv(command, jobs or genome.get("jobs"), offline or genome.get("offline"))
+
+
+def mutate_genome(genome, tools):
+    import copy
+    import random
+    next_genome = copy.deepcopy(genome)
+    genes = ["wrapper", "linker", "incremental", "debuginfo", "codegen_units", "loop", "sccache"]
+    if tools.get("cranelift"):
+        genes.append("dev_backend")
+    for gene in random.sample(genes, k=min(2, len(genes))):
+        if gene == "wrapper":
+            next_genome["wrapper"] = not next_genome.get("wrapper")
+            if next_genome["wrapper"]:
+                next_genome["sccache"] = False
+                next_genome["incremental"] = False
+        elif gene == "sccache":
+            next_genome["sccache"] = not next_genome.get("sccache")
+            if next_genome["sccache"]:
+                next_genome["wrapper"] = False
+        elif gene == "incremental":
+            next_genome["incremental"] = not next_genome.get("incremental")
+        elif gene == "linker":
+            order = ["default", "mold", "lld"]
+            next_genome["linker"] = order[(order.index(next_genome.get("linker") or "default") + 1) % 3]
+        elif gene == "debuginfo":
+            order = ["full", "line-tables-only", "none"]
+            next_genome["debuginfo"] = order[(order.index(next_genome.get("debuginfo") or "full") + 1) % 3]
+        elif gene == "codegen_units":
+            order = [None, 16, 256]
+            current = next_genome.get("codegen_units")
+            next_genome["codegen_units"] = order[(order.index(current) + 1) % 3] if current in order else 256
+        elif gene == "loop":
+            order = ["check", "graph", "test"]
+            nxt = order[(order.index(next_genome.get("loop") or "check") + 1) % 3]
+            if nxt == "test":
+                next_genome["dev_backend"] = "llvm"
+            next_genome["loop"] = nxt
+        elif gene == "dev_backend":
+            next_genome["dev_backend"] = "llvm" if next_genome.get("dev_backend") == "cranelift" else "cranelift"
+            if next_genome.get("loop") == "test":
+                next_genome["dev_backend"] = "llvm"
+    return next_genome
+
+
+def seed_genomes(nano, tools):
+    seeds = [
+        default_genome(),
+        default_genome(wrapper=True, incremental=False) if nano else None,
+        default_genome(loop="graph", wrapper=True, incremental=False) if nano else None,
+        default_genome(linker="mold", loop="test") if tools.get("mold") else default_genome(linker="lld", loop="test"),
+        default_genome(sccache=True) if tools.get("sccache") else None,
+        default_genome(codegen_units=256),
+        default_genome(debuginfo="line-tables-only", loop="test"),
+        default_genome(incremental=False),
+        default_genome(dev_backend="cranelift", loop="check") if tools.get("cranelift") else None,
+        default_genome(wrapper=True, incremental=False, debuginfo="line-tables-only", loop="graph") if nano else None,
+    ]
+    return [row for row in seeds if row]
+
+
+def evaluation_row(cell, size, edit, genome, summary, correctness, sample, commit):
+    ok = bool(correctness.get("agree_on_broken") and correctness.get("validate_is_final"))
+    return {
+        "cell": cell,
+        "size": size,
+        "edit": edit,
+        "genome": genome,
+        "fitness_ms": summary.get("median_ms"),
+        "spread_ms": summary.get("stdev_ms"),
+        "disk_bytes": summary.get("target_bytes"),
+        "correctness": {
+            "ok": ok,
+            "agree_on_broken": bool(correctness.get("agree_on_broken")),
+            "validate_is_final": bool(correctness.get("validate_is_final")),
+        },
+        "sample": sample,
+        "commit": commit,
+        "timestamp": now_iso(),
+        "n_evals": len(summary.get("samples_ms") or []),
+        "non_improving": 0,
+        "stopped": False,
+    }
+
+
+def write_shard(path: Path, sample, evaluations, commit):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps({
+        "schema_version": 1,
+        "kind": "nanocompile.rust-loop.map-elites.shard",
+        "sample": sample,
+        "commit": commit,
+        "timestamp": now_iso(),
+        "evaluations": evaluations,
+    }, indent=2) + "\n", encoding="utf-8")
+
+
+def shard_from_report(report, size):
+    commit = git_commit()
+    evaluations = []
+    for cell in report.get("cells") or []:
+        if cell.get("skipped") or not cell.get("ok"):
+            continue
+        edit = EDIT_FROM_PHASE.get(cell.get("phase"))
+        if not edit:
+            continue
+        step = cell.get("step")
+        overrides = dict(STEP_GENOMES.get(step) or {"loop": "check"})
+        if step == "fast-linker" and (report.get("tools") or {}).get("mold"):
+            overrides["linker"] = "mold"
+        elif step == "fast-linker":
+            overrides["linker"] = "lld"
+        genome = default_genome(**overrides)
+        evaluations.append(evaluation_row(
+            "%s|%s" % (size, edit), size, edit, genome, cell,
+            report.get("correctness") or {}, report.get("sample"), commit,
+        ))
+    return evaluations
+
+
+def measure_genome(genome, work, driver, nano, tools, base_env, jobs, offline, warmup, runs, edit, work_root, target):
+    isolate = work_root / "nano-cache"
+    extra = genome_env(genome, nano, tools, work_root / "sccache", isolate)
+    env = cargo_env(base_env, target, extra)
+    if genome.get("loop") == "test":
+        env.pop("CARGO_PROFILE_DEV_CODEGEN_BACKEND", None)
+        env.pop("CARGO_PROFILE_TEST_CODEGEN_BACKEND", None)
+    spec = None
+    if genome.get("loop") == "graph":
+        spec, err = prepare_graph(work, driver, target, nano, offline or genome.get("offline"))
+        if spec is None:
+            return None, err or "graph spec failed"
+    argv = genome_argv(genome, "check", jobs, offline, nano, spec)
+    if argv is None:
+        return None, "cannot build argv for genome"
+    record = None
+    if edit == "cold":
+        empty_target(target)
+        if (work / ".nanocompile-loop").exists():
+            shutil.rmtree(work / ".nanocompile-loop")
+    elif edit in ("body", "sig_dep"):
+        record = edit_project(work, "body" if edit == "body" else "sig")
+        if record is None:
+            return None, "no safe edit site"
+    try:
+        summary = run_cell(type("S", (), {"id": "genome", "title": "genome"})(), genome.get("loop"), edit, argv, work, env, target, warmup, runs)
+        return summary, None
+    finally:
+        restore_edit(record)
+
+
+def execute_map_elites(args, work, driver, nano, tools, base_env, offline, correctness, size):
+    commit = git_commit()
+    sample = args.name or args.project.name
+    evaluations = []
+    seeds = seed_genomes(nano, tools)
+    if args.genome:
+        seeds = [default_genome(**json.loads(Path(args.genome).read_text(encoding="utf-8")))]
+    edits = ("cold", "noop", "body", "sig_dep")
+    elites = {}
+    for genome in seeds:
+        genome = default_genome(**genome)
+        genome["offline"] = offline
+        genome["jobs"] = args.jobs
+        target = args.work_root / "targets" / "genome" / ("%s-%s-%s" % (
+            genome.get("loop"), genome.get("linker"), genome.get("debuginfo")))
+        for edit in edits:
+            summary, err = measure_genome(
+                genome, work, driver, nano, tools, base_env, args.jobs, offline,
+                args.warmup, args.runs, edit, args.work_root, target,
+            )
+            if summary is None or not summary.get("ok"):
+                continue
+            row = evaluation_row(
+                "%s|%s" % (size, edit), size, edit, genome, summary, correctness, sample, commit,
+            )
+            evaluations.append(row)
+            elite = elites.get(row["cell"])
+            if elite is None or row["fitness_ms"] < elite["fitness_ms"] * 0.97:
+                elites[row["cell"]] = row
+    if not args.genome:
+        for key, elite in list(elites.items()):
+            tries = 0
+            current = elite["genome"]
+            while tries < (args.mutations or 4):
+                mutant = mutate_genome(current, tools)
+                mutant["offline"] = offline
+                mutant["jobs"] = args.jobs
+                mutant_target = args.work_root / "targets" / "mutant" / elite["edit"]
+                if elite["edit"] != "cold":
+                    # Warm the mutant target once so body/sig/noop are incremental.
+                    measure_genome(
+                        mutant, work, driver, nano, tools, base_env, args.jobs, offline,
+                        0, 1, "cold", args.work_root, mutant_target,
+                    )
+                summary, err = measure_genome(
+                    mutant, work, driver, nano, tools, base_env, args.jobs, offline,
+                    args.warmup, args.runs, elite["edit"], args.work_root, mutant_target,
+                )
+                if summary is None or not summary.get("ok"):
+                    tries += 1
+                    continue
+                row = evaluation_row(key, size, elite["edit"], mutant, summary, correctness, sample, commit)
+                evaluations.append(row)
+                if row["fitness_ms"] <= elite["fitness_ms"] * 0.97:
+                    elites[key] = row
+                    current = mutant
+                    elite = row
+                    tries = 0
+                else:
+                    tries += 1
+    destination = Path(args.emit_archive) if args.emit_archive else (REPO / "bench" / "archive" / ("%s.json" % sample))
+    write_shard(destination, sample, evaluations, commit)
+    return destination, evaluations
 
 
 def parse_list(value, allowed, default):
@@ -637,6 +959,10 @@ def main(argv=None):
     parser.add_argument("--offline", action="store_true")
     parser.add_argument("--skip-install", action="store_true")
     parser.add_argument("--self-test", action="store_true")
+    parser.add_argument("--genome", help="evaluate one MAP-Elites genome JSON")
+    parser.add_argument("--map-elites", action="store_true", help="seed + mutate elites for this sample")
+    parser.add_argument("--emit-archive", help="write a MAP-Elites shard (default bench/archive/<name>.json when --map-elites)")
+    parser.add_argument("--mutations", type=int, default=4, help="non-improving tries per cell for --map-elites")
     args = parser.parse_args(argv)
     args.steps = parse_list(args.steps, DEFAULT_STEPS, DEFAULT_STEPS)
     args.commands = parse_list(args.commands, DEFAULT_COMMANDS, DEFAULT_COMMANDS)

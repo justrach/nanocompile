@@ -2,7 +2,8 @@
 """Rust edit-check-validate declared-task checks.
 
 Run: python3 tests/rust_loop.py /path/to/nanocompile
-Uses the standard library plus the repository's tools/rust_loop.py helper.
+Exercises the native `nanocompile rust-loop` driver. The Python helper remains
+only as a catalog/cross-check fallback.
 """
 import json
 import os
@@ -68,7 +69,7 @@ class RustLoop(unittest.TestCase):
 
     def helper_run(self, args, cwd=None, env=None, expected=0):
         result = subprocess.run(
-            [sys.executable, "-I", "-S", "-B", str(HELPER), *args],
+            [str(BINARY), "rust-loop", *args],
             cwd=self.project if cwd is None else cwd,
             env=self.env if env is None else env,
             capture_output=True, text=True, timeout=90,
@@ -79,7 +80,7 @@ class RustLoop(unittest.TestCase):
     def write_spec(self, **kwargs):
         destination = self.project / "nanocompile.tasks.json"
         args = ["spec", "--manifest", str(self.project / "Cargo.toml"),
-                "--write", str(destination), "--offline", "--python", sys.executable]
+                "--write", str(destination), "--offline"]
         if kwargs.get("wrapper"):
             args.extend(["--wrapper", str(kwargs["wrapper"])])
         self.helper_run(args)

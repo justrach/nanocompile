@@ -39,6 +39,10 @@ Flags (keep these names):
 | `--offline` | `cargo --offline` after a successful `cargo fetch` |
 | `--skip-install` | do not try to install nightly cranelift / mold |
 | `--self-test` | correctness + 1-run check on `examples/rust-loop` |
+| `--genome FILE` | evaluate one MAP-Elites genome on every edit type |
+| `--map-elites` | seed + mutate elites for this sample's size bucket |
+| `--emit-archive FILE` | write `bench/archive/<sample>.json` shard |
+| `--mutations N` | stop a cell after N non-improving tries (default 4) |
 
 Prefer `nanocompile rust-loop` when that subcommand exists; otherwise the
 harness uses `tools/rust_loop.py`. Either driver must keep `validate` as the
@@ -90,6 +94,62 @@ bench/results/<sample>/result.md
 
 Other agents may add more sample directories. Do not change `schema` without
 bumping it and updating this page.
+
+## MAP-Elites archive
+
+Source of truth: [`bench/map_elites.json`](../bench/map_elites.json)
+(schema 1). JSON Schema: [`bench/map_elites.schema.json`](../bench/map_elites.schema.json).
+Other agents write [`bench/archive/<sample>.json`](../bench/archive/README.md)
+and merge:
+
+```sh
+python3 tools/map_elites.py validate bench/archive/my-sample.json
+python3 tools/map_elites.py merge --into bench/map_elites.json bench/archive/*.json
+python3 tools/map_elites.py render --into docs/rust-iteration-bench.md
+./zig-out/bin/nanocompile map-elites validate bench/map_elites.json
+```
+
+The grid is **size** (`small` / `mid` / `large`) × **edit** (`cold` / `noop` /
+`body` / `sig_dep`). Disk use is recorded per elite, not a third axis — a disk
+tertile would make 36 cells and leave most empty while four agents are seeding.
+
+A genome is the full loop config (`wrapper`, `dev_backend`, `linker`, `sccache`,
+`codegen_units`, `incremental`, `debuginfo`, `fast_check`, `loop`, `jobs`,
+`offline`). `validate` is **not** a gene: it is always `cargo test` with LLVM
+rustc. Merge replaces a cell only when the new median is ≥3% faster and
+`correctness.ok` is true.
+
+<!-- MAP_ELITES_GRID_BEGIN -->
+
+## MAP-Elites grid
+
+Canonical archive: [`bench/map_elites.json`](../bench/map_elites.json).
+Schema: [`bench/map_elites.schema.json`](../bench/map_elites.schema.json).
+Merge shards from `bench/archive/<sample>.json` with
+`nanocompile map-elites merge` or `python3 tools/map_elites.py merge`.
+
+Axes: size (`small` / `mid` / `large`) × edit (`cold` / `noop` / `body` / `sig_dep`).
+Fitness is median loop wall time in ms (lower is better). Disk is recorded, not an axis.
+
+| Size \ Edit | cold | noop | body | sig_dep |
+| --- | ---: | ---: | ---: | ---: |
+| small | — | — | — | — |
+| mid | — | — | — | — |
+| large | — | — | — | — |
+
+### Elites
+
+No cells occupied yet.
+
+### Generalization
+
+No held-out evaluations yet.
+
+### Promoted defaults
+
+No genome has been promoted to nanocompile defaults yet.
+
+<!-- MAP_ELITES_GRID_END -->
 
 ## Hill-climb log
 
