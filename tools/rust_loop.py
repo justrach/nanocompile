@@ -223,6 +223,21 @@ def members(root, directory):
     return result
 
 
+def expand_workspace_member(root, member):
+    """Expand one Cargo workspace member, including `crates/*` globs.
+
+    The conservative members reader returns the pattern string as written.
+    Large workspaces (ruff, rust-analyzer) use a glob, so a literal
+    `root / "crates/*"` is not a directory and discover_inputs would skip
+    every crate. Path.glob is the stdlib expansion; no extra TOML parser.
+    """
+    matches = [path.resolve() for path in sorted(root.glob(member)) if path.is_dir()]
+    if matches:
+        return matches
+    path = (root / member).resolve()
+    return [path] if path.is_dir() else []
+
+
 def workspace_members(text):
     """Conservative [workspace].members reader; not a TOML library."""
     found = []
@@ -264,7 +279,7 @@ def discover_inputs(root):
     paths = []
     packages = [root]
     for member in workspace_members(cargo.read_text(encoding="utf-8")):
-        packages.append((root / member).resolve())
+        packages.extend(expand_workspace_member(root, member))
     seen = set()
     for package in packages:
         if not package.is_dir():
