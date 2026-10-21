@@ -165,6 +165,41 @@ flag, a 600s timeout, and applies incremental edits once per cell so extra
 | rust-loop-steps | large|cold | 54911.63250550005 | 44.61392799976238 | True |
 | rust-loop-steps | large|body | 485.0828640001055 | 25.15832400013096 | True |
 | rust-loop | large|cold | 54911.63250550005 | 43.92367899981764 | True |
+| bhumi | large|body | 459.8145489999297 | 181.06 | True |
+| bhumi | large|cold | 38620.79256600009 | 7855.05 | True |
+| bhumi | large|noop | 161.86818000005587 | 68.72 | True |
+| bhumi | large|sig_dep | 6985.912018999898 | 196.33 | True |
+| codegraff2 | large|body | 504.79514800008474 | 1058.02 | True |
+| codegraff2 | large|cold | 32735.6638389997 | 12280.08 | True |
+| codegraff2 | large|noop | 165.60859300079755 | 191.71 | True |
+| codegraff2 | large|sig_dep | 7227.415809999911 | 1018.62 | True |
+| emergentDB | large|body | 518.4900649992414 | 244.05 | True |
+| emergentDB | large|cold | 460.0521715001378 | 5769.55 | True |
+| emergentDB | large|noop | 165.84001899991563 | 84.38 | True |
+| emergentDB | large|sig_dep | 7183.629058000406 | 214.91 | True |
+
+PR #10 `efe05c7` merged `bench/archive/rach-repos.json` (bhumi / emergentDB / codegraff2)
+and stalled the official grid. The 12 cell elites were evaluated unchanged on ruff
+0.17.1 (`cargo check -p ruff` unless `package_scope=touched`). 11 live timings +
+1 reused local `cargo check -j4` sig_dep. All four new gates agreed with LLVM validate.
+
+| Trained elite | Ruff vs local check-elite | Verdict on ruff |
+| --- | ---: | --- |
+| bhumi `crate-shape-16` body | 459.8 vs 454.4 ms (**+1.2%**) | no replace (<3%) |
+| bhumi / codegraff2 `sccache+noinc` cold | 38.6 / 32.7 s vs 46.6 s | **warm sccache**, not an empty-target win |
+| bhumi `sccache+noinc` noop | 161.9 vs 150.9 ms (**+7.3%**) | worse |
+| bhumi baseline `-j4` sig_dep | 6985.9 vs 6663.2 ms (**+4.8%**) | reused; worse than line-tables-only |
+| codegraff2 `sccache+noinc` body / sig_dep | 504.8 / 7227.4 ms | **+11.1% / +8.5%** vs local elites |
+| codegraff2 `crate-shape-16` noop | 165.6 vs 150.9 ms (**+9.7%**) | worse |
+| emergentDB `sccache+noinc` body / sig_dep | 518.5 / 7183.6 ms | **+14.1% / +7.8%** |
+| emergentDB `package_scope=touched` cold | 460 ms | `-p ruff_command_line` only; not workspace cold |
+| emergentDB nanocompile-wrapper noop | 165.8 vs 150.9 ms (**+9.9%**) | worse |
+
+Rach-repos incremental elites do **not** transfer: sccache+`CARGO_INCREMENTAL=0`
+wins on those mid/large trees and loses on ruff's edit loop. `codegen-units=16`
+body is a wash with our line-tables-only elite. Official-grid cells stay stalled
+(same midsize / rust-loop / hashbrown occupants). Cranelift-hashbrown and
+`*-from-*` shards are themselves held-outs, not new training elites.
 
 ## Baseline vs best (same VM, rustc 1.99.0, 4 cores)
 
@@ -228,4 +263,9 @@ the two incremental winners (`line-tables-only` + `-j4`) lost on `body`
 - gate cef2a085d2b6 codegen-units=16 agree=True
 - gate a7e22369508e line-tables-only + -j4 agree=True
 - cross-test fill: 18 reused local equivalent genomes; 3 live midsize rows; missing [('midsize', 'large|cold', 'no local cold'), ('pinned-hashbrown-held-out', 'mid|noop', 'no local noop'), ('rust-loop', 'small|noop', 'no local noop'), ('rust-loop-medium', 'small|noop', 'no local noop'), ('rust-loop', 'small|noop', 'no local noop'), ('pinned-hashbrown', 'mid|cold', 'no local cold'), ('rust-loop-from-hashbrown', 'small|cold', 'no local cold'), ('pinned-hashbrown', 'mid|noop', 'no local noop')]
+- gate a408f29b9b8b rach-cross crate-shape-16 agree=True pkg=ruff
+- gate f44a7b38c81e rach-cross sccache agree=True pkg=ruff
+- gate 38bec1895a53 rach-cross sccache agree=True pkg=ruff_command_line
+- gate d95668d61332 rach-cross nanocompile-wrapper agree=True pkg=ruff
+- rach-repos held-out: 11 live, 1 reused local equivalents at 2026-10-21T05:00:38.373047+00:00
 
