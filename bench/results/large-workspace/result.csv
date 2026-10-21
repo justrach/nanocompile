@@ -1,0 +1,54 @@
+cell,hypothesis,fitness_ms,spread_ms,disk_bytes,loop,wrapper,sccache,linker,dev_backend,incremental,codegen_units,correctness_ok
+large|cold,baseline cargo check,54780.96847799998,65.04001300004529,1393628013,check,False,False,default,llvm,True,,True
+large|cold,nanocompile wrapper + incremental=0,46575.10117200002,8173.257042000048,936845430,check,True,False,default,llvm,False,,True
+large|cold,sccache wrapper,48678.068086999934,8451.366989999999,1393628012,check,False,True,default,llvm,True,,True
+large|cold,crate-shape codegen-units=256,54911.63250550005,311.297356499952,1397828773,check,False,False,default,llvm,True,256,True
+large|cold,cargo check incremental=0,53275.11193500004,238.81631599988395,936845429,check,False,False,default,llvm,False,,True
+large|cold,baseline cargo build,138882.82472649997,750.9733175000874,3077149433,check,False,False,default,llvm,True,,True
+large|cold,mold linker,323.0541749999247,0.0,585419,check,False,False,mold,llvm,True,,True
+large|noop,baseline cargo check,167.97514400002456,1.022472974580463,1393628013,check,False,False,default,llvm,True,,True
+large|noop,nanocompile wrapper + incremental=0,168.70295600006102,8.48078228011414,936845430,check,True,False,default,llvm,False,,True
+large|noop,sccache wrapper,160.00780800004577,1.292459093163771,1393628012,check,False,True,default,llvm,True,,True
+large|noop,crate-shape codegen-units=256,165.08294000004753,0.7774160403886632,1397828773,check,False,False,default,llvm,True,256,True
+large|noop,cargo check incremental=0,155.90738900004908,4.784942221240176,936845429,check,False,False,default,llvm,False,,True
+large|noop,baseline cargo build,155.15035599992189,3.50437437810917,3077149433,check,False,False,default,llvm,True,,True
+large|noop,mold linker,268.27755700014677,3.487653434928086,585419,check,False,False,mold,llvm,True,,True
+large|body,baseline cargo check,507.8114340000184,6.511556572439224,1408616542,check,False,False,default,llvm,True,,True
+large|body,nanocompile wrapper + incremental=0,957.125281999879,4.293885086675775,936845430,check,True,False,default,llvm,False,,True
+large|body,sccache wrapper,527.4304189999839,22.373273398487225,1408616541,check,False,True,default,llvm,True,,True
+large|body,crate-shape codegen-units=256,485.0828640001055,9.43110799627704,1412817302,check,False,False,default,llvm,True,256,True
+large|body,cargo check incremental=0,937.6161509999292,4.397789614102807,936845429,check,False,False,default,llvm,False,,True
+large|body,baseline cargo build,1123.3310519996849,4.360874069043674,3137719047,check,False,False,default,llvm,True,,True
+large|body,mold linker,269.1832689997682,3.724022784237879,585419,check,False,False,mold,llvm,True,,True
+large|sig_dep,baseline cargo check,7257.977048999919,124.07047161501343,1809397699,check,False,False,default,llvm,True,,True
+large|sig_dep,nanocompile wrapper + incremental=0,15652.522196000064,414.17016275925545,936846421,check,True,False,default,llvm,False,,True
+large|sig_dep,sccache wrapper,7003.150605999963,91.13266552403398,1809397696,check,False,True,default,llvm,True,,True
+large|sig_dep,crate-shape codegen-units=256,6958.524607000072,9.909652932619036,1813598448,check,False,False,default,llvm,True,256,True
+large|sig_dep,cargo check incremental=0,14769.167882000147,45.68325062849508,936846420,check,False,False,default,llvm,False,,True
+large|sig_dep,baseline cargo build,8914.331961000244,39.866736105733324,4096292555,check,False,False,default,llvm,True,,True
+large|sig_dep,mold linker,261.72428400013814,0.9885324247967923,585419,check,False,False,mold,llvm,True,,True
+large|noop,mold cargo build,157.53772600010052,5.392902405095136,3126738468,check,False,False,mold,llvm,True,,True
+large|body,mold cargo build,1128.9901589998408,27.902684790240436,3187308063,check,False,False,mold,llvm,True,,True
+large|body,lld cargo build,1144.2971319997923,13.877619284246128,3137730755,check,False,False,lld,llvm,True,,True
+large|body,cranelift nightly build,1336.3288279997505,9.811546826298555,2843431697,check,False,False,default,cranelift,True,,True
+large|cold,test -p ruff_text_size,2230.612327500012,8.062157500035028,65040530,test,False,False,default,llvm,True,,False
+large|noop,test -p ruff_text_size,270.8267069997419,3.639186384176425,65040530,test,False,False,default,llvm,True,,False
+large|body,test -p ruff_text_size,266.3764000003539,3.782297470539365,65040530,test,False,False,default,llvm,True,,False
+large|noop,sccache + codegen-units=256,155.51032200028203,2.686301217307337,1397828843,check,False,True,default,llvm,True,256,True
+large|body,sccache + codegen-units=256,495.5723630000648,12.295822759005576,1412817372,check,False,True,default,llvm,True,256,True
+large|sig_dep,sccache + codegen-units=256,6938.325202000215,146.440785763807,1813598542,check,False,True,default,llvm,True,256,True
+large|noop,cargo check -j4,167.7387690001524,1.8862220831901488,1393628111,check,False,False,default,llvm,True,,True
+large|body,cargo check -j4,467.20387699997445,4.177440483551196,1408616640,check,False,False,default,llvm,True,,True
+large|sig_dep,cargo check -j4,6985.912018999898,27.150571387951764,1809397803,check,False,False,default,llvm,True,,True
+large|noop,explicit line-tables-only,153.60833600016122,2.874720576575372,1481426080,check,False,False,default,llvm,True,,True
+large|body,explicit line-tables-only,454.4071140003325,4.2194360835244815,1496414609,check,False,False,default,llvm,True,,True
+large|sig_dep,explicit line-tables-only,6663.227140999879,15.709520539259975,1901008717,check,False,False,default,llvm,True,,True
+large|noop,sccache + incremental=1,160.0366750003559,2.351618988046237,1809004315,check,False,True,default,llvm,True,,True
+large|body,sccache + incremental=1,474.2006040000888,2.8434268012505464,1808906918,check,False,True,default,llvm,True,,True
+large|sig_dep,sccache + incremental=1,7023.310069999752,140.1137519124939,1809397728,check,False,True,default,llvm,True,,True
+large|noop,codegen-units=16,150.90810600031546,5.528802700297184,1393718232,check,False,False,default,llvm,True,16,True
+large|body,codegen-units=16,469.3298940001114,3.3635097147669764,1408706761,check,False,False,default,llvm,True,16,True
+large|sig_dep,codegen-units=16,6843.124728000021,159.15857342387278,1808977940,check,False,False,default,llvm,True,16,True
+large|noop,line-tables-only + -j4,160.6067479997364,1.0556858383004148,1481426105,check,False,False,default,llvm,True,,True
+large|body,line-tables-only + -j4,484.67447300026834,12.0430929339643,1496414634,check,False,False,default,llvm,True,,True
+large|sig_dep,line-tables-only + -j4,6853.265128000203,87.3134005919376,1901008741,check,False,False,default,llvm,True,,True
