@@ -1,0 +1,9 @@
+[package]
+name = "nano-loop-app"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[dependencies]
+nano-intern = { path = "../intern" }
+nano-graph = { path = "../graph" }
