@@ -1,0 +1,49 @@
+{
+  "schema": 1,
+  "sample": "bhumi-from-hashbrown",
+  "project": "/tmp/real-samples/bhumi",
+  "timestamp": "2026-10-21T04:46:40.483193+00:00",
+  "runs": 1,
+  "warmup": 0,
+  "offline": true,
+  "platform": "Linux x86_64",
+  "driver": "zig",
+  "tools": {
+    "cargo": "/usr/local/cargo/bin/cargo",
+    "rustc": "/usr/local/cargo/bin/rustc",
+    "mold": "/usr/bin/mold",
+    "sccache": "/usr/local/cargo/bin/sccache",
+    "hyperfine": "/usr/local/cargo/bin/hyperfine",
+    "rust_lld": true,
+    "cranelift": true,
+    "nightly": true,
+    "nanocompile": "/workspace/zig-out/bin/nanocompile"
+  },
+  "install_notes": [],
+  "correctness": {
+    "broken_edit": true,
+    "fast_failed": true,
+    "validate_failed": true,
+    "validate_is_final": true,
+    "agree_on_broken": true,
+    "graph_fast_failed": true,
+    "graph_validate_stamp_written": false,
+    "notes": ""
+  },
+  "cells": [],
+  "size": {
+    "size": "small",
+    "crates": 1,
+    "loc": 1328
+  },
+  "map_elites": {
+    "shard": "bench/archive/bhumi-from-hashbrown.json",
+    "evaluations": 4,
+    "size": {
+      "size": "small",
+      "crates": 1,
+      "loc": 1328
+    },
+    "held_out": 4
+  }
+}

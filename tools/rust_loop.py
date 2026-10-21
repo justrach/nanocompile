@@ -227,21 +227,6 @@ def members(root, directory):
     return result
 
 
-def expand_workspace_member(root, member):
-    """Expand one Cargo workspace member, including `crates/*` globs.
-
-    The conservative members reader returns the pattern string as written.
-    Large workspaces (ruff, rust-analyzer) use a glob, so a literal
-    `root / "crates/*"` is not a directory and discover_inputs would skip
-    every crate. Path.glob is the stdlib expansion; no extra TOML parser.
-    """
-    matches = [path.resolve() for path in sorted(root.glob(member)) if path.is_dir()]
-    if matches:
-        return matches
-    path = (root / member).resolve()
-    return [path] if path.is_dir() else []
-
-
 def workspace_members(text):
     """Conservative [workspace].members reader; not a TOML library."""
     found = []
@@ -275,6 +260,28 @@ def workspace_members(text):
     return found
 
 
+def expand_workspace_members(root, patterns):
+    """Expand Cargo workspace globs such as crates/* to real package dirs."""
+    root = Path(root)
+    found = []
+    seen = set()
+    for pattern in patterns:
+        if any(char in pattern for char in "*?["):
+            matches = [path for path in sorted(root.glob(pattern))
+                       if path.is_dir() and (path / "Cargo.toml").is_file()]
+        else:
+            matches = [root / pattern]
+        for path in matches:
+            if not path.is_dir():
+                continue
+            rel = posix(path.resolve().relative_to(root.resolve()))
+            if rel in seen:
+                continue
+            seen.add(rel)
+            found.append(rel)
+    return found
+
+
 def discover_inputs(root):
     root = root.resolve()
     cargo = root / "Cargo.toml"
@@ -282,8 +289,8 @@ def discover_inputs(root):
         fail("no Cargo.toml in " + str(root))
     paths = []
     packages = [root]
-    for member in workspace_members(cargo.read_text(encoding="utf-8")):
-        packages.extend(expand_workspace_member(root, member))
+    for member in expand_workspace_members(root, workspace_members(cargo.read_text(encoding="utf-8"))):
+        packages.append((root / member).resolve())
     seen = set()
     for package in packages:
         if not package.is_dir():

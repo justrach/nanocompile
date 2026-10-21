@@ -158,7 +158,8 @@ fn correctnessOk(row: std.json.ObjectMap) bool {
 fn isHeldOut(row: std.json.ObjectMap) bool {
     if (get(row, "held_out")) |value| return asBool(value) catch false;
     const sample = if (get(row, "sample")) |value| asString(value) catch "" else "";
-    return std.mem.indexOf(u8, sample, "-held-out") != null;
+    return std.mem.indexOf(u8, sample, "-held-out") != null
+        or std.mem.indexOf(u8, sample, "-from-") != null;
 }
 
 fn checkEvaluation(row: std.json.ObjectMap) !void {

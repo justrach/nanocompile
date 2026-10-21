@@ -1,0 +1,200 @@
+{
+  "sample": "ripgrep-sccache",
+  "project": "/tmp/real-samples/ripgrep",
+  "cells": [
+    {
+      "genome_file": "bench/genomes/check-incremental.json",
+      "label": "check-incremental",
+      "edit": "cold",
+      "ok": true,
+      "error": null,
+      "median_ms": 2906.406994000463,
+      "n_evals": 3,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "size": "large"
+    },
+    {
+      "genome_file": "bench/genomes/check-incremental.json",
+      "label": "check-incremental",
+      "edit": "noop",
+      "ok": true,
+      "error": null,
+      "median_ms": 28.903161000016553,
+      "n_evals": 3,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "size": "large"
+    },
+    {
+      "genome_file": "bench/genomes/check-incremental.json",
+      "label": "check-incremental",
+      "edit": "body",
+      "ok": true,
+      "error": null,
+      "median_ms": 147.52349200080062,
+      "n_evals": 1,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "size": "large"
+    },
+    {
+      "genome_file": "bench/genomes/check-incremental.json",
+      "label": "check-incremental",
+      "edit": "sig_dep",
+      "ok": false,
+      "error": null,
+      "median_ms": 125.26549799986242,
+      "n_evals": 1,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "size": "large"
+    },
+    {
+      "genome_file": "bench/genomes/check-sccache-noinc.json",
+      "label": "check-sccache-noinc",
+      "edit": "cold",
+      "ok": true,
+      "error": null,
+      "median_ms": 3347.3818889997347,
+      "n_evals": 3,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": true,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "size": "large"
+    },
+    {
+      "genome_file": "bench/genomes/check-sccache-noinc.json",
+      "label": "check-sccache-noinc",
+      "edit": "noop",
+      "ok": true,
+      "error": null,
+      "median_ms": 30.718795000211685,
+      "n_evals": 3,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": true,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "size": "large"
+    },
+    {
+      "genome_file": "bench/genomes/check-sccache-noinc.json",
+      "label": "check-sccache-noinc",
+      "edit": "body",
+      "ok": true,
+      "error": null,
+      "median_ms": 363.0946490002316,
+      "n_evals": 1,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": true,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "size": "large"
+    },
+    {
+      "genome_file": "bench/genomes/check-sccache-noinc.json",
+      "label": "check-sccache-noinc",
+      "edit": "sig_dep",
+      "ok": false,
+      "error": null,
+      "median_ms": 361.51812199932465,
+      "n_evals": 1,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": true,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "size": "large"
+    }
+  ],
+  "correctness": {
+    "broken_edit": true,
+    "fast_failed": true,
+    "validate_failed": true,
+    "validate_is_final": true,
+    "agree_on_broken": true,
+    "graph_fast_failed": true,
+    "graph_validate_stamp_written": false,
+    "notes": ""
+  }
+}

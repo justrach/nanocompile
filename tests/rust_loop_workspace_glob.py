@@ -37,8 +37,8 @@ class WorkspaceGlob(unittest.TestCase):
                 rust_loop.workspace_members((root / "Cargo.toml").read_text(encoding="utf-8")),
                 ["crates/*"],
             )
-            expanded = rust_loop.expand_workspace_member(root, "crates/*")
-            self.assertEqual({path.name for path in expanded}, {"hub", "leaf"})
+            expanded = rust_loop.expand_workspace_members(root, ["crates/*"])
+            self.assertEqual(set(expanded), {"crates/hub", "crates/leaf"})
             inputs = rust_loop.discover_inputs(root)
             self.assertIn("crates/leaf/src/lib.rs", inputs)
             self.assertIn("crates/hub/src/lib.rs", inputs)

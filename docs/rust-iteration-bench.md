@@ -74,7 +74,7 @@ Each cell records sample wall times, median, population stdev, min/max, and
 | `fast-check` | `cargo check` only |
 | `validate-graph` | declared `fast-check` → `cargo test` via `nanocompile task` |
 | `nightly-llvm` | `cargo +nightly` LLVM `build` / `test` (control for cranelift) |
-| `cranelift-dev` | `cargo +nightly -Zcodegen-backend` with `CARGO_PROFILE_{DEV,TEST}_CODEGEN_BACKEND=cranelift` (`build` and `test`) |
+| `cranelift-dev` | `cargo +nightly -Zcodegen-backend` plus `RUSTFLAGS=-Zcodegen-backend=cranelift` (no `CARGO_PROFILE_*` / no `cargo-features` in the user's manifest) |
 | `fast-linker` | `-C link-arg=-fuse-ld=mold` or `lld` on build/test |
 | `sccache` | `RUSTC_WRAPPER=sccache` |
 | `crate-shape` | `-C codegen-units=256` |
@@ -217,6 +217,58 @@ Fitness is median loop wall time in ms (lower is better). Disk is recorded, not 
 | pinned-hashbrown | mid|noop | rust-loop-from-hashbrown | 1.5 | 10.2% | yes |
 | pinned-hashbrown | mid|body | rust-loop-from-hashbrown | 27.9 | 14.2% | yes |
 | pinned-hashbrown | mid|sig_dep | rust-loop-from-hashbrown | 197.3 | 696.8% | yes |
+| rust-loop | small|body | bhumi | 426.5 | 135.6% | yes |
+| rust-loop | small|body | emergentDB | 905.3 | 270.9% | yes |
+| rust-loop | small|body | codegraff2 | 4752.9 | 349.2% | yes |
+| rust-loop | small|sig_dep | bhumi | 439.1 | 123.7% | yes |
+| rust-loop | small|sig_dep | emergentDB | 877.9 | 308.5% | yes |
+| rust-loop | small|sig_dep | codegraff2 | 4880.2 | 379.1% | yes |
+| rust-loop-medium | mid|body | bhumi | 218.1 | 20.5% | yes |
+| rust-loop-medium | mid|body | emergentDB | 355.2 | 45.6% | yes |
+| rust-loop-medium | mid|body | codegraff2 | 1664.1 | 57.3% | yes |
+| rust-loop-steps | small|body | bhumi | 210.6 | 16.3% | yes |
+| rust-loop-steps | small|body | emergentDB | 330.6 | 35.5% | yes |
+| rust-loop-steps | small|body | codegraff2 | 1603.2 | 51.5% | yes |
+| rust-loop-steps | small|sig_dep | bhumi | 199.6 | 1.6% | yes |
+| rust-loop-steps | small|sig_dep | emergentDB | 316.6 | 47.3% | yes |
+| rust-loop-steps | small|sig_dep | codegraff2 | 1828.1 | 79.5% | yes |
+| rust-loop | small|noop | bhumi | 72.0 | 2.1% | yes |
+| rust-loop | small|noop | emergentDB | 88.3 | 1.6% | yes |
+| rust-loop | small|noop | codegraff2 | 206.8 | 7.9% | yes |
+| midsize | large|cold | bhumi | 14088.0 | 79.3% | yes |
+| midsize | large|cold | emergentDB | 3990.0 | -30.8% | yes |
+| midsize | large|noop | bhumi | 180.4 | 155.8% | yes |
+| midsize | large|noop | emergentDB | 107.3 | 23.5% | yes |
+| midsize | large|body | bhumi | 253.3 | 39.9% | yes |
+| midsize | large|body | emergentDB | 318.0 | 30.3% | yes |
+| midsize | large|sig_dep | bhumi | 278.4 | 41.8% | yes |
+| midsize | large|sig_dep | emergentDB | 406.8 | 89.3% | yes |
+| rust-loop-cranelift | small|body | bhumi | 0.0 | — | no |
+| rust-loop-cranelift | small|body | emergentDB | 0.0 | — | no |
+| midsize | large|cold | codegraff2 | 12485.2 | -0.7% | yes |
+| midsize | large|noop | codegraff2 | 192.8 | 0.6% | yes |
+| midsize | large|body | codegraff2 | 1646.3 | 55.6% | yes |
+| midsize | large|sig_dep | codegraff2 | 1633.2 | 60.3% | yes |
+| emergentDB | mid|body | hashbrown-from-rach-repos | 5585.7 | 1414.6% | yes |
+| emergentDB | mid|sig_dep | hashbrown-from-rach-repos | 255.0 | 175.2% | yes |
+| emergentDB | mid|noop | hashbrown-from-rach-repos | 15.2 | -84.1% | yes |
+| bhumi | small|body | hashbrown-from-rach-repos | 276.5 | -25.0% | yes |
+| bhumi | small|sig_dep | hashbrown-from-rach-repos | 254.1 | 174.2% | yes |
+| bhumi | small|noop | hashbrown-from-rach-repos | 15.5 | -83.7% | yes |
+| bhumi | small|cold | hashbrown-from-rach-repos | 403.1 | 10.1% | yes |
+| codegraff2 | large|body | hashbrown-from-rach-repos | 274.0 | -25.7% | yes |
+| codegraff2 | large|sig_dep | hashbrown-from-rach-repos | 319.0 | 244.3% | yes |
+| codegraff2 | large|noop | hashbrown-from-rach-repos | 15.0 | -84.3% | yes |
+| codegraff2 | large|cold | hashbrown-from-rach-repos | 404.8 | 10.5% | yes |
+| emergentDB | mid|cold | hashbrown-from-rach-repos | 7842.5 | 2041.0% | yes |
+| pinned-hashbrown | mid|cold | bhumi-from-hashbrown | 12264.5 | — | yes |
+| pinned-hashbrown | mid|noop | bhumi-from-hashbrown | 15.4 | — | yes |
+| pinned-hashbrown | mid|body | bhumi-from-hashbrown | 290.1 | — | yes |
+| pinned-hashbrown | mid|sig_dep | bhumi-from-hashbrown | 245.8 | — | yes |
+| pinned-hashbrown | mid|cold | ripgrep-from-hashbrown | 2919.9 | — | yes |
+| pinned-hashbrown | mid|noop | ripgrep-from-hashbrown | 2286.0 | — | yes |
+| pinned-hashbrown | mid|body | ripgrep-from-hashbrown | 153.9 | — | yes |
+| pinned-hashbrown | mid|sig_dep | ripgrep-from-hashbrown | 134.8 | — | yes |
 
 ### Promoted defaults
 
@@ -274,3 +326,8 @@ on the same sample, keep or revert.
 | 22 | ripgrep 15.2.0 | Cranelift on a real large crate | `nightly_pair.py` | **build cold 4939 vs 6808 (−27%)**; **build body 382 vs 473 (−19%)**; test --no-run cold 6118 vs 7849 (−22%), body 430 vs 506 (−15%). Sig edit sites failed (callers of `sign`). Check-loop elites still beat build (121ms vs 382ms) | keep cranelift as a build/test-codegen step; not a check-cell elite |
 | 23 | tokio 1.54.0 | Cranelift on tokio (`default=full`) | `nightly_pair.py` | **build cold 5808 vs 6749 (−14%)**; **build body 1033 vs 1120 (−8%)**; sig ~flat. `test --no-run` failed for **both** nightlies (cargo 101; workspace tests, not backend-specific) | keep the build win; do not read test cells |
 | 24 | cross-test | Rerun matrix on pinned-hashbrown | held-out canonical elites | rust-loop **noop graph transfers** (3.2ms, +0.9%); rust-loop body/sig **+112/+130%**. midsize body +5.7%; midsize noop check **+409%** vs graph. Hashbrown elites on rust-loop: noop +10%, body +14%, sig **+697%**. Promoted defaults unchanged | keep |
+| 25 | rach-repos (PR #12) | Merge bhumi / grep-core / forge_domain | Isolated `SCCACHE_DIR`; reject warm vs empty; held-out names include `-from-` | 144 evals, 12 ok elites. **No occupancy change.** sccache mid/large body 244/1058 lose to hashbrown 122.7 / are incomparable to midsize restore+mean. A `hashbrown-from-rach-repos` 403.1 cold was held-out (does not occupy mid\|cold). Promoted defaults unchanged | keep |
+| 26 | hashbrown + ripgrep + bhumi | sccache mid/large wins were method/cache-specific | Identical official first-rebuild; per-genome `SCCACHE_DIR`; shared target | incremental check **beats** sccache+noinc: hashbrown body 115 vs 337 (2.9×); ripgrep 148 vs 363 (2.5×); bhumi 290 vs 354 (+22%). n=5 on rach-repos body/sig mixed the first miss with warm/sccache hits. **sccache is sample/cache-specific, not a default** | revert sccache as iteration default |
+| 27 | crates/* workspaces | graph-loop `discover_inputs` missed globs | Expand `crates/*` in Zig + Python; test that an edit is a miss | rust-loop-medium graph noop 1.5ms still valid. Synthetic `members=["crates/*"]`: cold 630 / noop 1.4 / **body 509 miss** (was a bogus 1ms hit). Graph noop elites stay; they were never a glob-workspace occupy | keep |
+| 28 | cranelift | `CARGO_PROFILE_*` needs `cargo-features` | `RUSTFLAGS=-Zcodegen-backend=cranelift` + `cargo +nightly -Zcodegen-backend` (no manifest edit) | `cargo +nightly -Zcodegen-backend build` on rust-loop (no cargo-features) rc=0. Isolated nightly pair unchanged: cranelift is a build/test-codegen step, not a check-cell elite | keep the flag path |
+| 29 | cross-test | Hashbrown mid elites on bhumi + ripgrep | `--held-out` mid cells; `-from-` cannot occupy | bhumi: graph noop **15.4ms** (transfers), body 290 / sig 246. ripgrep: body 154 / sig 135 check; graph noop **2286ms** (does not transfer). Occupancy unchanged. Official 11/12 cells stalled. large\|sig_dep still n=1 (PR #11 method). Ruff PR #13 pending; forge_domain private here | keep |
