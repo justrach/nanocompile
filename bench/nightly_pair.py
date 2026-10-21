@@ -35,10 +35,7 @@ def pair_argv(command, cranelift, jobs, offline):
 def extra_env(cranelift):
     if not cranelift:
         return {}
-    return {
-        "CARGO_PROFILE_DEV_CODEGEN_BACKEND": "cranelift",
-        "CARGO_PROFILE_TEST_CODEGEN_BACKEND": "cranelift",
-    }
+    return {"RUSTFLAGS": "-Zcodegen-backend=cranelift"}
 
 
 def main(argv=None):

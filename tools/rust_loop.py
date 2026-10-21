@@ -260,6 +260,28 @@ def workspace_members(text):
     return found
 
 
+def expand_workspace_members(root, patterns):
+    """Expand Cargo workspace globs such as crates/* to real package dirs."""
+    root = Path(root)
+    found = []
+    seen = set()
+    for pattern in patterns:
+        if any(char in pattern for char in "*?["):
+            matches = [path for path in sorted(root.glob(pattern))
+                       if path.is_dir() and (path / "Cargo.toml").is_file()]
+        else:
+            matches = [root / pattern]
+        for path in matches:
+            if not path.is_dir():
+                continue
+            rel = posix(path.resolve().relative_to(root.resolve()))
+            if rel in seen:
+                continue
+            seen.add(rel)
+            found.append(rel)
+    return found
+
+
 def discover_inputs(root):
     root = root.resolve()
     cargo = root / "Cargo.toml"
@@ -267,7 +289,7 @@ def discover_inputs(root):
         fail("no Cargo.toml in " + str(root))
     paths = []
     packages = [root]
-    for member in workspace_members(cargo.read_text(encoding="utf-8")):
+    for member in expand_workspace_members(root, workspace_members(cargo.read_text(encoding="utf-8"))):
         packages.append((root / member).resolve())
     seen = set()
     for package in packages:

@@ -234,6 +234,42 @@ class MapElites(unittest.TestCase):
         self.assertEqual(elite["cache_state"], "empty")
         self.assertFalse(elite["genome"].get("sccache"))
 
+    def test_from_sample_name_is_held_out(self):
+        tmp = tempfile.TemporaryDirectory(prefix="map-elites ")
+        self.addCleanup(tmp.cleanup)
+        into = Path(tmp.name) / "map_elites.json"
+        elite = evaluation("mid|cold", fitness=441.7, sample="pinned-hashbrown")
+        elite["cache_state"] = "empty"
+        elite["fitness_method"] = "official_first_rebuild"
+        into.write_text(json.dumps({
+            "schema_version": 1,
+            "kind": "nanocompile.rust-loop.map-elites",
+            "axes": {"size": ["small", "mid", "large"], "edit": ["cold", "noop", "body", "sig_dep"]},
+            "fitness": {"metric": "median_ms", "goal": "min", "min_gain_pct": 3.0, "max_non_improving": 4},
+            "cells": {"mid|cold": elite},
+            "history": [],
+            "generalization": {"samples": [], "elites_tested": [], "matrix": []},
+            "promoted": {"defaults": None, "sample_specific": []},
+        }), encoding="utf-8")
+        shard = Path(tmp.name) / "held.json"
+        faster = evaluation("mid|cold", fitness=403.1, sample="hashbrown-from-rach-repos")
+        faster["cache_state"] = "empty"
+        faster["fitness_method"] = "official_first_rebuild"
+        flagged = evaluation("mid|body", fitness=10.0, sample="pinned-hashbrown")
+        flagged["held_out"] = True
+        shard.write_text(json.dumps({
+            "schema_version": 1,
+            "kind": "nanocompile.rust-loop.map-elites.shard",
+            "sample": "hashbrown-from-rach-repos",
+            "evaluations": [faster, flagged],
+        }), encoding="utf-8")
+        self.tool(["merge", "--into", str(into), str(shard)])
+        archive = json.loads(into.read_text(encoding="utf-8"))
+        self.assertEqual(archive["cells"]["mid|cold"]["fitness_ms"], 441.7)
+        self.assertEqual(archive["cells"]["mid|cold"]["sample"], "pinned-hashbrown")
+        self.assertNotIn("mid|body", archive["cells"])
+        self.assertTrue(any(row.get("action") == "held_out" for row in archive["history"]))
+
     def test_stacked_wrappers_rejected(self):
         tmp = tempfile.TemporaryDirectory(prefix="map-elites ")
         self.addCleanup(tmp.cleanup)

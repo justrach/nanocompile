@@ -160,7 +160,11 @@ def is_fixture_sample(sample):
 
 
 def is_held_out(row):
-    return bool(row.get("held_out")) or str(row.get("sample") or "").find("-held-out") >= 0
+    if bool(row.get("held_out")):
+        return True
+    sample = str(row.get("sample") or "")
+    # Cross-tests use either the --held-out suffix or "<tested>-from-<trained>".
+    return "-held-out" in sample or "-from-" in sample
 
 
 def correctness_ok(row):

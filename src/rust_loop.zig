@@ -201,6 +201,97 @@ test "workspace members parse quoted arrays" {
     try std.testing.expectEqualStrings("app", members[1]);
 }
 
+fn globComponentMatch(pat: []const u8, name: []const u8) bool {
+    if (std.mem.eql(u8, pat, "*")) return true;
+    if (std.mem.indexOfScalar(u8, pat, '*') == null) return eq(pat, name);
+    // prefix*suffix in one path component
+    const star = std.mem.indexOfScalar(u8, pat, '*').?;
+    const prefix = pat[0..star];
+    const suffix = pat[star + 1 ..];
+    return std.mem.startsWith(u8, name, prefix) and std.mem.endsWith(u8, name, suffix) and name.len >= prefix.len + suffix.len;
+}
+
+fn expandWorkspaceMembers(ctx: *cache.Context, root: []const u8, patterns: []const []const u8) ![]const []const u8 {
+    var found: std.ArrayList([]const u8) = .empty;
+    var seen = std.StringHashMap(void).init(ctx.a);
+    for (patterns) |pattern| {
+        if (std.mem.indexOfAny(u8, pattern, "*?[") == null) {
+            if (seen.contains(pattern)) continue;
+            try seen.put(pattern, {});
+            try found.append(ctx.a, pattern);
+            continue;
+        }
+        try globWorkspacePackages(ctx, root, pattern, &found, &seen);
+    }
+    return found.items;
+}
+
+fn globWorkspacePackages(
+    ctx: *cache.Context,
+    root: []const u8,
+    pattern: []const u8,
+    found: *std.ArrayList([]const u8),
+    seen: *std.StringHashMap(void),
+) !void {
+    const slash = std.mem.lastIndexOfScalar(u8, pattern, '/') orelse {
+        try globOneDir(ctx, root, "", pattern, found, seen);
+        return;
+    };
+    const parent = pattern[0..slash];
+    const name_pat = pattern[slash + 1 ..];
+    if (std.mem.indexOfAny(u8, parent, "*?[") != null) {
+        // crates/*/inner: walk from root and match the full relative path later.
+        try globWalk(ctx, root, parent, name_pat, found, seen);
+        return;
+    }
+    try globOneDir(ctx, root, parent, name_pat, found, seen);
+}
+
+fn globOneDir(
+    ctx: *cache.Context,
+    root: []const u8,
+    parent: []const u8,
+    name_pat: []const u8,
+    found: *std.ArrayList([]const u8),
+    seen: *std.StringHashMap(void),
+) !void {
+    const folder = if (parent.len == 0) root else try std.fs.path.join(ctx.a, &.{ root, parent });
+    var dir = Dir.cwd().openDir(ctx.io, folder, .{ .iterate = true }) catch return;
+    defer dir.close(ctx.io);
+    var it = dir.iterate();
+    while (try it.next(ctx.io)) |entry| {
+        if (entry.kind != .directory or !globComponentMatch(name_pat, entry.name)) continue;
+        const rel = if (parent.len == 0) entry.name else try posixJoin(ctx, &.{ parent, entry.name });
+        const cargo = try std.fs.path.join(ctx.a, &.{ root, rel, "Cargo.toml" });
+        if (!existsKind(ctx, cargo, .file) or seen.contains(rel)) continue;
+        try seen.put(rel, {});
+        try found.append(ctx.a, rel);
+    }
+}
+
+fn globWalk(
+    ctx: *cache.Context,
+    root: []const u8,
+    parent_pat: []const u8,
+    name_pat: []const u8,
+    found: *std.ArrayList([]const u8),
+    seen: *std.StringHashMap(void),
+) !void {
+    _ = parent_pat;
+    var dir = Dir.cwd().openDir(ctx.io, root, .{ .iterate = true }) catch return;
+    defer dir.close(ctx.io);
+    var walk = try dir.walk(ctx.a);
+    defer walk.deinit();
+    while (try walk.next(ctx.io)) |entry| {
+        if (entry.kind != .directory or !globComponentMatch(name_pat, entry.basename)) continue;
+        const rel = try posixJoin(ctx, &.{entry.path});
+        const cargo = try std.fs.path.join(ctx.a, &.{ root, rel, "Cargo.toml" });
+        if (!existsKind(ctx, cargo, .file) or seen.contains(rel)) continue;
+        try seen.put(rel, {});
+        try found.append(ctx.a, rel);
+    }
+}
+
 fn existsKind(ctx: *cache.Context, path: []const u8, kind: std.Io.File.Kind) bool {
     const st = Dir.cwd().statFile(ctx.io, path, .{}) catch return false;
     return st.kind == kind;
@@ -243,7 +334,8 @@ fn discoverInputs(ctx: *cache.Context, root: []const u8) ![]const []const u8 {
     var packages: std.ArrayList([]const u8) = .empty;
     try packages.append(ctx.a, root);
     const members = workspaceMembers(ctx.a, try ctx.read(cargo)) catch &.{};
-    for (members) |member| try packages.append(ctx.a, try std.fs.path.join(ctx.a, &.{ root, member }));
+    const expanded = try expandWorkspaceMembers(ctx, root, members);
+    for (expanded) |member| try packages.append(ctx.a, try std.fs.path.join(ctx.a, &.{ root, member }));
     for (packages.items) |package| {
         if (!existsKind(ctx, package, .directory) and !eq(package, root)) continue;
         for (config_files) |name| {

@@ -306,10 +306,7 @@ def available_steps(args, tools):
             ["build", "test"],
             toolchain="nightly",
             extra_flags=["-Zcodegen-backend"],
-            extra_env={
-                "CARGO_PROFILE_DEV_CODEGEN_BACKEND": "cranelift",
-                "CARGO_PROFILE_TEST_CODEGEN_BACKEND": "cranelift",
-            },
+            extra_env={"RUSTFLAGS": "-Zcodegen-backend=cranelift"},
             skip=None if tools["cranelift"] else "nightly rustc-codegen-cranelift-preview not installed",
         ),
         StepPlan(
@@ -729,8 +726,9 @@ def genome_env(genome, nano, tools, sccache_dir, isolate_cache):
     elif genome.get("incremental") and "CARGO_INCREMENTAL" not in extra:
         extra["CARGO_INCREMENTAL"] = "1"
     if genome.get("dev_backend") == "cranelift":
-        extra["CARGO_PROFILE_DEV_CODEGEN_BACKEND"] = "cranelift"
-        extra["CARGO_PROFILE_TEST_CODEGEN_BACKEND"] = "cranelift"
+        # rustc -Z flag: do not set CARGO_PROFILE_*_CODEGEN_BACKEND, which
+        # requires cargo-features = ["codegen-backend"] in the user's manifest.
+        rustflags.append("-Zcodegen-backend=cranelift")
     linker = genome.get("linker") or "default"
     if linker == "mold":
         rustflags.append("-C link-arg=-fuse-ld=mold")
@@ -856,9 +854,12 @@ def evaluation_row(cell, size, edit, genome, summary, correctness, sample, commi
         "n_evals": len(summary.get("samples_ms") or []),
         "non_improving": 0,
         "stopped": False,
+        "held_out": "-held-out" in str(sample) or "-from-" in str(sample),
         "fitness_method": "official_first_rebuild",
         "sample_class": "fixture" if str(sample).startswith("rust-loop") else "real",
-        "cache_state": "empty" if edit == "cold" else None,
+        "cache_state": (
+            "empty" if edit == "cold" else None
+        ),
     }
 
 
@@ -907,7 +908,7 @@ def shard_from_report(report, size):
 
 def measure_genome(genome, work, driver, nano, tools, base_env, jobs, offline, warmup, runs, edit, work_root, target):
     isolate = work_root / "nano-cache"
-    extra = genome_env(genome, nano, tools, work_root / "sccache", isolate)
+    extra = genome_env(genome, nano, tools, Path(str(target) + ".sccache"), isolate)
     env = cargo_env(base_env, target, extra)
     if genome.get("loop") == "test":
         env.pop("CARGO_PROFILE_DEV_CODEGEN_BACKEND", None)
@@ -1028,6 +1029,7 @@ def execute_held_out(args, work, driver, nano, tools, base_env, offline, correct
             continue
         local_key = "%s|%s" % (size, edit)
         row = evaluation_row(local_key, size, edit, genome, summary, correctness, sample, commit)
+        row["held_out"] = True
         evaluations.append(row)
         local_elite = cells.get(local_key)
         delta = None

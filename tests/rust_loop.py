@@ -192,6 +192,46 @@ class RustLoop(unittest.TestCase):
         self.assertFalse((self.project / ".nanocompile-loop" / "validate.ok").exists())
         self.assertIn(b"error", broken.stderr.lower() + broken.stdout.lower())
 
+    def test_discover_inputs_expands_crates_glob(self):
+        (self.project / "Cargo.toml").write_text("[workspace]\nmembers = [\"crates/*\"]\n", encoding="utf-8")
+        (self.project / "src" / "lib.rs").unlink()
+        (self.project / "src").rmdir()
+        core = self.project / "crates" / "core"
+        (core / "src").mkdir(parents=True)
+        (core / "Cargo.toml").write_text(
+            "[package]\nname = \"core\"\nversion = \"0.1.0\"\nedition = \"2021\"\n",
+            encoding="utf-8",
+        )
+        (core / "src" / "lib.rs").write_text("pub fn answer() -> u8 { 1 }\n", encoding="utf-8")
+        skipped = self.helper.workspace_members((self.project / "Cargo.toml").read_text(encoding="utf-8"))
+        self.assertEqual(skipped, ["crates/*"])
+        self.assertEqual(self.helper.expand_workspace_members(self.project, skipped), ["crates/core"])
+        inputs = self.helper.discover_inputs(self.project)
+        self.assertIn("crates/core/src/lib.rs", inputs)
+        self.assertIn("crates/core/Cargo.toml", inputs)
+
+    def test_graph_noop_sees_workspace_glob_edits(self):
+        (self.project / "Cargo.toml").write_text("[workspace]\nmembers = [\"crates/*\"]\n", encoding="utf-8")
+        (self.project / "src" / "lib.rs").unlink()
+        (self.project / "src").rmdir()
+        core = self.project / "crates" / "core"
+        (core / "src").mkdir(parents=True)
+        (core / "Cargo.toml").write_text(
+            "[package]\nname = \"core\"\nversion = \"0.1.0\"\nedition = \"2021\"\n",
+            encoding="utf-8",
+        )
+        source = core / "src" / "lib.rs"
+        source.write_text("pub fn answer() -> u8 { 1 }\n", encoding="utf-8")
+        spec = self.write_spec(wrapper=BINARY)
+        self.assertIn("crates/core/src/lib.rs", spec["tasks"][0]["inputs"])
+        _, report = self.run_task()
+        self.assertEqual([row["outcome"] for row in report["tasks"]], ["miss", "miss"])
+        _, warm = self.run_task()
+        self.assertEqual([row["outcome"] for row in warm["tasks"]], ["hit", "hit"])
+        source.write_text("pub fn answer() -> u8 { 2 }\n", encoding="utf-8")
+        _, edited = self.run_task()
+        self.assertEqual(edited["tasks"][0]["outcome"], "miss")
+
     def test_example_specification_is_a_valid_rust_loop(self):
         spec_path = EXAMPLE / "nanocompile.tasks.json"
         self.helper_run(["check-spec", str(spec_path)], cwd=EXAMPLE)
