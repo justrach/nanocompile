@@ -31,6 +31,57 @@ class RustLoopBench(unittest.TestCase):
         argv = BENCH.cargo_argv("build", 0, False, "nightly", ["-Zcodegen-backend"])
         self.assertEqual(argv[:4], ["cargo", "+nightly", "-Zcodegen-backend", "build"])
 
+    def test_cargo_argv_includes_package(self):
+        argv = BENCH.cargo_argv("check", 0, False, package="ruff")
+        self.assertEqual(argv[:4], ["cargo", "check", "-p", "ruff"])
+        genome = BENCH.default_genome(package="ruff", loop="check")
+        argv = BENCH.genome_argv(genome, "check", None, False, None, None)
+        self.assertIn("-p", argv)
+        self.assertEqual(argv[argv.index("-p") + 1], "ruff")
+
+    def test_broken_edit_prefers_body_mark_file(self):
+        import tempfile
+        root = Path(tempfile.mkdtemp(prefix="nano-mark-"))
+        first = root / "a.rs"
+        first.write_text("fn first() {}\n", encoding="utf-8")
+        marked = root / "crates" / "cmd" / "src"
+        marked.mkdir(parents=True)
+        lib = marked / "lib.rs"
+        lib.write_text("// nano-loop-body\nfn is_response_file() {}\n", encoding="utf-8")
+        record = BENCH.edit_project(root, "broken")
+        self.assertEqual(record[0], lib)
+        self.assertIn('let _nano_loop_body: u32 = "nope";', lib.read_text(encoding="utf-8"))
+        self.assertEqual(first.read_text(encoding="utf-8"), "fn first() {}\n")
+        BENCH.restore_edit(record)
+        self.assertEqual(lib.read_text(encoding="utf-8"), "// nano-loop-body\nfn is_response_file() {}\n")
+
+    def test_run_cell_applies_and_reverts_each_edit_run(self):
+        import tempfile
+        root = Path(tempfile.mkdtemp(prefix="nano-edit-runs-"))
+        src = root / "src"
+        src.mkdir()
+        lib = src / "lib.rs"
+        lib.write_text("fn mark() { // nano-loop-body\n}\n", encoding="utf-8")
+        seen = []
+
+        def fake_measure(argv, cwd, env, target):
+            text = lib.read_text(encoding="utf-8")
+            seen.append("_nano_loop_body" in text)
+            return {"ms": 1.0, "returncode": 0, "target_bytes": 0, "stderr_tail": "", "stdout_tail": ""}
+
+        original = BENCH.measure_once
+        BENCH.measure_once = fake_measure
+        try:
+            step = type("S", (), {"id": "t", "title": "t"})()
+            summary = BENCH.run_cell(step, "check", "body", ["true"], root, {}, root / "target", 0, 3, "body")
+        finally:
+            BENCH.measure_once = original
+        self.assertEqual(summary["ok"], True)
+        self.assertEqual(len(summary["samples_ms"]), 3)
+        # Timed samples see the edit; restore rebuilds see the original.
+        self.assertEqual(seen, [True, False, True, False, True, False])
+        self.assertNotIn("_nano_loop_body", lib.read_text(encoding="utf-8"))
+
     def test_cargo_z_flags_precede_subcommand(self):
         argv = BENCH.cargo_argv("test", 0, True, "nightly", ["-Zcodegen-backend", "--no-run"])
         self.assertEqual(argv[:4], ["cargo", "+nightly", "-Zcodegen-backend", "test"])

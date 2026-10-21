@@ -46,6 +46,9 @@ Flags (keep these names):
 | `--map-elites` | seed + mutate elites for this sample's size bucket |
 | `--emit-archive FILE` | write `bench/archive/<sample>.json` shard |
 | `--mutations N` | stop a cell after N non-improving tries (default 4) |
+| `--package NAME` | `cargo -p NAME` for check/build/test and the graph spec |
+| `--validate-package NAME` | `cargo test -p NAME` for the broken-edit gate (default: `--package`) |
+| `--timeout SEC` | per-invocation timeout (default 3600; was a hard 600) |
 
 Prefer `nanocompile rust-loop` when that subcommand exists; otherwise the
 harness uses `tools/rust_loop.py`. Either driver must keep `validate` as the
@@ -63,7 +66,9 @@ Phases, in order, per step × command:
 | `edit_sig` | add `_nano_loop_sig: ()` (`// nano-loop-sig` or the first `fn`) |
 
 Each cell records sample wall times, median, population stdev, min/max, and
-`target/` byte size.
+`target/` byte size. Incremental edits are applied, timed, and reverted **per
+run**, then an untimed rebuild restores the original tree so extra `--runs` are
+independent first rebuilds, not no-ops of an already-edited workspace.
 
 ### Step ids
 
@@ -129,6 +134,9 @@ Size is by Rust LOC, not crate-count tricks: `small` is LOC < 2000,
 `examples/rust-loop-medium` fixture is small. `examples/pinned-hashbrown`
 (hashbrown 0.15.2, ~23k LOC) is the mid sample this agent controls.
 PR #11's ripgrep 15.2.0 + tokio 1.54.0 trees classify as **large**.
+PR #13's ruff 0.17.1 tree is also large (~838k LOC); measure it with
+`--package ruff`. Incremental edits are applied/reverted per `--runs`
+sample so extra runs stay first rebuilds.
 
 Each elite records `fitness_method` and, for cold cells, `cache_state`.
 `official_first_rebuild` is this harness. `restore_rebuild_mean_of_medians`
@@ -156,7 +164,7 @@ Fitness is median loop wall time in ms (lower is better). Disk is recorded, not 
 | --- | ---: | ---: | ---: | ---: |
 | small | 43.5 ms (rust-loop, check) | 1.3 ms (rust-loop, graph) | 24.4 ms (rust-loop, check) | 24.8 ms (rust-loop, check) |
 | mid | 441.7 ms (pinned-hashbrown, check) | 3.2 ms (pinned-hashbrown, graph) | 122.7 ms (pinned-hashbrown, check) | 113.2 ms (pinned-hashbrown, check) |
-| large | 1387.3 ms (midsize, check) | 31.2 ms (midsize, check) | 121.9 ms (midsize, check) | 712.0 ms (midsize, check) |
+| large | 3114.8 ms (ripgrep, check) | 30.7 ms (ripgrep, check) | 155.7 ms (ripgrep, check) | 6441.7 ms (ruff-check-line-tables, check) |
 
 ### Elites
 
@@ -170,10 +178,10 @@ Fitness is median loop wall time in ms (lower is better). Disk is recorded, not 
 | mid|noop | pinned-hashbrown | 3.2 | first-rebuild | — | graph | yes | llvm |
 | mid|body | pinned-hashbrown | 122.7 | first-rebuild | — | check | no | llvm |
 | mid|sig_dep | pinned-hashbrown | 113.2 | first-rebuild | — | check | no | llvm |
-| large|cold | midsize | 1387.3 | restore+mean | warm_compiler_cache | check | no | llvm |
-| large|noop | midsize | 31.2 | restore+mean | — | check | yes | llvm |
-| large|body | midsize | 121.9 | restore+mean | — | check | no | llvm |
-| large|sig_dep | midsize | 712.0 | restore+mean | — | check | no | llvm |
+| large|cold | ripgrep | 3114.8 | first-rebuild | empty | check | no | llvm |
+| large|noop | ripgrep | 30.7 | first-rebuild | — | check | no | llvm |
+| large|body | ripgrep | 155.7 | first-rebuild | — | check | no | llvm |
+| large|sig_dep | ruff-check-line-tables | 6441.7 | first-rebuild | — | check | no | llvm |
 
 ### Generalization
 
@@ -269,14 +277,52 @@ Fitness is median loop wall time in ms (lower is better). Disk is recorded, not 
 | pinned-hashbrown | mid|noop | ripgrep-from-hashbrown | 2286.0 | — | yes |
 | pinned-hashbrown | mid|body | ripgrep-from-hashbrown | 153.9 | — | yes |
 | pinned-hashbrown | mid|sig_dep | ripgrep-from-hashbrown | 134.8 | — | yes |
+| midsize | large|cold | large-workspace | 471.5 | 3.8% | yes |
+| midsize | large|noop | large-workspace | 169.9 | 12.6% | yes |
+| midsize | large|sig_dep | large-workspace | 7052.3 | 5.8% | yes |
+| pinned-hashbrown-held-out | mid|cold | large-workspace | 53275.1 | 14.4% | yes |
+| rust-loop | small|cold | large-workspace | 53275.1 | 14.4% | yes |
+| rust-loop | small|sig_dep | large-workspace | 14769.2 | 121.7% | yes |
+| rust-loop-medium | small|cold | large-workspace | 53275.1 | 14.4% | yes |
+| rust-loop-medium | small|sig_dep | large-workspace | 14769.2 | 121.7% | yes |
+| pinned-hashbrown-held-out | mid|body | large-workspace | 467.2 | 2.8% | yes |
+| pinned-hashbrown-held-out | mid|sig_dep | large-workspace | 6985.9 | 4.8% | yes |
+| pinned-hashbrown | mid|body | large-workspace | 467.2 | 2.8% | yes |
+| pinned-hashbrown | mid|sig_dep | large-workspace | 6985.9 | 4.8% | yes |
+| rust-loop-medium | small|body | large-workspace | 467.2 | 2.8% | yes |
+| rust-loop-cranelift | small|body | large-workspace | 1336.3 | 194.1% | yes |
+| rust-loop-cranelift | small|noop | large-workspace | 167.7 | 11.2% | yes |
+| rust-loop-steps | small|sig_dep | large-workspace | 6985.9 | 4.8% | yes |
+| rust-loop-steps | small|cold | large-workspace | 54911.6 | 17.9% | yes |
+| rust-loop-steps | small|body | large-workspace | 485.1 | 6.8% | yes |
+| ripgrep | large|cold | hashbrown-from-large | 524.2 | 18.7% | yes |
+| ripgrep | large|noop | hashbrown-from-large | 16.2 | 408.8% | yes |
+| ripgrep | large|body | hashbrown-from-large | 119.1 | -2.9% | yes |
+| ruff-check-line-tables | large|sig_dep | hashbrown-from-large | 124.5 | 10.0% | yes |
+| ripgrep | large|cold | ripgrep-from-large | 3205.8 | 2.9% | yes |
+| ripgrep | large|noop | ripgrep-from-large | 35.2 | 14.7% | yes |
+| ripgrep | large|body | ripgrep-from-large | 166.1 | 6.6% | yes |
+| ruff-check-line-tables | large|sig_dep | ripgrep-from-large | 160.3 | -97.5% | yes |
+| ripgrep | large|cold | bhumi-from-large | 12145.6 | 27809.7% | yes |
+| ripgrep | large|noop | bhumi-from-large | 63.5 | 4701.6% | yes |
+| ripgrep | large|body | bhumi-from-large | 274.9 | 1024.5% | yes |
+| ruff-check-line-tables | large|sig_dep | bhumi-from-large | 241.2 | 874.1% | yes |
+| pinned-hashbrown | mid|cold | ruff-from-mid | 52073.8 | 1571.8% | yes |
+| pinned-hashbrown | mid|noop | ruff-from-mid | 1288.4 | 4094.1% | yes |
+| pinned-hashbrown | mid|body | ruff-from-mid | 469.8 | 201.7% | yes |
+| pinned-hashbrown | mid|sig_dep | ruff-from-mid | 6708.0 | 4.1% | yes |
+| ripgrep | large|cold | ruff-from-large | 52836.8 | 1596.3% | yes |
+| ripgrep | large|noop | ruff-from-large | 196.4 | 539.2% | yes |
+| ripgrep | large|body | ruff-from-large | 547.3 | 251.4% | yes |
+| ruff-check-line-tables | large|sig_dep | ruff-from-large | 6519.1 | 1.2% | yes |
 
 ### Promoted defaults
 
-Iteration default (cold/body/sig_dep): `{"codegen_units": null, "command_build": false, "debuginfo": "line-tables-only", "dev_backend": "llvm", "fast_check": "cargo-check", "incremental": true, "jobs": 3, "linker": "default", "loop": "check", "offline": true, "package_scope": null, "quiet": false, "sccache": false, "wrapper": false}`
+Iteration default (cold/body/sig_dep): `{"codegen_units": null, "debuginfo": "full", "dev_backend": "llvm", "fast_check": "cargo-check", "incremental": true, "jobs": 3, "linker": "default", "loop": "check", "offline": true, "sccache": false, "wrapper": false}`
 
 weighted majority on real-sample cold/body/sig_dep; fixture cells do not vote when real elites exist; warm-cache sccache cold is sample-specific, not a true-cold default
 
-No-op default: `{"codegen_units": null, "command_build": false, "debuginfo": "full", "dev_backend": "llvm", "fast_check": "cargo-check", "incremental": false, "jobs": 3, "linker": "default", "loop": "check", "offline": true, "package_scope": null, "quiet": false, "sccache": false, "wrapper": true}`
+No-op default: `{"codegen_units": null, "debuginfo": "full", "dev_backend": "llvm", "fast_check": "cargo-check", "incremental": true, "jobs": 3, "linker": "default", "loop": "check", "offline": true, "sccache": false, "wrapper": false}`
 
 weighted majority on real-sample noop; fixture graph elites do not set the default when a real noop exists
 
@@ -286,11 +332,9 @@ Sample-specific elites:
 - `small|noop` `rust-loop`: fixture elite; real samples outvote fixtures; loses the weighted vote for its edit family
 - `small|body` `rust-loop`: fixture elite; real samples outvote fixtures; loses the weighted vote for its edit family
 - `small|sig_dep` `rust-loop`: fixture elite; real samples outvote fixtures; loses the weighted vote for its edit family
-- `large|cold` `midsize`: warm compiler cache (sccache/wrapper retained), not empty-cache cold; loses the weighted vote for its edit family
+- `large|sig_dep` `ruff-check-line-tables`: loses the weighted vote for its edit family
 - `mid|cold` `pinned-hashbrown`: loses the weighted vote for its edit family
 - `mid|noop` `pinned-hashbrown`: loses the weighted vote for its edit family
-- `mid|body` `pinned-hashbrown`: loses the weighted vote for its edit family
-- `mid|sig_dep` `pinned-hashbrown`: loses the weighted vote for its edit family
 
 <!-- MAP_ELITES_GRID_END -->
 
@@ -331,3 +375,10 @@ on the same sample, keep or revert.
 | 27 | crates/* workspaces | graph-loop `discover_inputs` missed globs | Expand `crates/*` in Zig + Python; test that an edit is a miss | rust-loop-medium graph noop 1.5ms still valid. Synthetic `members=["crates/*"]`: cold 630 / noop 1.4 / **body 509 miss** (was a bogus 1ms hit). Graph noop elites stay; they were never a glob-workspace occupy | keep |
 | 28 | cranelift | `CARGO_PROFILE_*` needs `cargo-features` | `RUSTFLAGS=-Zcodegen-backend=cranelift` + `cargo +nightly -Zcodegen-backend` (no manifest edit) | `cargo +nightly -Zcodegen-backend build` on rust-loop (no cargo-features) rc=0. Isolated nightly pair unchanged: cranelift is a build/test-codegen step, not a check-cell elite | keep the flag path |
 | 29 | cross-test | Hashbrown mid elites on bhumi + ripgrep | `--held-out` mid cells; `-from-` cannot occupy | bhumi: graph noop **15.4ms** (transfers), body 290 / sig 246. ripgrep: body 154 / sig 135 check; graph noop **2286ms** (does not transfer). Occupancy unchanged. Official 11/12 cells stalled. large\|sig_dep still n=1 (PR #11 method). Ruff PR #13 pending; forge_domain private here | keep |
+| 30 | large-workspace (PR #13) | Merge ruff 0.17.1 / `cargo check -p ruff` | One `crates/*` expand (Zig + Python fallback + test); reject mold first-attempts (~260ms / 585KB, `ok=false`) | Official method supersedes PR #11 restore+mean. First occupy: large cold 54781 empty, noop 155, body 467, sig 6663 line-tables | keep |
+| 31 | rust_loop_bench | Extra `--runs` were no-ops; no `--package`; 600s timeout | Apply/revert + untimed restore per run; `--package` / `--validate-package`; timeout 3600 | 13 harness tests; broken edit prefers `// nano-loop-body` so `check -p ruff` sees `ruff_command_line` | keep |
+| 32 | ruff unified | Re-measure four genomes under official first-rebuild | Marks: body `ruff_command_line::is_response_file`; hub `ruff_text_size` private fn | incremental body **484** / sig **6522**; line-tables body **517** (+6.8%, lose) / sig **6442** (−1.2%); sccache body **1268** (+162%) / sig **19890**; wrapper body **1000** (+107%) / sig **15614**; wrapper empty-cold 53027 (−4%) | keep incremental; revert the rest as defaults |
+| 33 | sccache | PR #13 −11% cold / −3.5% sig | Official empty `SCCACHE_DIR` + first-rebuild | sccache cold **+6.8%**, body **+162%**, sig **+205%** vs incremental. The shard “wins” were cache/sample-specific. **sccache is not a default** | revert |
+| 34 | wrapper `CARGO_INCREMENTAL=0` | Should the wrapper stop forcing inc=0? | Unified ruff + prior hashbrown/ripgrep/bhumi | Wrapper body/sig **+88–139%** because it disables incremental. Keep the force (nanocompile cache is ineligible for incremental artifacts). Do **not** promote wrapper for iteration. Graph+wrapper stays a fixture noop gene | keep the force; not an iteration default |
+| 35 | rematch | All four shards, official method | ripgrep 53k LOC is large; ruff 838k LOC / ` -p ruff` is large | **large cold/noop/body → ripgrep** 3115 / 30.7 / 155.7; **large sig → ruff line-tables** 6442. Promoted: `cargo check` LLVM `incremental=true` `debuginfo=full`, no wrapper, no sccache, no sample `package`. **12/12 stalled** | keep |
+| 36 | four-shard cross-test | Unified official first-rebuild | mid elites → ruff `-p ruff`; large elites → hashbrown / ripgrep / bhumi / ruff | Hashbrown body **119 (−2.9%)** transfers; graph noop **+409%** does not. On ruff, hashbrown body **470** matches ruff incremental 484; graph noop **1288** does not transfer. Ripgrep self +3–15%. Same-project ruff sig elite **+1.2%**. **Stop: 12/12 stalled** | keep |

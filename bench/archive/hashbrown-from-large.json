@@ -1,0 +1,204 @@
+{
+  "schema_version": 1,
+  "kind": "nanocompile.rust-loop.map-elites.shard",
+  "sample": "hashbrown-from-large",
+  "commit": "efe05c770bfe0f0645272992f141737b8d047639",
+  "timestamp": "2026-10-21T05:36:34.617523+00:00",
+  "evaluations": [
+    {
+      "cell": "mid|cold",
+      "size": "mid",
+      "edit": "cold",
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true
+      },
+      "fitness_ms": 524.1811214991685,
+      "spread_ms": 24.367108499973256,
+      "disk_bytes": 9152968,
+      "correctness": {
+        "ok": true,
+        "agree_on_broken": true,
+        "validate_is_final": true
+      },
+      "sample": "hashbrown-from-large",
+      "commit": "efe05c770bfe0f0645272992f141737b8d047639",
+      "timestamp": "2026-10-21T05:36:32.065906+00:00",
+      "n_evals": 2,
+      "non_improving": 0,
+      "stopped": false,
+      "held_out": true,
+      "fitness_method": "official_first_rebuild",
+      "sample_class": "real",
+      "cache_state": "empty"
+    },
+    {
+      "cell": "mid|noop",
+      "size": "mid",
+      "edit": "noop",
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true
+      },
+      "fitness_ms": 16.233299499617715,
+      "spread_ms": 0.6765874995835475,
+      "disk_bytes": 9152968,
+      "correctness": {
+        "ok": true,
+        "agree_on_broken": true,
+        "validate_is_final": true
+      },
+      "sample": "hashbrown-from-large",
+      "commit": "efe05c770bfe0f0645272992f141737b8d047639",
+      "timestamp": "2026-10-21T05:36:32.615250+00:00",
+      "n_evals": 2,
+      "non_improving": 0,
+      "stopped": false,
+      "held_out": true,
+      "fitness_method": "official_first_rebuild",
+      "sample_class": "real",
+      "cache_state": null
+    },
+    {
+      "cell": "mid|body",
+      "size": "mid",
+      "edit": "body",
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true
+      },
+      "fitness_ms": 119.07009900096455,
+      "spread_ms": 1.6856229995028116,
+      "disk_bytes": 9151185,
+      "correctness": {
+        "ok": true,
+        "agree_on_broken": true,
+        "validate_is_final": true
+      },
+      "sample": "hashbrown-from-large",
+      "commit": "efe05c770bfe0f0645272992f141737b8d047639",
+      "timestamp": "2026-10-21T05:36:33.614270+00:00",
+      "n_evals": 2,
+      "non_improving": 0,
+      "stopped": false,
+      "held_out": true,
+      "fitness_method": "official_first_rebuild",
+      "sample_class": "real",
+      "cache_state": null
+    },
+    {
+      "cell": "mid|sig_dep",
+      "size": "mid",
+      "edit": "sig_dep",
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "line-tables-only",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true
+      },
+      "fitness_ms": 124.47826649986382,
+      "spread_ms": 1.2910224995721364,
+      "disk_bytes": 9151341,
+      "correctness": {
+        "ok": true,
+        "agree_on_broken": true,
+        "validate_is_final": true
+      },
+      "sample": "hashbrown-from-large",
+      "commit": "efe05c770bfe0f0645272992f141737b8d047639",
+      "timestamp": "2026-10-21T05:36:34.617498+00:00",
+      "n_evals": 2,
+      "non_improving": 0,
+      "stopped": false,
+      "held_out": true,
+      "fitness_method": "official_first_rebuild",
+      "sample_class": "real",
+      "cache_state": null
+    }
+  ],
+  "generalization": {
+    "samples": [
+      "hashbrown-from-large"
+    ],
+    "matrix": [
+      {
+        "genome_from": "large|cold",
+        "trained_on": "ripgrep",
+        "tested_on": "hashbrown-from-large",
+        "cell": "mid|cold",
+        "fitness_ms": 524.1811214991685,
+        "spread_ms": 24.367108499973256,
+        "disk_bytes": 9152968,
+        "correctness_ok": true,
+        "delta_vs_local_elite_pct": 18.682551843854146
+      },
+      {
+        "genome_from": "large|noop",
+        "trained_on": "ripgrep",
+        "tested_on": "hashbrown-from-large",
+        "cell": "mid|noop",
+        "fitness_ms": 16.233299499617715,
+        "spread_ms": 0.6765874995835475,
+        "disk_bytes": 9152968,
+        "correctness_ok": true,
+        "delta_vs_local_elite_pct": 408.8339663908346
+      },
+      {
+        "genome_from": "large|body",
+        "trained_on": "ripgrep",
+        "tested_on": "hashbrown-from-large",
+        "cell": "mid|body",
+        "fitness_ms": 119.07009900096455,
+        "spread_ms": 1.6856229995028116,
+        "disk_bytes": 9151185,
+        "correctness_ok": true,
+        "delta_vs_local_elite_pct": -2.9400689698224483
+      },
+      {
+        "genome_from": "large|sig_dep",
+        "trained_on": "ruff-check-line-tables",
+        "tested_on": "hashbrown-from-large",
+        "cell": "mid|sig_dep",
+        "fitness_ms": 124.47826649986382,
+        "spread_ms": 1.2910224995721364,
+        "disk_bytes": 9151341,
+        "correctness_ok": true,
+        "delta_vs_local_elite_pct": 9.952572840817089
+      }
+    ]
+  }
+}

@@ -252,10 +252,17 @@ def annotate_row(row, shard=None):
             row["fitness_method"] = "official_first_rebuild"
     genome = row.get("genome") or {}
     if not row.get("cache_state"):
-        if row.get("edit") == "cold" and (
-            genome.get("sccache") or genome.get("wrapper")
-        ) and row.get("fitness_method") == "restore_rebuild_mean_of_medians":
-            row["cache_state"] = "warm_compiler_cache"
+        if row.get("edit") == "cold" and (genome.get("sccache") or genome.get("wrapper")):
+            spread = row.get("spread_ms")
+            fitness = row.get("fitness_ms") or 0
+            # Two-sample wrapper/sccache colds with a huge spread are a miss
+            # plus a cache hit, not an empty-cache cold.
+            if row.get("fitness_method") == "restore_rebuild_mean_of_medians" or (
+                spread and fitness and spread > 0.1 * fitness
+            ):
+                row["cache_state"] = "warm_compiler_cache"
+            else:
+                row["cache_state"] = "empty"
         elif row.get("edit") == "cold":
             row["cache_state"] = "empty"
     return row
@@ -392,6 +399,10 @@ def apply_candidate(archive, row):
     elite = cells.get(row["cell"])
     if elite and elite.get("fitness_method") and row.get("fitness_method"):
         if elite.get("fitness_method") != row.get("fitness_method"):
+            if (row.get("fitness_method") == "official_first_rebuild"
+                    and elite.get("fitness_method") == "restore_rebuild_mean_of_medians"):
+                occupy(archive, row, "replace", "official harness supersedes restore+mean")
+                return "replace"
             note(archive, "reject", row, "incomparable fitness_method %s vs elite %s" % (
                 row.get("fitness_method"), elite.get("fitness_method")))
             return "reject"
@@ -697,13 +708,19 @@ def promote(archive):
     noops = [row for row in cells.values() if row.get("edit") == "noop"]
     inc_sig = majority(incremental)
     noop_sig = majority(noops)
+    def without_sample_keys(genome):
+        genome = dict(genome or {})
+        genome.pop("package", None)
+        genome.pop("cargo_command", None)
+        return genome
+
     inc_genome = next(
-        (row.get("genome") for row in incremental
+        (without_sample_keys(row.get("genome")) for row in incremental
          if signature(row.get("genome")) == inc_sig and weight(row) > 0),
         None,
     )
     noop_genome = next(
-        (row.get("genome") for row in noops
+        (without_sample_keys(row.get("genome")) for row in noops
          if signature(row.get("genome")) == noop_sig and weight(row) > 0),
         None,
     )

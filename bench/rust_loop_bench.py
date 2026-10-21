@@ -9,6 +9,7 @@ Stable CLI (do not rename flags other agents already use):
         --output DIR --name SAMPLE
         --steps LIST --commands LIST
         --offline --skip-install --self-test
+        --package NAME --timeout SEC
         --genome FILE --map-elites --emit-archive FILE
 
 Schema 1 JSON + markdown go to --output (default bench/results/<sample>/).
@@ -51,6 +52,7 @@ BODY_MARK = "nano-loop-body"
 SIG_MARK = "nano-loop-sig"
 BODY_INSERT = "let _nano_loop_body = 1u8;"
 FORBIDDEN_VALIDATE = ("cranelift", "codegen-backend", "cg_clif", "rustd", "lust", "relax")
+RUN_TIMEOUT = 3600
 
 
 def now_iso():
@@ -61,8 +63,8 @@ def which(name):
     return shutil.which(name)
 
 
-def run(argv, cwd=None, env=None, timeout=600):
-    return subprocess.run(argv, cwd=cwd, env=env, capture_output=True, timeout=timeout)
+def run(argv, cwd=None, env=None, timeout=None):
+    return subprocess.run(argv, cwd=cwd, env=env, capture_output=True, timeout=timeout or RUN_TIMEOUT)
 
 
 def dir_bytes(path: Path) -> int:
@@ -198,7 +200,7 @@ def apply_broken_edit(text):
 
 
 def edit_project(root: Path, kind: str):
-    mark = BODY_MARK if kind == "body" else SIG_MARK if kind == "sig" else None
+    mark = BODY_MARK if kind in ("body", "broken") else SIG_MARK if kind == "sig" else None
     path, text = (find_marked(root, mark) if mark else (None, None))
     if path is None:
         candidates = [p for p in rust_files(root) if p.name in ("lib.rs", "main.rs")] or rust_files(root)
@@ -337,13 +339,28 @@ def available_steps(args, tools):
     return [step for step in steps if step.id in wanted]
 
 
-def cargo_argv(command, jobs, offline, toolchain=None, extra_flags=None):
+def cargo_package(genome=None, package=None):
+    if package:
+        return package
+    genome = genome or {}
+    named = genome.get("package")
+    if named:
+        return named
+    scope = genome.get("package_scope")
+    if scope in (None, "", "workspace", "touched"):
+        return None
+    return scope
+
+
+def cargo_argv(command, jobs, offline, toolchain=None, extra_flags=None, package=None):
     argv = ["cargo"]
     if toolchain:
         argv = ["cargo", "+" + toolchain]
     flags = list(extra_flags or [])
     argv.extend(flag for flag in flags if flag.startswith("-Z"))
     argv.append(command)
+    if package:
+        argv.extend(["-p", package])
     if jobs:
         argv.extend(["-j", str(jobs)])
     if offline:
@@ -354,7 +371,7 @@ def cargo_argv(command, jobs, offline, toolchain=None, extra_flags=None):
     return argv
 
 
-def prepare_graph(work, driver, target, wrapper, offline):
+def prepare_graph(work, driver, target, wrapper, offline, package=None):
     spec = work / "nanocompile.tasks.json"
     extra = ["--manifest", str(work / "Cargo.toml"), "--write", str(spec),
              "--target-dir", str(target)]
@@ -362,6 +379,8 @@ def prepare_graph(work, driver, target, wrapper, offline):
         extra.append("--offline")
     if wrapper:
         extra.extend(["--wrapper", str(wrapper)])
+    if package:
+        extra.extend(["--package", package])
     built = run(rust_loop_cmd(driver, "spec", extra), cwd=work)
     if built.returncode != 0:
         return None, built.stderr.decode(errors="replace")
@@ -474,7 +493,7 @@ def maybe_install(skip):
     return notes
 
 
-def run_correctness(work, driver, nanocompile, offline, jobs, tools_env):
+def run_correctness(work, driver, nanocompile, offline, jobs, tools_env, package=None, validate_package=None):
     record = edit_project(work, "broken")
     notes = []
     if record is None:
@@ -489,11 +508,13 @@ def run_correctness(work, driver, nanocompile, offline, jobs, tools_env):
         target = work / "target-correctness"
         empty_target(target)
         env = cargo_env(tools_env, target)
-        check = run(cargo_argv("check", jobs, offline), cwd=work, env=env)
-        test = run(cargo_argv("test", jobs, offline), cwd=work, env=env)
+        check_pkg = package
+        test_pkg = validate_package or package
+        check = run(cargo_argv("check", jobs, offline, package=check_pkg), cwd=work, env=env)
+        test = run(cargo_argv("test", jobs, offline, package=test_pkg), cwd=work, env=env)
         fast_failed = check.returncode != 0
         validate_failed = test.returncode != 0
-        spec, spec_err = prepare_graph(work, driver, target, nanocompile, offline)
+        spec, spec_err = prepare_graph(work, driver, target, nanocompile, offline, package=check_pkg)
         graph_fast = None
         graph_validate_ran = None
         if spec and nanocompile:
@@ -504,7 +525,7 @@ def run_correctness(work, driver, nanocompile, offline, jobs, tools_env):
             graph_validate_ran = (work / ".nanocompile-loop" / "validate.ok").exists()
         elif spec_err:
             notes.append(spec_err[-300:])
-        banned = any(token in " ".join(cargo_argv("test", jobs, offline)).lower() for token in FORBIDDEN_VALIDATE)
+        banned = any(token in " ".join(cargo_argv("test", jobs, offline, package=test_pkg)).lower() for token in FORBIDDEN_VALIDATE)
         agree = fast_failed and validate_failed
         validate_is_final = validate_failed and not banned and graph_validate_ran is not True
         return {
@@ -521,25 +542,37 @@ def run_correctness(work, driver, nanocompile, offline, jobs, tools_env):
         restore_edit(record)
 
 
-def run_cell(step, command, phase, argv, cwd, env, target, warmup, runs):
+def run_cell(step, command, phase, argv, cwd, env, target, warmup, runs, edit_kind=None):
     samples = []
     reset = phase in ("cold",)
-    # Edits: time the first rebuild only. Extra samples would be no-ops of the
-    # already-edited tree. Cold: empty target and the isolated nanocompile cache
-    # so a graph hit is not mistaken for a cold miss.
-    if phase in ("edit_body", "edit_sig", "body", "sig_dep"):
-        warmup = 0
-        runs = 1
+    timed_edit = phase in ("edit_body", "edit_sig", "body", "sig_dep")
+    kind = edit_kind or (
+        "body" if "body" in str(phase) else "sig" if phase in ("edit_sig", "sig_dep") else None
+    )
+
+    def one_sample():
+        if reset:
+            empty_target(target)
+            _clear_nano_cache(env)
+        if timed_edit:
+            record = edit_project(cwd, kind)
+            if record is None:
+                return None
+            try:
+                return measure_once(argv, cwd, env, target)
+            finally:
+                restore_edit(record)
+                # Restore the incremental baseline so the next timed sample
+                # is another first rebuild, not a no-op of the edited tree.
+                measure_once(argv, cwd, env, target)
+        return measure_once(argv, cwd, env, target)
+
     for _ in range(warmup):
-        if reset:
-            empty_target(target)
-            _clear_nano_cache(env)
-        measure_once(argv, cwd, env, target)
+        one_sample()
     for _ in range(runs):
-        if reset:
-            empty_target(target)
-            _clear_nano_cache(env)
-        samples.append(measure_once(argv, cwd, env, target))
+        sample = one_sample()
+        if sample is not None:
+            samples.append(sample)
     summary = summarize(samples)
     summary.update({
         "step": step.id,
@@ -576,7 +609,11 @@ def execute(args):
     offline = args.offline and fetch.returncode == 0
     if fetch.returncode != 0 and args.offline:
         offline = False
-    correctness = run_correctness(work, driver, nano, offline, args.jobs, base_env)
+    correctness = run_correctness(
+        work, driver, nano, offline, args.jobs, base_env,
+        package=getattr(args, "package", None),
+        validate_package=getattr(args, "validate_package", None),
+    )
     size_info = classify_project(project)
     args.work_root = work_root
     map_elites_meta = None
@@ -602,7 +639,7 @@ def execute(args):
             extra = dict(step.extra_env)
             env = cargo_env(base_env, target, extra)
             if step.graph:
-                spec, err = prepare_graph(work, driver, target, nano, offline)
+                spec, err = prepare_graph(work, driver, target, nano, offline, getattr(args, "package", None))
                 if spec is None or nano is None:
                     cells.append({
                         "step": step.id, "title": step.title, "command": "graph",
@@ -614,7 +651,7 @@ def execute(args):
                 argv = [str(nano), "task", str(spec)]
                 command_name = "graph"
             else:
-                argv = cargo_argv(command, args.jobs, offline, step.toolchain, step.extra_flags)
+                argv = cargo_argv(command, args.jobs, offline, step.toolchain, step.extra_flags, getattr(args, "package", None))
                 command_name = command
             empty_target(target)
             if (work / ".nanocompile-loop").exists():
@@ -622,20 +659,16 @@ def execute(args):
             cells.append(run_cell(step, command_name, "cold", argv, work, env, target, args.warmup, args.runs))
             cells.append(run_cell(step, command_name, "noop", argv, work, env, target, args.warmup, args.runs))
             for phase, kind in (("edit_body", "body"), ("edit_sig", "sig")):
-                record = edit_project(work, kind)
-                if record is None:
+                probe = edit_project(work, kind)
+                if probe is None:
                     cells.append({
                         "step": step.id, "title": step.title, "command": command_name,
                         "phase": phase, "skipped": True, "skip_reason": "no safe %s edit site" % kind,
                         "median_ms": None, "stdev_ms": None, "target_bytes": None, "ok": False,
                     })
                     continue
-                try:
-                    cells.append(run_cell(step, command_name, phase, argv, work, env, target, args.warmup, args.runs))
-                finally:
-                    restore_edit(record)
-                    if step.graph:
-                        prepare_graph(work, driver, target, nano, offline)
+                restore_edit(probe)
+                cells.append(run_cell(step, command_name, phase, argv, work, env, target, args.warmup, args.runs, kind))
     report = {
         "schema": SCHEMA,
         "sample": sample,
@@ -767,7 +800,7 @@ def genome_argv(genome, command, jobs, offline, nano, spec):
         extra_flags = ["-Zcodegen-backend"]
     return cargo_argv(
         command, jobs or genome.get("jobs"), offline or genome.get("offline"),
-        toolchain, extra_flags,
+        toolchain, extra_flags, cargo_package(genome),
     )
 
 
@@ -915,26 +948,30 @@ def measure_genome(genome, work, driver, nano, tools, base_env, jobs, offline, w
         env.pop("CARGO_PROFILE_TEST_CODEGEN_BACKEND", None)
     spec = None
     if genome.get("loop") == "graph":
-        spec, err = prepare_graph(work, driver, target, nano, offline or genome.get("offline"))
+        spec, err = prepare_graph(
+            work, driver, target, nano, offline or genome.get("offline"),
+            cargo_package(genome),
+        )
         if spec is None:
             return None, err or "graph spec failed"
     argv = genome_argv(genome, "check", jobs, offline, nano, spec)
     if argv is None:
         return None, "cannot build argv for genome"
-    record = None
     if edit == "cold":
         empty_target(target)
         if (work / ".nanocompile-loop").exists():
             shutil.rmtree(work / ".nanocompile-loop")
     elif edit in ("body", "sig_dep"):
-        record = edit_project(work, "body" if edit == "body" else "sig")
-        if record is None:
+        probe = edit_project(work, "body" if edit == "body" else "sig")
+        if probe is None:
             return None, "no safe edit site"
-    try:
-        summary = run_cell(type("S", (), {"id": "genome", "title": "genome"})(), genome.get("loop"), edit, argv, work, env, target, warmup, runs)
-        return summary, None
-    finally:
-        restore_edit(record)
+        restore_edit(probe)
+    summary = run_cell(
+        type("S", (), {"id": "genome", "title": "genome"})(),
+        genome.get("loop"), edit, argv, work, env, target, warmup, runs,
+        "body" if edit == "body" else "sig" if edit == "sig_dep" else None,
+    )
+    return summary, None
 
 
 def execute_map_elites(args, work, driver, nano, tools, base_env, offline, correctness, size):
@@ -959,6 +996,8 @@ def execute_map_elites(args, work, driver, nano, tools, base_env, offline, corre
         genome = default_genome(**genome)
         genome["offline"] = offline
         genome["jobs"] = args.jobs
+        if getattr(args, "package", None) and not genome.get("package"):
+            genome["package"] = args.package
         target = args.work_root / "targets" / "genome" / ("%s-%s-%s" % (
             genome.get("loop"), genome.get("linker"), genome.get("debuginfo")))
         for edit in edits:
@@ -979,6 +1018,8 @@ def execute_map_elites(args, work, driver, nano, tools, base_env, offline, corre
                 mutant = mutate_genome(current, tools)
                 mutant["offline"] = offline
                 mutant["jobs"] = args.jobs
+                if getattr(args, "package", None) and not mutant.get("package"):
+                    mutant["package"] = args.package
                 mutant_target = args.work_root / "targets" / "mutant" / elite["edit"]
                 if elite["edit"] != "cold":
                     # Warm the mutant target once so body/sig/noop are incremental.
@@ -1017,6 +1058,8 @@ def execute_held_out(args, work, driver, nano, tools, base_env, offline, correct
     for key, elite in cells.items():
         genome = default_genome(**(elite.get("genome") or {}))
         genome["offline"] = offline
+        if getattr(args, "package", None) and not genome.get("package"):
+            genome["package"] = args.package
         edit = elite.get("edit") or key.split("|", 1)[-1]
         target = args.work_root / "targets" / "held-out" / key.replace("|", "-")
         if edit != "cold":
@@ -1083,6 +1126,9 @@ def main(argv=None):
     parser.add_argument("--steps", help="comma-separated step ids")
     parser.add_argument("--commands", help="comma-separated cargo commands: check,build,test")
     parser.add_argument("--offline", action="store_true")
+    parser.add_argument("--package", help="cargo -p PACKAGE for check/build/test and the graph spec")
+    parser.add_argument("--validate-package", help="cargo test -p PACKAGE for the correctness gate (default: --package)")
+    parser.add_argument("--timeout", type=int, default=3600, help="seconds per cargo/nanocompile invocation (default 3600)")
     parser.add_argument("--skip-install", action="store_true")
     parser.add_argument("--self-test", action="store_true")
     parser.add_argument("--genome", help="evaluate one MAP-Elites genome JSON")
@@ -1094,6 +1140,8 @@ def main(argv=None):
     args.steps = parse_list(args.steps, KNOWN_STEPS, DEFAULT_STEPS)
     args.commands = parse_list(args.commands, DEFAULT_COMMANDS, DEFAULT_COMMANDS)
     args.jobs = args.jobs or None
+    global RUN_TIMEOUT
+    RUN_TIMEOUT = args.timeout or 3600
     if args.self_test:
         args.project = args.project or (REPO / "examples" / "rust-loop")
         args.runs = 1

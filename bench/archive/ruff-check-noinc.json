@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "kind": "nanocompile.rust-loop.map-elites.shard",
+  "sample": "ruff-check-noinc",
+  "commit": null,
+  "timestamp": "2026-10-21T05:35:00+00:00",
+  "evaluations": [
+    {
+      "cell": "large|sig_dep",
+      "size": "large",
+      "edit": "sig_dep",
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package": "ruff"
+      },
+      "fitness_ms": 15927.032977499948,
+      "spread_ms": null,
+      "disk_bytes": null,
+      "correctness": {
+        "ok": true,
+        "agree_on_broken": true,
+        "validate_is_final": true
+      },
+      "sample": "ruff-check-noinc",
+      "n_evals": 2,
+      "non_improving": 0,
+      "stopped": false,
+      "held_out": false,
+      "fitness_method": "official_first_rebuild",
+      "sample_class": "real",
+      "cache_state": null
+    }
+  ]
+}

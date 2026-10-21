@@ -1,0 +1,204 @@
+{
+  "schema_version": 1,
+  "kind": "nanocompile.rust-loop.map-elites.shard",
+  "sample": "bhumi-from-large",
+  "commit": "efe05c770bfe0f0645272992f141737b8d047639",
+  "timestamp": "2026-10-21T05:38:30.853017+00:00",
+  "evaluations": [
+    {
+      "cell": "small|cold",
+      "size": "small",
+      "edit": "cold",
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true
+      },
+      "fitness_ms": 12145.599566501005,
+      "spread_ms": 2.646275500410411,
+      "disk_bytes": 304243103,
+      "correctness": {
+        "ok": true,
+        "agree_on_broken": true,
+        "validate_is_final": true
+      },
+      "sample": "bhumi-from-large",
+      "commit": "efe05c770bfe0f0645272992f141737b8d047639",
+      "timestamp": "2026-10-21T05:37:52.245705+00:00",
+      "n_evals": 2,
+      "non_improving": 0,
+      "stopped": false,
+      "held_out": true,
+      "fitness_method": "official_first_rebuild",
+      "sample_class": "real",
+      "cache_state": "empty"
+    },
+    {
+      "cell": "small|noop",
+      "size": "small",
+      "edit": "noop",
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true
+      },
+      "fitness_ms": 63.52445600077772,
+      "spread_ms": 1.7390200000590994,
+      "disk_bytes": 304243104,
+      "correctness": {
+        "ok": true,
+        "agree_on_broken": true,
+        "validate_is_final": true
+      },
+      "sample": "bhumi-from-large",
+      "commit": "efe05c770bfe0f0645272992f141737b8d047639",
+      "timestamp": "2026-10-21T05:38:04.568734+00:00",
+      "n_evals": 2,
+      "non_improving": 0,
+      "stopped": false,
+      "held_out": true,
+      "fitness_method": "official_first_rebuild",
+      "sample_class": "real",
+      "cache_state": null
+    },
+    {
+      "cell": "small|body",
+      "size": "small",
+      "edit": "body",
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true
+      },
+      "fitness_ms": 274.8835385000348,
+      "spread_ms": 2.946708499621309,
+      "disk_bytes": 304352887,
+      "correctness": {
+        "ok": true,
+        "agree_on_broken": true,
+        "validate_is_final": true
+      },
+      "sample": "bhumi-from-large",
+      "commit": "efe05c770bfe0f0645272992f141737b8d047639",
+      "timestamp": "2026-10-21T05:38:17.554097+00:00",
+      "n_evals": 2,
+      "non_improving": 0,
+      "stopped": false,
+      "held_out": true,
+      "fitness_method": "official_first_rebuild",
+      "sample_class": "real",
+      "cache_state": null
+    },
+    {
+      "cell": "small|sig_dep",
+      "size": "small",
+      "edit": "sig_dep",
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "line-tables-only",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true
+      },
+      "fitness_ms": 241.19714749940613,
+      "spread_ms": 2.6394525011710357,
+      "disk_bytes": 344833781,
+      "correctness": {
+        "ok": true,
+        "agree_on_broken": true,
+        "validate_is_final": true
+      },
+      "sample": "bhumi-from-large",
+      "commit": "efe05c770bfe0f0645272992f141737b8d047639",
+      "timestamp": "2026-10-21T05:38:30.852994+00:00",
+      "n_evals": 2,
+      "non_improving": 0,
+      "stopped": false,
+      "held_out": true,
+      "fitness_method": "official_first_rebuild",
+      "sample_class": "real",
+      "cache_state": null
+    }
+  ],
+  "generalization": {
+    "samples": [
+      "bhumi-from-large"
+    ],
+    "matrix": [
+      {
+        "genome_from": "large|cold",
+        "trained_on": "ripgrep",
+        "tested_on": "bhumi-from-large",
+        "cell": "small|cold",
+        "fitness_ms": 12145.599566501005,
+        "spread_ms": 2.646275500410411,
+        "disk_bytes": 304243103,
+        "correctness_ok": true,
+        "delta_vs_local_elite_pct": 27809.655874948578
+      },
+      {
+        "genome_from": "large|noop",
+        "trained_on": "ripgrep",
+        "tested_on": "bhumi-from-large",
+        "cell": "small|noop",
+        "fitness_ms": 63.52445600077772,
+        "spread_ms": 1.7390200000590994,
+        "disk_bytes": 304243104,
+        "correctness_ok": true,
+        "delta_vs_local_elite_pct": 4701.600622474306
+      },
+      {
+        "genome_from": "large|body",
+        "trained_on": "ripgrep",
+        "tested_on": "bhumi-from-large",
+        "cell": "small|body",
+        "fitness_ms": 274.8835385000348,
+        "spread_ms": 2.946708499621309,
+        "disk_bytes": 304352887,
+        "correctness_ok": true,
+        "delta_vs_local_elite_pct": 1024.461624096741
+      },
+      {
+        "genome_from": "large|sig_dep",
+        "trained_on": "ruff-check-line-tables",
+        "tested_on": "bhumi-from-large",
+        "cell": "small|sig_dep",
+        "fitness_ms": 241.19714749940613,
+        "spread_ms": 2.6394525011710357,
+        "disk_bytes": 344833781,
+        "correctness_ok": true,
+        "delta_vs_local_elite_pct": 874.0653153191734
+      }
+    ]
+  }
+}

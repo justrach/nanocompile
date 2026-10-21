@@ -260,20 +260,31 @@ def workspace_members(text):
     return found
 
 
+def expand_workspace_member(root, member):
+    """Expand one Cargo workspace member, including `crates/*` globs.
+
+    Returns absolute Path objects. Native `nanocompile rust-loop` does the
+    same walk in Zig; this is the Python fallback.
+    """
+    root = Path(root)
+    if any(char in member for char in "*?["):
+        matches = [
+            path.resolve() for path in sorted(root.glob(member))
+            if path.is_dir() and (path / "Cargo.toml").is_file()
+        ]
+        if matches:
+            return matches
+    path = (root / member).resolve()
+    return [path] if path.is_dir() and (path / "Cargo.toml").is_file() else []
+
+
 def expand_workspace_members(root, patterns):
-    """Expand Cargo workspace globs such as crates/* to real package dirs."""
+    """Expand Cargo workspace globs such as crates/* to relative package dirs."""
     root = Path(root)
     found = []
     seen = set()
     for pattern in patterns:
-        if any(char in pattern for char in "*?["):
-            matches = [path for path in sorted(root.glob(pattern))
-                       if path.is_dir() and (path / "Cargo.toml").is_file()]
-        else:
-            matches = [root / pattern]
-        for path in matches:
-            if not path.is_dir():
-                continue
+        for path in expand_workspace_member(root, pattern):
             rel = posix(path.resolve().relative_to(root.resolve()))
             if rel in seen:
                 continue
@@ -368,7 +379,7 @@ def check_spec(spec):
     return by_name
 
 
-def spec_command(python, script_path, step, stamp, target_dir, offline, wrapper, cargo_subcommand):
+def spec_command(python, script_path, step, stamp, target_dir, offline, wrapper, cargo_subcommand, package=None):
     command = [python, "-I", "-S", "-B", posix(script_path), "run",
                "--step", step, "--stamp", stamp, "--target-dir", target_dir]
     if offline:
@@ -376,10 +387,12 @@ def spec_command(python, script_path, step, stamp, target_dir, offline, wrapper,
     if wrapper:
         command.extend(["--wrapper", posix(wrapper)])
     command.extend(["--", "cargo", cargo_subcommand])
+    if package:
+        command.extend(["-p", package])
     return command
 
 
-def build_spec(root, python, offline, wrapper, target_dir):
+def build_spec(root, python, offline, wrapper, target_dir, package=None):
     script = rust_loop_script()
     inputs = discover_inputs(root)
     script_input = posix(os.path.relpath(script, root))
@@ -394,7 +407,7 @@ def build_spec(root, python, offline, wrapper, target_dir):
                 "name": FAST_CHECK,
                 "cwd": ".",
                 "command": spec_command(python, script_input, FAST_CHECK, fast_stamp, target_dir,
-                                        offline, wrapper, "check"),
+                                        offline, wrapper, "check", package),
                 "inputs": list(inputs),
                 "outputs": [fast_stamp],
             },
@@ -403,7 +416,7 @@ def build_spec(root, python, offline, wrapper, target_dir):
                 "cwd": ".",
                 "depends_on": [FAST_CHECK],
                 "command": spec_command(python, script_input, VALIDATE, validate_stamp, target_dir,
-                                        offline, wrapper, "test"),
+                                        offline, wrapper, "test", package),
                 "inputs": list(inputs) + [fast_stamp],
                 "outputs": [validate_stamp],
             },
@@ -506,6 +519,7 @@ def main(argv=None):
     spec.add_argument("--python", default=sys.executable)
     spec.add_argument("--wrapper")
     spec.add_argument("--target-dir", default="target")
+    spec.add_argument("--package", help="cargo -p PACKAGE for fast-check and validate")
     spec.add_argument("--offline", action="store_true")
 
     check = sub.add_parser("check-spec", help="reject a spec that skips the rustc gate")
@@ -536,7 +550,7 @@ def main(argv=None):
         return 0
     if args.action == "spec":
         root = Path(args.manifest).resolve().parent
-        document = build_spec(root, args.python, args.offline, args.wrapper, args.target_dir)
+        document = build_spec(root, args.python, args.offline, args.wrapper, args.target_dir, args.package)
         encoded = json.dumps(document, indent=2) + "\n"
         if args.write == "-":
             sys.stdout.write(encoded)

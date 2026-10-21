@@ -357,7 +357,7 @@ fn discoverInputs(ctx: *cache.Context, root: []const u8) ![]const []const u8 {
     return paths.items;
 }
 
-fn specCommand(ctx: *cache.Context, self_exe: []const u8, step: []const u8, stamp: []const u8, target_dir: []const u8, offline: bool, wrapper: ?[]const u8, cargo_subcommand: []const u8) ![]const []const u8 {
+fn specCommand(ctx: *cache.Context, self_exe: []const u8, step: []const u8, stamp: []const u8, target_dir: []const u8, offline: bool, wrapper: ?[]const u8, cargo_subcommand: []const u8, package: ?[]const u8) ![]const []const u8 {
     var command: std.ArrayList([]const u8) = .empty;
     try command.appendSlice(ctx.a, &.{ self_exe, "rust-loop", "run", "--step", step, "--stamp", stamp, "--target-dir", target_dir });
     if (offline) try command.append(ctx.a, "--offline");
@@ -366,10 +366,14 @@ fn specCommand(ctx: *cache.Context, self_exe: []const u8, step: []const u8, stam
         try command.append(ctx.a, path);
     }
     try command.appendSlice(ctx.a, &.{ "--", "cargo", cargo_subcommand });
+    if (package) |name| {
+        try command.append(ctx.a, "-p");
+        try command.append(ctx.a, name);
+    }
     return command.items;
 }
 
-fn buildSpec(ctx: *cache.Context, root: []const u8, self_exe: []const u8, offline: bool, wrapper: ?[]const u8, target_dir: []const u8) !Spec {
+fn buildSpec(ctx: *cache.Context, root: []const u8, self_exe: []const u8, offline: bool, wrapper: ?[]const u8, target_dir: []const u8, package: ?[]const u8) !Spec {
     const resolved_self = if (std.fs.path.isAbsolute(self_exe)) self_exe else identity.selectedExecutable(ctx, self_exe) catch self_exe;
     const inputs = try discoverInputs(ctx, root);
     const fast_stamp = stamp_dir ++ "/fast-check.ok";
@@ -387,7 +391,7 @@ fn buildSpec(ctx: *cache.Context, root: []const u8, self_exe: []const u8, offlin
     const tasks = try ctx.a.alloc(Task, 2);
     tasks[0] = .{
         .name = fast_check,
-        .command = try specCommand(ctx, resolved_self, fast_check, fast_stamp, target_dir, offline, wrapper, "check"),
+        .command = try specCommand(ctx, resolved_self, fast_check, fast_stamp, target_dir, offline, wrapper, "check", package),
         .inputs = inputs,
         .outputs = try ctx.a.dupe([]const u8, &.{fast_stamp}),
         .tool_resources = tools,
@@ -395,7 +399,7 @@ fn buildSpec(ctx: *cache.Context, root: []const u8, self_exe: []const u8, offlin
     tasks[1] = .{
         .name = validate,
         .depends_on = try ctx.a.dupe([]const u8, &.{fast_check}),
-        .command = try specCommand(ctx, resolved_self, validate, validate_stamp, target_dir, offline, wrapper, "test"),
+        .command = try specCommand(ctx, resolved_self, validate, validate_stamp, target_dir, offline, wrapper, "test", package),
         .inputs = validate_inputs.items,
         .outputs = try ctx.a.dupe([]const u8, &.{validate_stamp}),
         .tool_resources = tools,
@@ -567,6 +571,7 @@ const Parsed = struct {
     stamp: ?[]const u8 = null,
     step: ?[]const u8 = null,
     spec: ?[]const u8 = null,
+    package: ?[]const u8 = null,
     offline: bool = false,
     cargo: []const []const u8 = &.{},
 };
@@ -611,6 +616,9 @@ fn parseArgs(ctx: *cache.Context, args: []const [:0]const u8) !Parsed {
         } else if (eq(arg, "--step")) {
             i += 1;
             parsed.step = args[i];
+        } else if (eq(arg, "--package")) {
+            i += 1;
+            parsed.package = args[i];
         } else if (eq(parsed.action, "check-spec") and parsed.spec == null) {
             parsed.spec = arg;
         } else return error.InvalidRustLoopArgument;
@@ -647,7 +655,7 @@ pub fn execute(ctx: *cache.Context, args: []const [:0]const u8, self_exe: []cons
     if (eq(parsed.action, "spec")) {
         const manifest = try resolveUnderCwd(ctx, parsed.manifest);
         const root = std.fs.path.dirname(manifest) orelse ctx.cwd;
-        const spec = buildSpec(ctx, root, self_exe, parsed.offline, parsed.wrapper, parsed.target_dir) catch |err| {
+        const spec = buildSpec(ctx, root, self_exe, parsed.offline, parsed.wrapper, parsed.target_dir, parsed.package) catch |err| {
             try fail(ctx, @errorName(err));
             return 2;
         };
