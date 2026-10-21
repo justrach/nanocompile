@@ -81,6 +81,7 @@ jobs:
           python3 tests/cache_savings.py
           python3 tests/task_relocatable.py zig-out/bin/nanocompile
           python3 tests/focused_task_inputs.py zig-out/bin/nanocompile
+          python3 tests/rust_loop.py zig-out/bin/nanocompile
           python3 tests/task_layering.py zig-out/bin/nanocompile --runs 1 --output "$RUNNER_TEMP/task-cache-layering.json"
           python3 tests/cache_savings_integration.py zig-out/bin/nanocompile
       - name: Verify real Turborepo task cache
@@ -128,6 +129,7 @@ jobs:
           python tests/cache_savings.py
           python tests/task_relocatable.py zig-out/bin/nanocompile.exe
           python tests/focused_task_inputs.py zig-out/bin/nanocompile.exe
+          python tests/rust_loop.py zig-out/bin/nanocompile.exe
           python tests/task_layering.py zig-out/bin/nanocompile.exe --runs 1 --output "$RUNNER_TEMP/task-cache-layering.json"
           python tests/cache_savings_integration.py zig-out/bin/nanocompile.exe
       - name: Windows Rust cache, concurrent locks and artifacts

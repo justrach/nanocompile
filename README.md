@@ -18,6 +18,7 @@
   <a href="#build-and-use">Build and use</a> ·
   <a href="#xcode-native-cache">Xcode</a> ·
   <a href="examples/turborepo/README.md">Turborepo</a> ·
+  <a href="docs/rust-iteration.md">Rust edit loop</a> ·
   <a href="#current-eligibility">Supported builds</a> ·
   <a href="benchmarks/README.md">Benchmarks</a>
 </p>
@@ -131,6 +132,22 @@ passed on Linux and Mac; it is not a deployed public cache service.
 ```sh
 npm ci --prefix examples/turborepo --ignore-scripts --no-audit --no-fund
 python3 tests/turbo_integration.py zig-out/bin/nanocompile
+```
+
+## Rust edit-compile-check loop
+
+For a Cargo project, `nanocompile task` can run a two-step declared graph:
+`cargo check` first, then a mandatory `cargo test` that still uses rustc. The
+helper refuses a specification that skips that gate or hands it to cranelift,
+rustd, Lust or Relax. See [the loop, tradeoffs and watch-list](docs/rust-iteration.md)
+and the [example crate](examples/rust-loop/README.md). Ideas and attribution:
+[Charlie Marsh, 21 Oct 2026](https://x.com/charliermarsh/status/2112711387285758250).
+
+```sh
+python3 tools/rust_loop.py spec --manifest path/to/Cargo.toml \
+  --write nanocompile.tasks.json --wrapper "$nano_wrapper"
+python3 tools/rust_loop.py check-spec nanocompile.tasks.json
+"$nano_wrapper" task nanocompile.tasks.json
 ```
 
 ## Cache correctness and storage
