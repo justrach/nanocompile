@@ -59,6 +59,7 @@ pub const usable_now = [_]CatalogItem{
     .{ .id = "crate-shape", .title = "Split crates and keep codegen-units parallel", .command = &.{ "rustc", "-C", "codegen-units=256" }, .verified = "rustc -C help lists codegen-units" },
     .{ .id = "hot-reload", .title = "Hot-reload a dylib or a Dioxus app", .command = &.{"hot-lib-reloader"}, .verified = "https://github.com/rksm/hot-lib-reloader-rs; DioxusLabs/dioxus subsecond", .url = "https://github.com/rksm/hot-lib-reloader-rs" },
     .{ .id = "disk-hygiene", .title = "Bound target and cache disk use", .command = &.{ "nanocompile", "gc" }, .verified = "nanocompile gc; cargo clean; profile.dev debug = line-tables-only", .url = "https://doc.rust-lang.org/cargo/guide/build-performance.html" },
+    .{ .id = "agent-worktrees", .title = "Share one nanocompile store across agent git worktrees", .command = &.{ "nanocompile", "worktree", "init" }, .verified = "docs/agent-worktrees.md; each worktree keeps its own target/; NANOCOMPILE_DIR is shared" },
 };
 pub const experimental = [_]CatalogItem{
     .{ .id = "rustd", .title = "rustd (Jon Kelley / Dioxus Labs)", .verified = "DioxusLabs/rustd README", .url = "https://github.com/DioxusLabs/rustd", .thread = "https://x.com/jkelleyrtp/status/2110433801071689733" },

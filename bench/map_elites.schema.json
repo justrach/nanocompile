@@ -106,6 +106,16 @@
           "type": "string",
           "enum": ["nanocompile", "kache", "none"],
           "description": "Competing build-cache identity for the nanocompile-vs-kache bakeoff. Tag only; not an occupancy axis."
+        },
+        "split": {
+          "type": "string",
+          "enum": ["train", "held_out"],
+          "description": "agent-worktrees generalization tag. Train = axum+ripgrep. Held-out never occupies a cell."
+        },
+        "product": {
+          "type": "string",
+          "enum": ["agent_worktrees"],
+          "description": "Tag only. agent-worktrees rows live in archive.agent_worktrees and do not occupy the size x edit grid."
         }
       }
     },

@@ -242,6 +242,14 @@ debug = false
 `gc` is explicit so the compile path does not scan the store. It is not part
 of the two-task graph.
 
+### 12. `agent-worktrees`
+
+`nanocompile worktree init` writes `.cargo/config.toml` so a main checkout and
+N agent git worktrees share one `NANOCOMPILE_DIR`. Each worktree keeps its own
+`target/` (`CARGO_TARGET_DIR`). The store restores anything main or a sibling
+already compiled; only the worktree's own edit should miss. See
+[agent-worktrees](agent-worktrees.md).
+
 ## (b) Experimental watch-list
 
 Charlie's disclaimer still applies: these projects are early, and he had not

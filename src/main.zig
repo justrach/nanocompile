@@ -24,6 +24,7 @@ const help =
     \\  nanocompile rust-loop list|spec|check-spec|run|verify-flags
     \\  nanocompile map-elites validate|merge|render|classify
     \\  nanocompile artifact put|get|head NAMESPACE KEY [FILE] [METADATA_JSON]
+    \\  nanocompile worktree init [DIR]  shared store for agent worktrees (general defaults)
     \\  nanocompile stats | clear | doctor
     \\  nanocompile gc [MAX_BYTES]  remove orphan blobs and evict to a budget
     \\Environment:
@@ -33,6 +34,7 @@ const help =
     \\  NANOCOMPILE_PROC_MACROS=reported  opt into compiler-reported macro inputs
     \\  NANOCOMPILE_PROC_MACRO_PRODUCERS=1  cache proc-macro .so/.dylib (Linux reported path; Darwin observer when debuginfo=0)
     \\  NANOCOMPILE_EXECUTABLE_PRODUCERS=1  cache host binaries / test harnesses
+    \\  NANOCOMPILE_BUILD_SCRIPT_CACHE=1  default-safe build-script RUN cache (no contract file)
     \\  NANOCOMPILE_EXTRA_INPUTS_FILE    JSON array declaring additional files
     \\  NANOCOMPILE_ZIG       Zig executable (default: zig)
     \\  NANOCOMPILE_RUSTC     rustc executable (default: rustc)
@@ -126,6 +128,9 @@ fn dispatch(ctx: *cache.Context, args: []const [:0]const u8) !u8 {
     if (std.mem.eql(u8, command, "map-elites")) {
         return @import("map_elites.zig").execute(ctx, args[2..]);
     }
+    if (std.mem.eql(u8, command, "worktree")) {
+        return @import("worktree.zig").execute(ctx, args[2..], args[0]);
+    }
     if (std.mem.eql(u8, command, "artifact")) {
         if (args.len < 5) return error.MissingArtifactArguments;
         const op = args[2];
@@ -209,4 +214,5 @@ test {
     _ = @import("task.zig");
     _ = @import("rust_loop.zig");
     _ = @import("map_elites.zig");
+    _ = @import("worktree.zig");
 }

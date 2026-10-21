@@ -156,6 +156,13 @@ USABLE_NOW = (
         "verified": "nanocompile gc; cargo clean; profile.dev debug = line-tables-only",
         "url": "https://doc.rust-lang.org/cargo/guide/build-performance.html",
     },
+    {
+        "id": "agent-worktrees",
+        "role": "recommendation",
+        "title": "Share one nanocompile store across agent git worktrees",
+        "command": ["nanocompile", "worktree", "init"],
+        "verified": "docs/agent-worktrees.md; each worktree keeps its own target/; NANOCOMPILE_DIR is shared",
+    },
 )
 
 # Experimental compilers from Charlie Marsh's 21 Oct 2026 thread.

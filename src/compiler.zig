@@ -83,6 +83,7 @@ fn rustPlan(ctx: *cache.Context, argv: []const []const u8) !Plan {
     var target: ?[]const u8 = null;
     var static_companion = false;
     var prefer_dynamic = false;
+    var test_harness = false;
     var i: usize = 1;
     while (i < argv.len) : (i += 1) {
         const arg = argv[i];
@@ -209,6 +210,11 @@ fn rustPlan(ctx: *cache.Context, argv: []const []const u8) !Plan {
             // Hash the full argv so these stay part of the key.
             continue;
         }
+        if (eq(arg, "--test")) {
+            // cargo test --no-run / cargo test: host test harness binary.
+            test_harness = true;
+            continue;
+        }
         if (std.mem.startsWith(u8, arg, "-")) {
             ctx.trace(try std.fmt.allocPrint(ctx.a, "unsupported Rust option: {s}", .{arg}));
             return error.UnsupportedRustOption;
@@ -216,9 +222,10 @@ fn rustPlan(ctx: *cache.Context, argv: []const []const u8) !Plan {
         if (source != null or !std.mem.endsWith(u8, arg, ".rs")) return error.UnsupportedSource;
         source = arg;
     }
+    if (test_harness and crate_type == null) crate_type = "bin";
     const ct = crate_type orelse return error.NoCrateType;
     const producer_dylib = eq(ct, "proc-macro") and eq(ctx.env.get("NANOCOMPILE_PROC_MACRO_PRODUCERS") orelse "", "1");
-    const executable = eq(ct, "bin") and eq(ctx.env.get("NANOCOMPILE_EXECUTABLE_PRODUCERS") orelse "", "1");
+    const executable = (eq(ct, "bin") or test_harness) and eq(ctx.env.get("NANOCOMPILE_EXECUTABLE_PRODUCERS") orelse "", "1");
     // Darwin observer stays for the measured zero-debug macOS path. Linux (and
     // debug cargo check/dev builds) cache the same .so/.dylib/bin through the
     // ordinary rustc-dep-info store: reported inputs, no linker observer.
@@ -585,7 +592,13 @@ fn argvCrateType(argv: []const []const u8) ?[]const u8 {
     return null;
 }
 
+fn argvHasTest(argv: []const []const u8) bool {
+    for (argv) |arg| if (eq(arg, "--test")) return true;
+    return false;
+}
+
 fn cacheableProducerCrate(ctx: *cache.Context, argv: []const []const u8) bool {
+    if (argvHasTest(argv) and eq(ctx.env.get("NANOCOMPILE_EXECUTABLE_PRODUCERS") orelse "", "1")) return true;
     const ct = argvCrateType(argv) orelse return false;
     if (eq(ct, "proc-macro") and eq(ctx.env.get("NANOCOMPILE_PROC_MACRO_PRODUCERS") orelse "", "1")) return true;
     if (eq(ct, "bin") and eq(ctx.env.get("NANOCOMPILE_EXECUTABLE_PRODUCERS") orelse "", "1")) return true;
@@ -1185,4 +1198,23 @@ test "reported executable artifacts are eligible on the host" {
         if (std.mem.endsWith(u8, path, "app-abc")) found_bin = true;
     }
     try std.testing.expect(found_bin);
+}
+
+test "cargo test harness binaries are eligible as executables" {
+    var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer arena.deinit();
+    const a = arena.allocator();
+    var env = std.process.Environ.Map.init(a);
+    try env.put("NANOCOMPILE_EXECUTABLE_PRODUCERS", "1");
+    var ctx: cache.Context = .{ .a = a, .io = std.testing.io, .env = &env, .root = "/cache", .cwd = "/work" };
+    const argv = [_][]const u8{
+        "rustc", "lib.rs", "--crate-name", "app", "--test",
+        "--emit", "dep-info,link", "--out-dir", "/tmp/out",
+        "-C", "debuginfo=2", "-C", "extra-filename=-abc",
+    };
+    const plan = try rustPlan(&ctx, &argv);
+    try std.testing.expect(plan.executable);
+    try std.testing.expect(cacheableProducerCrate(&ctx, &argv));
+    try env.put("NANOCOMPILE_EXECUTABLE_PRODUCERS", "0");
+    try std.testing.expectError(error.UnsupportedCrateType, rustPlan(&ctx, &argv));
 }

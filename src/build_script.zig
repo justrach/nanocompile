@@ -203,6 +203,232 @@ const MaterialJob = struct {
         };
     }
 };
+fn defaultCacheEnabled(ctx: *cache.Context) bool {
+    return eq(ctx.env.get("NANOCOMPILE_BUILD_SCRIPT_CACHE") orelse "", "1");
+}
+
+const RerunFile = struct { path: []const u8, hash: []const u8 };
+const RerunEnv = struct { name: []const u8, value: ?[]const u8 = null };
+const DefaultReceipt = struct {
+    schema: u32 = 2,
+    kind: []const u8 = "default",
+    outputs: []const []const u8 = &.{},
+    rerun_if_changed: []const RerunFile = &.{},
+    rerun_if_env_changed: []const RerunEnv = &.{},
+};
+
+fn skipDefaultEnv(name: []const u8) bool {
+    if (eq(name, "OUT_DIR") or eq(name, "CARGO_MANIFEST_DIR") or eq(name, "CARGO_MANIFEST_PATH") or
+        eq(name, "CARGO_TARGET_DIR") or eq(name, "PWD") or eq(name, "OLDPWD") or
+        eq(name, "PATH") or eq(name, "HOME") or eq(name, "USER") or eq(name, "TERM") or
+        eq(name, "CARGO") or eq(name, "CARGO_MAKEFLAGS") or eq(name, "NUM_JOBS") or
+        std.mem.startsWith(u8, name, "NANOCOMPILE_") or std.mem.startsWith(u8, name, "LC_") or
+        std.mem.startsWith(u8, name, "DEP_")) return true;
+    return false;
+}
+
+fn keepDefaultEnv(name: []const u8) bool {
+    if (eq(name, "CARGO_PKG_NAME") or eq(name, "CARGO_PKG_VERSION") or
+        eq(name, "TARGET") or eq(name, "HOST") or eq(name, "OPT_LEVEL") or
+        eq(name, "DEBUG") or eq(name, "PROFILE")) return true;
+    return std.mem.startsWith(u8, name, "CARGO_FEATURE_") or std.mem.startsWith(u8, name, "CARGO_CFG_");
+}
+
+pub fn defaultMaterial(ctx: *cache.Context, real: []const u8) ![]const u8 {
+    var h = cache.Hash.init(.{});
+    cache.field(&h, "nano-build-script-default-v1");
+    cache.field(&h, real);
+    cache.field(&h, try ctx.digest(real));
+    const names = try ctx.a.dupe([]const u8, ctx.env.keys());
+    std.mem.sort([]const u8, names, {}, less);
+    for (names) |name| {
+        if (!keepDefaultEnv(name) or skipDefaultEnv(name)) continue;
+        cache.field(&h, name);
+        cache.field(&h, ctx.env.get(name).?);
+    }
+    if (ctx.env.get("RUSTC")) |rustc| cache.field(&h, try identity.fingerprint(ctx, false, rustc));
+    return cache.finish(ctx.a, &h);
+}
+
+fn setOutRewrites(ctx: *cache.Context, root: []const u8) !void {
+    var list: std.ArrayList(cache.PathRewrite) = .empty;
+    try list.append(ctx.a, .{ .token = "$NANO_OUT", .path = try ctx.a.dupe(u8, root) });
+    const real = Dir.cwd().realPathFileAlloc(ctx.io, root, ctx.a) catch root;
+    if (!eq(real, root)) try list.append(ctx.a, .{ .token = "$NANO_OUT", .path = real });
+    ctx.rewrites = list.items;
+}
+
+fn relativeTo(root: []const u8, path: []const u8) ?[]const u8 {
+    if (path.len <= root.len + 1) return null;
+    if (!std.mem.startsWith(u8, path, root)) return null;
+    if (path[root.len] != '/' and path[root.len] != '\\') return null;
+    return path[root.len + 1 ..];
+}
+
+fn collectNestedOutputs(ctx: *cache.Context, root: []const u8) ![]const []const u8 {
+    var paths: std.ArrayList([]const u8) = .empty;
+    var dir = try Dir.cwd().openDir(ctx.io, root, .{ .iterate = true });
+    defer dir.close(ctx.io);
+    var walk = try dir.walk(ctx.a);
+    defer walk.deinit();
+    var size: u64 = 0;
+    while (try walk.next(ctx.io)) |entry| {
+        if (entry.kind == .directory) continue;
+        if (entry.kind != .file or paths.items.len >= 50000) return error.UnsupportedOutput;
+        const path = try std.fs.path.join(ctx.a, &.{ root, entry.path });
+        size += (try Dir.cwd().statFile(ctx.io, path, .{})).size;
+        if (size > 1024 * 1024 * 1024) return error.OutputTooLarge;
+        try paths.append(ctx.a, path);
+    }
+    std.mem.sort([]const u8, paths.items, {}, less);
+    return paths.items;
+}
+
+fn parseRerun(ctx: *cache.Context, stdout: []const u8, manifest: []const u8) !struct { files: []const RerunFile, envs: []const RerunEnv } {
+    var files: std.ArrayList(RerunFile) = .empty;
+    var envs: std.ArrayList(RerunEnv) = .empty;
+    var lines = std.mem.splitScalar(u8, stdout, '\n');
+    while (lines.next()) |raw| {
+        const line = std.mem.trim(u8, raw, "\r");
+        if (std.mem.startsWith(u8, line, "cargo:rerun-if-changed=")) {
+            const spec = line["cargo:rerun-if-changed=".len..];
+            if (spec.len == 0) continue;
+            const resolved = if (std.fs.path.isAbsolute(spec)) spec else try std.fs.path.resolve(ctx.a, &.{ manifest, spec });
+            const stored = if (relativeTo(manifest, resolved)) |rel| rel else resolved;
+            const hash = if (Dir.cwd().statFile(ctx.io, resolved, .{}) catch null) |st|
+                if (st.kind == .directory) try ctx.nativeDirectoryDigest(resolved) else (try ctx.checkedDigest(resolved)).hash
+            else
+                "missing";
+            try files.append(ctx.a, .{ .path = stored, .hash = hash });
+        } else if (std.mem.startsWith(u8, line, "cargo:rerun-if-env-changed=")) {
+            const name = line["cargo:rerun-if-env-changed=".len..];
+            if (name.len == 0) continue;
+            try envs.append(ctx.a, .{ .name = name, .value = ctx.env.get(name) });
+        }
+    }
+    return .{ .files = files.items, .envs = envs.items };
+}
+
+fn rerunStillValid(ctx: *cache.Context, receipt: DefaultReceipt, manifest: []const u8) bool {
+    for (receipt.rerun_if_changed) |item| {
+        const resolved = if (std.fs.path.isAbsolute(item.path)) item.path else try_resolve: {
+            break :try_resolve std.fs.path.resolve(ctx.a, &.{ manifest, item.path }) catch return false;
+        };
+        const hash = if (Dir.cwd().statFile(ctx.io, resolved, .{}) catch null) |st|
+            if (st.kind == .directory) (ctx.nativeDirectoryDigest(resolved) catch return false) else ((ctx.checkedDigest(resolved) catch return false).hash)
+        else
+            "missing";
+        if (!eq(hash, item.hash)) return false;
+    }
+    for (receipt.rerun_if_env_changed) |item| {
+        const actual = ctx.env.get(item.name);
+        if (item.value) |expected| {
+            if (!eq(actual orelse return false, expected)) return false;
+        } else if (actual != null) return false;
+    }
+    return true;
+}
+
+fn restoreDefaultOutputs(ctx: *cache.Context, key: []const u8, root: []const u8, rels: []const []const u8) !bool {
+    var random: [16]u8 = undefined;
+    var staging: ?[]const u8 = null;
+    for (0..8) |_| {
+        try std.Io.randomSecure(ctx.io, &random);
+        const path = try std.fmt.allocPrint(ctx.a, "{s}/.nano-script-{s}", .{ std.fs.path.dirname(root).?, std.fmt.bytesToHex(random, .lower) });
+        Dir.cwd().createDir(ctx.io, path, .fromMode(0o700)) catch |err| switch (err) {
+            error.PathAlreadyExists => continue,
+            else => return err,
+        };
+        staging = path;
+        break;
+    }
+    const stage = staging orelse return error.StagingCollision;
+    defer Dir.cwd().deleteTree(ctx.io, stage) catch {};
+    const allowed = try ctx.a.alloc([]const u8, rels.len);
+    const destinations = try ctx.a.alloc([]const u8, rels.len);
+    for (rels, allowed, destinations) |rel, *allow, *dest| {
+        if (rel.len == 0 or eq(rel, "..") or std.mem.startsWith(u8, rel, "../") or std.mem.indexOf(u8, rel, "/../") != null)
+            return error.UnsupportedOutput;
+        allow.* = try std.fs.path.join(ctx.a, &.{ root, rel });
+        dest.* = try std.fs.path.join(ctx.a, &.{ stage, rel });
+        if (std.fs.path.dirname(dest.*)) |parent| Dir.cwd().createDirPath(ctx.io, parent) catch {};
+    }
+    const streams = (try cache.restoreStaged(ctx, key, allowed, destinations)) orelse return false;
+    const original = try Dir.cwd().statFile(ctx.io, root, .{});
+    var dir = try Dir.cwd().openDir(ctx.io, stage, .{ .iterate = true });
+    defer dir.close(ctx.io);
+    try dir.setPermissions(ctx.io, original.permissions);
+    if (!try empty(ctx, root)) return error.OutputChangedDuringRestore;
+    try Dir.cwd().access(ctx.io, root, .{ .write = true, .execute = true });
+    try Dir.cwd().rename(stage, .cwd(), root, ctx.io);
+    try ctx.out(streams.stdout);
+    try std.Io.File.stderr().writeStreamingAll(ctx.io, streams.stderr);
+    return true;
+}
+
+fn executeDefault(ctx: *cache.Context, real: []const u8, args: []const []const u8) !u8 {
+    if (eq(ctx.env.get("NANOCOMPILE_DISABLE") orelse "", "1")) return passthrough(ctx, real, args);
+    if (!nullStdin(ctx)) {
+        ctx.event("build_script_bypass");
+        ctx.trace("build-script stdin is not /dev/null");
+        return passthrough(ctx, real, args);
+    }
+    const requested_root = ctx.env.get("OUT_DIR") orelse return replay(ctx, try run(ctx, real, args));
+    if (!std.fs.path.isAbsolute(requested_root)) return passthrough(ctx, real, args);
+    const root = try Dir.cwd().realPathFileAlloc(ctx.io, requested_root, ctx.a);
+    const manifest = ctx.env.get("CARGO_MANIFEST_DIR") orelse ctx.cwd;
+    try setOutRewrites(ctx, root);
+    const maintenance = try cache.Lock.acquire(ctx, "maintenance", false);
+    defer maintenance.release();
+    var oh = cache.Hash.init(.{});
+    cache.field(&oh, root);
+    const flight = try cache.Lock.acquire(ctx, try std.fmt.allocPrint(ctx.a, "script-out-{s}", .{try cache.finish(ctx.a, &oh)}), true);
+    defer flight.release();
+    if (!try empty(ctx, root)) {
+        ctx.trace("build-script output directory is not empty");
+        ctx.event("build_script_bypass");
+        return replay(ctx, try run(ctx, real, args));
+    }
+    Dir.cwd().access(ctx.io, root, .{ .write = true, .execute = true }) catch {
+        ctx.event("build_script_bypass");
+        return replay(ctx, try run(ctx, real, args));
+    };
+    const key = defaultMaterial(ctx, real) catch {
+        ctx.event("build_script_bypass");
+        return replay(ctx, try run(ctx, real, args));
+    };
+    const keyed = try cache.Lock.acquire(ctx, try std.fmt.allocPrint(ctx.a, "script-key-{s}", .{key}), true);
+    defer keyed.release();
+    const index = try ctx.path(&.{ "build-script-receipts", key });
+    if (ctx.read(index)) |bytes| restore: {
+        const parsed = std.json.parseFromSlice(DefaultReceipt, ctx.a, cache.unseal(ctx, bytes) catch break :restore, .{ .allocate = .alloc_always }) catch break :restore;
+        if (parsed.value.schema != 2 or !eq(parsed.value.kind, "default") or parsed.value.outputs.len > 50000) break :restore;
+        if (!rerunStillValid(ctx, parsed.value, manifest)) break :restore;
+        if (try restoreDefaultOutputs(ctx, key, root, parsed.value.outputs)) {
+            ctx.event("build_script_hit");
+            return 0;
+        }
+    } else |_| {}
+    const result = try run(ctx, real, args);
+    const code = try replay(ctx, result);
+    if (code != 0) {
+        ctx.event("build_script_failed");
+        return code;
+    }
+    ctx.event("build_script_miss");
+    const paths = collectNestedOutputs(ctx, root) catch return 0;
+    var rels: std.ArrayList([]const u8) = .empty;
+    for (paths) |path| try rels.append(ctx.a, relativeTo(root, path) orelse return 0);
+    const rerun = parseRerun(ctx, result.stdout, manifest) catch return 0;
+    cache.store(ctx, key, &.{}, paths, result.stdout, result.stderr) catch |err| {
+        ctx.trace(@errorName(err));
+        return 0;
+    };
+    const receipt = DefaultReceipt{ .outputs = rels.items, .rerun_if_changed = rerun.files, .rerun_if_env_changed = rerun.envs };
+    ctx.atomic(index, try cache.seal(ctx, try std.json.Stringify.valueAlloc(ctx.a, receipt, .{ .emit_null_optional_fields = false }))) catch |err| ctx.trace(@errorName(err));
+    return 0;
+}
+
 fn empty(ctx: *cache.Context, root: []const u8) !bool {
     var dir = try Dir.cwd().openDir(ctx.io, root, .{ .iterate = true });
     defer dir.close(ctx.io);
@@ -336,7 +562,10 @@ fn restoreOutputs(ctx: *cache.Context, key: []const u8, root: []const u8, paths:
 }
 pub fn execute(ctx: *cache.Context, real: []const u8, args: []const []const u8) !u8 {
     ctx.prepare() catch return passthrough(ctx, real, args);
-    const item = contract(ctx) catch return passthrough(ctx, real, args);
+    const item = contract(ctx) catch {
+        if (defaultCacheEnabled(ctx)) return executeDefault(ctx, real, args);
+        return passthrough(ctx, real, args);
+    };
     if (!environmentMatches(ctx, item)) {
         ctx.event("build_script_bypass");
         ctx.trace("build-script environment outside explicit contract");
@@ -440,7 +669,8 @@ pub fn execute(ctx: *cache.Context, real: []const u8, args: []const []const u8) 
 // The explicit contract is checked at execution too, including disabled shims.
 pub fn install(ctx: *cache.Context, argv: []const []const u8) !void {
     if (@import("builtin").os.tag == .windows) return; // Unix build-script shims are unsupported.
-    _ = contract(ctx) catch return;
+    const contracted = if (contract(ctx)) |_| true else |_| false;
+    if (!contracted and !defaultCacheEnabled(ctx)) return;
     var name: ?[]const u8 = null;
     var dir: ?[]const u8 = null;
     var extra: []const u8 = "";
@@ -475,12 +705,16 @@ pub fn launch(ctx: *cache.Context, args: []const [:0]const u8) !?u8 {
 
 pub fn wantsInstall(ctx: *cache.Context, argv: []const []const u8) bool {
     if (@import("builtin").os.tag == .windows) return false; // Unix build-script shims are unsupported.
-    if (ctx.env.get("NANOCOMPILE_BUILD_SCRIPTS_FILE") == null) return false;
+    var script = false;
     for (argv, 0..) |arg, i| if (eq(arg, "--crate-name") and i + 1 < argv.len and eq(argv[i + 1], "build_script_build")) {
-        _ = contract(ctx) catch return false;
-        return true;
+        script = true;
+        break;
     };
-    return false;
+    if (!script) return false;
+    if (defaultCacheEnabled(ctx)) return true;
+    if (ctx.env.get("NANOCOMPILE_BUILD_SCRIPTS_FILE") == null) return false;
+    _ = contract(ctx) catch return false;
+    return true;
 }
 pub fn installLockName(ctx: *cache.Context, argv: []const []const u8) ![]const u8 {
     var h = cache.Hash.init(.{});
@@ -549,4 +783,63 @@ test "execution contract distinguishes absent, empty and exact environment value
     try std.testing.expect(!environmentMatches(&ctx, item));
     try env.put("MODE", "bundled");
     try std.testing.expect(environmentMatches(&ctx, item));
+}
+
+test "default build-script key ignores worktree-local paths" {
+    var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer arena.deinit();
+    const a = arena.allocator();
+    const io = std.testing.io;
+    var tmp = std.testing.tmpDir(.{});
+    defer tmp.cleanup();
+    const cwd = try Dir.cwd().realPathFileAlloc(io, try std.fs.path.join(a, &.{ ".zig-cache", "tmp", &tmp.sub_path }), a);
+    try tmp.dir.writeFile(io, .{ .sub_path = "script", .data = "binary" });
+    const real = try std.fs.path.join(a, &.{ cwd, "script" });
+    var env = std.process.Environ.Map.init(a);
+    try env.put("CARGO_PKG_NAME", "demo");
+    try env.put("CARGO_PKG_VERSION", "1.0.0");
+    try env.put("CARGO_FEATURE_DEFAULT", "1");
+    try env.put("TARGET", "x86_64-unknown-linux-gnu");
+    try env.put("HOST", "x86_64-unknown-linux-gnu");
+    try env.put("OPT_LEVEL", "0");
+    try env.put("DEBUG", "true");
+    try env.put("PROFILE", "debug");
+    try env.put("OUT_DIR", "/worktree-a/target/out");
+    try env.put("CARGO_MANIFEST_DIR", "/worktree-a");
+    try env.put("CARGO_TARGET_DIR", "/worktree-a/target");
+    var ctx: cache.Context = .{ .a = a, .io = io, .env = &env, .root = try std.fs.path.join(a, &.{ cwd, "cache" }), .cwd = cwd };
+    try ctx.prepare();
+    const left = try defaultMaterial(&ctx, real);
+    try env.put("OUT_DIR", "/worktree-b/target/out");
+    try env.put("CARGO_MANIFEST_DIR", "/worktree-b");
+    try env.put("CARGO_TARGET_DIR", "/worktree-b/target");
+    const right = try defaultMaterial(&ctx, real);
+    try std.testing.expectEqualStrings(left, right);
+    try env.put("CARGO_FEATURE_EXTRA", "1");
+    const changed = try defaultMaterial(&ctx, real);
+    try std.testing.expect(!eq(left, changed));
+}
+
+test "default receipt keeps nested OUT_DIR files and rerun-if lines" {
+    var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer arena.deinit();
+    const a = arena.allocator();
+    var env = std.process.Environ.Map.init(a);
+    try env.put("FOO", "bar");
+    var ctx: cache.Context = .{ .a = a, .io = std.testing.io, .env = &env, .root = "/unused", .cwd = "/unused" };
+    const parsed = try parseRerun(&ctx, "cargo:rerun-if-changed=src/lib.rs\ncargo:rerun-if-env-changed=FOO\n", "/pkg");
+    try std.testing.expectEqual(@as(usize, 1), parsed.files.len);
+    try std.testing.expectEqualStrings("src/lib.rs", parsed.files[0].path);
+    try std.testing.expectEqual(@as(usize, 1), parsed.envs.len);
+    try std.testing.expectEqualStrings("FOO", parsed.envs[0].name);
+    try std.testing.expectEqualStrings("bar", parsed.envs[0].value.?);
+    const receipt = DefaultReceipt{
+        .outputs = &.{ "value.rs", "nested/extra.txt" },
+        .rerun_if_changed = parsed.files,
+        .rerun_if_env_changed = parsed.envs,
+    };
+    try std.testing.expect(eq(receipt.outputs[1], "nested/extra.txt"));
+    try std.testing.expect(rerunStillValid(&ctx, receipt, "/pkg"));
+    _ = env.swapRemove("FOO");
+    try std.testing.expect(!rerunStillValid(&ctx, receipt, "/pkg"));
 }
