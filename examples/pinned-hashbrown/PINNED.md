@@ -9,5 +9,7 @@ from crates.io, vendored at that exact version.
 - classification: **mid** (one crate, ~23k Rust LOC)
 
 `src/lib.rs` carries `// nano-loop-body` and `// nano-loop-sig` probes for
-`bench/rust_loop_bench`. Do not bump the crate version without updating this
-pin and re-running the mid MAP-Elites cells.
+`bench/rust_loop_bench`. `[lib] doctest = false` keeps official `cargo test`
+on unit/integration tests; rustdoc snippets are not the edit-loop signal.
+Do not bump the crate version without updating this pin and re-running the
+mid MAP-Elites cells.

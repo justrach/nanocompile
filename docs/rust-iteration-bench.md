@@ -16,6 +16,9 @@ zig build -Doptimize=ReleaseFast
 # Smoke the fixture (1 run, check only, plus the broken-edit gate)
 python3 bench/rust_loop_bench --self-test --nanocompile zig-out/bin/nanocompile
 
+# Isolate cranelift from nightly-vs-stable (same nightly, test --no-run)
+python3 bench/nightly_pair.py examples/rust-loop --name rust-loop --offline
+
 # Any Cargo project
 python3 bench/rust_loop_bench path/to/crate \
   --nanocompile zig-out/bin/nanocompile \
@@ -70,6 +73,7 @@ Each cell records sample wall times, median, population stdev, min/max, and
 | `nanocompile-wrapper` | `RUSTC_WRAPPER=nanocompile CARGO_INCREMENTAL=0` |
 | `fast-check` | `cargo check` only |
 | `validate-graph` | declared `fast-check` → `cargo test` via `nanocompile task` |
+| `nightly-llvm` | `cargo +nightly` LLVM `build` / `test` (control for cranelift) |
 | `cranelift-dev` | `cargo +nightly -Zcodegen-backend` with `CARGO_PROFILE_{DEV,TEST}_CODEGEN_BACKEND=cranelift` (`build` and `test`) |
 | `fast-linker` | `-C link-arg=-fuse-ld=mold` or `lld` on build/test |
 | `sccache` | `RUSTC_WRAPPER=sccache` |
@@ -151,7 +155,7 @@ Fitness is median loop wall time in ms (lower is better). Disk is recorded, not 
 | Size \ Edit | cold | noop | body | sig_dep |
 | --- | ---: | ---: | ---: | ---: |
 | small | 43.5 ms (rust-loop, check) | 1.3 ms (rust-loop, graph) | 24.4 ms (rust-loop, check) | 24.8 ms (rust-loop, check) |
-| mid | — | — | — | — |
+| mid | 441.7 ms (pinned-hashbrown, check) | 3.2 ms (pinned-hashbrown, graph) | 122.7 ms (pinned-hashbrown, check) | 113.2 ms (pinned-hashbrown, check) |
 | large | 1387.3 ms (midsize, check) | 31.2 ms (midsize, check) | 121.9 ms (midsize, check) | 712.0 ms (midsize, check) |
 
 ### Elites
@@ -162,6 +166,10 @@ Fitness is median loop wall time in ms (lower is better). Disk is recorded, not 
 | small|noop | rust-loop | 1.3 | first-rebuild | — | graph | yes | llvm |
 | small|body | rust-loop | 24.4 | first-rebuild | — | check | no | llvm |
 | small|sig_dep | rust-loop | 24.8 | first-rebuild | — | check | no | llvm |
+| mid|cold | pinned-hashbrown | 441.7 | first-rebuild | empty | check | no | llvm |
+| mid|noop | pinned-hashbrown | 3.2 | first-rebuild | — | graph | yes | llvm |
+| mid|body | pinned-hashbrown | 122.7 | first-rebuild | — | check | no | llvm |
+| mid|sig_dep | pinned-hashbrown | 113.2 | first-rebuild | — | check | no | llvm |
 | large|cold | midsize | 1387.3 | restore+mean | warm_compiler_cache | check | no | llvm |
 | large|noop | midsize | 31.2 | restore+mean | — | check | yes | llvm |
 | large|body | midsize | 121.9 | restore+mean | — | check | no | llvm |
@@ -211,6 +219,10 @@ Sample-specific elites:
 - `small|body` `rust-loop`: fixture elite; real samples outvote fixtures; loses the weighted vote for its edit family
 - `small|sig_dep` `rust-loop`: fixture elite; real samples outvote fixtures; loses the weighted vote for its edit family
 - `large|cold` `midsize`: warm compiler cache (sccache/wrapper retained), not empty-cache cold; loses the weighted vote for its edit family
+- `mid|cold` `pinned-hashbrown`: loses the weighted vote for its edit family
+- `mid|noop` `pinned-hashbrown`: loses the weighted vote for its edit family
+- `mid|body` `pinned-hashbrown`: loses the weighted vote for its edit family
+- `mid|sig_dep` `pinned-hashbrown`: loses the weighted vote for its edit family
 
 <!-- MAP_ELITES_GRID_END -->
 
@@ -238,3 +250,5 @@ on the same sample, keep or revert.
 | 14 | pinned-hashbrown | Mid cell needs a real crate | Vendor hashbrown 0.15.2 (23k LOC); size by LOC | rust-loop-medium (202 LOC) reclassified small; mid vacated for a real tree | keep |
 | 15 | midsize (PR #11) | Merge ripgrep+tokio shard | Record `fitness_method` / `cache_state`; reject `package_scope=touched` on sig_dep | large cells occupied; sig_dep elite is line-tables-only 712ms (touched 530ms rejected: no dependent-crate gate); cold sccache 1387ms marked warm_compiler_cache | keep with annotations |
 | 16 | midsize held-out | Fixture elites on real crates | Weight real samples in promote | small/mid fixtures **+10–213%** vs large elites; graph skipped on large. Iteration default = real `cargo check` + line-tables-only; noop = wrapper check (not fixture graph) | keep |
+| 17 | rust-loop | Cranelift test win was nightly vs 1.83 | `bench/nightly_pair.py`: nightly LLVM vs nightly cranelift, `test --no-run` | build body 26.4 vs 27.4 (−3.6%); test compile body 81.0 vs 83.0 (−2.4%). The earlier −47% test body was the toolchain, not the backend | revert cranelift as a test elite; keep nightly-llvm as the control |
+| 18 | pinned-hashbrown | Official harness fills vacated mid | `[lib] doctest = false`; `--map-elites` check seeds first; incremental shard writes | **grid change:** mid|cold 441.7 check (`incremental=false`); mid|noop **3.2 graph+wrapper** (was 15.4 check); mid|body 122.7 / sig_dep 113.2 check. Graph cold 8129ms loses. Promoted defaults unchanged (large noop still votes check+wrapper; graph does not transfer) | keep |

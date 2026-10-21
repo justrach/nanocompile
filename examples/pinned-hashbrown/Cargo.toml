@@ -52,6 +52,9 @@ rustdoc-args = ["--generate-link-to-definition"]
 [lib]
 name = "hashbrown"
 path = "src/lib.rs"
+# Official harness validate is still `cargo test` + LLVM rustc. rustdoc
+# snippets (250+) dominate wall time and do not change the edit-loop signal.
+doctest = false
 
 [[test]]
 name = "equivalent_trait"

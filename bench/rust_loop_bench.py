@@ -44,6 +44,7 @@ DEFAULT_STEPS = (
     "crate-shape",
     "disk-hygiene",
 )
+KNOWN_STEPS = DEFAULT_STEPS + ("nightly-llvm",)
 DEFAULT_COMMANDS = ("check", "build", "test")
 PHASES = ("cold", "noop", "edit_body", "edit_sig")
 BODY_MARK = "nano-loop-body"
@@ -293,6 +294,11 @@ def available_steps(args, tools):
             extra_env={"RUSTC_WRAPPER": str(nano), "CARGO_INCREMENTAL": "0"} if nano else {},
         ),
         StepPlan(
+            "nightly-llvm", "nightly LLVM codegen (control for cranelift)",
+            ["build", "test"],
+            toolchain="nightly",
+        ),
+        StepPlan(
             "cranelift-dev", "nightly cranelift codegen backend (dev build/test)",
             ["build", "test"],
             toolchain="nightly",
@@ -335,13 +341,14 @@ def cargo_argv(command, jobs, offline, toolchain=None, extra_flags=None):
     argv = ["cargo"]
     if toolchain:
         argv = ["cargo", "+" + toolchain]
+    flags = list(extra_flags or [])
+    argv.extend(flag for flag in flags if flag.startswith("-Z"))
     argv.append(command)
     if jobs:
         argv.extend(["-j", str(jobs)])
     if offline:
         argv.append("--offline")
-    if extra_flags:
-        argv.extend(extra_flags)
+    argv.extend(flag for flag in flags if not flag.startswith("-Z"))
     if command == "test":
         argv.extend(["--", "--test-threads", "1"])
     return argv
@@ -665,6 +672,7 @@ STEP_GENOMES = {
     "nanocompile-wrapper": {"wrapper": True, "incremental": False, "loop": "check"},
     "fast-check": {"fast_check": "cargo-check", "loop": "check"},
     "validate-graph": {"wrapper": True, "incremental": False, "loop": "graph"},
+    "nightly-llvm": {"dev_backend": "llvm", "loop": "build"},
     "cranelift-dev": {"dev_backend": "cranelift", "loop": "build"},
     "fast-linker": {"linker": "mold", "loop": "test"},
     "sccache": {"sccache": True, "loop": "check"},
@@ -806,16 +814,19 @@ def mutate_genome(genome, tools):
 
 
 def seed_genomes(nano, tools):
+    # Check/build first so incremental shard writes occupy cells before
+    # loop=test/graph seeds pay full cargo test cost.
     seeds = [
         default_genome(),
         default_genome(wrapper=True, incremental=False) if nano else None,
-        default_genome(loop="graph", wrapper=True, incremental=False) if nano else None,
-        default_genome(linker="mold", loop="test") if tools.get("mold") else default_genome(linker="lld", loop="test"),
         default_genome(sccache=True) if tools.get("sccache") else None,
         default_genome(codegen_units=256),
-        default_genome(debuginfo="line-tables-only", loop="test"),
         default_genome(incremental=False),
+        default_genome(debuginfo="line-tables-only"),
         default_genome(dev_backend="cranelift", loop="build") if tools.get("cranelift") else None,
+        default_genome(loop="graph", wrapper=True, incremental=False) if nano else None,
+        default_genome(linker="mold", loop="test") if tools.get("mold") else default_genome(linker="lld", loop="test"),
+        default_genome(debuginfo="line-tables-only", loop="test"),
         default_genome(wrapper=True, incremental=False, debuginfo="line-tables-only", loop="graph") if nano else None,
     ]
     return [row for row in seeds if row]
@@ -875,6 +886,10 @@ def shard_from_report(report, size):
         if step == "cranelift-dev" and cell.get("command") == "test":
             continue
         overrides = dict(STEP_GENOMES.get(step) or {"loop": "check"})
+        if step == "nightly-llvm" and cell.get("command") == "test":
+            overrides["loop"] = "test"
+        if step in ("nightly-llvm", "cranelift-dev"):
+            overrides["toolchain"] = "nightly"
         if step == "fast-linker" and (report.get("tools") or {}).get("mold"):
             overrides["linker"] = "mold"
         elif step == "fast-linker":
@@ -921,12 +936,21 @@ def measure_genome(genome, work, driver, nano, tools, base_env, jobs, offline, w
 def execute_map_elites(args, work, driver, nano, tools, base_env, offline, correctness, size):
     commit = git_commit()
     sample = args.name or args.project.name
+    destination = Path(args.emit_archive) if args.emit_archive else (REPO / "bench" / "archive" / ("%s.json" % sample))
     evaluations = []
     seeds = seed_genomes(nano, tools)
     if args.genome:
         seeds = [default_genome(**json.loads(Path(args.genome).read_text(encoding="utf-8")))]
     edits = ("cold", "noop", "body", "sig_dep")
     elites = {}
+
+    def record(row):
+        evaluations.append(row)
+        write_shard(destination, sample, evaluations, commit)
+        elite = elites.get(row["cell"])
+        if elite is None or row["fitness_ms"] < elite["fitness_ms"] * 0.97:
+            elites[row["cell"]] = row
+
     for genome in seeds:
         genome = default_genome(**genome)
         genome["offline"] = offline
@@ -940,13 +964,9 @@ def execute_map_elites(args, work, driver, nano, tools, base_env, offline, corre
             )
             if summary is None or not summary.get("ok"):
                 continue
-            row = evaluation_row(
+            record(evaluation_row(
                 "%s|%s" % (size, edit), size, edit, genome, summary, correctness, sample, commit,
-            )
-            evaluations.append(row)
-            elite = elites.get(row["cell"])
-            if elite is None or row["fitness_ms"] < elite["fitness_ms"] * 0.97:
-                elites[row["cell"]] = row
+            ))
     if not args.genome:
         for key, elite in list(elites.items()):
             tries = 0
@@ -970,15 +990,13 @@ def execute_map_elites(args, work, driver, nano, tools, base_env, offline, corre
                     tries += 1
                     continue
                 row = evaluation_row(key, size, elite["edit"], mutant, summary, correctness, sample, commit)
-                evaluations.append(row)
+                record(row)
                 if row["fitness_ms"] <= elite["fitness_ms"] * 0.97:
-                    elites[key] = row
                     current = mutant
                     elite = row
                     tries = 0
                 else:
                     tries += 1
-    destination = Path(args.emit_archive) if args.emit_archive else (REPO / "bench" / "archive" / ("%s.json" % sample))
     write_shard(destination, sample, evaluations, commit)
     return destination, evaluations
 
@@ -1068,7 +1086,7 @@ def main(argv=None):
     parser.add_argument("--mutations", type=int, default=4, help="non-improving tries per cell for --map-elites")
     parser.add_argument("--held-out", help="evaluate elite genomes from a MAP-Elites archive on this sample")
     args = parser.parse_args(argv)
-    args.steps = parse_list(args.steps, DEFAULT_STEPS, DEFAULT_STEPS)
+    args.steps = parse_list(args.steps, KNOWN_STEPS, DEFAULT_STEPS)
     args.commands = parse_list(args.commands, DEFAULT_COMMANDS, DEFAULT_COMMANDS)
     args.jobs = args.jobs or None
     if args.self_test:
