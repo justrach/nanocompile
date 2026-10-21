@@ -1,0 +1,11 @@
+cell,sample,held_out,fitness_ms,spread_ms,disk_bytes,loop,wrapper,sccache,incremental,debuginfo,package_scope,linker,dev_backend,correctness_ok,n_evals,stopped,trained_on,timestamp
+large|cold,midsize,False,1387.3198349999143,24.53562450006075,196497613,check,False,True,False,full,,default,llvm,True,18,True,,2026-10-21T03:26:17.978379+00:00
+large|noop,midsize,False,31.221453999933146,0.837486664043877,196497613,check,True,False,False,full,,default,llvm,True,11,True,,2026-10-21T03:19:46.188562+00:00
+large|body,midsize,False,121.93916600006105,4.545792332077087,314162647,check,False,False,True,line-tables-only,,default,llvm,True,13,True,,2026-10-21T03:20:21.425557+00:00
+large|sig_dep,midsize,False,529.7661290000519,14.392192180814373,432613103,check,False,False,True,full,touched,default,llvm,True,10,True,,2026-10-21T03:21:11.570323+00:00
+large|cold,midsize-held-out-from-rust-loop,True,3908.885816999941,48.04283350006244,196497609,check,False,False,False,full,,default,llvm,True,3,False,rust-loop,2026-10-21T03:35:21.667183+00:00
+large|body,midsize-held-out-from-rust-loop,True,245.90918599994893,5.279721964173199,201689878,check,False,False,False,line-tables-only,,default,llvm,True,3,False,rust-loop,2026-10-21T03:35:28.308808+00:00
+large|sig_dep,midsize-held-out-from-rust-loop,True,1560.9420870000577,51.28091865396217,196497661,check,False,False,False,full,,default,llvm,True,3,False,rust-loop,2026-10-21T03:35:51.489632+00:00
+large|cold,midsize-held-out-from-rust-loop-medium,True,4211.840735250007,77.11390874999324,196497609,check,False,False,False,full,,default,llvm,True,3,False,rust-loop-medium,2026-10-21T03:36:08.421057+00:00
+large|body,midsize-held-out-from-rust-loop-medium,True,134.18279649988563,14.315681745855233,381149562,check,False,False,True,full,,default,llvm,True,3,False,rust-loop-medium,2026-10-21T03:36:11.970974+00:00
+large|sig_dep,midsize-held-out-from-rust-loop-medium,True,1659.058936499946,99.06621833282419,196497662,check,False,False,False,full,,default,llvm,True,3,False,rust-loop-medium,2026-10-21T03:36:35.510348+00:00

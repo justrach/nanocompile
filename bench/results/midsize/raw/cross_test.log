@@ -1,0 +1,17 @@
+CROSS small|cold rust-loop {'command': 'check', 'incremental': False, 'wrapper': None, 'linker': None, 'codegen_backend': None, 'codegen_units': None, 'debuginfo': None, 'quiet': False, 'package_scope': None, 'jobs': 3, 'toolchain': 'stable', 'offline': True}
+  fitness 3908.885816999941 ok True
+CROSS small|noop rust-loop {'command': 'graph', 'incremental': False, 'wrapper': 'nanocompile', 'linker': None, 'codegen_backend': None, 'codegen_units': None, 'debuginfo': None, 'quiet': False, 'package_scope': None, 'jobs': 3, 'toolchain': 'stable', 'offline': True}
+  skip graph
+CROSS small|body rust-loop {'command': 'check', 'incremental': False, 'wrapper': None, 'linker': None, 'codegen_backend': None, 'codegen_units': None, 'debuginfo': 'line-tables-only', 'quiet': False, 'package_scope': None, 'jobs': 3, 'toolchain': 'stable', 'offline': True}
+  fitness 245.90918599994893 ok True
+CROSS small|sig_dep rust-loop {'command': 'check', 'incremental': False, 'wrapper': None, 'linker': None, 'codegen_backend': None, 'codegen_units': None, 'debuginfo': None, 'quiet': False, 'package_scope': None, 'jobs': 3, 'toolchain': 'stable', 'offline': True}
+  fitness 1560.9420870000577 ok True
+CROSS mid|cold rust-loop-medium {'command': 'check', 'incremental': False, 'wrapper': None, 'linker': None, 'codegen_backend': None, 'codegen_units': None, 'debuginfo': None, 'quiet': False, 'package_scope': None, 'jobs': 3, 'toolchain': 'stable', 'offline': True}
+  fitness 4211.840735250007 ok True
+CROSS mid|noop rust-loop-medium {'command': 'graph', 'incremental': False, 'wrapper': 'nanocompile', 'linker': None, 'codegen_backend': None, 'codegen_units': None, 'debuginfo': None, 'quiet': False, 'package_scope': None, 'jobs': 3, 'toolchain': 'stable', 'offline': True}
+  skip graph
+CROSS mid|body rust-loop-medium {'command': 'check', 'incremental': True, 'wrapper': None, 'linker': None, 'codegen_backend': None, 'codegen_units': None, 'debuginfo': None, 'quiet': False, 'package_scope': None, 'jobs': 3, 'toolchain': 'stable', 'offline': True}
+  fitness 134.18279649988563 ok True
+CROSS mid|sig_dep rust-loop-medium {'command': 'check', 'incremental': False, 'wrapper': None, 'linker': None, 'codegen_backend': None, 'codegen_units': None, 'debuginfo': None, 'quiet': False, 'package_scope': None, 'jobs': 3, 'toolchain': 'stable', 'offline': True}
+  fitness 1659.058936499946 ok True
+WROTE 8 matrix rows

@@ -1,0 +1,9 @@
+genome_from,trained_on,tested_on,cell,fitness_ms,spread_ms,disk_bytes,correctness_ok,delta_vs_local_elite_pct,ok,skip_reason
+small|cold,rust-loop,midsize,large|cold,3908.885816999941,48.04283350006244,196497609,True,181.75808623108043,True,
+small|noop,rust-loop,midsize,large|noop,0.0,,0,False,,False,skipped-graph-on-large
+small|body,rust-loop,midsize,large|body,245.90918599994893,5.279721964173199,201689878,True,101.66546489240858,True,
+small|sig_dep,rust-loop,midsize,large|sig_dep,1560.9420870000577,51.28091865396217,196497661,True,194.64739279318943,True,
+mid|cold,rust-loop-medium,midsize,large|cold,4211.840735250007,77.11390874999324,196497609,True,203.59551049381972,True,
+mid|noop,rust-loop-medium,midsize,large|noop,0.0,,0,False,,False,skipped-graph-on-large
+mid|body,rust-loop-medium,midsize,large|body,134.18279649988563,14.315681745855233,381149562,True,10.040769427452412,True,
+mid|sig_dep,rust-loop-medium,midsize,large|sig_dep,1659.058936499946,99.06621833282419,196497662,True,213.16817850009872,True,

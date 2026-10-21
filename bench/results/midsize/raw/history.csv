@@ -1,0 +1,65 @@
+cell,action,reason,fitness_ms,loop,wrapper,sccache,incremental,debuginfo,package_scope,timestamp
+large|cold,seed,empty-cell,4466.951885250011,check,False,False,True,full,,2026-10-21T03:19:18.446958+00:00
+large|cold,replace,win,3388.4382534999986,check,True,False,False,full,,2026-10-21T03:19:45.862931+00:00
+large|cold,seed,gate-or-fail,,check,False,True,True,full,,2026-10-21T03:20:10.795180+00:00
+large|cold,seed,lt-3pct,4284.54157675003,check,False,False,True,line-tables-only,,2026-10-21T03:20:49.138968+00:00
+large|cold,seed,lt-3pct,7632.7343150000215,check,False,False,True,full,,2026-10-21T03:22:25.020681+00:00
+large|cold,seed,lt-3pct,7769.0952650000045,check,False,False,True,full,,2026-10-21T03:22:56.756084+00:00
+large|cold,seed,lt-3pct,7651.371323749998,check,False,False,True,full,,2026-10-21T03:23:27.902188+00:00
+large|cold,seed,lt-3pct,6953.901042000012,check,False,False,True,line-tables-only,,2026-10-21T03:23:55.837154+00:00
+large|cold,seed,lt-3pct,7120.199317750007,check,False,False,True,full,,2026-10-21T03:24:24.453438+00:00
+large|cold,seed,lt-3pct,7231.815860250009,check,False,False,True,line-tables-only,,2026-10-21T03:24:53.944140+00:00
+large|cold,reject,lt-3pct,3302.262744499984,check,True,False,False,full,,2026-10-21T03:25:37.034250+00:00
+large|cold,reject,within-noise,2988.078279999996,check,False,True,False,full,,2026-10-21T03:25:49.029648+00:00
+large|cold,reject,lt-3pct,5812.26520125,check,True,False,False,full,,2026-10-21T03:26:12.340211+00:00
+large|cold,replace,win,1387.3198349999143,check,False,True,False,full,,2026-10-21T03:26:17.978379+00:00
+large|cold,reject,lt-3pct,3938.8285164999957,check,False,False,False,full,,2026-10-21T03:26:33.800458+00:00
+large|cold,reject,lt-3pct,3025.355257499996,check,False,True,False,full,,2026-10-21T03:26:45.947682+00:00
+large|cold,reject,gate-or-fail,,check,False,True,True,full,,2026-10-21T03:26:46.008539+00:00
+large|cold,reject,lt-3pct,4615.516709749954,check,False,True,False,full,,2026-10-21T03:27:04.537533+00:00
+large|cold,stop,4 consecutive tries under 3% / noise,1387.3198349999143,check,False,True,False,full,,2026-10-21T03:32:48.613531+00:00
+large|noop,seed,empty-cell,33.15245350006535,check,False,False,True,full,,2026-10-21T03:19:18.808839+00:00
+large|noop,replace,win,31.221453999933146,check,True,False,False,full,,2026-10-21T03:19:46.188562+00:00
+large|noop,seed,gate-or-fail,,check,False,True,True,full,,2026-10-21T03:20:10.742678+00:00
+large|noop,seed,lt-3pct,45.36904800005459,check,False,False,True,full,,2026-10-21T03:22:25.520334+00:00
+large|noop,seed,lt-3pct,35.74745100002019,check,False,False,True,full,,2026-10-21T03:22:57.155970+00:00
+large|noop,seed,lt-3pct,43.554057499989085,check,False,False,True,full,,2026-10-21T03:24:24.906858+00:00
+large|noop,seed,gate-or-fail,,graph,False,False,True,full,,2026-10-21T03:25:22.591994+00:00
+large|noop,reject,lt-3pct,35.15603499988629,check,True,False,False,full,,2026-10-21T03:27:19.984784+00:00
+large|noop,reject,lt-3pct,32.74564950004333,check,True,False,False,full,,2026-10-21T03:27:23.280345+00:00
+large|noop,reject,lt-3pct,33.10443199995916,check,True,False,False,full,,2026-10-21T03:27:23.621862+00:00
+large|noop,reject,lt-3pct,35.63417949999348,check,True,False,False,full,,2026-10-21T03:27:37.698345+00:00
+large|noop,stop,4 consecutive tries under 3% / noise,31.221453999933146,check,True,False,False,full,,2026-10-21T03:32:48.613531+00:00
+large|body,seed,empty-cell,127.39468350008565,check,False,False,True,full,,2026-10-21T03:19:20.806045+00:00
+large|body,seed,lt-3pct,254.7870304999833,check,True,False,False,full,,2026-10-21T03:19:49.905159+00:00
+large|body,seed,gate-or-fail,,check,False,True,True,full,,2026-10-21T03:20:10.687411+00:00
+large|body,replace,win,121.93916600006105,check,False,False,True,line-tables-only,,2026-10-21T03:20:21.425557+00:00
+large|body,seed,lt-3pct,130.2240905000076,check,False,False,True,full,touched,2026-10-21T03:20:59.509601+00:00
+large|body,seed,lt-3pct,127.90828150002653,check,False,False,True,full,,2026-10-21T03:21:22.105882+00:00
+large|body,seed,lt-3pct,237.60070399998767,check,False,False,False,full,,2026-10-21T03:21:43.642533+00:00
+large|body,seed,lt-3pct,122.7862205000747,check,False,False,True,full,,2026-10-21T03:21:54.352290+00:00
+large|body,seed,gate-or-fail,,graph,False,False,True,full,,2026-10-21T03:25:23.786814+00:00
+large|body,reject,lt-3pct,240.40767899998627,check,False,False,False,line-tables-only,,2026-10-21T03:27:49.729870+00:00
+large|body,reject,lt-3pct,274.7730760000877,check,False,False,True,line-tables-only,,2026-10-21T03:28:07.060621+00:00
+large|body,reject,lt-3pct,136.08814199994868,check,False,False,True,line-tables-only,,2026-10-21T03:28:20.180746+00:00
+large|body,reject,lt-3pct,128.0749500000411,check,False,False,True,line-tables-only,,2026-10-21T03:28:31.969424+00:00
+large|body,stop,4 consecutive tries under 3% / noise,121.93916600006105,check,False,False,True,line-tables-only,,2026-10-21T03:32:48.613531+00:00
+large|sig_dep,seed,empty-cell,777.3346029999857,check,False,False,True,full,,2026-10-21T03:19:32.269907+00:00
+large|sig_dep,seed,lt-3pct,1416.437644000041,check,True,False,False,full,,2026-10-21T03:20:10.620738+00:00
+large|sig_dep,seed,gate-or-fail,,check,False,True,True,full,,2026-10-21T03:20:10.715816+00:00
+large|sig_dep,replace,win,711.9701940000027,check,False,False,True,line-tables-only,,2026-10-21T03:20:31.893557+00:00
+large|sig_dep,replace,win,529.7661290000519,check,False,False,True,full,touched,2026-10-21T03:21:11.570323+00:00
+large|sig_dep,seed,lt-3pct,716.0089035000965,check,False,False,True,full,,2026-10-21T03:21:32.689116+00:00
+large|sig_dep,reject,lt-3pct,1931.8773264999436,check,True,False,False,full,touched,2026-10-21T03:29:07.082509+00:00
+large|sig_dep,reject,lt-3pct,752.646948499887,check,False,False,True,full,,2026-10-21T03:29:19.566000+00:00
+large|sig_dep,reject,lt-3pct,560.4455224998901,check,False,False,True,full,touched,2026-10-21T03:29:34.298818+00:00
+large|sig_dep,reject,lt-3pct,542.1095875000219,check,False,False,True,full,touched,2026-10-21T03:29:49.067488+00:00
+large|sig_dep,stop,4 consecutive tries under 3% / noise,529.7661290000519,check,False,False,True,full,touched,2026-10-21T03:32:48.613531+00:00
+large|cold,held_out,cross-test small|cold elite on ripgrep+tokio,3908.885816999941,check,False,False,False,full,,2026-10-21T03:35:21.667191+00:00
+large|noop,held_out,cross-test small|noop elite on ripgrep+tokio (failed or skipped),,graph,True,False,False,full,,2026-10-21T03:35:21.667268+00:00
+large|body,held_out,cross-test small|body elite on ripgrep+tokio,245.90918599994893,check,False,False,False,line-tables-only,,2026-10-21T03:35:28.308813+00:00
+large|sig_dep,held_out,cross-test small|sig_dep elite on ripgrep+tokio,1560.9420870000577,check,False,False,False,full,,2026-10-21T03:35:51.489640+00:00
+large|cold,held_out,cross-test mid|cold elite on ripgrep+tokio,4211.840735250007,check,False,False,False,full,,2026-10-21T03:36:08.421071+00:00
+large|noop,held_out,cross-test mid|noop elite on ripgrep+tokio (failed or skipped),,graph,True,False,False,full,,2026-10-21T03:36:08.421169+00:00
+large|body,held_out,cross-test mid|body elite on ripgrep+tokio,134.18279649988563,check,False,False,True,full,,2026-10-21T03:36:11.970980+00:00
+large|sig_dep,held_out,cross-test mid|sig_dep elite on ripgrep+tokio,1659.058936499946,check,False,False,False,full,,2026-10-21T03:36:35.510358+00:00
