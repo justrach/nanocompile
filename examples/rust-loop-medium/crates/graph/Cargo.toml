@@ -1,0 +1,8 @@
+[package]
+name = "nano-graph"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[dependencies]
+nano-intern = { path = "../intern" }

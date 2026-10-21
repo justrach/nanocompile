@@ -96,7 +96,8 @@ def cargo_env(base, target, extra=None):
     env = {k: v for k, v in base.items()
            if k not in ("RUSTC_WRAPPER", "RUSTC_WORKSPACE_WRAPPER")
            and not k.startswith("CARGO_PROFILE_")
-           and k != "CARGO_ENCODED_RUSTFLAGS"}
+           and k != "CARGO_ENCODED_RUSTFLAGS"
+           and (k == "NANOCOMPILE_DIR" or not k.startswith("NANOCOMPILE_"))}
     env["CARGO_TARGET_DIR"] = str(target)
     env["CARGO_TERM_COLOR"] = "never"
     if extra:
@@ -239,6 +240,12 @@ def measure_once(argv, cwd, env, target):
         "stderr_tail": result.stderr.decode(errors="replace")[-2000:],
         "stdout_tail": result.stdout.decode(errors="replace")[-1000:],
     }
+
+
+def _clear_nano_cache(env):
+    cache = env.get("NANOCOMPILE_DIR")
+    if cache and Path(cache).exists():
+        shutil.rmtree(cache)
 
 
 def empty_target(target: Path):
@@ -504,9 +511,22 @@ def run_correctness(work, driver, nanocompile, offline, jobs, tools_env):
 
 def run_cell(step, command, phase, argv, cwd, env, target, warmup, runs):
     samples = []
+    reset = phase in ("cold",)
+    # Edits: time the first rebuild only. Extra samples would be no-ops of the
+    # already-edited tree. Cold: empty target and the isolated nanocompile cache
+    # so a graph hit is not mistaken for a cold miss.
+    if phase in ("edit_body", "edit_sig", "body", "sig_dep"):
+        warmup = 0
+        runs = 1
     for _ in range(warmup):
+        if reset:
+            empty_target(target)
+            _clear_nano_cache(env)
         measure_once(argv, cwd, env, target)
     for _ in range(runs):
+        if reset:
+            empty_target(target)
+            _clear_nano_cache(env)
         samples.append(measure_once(argv, cwd, env, target))
     summary = summarize(samples)
     summary.update({
@@ -539,6 +559,7 @@ def execute(args):
     work = work_root / "project"
     copy_project(project, work)
     base_env = {k: v for k, v in os.environ.items() if not k.startswith("NANOCOMPILE_")}
+    base_env["NANOCOMPILE_DIR"] = str(work_root / "nano-cache")
     fetch = run(["cargo", "fetch"], cwd=work, env=base_env)
     offline = args.offline and fetch.returncode == 0
     if fetch.returncode != 0 and args.offline:
@@ -547,11 +568,14 @@ def execute(args):
     size_info = classify_project(project)
     args.work_root = work_root
     map_elites_meta = None
-    if getattr(args, "map_elites", False) or getattr(args, "genome", None):
+    if getattr(args, "held_out", None):
+        dest, evs, matrix = execute_held_out(args, work, driver, nano, tools, base_env, offline, correctness, size_info["size"])
+        map_elites_meta = {"shard": str(dest), "evaluations": len(evs), "size": size_info, "held_out": len(matrix)}
+    elif getattr(args, "map_elites", False) or getattr(args, "genome", None):
         dest, evs = execute_map_elites(args, work, driver, nano, tools, base_env, offline, correctness, size_info["size"])
         map_elites_meta = {"shard": str(dest), "evaluations": len(evs), "size": size_info}
     cells = []
-    skip_steps = bool(getattr(args, "map_elites", False) or getattr(args, "genome", None))
+    skip_steps = bool(getattr(args, "map_elites", False) or getattr(args, "genome", None) or getattr(args, "held_out", None))
     for step in [] if skip_steps else available_steps(argparse.Namespace(
             commands=args.commands, steps=args.steps, work=work_root), tools):
         if step.skip:
@@ -935,6 +959,61 @@ def execute_map_elites(args, work, driver, nano, tools, base_env, offline, corre
     return destination, evaluations
 
 
+def execute_held_out(args, work, driver, nano, tools, base_env, offline, correctness, size):
+    archive = json.loads(Path(args.held_out).read_text(encoding="utf-8"))
+    cells = archive.get("cells") or {}
+    if archive.get("kind") == "nanocompile.rust-loop.map-elites.shard":
+        cells = {row["cell"]: row for row in archive.get("evaluations") or []}
+    sample = args.name or args.project.name
+    commit = git_commit()
+    matrix = []
+    evaluations = []
+    for key, elite in cells.items():
+        genome = default_genome(**(elite.get("genome") or {}))
+        genome["offline"] = offline
+        edit = elite.get("edit") or key.split("|", 1)[-1]
+        target = args.work_root / "targets" / "held-out" / key.replace("|", "-")
+        if edit != "cold":
+            measure_genome(genome, work, driver, nano, tools, base_env, args.jobs, offline, 0, 1, "cold", args.work_root, target)
+        summary, err = measure_genome(
+            genome, work, driver, nano, tools, base_env, args.jobs, offline,
+            args.warmup, args.runs, edit, args.work_root, target,
+        )
+        if summary is None:
+            continue
+        local_key = "%s|%s" % (size, edit)
+        row = evaluation_row(local_key, size, edit, genome, summary, correctness, sample, commit)
+        evaluations.append(row)
+        local_elite = cells.get(local_key)
+        delta = None
+        if local_elite and local_elite.get("fitness_ms"):
+            delta = (row["fitness_ms"] - local_elite["fitness_ms"]) / local_elite["fitness_ms"] * 100.0
+        matrix.append({
+            "genome_from": key,
+            "trained_on": elite.get("sample"),
+            "tested_on": sample,
+            "cell": local_key,
+            "fitness_ms": row["fitness_ms"],
+            "spread_ms": row["spread_ms"],
+            "disk_bytes": row["disk_bytes"],
+            "correctness_ok": row["correctness"]["ok"],
+            "delta_vs_local_elite_pct": delta,
+        })
+    destination = Path(args.emit_archive) if args.emit_archive else (REPO / "bench" / "archive" / ("%s-held-out.json" % sample))
+    shard = {
+        "schema_version": 1,
+        "kind": "nanocompile.rust-loop.map-elites.shard",
+        "sample": sample,
+        "commit": commit,
+        "timestamp": now_iso(),
+        "evaluations": evaluations,
+        "generalization": {"samples": [sample], "matrix": matrix},
+    }
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    destination.write_text(json.dumps(shard, indent=2) + "\n", encoding="utf-8")
+    return destination, evaluations, matrix
+
+
 def parse_list(value, allowed, default):
     if not value:
         return list(default)
@@ -963,6 +1042,7 @@ def main(argv=None):
     parser.add_argument("--map-elites", action="store_true", help="seed + mutate elites for this sample")
     parser.add_argument("--emit-archive", help="write a MAP-Elites shard (default bench/archive/<name>.json when --map-elites)")
     parser.add_argument("--mutations", type=int, default=4, help="non-improving tries per cell for --map-elites")
+    parser.add_argument("--held-out", help="evaluate elite genomes from a MAP-Elites archive on this sample")
     args = parser.parse_args(argv)
     args.steps = parse_list(args.steps, DEFAULT_STEPS, DEFAULT_STEPS)
     args.commands = parse_list(args.commands, DEFAULT_COMMANDS, DEFAULT_COMMANDS)

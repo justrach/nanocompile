@@ -1,0 +1,317 @@
+{
+  "schema_version": 1,
+  "kind": "nanocompile.rust-loop.map-elites.shard",
+  "sample": "rust-loop-medium",
+  "commit": "19fa491f3207bd9715d3c44b24ee81cdea6f7e01",
+  "timestamp": "2026-10-21T03:28:18.286725+00:00",
+  "evaluations": [
+    {
+      "cell": "mid|cold",
+      "size": "mid",
+      "edit": "cold",
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "fitness_ms": 108.47162299978663,
+      "spread_ms": 1.7179978531638347,
+      "disk_bytes": 1447512,
+      "correctness": {
+        "ok": true,
+        "agree_on_broken": true,
+        "validate_is_final": true
+      },
+      "sample": "rust-loop-medium",
+      "commit": "19fa491f3207bd9715d3c44b24ee81cdea6f7e01",
+      "timestamp": "2026-10-21T03:28:16.270285+00:00",
+      "n_evals": 3,
+      "non_improving": 0,
+      "stopped": false
+    },
+    {
+      "cell": "mid|noop",
+      "size": "mid",
+      "edit": "noop",
+      "genome": {
+        "wrapper": true,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "graph",
+        "jobs": null,
+        "offline": true
+      },
+      "fitness_ms": 1.387633000376809,
+      "spread_ms": 0.06249031176895958,
+      "disk_bytes": 22309386,
+      "correctness": {
+        "ok": true,
+        "agree_on_broken": true,
+        "validate_is_final": true
+      },
+      "sample": "rust-loop-medium",
+      "commit": "19fa491f3207bd9715d3c44b24ee81cdea6f7e01",
+      "timestamp": "2026-10-21T03:28:16.889647+00:00",
+      "n_evals": 3,
+      "non_improving": 0,
+      "stopped": false
+    },
+    {
+      "cell": "mid|body",
+      "size": "mid",
+      "edit": "body",
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "line-tables-only",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "fitness_ms": 67.36698099985006,
+      "spread_ms": 0.0,
+      "disk_bytes": 22988,
+      "correctness": {
+        "ok": true,
+        "agree_on_broken": true,
+        "validate_is_final": true
+      },
+      "sample": "rust-loop-medium",
+      "commit": "19fa491f3207bd9715d3c44b24ee81cdea6f7e01",
+      "timestamp": "2026-10-21T03:28:17.046792+00:00",
+      "n_evals": 1,
+      "non_improving": 0,
+      "stopped": false
+    },
+    {
+      "cell": "mid|sig_dep",
+      "size": "mid",
+      "edit": "sig_dep",
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "fitness_ms": 34.26494699988325,
+      "spread_ms": 0.0,
+      "disk_bytes": 33131,
+      "correctness": {
+        "ok": true,
+        "agree_on_broken": true,
+        "validate_is_final": true
+      },
+      "sample": "rust-loop-medium",
+      "commit": "19fa491f3207bd9715d3c44b24ee81cdea6f7e01",
+      "timestamp": "2026-10-21T03:28:17.172670+00:00",
+      "n_evals": 1,
+      "non_improving": 0,
+      "stopped": false
+    },
+    {
+      "cell": "mid|cold",
+      "size": "mid",
+      "edit": "cold",
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "fitness_ms": 85.17907899977217,
+      "spread_ms": 0.5171219161489553,
+      "disk_bytes": 22876,
+      "correctness": {
+        "ok": true,
+        "agree_on_broken": true,
+        "validate_is_final": true
+      },
+      "sample": "rust-loop-medium",
+      "commit": "19fa491f3207bd9715d3c44b24ee81cdea6f7e01",
+      "timestamp": "2026-10-21T03:28:17.517072+00:00",
+      "n_evals": 3,
+      "non_improving": 0,
+      "stopped": false
+    },
+    {
+      "cell": "mid|noop",
+      "size": "mid",
+      "edit": "noop",
+      "genome": {
+        "wrapper": true,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "graph",
+        "jobs": null,
+        "offline": true
+      },
+      "fitness_ms": 1.4196060001268052,
+      "spread_ms": 0.09356091851361135,
+      "disk_bytes": 22309344,
+      "correctness": {
+        "ok": true,
+        "agree_on_broken": true,
+        "validate_is_final": true
+      },
+      "sample": "rust-loop-medium",
+      "commit": "19fa491f3207bd9715d3c44b24ee81cdea6f7e01",
+      "timestamp": "2026-10-21T03:28:18.119328+00:00",
+      "n_evals": 3,
+      "non_improving": 0,
+      "stopped": false
+    },
+    {
+      "cell": "mid|body",
+      "size": "mid",
+      "edit": "body",
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "fitness_ms": 63.34535499991034,
+      "spread_ms": 0.0,
+      "disk_bytes": 1453932,
+      "correctness": {
+        "ok": true,
+        "agree_on_broken": true,
+        "validate_is_final": true
+      },
+      "sample": "rust-loop-medium",
+      "commit": "19fa491f3207bd9715d3c44b24ee81cdea6f7e01",
+      "timestamp": "2026-10-21T03:28:18.286708+00:00",
+      "n_evals": 1,
+      "non_improving": 0,
+      "stopped": false
+    }
+  ],
+  "generalization": {
+    "samples": [
+      "rust-loop-medium"
+    ],
+    "matrix": [
+      {
+        "genome_from": "small|cold",
+        "trained_on": "rust-loop",
+        "tested_on": "rust-loop-medium",
+        "cell": "mid|cold",
+        "fitness_ms": 108.47162299978663,
+        "spread_ms": 1.7179978531638347,
+        "disk_bytes": 1447512,
+        "correctness_ok": true,
+        "delta_vs_local_elite_pct": 24.29909400358029
+      },
+      {
+        "genome_from": "small|noop",
+        "trained_on": "rust-loop",
+        "tested_on": "rust-loop-medium",
+        "cell": "mid|noop",
+        "fitness_ms": 1.387633000376809,
+        "spread_ms": 0.06249031176895958,
+        "disk_bytes": 22309386,
+        "correctness_ok": true,
+        "delta_vs_local_elite_pct": 0.45280873471132566
+      },
+      {
+        "genome_from": "small|body",
+        "trained_on": "rust-loop",
+        "tested_on": "rust-loop-medium",
+        "cell": "mid|body",
+        "fitness_ms": 67.36698099985006,
+        "spread_ms": 0.0,
+        "disk_bytes": 22988,
+        "correctness_ok": true,
+        "delta_vs_local_elite_pct": 7.059573893137458
+      },
+      {
+        "genome_from": "small|sig_dep",
+        "trained_on": "rust-loop",
+        "tested_on": "rust-loop-medium",
+        "cell": "mid|sig_dep",
+        "fitness_ms": 34.26494699988325,
+        "spread_ms": 0.0,
+        "disk_bytes": 33131,
+        "correctness_ok": true,
+        "delta_vs_local_elite_pct": null
+      },
+      {
+        "genome_from": "mid|cold",
+        "trained_on": "rust-loop-medium",
+        "tested_on": "rust-loop-medium",
+        "cell": "mid|cold",
+        "fitness_ms": 85.17907899977217,
+        "spread_ms": 0.5171219161489553,
+        "disk_bytes": 22876,
+        "correctness_ok": true,
+        "delta_vs_local_elite_pct": -2.392145937081631
+      },
+      {
+        "genome_from": "mid|noop",
+        "trained_on": "rust-loop-medium",
+        "tested_on": "rust-loop-medium",
+        "cell": "mid|noop",
+        "fitness_ms": 1.4196060001268052,
+        "spread_ms": 0.09356091851361135,
+        "disk_bytes": 22309344,
+        "correctness_ok": true,
+        "delta_vs_local_elite_pct": 2.7673815559754447
+      },
+      {
+        "genome_from": "mid|body",
+        "trained_on": "rust-loop-medium",
+        "tested_on": "rust-loop-medium",
+        "cell": "mid|body",
+        "fitness_ms": 63.34535499991034,
+        "spread_ms": 0.0,
+        "disk_bytes": 1453932,
+        "correctness_ok": true,
+        "delta_vs_local_elite_pct": 0.6684077829615088
+      }
+    ]
+  }
+}
