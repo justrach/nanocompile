@@ -14,7 +14,8 @@
       "fast_check": "cargo-check",
       "loop": "check",
       "jobs": 4,
-      "offline": true
+      "offline": true,
+      "package_scope": "workspace"
     },
     "fitness_ms": 338.81,
     "spread_ms": 29.13,
@@ -22,14 +23,17 @@
     "correctness": {
       "ok": true,
       "agree_on_broken": true,
-      "validate_is_final": true
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
     },
     "sample": "emergentDB",
     "commit": "1205db48e7bdee8db49fa3c705e209dd1f4efde0",
     "timestamp": "2026-10-21T03:18:53.260135+00:00",
     "n_evals": 5,
     "label": "baseline",
-    "source": "scratch-mapelites"
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
   },
   {
     "cell": "mid|body",
@@ -46,7 +50,8 @@
       "fast_check": "cargo-check",
       "loop": "check",
       "jobs": 4,
-      "offline": true
+      "offline": true,
+      "package_scope": "workspace"
     },
     "fitness_ms": 769.72,
     "spread_ms": 26.99,
@@ -54,14 +59,17 @@
     "correctness": {
       "ok": true,
       "agree_on_broken": true,
-      "validate_is_final": true
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
     },
     "sample": "emergentDB",
     "commit": "1205db48e7bdee8db49fa3c705e209dd1f4efde0",
     "timestamp": "2026-10-21T03:19:03.587871+00:00",
     "n_evals": 5,
     "label": "plain-noinc",
-    "source": "scratch-mapelites"
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
   },
   {
     "cell": "mid|body",
@@ -78,7 +86,8 @@
       "fast_check": "cargo-check",
       "loop": "check",
       "jobs": 4,
-      "offline": true
+      "offline": true,
+      "package_scope": "workspace"
     },
     "fitness_ms": 817.51,
     "spread_ms": 27.39,
@@ -86,14 +95,17 @@
     "correctness": {
       "ok": true,
       "agree_on_broken": true,
-      "validate_is_final": true
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
     },
     "sample": "emergentDB",
     "commit": "1205db48e7bdee8db49fa3c705e209dd1f4efde0",
     "timestamp": "2026-10-21T03:19:14.561554+00:00",
     "n_evals": 5,
     "label": "nanocompile-wrapper",
-    "source": "scratch-mapelites"
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
   },
   {
     "cell": "mid|body",
@@ -110,7 +122,8 @@
       "fast_check": "cargo-check",
       "loop": "check",
       "jobs": 4,
-      "offline": true
+      "offline": true,
+      "package_scope": "workspace"
     },
     "fitness_ms": 244.05,
     "spread_ms": 6.75,
@@ -118,14 +131,17 @@
     "correctness": {
       "ok": true,
       "agree_on_broken": true,
-      "validate_is_final": true
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
     },
     "sample": "emergentDB",
     "commit": "1205db48e7bdee8db49fa3c705e209dd1f4efde0",
     "timestamp": "2026-10-21T03:19:23.515476+00:00",
     "n_evals": 5,
     "label": "sccache",
-    "source": "scratch-mapelites"
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
   },
   {
     "cell": "mid|body",
@@ -142,7 +158,8 @@
       "fast_check": "cargo-check",
       "loop": "check",
       "jobs": 4,
-      "offline": true
+      "offline": true,
+      "package_scope": "workspace"
     },
     "fitness_ms": 841.82,
     "spread_ms": 23.14,
@@ -150,14 +167,17 @@
     "correctness": {
       "ok": true,
       "agree_on_broken": true,
-      "validate_is_final": true
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
     },
     "sample": "emergentDB",
     "commit": "1205db48e7bdee8db49fa3c705e209dd1f4efde0",
     "timestamp": "2026-10-21T03:19:34.742168+00:00",
     "n_evals": 5,
     "label": "fast-check",
-    "source": "scratch-mapelites"
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
   },
   {
     "cell": "mid|body",
@@ -174,7 +194,8 @@
       "fast_check": "cargo-check",
       "loop": "check",
       "jobs": 4,
-      "offline": true
+      "offline": true,
+      "package_scope": "workspace"
     },
     "fitness_ms": 313.93,
     "spread_ms": 4.15,
@@ -182,14 +203,17 @@
     "correctness": {
       "ok": true,
       "agree_on_broken": true,
-      "validate_is_final": true
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
     },
     "sample": "emergentDB",
     "commit": "1205db48e7bdee8db49fa3c705e209dd1f4efde0",
     "timestamp": "2026-10-21T03:19:42.948011+00:00",
     "n_evals": 5,
     "label": "disk-hygiene",
-    "source": "scratch-mapelites"
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
   },
   {
     "cell": "mid|body",
@@ -206,7 +230,8 @@
       "fast_check": "cargo-check",
       "loop": "check",
       "jobs": 4,
-      "offline": true
+      "offline": true,
+      "package_scope": "workspace"
     },
     "fitness_ms": 343.05,
     "spread_ms": 28.16,
@@ -214,14 +239,17 @@
     "correctness": {
       "ok": true,
       "agree_on_broken": true,
-      "validate_is_final": true
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
     },
     "sample": "emergentDB",
     "commit": "1205db48e7bdee8db49fa3c705e209dd1f4efde0",
     "timestamp": "2026-10-21T03:19:50.927277+00:00",
     "n_evals": 5,
     "label": "crate-shape-256",
-    "source": "scratch-mapelites"
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
   },
   {
     "cell": "mid|body",
@@ -238,7 +266,8 @@
       "fast_check": "cargo-check",
       "loop": "check",
       "jobs": 4,
-      "offline": true
+      "offline": true,
+      "package_scope": "workspace"
     },
     "fitness_ms": 319.9,
     "spread_ms": 16.89,
@@ -246,14 +275,17 @@
     "correctness": {
       "ok": true,
       "agree_on_broken": true,
-      "validate_is_final": true
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
     },
     "sample": "emergentDB",
     "commit": "1205db48e7bdee8db49fa3c705e209dd1f4efde0",
     "timestamp": "2026-10-21T03:22:19.590778+00:00",
     "n_evals": 5,
     "label": "crate-shape-16",
-    "source": "scratch-mapelites"
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
   },
   {
     "cell": "mid|body",
@@ -268,9 +300,10 @@
       "incremental": true,
       "debuginfo": "full",
       "fast_check": "cargo-check",
-      "loop": "check",
+      "loop": "build",
       "jobs": 4,
-      "offline": true
+      "offline": true,
+      "package_scope": "workspace"
     },
     "fitness_ms": 485.73,
     "spread_ms": 14.63,
@@ -278,14 +311,17 @@
     "correctness": {
       "ok": true,
       "agree_on_broken": true,
-      "validate_is_final": true
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
     },
     "sample": "emergentDB",
     "commit": "1205db48e7bdee8db49fa3c705e209dd1f4efde0",
     "timestamp": "2026-10-21T03:22:31.493964+00:00",
     "n_evals": 5,
     "label": "lld",
-    "source": "scratch-mapelites"
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
   },
   {
     "cell": "mid|body",
@@ -300,9 +336,10 @@
       "incremental": false,
       "debuginfo": "full",
       "fast_check": "cargo-check",
-      "loop": "check",
+      "loop": "build",
       "jobs": 4,
-      "offline": true
+      "offline": true,
+      "package_scope": "workspace"
     },
     "fitness_ms": 1651.99,
     "spread_ms": 14.78,
@@ -310,14 +347,17 @@
     "correctness": {
       "ok": true,
       "agree_on_broken": true,
-      "validate_is_final": true
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
     },
     "sample": "emergentDB",
     "commit": "1205db48e7bdee8db49fa3c705e209dd1f4efde0",
     "timestamp": "2026-10-21T03:23:09.645472+00:00",
     "n_evals": 5,
     "label": "mut-command=build,wrapper=nanocompile,noinc",
-    "source": "scratch-mapelites"
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
   },
   {
     "cell": "mid|body",
@@ -334,7 +374,8 @@
       "fast_check": "cargo-check",
       "loop": "check",
       "jobs": 4,
-      "offline": true
+      "offline": true,
+      "package_scope": "workspace"
     },
     "fitness_ms": 840.01,
     "spread_ms": 49.27,
@@ -342,14 +383,17 @@
     "correctness": {
       "ok": true,
       "agree_on_broken": true,
-      "validate_is_final": true
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
     },
     "sample": "emergentDB",
     "commit": "1205db48e7bdee8db49fa3c705e209dd1f4efde0",
     "timestamp": "2026-10-21T03:23:21.265630+00:00",
     "n_evals": 5,
     "label": "mut-check,wrapper=nanocompile,noinc",
-    "source": "scratch-mapelites"
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
   },
   {
     "cell": "mid|sig_dep",
@@ -366,7 +410,8 @@
       "fast_check": "cargo-check",
       "loop": "check",
       "jobs": 4,
-      "offline": true
+      "offline": true,
+      "package_scope": "workspace"
     },
     "fitness_ms": 310.08,
     "spread_ms": 5.21,
@@ -374,14 +419,17 @@
     "correctness": {
       "ok": true,
       "agree_on_broken": true,
-      "validate_is_final": true
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
     },
     "sample": "emergentDB",
     "commit": "1205db48e7bdee8db49fa3c705e209dd1f4efde0",
     "timestamp": "2026-10-21T03:19:58.363754+00:00",
     "n_evals": 5,
     "label": "baseline",
-    "source": "scratch-mapelites"
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
   },
   {
     "cell": "mid|sig_dep",
@@ -398,7 +446,8 @@
       "fast_check": "cargo-check",
       "loop": "check",
       "jobs": 4,
-      "offline": true
+      "offline": true,
+      "package_scope": "workspace"
     },
     "fitness_ms": 757.53,
     "spread_ms": 3.96,
@@ -406,14 +455,17 @@
     "correctness": {
       "ok": true,
       "agree_on_broken": true,
-      "validate_is_final": true
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
     },
     "sample": "emergentDB",
     "commit": "1205db48e7bdee8db49fa3c705e209dd1f4efde0",
     "timestamp": "2026-10-21T03:20:08.146251+00:00",
     "n_evals": 5,
     "label": "plain-noinc",
-    "source": "scratch-mapelites"
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
   },
   {
     "cell": "mid|sig_dep",
@@ -430,7 +482,8 @@
       "fast_check": "cargo-check",
       "loop": "check",
       "jobs": 4,
-      "offline": true
+      "offline": true,
+      "package_scope": "workspace"
     },
     "fitness_ms": 806.31,
     "spread_ms": 33.36,
@@ -438,14 +491,17 @@
     "correctness": {
       "ok": true,
       "agree_on_broken": true,
-      "validate_is_final": true
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
     },
     "sample": "emergentDB",
     "commit": "1205db48e7bdee8db49fa3c705e209dd1f4efde0",
     "timestamp": "2026-10-21T03:20:18.583771+00:00",
     "n_evals": 5,
     "label": "nanocompile-wrapper",
-    "source": "scratch-mapelites"
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
   },
   {
     "cell": "mid|sig_dep",
@@ -462,7 +518,8 @@
       "fast_check": "cargo-check",
       "loop": "check",
       "jobs": 4,
-      "offline": true
+      "offline": true,
+      "package_scope": "workspace"
     },
     "fitness_ms": 214.91,
     "spread_ms": 9.49,
@@ -470,14 +527,17 @@
     "correctness": {
       "ok": true,
       "agree_on_broken": true,
-      "validate_is_final": true
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
     },
     "sample": "emergentDB",
     "commit": "1205db48e7bdee8db49fa3c705e209dd1f4efde0",
     "timestamp": "2026-10-21T03:20:26.330442+00:00",
     "n_evals": 5,
     "label": "sccache",
-    "source": "scratch-mapelites"
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
   },
   {
     "cell": "mid|sig_dep",
@@ -494,7 +554,8 @@
       "fast_check": "cargo-check",
       "loop": "check",
       "jobs": 4,
-      "offline": true
+      "offline": true,
+      "package_scope": "workspace"
     },
     "fitness_ms": 774.72,
     "spread_ms": 15.86,
@@ -502,14 +563,17 @@
     "correctness": {
       "ok": true,
       "agree_on_broken": true,
-      "validate_is_final": true
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
     },
     "sample": "emergentDB",
     "commit": "1205db48e7bdee8db49fa3c705e209dd1f4efde0",
     "timestamp": "2026-10-21T03:20:36.698370+00:00",
     "n_evals": 5,
     "label": "fast-check",
-    "source": "scratch-mapelites"
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
   },
   {
     "cell": "mid|sig_dep",
@@ -526,7 +590,8 @@
       "fast_check": "cargo-check",
       "loop": "check",
       "jobs": 4,
-      "offline": true
+      "offline": true,
+      "package_scope": "workspace"
     },
     "fitness_ms": 312.74,
     "spread_ms": 35.29,
@@ -534,14 +599,17 @@
     "correctness": {
       "ok": true,
       "agree_on_broken": true,
-      "validate_is_final": true
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
     },
     "sample": "emergentDB",
     "commit": "1205db48e7bdee8db49fa3c705e209dd1f4efde0",
     "timestamp": "2026-10-21T03:20:44.473516+00:00",
     "n_evals": 5,
     "label": "disk-hygiene",
-    "source": "scratch-mapelites"
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
   },
   {
     "cell": "mid|sig_dep",
@@ -558,7 +626,8 @@
       "fast_check": "cargo-check",
       "loop": "check",
       "jobs": 4,
-      "offline": true
+      "offline": true,
+      "package_scope": "workspace"
     },
     "fitness_ms": 313.93,
     "spread_ms": 3.02,
@@ -566,14 +635,17 @@
     "correctness": {
       "ok": true,
       "agree_on_broken": true,
-      "validate_is_final": true
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
     },
     "sample": "emergentDB",
     "commit": "1205db48e7bdee8db49fa3c705e209dd1f4efde0",
     "timestamp": "2026-10-21T03:20:52.329086+00:00",
     "n_evals": 5,
     "label": "crate-shape-256",
-    "source": "scratch-mapelites"
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
   },
   {
     "cell": "mid|sig_dep",
@@ -590,7 +662,8 @@
       "fast_check": "cargo-check",
       "loop": "check",
       "jobs": 4,
-      "offline": true
+      "offline": true,
+      "package_scope": "workspace"
     },
     "fitness_ms": 327.44,
     "spread_ms": 11.13,
@@ -598,14 +671,17 @@
     "correctness": {
       "ok": true,
       "agree_on_broken": true,
-      "validate_is_final": true
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
     },
     "sample": "emergentDB",
     "commit": "1205db48e7bdee8db49fa3c705e209dd1f4efde0",
     "timestamp": "2026-10-21T03:23:29.171762+00:00",
     "n_evals": 5,
     "label": "crate-shape-16",
-    "source": "scratch-mapelites"
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
   },
   {
     "cell": "mid|sig_dep",
@@ -622,7 +698,8 @@
       "fast_check": "cargo-check",
       "loop": "check",
       "jobs": 4,
-      "offline": true
+      "offline": true,
+      "package_scope": "workspace"
     },
     "fitness_ms": 853.58,
     "spread_ms": 75.05,
@@ -630,14 +707,17 @@
     "correctness": {
       "ok": true,
       "agree_on_broken": true,
-      "validate_is_final": true
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
     },
     "sample": "emergentDB",
     "commit": "1205db48e7bdee8db49fa3c705e209dd1f4efde0",
     "timestamp": "2026-10-21T03:23:40.769969+00:00",
     "n_evals": 5,
     "label": "mut-check,wrapper=nanocompile,noinc",
-    "source": "scratch-mapelites"
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
   },
   {
     "cell": "mid|sig_dep",
@@ -654,7 +734,8 @@
       "fast_check": "cargo-check",
       "loop": "check",
       "jobs": 4,
-      "offline": true
+      "offline": true,
+      "package_scope": "workspace"
     },
     "fitness_ms": 221.33,
     "spread_ms": 19.38,
@@ -662,14 +743,17 @@
     "correctness": {
       "ok": true,
       "agree_on_broken": true,
-      "validate_is_final": true
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
     },
     "sample": "emergentDB",
     "commit": "1205db48e7bdee8db49fa3c705e209dd1f4efde0",
     "timestamp": "2026-10-21T03:23:48.867839+00:00",
     "n_evals": 5,
     "label": "mut-check,wrapper=sccache,noinc",
-    "source": "scratch-mapelites"
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
   },
   {
     "cell": "mid|noop",
@@ -686,7 +770,8 @@
       "fast_check": "cargo-check",
       "loop": "check",
       "jobs": 4,
-      "offline": true
+      "offline": true,
+      "package_scope": "workspace"
     },
     "fitness_ms": 86.9,
     "spread_ms": 1.26,
@@ -694,14 +779,17 @@
     "correctness": {
       "ok": true,
       "agree_on_broken": true,
-      "validate_is_final": true
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
     },
     "sample": "emergentDB",
     "commit": "1205db48e7bdee8db49fa3c705e209dd1f4efde0",
     "timestamp": "2026-10-21T03:20:58.286100+00:00",
     "n_evals": 5,
     "label": "baseline",
-    "source": "scratch-mapelites"
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
   },
   {
     "cell": "mid|noop",
@@ -718,7 +806,8 @@
       "fast_check": "cargo-check",
       "loop": "check",
       "jobs": 4,
-      "offline": true
+      "offline": true,
+      "package_scope": "workspace"
     },
     "fitness_ms": 88.66,
     "spread_ms": 1.41,
@@ -726,14 +815,17 @@
     "correctness": {
       "ok": true,
       "agree_on_broken": true,
-      "validate_is_final": true
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
     },
     "sample": "emergentDB",
     "commit": "1205db48e7bdee8db49fa3c705e209dd1f4efde0",
     "timestamp": "2026-10-21T03:21:04.320261+00:00",
     "n_evals": 5,
     "label": "plain-noinc",
-    "source": "scratch-mapelites"
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
   },
   {
     "cell": "mid|noop",
@@ -750,7 +842,8 @@
       "fast_check": "cargo-check",
       "loop": "check",
       "jobs": 4,
-      "offline": true
+      "offline": true,
+      "package_scope": "workspace"
     },
     "fitness_ms": 84.38,
     "spread_ms": 1.86,
@@ -758,14 +851,17 @@
     "correctness": {
       "ok": true,
       "agree_on_broken": true,
-      "validate_is_final": true
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
     },
     "sample": "emergentDB",
     "commit": "1205db48e7bdee8db49fa3c705e209dd1f4efde0",
     "timestamp": "2026-10-21T03:21:10.538371+00:00",
     "n_evals": 5,
     "label": "nanocompile-wrapper",
-    "source": "scratch-mapelites"
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
   },
   {
     "cell": "mid|noop",
@@ -782,7 +878,8 @@
       "fast_check": "cargo-check",
       "loop": "check",
       "jobs": 4,
-      "offline": true
+      "offline": true,
+      "package_scope": "workspace"
     },
     "fitness_ms": 88.16,
     "spread_ms": 4.43,
@@ -790,14 +887,17 @@
     "correctness": {
       "ok": true,
       "agree_on_broken": true,
-      "validate_is_final": true
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
     },
     "sample": "emergentDB",
     "commit": "1205db48e7bdee8db49fa3c705e209dd1f4efde0",
     "timestamp": "2026-10-21T03:21:16.873822+00:00",
     "n_evals": 5,
     "label": "sccache",
-    "source": "scratch-mapelites"
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
   },
   {
     "cell": "mid|noop",
@@ -814,7 +914,8 @@
       "fast_check": "cargo-check",
       "loop": "check",
       "jobs": 4,
-      "offline": true
+      "offline": true,
+      "package_scope": "workspace"
     },
     "fitness_ms": 87.99,
     "spread_ms": 1.75,
@@ -822,14 +923,17 @@
     "correctness": {
       "ok": true,
       "agree_on_broken": true,
-      "validate_is_final": true
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
     },
     "sample": "emergentDB",
     "commit": "1205db48e7bdee8db49fa3c705e209dd1f4efde0",
     "timestamp": "2026-10-21T03:23:55.176081+00:00",
     "n_evals": 5,
     "label": "fast-check",
-    "source": "scratch-mapelites"
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
   },
   {
     "cell": "mid|noop",
@@ -846,7 +950,8 @@
       "fast_check": "cargo-check",
       "loop": "check",
       "jobs": 4,
-      "offline": true
+      "offline": true,
+      "package_scope": "workspace"
     },
     "fitness_ms": 93.24,
     "spread_ms": 2.92,
@@ -854,14 +959,17 @@
     "correctness": {
       "ok": true,
       "agree_on_broken": true,
-      "validate_is_final": true
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
     },
     "sample": "emergentDB",
     "commit": "1205db48e7bdee8db49fa3c705e209dd1f4efde0",
     "timestamp": "2026-10-21T03:24:02.423198+00:00",
     "n_evals": 5,
     "label": "disk-hygiene",
-    "source": "scratch-mapelites"
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
   },
   {
     "cell": "mid|noop",
@@ -878,7 +986,8 @@
       "fast_check": "cargo-check",
       "loop": "check",
       "jobs": 4,
-      "offline": true
+      "offline": true,
+      "package_scope": "workspace"
     },
     "fitness_ms": 85.33,
     "spread_ms": 3.91,
@@ -886,14 +995,17 @@
     "correctness": {
       "ok": true,
       "agree_on_broken": true,
-      "validate_is_final": true
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
     },
     "sample": "emergentDB",
     "commit": "1205db48e7bdee8db49fa3c705e209dd1f4efde0",
     "timestamp": "2026-10-21T03:24:09.208870+00:00",
     "n_evals": 5,
     "label": "crate-shape-256",
-    "source": "scratch-mapelites"
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
   },
   {
     "cell": "mid|noop",
@@ -910,7 +1022,8 @@
       "fast_check": "cargo-check",
       "loop": "check",
       "jobs": 4,
-      "offline": true
+      "offline": true,
+      "package_scope": "workspace"
     },
     "fitness_ms": 95.63,
     "spread_ms": 12.48,
@@ -918,14 +1031,17 @@
     "correctness": {
       "ok": true,
       "agree_on_broken": true,
-      "validate_is_final": true
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
     },
     "sample": "emergentDB",
     "commit": "1205db48e7bdee8db49fa3c705e209dd1f4efde0",
     "timestamp": "2026-10-21T03:24:15.791651+00:00",
     "n_evals": 5,
     "label": "crate-shape-16",
-    "source": "scratch-mapelites"
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
   },
   {
     "cell": "mid|noop",
@@ -942,7 +1058,8 @@
       "fast_check": "cargo-check",
       "loop": "check",
       "jobs": 4,
-      "offline": true
+      "offline": true,
+      "package_scope": "workspace"
     },
     "fitness_ms": 88.65,
     "spread_ms": 4.24,
@@ -950,14 +1067,17 @@
     "correctness": {
       "ok": true,
       "agree_on_broken": true,
-      "validate_is_final": true
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
     },
     "sample": "emergentDB",
     "commit": "1205db48e7bdee8db49fa3c705e209dd1f4efde0",
     "timestamp": "2026-10-21T03:24:22.439160+00:00",
     "n_evals": 5,
     "label": "mut-check",
-    "source": "scratch-mapelites"
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
   },
   {
     "cell": "mid|noop",
@@ -972,9 +1092,10 @@
       "incremental": true,
       "debuginfo": "full",
       "fast_check": "cargo-check",
-      "loop": "check",
+      "loop": "build",
       "jobs": 4,
-      "offline": true
+      "offline": true,
+      "package_scope": "workspace"
     },
     "fitness_ms": 97.05,
     "spread_ms": 1.02,
@@ -982,14 +1103,17 @@
     "correctness": {
       "ok": true,
       "agree_on_broken": true,
-      "validate_is_final": true
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
     },
     "sample": "emergentDB",
     "commit": "1205db48e7bdee8db49fa3c705e209dd1f4efde0",
     "timestamp": "2026-10-21T03:24:32.186810+00:00",
     "n_evals": 5,
     "label": "mut-command=build",
-    "source": "scratch-mapelites"
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
   },
   {
     "cell": "mid|noop",
@@ -1004,9 +1128,10 @@
       "incremental": true,
       "debuginfo": "full",
       "fast_check": "cargo-check",
-      "loop": "check",
+      "loop": "build",
       "jobs": 4,
-      "offline": true
+      "offline": true,
+      "package_scope": "workspace"
     },
     "fitness_ms": 91.68,
     "spread_ms": 5.86,
@@ -1014,14 +1139,17 @@
     "correctness": {
       "ok": true,
       "agree_on_broken": true,
-      "validate_is_final": true
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
     },
     "sample": "emergentDB",
     "commit": "1205db48e7bdee8db49fa3c705e209dd1f4efde0",
     "timestamp": "2026-10-21T03:24:41.716763+00:00",
     "n_evals": 5,
     "label": "mut-command=build,linker=lld",
-    "source": "scratch-mapelites"
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
   },
   {
     "cell": "small|body",
@@ -1038,7 +1166,8 @@
       "fast_check": "cargo-check",
       "loop": "check",
       "jobs": 4,
-      "offline": true
+      "offline": true,
+      "package_scope": "workspace"
     },
     "fitness_ms": 213.69,
     "spread_ms": 6.32,
@@ -1046,14 +1175,17 @@
     "correctness": {
       "ok": true,
       "agree_on_broken": true,
-      "validate_is_final": true
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
     },
     "sample": "bhumi",
     "commit": "355545d6b8ec2e35b9976ae8e2977c76fa303f1d",
     "timestamp": "2026-10-21T03:25:14.472757+00:00",
     "n_evals": 5,
     "label": "baseline",
-    "source": "scratch-mapelites"
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
   },
   {
     "cell": "small|body",
@@ -1070,7 +1202,8 @@
       "fast_check": "cargo-check",
       "loop": "check",
       "jobs": 4,
-      "offline": true
+      "offline": true,
+      "package_scope": "workspace"
     },
     "fitness_ms": 429.02,
     "spread_ms": 43.29,
@@ -1078,14 +1211,17 @@
     "correctness": {
       "ok": true,
       "agree_on_broken": true,
-      "validate_is_final": true
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
     },
     "sample": "bhumi",
     "commit": "355545d6b8ec2e35b9976ae8e2977c76fa303f1d",
     "timestamp": "2026-10-21T03:25:27.587818+00:00",
     "n_evals": 5,
     "label": "plain-noinc",
-    "source": "scratch-mapelites"
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
   },
   {
     "cell": "small|body",
@@ -1102,7 +1238,8 @@
       "fast_check": "cargo-check",
       "loop": "check",
       "jobs": 4,
-      "offline": true
+      "offline": true,
+      "package_scope": "workspace"
     },
     "fitness_ms": 418.35,
     "spread_ms": 12.76,
@@ -1110,14 +1247,17 @@
     "correctness": {
       "ok": true,
       "agree_on_broken": true,
-      "validate_is_final": true
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
     },
     "sample": "bhumi",
     "commit": "355545d6b8ec2e35b9976ae8e2977c76fa303f1d",
     "timestamp": "2026-10-21T03:25:41.546226+00:00",
     "n_evals": 5,
     "label": "nanocompile-wrapper",
-    "source": "scratch-mapelites"
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
   },
   {
     "cell": "small|body",
@@ -1134,7 +1274,8 @@
       "fast_check": "cargo-check",
       "loop": "check",
       "jobs": 4,
-      "offline": true
+      "offline": true,
+      "package_scope": "workspace"
     },
     "fitness_ms": 424.38,
     "spread_ms": 37.64,
@@ -1142,14 +1283,17 @@
     "correctness": {
       "ok": true,
       "agree_on_broken": true,
-      "validate_is_final": true
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
     },
     "sample": "bhumi",
     "commit": "355545d6b8ec2e35b9976ae8e2977c76fa303f1d",
     "timestamp": "2026-10-21T03:25:56.858326+00:00",
     "n_evals": 5,
     "label": "sccache",
-    "source": "scratch-mapelites"
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
   },
   {
     "cell": "small|body",
@@ -1166,7 +1310,8 @@
       "fast_check": "cargo-check",
       "loop": "check",
       "jobs": 4,
-      "offline": true
+      "offline": true,
+      "package_scope": "workspace"
     },
     "fitness_ms": 409.15,
     "spread_ms": 10.73,
@@ -1174,13 +1319,3921 @@
     "correctness": {
       "ok": true,
       "agree_on_broken": true,
-      "validate_is_final": true
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
     },
     "sample": "bhumi",
     "commit": "355545d6b8ec2e35b9976ae8e2977c76fa303f1d",
     "timestamp": "2026-10-21T03:26:10.449544+00:00",
     "n_evals": 5,
     "label": "fast-check",
-    "source": "scratch-mapelites"
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
+  },
+  {
+    "cell": "small|body",
+    "size": "small",
+    "edit": "body",
+    "genome": {
+      "wrapper": false,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": false,
+      "codegen_units": null,
+      "incremental": true,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "check",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "workspace"
+    },
+    "fitness_ms": 194.3,
+    "spread_ms": 4.66,
+    "disk_bytes": 305604017,
+    "correctness": {
+      "ok": true,
+      "agree_on_broken": true,
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
+    },
+    "sample": "bhumi",
+    "commit": "355545d6b8ec2e35b9976ae8e2977c76fa303f1d",
+    "timestamp": "2026-10-21T03:40:02.588319+00:00",
+    "n_evals": 5,
+    "label": "baseline",
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
+  },
+  {
+    "cell": "small|body",
+    "size": "small",
+    "edit": "body",
+    "genome": {
+      "wrapper": false,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": false,
+      "codegen_units": null,
+      "incremental": false,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "check",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "workspace"
+    },
+    "fitness_ms": 397.04,
+    "spread_ms": 3.08,
+    "disk_bytes": 292455686,
+    "correctness": {
+      "ok": true,
+      "agree_on_broken": true,
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
+    },
+    "sample": "bhumi",
+    "commit": "355545d6b8ec2e35b9976ae8e2977c76fa303f1d",
+    "timestamp": "2026-10-21T03:40:08.510340+00:00",
+    "n_evals": 5,
+    "label": "plain-noinc",
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
+  },
+  {
+    "cell": "small|body",
+    "size": "small",
+    "edit": "body",
+    "genome": {
+      "wrapper": true,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": false,
+      "codegen_units": null,
+      "incremental": false,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "check",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "workspace"
+    },
+    "fitness_ms": 400.96,
+    "spread_ms": 11.69,
+    "disk_bytes": 292458338,
+    "correctness": {
+      "ok": true,
+      "agree_on_broken": true,
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
+    },
+    "sample": "bhumi",
+    "commit": "355545d6b8ec2e35b9976ae8e2977c76fa303f1d",
+    "timestamp": "2026-10-21T03:40:14.783468+00:00",
+    "n_evals": 5,
+    "label": "nanocompile-wrapper",
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
+  },
+  {
+    "cell": "small|body",
+    "size": "small",
+    "edit": "body",
+    "genome": {
+      "wrapper": false,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": true,
+      "codegen_units": null,
+      "incremental": false,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "check",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "workspace"
+    },
+    "fitness_ms": 419.33,
+    "spread_ms": 7.68,
+    "disk_bytes": 292454382,
+    "correctness": {
+      "ok": true,
+      "agree_on_broken": true,
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
+    },
+    "sample": "bhumi",
+    "commit": "355545d6b8ec2e35b9976ae8e2977c76fa303f1d",
+    "timestamp": "2026-10-21T03:40:21.829306+00:00",
+    "n_evals": 5,
+    "label": "sccache",
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
+  },
+  {
+    "cell": "small|body",
+    "size": "small",
+    "edit": "body",
+    "genome": {
+      "wrapper": true,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": false,
+      "codegen_units": null,
+      "incremental": false,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "check",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "workspace"
+    },
+    "fitness_ms": 421.07,
+    "spread_ms": 8.02,
+    "disk_bytes": 292455386,
+    "correctness": {
+      "ok": true,
+      "agree_on_broken": true,
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
+    },
+    "sample": "bhumi",
+    "commit": "355545d6b8ec2e35b9976ae8e2977c76fa303f1d",
+    "timestamp": "2026-10-21T03:40:28.616512+00:00",
+    "n_evals": 5,
+    "label": "fast-check",
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
+  },
+  {
+    "cell": "small|body",
+    "size": "small",
+    "edit": "body",
+    "genome": {
+      "wrapper": false,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": false,
+      "codegen_units": null,
+      "incremental": true,
+      "debuginfo": "line-tables-only",
+      "fast_check": "cargo-check",
+      "loop": "check",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "workspace"
+    },
+    "fitness_ms": 230.04,
+    "spread_ms": 23.21,
+    "disk_bytes": 339535377,
+    "correctness": {
+      "ok": true,
+      "agree_on_broken": true,
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
+    },
+    "sample": "bhumi",
+    "commit": "355545d6b8ec2e35b9976ae8e2977c76fa303f1d",
+    "timestamp": "2026-10-21T03:40:40.876034+00:00",
+    "n_evals": 5,
+    "label": "disk-hygiene",
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
+  },
+  {
+    "cell": "small|body",
+    "size": "small",
+    "edit": "body",
+    "genome": {
+      "wrapper": false,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": false,
+      "codegen_units": 256,
+      "incremental": true,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "check",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "workspace"
+    },
+    "fitness_ms": 202.96,
+    "spread_ms": 3.83,
+    "disk_bytes": 307672742,
+    "correctness": {
+      "ok": true,
+      "agree_on_broken": true,
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
+    },
+    "sample": "bhumi",
+    "commit": "355545d6b8ec2e35b9976ae8e2977c76fa303f1d",
+    "timestamp": "2026-10-21T03:40:53.031619+00:00",
+    "n_evals": 5,
+    "label": "crate-shape-256",
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
+  },
+  {
+    "cell": "small|body",
+    "size": "small",
+    "edit": "body",
+    "genome": {
+      "wrapper": false,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": false,
+      "codegen_units": 16,
+      "incremental": true,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "check",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "workspace"
+    },
+    "fitness_ms": 181.06,
+    "spread_ms": 1.63,
+    "disk_bytes": 306094776,
+    "correctness": {
+      "ok": true,
+      "agree_on_broken": true,
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
+    },
+    "sample": "bhumi",
+    "commit": "355545d6b8ec2e35b9976ae8e2977c76fa303f1d",
+    "timestamp": "2026-10-21T03:41:04.075342+00:00",
+    "n_evals": 5,
+    "label": "crate-shape-16",
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
+  },
+  {
+    "cell": "small|body",
+    "size": "small",
+    "edit": "body",
+    "genome": {
+      "wrapper": false,
+      "dev_backend": "llvm",
+      "linker": "lld",
+      "sccache": false,
+      "codegen_units": null,
+      "incremental": true,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "build",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "workspace"
+    },
+    "fitness_ms": 500.64,
+    "spread_ms": 10.51,
+    "disk_bytes": 685056440,
+    "correctness": {
+      "ok": true,
+      "agree_on_broken": true,
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
+    },
+    "sample": "bhumi",
+    "commit": "355545d6b8ec2e35b9976ae8e2977c76fa303f1d",
+    "timestamp": "2026-10-21T03:41:22.061996+00:00",
+    "n_evals": 5,
+    "label": "lld",
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
+  },
+  {
+    "cell": "small|body",
+    "size": "small",
+    "edit": "body",
+    "genome": {
+      "wrapper": true,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": false,
+      "codegen_units": null,
+      "incremental": false,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "build",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "workspace"
+    },
+    "fitness_ms": 1047.48,
+    "spread_ms": 15.41,
+    "disk_bytes": 625464731,
+    "correctness": {
+      "ok": true,
+      "agree_on_broken": true,
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
+    },
+    "sample": "bhumi",
+    "commit": "355545d6b8ec2e35b9976ae8e2977c76fa303f1d",
+    "timestamp": "2026-10-21T03:42:07.448775+00:00",
+    "n_evals": 5,
+    "label": "mut-command=build,wrapper=nanocompile,noinc",
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
+  },
+  {
+    "cell": "small|body",
+    "size": "small",
+    "edit": "body",
+    "genome": {
+      "wrapper": true,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": false,
+      "codegen_units": null,
+      "incremental": false,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "check",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "workspace"
+    },
+    "fitness_ms": 395.22,
+    "spread_ms": 8.34,
+    "disk_bytes": 292463574,
+    "correctness": {
+      "ok": true,
+      "agree_on_broken": true,
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
+    },
+    "sample": "bhumi",
+    "commit": "355545d6b8ec2e35b9976ae8e2977c76fa303f1d",
+    "timestamp": "2026-10-21T03:42:21.523509+00:00",
+    "n_evals": 5,
+    "label": "mut-check,wrapper=nanocompile,noinc",
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
+  },
+  {
+    "cell": "small|sig_dep",
+    "size": "small",
+    "edit": "sig_dep",
+    "genome": {
+      "wrapper": false,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": false,
+      "codegen_units": null,
+      "incremental": true,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "check",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "workspace"
+    },
+    "fitness_ms": 196.33,
+    "spread_ms": 2.47,
+    "disk_bytes": 305624537,
+    "correctness": {
+      "ok": true,
+      "agree_on_broken": true,
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
+    },
+    "sample": "bhumi",
+    "commit": "355545d6b8ec2e35b9976ae8e2977c76fa303f1d",
+    "timestamp": "2026-10-21T03:42:33.458036+00:00",
+    "n_evals": 5,
+    "label": "baseline",
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
+  },
+  {
+    "cell": "small|sig_dep",
+    "size": "small",
+    "edit": "sig_dep",
+    "genome": {
+      "wrapper": false,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": false,
+      "codegen_units": null,
+      "incremental": false,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "check",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "workspace"
+    },
+    "fitness_ms": 413.26,
+    "spread_ms": 13.22,
+    "disk_bytes": 292459348,
+    "correctness": {
+      "ok": true,
+      "agree_on_broken": true,
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
+    },
+    "sample": "bhumi",
+    "commit": "355545d6b8ec2e35b9976ae8e2977c76fa303f1d",
+    "timestamp": "2026-10-21T03:42:45.910686+00:00",
+    "n_evals": 5,
+    "label": "plain-noinc",
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
+  },
+  {
+    "cell": "small|sig_dep",
+    "size": "small",
+    "edit": "sig_dep",
+    "genome": {
+      "wrapper": true,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": false,
+      "codegen_units": null,
+      "incremental": false,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "check",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "workspace"
+    },
+    "fitness_ms": 406.78,
+    "spread_ms": 4.92,
+    "disk_bytes": 292462004,
+    "correctness": {
+      "ok": true,
+      "agree_on_broken": true,
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
+    },
+    "sample": "bhumi",
+    "commit": "355545d6b8ec2e35b9976ae8e2977c76fa303f1d",
+    "timestamp": "2026-10-21T03:42:59.235821+00:00",
+    "n_evals": 5,
+    "label": "nanocompile-wrapper",
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
+  },
+  {
+    "cell": "small|sig_dep",
+    "size": "small",
+    "edit": "sig_dep",
+    "genome": {
+      "wrapper": false,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": true,
+      "codegen_units": null,
+      "incremental": false,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "check",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "workspace"
+    },
+    "fitness_ms": 401.5,
+    "spread_ms": 11.14,
+    "disk_bytes": 292458056,
+    "correctness": {
+      "ok": true,
+      "agree_on_broken": true,
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
+    },
+    "sample": "bhumi",
+    "commit": "355545d6b8ec2e35b9976ae8e2977c76fa303f1d",
+    "timestamp": "2026-10-21T03:43:14.142931+00:00",
+    "n_evals": 5,
+    "label": "sccache",
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
+  },
+  {
+    "cell": "small|sig_dep",
+    "size": "small",
+    "edit": "sig_dep",
+    "genome": {
+      "wrapper": true,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": false,
+      "codegen_units": null,
+      "incremental": false,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "check",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "workspace"
+    },
+    "fitness_ms": 416.75,
+    "spread_ms": 18.71,
+    "disk_bytes": 292459056,
+    "correctness": {
+      "ok": true,
+      "agree_on_broken": true,
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
+    },
+    "sample": "bhumi",
+    "commit": "355545d6b8ec2e35b9976ae8e2977c76fa303f1d",
+    "timestamp": "2026-10-21T03:43:27.473648+00:00",
+    "n_evals": 5,
+    "label": "fast-check",
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
+  },
+  {
+    "cell": "small|sig_dep",
+    "size": "small",
+    "edit": "sig_dep",
+    "genome": {
+      "wrapper": false,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": false,
+      "codegen_units": null,
+      "incremental": true,
+      "debuginfo": "line-tables-only",
+      "fast_check": "cargo-check",
+      "loop": "check",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "workspace"
+    },
+    "fitness_ms": 199.05,
+    "spread_ms": 3.69,
+    "disk_bytes": 339556019,
+    "correctness": {
+      "ok": true,
+      "agree_on_broken": true,
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
+    },
+    "sample": "bhumi",
+    "commit": "355545d6b8ec2e35b9976ae8e2977c76fa303f1d",
+    "timestamp": "2026-10-21T03:43:39.278207+00:00",
+    "n_evals": 5,
+    "label": "disk-hygiene",
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
+  },
+  {
+    "cell": "small|sig_dep",
+    "size": "small",
+    "edit": "sig_dep",
+    "genome": {
+      "wrapper": false,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": false,
+      "codegen_units": 256,
+      "incremental": true,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "check",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "workspace"
+    },
+    "fitness_ms": 201.23,
+    "spread_ms": 4.41,
+    "disk_bytes": 307693248,
+    "correctness": {
+      "ok": true,
+      "agree_on_broken": true,
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
+    },
+    "sample": "bhumi",
+    "commit": "355545d6b8ec2e35b9976ae8e2977c76fa303f1d",
+    "timestamp": "2026-10-21T03:43:51.032188+00:00",
+    "n_evals": 5,
+    "label": "crate-shape-256",
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
+  },
+  {
+    "cell": "small|sig_dep",
+    "size": "small",
+    "edit": "sig_dep",
+    "genome": {
+      "wrapper": false,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": false,
+      "codegen_units": 16,
+      "incremental": true,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "check",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "workspace"
+    },
+    "fitness_ms": 219.79,
+    "spread_ms": 10.76,
+    "disk_bytes": 306115290,
+    "correctness": {
+      "ok": true,
+      "agree_on_broken": true,
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
+    },
+    "sample": "bhumi",
+    "commit": "355545d6b8ec2e35b9976ae8e2977c76fa303f1d",
+    "timestamp": "2026-10-21T03:44:02.887410+00:00",
+    "n_evals": 5,
+    "label": "crate-shape-16",
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
+  },
+  {
+    "cell": "small|sig_dep",
+    "size": "small",
+    "edit": "sig_dep",
+    "genome": {
+      "wrapper": false,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": true,
+      "codegen_units": null,
+      "incremental": false,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "check",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "workspace"
+    },
+    "fitness_ms": 399.24,
+    "spread_ms": 17.76,
+    "disk_bytes": 292465890,
+    "correctness": {
+      "ok": true,
+      "agree_on_broken": true,
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
+    },
+    "sample": "bhumi",
+    "commit": "355545d6b8ec2e35b9976ae8e2977c76fa303f1d",
+    "timestamp": "2026-10-21T03:44:17.680662+00:00",
+    "n_evals": 5,
+    "label": "mut-check,wrapper=sccache,noinc",
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
+  },
+  {
+    "cell": "small|sig_dep",
+    "size": "small",
+    "edit": "sig_dep",
+    "genome": {
+      "wrapper": false,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": false,
+      "codegen_units": null,
+      "incremental": false,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "check",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "workspace"
+    },
+    "fitness_ms": 408.62,
+    "spread_ms": 30.41,
+    "disk_bytes": 292460642,
+    "correctness": {
+      "ok": true,
+      "agree_on_broken": true,
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
+    },
+    "sample": "bhumi",
+    "commit": "355545d6b8ec2e35b9976ae8e2977c76fa303f1d",
+    "timestamp": "2026-10-21T03:44:29.988819+00:00",
+    "n_evals": 5,
+    "label": "mut-check,noinc",
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
+  },
+  {
+    "cell": "small|noop",
+    "size": "small",
+    "edit": "noop",
+    "genome": {
+      "wrapper": false,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": false,
+      "codegen_units": null,
+      "incremental": true,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "check",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "workspace"
+    },
+    "fitness_ms": 70.54,
+    "spread_ms": 2.68,
+    "disk_bytes": 299025379,
+    "correctness": {
+      "ok": true,
+      "agree_on_broken": true,
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
+    },
+    "sample": "bhumi",
+    "commit": "355545d6b8ec2e35b9976ae8e2977c76fa303f1d",
+    "timestamp": "2026-10-21T03:44:39.914229+00:00",
+    "n_evals": 5,
+    "label": "baseline",
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
+  },
+  {
+    "cell": "small|noop",
+    "size": "small",
+    "edit": "noop",
+    "genome": {
+      "wrapper": false,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": false,
+      "codegen_units": null,
+      "incremental": false,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "check",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "workspace"
+    },
+    "fitness_ms": 71.96,
+    "spread_ms": 3.44,
+    "disk_bytes": 292454696,
+    "correctness": {
+      "ok": true,
+      "agree_on_broken": true,
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
+    },
+    "sample": "bhumi",
+    "commit": "355545d6b8ec2e35b9976ae8e2977c76fa303f1d",
+    "timestamp": "2026-10-21T03:44:50.020829+00:00",
+    "n_evals": 5,
+    "label": "plain-noinc",
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
+  },
+  {
+    "cell": "small|noop",
+    "size": "small",
+    "edit": "noop",
+    "genome": {
+      "wrapper": true,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": false,
+      "codegen_units": null,
+      "incremental": false,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "check",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "workspace"
+    },
+    "fitness_ms": 72.98,
+    "spread_ms": 2.92,
+    "disk_bytes": 292457350,
+    "correctness": {
+      "ok": true,
+      "agree_on_broken": true,
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
+    },
+    "sample": "bhumi",
+    "commit": "355545d6b8ec2e35b9976ae8e2977c76fa303f1d",
+    "timestamp": "2026-10-21T03:45:01.520818+00:00",
+    "n_evals": 5,
+    "label": "nanocompile-wrapper",
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
+  },
+  {
+    "cell": "small|noop",
+    "size": "small",
+    "edit": "noop",
+    "genome": {
+      "wrapper": false,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": true,
+      "codegen_units": null,
+      "incremental": false,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "check",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "workspace"
+    },
+    "fitness_ms": 68.72,
+    "spread_ms": 3.44,
+    "disk_bytes": 292453412,
+    "correctness": {
+      "ok": true,
+      "agree_on_broken": true,
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
+    },
+    "sample": "bhumi",
+    "commit": "355545d6b8ec2e35b9976ae8e2977c76fa303f1d",
+    "timestamp": "2026-10-21T03:45:13.800634+00:00",
+    "n_evals": 5,
+    "label": "sccache",
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
+  },
+  {
+    "cell": "small|noop",
+    "size": "small",
+    "edit": "noop",
+    "genome": {
+      "wrapper": true,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": false,
+      "codegen_units": null,
+      "incremental": false,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "check",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "workspace"
+    },
+    "fitness_ms": 70.39,
+    "spread_ms": 4.22,
+    "disk_bytes": 292454412,
+    "correctness": {
+      "ok": true,
+      "agree_on_broken": true,
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
+    },
+    "sample": "bhumi",
+    "commit": "355545d6b8ec2e35b9976ae8e2977c76fa303f1d",
+    "timestamp": "2026-10-21T03:45:24.914279+00:00",
+    "n_evals": 5,
+    "label": "fast-check",
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
+  },
+  {
+    "cell": "small|noop",
+    "size": "small",
+    "edit": "noop",
+    "genome": {
+      "wrapper": false,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": false,
+      "codegen_units": null,
+      "incremental": true,
+      "debuginfo": "line-tables-only",
+      "fast_check": "cargo-check",
+      "loop": "check",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "workspace"
+    },
+    "fitness_ms": 72.24,
+    "spread_ms": 2.42,
+    "disk_bytes": 332956704,
+    "correctness": {
+      "ok": true,
+      "agree_on_broken": true,
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
+    },
+    "sample": "bhumi",
+    "commit": "355545d6b8ec2e35b9976ae8e2977c76fa303f1d",
+    "timestamp": "2026-10-21T03:45:36.332136+00:00",
+    "n_evals": 5,
+    "label": "disk-hygiene",
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
+  },
+  {
+    "cell": "small|noop",
+    "size": "small",
+    "edit": "noop",
+    "genome": {
+      "wrapper": false,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": false,
+      "codegen_units": 256,
+      "incremental": true,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "check",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "workspace"
+    },
+    "fitness_ms": 72.63,
+    "spread_ms": 2.9,
+    "disk_bytes": 301094091,
+    "correctness": {
+      "ok": true,
+      "agree_on_broken": true,
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
+    },
+    "sample": "bhumi",
+    "commit": "355545d6b8ec2e35b9976ae8e2977c76fa303f1d",
+    "timestamp": "2026-10-21T03:45:47.494774+00:00",
+    "n_evals": 5,
+    "label": "crate-shape-256",
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
+  },
+  {
+    "cell": "small|noop",
+    "size": "small",
+    "edit": "noop",
+    "genome": {
+      "wrapper": false,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": false,
+      "codegen_units": 16,
+      "incremental": true,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "check",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "workspace"
+    },
+    "fitness_ms": 75.82,
+    "spread_ms": 2.95,
+    "disk_bytes": 299516133,
+    "correctness": {
+      "ok": true,
+      "agree_on_broken": true,
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
+    },
+    "sample": "bhumi",
+    "commit": "355545d6b8ec2e35b9976ae8e2977c76fa303f1d",
+    "timestamp": "2026-10-21T03:45:57.910522+00:00",
+    "n_evals": 5,
+    "label": "crate-shape-16",
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
+  },
+  {
+    "cell": "small|noop",
+    "size": "small",
+    "edit": "noop",
+    "genome": {
+      "wrapper": false,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": false,
+      "codegen_units": null,
+      "incremental": true,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "check",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "workspace"
+    },
+    "fitness_ms": 72.02,
+    "spread_ms": 4.95,
+    "disk_bytes": 299025712,
+    "correctness": {
+      "ok": true,
+      "agree_on_broken": true,
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
+    },
+    "sample": "bhumi",
+    "commit": "355545d6b8ec2e35b9976ae8e2977c76fa303f1d",
+    "timestamp": "2026-10-21T03:46:08.778076+00:00",
+    "n_evals": 5,
+    "label": "mut-check",
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
+  },
+  {
+    "cell": "small|noop",
+    "size": "small",
+    "edit": "noop",
+    "genome": {
+      "wrapper": false,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": false,
+      "codegen_units": null,
+      "incremental": true,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "build",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "workspace"
+    },
+    "fitness_ms": 74.16,
+    "spread_ms": 2.56,
+    "disk_bytes": 670926155,
+    "correctness": {
+      "ok": true,
+      "agree_on_broken": true,
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
+    },
+    "sample": "bhumi",
+    "commit": "355545d6b8ec2e35b9976ae8e2977c76fa303f1d",
+    "timestamp": "2026-10-21T03:46:23.864286+00:00",
+    "n_evals": 5,
+    "label": "mut-command=build",
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
+  },
+  {
+    "cell": "small|noop",
+    "size": "small",
+    "edit": "noop",
+    "genome": {
+      "wrapper": false,
+      "dev_backend": "llvm",
+      "linker": "lld",
+      "sccache": false,
+      "codegen_units": null,
+      "incremental": true,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "build",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "workspace"
+    },
+    "fitness_ms": 69.35,
+    "spread_ms": 2.95,
+    "disk_bytes": 670935133,
+    "correctness": {
+      "ok": true,
+      "agree_on_broken": true,
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
+    },
+    "sample": "bhumi",
+    "commit": "355545d6b8ec2e35b9976ae8e2977c76fa303f1d",
+    "timestamp": "2026-10-21T03:46:39.065911+00:00",
+    "n_evals": 5,
+    "label": "mut-command=build,linker=lld",
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
+  },
+  {
+    "cell": "small|cold",
+    "size": "small",
+    "edit": "cold",
+    "genome": {
+      "wrapper": false,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": false,
+      "codegen_units": null,
+      "incremental": true,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "check",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "workspace"
+    },
+    "fitness_ms": 9891.42,
+    "spread_ms": 137.34,
+    "disk_bytes": 299025379,
+    "correctness": {
+      "ok": true,
+      "agree_on_broken": true,
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
+    },
+    "sample": "bhumi",
+    "commit": "355545d6b8ec2e35b9976ae8e2977c76fa303f1d",
+    "timestamp": "2026-10-21T03:46:58.934471+00:00",
+    "n_evals": 2,
+    "label": "baseline",
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real",
+    "cache_state": "empty"
+  },
+  {
+    "cell": "small|cold",
+    "size": "small",
+    "edit": "cold",
+    "genome": {
+      "wrapper": false,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": false,
+      "codegen_units": null,
+      "incremental": false,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "check",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "workspace"
+    },
+    "fitness_ms": 9392.48,
+    "spread_ms": 80.34,
+    "disk_bytes": 292454691,
+    "correctness": {
+      "ok": true,
+      "agree_on_broken": true,
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
+    },
+    "sample": "bhumi",
+    "commit": "355545d6b8ec2e35b9976ae8e2977c76fa303f1d",
+    "timestamp": "2026-10-21T03:47:17.806799+00:00",
+    "n_evals": 2,
+    "label": "plain-noinc",
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real",
+    "cache_state": "empty"
+  },
+  {
+    "cell": "small|cold",
+    "size": "small",
+    "edit": "cold",
+    "genome": {
+      "wrapper": true,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": false,
+      "codegen_units": null,
+      "incremental": false,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "check",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "workspace"
+    },
+    "fitness_ms": 8406.91,
+    "spread_ms": 1861.29,
+    "disk_bytes": 292457347,
+    "correctness": {
+      "ok": true,
+      "agree_on_broken": true,
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
+    },
+    "sample": "bhumi",
+    "commit": "355545d6b8ec2e35b9976ae8e2977c76fa303f1d",
+    "timestamp": "2026-10-21T03:47:34.704563+00:00",
+    "n_evals": 2,
+    "label": "nanocompile-wrapper",
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real",
+    "cache_state": "warm_compiler_cache"
+  },
+  {
+    "cell": "small|cold",
+    "size": "small",
+    "edit": "cold",
+    "genome": {
+      "wrapper": false,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": true,
+      "codegen_units": null,
+      "incremental": false,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "check",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "workspace"
+    },
+    "fitness_ms": 7855.05,
+    "spread_ms": 3701.47,
+    "disk_bytes": 292453407,
+    "correctness": {
+      "ok": true,
+      "agree_on_broken": true,
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
+    },
+    "sample": "bhumi",
+    "commit": "355545d6b8ec2e35b9976ae8e2977c76fa303f1d",
+    "timestamp": "2026-10-21T03:47:50.501766+00:00",
+    "n_evals": 2,
+    "label": "sccache",
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real",
+    "cache_state": "warm_compiler_cache"
+  },
+  {
+    "cell": "small|cold",
+    "size": "small",
+    "edit": "cold",
+    "genome": {
+      "wrapper": false,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": false,
+      "codegen_units": null,
+      "incremental": true,
+      "debuginfo": "line-tables-only",
+      "fast_check": "cargo-check",
+      "loop": "check",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "workspace"
+    },
+    "fitness_ms": 10188.25,
+    "spread_ms": 77.34,
+    "disk_bytes": 332956702,
+    "correctness": {
+      "ok": true,
+      "agree_on_broken": true,
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
+    },
+    "sample": "bhumi",
+    "commit": "355545d6b8ec2e35b9976ae8e2977c76fa303f1d",
+    "timestamp": "2026-10-21T03:48:10.967788+00:00",
+    "n_evals": 2,
+    "label": "disk-hygiene",
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real",
+    "cache_state": "empty"
+  },
+  {
+    "cell": "small|cold",
+    "size": "small",
+    "edit": "cold",
+    "genome": {
+      "wrapper": true,
+      "dev_backend": "llvm",
+      "linker": "lld",
+      "sccache": false,
+      "codegen_units": null,
+      "incremental": false,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "build",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "workspace"
+    },
+    "fitness_ms": 14086.56,
+    "spread_ms": 321.26,
+    "disk_bytes": 625472443,
+    "correctness": {
+      "ok": true,
+      "agree_on_broken": true,
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
+    },
+    "sample": "bhumi",
+    "commit": "355545d6b8ec2e35b9976ae8e2977c76fa303f1d",
+    "timestamp": "2026-10-21T03:48:39.291523+00:00",
+    "n_evals": 2,
+    "label": "mut-command=build,wrapper=nanocompile,noinc,linker=lld",
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real",
+    "cache_state": "warm_compiler_cache"
+  },
+  {
+    "cell": "small|cold",
+    "size": "small",
+    "edit": "cold",
+    "genome": {
+      "wrapper": true,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": false,
+      "codegen_units": null,
+      "incremental": false,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "check",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "workspace"
+    },
+    "fitness_ms": 8815.4,
+    "spread_ms": 1569.65,
+    "disk_bytes": 292462581,
+    "correctness": {
+      "ok": true,
+      "agree_on_broken": true,
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
+    },
+    "sample": "bhumi",
+    "commit": "355545d6b8ec2e35b9976ae8e2977c76fa303f1d",
+    "timestamp": "2026-10-21T03:48:57.023438+00:00",
+    "n_evals": 2,
+    "label": "mut-check,wrapper=nanocompile,noinc",
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real",
+    "cache_state": "warm_compiler_cache"
+  },
+  {
+    "cell": "small|cold",
+    "size": "small",
+    "edit": "cold",
+    "genome": {
+      "wrapper": false,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": false,
+      "codegen_units": null,
+      "incremental": false,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "check",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "workspace"
+    },
+    "fitness_ms": 10967.37,
+    "spread_ms": 480.11,
+    "disk_bytes": 298366087,
+    "correctness": {
+      "ok": true,
+      "agree_on_broken": true,
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
+    },
+    "sample": "bhumi",
+    "commit": "355545d6b8ec2e35b9976ae8e2977c76fa303f1d",
+    "timestamp": "2026-10-21T03:49:19.059131+00:00",
+    "n_evals": 2,
+    "label": "mut-check,noinc",
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real",
+    "cache_state": "empty"
+  },
+  {
+    "cell": "large|body",
+    "size": "large",
+    "edit": "body",
+    "genome": {
+      "wrapper": false,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": false,
+      "codegen_units": null,
+      "incremental": true,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "check",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "workspace"
+    },
+    "fitness_ms": 1604.02,
+    "spread_ms": 45.94,
+    "disk_bytes": 525867663,
+    "correctness": {
+      "ok": true,
+      "agree_on_broken": true,
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
+    },
+    "sample": "codegraff2",
+    "commit": "e5610ede9cf38ac3bd71d5f984fa8936f21539d3",
+    "timestamp": "2026-10-21T03:50:34.330518+00:00",
+    "n_evals": 5,
+    "label": "baseline",
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
+  },
+  {
+    "cell": "large|body",
+    "size": "large",
+    "edit": "body",
+    "genome": {
+      "wrapper": false,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": false,
+      "codegen_units": null,
+      "incremental": false,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "check",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "workspace"
+    },
+    "fitness_ms": 3916.16,
+    "spread_ms": 97.75,
+    "disk_bytes": 396598672,
+    "correctness": {
+      "ok": true,
+      "agree_on_broken": true,
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
+    },
+    "sample": "codegraff2",
+    "commit": "e5610ede9cf38ac3bd71d5f984fa8936f21539d3",
+    "timestamp": "2026-10-21T03:51:13.591357+00:00",
+    "n_evals": 5,
+    "label": "plain-noinc",
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
+  },
+  {
+    "cell": "large|body",
+    "size": "large",
+    "edit": "body",
+    "genome": {
+      "wrapper": true,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": false,
+      "codegen_units": null,
+      "incremental": false,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "check",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "workspace"
+    },
+    "fitness_ms": 4204.85,
+    "spread_ms": 140.04,
+    "disk_bytes": 396601769,
+    "correctness": {
+      "ok": true,
+      "agree_on_broken": true,
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
+    },
+    "sample": "codegraff2",
+    "commit": "e5610ede9cf38ac3bd71d5f984fa8936f21539d3",
+    "timestamp": "2026-10-21T03:51:56.518876+00:00",
+    "n_evals": 5,
+    "label": "nanocompile-wrapper",
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
+  },
+  {
+    "cell": "large|body",
+    "size": "large",
+    "edit": "body",
+    "genome": {
+      "wrapper": false,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": true,
+      "codegen_units": null,
+      "incremental": false,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "check",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "workspace"
+    },
+    "fitness_ms": 1058.02,
+    "spread_ms": 39.03,
+    "disk_bytes": 396597126,
+    "correctness": {
+      "ok": true,
+      "agree_on_broken": true,
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
+    },
+    "sample": "codegraff2",
+    "commit": "e5610ede9cf38ac3bd71d5f984fa8936f21539d3",
+    "timestamp": "2026-10-21T03:52:25.906997+00:00",
+    "n_evals": 5,
+    "label": "sccache",
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
+  },
+  {
+    "cell": "large|body",
+    "size": "large",
+    "edit": "body",
+    "genome": {
+      "wrapper": true,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": false,
+      "codegen_units": null,
+      "incremental": false,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "check",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "workspace"
+    },
+    "fitness_ms": 4096.6,
+    "spread_ms": 56.34,
+    "disk_bytes": 396598286,
+    "correctness": {
+      "ok": true,
+      "agree_on_broken": true,
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
+    },
+    "sample": "codegraff2",
+    "commit": "e5610ede9cf38ac3bd71d5f984fa8936f21539d3",
+    "timestamp": "2026-10-21T03:53:08.362580+00:00",
+    "n_evals": 5,
+    "label": "fast-check",
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
+  },
+  {
+    "cell": "large|body",
+    "size": "large",
+    "edit": "body",
+    "genome": {
+      "wrapper": false,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": false,
+      "codegen_units": null,
+      "incremental": true,
+      "debuginfo": "line-tables-only",
+      "fast_check": "cargo-check",
+      "loop": "check",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "workspace"
+    },
+    "fitness_ms": 1610.22,
+    "spread_ms": 39.8,
+    "disk_bytes": 585514126,
+    "correctness": {
+      "ok": true,
+      "agree_on_broken": true,
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
+    },
+    "sample": "codegraff2",
+    "commit": "e5610ede9cf38ac3bd71d5f984fa8936f21539d3",
+    "timestamp": "2026-10-21T03:53:36.136239+00:00",
+    "n_evals": 5,
+    "label": "disk-hygiene",
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
+  },
+  {
+    "cell": "large|body",
+    "size": "large",
+    "edit": "body",
+    "genome": {
+      "wrapper": false,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": false,
+      "codegen_units": 256,
+      "incremental": true,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "check",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "workspace"
+    },
+    "fitness_ms": 1669.76,
+    "spread_ms": 29.11,
+    "disk_bytes": 528914355,
+    "correctness": {
+      "ok": true,
+      "agree_on_broken": true,
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
+    },
+    "sample": "codegraff2",
+    "commit": "e5610ede9cf38ac3bd71d5f984fa8936f21539d3",
+    "timestamp": "2026-10-21T03:54:04.891297+00:00",
+    "n_evals": 5,
+    "label": "crate-shape-256",
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
+  },
+  {
+    "cell": "large|body",
+    "size": "large",
+    "edit": "body",
+    "genome": {
+      "wrapper": false,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": false,
+      "codegen_units": 16,
+      "incremental": true,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "check",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "workspace"
+    },
+    "fitness_ms": 1630.55,
+    "spread_ms": 38.53,
+    "disk_bytes": 526522365,
+    "correctness": {
+      "ok": true,
+      "agree_on_broken": true,
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
+    },
+    "sample": "codegraff2",
+    "commit": "e5610ede9cf38ac3bd71d5f984fa8936f21539d3",
+    "timestamp": "2026-10-21T03:54:32.656179+00:00",
+    "n_evals": 5,
+    "label": "crate-shape-16",
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
+  },
+  {
+    "cell": "large|body",
+    "size": "large",
+    "edit": "body",
+    "genome": {
+      "wrapper": false,
+      "dev_backend": "llvm",
+      "linker": "lld",
+      "sccache": false,
+      "codegen_units": null,
+      "incremental": true,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "build",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "workspace"
+    },
+    "fitness_ms": 2002.49,
+    "spread_ms": 53.73,
+    "disk_bytes": 884709104,
+    "correctness": {
+      "ok": true,
+      "agree_on_broken": true,
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
+    },
+    "sample": "codegraff2",
+    "commit": "e5610ede9cf38ac3bd71d5f984fa8936f21539d3",
+    "timestamp": "2026-10-21T03:55:08.505552+00:00",
+    "n_evals": 5,
+    "label": "lld",
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
+  },
+  {
+    "cell": "large|body",
+    "size": "large",
+    "edit": "body",
+    "genome": {
+      "wrapper": true,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": false,
+      "codegen_units": null,
+      "incremental": false,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "build",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "workspace"
+    },
+    "fitness_ms": 6089.33,
+    "spread_ms": 431.47,
+    "disk_bytes": 632351845,
+    "correctness": {
+      "ok": true,
+      "agree_on_broken": true,
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
+    },
+    "sample": "codegraff2",
+    "commit": "e5610ede9cf38ac3bd71d5f984fa8936f21539d3",
+    "timestamp": "2026-10-21T03:56:51.111132+00:00",
+    "n_evals": 5,
+    "label": "mut-command=build,wrapper=nanocompile,noinc",
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
+  },
+  {
+    "cell": "large|body",
+    "size": "large",
+    "edit": "body",
+    "genome": {
+      "wrapper": true,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": false,
+      "codegen_units": null,
+      "incremental": false,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "check",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "workspace"
+    },
+    "fitness_ms": 4304.59,
+    "spread_ms": 181.24,
+    "disk_bytes": 396607965,
+    "correctness": {
+      "ok": true,
+      "agree_on_broken": true,
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
+    },
+    "sample": "codegraff2",
+    "commit": "e5610ede9cf38ac3bd71d5f984fa8936f21539d3",
+    "timestamp": "2026-10-21T03:57:36.000239+00:00",
+    "n_evals": 5,
+    "label": "mut-check,wrapper=nanocompile,noinc",
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
+  },
+  {
+    "cell": "large|sig_dep",
+    "size": "large",
+    "edit": "sig_dep",
+    "genome": {
+      "wrapper": false,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": false,
+      "codegen_units": null,
+      "incremental": true,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "check",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "workspace"
+    },
+    "fitness_ms": 1766.01,
+    "spread_ms": 105.49,
+    "disk_bytes": 525893004,
+    "correctness": {
+      "ok": true,
+      "agree_on_broken": true,
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
+    },
+    "sample": "codegraff2",
+    "commit": "e5610ede9cf38ac3bd71d5f984fa8936f21539d3",
+    "timestamp": "2026-10-21T03:58:05.480083+00:00",
+    "n_evals": 5,
+    "label": "baseline",
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
+  },
+  {
+    "cell": "large|sig_dep",
+    "size": "large",
+    "edit": "sig_dep",
+    "genome": {
+      "wrapper": false,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": false,
+      "codegen_units": null,
+      "incremental": false,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "check",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "workspace"
+    },
+    "fitness_ms": 4288.56,
+    "spread_ms": 126.94,
+    "disk_bytes": 396603050,
+    "correctness": {
+      "ok": true,
+      "agree_on_broken": true,
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
+    },
+    "sample": "codegraff2",
+    "commit": "e5610ede9cf38ac3bd71d5f984fa8936f21539d3",
+    "timestamp": "2026-10-21T03:58:47.584873+00:00",
+    "n_evals": 5,
+    "label": "plain-noinc",
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
+  },
+  {
+    "cell": "large|sig_dep",
+    "size": "large",
+    "edit": "sig_dep",
+    "genome": {
+      "wrapper": true,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": false,
+      "codegen_units": null,
+      "incremental": false,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "check",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "workspace"
+    },
+    "fitness_ms": 4205.42,
+    "spread_ms": 159.68,
+    "disk_bytes": 396606151,
+    "correctness": {
+      "ok": true,
+      "agree_on_broken": true,
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
+    },
+    "sample": "codegraff2",
+    "commit": "e5610ede9cf38ac3bd71d5f984fa8936f21539d3",
+    "timestamp": "2026-10-21T03:59:31.205005+00:00",
+    "n_evals": 5,
+    "label": "nanocompile-wrapper",
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
+  },
+  {
+    "cell": "large|sig_dep",
+    "size": "large",
+    "edit": "sig_dep",
+    "genome": {
+      "wrapper": false,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": true,
+      "codegen_units": null,
+      "incremental": false,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "check",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "workspace"
+    },
+    "fitness_ms": 1018.62,
+    "spread_ms": 15.05,
+    "disk_bytes": 396601504,
+    "correctness": {
+      "ok": true,
+      "agree_on_broken": true,
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
+    },
+    "sample": "codegraff2",
+    "commit": "e5610ede9cf38ac3bd71d5f984fa8936f21539d3",
+    "timestamp": "2026-10-21T04:00:01.048351+00:00",
+    "n_evals": 5,
+    "label": "sccache",
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
+  },
+  {
+    "cell": "large|sig_dep",
+    "size": "large",
+    "edit": "sig_dep",
+    "genome": {
+      "wrapper": true,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": false,
+      "codegen_units": null,
+      "incremental": false,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "check",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "workspace"
+    },
+    "fitness_ms": 4236.42,
+    "spread_ms": 277.19,
+    "disk_bytes": 396602664,
+    "correctness": {
+      "ok": true,
+      "agree_on_broken": true,
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
+    },
+    "sample": "codegraff2",
+    "commit": "e5610ede9cf38ac3bd71d5f984fa8936f21539d3",
+    "timestamp": "2026-10-21T04:00:45.115759+00:00",
+    "n_evals": 5,
+    "label": "fast-check",
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
+  },
+  {
+    "cell": "large|sig_dep",
+    "size": "large",
+    "edit": "sig_dep",
+    "genome": {
+      "wrapper": false,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": false,
+      "codegen_units": null,
+      "incremental": true,
+      "debuginfo": "line-tables-only",
+      "fast_check": "cargo-check",
+      "loop": "check",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "workspace"
+    },
+    "fitness_ms": 1715.27,
+    "spread_ms": 79.19,
+    "disk_bytes": 585539466,
+    "correctness": {
+      "ok": true,
+      "agree_on_broken": true,
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
+    },
+    "sample": "codegraff2",
+    "commit": "e5610ede9cf38ac3bd71d5f984fa8936f21539d3",
+    "timestamp": "2026-10-21T04:01:13.592080+00:00",
+    "n_evals": 5,
+    "label": "disk-hygiene",
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
+  },
+  {
+    "cell": "large|sig_dep",
+    "size": "large",
+    "edit": "sig_dep",
+    "genome": {
+      "wrapper": false,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": false,
+      "codegen_units": 256,
+      "incremental": true,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "check",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "workspace"
+    },
+    "fitness_ms": 1726.76,
+    "spread_ms": 102.53,
+    "disk_bytes": 528939697,
+    "correctness": {
+      "ok": true,
+      "agree_on_broken": true,
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
+    },
+    "sample": "codegraff2",
+    "commit": "e5610ede9cf38ac3bd71d5f984fa8936f21539d3",
+    "timestamp": "2026-10-21T04:01:43.564811+00:00",
+    "n_evals": 5,
+    "label": "crate-shape-256",
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
+  },
+  {
+    "cell": "large|sig_dep",
+    "size": "large",
+    "edit": "sig_dep",
+    "genome": {
+      "wrapper": false,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": false,
+      "codegen_units": 16,
+      "incremental": true,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "check",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "workspace"
+    },
+    "fitness_ms": 1825.18,
+    "spread_ms": 73.81,
+    "disk_bytes": 526547708,
+    "correctness": {
+      "ok": true,
+      "agree_on_broken": true,
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
+    },
+    "sample": "codegraff2",
+    "commit": "e5610ede9cf38ac3bd71d5f984fa8936f21539d3",
+    "timestamp": "2026-10-21T04:02:14.511909+00:00",
+    "n_evals": 5,
+    "label": "crate-shape-16",
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
+  },
+  {
+    "cell": "large|sig_dep",
+    "size": "large",
+    "edit": "sig_dep",
+    "genome": {
+      "wrapper": true,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": false,
+      "codegen_units": null,
+      "incremental": false,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "check",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "workspace"
+    },
+    "fitness_ms": 4394.79,
+    "spread_ms": 89.06,
+    "disk_bytes": 396612343,
+    "correctness": {
+      "ok": true,
+      "agree_on_broken": true,
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
+    },
+    "sample": "codegraff2",
+    "commit": "e5610ede9cf38ac3bd71d5f984fa8936f21539d3",
+    "timestamp": "2026-10-21T04:03:00.832632+00:00",
+    "n_evals": 5,
+    "label": "mut-check,wrapper=nanocompile,noinc",
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
+  },
+  {
+    "cell": "large|sig_dep",
+    "size": "large",
+    "edit": "sig_dep",
+    "genome": {
+      "wrapper": false,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": true,
+      "codegen_units": null,
+      "incremental": false,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "check",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "workspace"
+    },
+    "fitness_ms": 1071.29,
+    "spread_ms": 11.25,
+    "disk_bytes": 396610796,
+    "correctness": {
+      "ok": true,
+      "agree_on_broken": true,
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
+    },
+    "sample": "codegraff2",
+    "commit": "e5610ede9cf38ac3bd71d5f984fa8936f21539d3",
+    "timestamp": "2026-10-21T04:03:31.918997+00:00",
+    "n_evals": 5,
+    "label": "mut-check,wrapper=sccache,noinc",
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
+  },
+  {
+    "cell": "large|noop",
+    "size": "large",
+    "edit": "noop",
+    "genome": {
+      "wrapper": false,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": false,
+      "codegen_units": null,
+      "incremental": true,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "check",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "workspace"
+    },
+    "fitness_ms": 200.58,
+    "spread_ms": 4.92,
+    "disk_bytes": 462563746,
+    "correctness": {
+      "ok": true,
+      "agree_on_broken": true,
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
+    },
+    "sample": "codegraff2",
+    "commit": "e5610ede9cf38ac3bd71d5f984fa8936f21539d3",
+    "timestamp": "2026-10-21T04:03:51.199063+00:00",
+    "n_evals": 5,
+    "label": "baseline",
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
+  },
+  {
+    "cell": "large|noop",
+    "size": "large",
+    "edit": "noop",
+    "genome": {
+      "wrapper": false,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": false,
+      "codegen_units": null,
+      "incremental": false,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "check",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "workspace"
+    },
+    "fitness_ms": 201.82,
+    "spread_ms": 17.81,
+    "disk_bytes": 396597511,
+    "correctness": {
+      "ok": true,
+      "agree_on_broken": true,
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
+    },
+    "sample": "codegraff2",
+    "commit": "e5610ede9cf38ac3bd71d5f984fa8936f21539d3",
+    "timestamp": "2026-10-21T04:04:09.686259+00:00",
+    "n_evals": 5,
+    "label": "plain-noinc",
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
+  },
+  {
+    "cell": "large|noop",
+    "size": "large",
+    "edit": "noop",
+    "genome": {
+      "wrapper": true,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": false,
+      "codegen_units": null,
+      "incremental": false,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "check",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "workspace"
+    },
+    "fitness_ms": 206.8,
+    "spread_ms": 3.53,
+    "disk_bytes": 396600608,
+    "correctness": {
+      "ok": true,
+      "agree_on_broken": true,
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
+    },
+    "sample": "codegraff2",
+    "commit": "e5610ede9cf38ac3bd71d5f984fa8936f21539d3",
+    "timestamp": "2026-10-21T04:04:38.677293+00:00",
+    "n_evals": 5,
+    "label": "nanocompile-wrapper",
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
+  },
+  {
+    "cell": "large|noop",
+    "size": "large",
+    "edit": "noop",
+    "genome": {
+      "wrapper": false,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": true,
+      "codegen_units": null,
+      "incremental": false,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "check",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "workspace"
+    },
+    "fitness_ms": 284.83,
+    "spread_ms": 56.17,
+    "disk_bytes": 396595965,
+    "correctness": {
+      "ok": true,
+      "agree_on_broken": true,
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
+    },
+    "sample": "codegraff2",
+    "commit": "e5610ede9cf38ac3bd71d5f984fa8936f21539d3",
+    "timestamp": "2026-10-21T04:05:10.290748+00:00",
+    "n_evals": 5,
+    "label": "sccache",
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
+  },
+  {
+    "cell": "large|noop",
+    "size": "large",
+    "edit": "noop",
+    "genome": {
+      "wrapper": true,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": false,
+      "codegen_units": null,
+      "incremental": false,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "check",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "workspace"
+    },
+    "fitness_ms": 244.38,
+    "spread_ms": 68.29,
+    "disk_bytes": 396597125,
+    "correctness": {
+      "ok": true,
+      "agree_on_broken": true,
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
+    },
+    "sample": "codegraff2",
+    "commit": "e5610ede9cf38ac3bd71d5f984fa8936f21539d3",
+    "timestamp": "2026-10-21T04:05:40.043778+00:00",
+    "n_evals": 5,
+    "label": "fast-check",
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
+  },
+  {
+    "cell": "large|noop",
+    "size": "large",
+    "edit": "noop",
+    "genome": {
+      "wrapper": false,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": false,
+      "codegen_units": null,
+      "incremental": true,
+      "debuginfo": "line-tables-only",
+      "fast_check": "cargo-check",
+      "loop": "check",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "workspace"
+    },
+    "fitness_ms": 207.39,
+    "spread_ms": 11.31,
+    "disk_bytes": 522210213,
+    "correctness": {
+      "ok": true,
+      "agree_on_broken": true,
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
+    },
+    "sample": "codegraff2",
+    "commit": "e5610ede9cf38ac3bd71d5f984fa8936f21539d3",
+    "timestamp": "2026-10-21T04:06:10.740741+00:00",
+    "n_evals": 5,
+    "label": "disk-hygiene",
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
+  },
+  {
+    "cell": "large|noop",
+    "size": "large",
+    "edit": "noop",
+    "genome": {
+      "wrapper": false,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": false,
+      "codegen_units": 256,
+      "incremental": true,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "check",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "workspace"
+    },
+    "fitness_ms": 199.59,
+    "spread_ms": 24.39,
+    "disk_bytes": 465610437,
+    "correctness": {
+      "ok": true,
+      "agree_on_broken": true,
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
+    },
+    "sample": "codegraff2",
+    "commit": "e5610ede9cf38ac3bd71d5f984fa8936f21539d3",
+    "timestamp": "2026-10-21T04:06:36.710215+00:00",
+    "n_evals": 5,
+    "label": "crate-shape-256",
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
+  },
+  {
+    "cell": "large|noop",
+    "size": "large",
+    "edit": "noop",
+    "genome": {
+      "wrapper": false,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": false,
+      "codegen_units": 16,
+      "incremental": true,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "check",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "workspace"
+    },
+    "fitness_ms": 191.71,
+    "spread_ms": 11.24,
+    "disk_bytes": 463218451,
+    "correctness": {
+      "ok": true,
+      "agree_on_broken": true,
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
+    },
+    "sample": "codegraff2",
+    "commit": "e5610ede9cf38ac3bd71d5f984fa8936f21539d3",
+    "timestamp": "2026-10-21T04:06:55.646043+00:00",
+    "n_evals": 5,
+    "label": "crate-shape-16",
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
+  },
+  {
+    "cell": "large|noop",
+    "size": "large",
+    "edit": "noop",
+    "genome": {
+      "wrapper": false,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": false,
+      "codegen_units": 16,
+      "incremental": true,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "check",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "workspace"
+    },
+    "fitness_ms": 201.59,
+    "spread_ms": 6.47,
+    "disk_bytes": 463223095,
+    "correctness": {
+      "ok": true,
+      "agree_on_broken": true,
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
+    },
+    "sample": "codegraff2",
+    "commit": "e5610ede9cf38ac3bd71d5f984fa8936f21539d3",
+    "timestamp": "2026-10-21T04:07:13.840574+00:00",
+    "n_evals": 5,
+    "label": "mut-check,codegen_units=16",
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
+  },
+  {
+    "cell": "large|noop",
+    "size": "large",
+    "edit": "noop",
+    "genome": {
+      "wrapper": false,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": false,
+      "codegen_units": 16,
+      "incremental": true,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "build",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "workspace"
+    },
+    "fitness_ms": 194.43,
+    "spread_ms": 9.41,
+    "disk_bytes": 779739160,
+    "correctness": {
+      "ok": true,
+      "agree_on_broken": true,
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
+    },
+    "sample": "codegraff2",
+    "commit": "e5610ede9cf38ac3bd71d5f984fa8936f21539d3",
+    "timestamp": "2026-10-21T04:07:39.923096+00:00",
+    "n_evals": 5,
+    "label": "mut-command=build,codegen_units=16",
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
+  },
+  {
+    "cell": "large|noop",
+    "size": "large",
+    "edit": "noop",
+    "genome": {
+      "wrapper": false,
+      "dev_backend": "llvm",
+      "linker": "lld",
+      "sccache": false,
+      "codegen_units": 16,
+      "incremental": true,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "build",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "workspace"
+    },
+    "fitness_ms": 193.38,
+    "spread_ms": 12.23,
+    "disk_bytes": 779749264,
+    "correctness": {
+      "ok": true,
+      "agree_on_broken": true,
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
+    },
+    "sample": "codegraff2",
+    "commit": "e5610ede9cf38ac3bd71d5f984fa8936f21539d3",
+    "timestamp": "2026-10-21T04:08:03.554654+00:00",
+    "n_evals": 5,
+    "label": "mut-command=build,linker=lld,codegen_units=16",
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real"
+  },
+  {
+    "cell": "large|cold",
+    "size": "large",
+    "edit": "cold",
+    "genome": {
+      "wrapper": false,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": false,
+      "codegen_units": null,
+      "incremental": true,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "check",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "workspace"
+    },
+    "fitness_ms": 16178.68,
+    "spread_ms": 195.05,
+    "disk_bytes": 462563743,
+    "correctness": {
+      "ok": true,
+      "agree_on_broken": true,
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
+    },
+    "sample": "codegraff2",
+    "commit": "e5610ede9cf38ac3bd71d5f984fa8936f21539d3",
+    "timestamp": "2026-10-21T04:08:36.040129+00:00",
+    "n_evals": 2,
+    "label": "baseline",
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real",
+    "cache_state": "empty"
+  },
+  {
+    "cell": "large|cold",
+    "size": "large",
+    "edit": "cold",
+    "genome": {
+      "wrapper": false,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": false,
+      "codegen_units": null,
+      "incremental": false,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "check",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "workspace"
+    },
+    "fitness_ms": 15833.29,
+    "spread_ms": 22.88,
+    "disk_bytes": 396597508,
+    "correctness": {
+      "ok": true,
+      "agree_on_broken": true,
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
+    },
+    "sample": "codegraff2",
+    "commit": "e5610ede9cf38ac3bd71d5f984fa8936f21539d3",
+    "timestamp": "2026-10-21T04:09:07.839011+00:00",
+    "n_evals": 2,
+    "label": "plain-noinc",
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real",
+    "cache_state": "empty"
+  },
+  {
+    "cell": "large|cold",
+    "size": "large",
+    "edit": "cold",
+    "genome": {
+      "wrapper": true,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": false,
+      "codegen_units": null,
+      "incremental": false,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "check",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "workspace"
+    },
+    "fitness_ms": 16713.74,
+    "spread_ms": 358.06,
+    "disk_bytes": 396600605,
+    "correctness": {
+      "ok": true,
+      "agree_on_broken": true,
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
+    },
+    "sample": "codegraff2",
+    "commit": "e5610ede9cf38ac3bd71d5f984fa8936f21539d3",
+    "timestamp": "2026-10-21T04:09:41.386386+00:00",
+    "n_evals": 2,
+    "label": "nanocompile-wrapper",
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real",
+    "cache_state": "warm_compiler_cache"
+  },
+  {
+    "cell": "large|cold",
+    "size": "large",
+    "edit": "cold",
+    "genome": {
+      "wrapper": false,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": true,
+      "codegen_units": null,
+      "incremental": false,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "check",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "workspace"
+    },
+    "fitness_ms": 12576.43,
+    "spread_ms": 6289.89,
+    "disk_bytes": 396595962,
+    "correctness": {
+      "ok": true,
+      "agree_on_broken": true,
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
+    },
+    "sample": "codegraff2",
+    "commit": "e5610ede9cf38ac3bd71d5f984fa8936f21539d3",
+    "timestamp": "2026-10-21T04:10:06.680795+00:00",
+    "n_evals": 2,
+    "label": "sccache",
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real",
+    "cache_state": "warm_compiler_cache"
+  },
+  {
+    "cell": "large|cold",
+    "size": "large",
+    "edit": "cold",
+    "genome": {
+      "wrapper": false,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": false,
+      "codegen_units": null,
+      "incremental": true,
+      "debuginfo": "line-tables-only",
+      "fast_check": "cargo-check",
+      "loop": "check",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "workspace"
+    },
+    "fitness_ms": 17834.69,
+    "spread_ms": 102.29,
+    "disk_bytes": 522210208,
+    "correctness": {
+      "ok": true,
+      "agree_on_broken": true,
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
+    },
+    "sample": "codegraff2",
+    "commit": "e5610ede9cf38ac3bd71d5f984fa8936f21539d3",
+    "timestamp": "2026-10-21T04:10:42.519919+00:00",
+    "n_evals": 2,
+    "label": "disk-hygiene",
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real",
+    "cache_state": "empty"
+  },
+  {
+    "cell": "large|cold",
+    "size": "large",
+    "edit": "cold",
+    "genome": {
+      "wrapper": false,
+      "dev_backend": "llvm",
+      "linker": "lld",
+      "sccache": true,
+      "codegen_units": null,
+      "incremental": false,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "build",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "workspace"
+    },
+    "fitness_ms": 15040.56,
+    "spread_ms": 8743.66,
+    "disk_bytes": 632358486,
+    "correctness": {
+      "ok": true,
+      "agree_on_broken": true,
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
+    },
+    "sample": "codegraff2",
+    "commit": "e5610ede9cf38ac3bd71d5f984fa8936f21539d3",
+    "timestamp": "2026-10-21T04:11:12.762301+00:00",
+    "n_evals": 2,
+    "label": "mut-command=build,wrapper=sccache,noinc,linker=lld",
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real",
+    "cache_state": "warm_compiler_cache"
+  },
+  {
+    "cell": "large|cold",
+    "size": "large",
+    "edit": "cold",
+    "genome": {
+      "wrapper": false,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": true,
+      "codegen_units": null,
+      "incremental": false,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "check",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "workspace"
+    },
+    "fitness_ms": 12280.08,
+    "spread_ms": 5919.16,
+    "disk_bytes": 396605253,
+    "correctness": {
+      "ok": true,
+      "agree_on_broken": true,
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
+    },
+    "sample": "codegraff2",
+    "commit": "e5610ede9cf38ac3bd71d5f984fa8936f21539d3",
+    "timestamp": "2026-10-21T04:11:37.442625+00:00",
+    "n_evals": 2,
+    "label": "mut-check,wrapper=sccache,noinc",
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real",
+    "cache_state": "warm_compiler_cache"
+  },
+  {
+    "cell": "large|cold",
+    "size": "large",
+    "edit": "cold",
+    "genome": {
+      "wrapper": false,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": false,
+      "codegen_units": null,
+      "incremental": false,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "check",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "workspace"
+    },
+    "fitness_ms": 15829.62,
+    "spread_ms": 181.49,
+    "disk_bytes": 425839505,
+    "correctness": {
+      "ok": true,
+      "agree_on_broken": true,
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
+    },
+    "sample": "codegraff2",
+    "commit": "e5610ede9cf38ac3bd71d5f984fa8936f21539d3",
+    "timestamp": "2026-10-21T04:12:09.247098+00:00",
+    "n_evals": 2,
+    "label": "mut-check,noinc",
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "sample_class": "real",
+    "cache_state": "empty"
+  },
+  {
+    "cell": "mid|cold",
+    "size": "mid",
+    "edit": "cold",
+    "genome": {
+      "wrapper": false,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": false,
+      "codegen_units": null,
+      "incremental": true,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "check",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "touched"
+    },
+    "fitness_ms": 11111.45,
+    "spread_ms": 765.19,
+    "disk_bytes": 144597944,
+    "correctness": {
+      "ok": true,
+      "agree_on_broken": true,
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
+    },
+    "sample": "emergentDB",
+    "commit": "1205db48e7bdee8db49fa3c705e209dd1f4efde0",
+    "timestamp": "2026-10-21T04:04:32.297253+00:00",
+    "n_evals": 2,
+    "label": "baseline",
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "cache_state": "empty",
+    "sample_class": "real",
+    "error": null
+  },
+  {
+    "cell": "mid|cold",
+    "size": "mid",
+    "edit": "cold",
+    "genome": {
+      "wrapper": false,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": false,
+      "codegen_units": null,
+      "incremental": false,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "check",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "touched"
+    },
+    "fitness_ms": 8176.21,
+    "spread_ms": 1746.25,
+    "disk_bytes": 131621116,
+    "correctness": {
+      "ok": true,
+      "agree_on_broken": true,
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
+    },
+    "sample": "emergentDB",
+    "commit": "1205db48e7bdee8db49fa3c705e209dd1f4efde0",
+    "timestamp": "2026-10-21T04:04:48.725609+00:00",
+    "n_evals": 2,
+    "label": "plain-noinc",
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "cache_state": "empty",
+    "sample_class": "real",
+    "error": null
+  },
+  {
+    "cell": "mid|cold",
+    "size": "mid",
+    "edit": "cold",
+    "genome": {
+      "wrapper": true,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": false,
+      "codegen_units": null,
+      "incremental": false,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "check",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "touched"
+    },
+    "fitness_ms": 7594.2,
+    "spread_ms": 3646.03,
+    "disk_bytes": 131621118,
+    "correctness": {
+      "ok": true,
+      "agree_on_broken": true,
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
+    },
+    "sample": "emergentDB",
+    "commit": "1205db48e7bdee8db49fa3c705e209dd1f4efde0",
+    "timestamp": "2026-10-21T04:05:04.046978+00:00",
+    "n_evals": 2,
+    "label": "nanocompile-wrapper",
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "cache_state": "warm_compiler_cache",
+    "sample_class": "real",
+    "error": null
+  },
+  {
+    "cell": "mid|cold",
+    "size": "mid",
+    "edit": "cold",
+    "genome": {
+      "wrapper": false,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": true,
+      "codegen_units": null,
+      "incremental": false,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "check",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "touched"
+    },
+    "fitness_ms": 5769.55,
+    "spread_ms": 1563.92,
+    "disk_bytes": 131621117,
+    "correctness": {
+      "ok": true,
+      "agree_on_broken": true,
+      "validate_is_final": true,
+      "dependents_agree_on_broken": true
+    },
+    "sample": "emergentDB",
+    "commit": "1205db48e7bdee8db49fa3c705e209dd1f4efde0",
+    "timestamp": "2026-10-21T04:05:15.675451+00:00",
+    "n_evals": 2,
+    "label": "sccache",
+    "source": "scratch-mapelites",
+    "fitness_method": "official_first_rebuild",
+    "cache_state": "warm_compiler_cache",
+    "sample_class": "real",
+    "error": null
+  },
+  {
+    "cell": "mid|cold",
+    "size": "mid",
+    "edit": "cold",
+    "genome": {
+      "wrapper": false,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": false,
+      "codegen_units": null,
+      "incremental": true,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "check",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "touched"
+    },
+    "fitness_ms": 93.33190100005595,
+    "spread_ms": 1.7655435479566683,
+    "disk_bytes": 203812482,
+    "correctness": {
+      "ok": false,
+      "agree_on_broken": false,
+      "validate_is_final": false,
+      "note": "official rust_loop_bench probe-fn still type-checked; excluded from elites"
+    },
+    "sample": "emergentDB",
+    "commit": "19fa491f3207bd9715d3c44b24ee81cdea6f7e01",
+    "timestamp": "2026-10-21T03:27:37.880611+00:00",
+    "n_evals": 3,
+    "non_improving": 0,
+    "stopped": false,
+    "source": "rust_loop_bench",
+    "sample_class": "real",
+    "fitness_method": "official_first_rebuild",
+    "cache_state": "empty"
+  },
+  {
+    "cell": "mid|noop",
+    "size": "mid",
+    "edit": "noop",
+    "genome": {
+      "wrapper": false,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": false,
+      "codegen_units": null,
+      "incremental": true,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "check",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "touched"
+    },
+    "fitness_ms": 106.71442099987871,
+    "spread_ms": 2.6044488258784924,
+    "disk_bytes": 203812482,
+    "correctness": {
+      "ok": false,
+      "agree_on_broken": false,
+      "validate_is_final": false,
+      "note": "official rust_loop_bench probe-fn still type-checked; excluded from elites"
+    },
+    "sample": "emergentDB",
+    "commit": "19fa491f3207bd9715d3c44b24ee81cdea6f7e01",
+    "timestamp": "2026-10-21T03:27:38.314569+00:00",
+    "n_evals": 3,
+    "non_improving": 0,
+    "stopped": false,
+    "source": "rust_loop_bench",
+    "sample_class": "real",
+    "fitness_method": "official_first_rebuild"
+  },
+  {
+    "cell": "mid|body",
+    "size": "mid",
+    "edit": "body",
+    "genome": {
+      "wrapper": false,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": false,
+      "codegen_units": null,
+      "incremental": true,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "check",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "touched"
+    },
+    "fitness_ms": 95.23539399992842,
+    "spread_ms": 7.068553679425732,
+    "disk_bytes": 217780528,
+    "correctness": {
+      "ok": false,
+      "agree_on_broken": false,
+      "validate_is_final": false,
+      "note": "official rust_loop_bench probe-fn still type-checked; excluded from elites"
+    },
+    "sample": "emergentDB",
+    "commit": "19fa491f3207bd9715d3c44b24ee81cdea6f7e01",
+    "timestamp": "2026-10-21T03:27:39.040132+00:00",
+    "n_evals": 3,
+    "non_improving": 0,
+    "stopped": false,
+    "source": "rust_loop_bench",
+    "sample_class": "real",
+    "fitness_method": "official_first_rebuild"
+  },
+  {
+    "cell": "mid|sig_dep",
+    "size": "mid",
+    "edit": "sig_dep",
+    "genome": {
+      "wrapper": false,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": false,
+      "codegen_units": null,
+      "incremental": true,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "check",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "touched"
+    },
+    "fitness_ms": 99.6542129998943,
+    "spread_ms": 5.238226128140039,
+    "disk_bytes": 217770182,
+    "correctness": {
+      "ok": false,
+      "agree_on_broken": false,
+      "validate_is_final": false,
+      "note": "official rust_loop_bench probe-fn still type-checked; excluded from elites"
+    },
+    "sample": "emergentDB",
+    "commit": "19fa491f3207bd9715d3c44b24ee81cdea6f7e01",
+    "timestamp": "2026-10-21T03:27:39.745118+00:00",
+    "n_evals": 3,
+    "non_improving": 0,
+    "stopped": false,
+    "source": "rust_loop_bench",
+    "sample_class": "real",
+    "fitness_method": "official_first_rebuild"
+  },
+  {
+    "cell": "mid|cold",
+    "size": "mid",
+    "edit": "cold",
+    "genome": {
+      "wrapper": true,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": false,
+      "codegen_units": null,
+      "incremental": false,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "check",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "touched"
+    },
+    "fitness_ms": 94.0449439999611,
+    "spread_ms": 9.869408156548447,
+    "disk_bytes": 189835566,
+    "correctness": {
+      "ok": false,
+      "agree_on_broken": false,
+      "validate_is_final": false,
+      "note": "official rust_loop_bench probe-fn still type-checked; excluded from elites"
+    },
+    "sample": "emergentDB",
+    "commit": "19fa491f3207bd9715d3c44b24ee81cdea6f7e01",
+    "timestamp": "2026-10-21T03:27:47.658447+00:00",
+    "n_evals": 3,
+    "non_improving": 0,
+    "stopped": false,
+    "source": "rust_loop_bench",
+    "sample_class": "real",
+    "fitness_method": "official_first_rebuild",
+    "cache_state": "warm_compiler_cache"
+  },
+  {
+    "cell": "mid|noop",
+    "size": "mid",
+    "edit": "noop",
+    "genome": {
+      "wrapper": true,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": false,
+      "codegen_units": null,
+      "incremental": false,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "check",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "touched"
+    },
+    "fitness_ms": 94.20786100008627,
+    "spread_ms": 0.47949019856588293,
+    "disk_bytes": 189835566,
+    "correctness": {
+      "ok": false,
+      "agree_on_broken": false,
+      "validate_is_final": false,
+      "note": "official rust_loop_bench probe-fn still type-checked; excluded from elites"
+    },
+    "sample": "emergentDB",
+    "commit": "19fa491f3207bd9715d3c44b24ee81cdea6f7e01",
+    "timestamp": "2026-10-21T03:27:48.056366+00:00",
+    "n_evals": 3,
+    "non_improving": 0,
+    "stopped": false,
+    "source": "rust_loop_bench",
+    "sample_class": "real",
+    "fitness_method": "official_first_rebuild"
+  },
+  {
+    "cell": "mid|body",
+    "size": "mid",
+    "edit": "body",
+    "genome": {
+      "wrapper": true,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": false,
+      "codegen_units": null,
+      "incremental": false,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "check",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "touched"
+    },
+    "fitness_ms": 95.58127399986915,
+    "spread_ms": 19.8531202995493,
+    "disk_bytes": 189835566,
+    "correctness": {
+      "ok": false,
+      "agree_on_broken": false,
+      "validate_is_final": false,
+      "note": "official rust_loop_bench probe-fn still type-checked; excluded from elites"
+    },
+    "sample": "emergentDB",
+    "commit": "19fa491f3207bd9715d3c44b24ee81cdea6f7e01",
+    "timestamp": "2026-10-21T03:27:49.257139+00:00",
+    "n_evals": 3,
+    "non_improving": 0,
+    "stopped": false,
+    "source": "rust_loop_bench",
+    "sample_class": "real",
+    "fitness_method": "official_first_rebuild"
+  },
+  {
+    "cell": "mid|sig_dep",
+    "size": "mid",
+    "edit": "sig_dep",
+    "genome": {
+      "wrapper": true,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": false,
+      "codegen_units": null,
+      "incremental": false,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "check",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "touched"
+    },
+    "fitness_ms": 108.09359700010646,
+    "spread_ms": 6.433410878819748,
+    "disk_bytes": 189835590,
+    "correctness": {
+      "ok": false,
+      "agree_on_broken": false,
+      "validate_is_final": false,
+      "note": "official rust_loop_bench probe-fn still type-checked; excluded from elites"
+    },
+    "sample": "emergentDB",
+    "commit": "19fa491f3207bd9715d3c44b24ee81cdea6f7e01",
+    "timestamp": "2026-10-21T03:27:50.594966+00:00",
+    "n_evals": 3,
+    "non_improving": 0,
+    "stopped": false,
+    "source": "rust_loop_bench",
+    "sample_class": "real",
+    "fitness_method": "official_first_rebuild"
+  },
+  {
+    "cell": "mid|cold",
+    "size": "mid",
+    "edit": "cold",
+    "genome": {
+      "wrapper": false,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": false,
+      "codegen_units": 256,
+      "incremental": true,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "check",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "touched"
+    },
+    "fitness_ms": 90.54891699997825,
+    "spread_ms": 3.9850355589158375,
+    "disk_bytes": 204524511,
+    "correctness": {
+      "ok": false,
+      "agree_on_broken": false,
+      "validate_is_final": false,
+      "note": "official rust_loop_bench probe-fn still type-checked; excluded from elites"
+    },
+    "sample": "emergentDB",
+    "commit": "19fa491f3207bd9715d3c44b24ee81cdea6f7e01",
+    "timestamp": "2026-10-21T03:28:24.555178+00:00",
+    "n_evals": 3,
+    "non_improving": 0,
+    "stopped": false,
+    "source": "rust_loop_bench",
+    "sample_class": "real",
+    "fitness_method": "official_first_rebuild",
+    "cache_state": "empty"
+  },
+  {
+    "cell": "mid|noop",
+    "size": "mid",
+    "edit": "noop",
+    "genome": {
+      "wrapper": false,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": false,
+      "codegen_units": 256,
+      "incremental": true,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "check",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "touched"
+    },
+    "fitness_ms": 85.81416200013336,
+    "spread_ms": 1.1140488999574032,
+    "disk_bytes": 204524511,
+    "correctness": {
+      "ok": false,
+      "agree_on_broken": false,
+      "validate_is_final": false,
+      "note": "official rust_loop_bench probe-fn still type-checked; excluded from elites"
+    },
+    "sample": "emergentDB",
+    "commit": "19fa491f3207bd9715d3c44b24ee81cdea6f7e01",
+    "timestamp": "2026-10-21T03:28:24.927726+00:00",
+    "n_evals": 3,
+    "non_improving": 0,
+    "stopped": false,
+    "source": "rust_loop_bench",
+    "sample_class": "real",
+    "fitness_method": "official_first_rebuild"
+  },
+  {
+    "cell": "mid|body",
+    "size": "mid",
+    "edit": "body",
+    "genome": {
+      "wrapper": false,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": false,
+      "codegen_units": 256,
+      "incremental": true,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "check",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "touched"
+    },
+    "fitness_ms": 90.12887500011857,
+    "spread_ms": 5.2685148256651475,
+    "disk_bytes": 218492557,
+    "correctness": {
+      "ok": false,
+      "agree_on_broken": false,
+      "validate_is_final": false,
+      "note": "official rust_loop_bench probe-fn still type-checked; excluded from elites"
+    },
+    "sample": "emergentDB",
+    "commit": "19fa491f3207bd9715d3c44b24ee81cdea6f7e01",
+    "timestamp": "2026-10-21T03:28:25.591319+00:00",
+    "n_evals": 3,
+    "non_improving": 0,
+    "stopped": false,
+    "source": "rust_loop_bench",
+    "sample_class": "real",
+    "fitness_method": "official_first_rebuild"
+  },
+  {
+    "cell": "mid|sig_dep",
+    "size": "mid",
+    "edit": "sig_dep",
+    "genome": {
+      "wrapper": false,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": false,
+      "codegen_units": 256,
+      "incremental": true,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "check",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "touched"
+    },
+    "fitness_ms": 90.13284000002386,
+    "spread_ms": 3.133429709708067,
+    "disk_bytes": 218482211,
+    "correctness": {
+      "ok": false,
+      "agree_on_broken": false,
+      "validate_is_final": false,
+      "note": "official rust_loop_bench probe-fn still type-checked; excluded from elites"
+    },
+    "sample": "emergentDB",
+    "commit": "19fa491f3207bd9715d3c44b24ee81cdea6f7e01",
+    "timestamp": "2026-10-21T03:28:26.235590+00:00",
+    "n_evals": 3,
+    "non_improving": 0,
+    "stopped": false,
+    "source": "rust_loop_bench",
+    "sample_class": "real",
+    "fitness_method": "official_first_rebuild"
+  },
+  {
+    "cell": "mid|cold",
+    "size": "mid",
+    "edit": "cold",
+    "genome": {
+      "wrapper": false,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": false,
+      "codegen_units": null,
+      "incremental": true,
+      "debuginfo": "line-tables-only",
+      "fast_check": "cargo-check",
+      "loop": "test",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "touched"
+    },
+    "fitness_ms": 355.8218640000632,
+    "spread_ms": 8.912359440478031,
+    "disk_bytes": 679268771,
+    "correctness": {
+      "ok": false,
+      "agree_on_broken": false,
+      "validate_is_final": false,
+      "note": "official rust_loop_bench probe-fn still type-checked; excluded from elites"
+    },
+    "sample": "emergentDB",
+    "commit": "19fa491f3207bd9715d3c44b24ee81cdea6f7e01",
+    "timestamp": "2026-10-21T03:28:38.174219+00:00",
+    "n_evals": 3,
+    "non_improving": 0,
+    "stopped": false,
+    "source": "rust_loop_bench",
+    "sample_class": "real",
+    "fitness_method": "official_first_rebuild",
+    "cache_state": "empty"
+  },
+  {
+    "cell": "mid|noop",
+    "size": "mid",
+    "edit": "noop",
+    "genome": {
+      "wrapper": false,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": false,
+      "codegen_units": null,
+      "incremental": true,
+      "debuginfo": "line-tables-only",
+      "fast_check": "cargo-check",
+      "loop": "test",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "touched"
+    },
+    "fitness_ms": 360.84189700000024,
+    "spread_ms": 4.958507864014871,
+    "disk_bytes": 679268771,
+    "correctness": {
+      "ok": false,
+      "agree_on_broken": false,
+      "validate_is_final": false,
+      "note": "official rust_loop_bench probe-fn still type-checked; excluded from elites"
+    },
+    "sample": "emergentDB",
+    "commit": "19fa491f3207bd9715d3c44b24ee81cdea6f7e01",
+    "timestamp": "2026-10-21T03:28:39.669138+00:00",
+    "n_evals": 3,
+    "non_improving": 0,
+    "stopped": false,
+    "source": "rust_loop_bench",
+    "sample_class": "real",
+    "fitness_method": "official_first_rebuild"
+  },
+  {
+    "cell": "mid|body",
+    "size": "mid",
+    "edit": "body",
+    "genome": {
+      "wrapper": false,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": false,
+      "codegen_units": null,
+      "incremental": true,
+      "debuginfo": "line-tables-only",
+      "fast_check": "cargo-check",
+      "loop": "test",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "touched"
+    },
+    "fitness_ms": 366.5068880000035,
+    "spread_ms": 3.359611592105626,
+    "disk_bytes": 804735823,
+    "correctness": {
+      "ok": false,
+      "agree_on_broken": false,
+      "validate_is_final": false,
+      "note": "official rust_loop_bench probe-fn still type-checked; excluded from elites"
+    },
+    "sample": "emergentDB",
+    "commit": "19fa491f3207bd9715d3c44b24ee81cdea6f7e01",
+    "timestamp": "2026-10-21T03:28:42.065992+00:00",
+    "n_evals": 3,
+    "non_improving": 0,
+    "stopped": false,
+    "source": "rust_loop_bench",
+    "sample_class": "real",
+    "fitness_method": "official_first_rebuild"
+  },
+  {
+    "cell": "mid|sig_dep",
+    "size": "mid",
+    "edit": "sig_dep",
+    "genome": {
+      "wrapper": false,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": false,
+      "codegen_units": null,
+      "incremental": true,
+      "debuginfo": "line-tables-only",
+      "fast_check": "cargo-check",
+      "loop": "test",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "touched"
+    },
+    "fitness_ms": 376.6645539999445,
+    "spread_ms": 7.007589586057258,
+    "disk_bytes": 800651352,
+    "correctness": {
+      "ok": false,
+      "agree_on_broken": false,
+      "validate_is_final": false,
+      "note": "official rust_loop_bench probe-fn still type-checked; excluded from elites"
+    },
+    "sample": "emergentDB",
+    "commit": "19fa491f3207bd9715d3c44b24ee81cdea6f7e01",
+    "timestamp": "2026-10-21T03:28:44.508751+00:00",
+    "n_evals": 3,
+    "non_improving": 0,
+    "stopped": false,
+    "source": "rust_loop_bench",
+    "sample_class": "real",
+    "fitness_method": "official_first_rebuild"
+  },
+  {
+    "cell": "mid|cold",
+    "size": "mid",
+    "edit": "cold",
+    "genome": {
+      "wrapper": false,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": false,
+      "codegen_units": null,
+      "incremental": false,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "check",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "touched"
+    },
+    "fitness_ms": 89.77826699992875,
+    "spread_ms": 2.816602495240936,
+    "disk_bytes": 189835564,
+    "correctness": {
+      "ok": false,
+      "agree_on_broken": false,
+      "validate_is_final": false,
+      "note": "official rust_loop_bench probe-fn still type-checked; excluded from elites"
+    },
+    "sample": "emergentDB",
+    "commit": "19fa491f3207bd9715d3c44b24ee81cdea6f7e01",
+    "timestamp": "2026-10-21T03:28:50.354220+00:00",
+    "n_evals": 3,
+    "non_improving": 0,
+    "stopped": false,
+    "source": "rust_loop_bench",
+    "sample_class": "real",
+    "fitness_method": "official_first_rebuild",
+    "cache_state": "empty"
+  },
+  {
+    "cell": "mid|noop",
+    "size": "mid",
+    "edit": "noop",
+    "genome": {
+      "wrapper": false,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": false,
+      "codegen_units": null,
+      "incremental": false,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "check",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "touched"
+    },
+    "fitness_ms": 95.29936100011582,
+    "spread_ms": 11.688651595063073,
+    "disk_bytes": 189835564,
+    "correctness": {
+      "ok": false,
+      "agree_on_broken": false,
+      "validate_is_final": false,
+      "note": "official rust_loop_bench probe-fn still type-checked; excluded from elites"
+    },
+    "sample": "emergentDB",
+    "commit": "19fa491f3207bd9715d3c44b24ee81cdea6f7e01",
+    "timestamp": "2026-10-21T03:28:50.765601+00:00",
+    "n_evals": 3,
+    "non_improving": 0,
+    "stopped": false,
+    "source": "rust_loop_bench",
+    "sample_class": "real",
+    "fitness_method": "official_first_rebuild"
+  },
+  {
+    "cell": "mid|body",
+    "size": "mid",
+    "edit": "body",
+    "genome": {
+      "wrapper": false,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": false,
+      "codegen_units": null,
+      "incremental": false,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "check",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "touched"
+    },
+    "fitness_ms": 93.74328500007323,
+    "spread_ms": 1.5153735522219838,
+    "disk_bytes": 189835564,
+    "correctness": {
+      "ok": false,
+      "agree_on_broken": false,
+      "validate_is_final": false,
+      "note": "official rust_loop_bench probe-fn still type-checked; excluded from elites"
+    },
+    "sample": "emergentDB",
+    "commit": "19fa491f3207bd9715d3c44b24ee81cdea6f7e01",
+    "timestamp": "2026-10-21T03:28:51.874802+00:00",
+    "n_evals": 3,
+    "non_improving": 0,
+    "stopped": false,
+    "source": "rust_loop_bench",
+    "sample_class": "real",
+    "fitness_method": "official_first_rebuild"
+  },
+  {
+    "cell": "mid|sig_dep",
+    "size": "mid",
+    "edit": "sig_dep",
+    "genome": {
+      "wrapper": false,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": false,
+      "codegen_units": null,
+      "incremental": false,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "check",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "touched"
+    },
+    "fitness_ms": 92.66612000010355,
+    "spread_ms": 1.8268706086901483,
+    "disk_bytes": 189835588,
+    "correctness": {
+      "ok": false,
+      "agree_on_broken": false,
+      "validate_is_final": false,
+      "note": "official rust_loop_bench probe-fn still type-checked; excluded from elites"
+    },
+    "sample": "emergentDB",
+    "commit": "19fa491f3207bd9715d3c44b24ee81cdea6f7e01",
+    "timestamp": "2026-10-21T03:28:53.021597+00:00",
+    "n_evals": 3,
+    "non_improving": 0,
+    "stopped": false,
+    "source": "rust_loop_bench",
+    "sample_class": "real",
+    "fitness_method": "official_first_rebuild"
+  },
+  {
+    "cell": "mid|cold",
+    "size": "mid",
+    "edit": "cold",
+    "genome": {
+      "wrapper": true,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": false,
+      "codegen_units": 16,
+      "incremental": false,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "test",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "touched"
+    },
+    "fitness_ms": 366.2951440001052,
+    "spread_ms": 8.979869746035472,
+    "disk_bytes": 887962948,
+    "correctness": {
+      "ok": false,
+      "agree_on_broken": false,
+      "validate_is_final": false,
+      "note": "official rust_loop_bench probe-fn still type-checked; excluded from elites"
+    },
+    "sample": "emergentDB",
+    "commit": "19fa491f3207bd9715d3c44b24ee81cdea6f7e01",
+    "timestamp": "2026-10-21T03:30:03.280540+00:00",
+    "n_evals": 3,
+    "non_improving": 0,
+    "stopped": false,
+    "source": "rust_loop_bench",
+    "sample_class": "real",
+    "fitness_method": "official_first_rebuild",
+    "cache_state": "warm_compiler_cache"
+  },
+  {
+    "cell": "mid|body",
+    "size": "mid",
+    "edit": "body",
+    "genome": {
+      "wrapper": true,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": false,
+      "codegen_units": null,
+      "incremental": false,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "test",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "touched"
+    },
+    "fitness_ms": 349.23593100006656,
+    "spread_ms": 1.9337899506688658,
+    "disk_bytes": 868825581,
+    "correctness": {
+      "ok": false,
+      "agree_on_broken": false,
+      "validate_is_final": false,
+      "note": "official rust_loop_bench probe-fn still type-checked; excluded from elites"
+    },
+    "sample": "emergentDB",
+    "commit": "19fa491f3207bd9715d3c44b24ee81cdea6f7e01",
+    "timestamp": "2026-10-21T03:31:13.374658+00:00",
+    "n_evals": 3,
+    "non_improving": 0,
+    "stopped": false,
+    "source": "rust_loop_bench",
+    "sample_class": "real",
+    "fitness_method": "official_first_rebuild"
+  },
+  {
+    "cell": "mid|body",
+    "size": "mid",
+    "edit": "body",
+    "genome": {
+      "wrapper": false,
+      "dev_backend": "llvm",
+      "linker": "default",
+      "sccache": false,
+      "codegen_units": null,
+      "incremental": false,
+      "debuginfo": "full",
+      "fast_check": "cargo-check",
+      "loop": "test",
+      "jobs": 4,
+      "offline": true,
+      "package_scope": "touched"
+    },
+    "fitness_ms": 368.7870329999896,
+    "spread_ms": 4.934441292791665,
+    "disk_bytes": 868825579,
+    "correctness": {
+      "ok": false,
+      "agree_on_broken": false,
+      "validate_is_final": false,
+      "note": "official rust_loop_bench probe-fn still type-checked; excluded from elites"
+    },
+    "sample": "emergentDB",
+    "commit": "19fa491f3207bd9715d3c44b24ee81cdea6f7e01",
+    "timestamp": "2026-10-21T03:31:46.712442+00:00",
+    "n_evals": 3,
+    "non_improving": 0,
+    "stopped": false,
+    "source": "rust_loop_bench",
+    "sample_class": "real",
+    "fitness_method": "official_first_rebuild"
   }
 ]

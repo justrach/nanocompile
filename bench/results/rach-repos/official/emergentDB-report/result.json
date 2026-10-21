@@ -1,0 +1,48 @@
+{
+  "schema": 1,
+  "sample": "emergentDB",
+  "project": "/tmp/rach-scratch/emergentDB",
+  "timestamp": "2026-10-21T03:33:04.720015+00:00",
+  "runs": 3,
+  "warmup": 1,
+  "offline": true,
+  "platform": "Linux x86_64",
+  "driver": "python",
+  "tools": {
+    "cargo": "/usr/local/cargo/bin/cargo",
+    "rustc": "/usr/local/cargo/bin/rustc",
+    "mold": "/usr/local/bin/mold",
+    "sccache": "/usr/local/bin/sccache",
+    "hyperfine": "/usr/local/bin/hyperfine",
+    "rust_lld": true,
+    "cranelift": true,
+    "nightly": true,
+    "nanocompile": "/workspace/zig-out/bin/nanocompile"
+  },
+  "install_notes": [],
+  "correctness": {
+    "broken_edit": true,
+    "fast_failed": false,
+    "validate_failed": false,
+    "validate_is_final": false,
+    "agree_on_broken": false,
+    "graph_fast_failed": false,
+    "graph_validate_stamp_written": true,
+    "notes": ""
+  },
+  "cells": [],
+  "size": {
+    "size": "mid",
+    "crates": 7,
+    "loc": 19741
+  },
+  "map_elites": {
+    "shard": "/workspace/bench/results/rach-repos/official/emergentDB.json",
+    "evaluations": 41,
+    "size": {
+      "size": "mid",
+      "crates": 7,
+      "loc": 19741
+    }
+  }
+}
