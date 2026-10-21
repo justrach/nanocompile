@@ -3,7 +3,7 @@
   "kind": "nanocompile.rust-loop.map-elites.shard",
   "sample": "large-workspace",
   "commit": "0efba681365831f8d5c552dbdbd0ab6e837822b1",
-  "timestamp": "2026-10-21T05:03:23.965363+00:00",
+  "timestamp": "2026-10-21T05:59:02.955860+00:00",
   "codebase": {
     "repo": "https://github.com/astral-sh/ruff",
     "tag": "0.17.1",
@@ -48,7 +48,9 @@
     "gate f44a7b38c81e rach-cross sccache agree=True pkg=ruff",
     "gate 38bec1895a53 rach-cross sccache agree=True pkg=ruff_command_line",
     "gate d95668d61332 rach-cross nanocompile-wrapper agree=True pkg=ruff",
-    "rach-repos held-out: 11 live, 1 reused local equivalents at 2026-10-21T05:00:38.373047+00:00"
+    "rach-repos held-out: 11 live, 1 reused local equivalents at 2026-10-21T05:00:38.373047+00:00",
+    "ripgrep held-out: 5 reused local equivalent genomes at 2026-10-21T05:56:55.219125+00:00 (official large cells now ripgrep / ruff-check-line-tables; same genomes already measured)",
+    "ripgrep-line-tables cold live: 56008.7 ms (empty target, +20.3% vs local check elite) at 2026-10-21T05:59:02.955843+00:00"
   ],
   "hillclimb_log": [
     {
@@ -4006,7 +4008,9 @@
       "rach-repos",
       "bhumi",
       "emergentDB",
-      "codegraff2"
+      "codegraff2",
+      "ripgrep",
+      "ripgrep-line-tables"
     ],
     "elites_tested": [
       "small|body from bhumi",
@@ -4020,7 +4024,10 @@
       "mid|body from emergentDB",
       "mid|cold from emergentDB",
       "mid|noop from emergentDB",
-      "mid|sig_dep from emergentDB"
+      "mid|sig_dep from emergentDB",
+      "large|body from ripgrep",
+      "large|cold from ripgrep",
+      "large|noop from ripgrep"
     ],
     "matrix": [
       {
@@ -4554,6 +4561,102 @@
         "ok": true,
         "stderr_tail": "/crates/ruff_workspace)\n    Checking ruff_markdown v0.0.18 (/tmp/scratch/ruff/crates/ruff_markdown)\n    Checking ruff_server v0.0.18 (/tmp/scratch/ruff/crates/ruff_server)\n    Checking ruff v0.17.1 (/tmp/scratch/ruff/crates/ruff)\n    Finished `dev` profile [optimized + debuginfo] target(s) in 6.93s\n",
         "label": "sccache"
+      },
+      {
+        "genome_from": "large|body",
+        "trained_on": "ripgrep",
+        "tested_on": "large-workspace",
+        "cell": "large|body",
+        "fitness_ms": 507.8114340000184,
+        "spread_ms": 6.511556572439224,
+        "disk_bytes": 1408616542,
+        "correctness_ok": true,
+        "delta_vs_local_elite_pct": 11.752527272195564,
+        "source_path": "bench/archive/ripgrep.json",
+        "source_fitness_ms": 155.73977600070066,
+        "ok": true,
+        "stderr_tail": "reused local equivalent genome",
+        "label": "ripgrep"
+      },
+      {
+        "genome_from": "large|cold",
+        "trained_on": "ripgrep",
+        "tested_on": "large-workspace",
+        "cell": "large|cold",
+        "fitness_ms": 54780.96847799998,
+        "spread_ms": 65.04001300004529,
+        "disk_bytes": 1393628013,
+        "correctness_ok": true,
+        "delta_vs_local_elite_pct": 17.618571080921583,
+        "source_path": "bench/archive/ripgrep.json",
+        "source_fitness_ms": 3114.83015200065,
+        "ok": true,
+        "stderr_tail": "reused local equivalent genome",
+        "label": "ripgrep"
+      },
+      {
+        "genome_from": "large|noop",
+        "trained_on": "ripgrep",
+        "tested_on": "large-workspace",
+        "cell": "large|noop",
+        "fitness_ms": 167.97514400002456,
+        "spread_ms": 1.022472974580463,
+        "disk_bytes": 1393628013,
+        "correctness_ok": true,
+        "delta_vs_local_elite_pct": 11.309556823722525,
+        "source_path": "bench/archive/ripgrep.json",
+        "source_fitness_ms": 30.719066000528983,
+        "ok": true,
+        "stderr_tail": "reused local equivalent genome",
+        "label": "ripgrep"
+      },
+      {
+        "genome_from": "large|body",
+        "trained_on": "ripgrep",
+        "tested_on": "large-workspace",
+        "cell": "large|body",
+        "fitness_ms": 454.4071140003325,
+        "spread_ms": 4.2194360835244815,
+        "disk_bytes": 1496414609,
+        "correctness_ok": true,
+        "delta_vs_local_elite_pct": 0.0,
+        "source_path": "bench/archive/ripgrep-line-tables.json",
+        "source_fitness_ms": 152.1444909994898,
+        "ok": true,
+        "stderr_tail": "reused local equivalent genome",
+        "label": "ripgrep-line-tables"
+      },
+      {
+        "genome_from": "large|noop",
+        "trained_on": "ripgrep",
+        "tested_on": "large-workspace",
+        "cell": "large|noop",
+        "fitness_ms": 153.60833600016122,
+        "spread_ms": 2.874720576575372,
+        "disk_bytes": 1481426080,
+        "correctness_ok": true,
+        "delta_vs_local_elite_pct": 1.78932071405105,
+        "source_path": "bench/archive/ripgrep-line-tables.json",
+        "source_fitness_ms": 30.899961000613985,
+        "ok": true,
+        "stderr_tail": "reused local equivalent genome",
+        "label": "ripgrep-line-tables"
+      },
+      {
+        "genome_from": "large|cold",
+        "trained_on": "ripgrep",
+        "tested_on": "large-workspace",
+        "cell": "large|cold",
+        "fitness_ms": 56008.711471500195,
+        "spread_ms": 1154.779035500269,
+        "disk_bytes": 1481440111,
+        "correctness_ok": true,
+        "delta_vs_local_elite_pct": 20.25462116477692,
+        "source_path": "bench/archive/ripgrep-line-tables.json",
+        "source_fitness_ms": 3133.5087940005906,
+        "ok": true,
+        "stderr_tail": "complete_command v0.6.1\n    Checking ruff_command_line v0.0.18 (/tmp/scratch/ruff/crates/ruff_command_line)\n    Checking cachedir v0.3.1\n    Checking globwalk v0.9.1\n    Checking wild v2.2.1\n    Checking tikv-jemallocator v0.6.1\n    Finished `dev` profile [optimized + debuginfo] target(s) in 54.74s\n",
+        "label": "ripgrep-line-tables"
       }
     ]
   },

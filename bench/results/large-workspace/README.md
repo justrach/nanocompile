@@ -177,6 +177,19 @@ flag, a 600s timeout, and applies incremental edits once per cell so extra
 | emergentDB | large|cold | 460.0521715001378 | 5769.55 | True |
 | emergentDB | large|noop | 165.84001899991563 | 84.38 | True |
 | emergentDB | large|sig_dep | 7183.629058000406 | 214.91 | True |
+| ripgrep | large|body | 507.8114340000184 | 155.73977600070066 | True |
+| ripgrep | large|cold | 54780.96847799998 | 3114.83015200065 | True |
+| ripgrep | large|noop | 167.97514400002456 | 30.719066000528983 | True |
+| ripgrep | large|body | 454.4071140003325 | 152.1444909994898 | True |
+| ripgrep | large|noop | 153.60833600016122 | 30.899961000613985 | True |
+| ripgrep | large|cold | 56008.711471500195 | 3133.5087940005906 | True |
+
+PR #10 `acfd30c` promoted official `large|{cold,noop,body}` to ripgrep baseline
+`cargo check` and `large|sig_dep` to `ruff-check-line-tables`. Those genomes are
+ones this shard already measured (baseline check / line-tables-only). Recorded
+as reused held-out rows, plus one live empty-target cold for line-tables-only
+(56.0 s, **+20%** vs the local wrapper cold elite). Ripgrep's 3.1 s cold does
+not transfer: ruff `-p ruff` cold stays ~55 s. No local cell replaced.
 
 PR #10 `efe05c7` merged `bench/archive/rach-repos.json` (bhumi / emergentDB / codegraff2)
 and stalled the official grid. The 12 cell elites were evaluated unchanged on ruff
