@@ -391,6 +391,14 @@ def apply_candidate(archive, row):
             note(archive, "reject", row, "incomparable fitness_method %s vs elite %s" % (
                 row.get("fitness_method"), elite.get("fitness_method")))
             return "reject"
+    elite_cache = (elite or {}).get("cache_state")
+    row_cache = row.get("cache_state")
+    if elite and elite_cache == "warm_compiler_cache" and row_cache == "empty":
+        occupy(archive, row, "replace", "true-empty cold replaces warm_compiler_cache")
+        return "replace"
+    if elite and elite_cache == "empty" and row_cache == "warm_compiler_cache":
+        note(archive, "reject", row, "warm_compiler_cache cannot replace empty-cache cold")
+        return "reject"
     win, action = better(row, elite, min_gain(archive))
     if win:
         occupy(archive, row, action, "median %.3f ms" % row["fitness_ms"] if action == "seed"

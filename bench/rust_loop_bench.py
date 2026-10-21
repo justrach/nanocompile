@@ -247,6 +247,9 @@ def _clear_nano_cache(env):
     cache = env.get("NANOCOMPILE_DIR")
     if cache and Path(cache).exists():
         shutil.rmtree(cache)
+    sccache = env.get("SCCACHE_DIR")
+    if sccache and Path(sccache).exists():
+        shutil.rmtree(sccache)
 
 
 def empty_target(target: Path):

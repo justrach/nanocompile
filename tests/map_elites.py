@@ -199,6 +199,41 @@ class MapElites(unittest.TestCase):
             row.get("sample") == "rust-loop" for row in archive["promoted"]["sample_specific"]
         ))
 
+    def test_warm_cache_cannot_replace_empty_cold(self):
+        tmp = tempfile.TemporaryDirectory(prefix="map-elites ")
+        self.addCleanup(tmp.cleanup)
+        into = Path(tmp.name) / "map_elites.json"
+        empty = evaluation("mid|cold", fitness=400.0, sample="pinned-hashbrown")
+        empty["cache_state"] = "empty"
+        empty["fitness_method"] = "official_first_rebuild"
+        into.write_text(json.dumps({
+            "schema_version": 1,
+            "kind": "nanocompile.rust-loop.map-elites",
+            "axes": {"size": ["small", "mid", "large"], "edit": ["cold", "noop", "body", "sig_dep"]},
+            "fitness": {"metric": "median_ms", "goal": "min", "min_gain_pct": 3.0, "max_non_improving": 4},
+            "cells": {"mid|cold": empty},
+            "history": [],
+            "generalization": {"samples": [], "elites_tested": [], "matrix": []},
+            "promoted": {"defaults": None, "sample_specific": []},
+        }), encoding="utf-8")
+        shard = Path(tmp.name) / "warm.json"
+        warm = evaluation("mid|cold", fitness=140.0, sample="pinned-hashbrown")
+        warm["genome"]["sccache"] = True
+        warm["cache_state"] = "warm_compiler_cache"
+        warm["fitness_method"] = "official_first_rebuild"
+        shard.write_text(json.dumps({
+            "schema_version": 1,
+            "kind": "nanocompile.rust-loop.map-elites.shard",
+            "sample": "pinned-hashbrown",
+            "evaluations": [warm],
+        }), encoding="utf-8")
+        self.tool(["merge", "--into", str(into), str(shard)])
+        archive = json.loads(into.read_text(encoding="utf-8"))
+        elite = archive["cells"]["mid|cold"]
+        self.assertEqual(elite["fitness_ms"], 400.0)
+        self.assertEqual(elite["cache_state"], "empty")
+        self.assertFalse(elite["genome"].get("sccache"))
+
     def test_stacked_wrappers_rejected(self):
         tmp = tempfile.TemporaryDirectory(prefix="map-elites ")
         self.addCleanup(tmp.cleanup)

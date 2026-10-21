@@ -52,6 +52,15 @@ class RustLoopBench(unittest.TestCase):
         self.assertNotIn("+nightly", argv)
         self.assertNotIn("-Zcodegen-backend", argv)
 
+    def test_cold_clears_sccache_dir(self):
+        import tempfile
+        root = Path(tempfile.mkdtemp(prefix="nano-sccache-"))
+        cache = root / "sccache"
+        cache.mkdir()
+        (cache / "hit").write_text("x", encoding="utf-8")
+        BENCH._clear_nano_cache({"SCCACHE_DIR": str(cache)})
+        self.assertFalse(cache.exists())
+
     def test_seed_genomes_measure_check_before_test(self):
         seeds = BENCH.seed_genomes("/bin/true", {"sccache": True, "mold": True, "cranelift": True})
         loops = [row["loop"] for row in seeds]
