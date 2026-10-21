@@ -1,0 +1,204 @@
+{
+  "schema_version": 1,
+  "kind": "nanocompile.rust-loop.map-elites.shard",
+  "sample": "ripgrep-from-large",
+  "commit": "efe05c770bfe0f0645272992f141737b8d047639",
+  "timestamp": "2026-10-21T05:37:03.583501+00:00",
+  "evaluations": [
+    {
+      "cell": "large|cold",
+      "size": "large",
+      "edit": "cold",
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true
+      },
+      "fitness_ms": 3205.832712501433,
+      "spread_ms": 9.923831499691005,
+      "disk_bytes": 104497855,
+      "correctness": {
+        "ok": true,
+        "agree_on_broken": true,
+        "validate_is_final": true
+      },
+      "sample": "ripgrep-from-large",
+      "commit": "efe05c770bfe0f0645272992f141737b8d047639",
+      "timestamp": "2026-10-21T05:36:52.490977+00:00",
+      "n_evals": 2,
+      "non_improving": 0,
+      "stopped": false,
+      "held_out": true,
+      "fitness_method": "official_first_rebuild",
+      "sample_class": "real",
+      "cache_state": "empty"
+    },
+    {
+      "cell": "large|noop",
+      "size": "large",
+      "edit": "noop",
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true
+      },
+      "fitness_ms": 35.248408000370546,
+      "spread_ms": 0.8918310004446539,
+      "disk_bytes": 104497851,
+      "correctness": {
+        "ok": true,
+        "agree_on_broken": true,
+        "validate_is_final": true
+      },
+      "sample": "ripgrep-from-large",
+      "commit": "efe05c770bfe0f0645272992f141737b8d047639",
+      "timestamp": "2026-10-21T05:36:55.818827+00:00",
+      "n_evals": 2,
+      "non_improving": 0,
+      "stopped": false,
+      "held_out": true,
+      "fitness_method": "official_first_rebuild",
+      "sample_class": "real",
+      "cache_state": null
+    },
+    {
+      "cell": "large|body",
+      "size": "large",
+      "edit": "body",
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true
+      },
+      "fitness_ms": 166.05578100006824,
+      "spread_ms": 4.044190999593411,
+      "disk_bytes": 104502529,
+      "correctness": {
+        "ok": true,
+        "agree_on_broken": true,
+        "validate_is_final": true
+      },
+      "sample": "ripgrep-from-large",
+      "commit": "efe05c770bfe0f0645272992f141737b8d047639",
+      "timestamp": "2026-10-21T05:36:59.718406+00:00",
+      "n_evals": 2,
+      "non_improving": 0,
+      "stopped": false,
+      "held_out": true,
+      "fitness_method": "official_first_rebuild",
+      "sample_class": "real",
+      "cache_state": null
+    },
+    {
+      "cell": "large|sig_dep",
+      "size": "large",
+      "edit": "sig_dep",
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "line-tables-only",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true
+      },
+      "fitness_ms": 160.33322600105748,
+      "spread_ms": 0.3041139998458675,
+      "disk_bytes": 119413459,
+      "correctness": {
+        "ok": true,
+        "agree_on_broken": true,
+        "validate_is_final": true
+      },
+      "sample": "ripgrep-from-large",
+      "commit": "efe05c770bfe0f0645272992f141737b8d047639",
+      "timestamp": "2026-10-21T05:37:03.583477+00:00",
+      "n_evals": 2,
+      "non_improving": 0,
+      "stopped": false,
+      "held_out": true,
+      "fitness_method": "official_first_rebuild",
+      "sample_class": "real",
+      "cache_state": null
+    }
+  ],
+  "generalization": {
+    "samples": [
+      "ripgrep-from-large"
+    ],
+    "matrix": [
+      {
+        "genome_from": "large|cold",
+        "trained_on": "ripgrep",
+        "tested_on": "ripgrep-from-large",
+        "cell": "large|cold",
+        "fitness_ms": 3205.832712501433,
+        "spread_ms": 9.923831499691005,
+        "disk_bytes": 104497855,
+        "correctness_ok": true,
+        "delta_vs_local_elite_pct": 2.9215898158149125
+      },
+      {
+        "genome_from": "large|noop",
+        "trained_on": "ripgrep",
+        "tested_on": "ripgrep-from-large",
+        "cell": "large|noop",
+        "fitness_ms": 35.248408000370546,
+        "spread_ms": 0.8918310004446539,
+        "disk_bytes": 104497851,
+        "correctness_ok": true,
+        "delta_vs_local_elite_pct": 14.744400105665868
+      },
+      {
+        "genome_from": "large|body",
+        "trained_on": "ripgrep",
+        "tested_on": "ripgrep-from-large",
+        "cell": "large|body",
+        "fitness_ms": 166.05578100006824,
+        "spread_ms": 4.044190999593411,
+        "disk_bytes": 104502529,
+        "correctness_ok": true,
+        "delta_vs_local_elite_pct": 6.623873017077646
+      },
+      {
+        "genome_from": "large|sig_dep",
+        "trained_on": "ruff-check-line-tables",
+        "tested_on": "ripgrep-from-large",
+        "cell": "large|sig_dep",
+        "fitness_ms": 160.33322600105748,
+        "spread_ms": 0.3041139998458675,
+        "disk_bytes": 119413459,
+        "correctness_ok": true,
+        "delta_vs_local_elite_pct": -97.51101410564203
+      }
+    ]
+  }
+}

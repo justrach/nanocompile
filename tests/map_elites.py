@@ -234,6 +234,38 @@ class MapElites(unittest.TestCase):
         self.assertEqual(elite["cache_state"], "empty")
         self.assertFalse(elite["genome"].get("sccache"))
 
+    def test_official_supersedes_restore_mean(self):
+        tmp = tempfile.TemporaryDirectory(prefix="map-elites ")
+        self.addCleanup(tmp.cleanup)
+        into = Path(tmp.name) / "map_elites.json"
+        restore = evaluation("large|sig_dep", fitness=712.0, sample="midsize")
+        restore["fitness_method"] = "restore_rebuild_mean_of_medians"
+        into.write_text(json.dumps({
+            "schema_version": 1,
+            "kind": "nanocompile.rust-loop.map-elites",
+            "axes": {"size": ["small", "mid", "large"], "edit": ["cold", "noop", "body", "sig_dep"]},
+            "fitness": {"metric": "median_ms", "goal": "min", "min_gain_pct": 3.0, "max_non_improving": 4},
+            "cells": {"large|sig_dep": restore},
+            "history": [],
+            "generalization": {"samples": [], "elites_tested": [], "matrix": []},
+            "promoted": {"defaults": None, "sample_specific": []},
+        }), encoding="utf-8")
+        shard = Path(tmp.name) / "official.json"
+        official = evaluation("large|sig_dep", fitness=135.0, sample="ripgrep")
+        official["fitness_method"] = "official_first_rebuild"
+        shard.write_text(json.dumps({
+            "schema_version": 1,
+            "kind": "nanocompile.rust-loop.map-elites.shard",
+            "sample": "ripgrep",
+            "evaluations": [official],
+        }), encoding="utf-8")
+        self.tool(["merge", "--into", str(into), str(shard)])
+        archive = json.loads(into.read_text(encoding="utf-8"))
+        elite = archive["cells"]["large|sig_dep"]
+        self.assertEqual(elite["sample"], "ripgrep")
+        self.assertEqual(elite["fitness_method"], "official_first_rebuild")
+        self.assertEqual(elite["fitness_ms"], 135.0)
+
     def test_from_sample_name_is_held_out(self):
         tmp = tempfile.TemporaryDirectory(prefix="map-elites ")
         self.addCleanup(tmp.cleanup)

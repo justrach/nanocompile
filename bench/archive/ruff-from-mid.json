@@ -1,0 +1,208 @@
+{
+  "schema_version": 1,
+  "kind": "nanocompile.rust-loop.map-elites.shard",
+  "sample": "ruff-from-mid",
+  "commit": "efe05c770bfe0f0645272992f141737b8d047639",
+  "timestamp": "2026-10-21T05:45:41.186737+00:00",
+  "evaluations": [
+    {
+      "cell": "large|cold",
+      "size": "large",
+      "edit": "cold",
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true,
+        "package": "ruff"
+      },
+      "fitness_ms": 52073.84938250016,
+      "spread_ms": 76.04003049982566,
+      "disk_bytes": 727174259,
+      "correctness": {
+        "ok": true,
+        "agree_on_broken": true,
+        "validate_is_final": true
+      },
+      "sample": "ruff-from-mid",
+      "commit": "efe05c770bfe0f0645272992f141737b8d047639",
+      "timestamp": "2026-10-21T05:41:10.370151+00:00",
+      "n_evals": 2,
+      "non_improving": 0,
+      "stopped": false,
+      "held_out": true,
+      "fitness_method": "official_first_rebuild",
+      "sample_class": "real",
+      "cache_state": "empty"
+    },
+    {
+      "cell": "large|noop",
+      "size": "large",
+      "edit": "noop",
+      "genome": {
+        "wrapper": true,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "graph",
+        "jobs": null,
+        "offline": true,
+        "package": "ruff"
+      },
+      "fitness_ms": 1288.3760940003413,
+      "spread_ms": 20.667426999352756,
+      "disk_bytes": 2175783544,
+      "correctness": {
+        "ok": true,
+        "agree_on_broken": true,
+        "validate_is_final": true
+      },
+      "sample": "ruff-from-mid",
+      "commit": "efe05c770bfe0f0645272992f141737b8d047639",
+      "timestamp": "2026-10-21T05:43:22.526748+00:00",
+      "n_evals": 2,
+      "non_improving": 0,
+      "stopped": false,
+      "held_out": true,
+      "fitness_method": "official_first_rebuild",
+      "sample_class": "real",
+      "cache_state": null
+    },
+    {
+      "cell": "large|body",
+      "size": "large",
+      "edit": "body",
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true,
+        "package": "ruff"
+      },
+      "fitness_ms": 469.8452715001622,
+      "spread_ms": 2.9719024987571174,
+      "disk_bytes": 1231124548,
+      "correctness": {
+        "ok": true,
+        "agree_on_broken": true,
+        "validate_is_final": true
+      },
+      "sample": "ruff-from-mid",
+      "commit": "efe05c770bfe0f0645272992f141737b8d047639",
+      "timestamp": "2026-10-21T05:44:17.400605+00:00",
+      "n_evals": 2,
+      "non_improving": 0,
+      "stopped": false,
+      "held_out": true,
+      "fitness_method": "official_first_rebuild",
+      "sample_class": "real",
+      "cache_state": null
+    },
+    {
+      "cell": "large|sig_dep",
+      "size": "large",
+      "edit": "sig_dep",
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true,
+        "package": "ruff"
+      },
+      "fitness_ms": 6707.979827499912,
+      "spread_ms": 42.29901750022691,
+      "disk_bytes": 1231579617,
+      "correctness": {
+        "ok": true,
+        "agree_on_broken": true,
+        "validate_is_final": true
+      },
+      "sample": "ruff-from-mid",
+      "commit": "efe05c770bfe0f0645272992f141737b8d047639",
+      "timestamp": "2026-10-21T05:45:41.186713+00:00",
+      "n_evals": 2,
+      "non_improving": 0,
+      "stopped": false,
+      "held_out": true,
+      "fitness_method": "official_first_rebuild",
+      "sample_class": "real",
+      "cache_state": null
+    }
+  ],
+  "generalization": {
+    "samples": [
+      "ruff-from-mid"
+    ],
+    "matrix": [
+      {
+        "genome_from": "mid|cold",
+        "trained_on": "pinned-hashbrown",
+        "tested_on": "ruff-from-mid",
+        "cell": "large|cold",
+        "fitness_ms": 52073.84938250016,
+        "spread_ms": 76.04003049982566,
+        "disk_bytes": 727174259,
+        "correctness_ok": true,
+        "delta_vs_local_elite_pct": 1571.8038172660301
+      },
+      {
+        "genome_from": "mid|noop",
+        "trained_on": "pinned-hashbrown",
+        "tested_on": "ruff-from-mid",
+        "cell": "large|noop",
+        "fitness_ms": 1288.3760940003413,
+        "spread_ms": 20.667426999352756,
+        "disk_bytes": 2175783544,
+        "correctness_ok": true,
+        "delta_vs_local_elite_pct": 4094.0601123033994
+      },
+      {
+        "genome_from": "mid|body",
+        "trained_on": "pinned-hashbrown",
+        "tested_on": "ruff-from-mid",
+        "cell": "large|body",
+        "fitness_ms": 469.8452715001622,
+        "spread_ms": 2.9719024987571174,
+        "disk_bytes": 1231124548,
+        "correctness_ok": true,
+        "delta_vs_local_elite_pct": 201.6861097180777
+      },
+      {
+        "genome_from": "mid|sig_dep",
+        "trained_on": "pinned-hashbrown",
+        "tested_on": "ruff-from-mid",
+        "cell": "large|sig_dep",
+        "fitness_ms": 6707.979827499912,
+        "spread_ms": 42.29901750022691,
+        "disk_bytes": 1231579617,
+        "correctness_ok": true,
+        "delta_vs_local_elite_pct": 4.133544784877737
+      }
+    ]
+  }
+}
