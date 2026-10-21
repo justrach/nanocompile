@@ -31,7 +31,7 @@ BACKENDS = ("llvm", "cranelift")
 LINKERS = ("default", "mold", "lld")
 DEBUGINFO = ("full", "line-tables-only", "none")
 FAST_CHECK = ("cargo-check", "none")
-LOOPS = ("check", "graph", "test")
+LOOPS = ("check", "graph", "test", "build")
 ACTIONS = ("seed", "replace", "reject", "held_out", "promote", "stop")
 CHARLIE = "https://x.com/charliermarsh/status/2112711387285758250"
 FORBIDDEN = ("cranelift", "codegen-backend", "cg_clif", "cargo-clif", "rustd", "lust", "relax")
@@ -42,8 +42,8 @@ EMPTY = {
     "attribution": CHARLIE,
     "axes": {"size": list(SIZES), "edit": list(EDITS)},
     "size_rules": {
-        "small": "workspace crates <= 1 and Rust LOC < 2000",
-        "mid": "workspace crates <= 20 and Rust LOC < 50000",
+        "small": "Rust LOC < 2000",
+        "mid": "Rust LOC >= 2000 and < 50000 and workspace crates <= 20",
         "large": "otherwise",
     },
     "fitness": {
@@ -362,7 +362,7 @@ def classify(root: Path):
             loc += sum(1 for _ in path.open(encoding="utf-8", errors="replace"))
         except OSError:
             pass
-    if crates <= 1 and loc < 2000:
+    if loc < 2000:
         size = "small"
     elif crates <= 20 and loc < 50000:
         size = "mid"

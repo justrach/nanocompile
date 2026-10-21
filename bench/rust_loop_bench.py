@@ -256,13 +256,14 @@ def empty_target(target: Path):
 
 class StepPlan:
     def __init__(self, step_id, title, commands, extra_env=None, rustflags=None, toolchain=None,
-                 graph=False, skip=None, linker=None):
+                 extra_flags=None, graph=False, skip=None, linker=None):
         self.id = step_id
         self.title = title
         self.commands = commands
         self.extra_env = extra_env or {}
         self.rustflags = rustflags
         self.toolchain = toolchain
+        self.extra_flags = extra_flags
         self.graph = graph
         self.skip = skip
         self.linker = linker
@@ -292,10 +293,14 @@ def available_steps(args, tools):
             extra_env={"RUSTC_WRAPPER": str(nano), "CARGO_INCREMENTAL": "0"} if nano else {},
         ),
         StepPlan(
-            "cranelift-dev", "nightly cranelift codegen backend (dev build)",
-            ["build"],
+            "cranelift-dev", "nightly cranelift codegen backend (dev build/test)",
+            ["build", "test"],
             toolchain="nightly",
-            extra_env={"CARGO_PROFILE_DEV_CODEGEN_BACKEND": "cranelift"},
+            extra_flags=["-Zcodegen-backend"],
+            extra_env={
+                "CARGO_PROFILE_DEV_CODEGEN_BACKEND": "cranelift",
+                "CARGO_PROFILE_TEST_CODEGEN_BACKEND": "cranelift",
+            },
             skip=None if tools["cranelift"] else "nightly rustc-codegen-cranelift-preview not installed",
         ),
         StepPlan(
@@ -602,7 +607,7 @@ def execute(args):
                 argv = [str(nano), "task", str(spec)]
                 command_name = "graph"
             else:
-                argv = cargo_argv(command, args.jobs, offline, step.toolchain)
+                argv = cargo_argv(command, args.jobs, offline, step.toolchain, step.extra_flags)
                 command_name = command
             empty_target(target)
             if (work / ".nanocompile-loop").exists():
@@ -660,7 +665,7 @@ STEP_GENOMES = {
     "nanocompile-wrapper": {"wrapper": True, "incremental": False, "loop": "check"},
     "fast-check": {"fast_check": "cargo-check", "loop": "check"},
     "validate-graph": {"wrapper": True, "incremental": False, "loop": "graph"},
-    "cranelift-dev": {"dev_backend": "cranelift", "loop": "check"},
+    "cranelift-dev": {"dev_backend": "cranelift", "loop": "build"},
     "fast-linker": {"linker": "mold", "loop": "test"},
     "sccache": {"sccache": True, "loop": "check"},
     "crate-shape": {"codegen_units": 256, "loop": "check"},
@@ -714,6 +719,7 @@ def genome_env(genome, nano, tools, sccache_dir, isolate_cache):
         extra["CARGO_INCREMENTAL"] = "1"
     if genome.get("dev_backend") == "cranelift":
         extra["CARGO_PROFILE_DEV_CODEGEN_BACKEND"] = "cranelift"
+        extra["CARGO_PROFILE_TEST_CODEGEN_BACKEND"] = "cranelift"
     linker = genome.get("linker") or "default"
     if linker == "mold":
         rustflags.append("-C link-arg=-fuse-ld=mold")
@@ -741,9 +747,19 @@ def genome_argv(genome, command, jobs, offline, nano, spec):
         return [str(nano), "task", str(spec)]
     if kind == "test":
         command = "test"
+    elif kind == "build":
+        command = "build"
     elif kind == "check":
         command = "check"
-    return cargo_argv(command, jobs or genome.get("jobs"), offline or genome.get("offline"))
+    toolchain = None
+    extra_flags = None
+    if genome.get("dev_backend") == "cranelift":
+        toolchain = "nightly"
+        extra_flags = ["-Zcodegen-backend"]
+    return cargo_argv(
+        command, jobs or genome.get("jobs"), offline or genome.get("offline"),
+        toolchain, extra_flags,
+    )
 
 
 def mutate_genome(genome, tools):
@@ -776,8 +792,9 @@ def mutate_genome(genome, tools):
             current = next_genome.get("codegen_units")
             next_genome["codegen_units"] = order[(order.index(current) + 1) % 3] if current in order else 256
         elif gene == "loop":
-            order = ["check", "graph", "test"]
-            nxt = order[(order.index(next_genome.get("loop") or "check") + 1) % 3]
+            order = ["check", "graph", "test", "build"]
+            current = next_genome.get("loop") or "check"
+            nxt = order[(order.index(current) + 1) % len(order)] if current in order else "check"
             if nxt == "test":
                 next_genome["dev_backend"] = "llvm"
             next_genome["loop"] = nxt
@@ -798,7 +815,7 @@ def seed_genomes(nano, tools):
         default_genome(codegen_units=256),
         default_genome(debuginfo="line-tables-only", loop="test"),
         default_genome(incremental=False),
-        default_genome(dev_backend="cranelift", loop="check") if tools.get("cranelift") else None,
+        default_genome(dev_backend="cranelift", loop="build") if tools.get("cranelift") else None,
         default_genome(wrapper=True, incremental=False, debuginfo="line-tables-only", loop="graph") if nano else None,
     ]
     return [row for row in seeds if row]
@@ -850,6 +867,10 @@ def shard_from_report(report, size):
         if not edit:
             continue
         step = cell.get("step")
+        # cranelift + cargo test is a measured step, not a MAP-Elites gene:
+        # loop=test is LLVM-only because validate is always rustc.
+        if step == "cranelift-dev" and cell.get("command") == "test":
+            continue
         overrides = dict(STEP_GENOMES.get(step) or {"loop": "check"})
         if step == "fast-linker" and (report.get("tools") or {}).get("mold"):
             overrides["linker"] = "mold"

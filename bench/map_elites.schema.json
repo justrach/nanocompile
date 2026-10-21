@@ -21,8 +21,8 @@
     "fastCheck": { "type": "string", "enum": ["cargo-check", "none"] },
     "loop": {
       "type": "string",
-      "enum": ["check", "graph", "test"],
-      "description": "Iteration command whose wall time is fitness. validate (cargo test + LLVM rustc) is not a gene and always runs for the correctness gate."
+      "enum": ["check", "graph", "test", "build"],
+      "description": "Iteration command whose wall time is fitness. build is the cranelift-dev gene (codegen). validate (cargo test + LLVM rustc) is not a gene and always runs for the correctness gate."
     },
     "genome": {
       "type": "object",

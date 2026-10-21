@@ -13,7 +13,7 @@ const backends = [_][]const u8{ "llvm", "cranelift" };
 const linkers = [_][]const u8{ "default", "mold", "lld" };
 const debug_levels = [_][]const u8{ "full", "line-tables-only", "none" };
 const fast_checks = [_][]const u8{ "cargo-check", "none" };
-const loops = [_][]const u8{ "check", "graph", "test" };
+const loops = [_][]const u8{ "check", "graph", "test", "build" };
 const actions = [_][]const u8{ "seed", "replace", "reject", "held_out", "promote", "stop" };
 
 fn eq(a: []const u8, b: []const u8) bool {
@@ -402,7 +402,7 @@ fn classifyProject(ctx: *cache.Context, root: []const u8) !struct { size: []cons
         loc += std.mem.count(u8, bytes, "\n");
         if (bytes.len > 0 and bytes[bytes.len - 1] != '\n') loc += 1;
     }
-    const size: []const u8 = if (crates <= 1 and loc < 2000) "small" else if (crates <= 20 and loc < 50000) "mid" else "large";
+    const size: []const u8 = if (loc < 2000) "small" else if (crates <= 20 and loc < 50000) "mid" else "large";
     return .{ .size = size, .crates = crates, .loc = loc };
 }
 

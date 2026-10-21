@@ -57,8 +57,11 @@ A shard is schema 1, kind `nanocompile.rust-loop.map-elites.shard`:
 ```
 
 Cell key is `size|edit`. Size buckets: `small` / `mid` / `large` (see
-`size_rules` in the archive). Edit types: `cold`, `noop`, `body`, `sig_dep`.
-On a one-crate sample, `sig_dep` is a local signature change.
+`size_rules` in the archive). `small` is Rust LOC < 2000; `mid` is
+2000 ≤ LOC < 50000 and ≤20 crates. Edit types: `cold`, `noop`, `body`,
+`sig_dep`. On a one-crate sample, `sig_dep` is a local signature change.
+`loop=build` is allowed and is the cranelift-dev gene. `loop=test` cannot
+use `dev_backend=cranelift`.
 
 `validate` is not a gene. Do not put cranelift, rustd, Lust, or Relax on the
 gate. Merge keeps the lowest `fitness_ms` that still has `correctness.ok`.

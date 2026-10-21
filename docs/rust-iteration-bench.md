@@ -70,7 +70,7 @@ Each cell records sample wall times, median, population stdev, min/max, and
 | `nanocompile-wrapper` | `RUSTC_WRAPPER=nanocompile CARGO_INCREMENTAL=0` |
 | `fast-check` | `cargo check` only |
 | `validate-graph` | declared `fast-check` → `cargo test` via `nanocompile task` |
-| `cranelift-dev` | nightly `CARGO_PROFILE_DEV_CODEGEN_BACKEND=cranelift` `cargo build` |
+| `cranelift-dev` | `cargo +nightly -Zcodegen-backend` with `CARGO_PROFILE_{DEV,TEST}_CODEGEN_BACKEND=cranelift` (`build` and `test`) |
 | `fast-linker` | `-C link-arg=-fuse-ld=mold` or `lld` on build/test |
 | `sccache` | `RUSTC_WRAPPER=sccache` |
 | `crate-shape` | `-C codegen-units=256` |
@@ -115,9 +115,15 @@ tertile would make 36 cells and leave most empty while four agents are seeding.
 
 A genome is the full loop config (`wrapper`, `dev_backend`, `linker`, `sccache`,
 `codegen_units`, `incremental`, `debuginfo`, `fast_check`, `loop`, `jobs`,
-`offline`). `validate` is **not** a gene: it is always `cargo test` with LLVM
-rustc. Merge replaces a cell only when the new median is ≥3% faster and
-`correctness.ok` is true.
+`offline`). `loop` is `check`, `graph`, `test`, or `build`. `build` is the
+cranelift-dev gene because `cargo check` skips codegen. `validate` is **not**
+a gene: it is always `cargo test` with LLVM rustc. Merge replaces a cell only
+when the new median is ≥3% faster and `correctness.ok` is true.
+
+Size is by Rust LOC, not crate-count tricks: `small` is LOC < 2000,
+`mid` is 2000 ≤ LOC < 50000 and ≤20 crates, else `large`. The three-crate
+`examples/rust-loop-medium` fixture is small. `examples/pinned-hashbrown`
+(hashbrown 0.15.2, ~23k LOC) is the mid sample this agent controls.
 
 <!-- MAP_ELITES_GRID_BEGIN -->
 

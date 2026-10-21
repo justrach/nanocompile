@@ -95,6 +95,40 @@ class MapElites(unittest.TestCase):
     def test_classify_example_is_small(self):
         listed = json.loads(self.tool(["classify", str(ROOT / "examples" / "rust-loop")]).stdout)
         self.assertEqual(listed["size"], "small")
+        medium = json.loads(self.tool(["classify", str(ROOT / "examples" / "rust-loop-medium")]).stdout)
+        self.assertEqual(medium["size"], "small")
+        self.assertLess(medium["loc"], 2000)
+
+    def test_classify_pinned_hashbrown_is_mid(self):
+        pinned = ROOT / "examples" / "pinned-hashbrown"
+        listed = json.loads(self.tool(["classify", str(pinned)]).stdout)
+        self.assertEqual(listed["size"], "mid")
+        self.assertGreaterEqual(listed["loc"], 2000)
+        self.assertLess(listed["loc"], 50000)
+
+    def test_cranelift_build_genome_ok_test_rejected(self):
+        tmp = tempfile.TemporaryDirectory(prefix="map-elites ")
+        self.addCleanup(tmp.cleanup)
+        good = Path(tmp.name) / "good.json"
+        row = evaluation()
+        row["genome"]["dev_backend"] = "cranelift"
+        row["genome"]["loop"] = "build"
+        good.write_text(json.dumps({
+            "schema_version": 1,
+            "kind": "nanocompile.rust-loop.map-elites.shard",
+            "sample": "x",
+            "evaluations": [row],
+        }), encoding="utf-8")
+        self.tool(["validate", str(good)])
+        bad = Path(tmp.name) / "bad.json"
+        row["genome"]["loop"] = "test"
+        bad.write_text(json.dumps({
+            "schema_version": 1,
+            "kind": "nanocompile.rust-loop.map-elites.shard",
+            "sample": "x",
+            "evaluations": [row],
+        }), encoding="utf-8")
+        self.tool(["validate", str(bad)], expected=2)
 
     def test_stacked_wrappers_rejected(self):
         tmp = tempfile.TemporaryDirectory(prefix="map-elites ")

@@ -16,18 +16,19 @@
     ]
   },
   "size_rules": {
-    "small": "workspace crates <= 1 and Rust LOC < 2000",
-    "mid": "workspace crates <= 20 and Rust LOC < 50000",
+    "small": "Rust LOC < 2000",
+    "mid": "Rust LOC >= 2000 and < 50000 and workspace crates <= 20",
     "large": "otherwise"
   },
   "design_notes": [
     "Two axes (size x edit) yield 12 cells. Disk usage is a recorded metric, not a third axis: a disk tertile would triple the grid and leave most cells empty while four agents are still seeding.",
-    "Fitness is median wall time in milliseconds of the configured iteration loop (genome.loop: check, graph, or test) on that edit type. Lower is better. Spread is population stdev of the timed samples.",
+    "Fitness is median wall time in milliseconds of the configured iteration loop (genome.loop: check, graph, test, or build) on that edit type. Lower is better. Spread is population stdev of the timed samples. loop=build is the cranelift-dev gene; cargo check skips codegen so cranelift cannot occupy a check-loop cell on merit.",
     "validate is not a gene. It is always cargo test with default LLVM rustc. A genome that fails the correctness gate (fast path and rustc must agree on broken edits; validate is the final signal) cannot occupy a cell.",
     "Replace an elite only when the new median is at least fitness.min_gain_pct faster (default 3%) and correctness.ok is true. Seed an empty cell with the first passing evaluation.",
     "Stop a cell after fitness.max_non_improving consecutive non-improving tries. Hill-climb restarts may re-seed a stopped cell with a new genome family.",
     "Do not stack RUSTC_WRAPPER=nanocompile with sccache. Cranelift is a dev-backend gene only; rust-loop run strips it from validate.",
-    "Other agents write bench/archive/<sample>.json shards. Merge with `nanocompile map-elites merge` or `python3 tools/map_elites.py merge`."
+    "Other agents write bench/archive/<sample>.json shards. Merge with `nanocompile map-elites merge` or `python3 tools/map_elites.py merge`.",
+    "Size is by Rust LOC: small < 2000, mid 2000..50000 and <=20 crates. rust-loop-medium (202 LOC) is small; do not let it occupy mid."
   ],
   "fitness": {
     "metric": "median_ms",
@@ -163,134 +164,6 @@
       "n_evals": 39,
       "non_improving": 38,
       "stopped": true
-    },
-    "mid|cold": {
-      "cell": "mid|cold",
-      "size": "mid",
-      "edit": "cold",
-      "genome": {
-        "wrapper": false,
-        "dev_backend": "llvm",
-        "linker": "default",
-        "sccache": false,
-        "codegen_units": null,
-        "incremental": false,
-        "debuginfo": "full",
-        "fast_check": "cargo-check",
-        "loop": "check",
-        "jobs": null,
-        "offline": true
-      },
-      "fitness_ms": 87.26662400022178,
-      "spread_ms": 0.6081223032688218,
-      "disk_bytes": 22924,
-      "correctness": {
-        "ok": true,
-        "agree_on_broken": true,
-        "validate_is_final": true
-      },
-      "sample": "rust-loop-medium",
-      "commit": "19fa491f3207bd9715d3c44b24ee81cdea6f7e01",
-      "timestamp": "2026-10-21T03:27:47.072783+00:00",
-      "n_evals": 20,
-      "non_improving": 17,
-      "stopped": true
-    },
-    "mid|noop": {
-      "cell": "mid|noop",
-      "size": "mid",
-      "edit": "noop",
-      "genome": {
-        "wrapper": true,
-        "dev_backend": "llvm",
-        "linker": "default",
-        "sccache": false,
-        "codegen_units": null,
-        "incremental": false,
-        "debuginfo": "full",
-        "fast_check": "cargo-check",
-        "loop": "graph",
-        "jobs": null,
-        "offline": true
-      },
-      "fitness_ms": 1.3813780001328269,
-      "spread_ms": 0.08899972111487087,
-      "disk_bytes": 22309512,
-      "correctness": {
-        "ok": true,
-        "agree_on_broken": true,
-        "validate_is_final": true
-      },
-      "sample": "rust-loop-medium",
-      "commit": "19fa491f3207bd9715d3c44b24ee81cdea6f7e01",
-      "timestamp": "2026-10-21T03:27:40.987535+00:00",
-      "n_evals": 22,
-      "non_improving": 19,
-      "stopped": true
-    },
-    "mid|body": {
-      "cell": "mid|body",
-      "size": "mid",
-      "edit": "body",
-      "genome": {
-        "wrapper": false,
-        "dev_backend": "llvm",
-        "linker": "default",
-        "sccache": false,
-        "codegen_units": null,
-        "incremental": true,
-        "debuginfo": "full",
-        "fast_check": "cargo-check",
-        "loop": "check",
-        "jobs": null,
-        "offline": true
-      },
-      "fitness_ms": 62.92476099997657,
-      "spread_ms": 0.0,
-      "disk_bytes": 1453979,
-      "correctness": {
-        "ok": true,
-        "agree_on_broken": true,
-        "validate_is_final": true
-      },
-      "sample": "rust-loop-medium",
-      "commit": "19fa491f3207bd9715d3c44b24ee81cdea6f7e01",
-      "timestamp": "2026-10-21T03:27:37.478571+00:00",
-      "n_evals": 22,
-      "non_improving": 21,
-      "stopped": true
-    },
-    "mid|sig_dep": {
-      "cell": "mid|sig_dep",
-      "size": "mid",
-      "edit": "sig_dep",
-      "genome": {
-        "wrapper": false,
-        "dev_backend": "llvm",
-        "linker": "default",
-        "sccache": false,
-        "codegen_units": null,
-        "incremental": false,
-        "debuginfo": "full",
-        "fast_check": "cargo-check",
-        "loop": "check",
-        "jobs": null,
-        "offline": true
-      },
-      "fitness_ms": 34.26494699988325,
-      "spread_ms": 0.0,
-      "disk_bytes": 33131,
-      "correctness": {
-        "ok": true,
-        "agree_on_broken": true,
-        "validate_is_final": true
-      },
-      "sample": "rust-loop-medium",
-      "commit": "19fa491f3207bd9715d3c44b24ee81cdea6f7e01",
-      "timestamp": "2026-10-21T03:28:17.172670+00:00",
-      "n_evals": 1,
-      "non_improving": 0,
-      "stopped": false
     }
   },
   "history": [
@@ -5837,6 +5710,90 @@
         "offline": true
       },
       "reason": "majority elite on cold/body/sig_dep across occupied size buckets; do not use graph wall time as the edit-loop default"
+    },
+    {
+      "timestamp": "2026-10-21T03:36:41.399670+00:00",
+      "sample": "rust-loop-medium",
+      "cell": "mid|cold",
+      "action": "reject",
+      "fitness_ms": 87.26662400022178,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "reclassify: rust-loop-medium is LOC<2000 (small); mid reserved for a real crate"
+    },
+    {
+      "timestamp": "2026-10-21T03:36:41.399688+00:00",
+      "sample": "rust-loop-medium",
+      "cell": "mid|noop",
+      "action": "reject",
+      "fitness_ms": 1.3813780001328269,
+      "genome": {
+        "wrapper": true,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "graph",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "reclassify: rust-loop-medium is LOC<2000 (small); mid reserved for a real crate"
+    },
+    {
+      "timestamp": "2026-10-21T03:36:41.399692+00:00",
+      "sample": "rust-loop-medium",
+      "cell": "mid|body",
+      "action": "reject",
+      "fitness_ms": 62.92476099997657,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "reclassify: rust-loop-medium is LOC<2000 (small); mid reserved for a real crate"
+    },
+    {
+      "timestamp": "2026-10-21T03:36:41.399694+00:00",
+      "sample": "rust-loop-medium",
+      "cell": "mid|sig_dep",
+      "action": "reject",
+      "fitness_ms": 34.26494699988325,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "reclassify: rust-loop-medium is LOC<2000 (small); mid reserved for a real crate"
     }
   ],
   "generalization": {
