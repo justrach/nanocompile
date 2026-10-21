@@ -38,7 +38,12 @@
         "fast_check": { "$ref": "#/$defs/fastCheck" },
         "loop": { "$ref": "#/$defs/loop" },
         "jobs": { "type": ["integer", "null"], "minimum": 1 },
-        "offline": { "type": "boolean" }
+        "offline": { "type": "boolean" },
+        "package_scope": {
+          "type": ["string", "null"],
+          "enum": ["workspace", "touched", null],
+          "description": "workspace = full cargo check. touched = cargo check -p hub crate. touched cannot occupy sig_dep unless correctness.dependents_agree_on_broken."
+        }
       },
       "required": ["wrapper", "dev_backend", "linker", "sccache", "incremental", "debuginfo", "fast_check", "loop"]
     },
@@ -49,7 +54,11 @@
       "properties": {
         "ok": { "type": "boolean" },
         "agree_on_broken": { "type": "boolean" },
-        "validate_is_final": { "type": "boolean" }
+        "validate_is_final": { "type": "boolean" },
+        "dependents_agree_on_broken": {
+          "type": "boolean",
+          "description": "Required when genome.package_scope=touched on a sig_dep cell: a broken hub signature must fail a dependent crate check."
+        }
       }
     },
     "evaluation": {
@@ -70,7 +79,22 @@
         "timestamp": { "type": ["string", "null"] },
         "n_evals": { "type": "integer", "minimum": 0 },
         "non_improving": { "type": "integer", "minimum": 0 },
-        "stopped": { "type": "boolean" }
+        "stopped": { "type": "boolean" },
+        "fitness_method": {
+          "type": "string",
+          "enum": ["official_first_rebuild", "restore_rebuild_mean_of_medians"],
+          "description": "official_first_rebuild is rust_loop_bench (empty target+cache on cold; first rebuild after one edit). restore_rebuild_mean_of_medians is PR #11 (restore+rebuild before every timed edit, mean of project medians). Do not compare fitness_ms across methods."
+        },
+        "cache_state": {
+          "type": "string",
+          "enum": ["empty", "warm_compiler_cache"],
+          "description": "empty = cleared target and compiler cache. warm_compiler_cache = sccache/nanocompile retained after target/ was emptied. Mark cold sccache wins explicitly."
+        },
+        "sample_class": {
+          "type": "string",
+          "enum": ["fixture", "real"],
+          "description": "fixture = rust-loop* harness trees. real = pinned crates and public samples. Promote weights real samples."
+        }
       }
     },
     "historyEntry": {

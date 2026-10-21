@@ -130,6 +130,75 @@ class MapElites(unittest.TestCase):
         }), encoding="utf-8")
         self.tool(["validate", str(bad)], expected=2)
 
+    def test_touched_sig_dep_requires_dependent_gate(self):
+        tmp = tempfile.TemporaryDirectory(prefix="map-elites ")
+        self.addCleanup(tmp.cleanup)
+        into = Path(tmp.name) / "map_elites.json"
+        into.write_text(json.dumps({
+            "schema_version": 1,
+            "kind": "nanocompile.rust-loop.map-elites",
+            "axes": {"size": ["small", "mid", "large"], "edit": ["cold", "noop", "body", "sig_dep"]},
+            "fitness": {"metric": "median_ms", "goal": "min", "min_gain_pct": 3.0, "max_non_improving": 4},
+            "cells": {},
+            "history": [],
+            "generalization": {"samples": [], "elites_tested": [], "matrix": []},
+            "promoted": {"defaults": None, "sample_specific": []},
+        }), encoding="utf-8")
+        shard = Path(tmp.name) / "mid.json"
+        touched = evaluation("large|sig_dep", fitness=500.0, sample="midsize")
+        touched["genome"]["package_scope"] = "touched"
+        fallback = evaluation("large|sig_dep", fitness=700.0, sample="midsize")
+        fallback["genome"]["debuginfo"] = "line-tables-only"
+        shard.write_text(json.dumps({
+            "schema_version": 1,
+            "kind": "nanocompile.rust-loop.map-elites.shard",
+            "sample": "midsize",
+            "fitness": {"aggregation": "mean_of_per_sample_medians"},
+            "evaluations": [touched],
+            "history": [{
+                "cell": "large|sig_dep",
+                "action": "replace",
+                "fitness_ms": 700.0,
+                "genome": fallback["genome"],
+                "sample": "midsize",
+                "reason": "win",
+            }],
+        }), encoding="utf-8")
+        self.tool(["merge", "--into", str(into), str(shard)])
+        archive = json.loads(into.read_text(encoding="utf-8"))
+        elite = archive["cells"]["large|sig_dep"]
+        self.assertEqual(elite["genome"]["debuginfo"], "line-tables-only")
+        self.assertNotEqual(elite["genome"].get("package_scope"), "touched")
+        self.assertTrue(any("dependents" in (row.get("reason") or "") for row in archive["history"]))
+
+    def test_promote_weights_real_over_fixture(self):
+        tmp = tempfile.TemporaryDirectory(prefix="map-elites ")
+        self.addCleanup(tmp.cleanup)
+        into = Path(tmp.name) / "map_elites.json"
+        fixture = evaluation("small|body", fitness=20.0, sample="rust-loop")
+        fixture["genome"]["loop"] = "check"
+        fixture["genome"]["incremental"] = False
+        real = evaluation("large|body", fitness=120.0, sample="midsize")
+        real["genome"]["debuginfo"] = "line-tables-only"
+        real["sample_class"] = "real"
+        into.write_text(json.dumps({
+            "schema_version": 1,
+            "kind": "nanocompile.rust-loop.map-elites",
+            "axes": {"size": ["small", "mid", "large"], "edit": ["cold", "noop", "body", "sig_dep"]},
+            "fitness": {"metric": "median_ms", "goal": "min", "min_gain_pct": 3.0, "max_non_improving": 4},
+            "cells": {"small|body": fixture, "large|body": real},
+            "history": [],
+            "generalization": {"samples": [], "elites_tested": [], "matrix": []},
+            "promoted": {"defaults": None, "sample_specific": []},
+        }), encoding="utf-8")
+        self.tool(["promote", "--into", str(into)])
+        archive = json.loads(into.read_text(encoding="utf-8"))
+        promoted = archive["promoted"]["defaults"]["iteration"]["genome"]
+        self.assertEqual(promoted["debuginfo"], "line-tables-only")
+        self.assertTrue(any(
+            row.get("sample") == "rust-loop" for row in archive["promoted"]["sample_specific"]
+        ))
+
     def test_stacked_wrappers_rejected(self):
         tmp = tempfile.TemporaryDirectory(prefix="map-elites ")
         self.addCleanup(tmp.cleanup)

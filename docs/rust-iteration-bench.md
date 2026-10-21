@@ -124,6 +124,18 @@ Size is by Rust LOC, not crate-count tricks: `small` is LOC < 2000,
 `mid` is 2000 ≤ LOC < 50000 and ≤20 crates, else `large`. The three-crate
 `examples/rust-loop-medium` fixture is small. `examples/pinned-hashbrown`
 (hashbrown 0.15.2, ~23k LOC) is the mid sample this agent controls.
+PR #11's ripgrep 15.2.0 + tokio 1.54.0 trees classify as **large**.
+
+Each elite records `fitness_method` and, for cold cells, `cache_state`.
+`official_first_rebuild` is this harness. `restore_rebuild_mean_of_medians`
+is the PR #11 protocol (restore+rebuild before every timed edit, then mean
+of the two project medians). Do not compare raw ms across methods.
+`warm_compiler_cache` means sccache/nanocompile stayed populated after
+`target/` was emptied — not a true empty-cache cold.
+
+`package_scope=touched` (`cargo check -p` the hub crate) cannot occupy
+`sig_dep` unless `correctness.dependents_agree_on_broken` is true. Promote
+weights **real** samples over rust-loop fixtures.
 
 <!-- MAP_ELITES_GRID_BEGIN -->
 
@@ -139,21 +151,21 @@ Fitness is median loop wall time in ms (lower is better). Disk is recorded, not 
 | Size \ Edit | cold | noop | body | sig_dep |
 | --- | ---: | ---: | ---: | ---: |
 | small | 43.5 ms (rust-loop, check) | 1.3 ms (rust-loop, graph) | 24.4 ms (rust-loop, check) | 24.8 ms (rust-loop, check) |
-| mid | 87.3 ms (rust-loop-medium, check) | 1.4 ms (rust-loop-medium, graph) | 62.9 ms (rust-loop-medium, check) | 34.3 ms (rust-loop-medium, check) |
-| large | — | — | — | — |
+| mid | — | — | — | — |
+| large | 1387.3 ms (midsize, check) | 31.2 ms (midsize, check) | 121.9 ms (midsize, check) | 712.0 ms (midsize, check) |
 
 ### Elites
 
-| Cell | Sample | Fitness ms | Spread | Disk | Loop | Wrapper | Linker | Backend |
-| --- | --- | ---: | ---: | ---: | --- | --- | --- | --- |
-| small|cold | rust-loop | 43.5 | 0.4 | 7005 | check | no | default | llvm |
-| small|noop | rust-loop | 1.3 | 0.1 | 6327284 | graph | yes | default | llvm |
-| small|body | rust-loop | 24.4 | 0.0 | 7080 | check | no | default | llvm |
-| small|sig_dep | rust-loop | 24.8 | 0.0 | 7085 | check | no | default | llvm |
-| mid|cold | rust-loop-medium | 87.3 | 0.6 | 22924 | check | no | default | llvm |
-| mid|noop | rust-loop-medium | 1.4 | 0.1 | 22309512 | graph | yes | default | llvm |
-| mid|body | rust-loop-medium | 62.9 | 0.0 | 1453979 | check | no | default | llvm |
-| mid|sig_dep | rust-loop-medium | 34.3 | 0.0 | 33131 | check | no | default | llvm |
+| Cell | Sample | Fitness ms | Method | Cache | Loop | Wrapper | Backend |
+| --- | --- | ---: | --- | --- | --- | --- | --- |
+| small|cold | rust-loop | 43.5 | first-rebuild | empty | check | no | llvm |
+| small|noop | rust-loop | 1.3 | first-rebuild | — | graph | yes | llvm |
+| small|body | rust-loop | 24.4 | first-rebuild | — | check | no | llvm |
+| small|sig_dep | rust-loop | 24.8 | first-rebuild | — | check | no | llvm |
+| large|cold | midsize | 1387.3 | restore+mean | warm_compiler_cache | check | no | llvm |
+| large|noop | midsize | 31.2 | restore+mean | — | check | yes | llvm |
+| large|body | midsize | 121.9 | restore+mean | — | check | no | llvm |
+| large|sig_dep | midsize | 712.0 | restore+mean | — | check | no | llvm |
 
 ### Generalization
 
@@ -173,16 +185,32 @@ Fitness is median loop wall time in ms (lower is better). Disk is recorded, not 
 | rust-loop-medium | mid|cold | rust-loop-medium | 85.2 | -2.4% | yes |
 | rust-loop-medium | mid|noop | rust-loop-medium | 1.4 | 2.8% | yes |
 | rust-loop-medium | mid|body | rust-loop-medium | 63.3 | 0.7% | yes |
+| rust-loop | small|cold | midsize | 3908.9 | 181.8% | yes |
+| rust-loop | small|noop | midsize | 0.0 | — | no |
+| rust-loop | small|body | midsize | 245.9 | 101.7% | yes |
+| rust-loop | small|sig_dep | midsize | 1560.9 | 194.6% | yes |
+| rust-loop-medium | mid|cold | midsize | 4211.8 | 203.6% | yes |
+| rust-loop-medium | mid|noop | midsize | 0.0 | — | no |
+| rust-loop-medium | mid|body | midsize | 134.2 | 10.0% | yes |
+| rust-loop-medium | mid|sig_dep | midsize | 1659.1 | 213.2% | yes |
 
 ### Promoted defaults
 
-Iteration default (cold/body/sig_dep): `{"codegen_units": null, "debuginfo": "full", "dev_backend": "llvm", "fast_check": "cargo-check", "incremental": false, "jobs": null, "linker": "default", "loop": "check", "offline": true, "sccache": false, "wrapper": false}`
+Iteration default (cold/body/sig_dep): `{"codegen_units": null, "command_build": false, "debuginfo": "line-tables-only", "dev_backend": "llvm", "fast_check": "cargo-check", "incremental": true, "jobs": 3, "linker": "default", "loop": "check", "offline": true, "package_scope": null, "quiet": false, "sccache": false, "wrapper": false}`
 
-majority elite on cold/body/sig_dep across occupied size buckets; do not use graph wall time as the edit-loop default
+weighted majority on real-sample cold/body/sig_dep; fixture cells do not vote when real elites exist; warm-cache sccache cold is sample-specific, not a true-cold default
 
-No-op default: `{"codegen_units": null, "debuginfo": "full", "dev_backend": "llvm", "fast_check": "cargo-check", "incremental": false, "jobs": null, "linker": "default", "loop": "graph", "offline": true, "sccache": false, "wrapper": true}`
+No-op default: `{"codegen_units": null, "command_build": false, "debuginfo": "full", "dev_backend": "llvm", "fast_check": "cargo-check", "incremental": false, "jobs": 3, "linker": "default", "loop": "check", "offline": true, "package_scope": null, "quiet": false, "sccache": false, "wrapper": true}`
 
-majority elite on noop: declared graph plus nanocompile task cache
+weighted majority on real-sample noop; fixture graph elites do not set the default when a real noop exists
+
+Sample-specific elites:
+
+- `small|cold` `rust-loop`: fixture elite; real samples outvote fixtures; loses the weighted vote for its edit family
+- `small|noop` `rust-loop`: fixture elite; real samples outvote fixtures; loses the weighted vote for its edit family
+- `small|body` `rust-loop`: fixture elite; real samples outvote fixtures; loses the weighted vote for its edit family
+- `small|sig_dep` `rust-loop`: fixture elite; real samples outvote fixtures; loses the weighted vote for its edit family
+- `large|cold` `midsize`: warm compiler cache (sccache/wrapper retained), not empty-cache cold; loses the weighted vote for its edit family
 
 <!-- MAP_ELITES_GRID_END -->
 
@@ -206,3 +234,7 @@ on the same sample, keep or revert.
 | 10 | rust-loop | Cranelift wins dev build | nightly `codegen-backend=cranelift` | cell `ok: no` on this toolchain pairing | unmeasured / failed |
 | 11 | rust-loop-medium | Same elites generalize | held-out small genomes on mid | noop graph transfers (1.4ms, +0.5%); check body +7% | keep check + graph split |
 | 12 | both | Further gene flips | incremental/linker/cgu on check loop | consecutive tries <3% on body/sig | stop |
+| 13 | rust-loop | Cranelift needs nightly `-Zcodegen-backend` | `cargo +nightly -Zcodegen-backend` + `CARGO_PROFILE_*_CODEGEN_BACKEND` | build body 25.0 vs LLVM 26.8 (noise); **test body 77 vs 144 (−47%)**; test cold 108 vs 184 (−41%) | keep for linked test; not a check-loop elite |
+| 14 | pinned-hashbrown | Mid cell needs a real crate | Vendor hashbrown 0.15.2 (23k LOC); size by LOC | rust-loop-medium (202 LOC) reclassified small; mid vacated for a real tree | keep |
+| 15 | midsize (PR #11) | Merge ripgrep+tokio shard | Record `fitness_method` / `cache_state`; reject `package_scope=touched` on sig_dep | large cells occupied; sig_dep elite is line-tables-only 712ms (touched 530ms rejected: no dependent-crate gate); cold sccache 1387ms marked warm_compiler_cache | keep with annotations |
+| 16 | midsize held-out | Fixture elites on real crates | Weight real samples in promote | small/mid fixtures **+10–213%** vs large elites; graph skipped on large. Iteration default = real `cargo check` + line-tables-only; noop = wrapper check (not fixture graph) | keep |

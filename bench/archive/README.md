@@ -61,7 +61,9 @@ Cell key is `size|edit`. Size buckets: `small` / `mid` / `large` (see
 2000 ≤ LOC < 50000 and ≤20 crates. Edit types: `cold`, `noop`, `body`,
 `sig_dep`. On a one-crate sample, `sig_dep` is a local signature change.
 `loop=build` is allowed and is the cranelift-dev gene. `loop=test` cannot
-use `dev_backend=cranelift`.
+use `dev_backend=cranelift`. Record `fitness_method` and `cache_state` on
+every evaluation. `package_scope=touched` needs
+`correctness.dependents_agree_on_broken` to occupy `sig_dep`.
 
 `validate` is not a gene. Do not put cranelift, rustd, Lust, or Relax on the
 gate. Merge keeps the lowest `fitness_ms` that still has `correctness.ok`.

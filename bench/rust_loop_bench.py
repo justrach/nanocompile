@@ -842,6 +842,9 @@ def evaluation_row(cell, size, edit, genome, summary, correctness, sample, commi
         "n_evals": len(summary.get("samples_ms") or []),
         "non_improving": 0,
         "stopped": False,
+        "fitness_method": "official_first_rebuild",
+        "sample_class": "fixture" if str(sample).startswith("rust-loop") else "real",
+        "cache_state": "empty" if edit == "cold" else None,
     }
 
 
