@@ -28,6 +28,7 @@ sys.path.insert(0, str(REPO / "bench"))
 import rust_loop_bench as bench  # noqa: E402
 
 COMPILING = re.compile(r"^\s*(?:Compiling|Checking|Dirty)\s+(\S+)", re.M)
+STAT_LINE = re.compile(r"^([a-z0-9 /+-]+): ([0-9]+)\s*$")
 BODY_INSERT = "let _nano_agent_body = 1u8;"
 SIG_INSERT = "\n#[allow(dead_code)] pub fn _nano_agent_sig(x: u32) -> u32 { x }\n"
 LARGE_INSERT = "\n#[allow(dead_code)] pub fn _nano_agent_large(xs: &[u8]) -> usize { xs.len().wrapping_add(7) }\n"
@@ -79,6 +80,56 @@ def git_commit():
 
 def parse_compiled(text: str) -> list[str]:
     return COMPILING.findall(text)
+
+
+def parse_stats_text(text: str) -> dict:
+    out = {}
+    for line in (text or "").splitlines():
+        match = STAT_LINE.match(line.strip())
+        if match:
+            out[match.group(1).strip()] = int(match.group(2))
+    return out
+
+
+def read_nano_stats(wrapper: Path, store: Path) -> dict:
+    env = os.environ.copy()
+    env["NANOCOMPILE_DIR"] = str(store)
+    result = subprocess.run([str(wrapper), "stats"], env=env, capture_output=True, text=True)
+    return parse_stats_text(result.stdout)
+
+
+def read_kache_stats(store: Path) -> dict:
+    env = os.environ.copy()
+    env["KACHE_CACHE_DIR"] = str(store)
+    env["KACHE_LOCAL_ONLY"] = "1"
+    exe = kache_bin() or "kache"
+    result = subprocess.run([exe, "stats", "--json"], env=env, capture_output=True, text=True)
+    try:
+        data = json.loads(result.stdout or "{}")
+    except json.JSONDecodeError:
+        return parse_stats_text(result.stdout)
+    disk = data.get("disk") or {}
+    hits = data.get("hits") or data.get("counters", {}).get("hits") or 0
+    misses = data.get("misses") or data.get("counters", {}).get("misses") or 0
+    return {
+        "hits": int(hits or 0),
+        "misses": int(misses or 0),
+        "logical bytes": int(disk.get("store_bytes") or 0),
+    }
+
+
+def stats_compiled(before: dict, after: dict) -> tuple[int, int]:
+    """Return (compiled/misses, restored/hits) from a stats delta."""
+    def n(d, *keys):
+        for key in keys:
+            if key in d:
+                return int(d[key])
+        return 0
+    misses = n(after, "misses") - n(before, "misses")
+    script_miss = n(after, "build-script misses") - n(before, "build-script misses")
+    hits = n(after, "hits") - n(before, "hits")
+    script_hit = n(after, "build-script hits") - n(before, "build-script hits")
+    return max(0, misses + script_miss), max(0, hits + script_hit)
 
 
 def unique_disk_bytes(paths) -> int:
@@ -169,7 +220,7 @@ def restore_records(records):
 
 
 def cargo_cmd(loop: str, package: str | None, offline: bool = True) -> list[str]:
-    argv = ["cargo"]
+    argv = ["cargo", "+nightly"]
     if loop == "test":
         argv += ["test", "--no-run"]
     else:
@@ -301,7 +352,7 @@ def first_green(argv, cwd, env, loops=("check",)):
     for loop in loops:
         cmd = list(argv)
         if loop == "test":
-            cmd = ["cargo", "test", "--offline"] + (["-p", argv[argv.index("-p") + 1]] if "-p" in argv else [])
+            cmd = ["cargo", "+nightly", "test", "--offline"] + (["-p", argv[argv.index("-p") + 1]] if "-p" in argv else [])
         measured = run_cargo(cmd if loop == "test" else argv, cwd, env)
         out[loop] = measured
         if not measured["ok"]:
@@ -336,18 +387,34 @@ def measure_worktrees(
         if store.exists():
             shutil.rmtree(store, ignore_errors=True)
     bench.copy_project(src, main)
+    if not (main / "rust-toolchain.toml").exists() and not (main / "rust-toolchain").exists():
+        (main / "rust-toolchain.toml").write_text('[toolchain]\nchannel = "nightly"\n', encoding="utf-8")
     base = {k: v for k, v in os.environ.items() if not k.startswith(("NANOCOMPILE_", "KACHE_", "R2_"))}
     base.pop("RUSTC_WRAPPER", None)
     base.pop("RUSTC_WORKSPACE_WRAPPER", None)
+    base["RUSTUP_TOOLCHAIN"] = "nightly"
     env = approach_env(approach, base, store, wrapper, extra_env)
     shared_target = work / "shared-target"
     if approach == "shared_target":
         env["CARGO_TARGET_DIR"] = str(shared_target)
     argv = cargo_cmd(loop, package)
+
+    def snapshot():
+        if approach == "nanocompile":
+            return read_nano_stats(wrapper, store)
+        if approach == "kache":
+            return read_kache_stats(store)
+        return {}
+
+    before_warm = snapshot()
     warm = run_cargo(argv, main, env)
     if not warm["ok"] and "--offline" in argv:
         argv = [a for a in argv if a != "--offline"]
         warm = run_cargo(argv, main, env)
+    if approach in ("nanocompile", "kache"):
+        warm_compiled, warm_restored = stats_compiled(before_warm, snapshot())
+        warm["crates_compiled"] = warm_compiled
+        warm["crates_restored"] = warm_restored
     worktrees = []
     commit = older_commit(src) if from_older else None
     kinds = []
@@ -369,15 +436,29 @@ def measure_worktrees(
     per = []
     start = time.perf_counter()
     if mode == "concurrent":
+        before = snapshot()
         with ThreadPoolExecutor(max_workers=n_worktrees) as pool:
             futs = {pool.submit(run_cargo, argv, wt["path"], wt["env"]): i for i, wt in enumerate(worktrees)}
             by_i = {}
             for fut in as_completed(futs):
                 by_i[futs[fut]] = fut.result()
             per = [by_i[i] for i in range(n_worktrees)]
+        compiled_delta, restored_delta = stats_compiled(before, snapshot())
+        if approach in ("nanocompile", "kache") and n_worktrees:
+            share = compiled_delta / n_worktrees
+            restore_share = restored_delta / n_worktrees
+            for row in per:
+                row["crates_compiled"] = share
+                row["crates_restored"] = restore_share
     else:
         for wt in worktrees:
-            per.append(run_cargo(argv, wt["path"], wt["env"]))
+            before = snapshot()
+            row = run_cargo(argv, wt["path"], wt["env"])
+            if approach in ("nanocompile", "kache"):
+                compiled_delta, restored_delta = stats_compiled(before, snapshot())
+                row["crates_compiled"] = compiled_delta
+                row["crates_restored"] = restored_delta
+            per.append(row)
     wall_ms = (time.perf_counter() - start) * 1000
 
     first = {}

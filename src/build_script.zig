@@ -237,7 +237,6 @@ fn keepDefaultEnv(name: []const u8) bool {
 pub fn defaultMaterial(ctx: *cache.Context, real: []const u8) ![]const u8 {
     var h = cache.Hash.init(.{});
     cache.field(&h, "nano-build-script-default-v1");
-    cache.field(&h, real);
     cache.field(&h, try ctx.digest(real));
     const names = try ctx.a.dupe([]const u8, ctx.env.keys());
     std.mem.sort([]const u8, names, {}, less);
@@ -696,7 +695,9 @@ pub fn launch(ctx: *cache.Context, args: []const [:0]const u8) !?u8 {
     if (@import("builtin").os.tag == .windows) return null; // Unix build-script shims are unsupported.
     if (args.len == 0) return null;
     const name = std.fs.path.basename(args[0]);
-    if (!eq(name, "build-script-build") and !std.mem.startsWith(u8, name, "build_script_build-")) return null;
+    if (!eq(name, "build-script-build") and !eq(name, "build_script_build") and
+        !std.mem.startsWith(u8, name, "build_script_build-") and !std.mem.startsWith(u8, name, "build-script-build-"))
+        return null;
     const path = try std.process.executablePathAlloc(ctx.io, ctx.a);
     const record = try std.fs.path.join(ctx.a, &.{ std.fs.path.dirname(path).?, "nano-build-script.json" });
     const parsed = try std.json.parseFromSlice(Launch, ctx.a, try ctx.read(record), .{ .allocate = .alloc_always });

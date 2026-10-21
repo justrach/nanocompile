@@ -13,6 +13,21 @@ sys.path.insert(0, str(REPO / "bench"))
 import agent_worktrees as aw  # noqa: E402
 
 
+class CargoCmd(unittest.TestCase):
+    def test_uses_nightly(self):
+        self.assertEqual(aw.cargo_cmd("check", None)[:2], ["cargo", "+nightly"])
+        self.assertIn("--offline", aw.cargo_cmd("test", "ruff"))
+
+
+class StatsDelta(unittest.TestCase):
+    def test_parse_and_delta(self):
+        text = "hits: 10\nmisses: 4\nbuild-script hits: 2\nbuild-script misses: 1\n"
+        parsed = aw.parse_stats_text(text)
+        compiled, restored = aw.stats_compiled({"hits": 1, "misses": 1, "build-script misses": 0, "build-script hits": 0}, parsed)
+        self.assertEqual(compiled, 4)
+        self.assertEqual(restored, 11)
+
+
 class ParseCompiled(unittest.TestCase):
     def test_compiling_and_checking(self):
         text = (
