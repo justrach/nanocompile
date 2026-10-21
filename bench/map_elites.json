@@ -69,8 +69,8 @@
       "sample": "rust-loop",
       "commit": "19fa491f3207bd9715d3c44b24ee81cdea6f7e01",
       "timestamp": "2026-10-21T03:28:19.571983+00:00",
-      "n_evals": 41,
-      "non_improving": 38,
+      "n_evals": 42,
+      "non_improving": 39,
       "stopped": true,
       "sample_class": "fixture",
       "fitness_method": "official_first_rebuild",
@@ -104,8 +104,8 @@
       "sample": "rust-loop",
       "commit": "19fa491f3207bd9715d3c44b24ee81cdea6f7e01",
       "timestamp": "2026-10-21T03:27:27.285378+00:00",
-      "n_evals": 82,
-      "non_improving": 79,
+      "n_evals": 83,
+      "non_improving": 80,
       "stopped": true,
       "sample_class": "fixture",
       "fitness_method": "official_first_rebuild"
@@ -138,8 +138,8 @@
       "sample": "rust-loop",
       "commit": "19fa491f3207bd9715d3c44b24ee81cdea6f7e01",
       "timestamp": "2026-10-21T03:27:35.274468+00:00",
-      "n_evals": 84,
-      "non_improving": 83,
+      "n_evals": 85,
+      "non_improving": 84,
       "stopped": true,
       "sample_class": "fixture",
       "fitness_method": "official_first_rebuild"
@@ -172,8 +172,8 @@
       "sample": "rust-loop",
       "commit": "19fa491f3207bd9715d3c44b24ee81cdea6f7e01",
       "timestamp": "2026-10-21T03:27:30.068141+00:00",
-      "n_evals": 63,
-      "non_improving": 62,
+      "n_evals": 64,
+      "non_improving": 63,
       "stopped": true,
       "sample_class": "fixture",
       "fitness_method": "official_first_rebuild"
@@ -12565,10 +12565,381 @@
         "command_build": false
       },
       "reason": "weighted majority on real-sample cold/body/sig_dep; fixture cells do not vote when real elites exist; warm-cache sccache cold is sample-specific, not a true-cold default"
+    },
+    {
+      "timestamp": "2026-10-21T04:07:46.933576+00:00",
+      "sample": "pinned-hashbrown-held-out",
+      "cell": "mid|cold",
+      "action": "held_out",
+      "fitness_ms": 418.06070700022246,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "held-out evaluation; does not occupy a cell"
+    },
+    {
+      "timestamp": "2026-10-21T04:07:55.278571+00:00",
+      "sample": "pinned-hashbrown-held-out",
+      "cell": "mid|noop",
+      "action": "held_out",
+      "fitness_ms": 3.2203270002355566,
+      "genome": {
+        "wrapper": true,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "graph",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "held-out evaluation; does not occupy a cell"
+    },
+    {
+      "timestamp": "2026-10-21T04:07:55.963310+00:00",
+      "sample": "pinned-hashbrown-held-out",
+      "cell": "mid|body",
+      "action": "held_out",
+      "fitness_ms": 259.7452729996803,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "line-tables-only",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "held-out evaluation; does not occupy a cell"
+    },
+    {
+      "timestamp": "2026-10-21T04:07:56.643638+00:00",
+      "sample": "pinned-hashbrown-held-out",
+      "cell": "mid|sig_dep",
+      "action": "held_out",
+      "fitness_ms": 260.52865400015435,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "held-out evaluation; does not occupy a cell"
+    },
+    {
+      "timestamp": "2026-10-21T04:07:58.885892+00:00",
+      "sample": "pinned-hashbrown-held-out",
+      "cell": "mid|cold",
+      "action": "held_out",
+      "fitness_ms": 536.8957680002495,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": true,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "quiet": false,
+        "command_build": false
+      },
+      "reason": "held-out evaluation; does not occupy a cell"
+    },
+    {
+      "timestamp": "2026-10-21T04:07:59.505637+00:00",
+      "sample": "pinned-hashbrown-held-out",
+      "cell": "mid|noop",
+      "action": "held_out",
+      "fitness_ms": 16.254143999503867,
+      "genome": {
+        "wrapper": true,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "quiet": false,
+        "command_build": false
+      },
+      "reason": "held-out evaluation; does not occupy a cell"
+    },
+    {
+      "timestamp": "2026-10-21T04:08:00.122061+00:00",
+      "sample": "pinned-hashbrown-held-out",
+      "cell": "mid|body",
+      "action": "held_out",
+      "fitness_ms": 129.6544860006179,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "line-tables-only",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "quiet": false,
+        "command_build": false
+      },
+      "reason": "held-out evaluation; does not occupy a cell"
+    },
+    {
+      "timestamp": "2026-10-21T04:08:00.762143+00:00",
+      "sample": "pinned-hashbrown-held-out",
+      "cell": "mid|sig_dep",
+      "action": "held_out",
+      "fitness_ms": 129.06612400001904,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "line-tables-only",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "quiet": false,
+        "command_build": false
+      },
+      "reason": "held-out evaluation; does not occupy a cell"
+    },
+    {
+      "timestamp": "2026-10-21T04:08:02.419135+00:00",
+      "sample": "pinned-hashbrown-held-out",
+      "cell": "mid|cold",
+      "action": "held_out",
+      "fitness_ms": 411.5250719996766,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "held-out evaluation; does not occupy a cell"
+    },
+    {
+      "timestamp": "2026-10-21T04:08:10.509298+00:00",
+      "sample": "pinned-hashbrown-held-out",
+      "cell": "mid|noop",
+      "action": "held_out",
+      "fitness_ms": 3.1363420002890052,
+      "genome": {
+        "wrapper": true,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "graph",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "held-out evaluation; does not occupy a cell"
+    },
+    {
+      "timestamp": "2026-10-21T04:08:11.119127+00:00",
+      "sample": "pinned-hashbrown-held-out",
+      "cell": "mid|body",
+      "action": "held_out",
+      "fitness_ms": 122.79382300039288,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "held-out evaluation; does not occupy a cell"
+    },
+    {
+      "timestamp": "2026-10-21T04:08:11.735175+00:00",
+      "sample": "pinned-hashbrown-held-out",
+      "cell": "mid|sig_dep",
+      "action": "held_out",
+      "fitness_ms": 128.3432330001233,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "held-out evaluation; does not occupy a cell"
+    },
+    {
+      "timestamp": "2026-10-21T03:28:19.571983+00:00",
+      "sample": "rust-loop",
+      "cell": "small|cold",
+      "action": "stop",
+      "fitness_ms": 43.517553999663505,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "39 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:27.285378+00:00",
+      "sample": "rust-loop",
+      "cell": "small|noop",
+      "action": "stop",
+      "fitness_ms": 1.3229850001152954,
+      "genome": {
+        "wrapper": true,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "graph",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "80 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:35.274468+00:00",
+      "sample": "rust-loop",
+      "cell": "small|body",
+      "action": "stop",
+      "fitness_ms": 24.44579099983457,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "line-tables-only",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "84 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:30.068141+00:00",
+      "sample": "rust-loop",
+      "cell": "small|sig_dep",
+      "action": "stop",
+      "fitness_ms": 24.76190700008374,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "63 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T04:13:11.549881+00:00",
+      "sample": "real",
+      "cell": "iteration",
+      "action": "promote",
+      "fitness_ms": null,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "line-tables-only",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": null,
+        "quiet": false,
+        "command_build": false
+      },
+      "reason": "weighted majority on real-sample cold/body/sig_dep; fixture cells do not vote when real elites exist; warm-cache sccache cold is sample-specific, not a true-cold default"
     }
   ],
   "generalization": {
-    "samples": [],
+    "samples": [
+      "pinned-hashbrown-held-out",
+      "rust-loop-from-hashbrown"
+    ],
     "elites_tested": [],
     "matrix": [
       {
@@ -13050,6 +13421,182 @@
             "target_bytes": 79587135
           }
         }
+      },
+      {
+        "genome_from": "small|cold",
+        "trained_on": "rust-loop",
+        "tested_on": "pinned-hashbrown-held-out",
+        "cell": "mid|cold",
+        "fitness_ms": 418.06070700022246,
+        "spread_ms": 16.159092480167228,
+        "disk_bytes": 1284139,
+        "correctness_ok": true,
+        "delta_vs_local_elite_pct": -5.344718652728272
+      },
+      {
+        "genome_from": "small|noop",
+        "trained_on": "rust-loop",
+        "tested_on": "pinned-hashbrown-held-out",
+        "cell": "mid|noop",
+        "fitness_ms": 3.2203270002355566,
+        "spread_ms": 0.08974396216979667,
+        "disk_bytes": 133863176,
+        "correctness_ok": true,
+        "delta_vs_local_elite_pct": 0.9413866012848854
+      },
+      {
+        "genome_from": "small|body",
+        "trained_on": "rust-loop",
+        "tested_on": "pinned-hashbrown-held-out",
+        "cell": "mid|body",
+        "fitness_ms": 259.7452729996803,
+        "spread_ms": 0.0,
+        "disk_bytes": 1284271,
+        "correctness_ok": true,
+        "delta_vs_local_elite_pct": 111.73122802694056
+      },
+      {
+        "genome_from": "small|sig_dep",
+        "trained_on": "rust-loop",
+        "tested_on": "pinned-hashbrown-held-out",
+        "cell": "mid|sig_dep",
+        "fitness_ms": 260.52865400015435,
+        "spread_ms": 0.0,
+        "disk_bytes": 1284186,
+        "correctness_ok": true,
+        "delta_vs_local_elite_pct": 130.12688569296023
+      },
+      {
+        "genome_from": "large|cold",
+        "trained_on": "midsize",
+        "tested_on": "pinned-hashbrown-held-out",
+        "cell": "mid|cold",
+        "fitness_ms": 536.8957680002495,
+        "spread_ms": 4.052719727563473,
+        "disk_bytes": 1284139,
+        "correctness_ok": true,
+        "delta_vs_local_elite_pct": 21.56134054998884
+      },
+      {
+        "genome_from": "large|noop",
+        "trained_on": "midsize",
+        "tested_on": "pinned-hashbrown-held-out",
+        "cell": "mid|noop",
+        "fitness_ms": 16.254143999503867,
+        "spread_ms": 0.20293753074457116,
+        "disk_bytes": 1284139,
+        "correctness_ok": true,
+        "delta_vs_local_elite_pct": 409.48733877238607
+      },
+      {
+        "genome_from": "large|body",
+        "trained_on": "midsize",
+        "tested_on": "pinned-hashbrown-held-out",
+        "cell": "mid|body",
+        "fitness_ms": 129.6544860006179,
+        "spread_ms": 0.0,
+        "disk_bytes": 7447660,
+        "correctness_ok": true,
+        "delta_vs_local_elite_pct": 5.687788744268653
+      },
+      {
+        "genome_from": "large|sig_dep",
+        "trained_on": "midsize",
+        "tested_on": "pinned-hashbrown-held-out",
+        "cell": "mid|sig_dep",
+        "fitness_ms": 129.06612400001904,
+        "spread_ms": 0.0,
+        "disk_bytes": 7447656,
+        "correctness_ok": true,
+        "delta_vs_local_elite_pct": 14.005061280392667
+      },
+      {
+        "genome_from": "mid|cold",
+        "trained_on": "pinned-hashbrown",
+        "tested_on": "pinned-hashbrown-held-out",
+        "cell": "mid|cold",
+        "fitness_ms": 411.5250719996766,
+        "spread_ms": 0.545841807230272,
+        "disk_bytes": 1284123,
+        "correctness_ok": true,
+        "delta_vs_local_elite_pct": -6.824485488982074
+      },
+      {
+        "genome_from": "mid|noop",
+        "trained_on": "pinned-hashbrown",
+        "tested_on": "pinned-hashbrown-held-out",
+        "cell": "mid|noop",
+        "fitness_ms": 3.1363420002890052,
+        "spread_ms": 0.10003881304734895,
+        "disk_bytes": 133862968,
+        "correctness_ok": true,
+        "delta_vs_local_elite_pct": -1.6911293971505617
+      },
+      {
+        "genome_from": "mid|body",
+        "trained_on": "pinned-hashbrown",
+        "tested_on": "pinned-hashbrown-held-out",
+        "cell": "mid|body",
+        "fitness_ms": 122.79382300039288,
+        "spread_ms": 0.0,
+        "disk_bytes": 7447512,
+        "correctness_ok": true,
+        "delta_vs_local_elite_pct": 0.09532276657816452
+      },
+      {
+        "genome_from": "mid|sig_dep",
+        "trained_on": "pinned-hashbrown",
+        "tested_on": "pinned-hashbrown-held-out",
+        "cell": "mid|sig_dep",
+        "fitness_ms": 128.3432330001233,
+        "spread_ms": 0.0,
+        "disk_bytes": 7447508,
+        "correctness_ok": true,
+        "delta_vs_local_elite_pct": 13.366526317166008
+      },
+      {
+        "genome_from": "mid|cold",
+        "trained_on": "pinned-hashbrown",
+        "tested_on": "rust-loop-from-hashbrown",
+        "cell": "small|cold",
+        "fitness_ms": 81.1177300001873,
+        "spread_ms": 0.8513140569017805,
+        "disk_bytes": 7034,
+        "correctness_ok": true,
+        "delta_vs_local_elite_pct": 86.40231939693699
+      },
+      {
+        "genome_from": "mid|noop",
+        "trained_on": "pinned-hashbrown",
+        "tested_on": "rust-loop-from-hashbrown",
+        "cell": "small|noop",
+        "fitness_ms": 1.4583709998987615,
+        "spread_ms": 0.021890658157677108,
+        "disk_bytes": 6346744,
+        "correctness_ok": true,
+        "delta_vs_local_elite_pct": 10.233373754930517
+      },
+      {
+        "genome_from": "mid|body",
+        "trained_on": "pinned-hashbrown",
+        "tested_on": "rust-loop-from-hashbrown",
+        "cell": "small|body",
+        "fitness_ms": 27.925598000365426,
+        "spread_ms": 0.0,
+        "disk_bytes": 35785,
+        "correctness_ok": true,
+        "delta_vs_local_elite_pct": 14.234789950361609
+      },
+      {
+        "genome_from": "mid|sig_dep",
+        "trained_on": "pinned-hashbrown",
+        "tested_on": "rust-loop-from-hashbrown",
+        "cell": "small|sig_dep",
+        "fitness_ms": 197.2933369997918,
+        "spread_ms": 0.0,
+        "disk_bytes": 6308139,
+        "correctness_ok": true,
+        "delta_vs_local_elite_pct": 696.7614812507154
       }
     ]
   },

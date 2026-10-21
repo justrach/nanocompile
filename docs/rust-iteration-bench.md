@@ -201,6 +201,22 @@ Fitness is median loop wall time in ms (lower is better). Disk is recorded, not 
 | rust-loop-medium | mid|noop | midsize | 0.0 | — | no |
 | rust-loop-medium | mid|body | midsize | 134.2 | 10.0% | yes |
 | rust-loop-medium | mid|sig_dep | midsize | 1659.1 | 213.2% | yes |
+| rust-loop | small|cold | pinned-hashbrown-held-out | 418.1 | -5.3% | yes |
+| rust-loop | small|noop | pinned-hashbrown-held-out | 3.2 | 0.9% | yes |
+| rust-loop | small|body | pinned-hashbrown-held-out | 259.7 | 111.7% | yes |
+| rust-loop | small|sig_dep | pinned-hashbrown-held-out | 260.5 | 130.1% | yes |
+| midsize | large|cold | pinned-hashbrown-held-out | 536.9 | 21.6% | yes |
+| midsize | large|noop | pinned-hashbrown-held-out | 16.3 | 409.5% | yes |
+| midsize | large|body | pinned-hashbrown-held-out | 129.7 | 5.7% | yes |
+| midsize | large|sig_dep | pinned-hashbrown-held-out | 129.1 | 14.0% | yes |
+| pinned-hashbrown | mid|cold | pinned-hashbrown-held-out | 411.5 | -6.8% | yes |
+| pinned-hashbrown | mid|noop | pinned-hashbrown-held-out | 3.1 | -1.7% | yes |
+| pinned-hashbrown | mid|body | pinned-hashbrown-held-out | 122.8 | 0.1% | yes |
+| pinned-hashbrown | mid|sig_dep | pinned-hashbrown-held-out | 128.3 | 13.4% | yes |
+| pinned-hashbrown | mid|cold | rust-loop-from-hashbrown | 81.1 | 86.4% | yes |
+| pinned-hashbrown | mid|noop | rust-loop-from-hashbrown | 1.5 | 10.2% | yes |
+| pinned-hashbrown | mid|body | rust-loop-from-hashbrown | 27.9 | 14.2% | yes |
+| pinned-hashbrown | mid|sig_dep | rust-loop-from-hashbrown | 197.3 | 696.8% | yes |
 
 ### Promoted defaults
 
@@ -257,3 +273,4 @@ on the same sample, keep or revert.
 | 21 | pinned-hashbrown | Isolate cranelift on a real mid crate | `nightly_pair.py` nightly LLVM vs cranelift | **build body 140 vs 130 (+8%, lose)**; **test --no-run body 323 vs 390 (−17%)**, test cold 3262 vs 3474 (−6%). Cranelift is a test-codegen win, not a `loop=build` elite | keep as measured step; not a MAP-Elites gene |
 | 22 | ripgrep 15.2.0 | Cranelift on a real large crate | `nightly_pair.py` | **build cold 4939 vs 6808 (−27%)**; **build body 382 vs 473 (−19%)**; test --no-run cold 6118 vs 7849 (−22%), body 430 vs 506 (−15%). Sig edit sites failed (callers of `sign`). Check-loop elites still beat build (121ms vs 382ms) | keep cranelift as a build/test-codegen step; not a check-cell elite |
 | 23 | tokio 1.54.0 | Cranelift on tokio (`default=full`) | `nightly_pair.py` | **build cold 5808 vs 6749 (−14%)**; **build body 1033 vs 1120 (−8%)**; sig ~flat. `test --no-run` failed for **both** nightlies (cargo 101; workspace tests, not backend-specific) | keep the build win; do not read test cells |
+| 24 | cross-test | Rerun matrix on pinned-hashbrown | held-out canonical elites | rust-loop **noop graph transfers** (3.2ms, +0.9%); rust-loop body/sig **+112/+130%**. midsize body +5.7%; midsize noop check **+409%** vs graph. Hashbrown elites on rust-loop: noop +10%, body +14%, sig **+697%**. Promoted defaults unchanged | keep |
