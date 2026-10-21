@@ -1,0 +1,393 @@
+{
+  "schema": 1,
+  "kind": "nanocompile.rust-loop.nightly-pair",
+  "sample": "ripgrep",
+  "project": "/tmp/real-samples/ripgrep",
+  "note": "cargo +nightly build and cargo +nightly test --no-run; llvm vs cranelift on the same toolchain",
+  "cells": [
+    {
+      "samples_ms": [
+        6792.6346100002775,
+        6807.521853999788,
+        6856.468234999738
+      ],
+      "median_ms": 6807.521853999788,
+      "mean_ms": 6818.874899666601,
+      "stdev_ms": 27.26843907740856,
+      "min_ms": 6792.6346100002775,
+      "max_ms": 6856.468234999738,
+      "target_bytes": 403497542,
+      "target_bytes_median": 403497563,
+      "returncodes": [
+        0,
+        0,
+        0
+      ],
+      "ok": true,
+      "step": "nightly-llvm",
+      "title": "nightly-llvm",
+      "command": "build",
+      "phase": "cold",
+      "skipped": false,
+      "skip_reason": null
+    },
+    {
+      "samples_ms": [
+        27.027238000300713,
+        26.817834999746992,
+        26.58716599944455
+      ],
+      "median_ms": 26.817834999746992,
+      "mean_ms": 26.810746333164087,
+      "stdev_ms": 0.17972855158048612,
+      "min_ms": 26.58716599944455,
+      "max_ms": 27.027238000300713,
+      "target_bytes": 403497542,
+      "target_bytes_median": 403497542,
+      "returncodes": [
+        0,
+        0,
+        0
+      ],
+      "ok": true,
+      "step": "nightly-llvm",
+      "title": "nightly-llvm",
+      "command": "build",
+      "phase": "noop",
+      "skipped": false,
+      "skip_reason": null
+    },
+    {
+      "samples_ms": [
+        472.70660899994255
+      ],
+      "median_ms": 472.70660899994255,
+      "mean_ms": 472.70660899994255,
+      "stdev_ms": 0.0,
+      "min_ms": 472.70660899994255,
+      "max_ms": 472.70660899994255,
+      "target_bytes": 402423650,
+      "target_bytes_median": 402423650,
+      "returncodes": [
+        0
+      ],
+      "ok": true,
+      "step": "nightly-llvm",
+      "title": "nightly-llvm",
+      "command": "build",
+      "phase": "edit_body",
+      "skipped": false,
+      "skip_reason": null
+    },
+    {
+      "samples_ms": [
+        165.72939900015626
+      ],
+      "median_ms": 165.72939900015626,
+      "mean_ms": 165.72939900015626,
+      "stdev_ms": 0.0,
+      "min_ms": 165.72939900015626,
+      "max_ms": 165.72939900015626,
+      "target_bytes": 356732042,
+      "target_bytes_median": 356732042,
+      "returncodes": [
+        101
+      ],
+      "ok": false,
+      "step": "nightly-llvm",
+      "title": "nightly-llvm",
+      "command": "build",
+      "phase": "edit_sig",
+      "skipped": false,
+      "skip_reason": null
+    },
+    {
+      "samples_ms": [
+        5184.012769999754,
+        4938.938357000552,
+        4932.976813000096
+      ],
+      "median_ms": 4938.938357000552,
+      "mean_ms": 5018.642646666801,
+      "stdev_ms": 116.95966048196411,
+      "min_ms": 4932.976813000096,
+      "max_ms": 5184.012769999754,
+      "target_bytes": 278657269,
+      "target_bytes_median": 278657255,
+      "returncodes": [
+        0,
+        0,
+        0
+      ],
+      "ok": true,
+      "step": "nightly-cranelift",
+      "title": "nightly-cranelift",
+      "command": "build",
+      "phase": "cold",
+      "skipped": false,
+      "skip_reason": null
+    },
+    {
+      "samples_ms": [
+        27.086012999461673,
+        26.801267999871925,
+        26.56265999939933
+      ],
+      "median_ms": 26.801267999871925,
+      "mean_ms": 26.816646999577642,
+      "stdev_ms": 0.21393453187447337,
+      "min_ms": 26.56265999939933,
+      "max_ms": 27.086012999461673,
+      "target_bytes": 278657269,
+      "target_bytes_median": 278657269,
+      "returncodes": [
+        0,
+        0,
+        0
+      ],
+      "ok": true,
+      "step": "nightly-cranelift",
+      "title": "nightly-cranelift",
+      "command": "build",
+      "phase": "noop",
+      "skipped": false,
+      "skip_reason": null
+    },
+    {
+      "samples_ms": [
+        382.0962529998724
+      ],
+      "median_ms": 382.0962529998724,
+      "mean_ms": 382.0962529998724,
+      "stdev_ms": 0.0,
+      "min_ms": 382.0962529998724,
+      "max_ms": 382.0962529998724,
+      "target_bytes": 278345625,
+      "target_bytes_median": 278345625,
+      "returncodes": [
+        0
+      ],
+      "ok": true,
+      "step": "nightly-cranelift",
+      "title": "nightly-cranelift",
+      "command": "build",
+      "phase": "edit_body",
+      "skipped": false,
+      "skip_reason": null
+    },
+    {
+      "samples_ms": [
+        146.38731500053836
+      ],
+      "median_ms": 146.38731500053836,
+      "mean_ms": 146.38731500053836,
+      "stdev_ms": 0.0,
+      "min_ms": 146.38731500053836,
+      "max_ms": 146.38731500053836,
+      "target_bytes": 250466577,
+      "target_bytes_median": 250466577,
+      "returncodes": [
+        101
+      ],
+      "ok": false,
+      "step": "nightly-cranelift",
+      "title": "nightly-cranelift",
+      "command": "build",
+      "phase": "edit_sig",
+      "skipped": false,
+      "skip_reason": null
+    },
+    {
+      "samples_ms": [
+        7849.539541000013,
+        7866.827380999894,
+        7696.254229999795
+      ],
+      "median_ms": 7849.539541000013,
+      "mean_ms": 7804.207050666567,
+      "stdev_ms": 76.65975028396402,
+      "min_ms": 7696.254229999795,
+      "max_ms": 7866.827380999894,
+      "target_bytes": 570926614,
+      "target_bytes_median": 570926616,
+      "returncodes": [
+        0,
+        0,
+        0
+      ],
+      "ok": true,
+      "step": "nightly-llvm",
+      "title": "nightly-llvm",
+      "command": "test",
+      "phase": "cold",
+      "skipped": false,
+      "skip_reason": null
+    },
+    {
+      "samples_ms": [
+        28.28751299966825,
+        26.336721999541624,
+        26.329883000471455
+      ],
+      "median_ms": 26.336721999541624,
+      "mean_ms": 26.984705999893777,
+      "stdev_ms": 0.9212278950665419,
+      "min_ms": 26.329883000471455,
+      "max_ms": 28.28751299966825,
+      "target_bytes": 570926614,
+      "target_bytes_median": 570926614,
+      "returncodes": [
+        0,
+        0,
+        0
+      ],
+      "ok": true,
+      "step": "nightly-llvm",
+      "title": "nightly-llvm",
+      "command": "test",
+      "phase": "noop",
+      "skipped": false,
+      "skip_reason": null
+    },
+    {
+      "samples_ms": [
+        505.7009100000869
+      ],
+      "median_ms": 505.7009100000869,
+      "mean_ms": 505.7009100000869,
+      "stdev_ms": 0.0,
+      "min_ms": 505.7009100000869,
+      "max_ms": 505.7009100000869,
+      "target_bytes": 568902864,
+      "target_bytes_median": 568902864,
+      "returncodes": [
+        0
+      ],
+      "ok": true,
+      "step": "nightly-llvm",
+      "title": "nightly-llvm",
+      "command": "test",
+      "phase": "edit_body",
+      "skipped": false,
+      "skip_reason": null
+    },
+    {
+      "samples_ms": [
+        432.76402599985886
+      ],
+      "median_ms": 432.76402599985886,
+      "mean_ms": 432.76402599985886,
+      "stdev_ms": 0.0,
+      "min_ms": 432.76402599985886,
+      "max_ms": 432.76402599985886,
+      "target_bytes": 532429040,
+      "target_bytes_median": 532429040,
+      "returncodes": [
+        101
+      ],
+      "ok": false,
+      "step": "nightly-llvm",
+      "title": "nightly-llvm",
+      "command": "test",
+      "phase": "edit_sig",
+      "skipped": false,
+      "skip_reason": null
+    },
+    {
+      "samples_ms": [
+        6136.652570000479,
+        6065.037981999922,
+        6118.365532000098
+      ],
+      "median_ms": 6118.365532000098,
+      "mean_ms": 6106.6853613335,
+      "stdev_ms": 30.380718597196182,
+      "min_ms": 6065.037981999922,
+      "max_ms": 6136.652570000479,
+      "target_bytes": 420710836,
+      "target_bytes_median": 420710847,
+      "returncodes": [
+        0,
+        0,
+        0
+      ],
+      "ok": true,
+      "step": "nightly-cranelift",
+      "title": "nightly-cranelift",
+      "command": "test",
+      "phase": "cold",
+      "skipped": false,
+      "skip_reason": null
+    },
+    {
+      "samples_ms": [
+        28.06121499997971,
+        28.00188800028991,
+        27.157506999174075
+      ],
+      "median_ms": 28.00188800028991,
+      "mean_ms": 27.7402033331479,
+      "stdev_ms": 0.41273977794162175,
+      "min_ms": 27.157506999174075,
+      "max_ms": 28.06121499997971,
+      "target_bytes": 420710836,
+      "target_bytes_median": 420710836,
+      "returncodes": [
+        0,
+        0,
+        0
+      ],
+      "ok": true,
+      "step": "nightly-cranelift",
+      "title": "nightly-cranelift",
+      "command": "test",
+      "phase": "noop",
+      "skipped": false,
+      "skip_reason": null
+    },
+    {
+      "samples_ms": [
+        429.49032799970155
+      ],
+      "median_ms": 429.49032799970155,
+      "mean_ms": 429.49032799970155,
+      "stdev_ms": 0.0,
+      "min_ms": 429.49032799970155,
+      "max_ms": 429.49032799970155,
+      "target_bytes": 420051885,
+      "target_bytes_median": 420051885,
+      "returncodes": [
+        0
+      ],
+      "ok": true,
+      "step": "nightly-cranelift",
+      "title": "nightly-cranelift",
+      "command": "test",
+      "phase": "edit_body",
+      "skipped": false,
+      "skip_reason": null
+    },
+    {
+      "samples_ms": [
+        405.77883399964776
+      ],
+      "median_ms": 405.77883399964776,
+      "mean_ms": 405.77883399964776,
+      "stdev_ms": 0.0,
+      "min_ms": 405.77883399964776,
+      "max_ms": 405.77883399964776,
+      "target_bytes": 401390629,
+      "target_bytes_median": 401390629,
+      "returncodes": [
+        101
+      ],
+      "ok": false,
+      "step": "nightly-cranelift",
+      "title": "nightly-cranelift",
+      "command": "test",
+      "phase": "edit_sig",
+      "skipped": false,
+      "skip_reason": null
+    }
+  ]
+}
