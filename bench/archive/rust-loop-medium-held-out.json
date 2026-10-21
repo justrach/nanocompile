@@ -6,8 +6,8 @@
   "timestamp": "2026-10-21T03:28:18.286725+00:00",
   "evaluations": [
     {
-      "cell": "mid|cold",
-      "size": "mid",
+      "cell": "small|cold",
+      "size": "small",
       "edit": "cold",
       "genome": {
         "wrapper": false,
@@ -38,8 +38,8 @@
       "stopped": false
     },
     {
-      "cell": "mid|noop",
-      "size": "mid",
+      "cell": "small|noop",
+      "size": "small",
       "edit": "noop",
       "genome": {
         "wrapper": true,
@@ -70,8 +70,8 @@
       "stopped": false
     },
     {
-      "cell": "mid|body",
-      "size": "mid",
+      "cell": "small|body",
+      "size": "small",
       "edit": "body",
       "genome": {
         "wrapper": false,
@@ -102,8 +102,8 @@
       "stopped": false
     },
     {
-      "cell": "mid|sig_dep",
-      "size": "mid",
+      "cell": "small|sig_dep",
+      "size": "small",
       "edit": "sig_dep",
       "genome": {
         "wrapper": false,
@@ -134,8 +134,8 @@
       "stopped": false
     },
     {
-      "cell": "mid|cold",
-      "size": "mid",
+      "cell": "small|cold",
+      "size": "small",
       "edit": "cold",
       "genome": {
         "wrapper": false,
@@ -166,8 +166,8 @@
       "stopped": false
     },
     {
-      "cell": "mid|noop",
-      "size": "mid",
+      "cell": "small|noop",
+      "size": "small",
       "edit": "noop",
       "genome": {
         "wrapper": true,
@@ -198,8 +198,8 @@
       "stopped": false
     },
     {
-      "cell": "mid|body",
-      "size": "mid",
+      "cell": "small|body",
+      "size": "small",
       "edit": "body",
       "genome": {
         "wrapper": false,

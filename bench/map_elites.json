@@ -16,18 +16,23 @@
     ]
   },
   "size_rules": {
-    "small": "workspace crates <= 1 and Rust LOC < 2000",
-    "mid": "workspace crates <= 20 and Rust LOC < 50000",
+    "small": "Rust LOC < 2000",
+    "mid": "Rust LOC >= 2000 and < 50000 and workspace crates <= 20",
     "large": "otherwise"
   },
   "design_notes": [
     "Two axes (size x edit) yield 12 cells. Disk usage is a recorded metric, not a third axis: a disk tertile would triple the grid and leave most cells empty while four agents are still seeding.",
-    "Fitness is median wall time in milliseconds of the configured iteration loop (genome.loop: check, graph, or test) on that edit type. Lower is better. Spread is population stdev of the timed samples.",
+    "Fitness is median wall time in milliseconds of the configured iteration loop (genome.loop: check, graph, test, or build) on that edit type. Lower is better. Spread is population stdev of the timed samples. loop=build is the cranelift-dev gene; cargo check skips codegen so cranelift cannot occupy a check-loop cell on merit.",
     "validate is not a gene. It is always cargo test with default LLVM rustc. A genome that fails the correctness gate (fast path and rustc must agree on broken edits; validate is the final signal) cannot occupy a cell.",
     "Replace an elite only when the new median is at least fitness.min_gain_pct faster (default 3%) and correctness.ok is true. Seed an empty cell with the first passing evaluation.",
     "Stop a cell after fitness.max_non_improving consecutive non-improving tries. Hill-climb restarts may re-seed a stopped cell with a new genome family.",
     "Do not stack RUSTC_WRAPPER=nanocompile with sccache. Cranelift is a dev-backend gene only; rust-loop run strips it from validate.",
-    "Other agents write bench/archive/<sample>.json shards. Merge with `nanocompile map-elites merge` or `python3 tools/map_elites.py merge`."
+    "Other agents write bench/archive/<sample>.json shards. Merge with `nanocompile map-elites merge` or `python3 tools/map_elites.py merge`.",
+    "Size is by Rust LOC: small < 2000, mid 2000..50000 and <=20 crates. rust-loop-medium (202 LOC) is small; do not let it occupy mid.",
+    "fitness_method is recorded per elite. official_first_rebuild (this harness) and restore_rebuild_mean_of_medians (PR #11) are not comparable as raw ms.",
+    "cache_state=warm_compiler_cache means sccache/nanocompile survived an emptied target/. It is not true empty-cache cold and does not set the iteration default.",
+    "package_scope=touched (cargo check -p hub) fails the sig_dep correctness gate unless dependents_agree_on_broken. Fallback elite is workspace check.",
+    "Promote weights real samples (midsize, pinned-*) over rust-loop fixtures. Fixture cells stay sample-specific when real elites exist."
   ],
   "fitness": {
     "metric": "median_ms",
@@ -64,9 +69,12 @@
       "sample": "rust-loop",
       "commit": "19fa491f3207bd9715d3c44b24ee81cdea6f7e01",
       "timestamp": "2026-10-21T03:28:19.571983+00:00",
-      "n_evals": 3,
-      "non_improving": 0,
-      "stopped": false
+      "n_evals": 41,
+      "non_improving": 38,
+      "stopped": true,
+      "sample_class": "fixture",
+      "fitness_method": "official_first_rebuild",
+      "cache_state": "empty"
     },
     "small|noop": {
       "cell": "small|noop",
@@ -96,9 +104,11 @@
       "sample": "rust-loop",
       "commit": "19fa491f3207bd9715d3c44b24ee81cdea6f7e01",
       "timestamp": "2026-10-21T03:27:27.285378+00:00",
-      "n_evals": 46,
-      "non_improving": 43,
-      "stopped": true
+      "n_evals": 82,
+      "non_improving": 79,
+      "stopped": true,
+      "sample_class": "fixture",
+      "fitness_method": "official_first_rebuild"
     },
     "small|body": {
       "cell": "small|body",
@@ -128,9 +138,11 @@
       "sample": "rust-loop",
       "commit": "19fa491f3207bd9715d3c44b24ee81cdea6f7e01",
       "timestamp": "2026-10-21T03:27:35.274468+00:00",
-      "n_evals": 44,
-      "non_improving": 43,
-      "stopped": true
+      "n_evals": 84,
+      "non_improving": 83,
+      "stopped": true,
+      "sample_class": "fixture",
+      "fitness_method": "official_first_rebuild"
     },
     "small|sig_dep": {
       "cell": "small|sig_dep",
@@ -160,45 +172,103 @@
       "sample": "rust-loop",
       "commit": "19fa491f3207bd9715d3c44b24ee81cdea6f7e01",
       "timestamp": "2026-10-21T03:27:30.068141+00:00",
-      "n_evals": 39,
-      "non_improving": 38,
-      "stopped": true
+      "n_evals": 63,
+      "non_improving": 62,
+      "stopped": true,
+      "sample_class": "fixture",
+      "fitness_method": "official_first_rebuild"
     },
-    "mid|cold": {
-      "cell": "mid|cold",
-      "size": "mid",
+    "large|cold": {
+      "cell": "large|cold",
+      "size": "large",
       "edit": "cold",
       "genome": {
         "wrapper": false,
         "dev_backend": "llvm",
         "linker": "default",
-        "sccache": false,
+        "sccache": true,
         "codegen_units": null,
         "incremental": false,
         "debuginfo": "full",
         "fast_check": "cargo-check",
         "loop": "check",
-        "jobs": null,
-        "offline": true
+        "jobs": 3,
+        "offline": true,
+        "package_scope": null,
+        "quiet": false,
+        "command_build": false
       },
-      "fitness_ms": 87.26662400022178,
-      "spread_ms": 0.6081223032688218,
-      "disk_bytes": 22924,
+      "fitness_ms": 1387.3198349999143,
+      "spread_ms": 24.53562450006075,
+      "disk_bytes": 196497613,
       "correctness": {
         "ok": true,
         "agree_on_broken": true,
         "validate_is_final": true
       },
-      "sample": "rust-loop-medium",
-      "commit": "19fa491f3207bd9715d3c44b24ee81cdea6f7e01",
-      "timestamp": "2026-10-21T03:27:47.072783+00:00",
-      "n_evals": 20,
-      "non_improving": 17,
-      "stopped": true
+      "sample": "midsize",
+      "commit": "2348d3b550f59c3946d72cf0e10f5e2d8219a01c",
+      "timestamp": "2026-10-21T03:26:17.978379+00:00",
+      "n_evals": 21,
+      "non_improving": 7,
+      "stopped": true,
+      "projects": [
+        "ripgrep-15.2.0",
+        "tokio-1.54.0"
+      ],
+      "per_sample": {
+        "ripgrep": {
+          "ok": true,
+          "samples_ms": [
+            1487.0670729999347,
+            1464.098882999906
+          ],
+          "returncodes": [
+            0,
+            0
+          ],
+          "median_ms": 1475.5829779999203,
+          "spread_ms": 11.48409500001435,
+          "min_ms": 1464.098882999906,
+          "max_ms": 1487.0670729999347,
+          "target_bytes": 116910502
+        },
+        "tokio": {
+          "ok": true,
+          "samples_ms": [
+            1336.6438460000154,
+            1261.469537999801
+          ],
+          "returncodes": [
+            0,
+            0
+          ],
+          "median_ms": 1299.0566919999083,
+          "spread_ms": 37.58715400010715,
+          "min_ms": 1261.469537999801,
+          "max_ms": 1336.6438460000154,
+          "target_bytes": 79587111
+        }
+      },
+      "classified": {
+        "ripgrep": {
+          "size": "large",
+          "crates": 9,
+          "loc": 53030
+        },
+        "tokio": {
+          "size": "large",
+          "crates": 5,
+          "loc": 188515
+        }
+      },
+      "sample_class": "real",
+      "fitness_method": "restore_rebuild_mean_of_medians",
+      "cache_state": "warm_compiler_cache"
     },
-    "mid|noop": {
-      "cell": "mid|noop",
-      "size": "mid",
+    "large|noop": {
+      "cell": "large|noop",
+      "size": "large",
       "edit": "noop",
       "genome": {
         "wrapper": true,
@@ -209,28 +279,87 @@
         "incremental": false,
         "debuginfo": "full",
         "fast_check": "cargo-check",
-        "loop": "graph",
-        "jobs": null,
-        "offline": true
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": null,
+        "quiet": false,
+        "command_build": false
       },
-      "fitness_ms": 1.3813780001328269,
-      "spread_ms": 0.08899972111487087,
-      "disk_bytes": 22309512,
+      "fitness_ms": 31.221453999933146,
+      "spread_ms": 0.837486664043877,
+      "disk_bytes": 196497613,
       "correctness": {
         "ok": true,
         "agree_on_broken": true,
         "validate_is_final": true
       },
-      "sample": "rust-loop-medium",
-      "commit": "19fa491f3207bd9715d3c44b24ee81cdea6f7e01",
-      "timestamp": "2026-10-21T03:27:40.987535+00:00",
-      "n_evals": 22,
-      "non_improving": 19,
-      "stopped": true
+      "sample": "midsize",
+      "commit": "2348d3b550f59c3946d72cf0e10f5e2d8219a01c",
+      "timestamp": "2026-10-21T03:19:46.188562+00:00",
+      "n_evals": 13,
+      "non_improving": 6,
+      "stopped": true,
+      "projects": [
+        "ripgrep-15.2.0",
+        "tokio-1.54.0"
+      ],
+      "per_sample": {
+        "ripgrep": {
+          "ok": true,
+          "samples_ms": [
+            24.494333999996343,
+            25.764066999954593,
+            26.614574999939578
+          ],
+          "returncodes": [
+            0,
+            0,
+            0
+          ],
+          "median_ms": 25.764066999954593,
+          "spread_ms": 0.8712065482269546,
+          "min_ms": 24.494333999996343,
+          "max_ms": 26.614574999939578,
+          "target_bytes": 116910502
+        },
+        "tokio": {
+          "ok": true,
+          "samples_ms": [
+            36.6788409999117,
+            37.78695300002255,
+            35.823553000000175
+          ],
+          "returncodes": [
+            0,
+            0,
+            0
+          ],
+          "median_ms": 36.6788409999117,
+          "spread_ms": 0.8037667798607994,
+          "min_ms": 35.823553000000175,
+          "max_ms": 37.78695300002255,
+          "target_bytes": 79587111
+        }
+      },
+      "classified": {
+        "ripgrep": {
+          "size": "large",
+          "crates": 9,
+          "loc": 53030
+        },
+        "tokio": {
+          "size": "large",
+          "crates": 5,
+          "loc": 188515
+        }
+      },
+      "sample_class": "real",
+      "fitness_method": "restore_rebuild_mean_of_medians"
     },
-    "mid|body": {
-      "cell": "mid|body",
-      "size": "mid",
+    "large|body": {
+      "cell": "large|body",
+      "size": "large",
       "edit": "body",
       "genome": {
         "wrapper": false,
@@ -239,30 +368,89 @@
         "sccache": false,
         "codegen_units": null,
         "incremental": true,
-        "debuginfo": "full",
+        "debuginfo": "line-tables-only",
         "fast_check": "cargo-check",
         "loop": "check",
-        "jobs": null,
-        "offline": true
+        "jobs": 3,
+        "offline": true,
+        "package_scope": null,
+        "quiet": false,
+        "command_build": false
       },
-      "fitness_ms": 62.92476099997657,
-      "spread_ms": 0.0,
-      "disk_bytes": 1453979,
+      "fitness_ms": 121.93916600006105,
+      "spread_ms": 4.545792332077087,
+      "disk_bytes": 314162647,
       "correctness": {
         "ok": true,
         "agree_on_broken": true,
         "validate_is_final": true
       },
-      "sample": "rust-loop-medium",
-      "commit": "19fa491f3207bd9715d3c44b24ee81cdea6f7e01",
-      "timestamp": "2026-10-21T03:27:37.478571+00:00",
-      "n_evals": 22,
-      "non_improving": 21,
-      "stopped": true
+      "sample": "midsize",
+      "commit": "2348d3b550f59c3946d72cf0e10f5e2d8219a01c",
+      "timestamp": "2026-10-21T03:20:21.425557+00:00",
+      "n_evals": 15,
+      "non_improving": 6,
+      "stopped": true,
+      "projects": [
+        "ripgrep-15.2.0",
+        "tokio-1.54.0"
+      ],
+      "per_sample": {
+        "ripgrep": {
+          "ok": true,
+          "samples_ms": [
+            181.0556230000202,
+            163.62210700003743,
+            163.07894800002032
+          ],
+          "returncodes": [
+            0,
+            0,
+            0
+          ],
+          "median_ms": 163.62210700003743,
+          "spread_ms": 8.349207187089855,
+          "min_ms": 163.07894800002032,
+          "max_ms": 181.0556230000202,
+          "target_bytes": 156895365
+        },
+        "tokio": {
+          "ok": true,
+          "samples_ms": [
+            81.12594600004286,
+            79.30806399997437,
+            80.25622500008467
+          ],
+          "returncodes": [
+            0,
+            0,
+            0
+          ],
+          "median_ms": 80.25622500008467,
+          "spread_ms": 0.7423774770643206,
+          "min_ms": 79.30806399997437,
+          "max_ms": 81.12594600004286,
+          "target_bytes": 157267282
+        }
+      },
+      "classified": {
+        "ripgrep": {
+          "size": "large",
+          "crates": 9,
+          "loc": 53030
+        },
+        "tokio": {
+          "size": "large",
+          "crates": 5,
+          "loc": 188515
+        }
+      },
+      "sample_class": "real",
+      "fitness_method": "restore_rebuild_mean_of_medians"
     },
-    "mid|sig_dep": {
-      "cell": "mid|sig_dep",
-      "size": "mid",
+    "large|sig_dep": {
+      "cell": "large|sig_dep",
+      "size": "large",
       "edit": "sig_dep",
       "genome": {
         "wrapper": false,
@@ -270,24 +458,28 @@
         "linker": "default",
         "sccache": false,
         "codegen_units": null,
-        "incremental": false,
-        "debuginfo": "full",
+        "incremental": true,
+        "debuginfo": "line-tables-only",
         "fast_check": "cargo-check",
         "loop": "check",
-        "jobs": null,
-        "offline": true
+        "jobs": 3,
+        "offline": true,
+        "package_scope": null,
+        "quiet": false,
+        "command_build": false
       },
-      "fitness_ms": 34.26494699988325,
-      "spread_ms": 0.0,
-      "disk_bytes": 33131,
+      "fitness_ms": 711.9701940000027,
       "correctness": {
         "ok": true,
         "agree_on_broken": true,
         "validate_is_final": true
       },
-      "sample": "rust-loop-medium",
-      "commit": "19fa491f3207bd9715d3c44b24ee81cdea6f7e01",
-      "timestamp": "2026-10-21T03:28:17.172670+00:00",
+      "sample": "midsize",
+      "timestamp": "2026-10-21T03:20:31.893557+00:00",
+      "from_history": true,
+      "commit": "afdf578121ef0527fd6481eb576a44a9a5651c6f",
+      "sample_class": "real",
+      "fitness_method": "restore_rebuild_mean_of_medians",
       "n_evals": 1,
       "non_improving": 0,
       "stopped": false
@@ -5837,6 +6029,3513 @@
         "offline": true
       },
       "reason": "majority elite on cold/body/sig_dep across occupied size buckets; do not use graph wall time as the edit-loop default"
+    },
+    {
+      "timestamp": "2026-10-21T03:36:41.399670+00:00",
+      "sample": "rust-loop-medium",
+      "cell": "mid|cold",
+      "action": "reject",
+      "fitness_ms": 87.26662400022178,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "reclassify: rust-loop-medium is LOC<2000 (small); mid reserved for a real crate"
+    },
+    {
+      "timestamp": "2026-10-21T03:36:41.399688+00:00",
+      "sample": "rust-loop-medium",
+      "cell": "mid|noop",
+      "action": "reject",
+      "fitness_ms": 1.3813780001328269,
+      "genome": {
+        "wrapper": true,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "graph",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "reclassify: rust-loop-medium is LOC<2000 (small); mid reserved for a real crate"
+    },
+    {
+      "timestamp": "2026-10-21T03:36:41.399692+00:00",
+      "sample": "rust-loop-medium",
+      "cell": "mid|body",
+      "action": "reject",
+      "fitness_ms": 62.92476099997657,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "reclassify: rust-loop-medium is LOC<2000 (small); mid reserved for a real crate"
+    },
+    {
+      "timestamp": "2026-10-21T03:36:41.399694+00:00",
+      "sample": "rust-loop-medium",
+      "cell": "mid|sig_dep",
+      "action": "reject",
+      "fitness_ms": 34.26494699988325,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "reclassify: rust-loop-medium is LOC<2000 (small); mid reserved for a real crate"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:25.314717+00:00",
+      "sample": "rust-loop",
+      "cell": "small|cold",
+      "action": "reject",
+      "fitness_ms": 45.19417000028625,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "gain below 3.0% vs elite 43.518 ms"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:27.285378+00:00",
+      "sample": "rust-loop",
+      "cell": "small|noop",
+      "action": "stop",
+      "fitness_ms": 1.3229850001152954,
+      "genome": {
+        "wrapper": true,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "graph",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "44 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:35.274468+00:00",
+      "sample": "rust-loop",
+      "cell": "small|body",
+      "action": "stop",
+      "fitness_ms": 24.44579099983457,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "line-tables-only",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "44 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:30.068141+00:00",
+      "sample": "rust-loop",
+      "cell": "small|sig_dep",
+      "action": "stop",
+      "fitness_ms": 24.76190700008374,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "39 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:25.950200+00:00",
+      "sample": "rust-loop",
+      "cell": "small|cold",
+      "action": "reject",
+      "fitness_ms": 133.34482799973557,
+      "genome": {
+        "wrapper": true,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "gain below 3.0% vs elite 43.518 ms"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:27.285378+00:00",
+      "sample": "rust-loop",
+      "cell": "small|noop",
+      "action": "stop",
+      "fitness_ms": 1.3229850001152954,
+      "genome": {
+        "wrapper": true,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "graph",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "45 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:35.274468+00:00",
+      "sample": "rust-loop",
+      "cell": "small|body",
+      "action": "stop",
+      "fitness_ms": 24.44579099983457,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "line-tables-only",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "45 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:30.068141+00:00",
+      "sample": "rust-loop",
+      "cell": "small|sig_dep",
+      "action": "stop",
+      "fitness_ms": 24.76190700008374,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "40 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:27.276855+00:00",
+      "sample": "rust-loop",
+      "cell": "small|cold",
+      "action": "reject",
+      "fitness_ms": 294.9953050001568,
+      "genome": {
+        "wrapper": true,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "graph",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "gain below 3.0% vs elite 43.518 ms"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:27.285378+00:00",
+      "sample": "rust-loop",
+      "cell": "small|noop",
+      "action": "stop",
+      "fitness_ms": 1.3229850001152954,
+      "genome": {
+        "wrapper": true,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "graph",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "46 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:35.274468+00:00",
+      "sample": "rust-loop",
+      "cell": "small|body",
+      "action": "stop",
+      "fitness_ms": 24.44579099983457,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "line-tables-only",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "46 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:30.068141+00:00",
+      "sample": "rust-loop",
+      "cell": "small|sig_dep",
+      "action": "stop",
+      "fitness_ms": 24.76190700008374,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "41 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:28:19.571983+00:00",
+      "sample": "rust-loop",
+      "cell": "small|cold",
+      "action": "stop",
+      "fitness_ms": 43.517553999663505,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "4 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:27.285378+00:00",
+      "sample": "rust-loop",
+      "cell": "small|noop",
+      "action": "stop",
+      "fitness_ms": 1.3229850001152954,
+      "genome": {
+        "wrapper": true,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "graph",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "47 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:35.274468+00:00",
+      "sample": "rust-loop",
+      "cell": "small|body",
+      "action": "stop",
+      "fitness_ms": 24.44579099983457,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "line-tables-only",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "47 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:30.068141+00:00",
+      "sample": "rust-loop",
+      "cell": "small|sig_dep",
+      "action": "stop",
+      "fitness_ms": 24.76190700008374,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "42 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:28:19.571983+00:00",
+      "sample": "rust-loop",
+      "cell": "small|cold",
+      "action": "stop",
+      "fitness_ms": 43.517553999663505,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "5 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:27.285378+00:00",
+      "sample": "rust-loop",
+      "cell": "small|noop",
+      "action": "stop",
+      "fitness_ms": 1.3229850001152954,
+      "genome": {
+        "wrapper": true,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "graph",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "48 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:35.274468+00:00",
+      "sample": "rust-loop",
+      "cell": "small|body",
+      "action": "stop",
+      "fitness_ms": 24.44579099983457,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "line-tables-only",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "48 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:30.068141+00:00",
+      "sample": "rust-loop",
+      "cell": "small|sig_dep",
+      "action": "stop",
+      "fitness_ms": 24.76190700008374,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "43 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:28:19.571983+00:00",
+      "sample": "rust-loop",
+      "cell": "small|cold",
+      "action": "stop",
+      "fitness_ms": 43.517553999663505,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "6 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:27.285378+00:00",
+      "sample": "rust-loop",
+      "cell": "small|noop",
+      "action": "stop",
+      "fitness_ms": 1.3229850001152954,
+      "genome": {
+        "wrapper": true,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "graph",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "49 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:35.274468+00:00",
+      "sample": "rust-loop",
+      "cell": "small|body",
+      "action": "stop",
+      "fitness_ms": 24.44579099983457,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "line-tables-only",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "49 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:30.068141+00:00",
+      "sample": "rust-loop",
+      "cell": "small|sig_dep",
+      "action": "stop",
+      "fitness_ms": 24.76190700008374,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "44 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:28:19.571983+00:00",
+      "sample": "rust-loop",
+      "cell": "small|cold",
+      "action": "stop",
+      "fitness_ms": 43.517553999663505,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "7 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:27.285378+00:00",
+      "sample": "rust-loop",
+      "cell": "small|noop",
+      "action": "stop",
+      "fitness_ms": 1.3229850001152954,
+      "genome": {
+        "wrapper": true,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "graph",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "50 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:35.274468+00:00",
+      "sample": "rust-loop",
+      "cell": "small|body",
+      "action": "stop",
+      "fitness_ms": 24.44579099983457,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "line-tables-only",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "50 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:30.068141+00:00",
+      "sample": "rust-loop",
+      "cell": "small|sig_dep",
+      "action": "stop",
+      "fitness_ms": 24.76190700008374,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "45 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:28:19.571983+00:00",
+      "sample": "rust-loop",
+      "cell": "small|cold",
+      "action": "stop",
+      "fitness_ms": 43.517553999663505,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "8 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:27.285378+00:00",
+      "sample": "rust-loop",
+      "cell": "small|noop",
+      "action": "stop",
+      "fitness_ms": 1.3229850001152954,
+      "genome": {
+        "wrapper": true,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "graph",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "51 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:35.274468+00:00",
+      "sample": "rust-loop",
+      "cell": "small|body",
+      "action": "stop",
+      "fitness_ms": 24.44579099983457,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "line-tables-only",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "51 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:30.068141+00:00",
+      "sample": "rust-loop",
+      "cell": "small|sig_dep",
+      "action": "stop",
+      "fitness_ms": 24.76190700008374,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "46 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:28:19.571983+00:00",
+      "sample": "rust-loop",
+      "cell": "small|cold",
+      "action": "stop",
+      "fitness_ms": 43.517553999663505,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "9 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:28:19.571983+00:00",
+      "sample": "rust-loop",
+      "cell": "small|cold",
+      "action": "stop",
+      "fitness_ms": 43.517553999663505,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "10 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:28:19.571983+00:00",
+      "sample": "rust-loop",
+      "cell": "small|cold",
+      "action": "stop",
+      "fitness_ms": 43.517553999663505,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "11 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:27.285378+00:00",
+      "sample": "rust-loop",
+      "cell": "small|noop",
+      "action": "stop",
+      "fitness_ms": 1.3229850001152954,
+      "genome": {
+        "wrapper": true,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "graph",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "52 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:27.285378+00:00",
+      "sample": "rust-loop",
+      "cell": "small|noop",
+      "action": "stop",
+      "fitness_ms": 1.3229850001152954,
+      "genome": {
+        "wrapper": true,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "graph",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "53 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:35.274468+00:00",
+      "sample": "rust-loop",
+      "cell": "small|body",
+      "action": "stop",
+      "fitness_ms": 24.44579099983457,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "line-tables-only",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "52 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:35.274468+00:00",
+      "sample": "rust-loop",
+      "cell": "small|body",
+      "action": "stop",
+      "fitness_ms": 24.44579099983457,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "line-tables-only",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "53 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:35.274468+00:00",
+      "sample": "rust-loop",
+      "cell": "small|body",
+      "action": "stop",
+      "fitness_ms": 24.44579099983457,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "line-tables-only",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "54 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:35.274468+00:00",
+      "sample": "rust-loop",
+      "cell": "small|body",
+      "action": "stop",
+      "fitness_ms": 24.44579099983457,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "line-tables-only",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "55 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:35.274468+00:00",
+      "sample": "rust-loop",
+      "cell": "small|body",
+      "action": "stop",
+      "fitness_ms": 24.44579099983457,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "line-tables-only",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "56 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:35.274468+00:00",
+      "sample": "rust-loop",
+      "cell": "small|body",
+      "action": "stop",
+      "fitness_ms": 24.44579099983457,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "line-tables-only",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "57 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:30.068141+00:00",
+      "sample": "rust-loop",
+      "cell": "small|sig_dep",
+      "action": "stop",
+      "fitness_ms": 24.76190700008374,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "47 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:30.068141+00:00",
+      "sample": "rust-loop",
+      "cell": "small|sig_dep",
+      "action": "stop",
+      "fitness_ms": 24.76190700008374,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "48 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:28:19.571983+00:00",
+      "sample": "rust-loop",
+      "cell": "small|cold",
+      "action": "stop",
+      "fitness_ms": 43.517553999663505,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "12 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:27.285378+00:00",
+      "sample": "rust-loop",
+      "cell": "small|noop",
+      "action": "stop",
+      "fitness_ms": 1.3229850001152954,
+      "genome": {
+        "wrapper": true,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "graph",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "54 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:35.274468+00:00",
+      "sample": "rust-loop",
+      "cell": "small|body",
+      "action": "stop",
+      "fitness_ms": 24.44579099983457,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "line-tables-only",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "58 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:28:19.571983+00:00",
+      "sample": "rust-loop",
+      "cell": "small|cold",
+      "action": "stop",
+      "fitness_ms": 43.517553999663505,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "13 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:27.285378+00:00",
+      "sample": "rust-loop",
+      "cell": "small|noop",
+      "action": "stop",
+      "fitness_ms": 1.3229850001152954,
+      "genome": {
+        "wrapper": true,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "graph",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "55 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:35.274468+00:00",
+      "sample": "rust-loop",
+      "cell": "small|body",
+      "action": "stop",
+      "fitness_ms": 24.44579099983457,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "line-tables-only",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "59 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:28:19.571983+00:00",
+      "sample": "rust-loop",
+      "cell": "small|cold",
+      "action": "stop",
+      "fitness_ms": 43.517553999663505,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "14 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:27.285378+00:00",
+      "sample": "rust-loop",
+      "cell": "small|noop",
+      "action": "stop",
+      "fitness_ms": 1.3229850001152954,
+      "genome": {
+        "wrapper": true,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "graph",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "56 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:35.274468+00:00",
+      "sample": "rust-loop",
+      "cell": "small|body",
+      "action": "stop",
+      "fitness_ms": 24.44579099983457,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "line-tables-only",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "60 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:28:19.571983+00:00",
+      "sample": "rust-loop",
+      "cell": "small|cold",
+      "action": "stop",
+      "fitness_ms": 43.517553999663505,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "15 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:27.285378+00:00",
+      "sample": "rust-loop",
+      "cell": "small|noop",
+      "action": "stop",
+      "fitness_ms": 1.3229850001152954,
+      "genome": {
+        "wrapper": true,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "graph",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "57 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:35.274468+00:00",
+      "sample": "rust-loop",
+      "cell": "small|body",
+      "action": "stop",
+      "fitness_ms": 24.44579099983457,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "line-tables-only",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "61 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:28:19.571983+00:00",
+      "sample": "rust-loop",
+      "cell": "small|cold",
+      "action": "stop",
+      "fitness_ms": 43.517553999663505,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "16 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:27.285378+00:00",
+      "sample": "rust-loop",
+      "cell": "small|noop",
+      "action": "stop",
+      "fitness_ms": 1.3229850001152954,
+      "genome": {
+        "wrapper": true,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "graph",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "58 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:35.274468+00:00",
+      "sample": "rust-loop",
+      "cell": "small|body",
+      "action": "stop",
+      "fitness_ms": 24.44579099983457,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "line-tables-only",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "62 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:28:19.571983+00:00",
+      "sample": "rust-loop",
+      "cell": "small|cold",
+      "action": "stop",
+      "fitness_ms": 43.517553999663505,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "17 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:27.285378+00:00",
+      "sample": "rust-loop",
+      "cell": "small|noop",
+      "action": "stop",
+      "fitness_ms": 1.3229850001152954,
+      "genome": {
+        "wrapper": true,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "graph",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "59 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:35.274468+00:00",
+      "sample": "rust-loop",
+      "cell": "small|body",
+      "action": "stop",
+      "fitness_ms": 24.44579099983457,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "line-tables-only",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "63 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:28:19.571983+00:00",
+      "sample": "rust-loop",
+      "cell": "small|cold",
+      "action": "stop",
+      "fitness_ms": 43.517553999663505,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "18 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:27.285378+00:00",
+      "sample": "rust-loop",
+      "cell": "small|noop",
+      "action": "stop",
+      "fitness_ms": 1.3229850001152954,
+      "genome": {
+        "wrapper": true,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "graph",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "60 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:35.274468+00:00",
+      "sample": "rust-loop",
+      "cell": "small|body",
+      "action": "stop",
+      "fitness_ms": 24.44579099983457,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "line-tables-only",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "64 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:28:19.571983+00:00",
+      "sample": "rust-loop",
+      "cell": "small|cold",
+      "action": "stop",
+      "fitness_ms": 43.517553999663505,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "19 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:27.285378+00:00",
+      "sample": "rust-loop",
+      "cell": "small|noop",
+      "action": "stop",
+      "fitness_ms": 1.3229850001152954,
+      "genome": {
+        "wrapper": true,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "graph",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "61 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:35.274468+00:00",
+      "sample": "rust-loop",
+      "cell": "small|body",
+      "action": "stop",
+      "fitness_ms": 24.44579099983457,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "line-tables-only",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "65 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:28:19.571983+00:00",
+      "sample": "rust-loop",
+      "cell": "small|cold",
+      "action": "stop",
+      "fitness_ms": 43.517553999663505,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "20 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:28:19.571983+00:00",
+      "sample": "rust-loop",
+      "cell": "small|cold",
+      "action": "stop",
+      "fitness_ms": 43.517553999663505,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "21 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:28:19.571983+00:00",
+      "sample": "rust-loop",
+      "cell": "small|cold",
+      "action": "stop",
+      "fitness_ms": 43.517553999663505,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "22 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:27.285378+00:00",
+      "sample": "rust-loop",
+      "cell": "small|noop",
+      "action": "stop",
+      "fitness_ms": 1.3229850001152954,
+      "genome": {
+        "wrapper": true,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "graph",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "62 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:27.285378+00:00",
+      "sample": "rust-loop",
+      "cell": "small|noop",
+      "action": "stop",
+      "fitness_ms": 1.3229850001152954,
+      "genome": {
+        "wrapper": true,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "graph",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "63 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:35.274468+00:00",
+      "sample": "rust-loop",
+      "cell": "small|body",
+      "action": "stop",
+      "fitness_ms": 24.44579099983457,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "line-tables-only",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "66 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:35.274468+00:00",
+      "sample": "rust-loop",
+      "cell": "small|body",
+      "action": "stop",
+      "fitness_ms": 24.44579099983457,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "line-tables-only",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "67 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:28:19.571983+00:00",
+      "sample": "rust-loop",
+      "cell": "small|cold",
+      "action": "stop",
+      "fitness_ms": 43.517553999663505,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "23 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:27.285378+00:00",
+      "sample": "rust-loop",
+      "cell": "small|noop",
+      "action": "stop",
+      "fitness_ms": 1.3229850001152954,
+      "genome": {
+        "wrapper": true,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "graph",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "64 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:35.274468+00:00",
+      "sample": "rust-loop",
+      "cell": "small|body",
+      "action": "stop",
+      "fitness_ms": 24.44579099983457,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "line-tables-only",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "68 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:30.068141+00:00",
+      "sample": "rust-loop",
+      "cell": "small|sig_dep",
+      "action": "stop",
+      "fitness_ms": 24.76190700008374,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "49 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:28:19.571983+00:00",
+      "sample": "rust-loop",
+      "cell": "small|cold",
+      "action": "stop",
+      "fitness_ms": 43.517553999663505,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "24 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:27.285378+00:00",
+      "sample": "rust-loop",
+      "cell": "small|noop",
+      "action": "stop",
+      "fitness_ms": 1.3229850001152954,
+      "genome": {
+        "wrapper": true,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "graph",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "65 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:35.274468+00:00",
+      "sample": "rust-loop",
+      "cell": "small|body",
+      "action": "stop",
+      "fitness_ms": 24.44579099983457,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "line-tables-only",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "69 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:30.068141+00:00",
+      "sample": "rust-loop",
+      "cell": "small|sig_dep",
+      "action": "stop",
+      "fitness_ms": 24.76190700008374,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "50 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:28:19.571983+00:00",
+      "sample": "rust-loop",
+      "cell": "small|cold",
+      "action": "stop",
+      "fitness_ms": 43.517553999663505,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "25 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:27.285378+00:00",
+      "sample": "rust-loop",
+      "cell": "small|noop",
+      "action": "stop",
+      "fitness_ms": 1.3229850001152954,
+      "genome": {
+        "wrapper": true,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "graph",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "66 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:35.274468+00:00",
+      "sample": "rust-loop",
+      "cell": "small|body",
+      "action": "stop",
+      "fitness_ms": 24.44579099983457,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "line-tables-only",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "70 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:30.068141+00:00",
+      "sample": "rust-loop",
+      "cell": "small|sig_dep",
+      "action": "stop",
+      "fitness_ms": 24.76190700008374,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "51 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:28:19.571983+00:00",
+      "sample": "rust-loop",
+      "cell": "small|cold",
+      "action": "stop",
+      "fitness_ms": 43.517553999663505,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "26 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:27.285378+00:00",
+      "sample": "rust-loop",
+      "cell": "small|noop",
+      "action": "stop",
+      "fitness_ms": 1.3229850001152954,
+      "genome": {
+        "wrapper": true,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "graph",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "67 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:35.274468+00:00",
+      "sample": "rust-loop",
+      "cell": "small|body",
+      "action": "stop",
+      "fitness_ms": 24.44579099983457,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "line-tables-only",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "71 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:30.068141+00:00",
+      "sample": "rust-loop",
+      "cell": "small|sig_dep",
+      "action": "stop",
+      "fitness_ms": 24.76190700008374,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "52 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:28:19.571983+00:00",
+      "sample": "rust-loop",
+      "cell": "small|cold",
+      "action": "stop",
+      "fitness_ms": 43.517553999663505,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "27 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:27.285378+00:00",
+      "sample": "rust-loop",
+      "cell": "small|noop",
+      "action": "stop",
+      "fitness_ms": 1.3229850001152954,
+      "genome": {
+        "wrapper": true,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "graph",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "68 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:35.274468+00:00",
+      "sample": "rust-loop",
+      "cell": "small|body",
+      "action": "stop",
+      "fitness_ms": 24.44579099983457,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "line-tables-only",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "72 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:30.068141+00:00",
+      "sample": "rust-loop",
+      "cell": "small|sig_dep",
+      "action": "stop",
+      "fitness_ms": 24.76190700008374,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "53 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:28:19.571983+00:00",
+      "sample": "rust-loop",
+      "cell": "small|cold",
+      "action": "stop",
+      "fitness_ms": 43.517553999663505,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "28 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:27.285378+00:00",
+      "sample": "rust-loop",
+      "cell": "small|noop",
+      "action": "stop",
+      "fitness_ms": 1.3229850001152954,
+      "genome": {
+        "wrapper": true,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "graph",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "69 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:35.274468+00:00",
+      "sample": "rust-loop",
+      "cell": "small|body",
+      "action": "stop",
+      "fitness_ms": 24.44579099983457,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "line-tables-only",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "73 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:30.068141+00:00",
+      "sample": "rust-loop",
+      "cell": "small|sig_dep",
+      "action": "stop",
+      "fitness_ms": 24.76190700008374,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "54 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:28:19.571983+00:00",
+      "sample": "rust-loop",
+      "cell": "small|cold",
+      "action": "stop",
+      "fitness_ms": 43.517553999663505,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "29 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:27.285378+00:00",
+      "sample": "rust-loop",
+      "cell": "small|noop",
+      "action": "stop",
+      "fitness_ms": 1.3229850001152954,
+      "genome": {
+        "wrapper": true,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "graph",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "70 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:35.274468+00:00",
+      "sample": "rust-loop",
+      "cell": "small|body",
+      "action": "stop",
+      "fitness_ms": 24.44579099983457,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "line-tables-only",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "74 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:30.068141+00:00",
+      "sample": "rust-loop",
+      "cell": "small|sig_dep",
+      "action": "stop",
+      "fitness_ms": 24.76190700008374,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "55 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:28:19.571983+00:00",
+      "sample": "rust-loop",
+      "cell": "small|cold",
+      "action": "stop",
+      "fitness_ms": 43.517553999663505,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "30 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:27.285378+00:00",
+      "sample": "rust-loop",
+      "cell": "small|noop",
+      "action": "stop",
+      "fitness_ms": 1.3229850001152954,
+      "genome": {
+        "wrapper": true,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "graph",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "71 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:35.274468+00:00",
+      "sample": "rust-loop",
+      "cell": "small|body",
+      "action": "stop",
+      "fitness_ms": 24.44579099983457,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "line-tables-only",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "75 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:30.068141+00:00",
+      "sample": "rust-loop",
+      "cell": "small|sig_dep",
+      "action": "stop",
+      "fitness_ms": 24.76190700008374,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "56 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:28:19.571983+00:00",
+      "sample": "rust-loop",
+      "cell": "small|cold",
+      "action": "stop",
+      "fitness_ms": 43.517553999663505,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "31 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:27.285378+00:00",
+      "sample": "rust-loop",
+      "cell": "small|noop",
+      "action": "stop",
+      "fitness_ms": 1.3229850001152954,
+      "genome": {
+        "wrapper": true,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "graph",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "72 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:35.274468+00:00",
+      "sample": "rust-loop",
+      "cell": "small|body",
+      "action": "stop",
+      "fitness_ms": 24.44579099983457,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "line-tables-only",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "76 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:30.068141+00:00",
+      "sample": "rust-loop",
+      "cell": "small|sig_dep",
+      "action": "stop",
+      "fitness_ms": 24.76190700008374,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "57 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:28:19.571983+00:00",
+      "sample": "rust-loop",
+      "cell": "small|cold",
+      "action": "stop",
+      "fitness_ms": 43.517553999663505,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "32 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:27.285378+00:00",
+      "sample": "rust-loop",
+      "cell": "small|noop",
+      "action": "stop",
+      "fitness_ms": 1.3229850001152954,
+      "genome": {
+        "wrapper": true,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "graph",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "73 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:35.274468+00:00",
+      "sample": "rust-loop",
+      "cell": "small|body",
+      "action": "stop",
+      "fitness_ms": 24.44579099983457,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "line-tables-only",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "77 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:30.068141+00:00",
+      "sample": "rust-loop",
+      "cell": "small|sig_dep",
+      "action": "stop",
+      "fitness_ms": 24.76190700008374,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "58 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:28:19.571983+00:00",
+      "sample": "rust-loop",
+      "cell": "small|cold",
+      "action": "stop",
+      "fitness_ms": 43.517553999663505,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "33 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:27.285378+00:00",
+      "sample": "rust-loop",
+      "cell": "small|noop",
+      "action": "stop",
+      "fitness_ms": 1.3229850001152954,
+      "genome": {
+        "wrapper": true,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "graph",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "74 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:35.274468+00:00",
+      "sample": "rust-loop",
+      "cell": "small|body",
+      "action": "stop",
+      "fitness_ms": 24.44579099983457,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "line-tables-only",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "78 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:30.068141+00:00",
+      "sample": "rust-loop",
+      "cell": "small|sig_dep",
+      "action": "stop",
+      "fitness_ms": 24.76190700008374,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "59 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:28:19.571983+00:00",
+      "sample": "rust-loop",
+      "cell": "small|cold",
+      "action": "stop",
+      "fitness_ms": 43.517553999663505,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "34 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:27.285378+00:00",
+      "sample": "rust-loop",
+      "cell": "small|noop",
+      "action": "stop",
+      "fitness_ms": 1.3229850001152954,
+      "genome": {
+        "wrapper": true,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "graph",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "75 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:35.274468+00:00",
+      "sample": "rust-loop",
+      "cell": "small|body",
+      "action": "stop",
+      "fitness_ms": 24.44579099983457,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "line-tables-only",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "79 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:30.068141+00:00",
+      "sample": "rust-loop",
+      "cell": "small|sig_dep",
+      "action": "stop",
+      "fitness_ms": 24.76190700008374,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "60 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:28:19.571983+00:00",
+      "sample": "rust-loop",
+      "cell": "small|cold",
+      "action": "stop",
+      "fitness_ms": 43.517553999663505,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "35 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:27.285378+00:00",
+      "sample": "rust-loop",
+      "cell": "small|noop",
+      "action": "stop",
+      "fitness_ms": 1.3229850001152954,
+      "genome": {
+        "wrapper": true,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "graph",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "76 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:35.274468+00:00",
+      "sample": "rust-loop",
+      "cell": "small|body",
+      "action": "stop",
+      "fitness_ms": 24.44579099983457,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "line-tables-only",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "80 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:30.068141+00:00",
+      "sample": "rust-loop",
+      "cell": "small|sig_dep",
+      "action": "stop",
+      "fitness_ms": 24.76190700008374,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "61 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:28:19.571983+00:00",
+      "sample": "rust-loop",
+      "cell": "small|cold",
+      "action": "stop",
+      "fitness_ms": 43.517553999663505,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "36 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:27.285378+00:00",
+      "sample": "rust-loop",
+      "cell": "small|noop",
+      "action": "stop",
+      "fitness_ms": 1.3229850001152954,
+      "genome": {
+        "wrapper": true,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "graph",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "77 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:35.274468+00:00",
+      "sample": "rust-loop",
+      "cell": "small|body",
+      "action": "stop",
+      "fitness_ms": 24.44579099983457,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "line-tables-only",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "81 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:28:19.571983+00:00",
+      "sample": "rust-loop",
+      "cell": "small|cold",
+      "action": "stop",
+      "fitness_ms": 43.517553999663505,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "37 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:27.285378+00:00",
+      "sample": "rust-loop",
+      "cell": "small|noop",
+      "action": "stop",
+      "fitness_ms": 1.3229850001152954,
+      "genome": {
+        "wrapper": true,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "graph",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "78 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:35.274468+00:00",
+      "sample": "rust-loop",
+      "cell": "small|body",
+      "action": "stop",
+      "fitness_ms": 24.44579099983457,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "line-tables-only",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "82 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:30.068141+00:00",
+      "sample": "rust-loop",
+      "cell": "small|sig_dep",
+      "action": "stop",
+      "fitness_ms": 24.76190700008374,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "62 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:28:19.571983+00:00",
+      "sample": "rust-loop",
+      "cell": "small|cold",
+      "action": "stop",
+      "fitness_ms": 43.517553999663505,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "38 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:27.285378+00:00",
+      "sample": "rust-loop",
+      "cell": "small|noop",
+      "action": "stop",
+      "fitness_ms": 1.3229850001152954,
+      "genome": {
+        "wrapper": true,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "graph",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "79 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:27:35.274468+00:00",
+      "sample": "rust-loop",
+      "cell": "small|body",
+      "action": "stop",
+      "fitness_ms": 24.44579099983457,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "line-tables-only",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "83 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:26:17.978379+00:00",
+      "sample": "midsize",
+      "cell": "large|cold",
+      "action": "seed",
+      "fitness_ms": 1387.3198349999143,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": true,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": null,
+        "quiet": false,
+        "command_build": false
+      },
+      "reason": "median 1387.320 ms"
+    },
+    {
+      "timestamp": "2026-10-21T03:19:46.188562+00:00",
+      "sample": "midsize",
+      "cell": "large|noop",
+      "action": "seed",
+      "fitness_ms": 31.221453999933146,
+      "genome": {
+        "wrapper": true,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": null,
+        "quiet": false,
+        "command_build": false
+      },
+      "reason": "median 31.221 ms"
+    },
+    {
+      "timestamp": "2026-10-21T03:20:21.425557+00:00",
+      "sample": "midsize",
+      "cell": "large|body",
+      "action": "seed",
+      "fitness_ms": 121.93916600006105,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "line-tables-only",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": null,
+        "quiet": false,
+        "command_build": false
+      },
+      "reason": "median 121.939 ms"
+    },
+    {
+      "timestamp": "2026-10-21T03:21:11.570323+00:00",
+      "sample": "midsize",
+      "cell": "large|sig_dep",
+      "action": "reject",
+      "fitness_ms": 529.7661290000519,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": "touched",
+        "quiet": false,
+        "command_build": false
+      },
+      "reason": "package_scope=touched is cargo check -p hub; it skips dependents. Fail the sig_dep gate unless correctness.dependents_agree_on_broken or reframe as a gene with a mandatory workspace check before validate"
+    },
+    {
+      "timestamp": "2026-10-21T03:35:21.667183+00:00",
+      "sample": "midsize-held-out-from-rust-loop",
+      "cell": "large|cold",
+      "action": "held_out",
+      "fitness_ms": 3908.885816999941,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": null,
+        "quiet": false,
+        "command_build": false
+      },
+      "reason": "held-out evaluation; does not occupy a cell"
+    },
+    {
+      "timestamp": "2026-10-21T03:35:28.308808+00:00",
+      "sample": "midsize-held-out-from-rust-loop",
+      "cell": "large|body",
+      "action": "held_out",
+      "fitness_ms": 245.90918599994893,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "line-tables-only",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": null,
+        "quiet": false,
+        "command_build": false
+      },
+      "reason": "held-out evaluation; does not occupy a cell"
+    },
+    {
+      "timestamp": "2026-10-21T03:35:51.489632+00:00",
+      "sample": "midsize-held-out-from-rust-loop",
+      "cell": "large|sig_dep",
+      "action": "held_out",
+      "fitness_ms": 1560.9420870000577,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": null,
+        "quiet": false,
+        "command_build": false
+      },
+      "reason": "held-out evaluation; does not occupy a cell"
+    },
+    {
+      "timestamp": "2026-10-21T03:36:08.421057+00:00",
+      "sample": "midsize-held-out-from-rust-loop-medium",
+      "cell": "large|cold",
+      "action": "held_out",
+      "fitness_ms": 4211.840735250007,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": null,
+        "quiet": false,
+        "command_build": false
+      },
+      "reason": "held-out evaluation; does not occupy a cell"
+    },
+    {
+      "timestamp": "2026-10-21T03:36:11.970974+00:00",
+      "sample": "midsize-held-out-from-rust-loop-medium",
+      "cell": "large|body",
+      "action": "held_out",
+      "fitness_ms": 134.18279649988563,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": null,
+        "quiet": false,
+        "command_build": false
+      },
+      "reason": "held-out evaluation; does not occupy a cell"
+    },
+    {
+      "timestamp": "2026-10-21T03:36:35.510348+00:00",
+      "sample": "midsize-held-out-from-rust-loop-medium",
+      "cell": "large|sig_dep",
+      "action": "held_out",
+      "fitness_ms": 1659.058936499946,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": null,
+        "quiet": false,
+        "command_build": false
+      },
+      "reason": "held-out evaluation; does not occupy a cell"
+    },
+    {
+      "timestamp": "2026-10-21T03:26:17.978379+00:00",
+      "sample": "midsize",
+      "cell": "large|cold",
+      "action": "stop",
+      "fitness_ms": 1387.3198349999143,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": true,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": null,
+        "quiet": false,
+        "command_build": false
+      },
+      "reason": "5 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:26:17.978379+00:00",
+      "sample": "midsize",
+      "cell": "large|cold",
+      "action": "stop",
+      "fitness_ms": 1387.3198349999143,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": true,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": null,
+        "quiet": false,
+        "command_build": false
+      },
+      "reason": "6 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:26:17.978379+00:00",
+      "sample": "midsize",
+      "cell": "large|cold",
+      "action": "stop",
+      "fitness_ms": 1387.3198349999143,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": true,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": null,
+        "quiet": false,
+        "command_build": false
+      },
+      "reason": "7 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:19:46.188562+00:00",
+      "sample": "midsize",
+      "cell": "large|noop",
+      "action": "stop",
+      "fitness_ms": 31.221453999933146,
+      "genome": {
+        "wrapper": true,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": null,
+        "quiet": false,
+        "command_build": false
+      },
+      "reason": "5 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:19:46.188562+00:00",
+      "sample": "midsize",
+      "cell": "large|noop",
+      "action": "stop",
+      "fitness_ms": 31.221453999933146,
+      "genome": {
+        "wrapper": true,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": null,
+        "quiet": false,
+        "command_build": false
+      },
+      "reason": "6 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:20:21.425557+00:00",
+      "sample": "midsize",
+      "cell": "large|body",
+      "action": "stop",
+      "fitness_ms": 121.93916600006105,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "line-tables-only",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": null,
+        "quiet": false,
+        "command_build": false
+      },
+      "reason": "5 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:20:21.425557+00:00",
+      "sample": "midsize",
+      "cell": "large|body",
+      "action": "stop",
+      "fitness_ms": 121.93916600006105,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "line-tables-only",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": null,
+        "quiet": false,
+        "command_build": false
+      },
+      "reason": "6 non-improving tries"
+    },
+    {
+      "timestamp": "2026-10-21T03:19:32.269907+00:00",
+      "sample": "midsize",
+      "cell": "large|sig_dep",
+      "action": "seed",
+      "fitness_ms": 777.3346029999857,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": null,
+        "quiet": false,
+        "command_build": false
+      },
+      "reason": "median 777.335 ms"
+    },
+    {
+      "timestamp": "2026-10-21T03:20:31.893557+00:00",
+      "sample": "midsize",
+      "cell": "large|sig_dep",
+      "action": "replace",
+      "fitness_ms": 711.9701940000027,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "line-tables-only",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": null,
+        "quiet": false,
+        "command_build": false
+      },
+      "reason": "8.4% faster than 777.335 ms"
+    },
+    {
+      "timestamp": "2026-10-21T03:21:11.570323+00:00",
+      "sample": "midsize",
+      "cell": "large|sig_dep",
+      "action": "reject",
+      "fitness_ms": 529.7661290000519,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": "touched",
+        "quiet": false,
+        "command_build": false
+      },
+      "reason": "package_scope=touched is cargo check -p hub; it skips dependents. Fail the sig_dep gate unless correctness.dependents_agree_on_broken or reframe as a gene with a mandatory workspace check before validate"
+    },
+    {
+      "timestamp": "2026-10-21T03:41:08.870538+00:00",
+      "sample": "real",
+      "cell": "iteration",
+      "action": "promote",
+      "fitness_ms": null,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "line-tables-only",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": true
+      },
+      "reason": "weighted majority on real-sample cold/body/sig_dep; fixture cells do not vote when real elites exist; warm-cache sccache cold is sample-specific, not a true-cold default"
+    },
+    {
+      "timestamp": "2026-10-21T03:41:19.315557+00:00",
+      "sample": "real",
+      "cell": "iteration",
+      "action": "promote",
+      "fitness_ms": null,
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "line-tables-only",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": null,
+        "quiet": false,
+        "command_build": false
+      },
+      "reason": "weighted majority on real-sample cold/body/sig_dep; fixture cells do not vote when real elites exist; warm-cache sccache cold is sample-specific, not a true-cold default"
     }
   ],
   "generalization": {
@@ -5996,12 +9695,406 @@
         "disk_bytes": 1453932,
         "correctness_ok": true,
         "delta_vs_local_elite_pct": 0.6684077829615088
+      },
+      {
+        "genome_from": "small|cold",
+        "trained_on": "rust-loop",
+        "tested_on": "midsize",
+        "cell": "large|cold",
+        "fitness_ms": 3908.885816999941,
+        "spread_ms": 48.04283350006244,
+        "disk_bytes": 196497609,
+        "correctness_ok": true,
+        "delta_vs_local_elite_pct": 181.75808623108043,
+        "ok": true,
+        "skip_reason": null,
+        "per_sample": {
+          "ripgrep": {
+            "ok": true,
+            "samples_ms": [
+              3066.7097240000203,
+              2965.7238509998933
+            ],
+            "returncodes": [
+              0,
+              0
+            ],
+            "median_ms": 3016.216787499957,
+            "spread_ms": 50.49293650006348,
+            "min_ms": 2965.7238509998933,
+            "max_ms": 3066.7097240000203,
+            "target_bytes": 116910500
+          },
+          "tokio": {
+            "ok": true,
+            "samples_ms": [
+              4847.147576999987,
+              4755.962115999864
+            ],
+            "returncodes": [
+              0,
+              0
+            ],
+            "median_ms": 4801.554846499926,
+            "spread_ms": 45.59273050006141,
+            "min_ms": 4755.962115999864,
+            "max_ms": 4847.147576999987,
+            "target_bytes": 79587109
+          }
+        }
+      },
+      {
+        "genome_from": "small|noop",
+        "trained_on": "rust-loop",
+        "tested_on": "midsize",
+        "cell": "large|noop",
+        "fitness_ms": 0.0,
+        "spread_ms": null,
+        "disk_bytes": 0,
+        "correctness_ok": false,
+        "delta_vs_local_elite_pct": null,
+        "ok": false,
+        "skip_reason": "skipped-graph-on-large",
+        "per_sample": {}
+      },
+      {
+        "genome_from": "small|body",
+        "trained_on": "rust-loop",
+        "tested_on": "midsize",
+        "cell": "large|body",
+        "fitness_ms": 245.90918599994893,
+        "spread_ms": 5.279721964173199,
+        "disk_bytes": 201689878,
+        "correctness_ok": true,
+        "delta_vs_local_elite_pct": 101.66546489240858,
+        "ok": true,
+        "skip_reason": null,
+        "per_sample": {
+          "ripgrep": {
+            "ok": true,
+            "samples_ms": [
+              388.84560199994667,
+              407.36109299996315,
+              385.05911599986575
+            ],
+            "returncodes": [
+              0,
+              0,
+              0
+            ],
+            "median_ms": 388.84560199994667,
+            "spread_ms": 9.744166695535068,
+            "min_ms": 385.05911599986575,
+            "max_ms": 407.36109299996315,
+            "target_bytes": 117830552
+          },
+          "tokio": {
+            "ok": true,
+            "samples_ms": [
+              104.27496499983135,
+              102.31266100004177,
+              102.9727699999512
+            ],
+            "returncodes": [
+              0,
+              0,
+              0
+            ],
+            "median_ms": 102.9727699999512,
+            "spread_ms": 0.8152772328113304,
+            "min_ms": 102.31266100004177,
+            "max_ms": 104.27496499983135,
+            "target_bytes": 83859326
+          }
+        }
+      },
+      {
+        "genome_from": "small|sig_dep",
+        "trained_on": "rust-loop",
+        "tested_on": "midsize",
+        "cell": "large|sig_dep",
+        "fitness_ms": 1560.9420870000577,
+        "spread_ms": 51.28091865396217,
+        "disk_bytes": 196497661,
+        "correctness_ok": true,
+        "delta_vs_local_elite_pct": 194.64739279318943,
+        "ok": true,
+        "skip_reason": null,
+        "per_sample": {
+          "ripgrep": {
+            "ok": true,
+            "samples_ms": [
+              670.0154440000006,
+              670.2755260000686,
+              657.2253770000316
+            ],
+            "returncodes": [
+              0,
+              0,
+              0
+            ],
+            "median_ms": 670.0154440000006,
+            "spread_ms": 6.091522756472685,
+            "min_ms": 657.2253770000316,
+            "max_ms": 670.2755260000686,
+            "target_bytes": 116910526
+          },
+          "tokio": {
+            "ok": true,
+            "samples_ms": [
+              2369.8245880000286,
+              2602.760483999873,
+              2451.8687300001147
+            ],
+            "returncodes": [
+              0,
+              0,
+              0
+            ],
+            "median_ms": 2451.8687300001147,
+            "spread_ms": 96.47031455145165,
+            "min_ms": 2369.8245880000286,
+            "max_ms": 2602.760483999873,
+            "target_bytes": 79587135
+          }
+        }
+      },
+      {
+        "genome_from": "mid|cold",
+        "trained_on": "rust-loop-medium",
+        "tested_on": "midsize",
+        "cell": "large|cold",
+        "fitness_ms": 4211.840735250007,
+        "spread_ms": 77.11390874999324,
+        "disk_bytes": 196497609,
+        "correctness_ok": true,
+        "delta_vs_local_elite_pct": 203.59551049381972,
+        "ok": true,
+        "skip_reason": null,
+        "per_sample": {
+          "ripgrep": {
+            "ok": true,
+            "samples_ms": [
+              3185.1852500001314,
+              3176.007954999932
+            ],
+            "returncodes": [
+              0,
+              0
+            ],
+            "median_ms": 3180.5966025000316,
+            "spread_ms": 4.588647500099796,
+            "min_ms": 3176.007954999932,
+            "max_ms": 3185.1852500001314,
+            "target_bytes": 116910500
+          },
+          "tokio": {
+            "ok": true,
+            "samples_ms": [
+              5392.724037999869,
+              5093.445698000096
+            ],
+            "returncodes": [
+              0,
+              0
+            ],
+            "median_ms": 5243.084867999983,
+            "spread_ms": 149.6391699998867,
+            "min_ms": 5093.445698000096,
+            "max_ms": 5392.724037999869,
+            "target_bytes": 79587109
+          }
+        }
+      },
+      {
+        "genome_from": "mid|noop",
+        "trained_on": "rust-loop-medium",
+        "tested_on": "midsize",
+        "cell": "large|noop",
+        "fitness_ms": 0.0,
+        "spread_ms": null,
+        "disk_bytes": 0,
+        "correctness_ok": false,
+        "delta_vs_local_elite_pct": null,
+        "ok": false,
+        "skip_reason": "skipped-graph-on-large",
+        "per_sample": {}
+      },
+      {
+        "genome_from": "mid|body",
+        "trained_on": "rust-loop-medium",
+        "tested_on": "midsize",
+        "cell": "large|body",
+        "fitness_ms": 134.18279649988563,
+        "spread_ms": 14.315681745855233,
+        "disk_bytes": 381149562,
+        "correctness_ok": true,
+        "delta_vs_local_elite_pct": 10.040769427452412,
+        "ok": true,
+        "skip_reason": null,
+        "per_sample": {
+          "ripgrep": {
+            "ok": true,
+            "samples_ms": [
+              235.7098859999951,
+              180.5208240000411,
+              182.9588389998662
+            ],
+            "returncodes": [
+              0,
+              0,
+              0
+            ],
+            "median_ms": 182.9588389998662,
+            "spread_ms": 25.461189291381295,
+            "min_ms": 180.5208240000411,
+            "max_ms": 235.7098859999951,
+            "target_bytes": 164489407
+          },
+          "tokio": {
+            "ok": true,
+            "samples_ms": [
+              85.40675399990505,
+              89.09875399990597,
+              81.33651599996483
+            ],
+            "returncodes": [
+              0,
+              0,
+              0
+            ],
+            "median_ms": 85.40675399990505,
+            "spread_ms": 3.170174200329171,
+            "min_ms": 81.33651599996483,
+            "max_ms": 89.09875399990597,
+            "target_bytes": 216660155
+          }
+        }
+      },
+      {
+        "genome_from": "mid|sig_dep",
+        "trained_on": "rust-loop-medium",
+        "tested_on": "midsize",
+        "cell": "large|sig_dep",
+        "fitness_ms": 1659.058936499946,
+        "spread_ms": 99.06621833282419,
+        "disk_bytes": 196497662,
+        "correctness_ok": true,
+        "delta_vs_local_elite_pct": 213.16817850009872,
+        "ok": true,
+        "skip_reason": null,
+        "per_sample": {
+          "ripgrep": {
+            "ok": true,
+            "samples_ms": [
+              690.1086660000146,
+              696.0640539998622,
+              757.5156319999223
+            ],
+            "returncodes": [
+              0,
+              0,
+              0
+            ],
+            "median_ms": 696.0640539998622,
+            "spread_ms": 30.469405694234997,
+            "min_ms": 690.1086660000146,
+            "max_ms": 757.5156319999223,
+            "target_bytes": 116910527
+          },
+          "tokio": {
+            "ok": true,
+            "samples_ms": [
+              2510.3933839998263,
+              2622.0538190000298,
+              2908.4924639998917
+            ],
+            "returncodes": [
+              0,
+              0,
+              0
+            ],
+            "median_ms": 2622.0538190000298,
+            "spread_ms": 167.66303097141338,
+            "min_ms": 2510.3933839998263,
+            "max_ms": 2908.4924639998917,
+            "target_bytes": 79587135
+          }
+        }
       }
     ]
   },
   "promoted": {
     "defaults": {
       "iteration": {
+        "genome": {
+          "wrapper": false,
+          "dev_backend": "llvm",
+          "linker": "default",
+          "sccache": false,
+          "codegen_units": null,
+          "incremental": true,
+          "debuginfo": "line-tables-only",
+          "fast_check": "cargo-check",
+          "loop": "check",
+          "jobs": 3,
+          "offline": true,
+          "package_scope": null,
+          "quiet": false,
+          "command_build": false
+        },
+        "reason": "weighted majority on real-sample cold/body/sig_dep; fixture cells do not vote when real elites exist; warm-cache sccache cold is sample-specific, not a true-cold default",
+        "edits": [
+          "cold",
+          "body",
+          "sig_dep"
+        ],
+        "voters": "real"
+      },
+      "noop": {
+        "genome": {
+          "wrapper": true,
+          "dev_backend": "llvm",
+          "linker": "default",
+          "sccache": false,
+          "codegen_units": null,
+          "incremental": false,
+          "debuginfo": "full",
+          "fast_check": "cargo-check",
+          "loop": "check",
+          "jobs": 3,
+          "offline": true,
+          "package_scope": null,
+          "quiet": false,
+          "command_build": false
+        },
+        "reason": "weighted majority on real-sample noop; fixture graph elites do not set the default when a real noop exists",
+        "edits": [
+          "noop"
+        ],
+        "voters": "real"
+      },
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "line-tables-only",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": 3,
+        "offline": true,
+        "package_scope": null,
+        "quiet": false,
+        "command_build": false
+      }
+    },
+    "sample_specific": [
+      {
+        "sample": "rust-loop",
+        "cell": "small|cold",
         "genome": {
           "wrapper": false,
           "dev_backend": "llvm",
@@ -6015,14 +10108,14 @@
           "jobs": null,
           "offline": true
         },
-        "reason": "majority elite on cold/body/sig_dep across occupied size buckets; do not use graph wall time as the edit-loop default",
-        "edits": [
-          "cold",
-          "body",
-          "sig_dep"
-        ]
+        "reason": "fixture elite; real samples outvote fixtures; loses the weighted vote for its edit family",
+        "sample_class": "fixture",
+        "cache_state": "empty",
+        "fitness_method": "official_first_rebuild"
       },
-      "noop": {
+      {
+        "sample": "rust-loop",
+        "cell": "small|noop",
         "genome": {
           "wrapper": true,
           "dev_backend": "llvm",
@@ -6036,25 +10129,77 @@
           "jobs": null,
           "offline": true
         },
-        "reason": "majority elite on noop: declared graph plus nanocompile task cache",
-        "edits": [
-          "noop"
-        ]
+        "reason": "fixture elite; real samples outvote fixtures; loses the weighted vote for its edit family",
+        "sample_class": "fixture",
+        "cache_state": null,
+        "fitness_method": "official_first_rebuild"
       },
-      "genome": {
-        "wrapper": false,
-        "dev_backend": "llvm",
-        "linker": "default",
-        "sccache": false,
-        "codegen_units": null,
-        "incremental": false,
-        "debuginfo": "full",
-        "fast_check": "cargo-check",
-        "loop": "check",
-        "jobs": null,
-        "offline": true
+      {
+        "sample": "rust-loop",
+        "cell": "small|body",
+        "genome": {
+          "wrapper": false,
+          "dev_backend": "llvm",
+          "linker": "default",
+          "sccache": false,
+          "codegen_units": null,
+          "incremental": false,
+          "debuginfo": "line-tables-only",
+          "fast_check": "cargo-check",
+          "loop": "check",
+          "jobs": null,
+          "offline": true
+        },
+        "reason": "fixture elite; real samples outvote fixtures; loses the weighted vote for its edit family",
+        "sample_class": "fixture",
+        "cache_state": null,
+        "fitness_method": "official_first_rebuild"
+      },
+      {
+        "sample": "rust-loop",
+        "cell": "small|sig_dep",
+        "genome": {
+          "wrapper": false,
+          "dev_backend": "llvm",
+          "linker": "default",
+          "sccache": false,
+          "codegen_units": null,
+          "incremental": false,
+          "debuginfo": "full",
+          "fast_check": "cargo-check",
+          "loop": "check",
+          "jobs": null,
+          "offline": true
+        },
+        "reason": "fixture elite; real samples outvote fixtures; loses the weighted vote for its edit family",
+        "sample_class": "fixture",
+        "cache_state": null,
+        "fitness_method": "official_first_rebuild"
+      },
+      {
+        "sample": "midsize",
+        "cell": "large|cold",
+        "genome": {
+          "wrapper": false,
+          "dev_backend": "llvm",
+          "linker": "default",
+          "sccache": true,
+          "codegen_units": null,
+          "incremental": false,
+          "debuginfo": "full",
+          "fast_check": "cargo-check",
+          "loop": "check",
+          "jobs": 3,
+          "offline": true,
+          "package_scope": null,
+          "quiet": false,
+          "command_build": false
+        },
+        "reason": "warm compiler cache (sccache/wrapper retained), not empty-cache cold; loses the weighted vote for its edit family",
+        "sample_class": "real",
+        "cache_state": "warm_compiler_cache",
+        "fitness_method": "restore_rebuild_mean_of_medians"
       }
-    },
-    "sample_specific": []
+    ]
   }
 }

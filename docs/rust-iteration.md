@@ -37,9 +37,10 @@ cranelift, rustd, Lust or Relax as the gate.
 with a real Cargo crate. `tools/rust_loop.py` remains a compatibility fallback.
 
 The [example crate](../examples/rust-loop/README.md) is a no-dependency library
-with the same two-task graph. Timing and the broken-edit gate live in
-[rust-iteration-bench.md](rust-iteration-bench.md); the stable entrypoint is
-`bench/rust_loop_bench`.
+with the same two-task graph. The mid MAP-Elites sample is pinned
+[hashbrown 0.15.2](../examples/pinned-hashbrown/PINNED.md). Timing and the
+broken-edit gate live in [rust-iteration-bench.md](rust-iteration-bench.md);
+the stable entrypoint is `bench/rust_loop_bench`.
 
 ## Correctness rule
 
@@ -136,6 +137,13 @@ and [rustc_codegen_cranelift](https://github.com/rust-lang/rustc_codegen_craneli
 rustup component add rustc-codegen-cranelift-preview --toolchain nightly
 CARGO_PROFILE_DEV_CODEGEN_BACKEND=cranelift cargo +nightly build -Zcodegen-backend
 ```
+
+Nightly Cargo (1.101 here) still requires `-Zcodegen-backend` or
+`[unstable] codegen-backend = true` in `.cargo/config.toml`. Setting only
+`CARGO_PROFILE_DEV_CODEGEN_BACKEND=cranelift` fails on both stable Cargo
+1.83 and nightly Cargo. The rust-loop harness always passes
+`cargo +nightly -Zcodegen-backend` when `dev_backend=cranelift`. Never
+hand this to `validate`.
 
 Or in `.cargo/config.toml`:
 

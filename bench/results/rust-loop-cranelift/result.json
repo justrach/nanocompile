@@ -1,0 +1,433 @@
+{
+  "schema": 1,
+  "sample": "rust-loop-cranelift",
+  "project": "/workspace/examples/rust-loop",
+  "timestamp": "2026-10-21T03:37:17.761163+00:00",
+  "runs": 3,
+  "warmup": 1,
+  "offline": true,
+  "platform": "Linux x86_64",
+  "driver": "zig",
+  "tools": {
+    "cargo": "/usr/local/cargo/bin/cargo",
+    "rustc": "/usr/local/cargo/bin/rustc",
+    "mold": "/usr/bin/mold",
+    "sccache": "/usr/local/cargo/bin/sccache",
+    "hyperfine": "/usr/local/cargo/bin/hyperfine",
+    "rust_lld": true,
+    "cranelift": true,
+    "nightly": true,
+    "nanocompile": "/workspace/zig-out/bin/nanocompile"
+  },
+  "install_notes": [],
+  "correctness": {
+    "broken_edit": true,
+    "fast_failed": true,
+    "validate_failed": true,
+    "validate_is_final": true,
+    "agree_on_broken": true,
+    "graph_fast_failed": true,
+    "graph_validate_stamp_written": false,
+    "notes": ""
+  },
+  "cells": [
+    {
+      "samples_ms": [
+        48.958613999730005,
+        47.88090800002465,
+        48.550071000136086
+      ],
+      "median_ms": 48.550071000136086,
+      "mean_ms": 48.46319766663024,
+      "stdev_ms": 0.4442392654910521,
+      "min_ms": 47.88090800002465,
+      "max_ms": 48.958613999730005,
+      "target_bytes": 56404,
+      "target_bytes_median": 56404,
+      "returncodes": [
+        0,
+        0,
+        0
+      ],
+      "ok": true,
+      "step": "baseline",
+      "title": "plain cargo",
+      "command": "build",
+      "phase": "cold",
+      "skipped": false,
+      "skip_reason": null
+    },
+    {
+      "samples_ms": [
+        10.563622000063333,
+        9.902272000090306,
+        10.796181999921828
+      ],
+      "median_ms": 10.563622000063333,
+      "mean_ms": 10.420692000025156,
+      "stdev_ms": 0.3786735715035512,
+      "min_ms": 9.902272000090306,
+      "max_ms": 10.796181999921828,
+      "target_bytes": 56404,
+      "target_bytes_median": 56404,
+      "returncodes": [
+        0,
+        0,
+        0
+      ],
+      "ok": true,
+      "step": "baseline",
+      "title": "plain cargo",
+      "command": "build",
+      "phase": "noop",
+      "skipped": false,
+      "skip_reason": null
+    },
+    {
+      "samples_ms": [
+        26.827446999959648
+      ],
+      "median_ms": 26.827446999959648,
+      "mean_ms": 26.827446999959648,
+      "stdev_ms": 0.0,
+      "min_ms": 26.827446999959648,
+      "max_ms": 26.827446999959648,
+      "target_bytes": 56668,
+      "target_bytes_median": 56668,
+      "returncodes": [
+        0
+      ],
+      "ok": true,
+      "step": "baseline",
+      "title": "plain cargo",
+      "command": "build",
+      "phase": "edit_body",
+      "skipped": false,
+      "skip_reason": null
+    },
+    {
+      "samples_ms": [
+        26.695271999869874
+      ],
+      "median_ms": 26.695271999869874,
+      "mean_ms": 26.695271999869874,
+      "stdev_ms": 0.0,
+      "min_ms": 26.695271999869874,
+      "max_ms": 26.695271999869874,
+      "target_bytes": 56764,
+      "target_bytes_median": 56764,
+      "returncodes": [
+        0
+      ],
+      "ok": true,
+      "step": "baseline",
+      "title": "plain cargo",
+      "command": "build",
+      "phase": "edit_sig",
+      "skipped": false,
+      "skip_reason": null
+    },
+    {
+      "samples_ms": [
+        183.81916099997397,
+        183.56821499992293,
+        180.2459559999079
+      ],
+      "median_ms": 183.56821499992293,
+      "mean_ms": 182.54444399993494,
+      "stdev_ms": 1.6285021314972503,
+      "min_ms": 180.2459559999079,
+      "max_ms": 183.81916099997397,
+      "target_bytes": 7082318,
+      "target_bytes_median": 7082317,
+      "returncodes": [
+        0,
+        0,
+        0
+      ],
+      "ok": true,
+      "step": "baseline",
+      "title": "plain cargo",
+      "command": "test",
+      "phase": "cold",
+      "skipped": false,
+      "skip_reason": null
+    },
+    {
+      "samples_ms": [
+        22.134603000267816,
+        22.04293900012999,
+        22.052287999940745
+      ],
+      "median_ms": 22.052287999940745,
+      "mean_ms": 22.07661000011285,
+      "stdev_ms": 0.04118447927391861,
+      "min_ms": 22.04293900012999,
+      "max_ms": 22.134603000267816,
+      "target_bytes": 7082318,
+      "target_bytes_median": 7082318,
+      "returncodes": [
+        0,
+        0,
+        0
+      ],
+      "ok": true,
+      "step": "baseline",
+      "title": "plain cargo",
+      "command": "test",
+      "phase": "noop",
+      "skipped": false,
+      "skip_reason": null
+    },
+    {
+      "samples_ms": [
+        143.95072399975106
+      ],
+      "median_ms": 143.95072399975106,
+      "mean_ms": 143.95072399975106,
+      "stdev_ms": 0.0,
+      "min_ms": 143.95072399975106,
+      "max_ms": 143.95072399975106,
+      "target_bytes": 7081087,
+      "target_bytes_median": 7081087,
+      "returncodes": [
+        0
+      ],
+      "ok": true,
+      "step": "baseline",
+      "title": "plain cargo",
+      "command": "test",
+      "phase": "edit_body",
+      "skipped": false,
+      "skip_reason": null
+    },
+    {
+      "samples_ms": [
+        144.57988799995292
+      ],
+      "median_ms": 144.57988799995292,
+      "mean_ms": 144.57988799995292,
+      "stdev_ms": 0.0,
+      "min_ms": 144.57988799995292,
+      "max_ms": 144.57988799995292,
+      "target_bytes": 7081162,
+      "target_bytes_median": 7081162,
+      "returncodes": [
+        0
+      ],
+      "ok": true,
+      "step": "baseline",
+      "title": "plain cargo",
+      "command": "test",
+      "phase": "edit_sig",
+      "skipped": false,
+      "skip_reason": null
+    },
+    {
+      "samples_ms": [
+        45.46991999995953,
+        46.835911000016495,
+        43.427658999917185
+      ],
+      "median_ms": 45.46991999995953,
+      "mean_ms": 45.24449666663107,
+      "stdev_ms": 1.4005135209276922,
+      "min_ms": 43.427658999917185,
+      "max_ms": 46.835911000016495,
+      "target_bytes": 62372,
+      "target_bytes_median": 62372,
+      "returncodes": [
+        0,
+        0,
+        0
+      ],
+      "ok": true,
+      "step": "cranelift-dev",
+      "title": "nightly cranelift codegen backend (dev build/test)",
+      "command": "build",
+      "phase": "cold",
+      "skipped": false,
+      "skip_reason": null
+    },
+    {
+      "samples_ms": [
+        10.920842999894376,
+        10.665493000033166,
+        10.836642999947799
+      ],
+      "median_ms": 10.836642999947799,
+      "mean_ms": 10.807659666625113,
+      "stdev_ms": 0.10624164536611917,
+      "min_ms": 10.665493000033166,
+      "max_ms": 10.920842999894376,
+      "target_bytes": 62372,
+      "target_bytes_median": 62372,
+      "returncodes": [
+        0,
+        0,
+        0
+      ],
+      "ok": true,
+      "step": "cranelift-dev",
+      "title": "nightly cranelift codegen backend (dev build/test)",
+      "command": "build",
+      "phase": "noop",
+      "skipped": false,
+      "skip_reason": null
+    },
+    {
+      "samples_ms": [
+        24.97602600033133
+      ],
+      "median_ms": 24.97602600033133,
+      "mean_ms": 24.97602600033133,
+      "stdev_ms": 0.0,
+      "min_ms": 24.97602600033133,
+      "max_ms": 24.97602600033133,
+      "target_bytes": 62352,
+      "target_bytes_median": 62352,
+      "returncodes": [
+        0
+      ],
+      "ok": true,
+      "step": "cranelift-dev",
+      "title": "nightly cranelift codegen backend (dev build/test)",
+      "command": "build",
+      "phase": "edit_body",
+      "skipped": false,
+      "skip_reason": null
+    },
+    {
+      "samples_ms": [
+        26.26334200022029
+      ],
+      "median_ms": 26.26334200022029,
+      "mean_ms": 26.26334200022029,
+      "stdev_ms": 0.0,
+      "min_ms": 26.26334200022029,
+      "max_ms": 26.26334200022029,
+      "target_bytes": 62383,
+      "target_bytes_median": 62383,
+      "returncodes": [
+        0
+      ],
+      "ok": true,
+      "step": "cranelift-dev",
+      "title": "nightly cranelift codegen backend (dev build/test)",
+      "command": "build",
+      "phase": "edit_sig",
+      "skipped": false,
+      "skip_reason": null
+    },
+    {
+      "samples_ms": [
+        113.95872200000667,
+        108.32106299994848,
+        104.19264799975281
+      ],
+      "median_ms": 108.32106299994848,
+      "mean_ms": 108.82414433323599,
+      "stdev_ms": 4.0028213771068515,
+      "min_ms": 104.19264799975281,
+      "max_ms": 113.95872200000667,
+      "target_bytes": 7780976,
+      "target_bytes_median": 7780976,
+      "returncodes": [
+        0,
+        0,
+        0
+      ],
+      "ok": true,
+      "step": "cranelift-dev",
+      "title": "nightly cranelift codegen backend (dev build/test)",
+      "command": "test",
+      "phase": "cold",
+      "skipped": false,
+      "skip_reason": null
+    },
+    {
+      "samples_ms": [
+        21.223235000434215,
+        22.508777999973972,
+        21.612921999803802
+      ],
+      "median_ms": 21.612921999803802,
+      "mean_ms": 21.781645000070665,
+      "stdev_ms": 0.5382104848667216,
+      "min_ms": 21.223235000434215,
+      "max_ms": 22.508777999973972,
+      "target_bytes": 7780976,
+      "target_bytes_median": 7780976,
+      "returncodes": [
+        0,
+        0,
+        0
+      ],
+      "ok": true,
+      "step": "cranelift-dev",
+      "title": "nightly cranelift codegen backend (dev build/test)",
+      "command": "test",
+      "phase": "noop",
+      "skipped": false,
+      "skip_reason": null
+    },
+    {
+      "samples_ms": [
+        77.04406700031541
+      ],
+      "median_ms": 77.04406700031541,
+      "mean_ms": 77.04406700031541,
+      "stdev_ms": 0.0,
+      "min_ms": 77.04406700031541,
+      "max_ms": 77.04406700031541,
+      "target_bytes": 7794096,
+      "target_bytes_median": 7794096,
+      "returncodes": [
+        0
+      ],
+      "ok": true,
+      "step": "cranelift-dev",
+      "title": "nightly cranelift codegen backend (dev build/test)",
+      "command": "test",
+      "phase": "edit_body",
+      "skipped": false,
+      "skip_reason": null
+    },
+    {
+      "samples_ms": [
+        78.3675019997645
+      ],
+      "median_ms": 78.3675019997645,
+      "mean_ms": 78.3675019997645,
+      "stdev_ms": 0.0,
+      "min_ms": 78.3675019997645,
+      "max_ms": 78.3675019997645,
+      "target_bytes": 7794044,
+      "target_bytes_median": 7794044,
+      "returncodes": [
+        0
+      ],
+      "ok": true,
+      "step": "cranelift-dev",
+      "title": "nightly cranelift codegen backend (dev build/test)",
+      "command": "test",
+      "phase": "edit_sig",
+      "skipped": false,
+      "skip_reason": null
+    }
+  ],
+  "size": {
+    "size": "small",
+    "crates": 1,
+    "loc": 26
+  },
+  "map_elites": {
+    "shard": "bench/archive/rust-loop-cranelift.json",
+    "evaluations": "from-steps",
+    "size": {
+      "size": "small",
+      "crates": 1,
+      "loc": 26
+    }
+  }
+}

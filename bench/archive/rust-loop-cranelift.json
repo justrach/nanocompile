@@ -1,0 +1,393 @@
+{
+  "schema_version": 1,
+  "kind": "nanocompile.rust-loop.map-elites.shard",
+  "sample": "rust-loop-cranelift",
+  "commit": "b80aebecffa988735752e9bd576c7a0b175ae0e3",
+  "timestamp": "2026-10-21T03:37:17.763565+00:00",
+  "evaluations": [
+    {
+      "cell": "small|cold",
+      "size": "small",
+      "edit": "cold",
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": false
+      },
+      "fitness_ms": 48.550071000136086,
+      "spread_ms": 0.4442392654910521,
+      "disk_bytes": 56404,
+      "correctness": {
+        "ok": true,
+        "agree_on_broken": true,
+        "validate_is_final": true
+      },
+      "sample": "rust-loop-cranelift",
+      "commit": "b80aebecffa988735752e9bd576c7a0b175ae0e3",
+      "timestamp": "2026-10-21T03:37:17.762240+00:00",
+      "n_evals": 3,
+      "non_improving": 0,
+      "stopped": false
+    },
+    {
+      "cell": "small|noop",
+      "size": "small",
+      "edit": "noop",
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": false
+      },
+      "fitness_ms": 10.563622000063333,
+      "spread_ms": 0.3786735715035512,
+      "disk_bytes": 56404,
+      "correctness": {
+        "ok": true,
+        "agree_on_broken": true,
+        "validate_is_final": true
+      },
+      "sample": "rust-loop-cranelift",
+      "commit": "b80aebecffa988735752e9bd576c7a0b175ae0e3",
+      "timestamp": "2026-10-21T03:37:17.762251+00:00",
+      "n_evals": 3,
+      "non_improving": 0,
+      "stopped": false
+    },
+    {
+      "cell": "small|body",
+      "size": "small",
+      "edit": "body",
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": false
+      },
+      "fitness_ms": 26.827446999959648,
+      "spread_ms": 0.0,
+      "disk_bytes": 56668,
+      "correctness": {
+        "ok": true,
+        "agree_on_broken": true,
+        "validate_is_final": true
+      },
+      "sample": "rust-loop-cranelift",
+      "commit": "b80aebecffa988735752e9bd576c7a0b175ae0e3",
+      "timestamp": "2026-10-21T03:37:17.762256+00:00",
+      "n_evals": 1,
+      "non_improving": 0,
+      "stopped": false
+    },
+    {
+      "cell": "small|sig_dep",
+      "size": "small",
+      "edit": "sig_dep",
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": false
+      },
+      "fitness_ms": 26.695271999869874,
+      "spread_ms": 0.0,
+      "disk_bytes": 56764,
+      "correctness": {
+        "ok": true,
+        "agree_on_broken": true,
+        "validate_is_final": true
+      },
+      "sample": "rust-loop-cranelift",
+      "commit": "b80aebecffa988735752e9bd576c7a0b175ae0e3",
+      "timestamp": "2026-10-21T03:37:17.762260+00:00",
+      "n_evals": 1,
+      "non_improving": 0,
+      "stopped": false
+    },
+    {
+      "cell": "small|cold",
+      "size": "small",
+      "edit": "cold",
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": false
+      },
+      "fitness_ms": 183.56821499992293,
+      "spread_ms": 1.6285021314972503,
+      "disk_bytes": 7082318,
+      "correctness": {
+        "ok": true,
+        "agree_on_broken": true,
+        "validate_is_final": true
+      },
+      "sample": "rust-loop-cranelift",
+      "commit": "b80aebecffa988735752e9bd576c7a0b175ae0e3",
+      "timestamp": "2026-10-21T03:37:17.762263+00:00",
+      "n_evals": 3,
+      "non_improving": 0,
+      "stopped": false
+    },
+    {
+      "cell": "small|noop",
+      "size": "small",
+      "edit": "noop",
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": false
+      },
+      "fitness_ms": 22.052287999940745,
+      "spread_ms": 0.04118447927391861,
+      "disk_bytes": 7082318,
+      "correctness": {
+        "ok": true,
+        "agree_on_broken": true,
+        "validate_is_final": true
+      },
+      "sample": "rust-loop-cranelift",
+      "commit": "b80aebecffa988735752e9bd576c7a0b175ae0e3",
+      "timestamp": "2026-10-21T03:37:17.762266+00:00",
+      "n_evals": 3,
+      "non_improving": 0,
+      "stopped": false
+    },
+    {
+      "cell": "small|body",
+      "size": "small",
+      "edit": "body",
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": false
+      },
+      "fitness_ms": 143.95072399975106,
+      "spread_ms": 0.0,
+      "disk_bytes": 7081087,
+      "correctness": {
+        "ok": true,
+        "agree_on_broken": true,
+        "validate_is_final": true
+      },
+      "sample": "rust-loop-cranelift",
+      "commit": "b80aebecffa988735752e9bd576c7a0b175ae0e3",
+      "timestamp": "2026-10-21T03:37:17.762269+00:00",
+      "n_evals": 1,
+      "non_improving": 0,
+      "stopped": false
+    },
+    {
+      "cell": "small|sig_dep",
+      "size": "small",
+      "edit": "sig_dep",
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": false
+      },
+      "fitness_ms": 144.57988799995292,
+      "spread_ms": 0.0,
+      "disk_bytes": 7081162,
+      "correctness": {
+        "ok": true,
+        "agree_on_broken": true,
+        "validate_is_final": true
+      },
+      "sample": "rust-loop-cranelift",
+      "commit": "b80aebecffa988735752e9bd576c7a0b175ae0e3",
+      "timestamp": "2026-10-21T03:37:17.762272+00:00",
+      "n_evals": 1,
+      "non_improving": 0,
+      "stopped": false
+    },
+    {
+      "cell": "small|cold",
+      "size": "small",
+      "edit": "cold",
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "cranelift",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "build",
+        "jobs": null,
+        "offline": false
+      },
+      "fitness_ms": 45.46991999995953,
+      "spread_ms": 1.4005135209276922,
+      "disk_bytes": 62372,
+      "correctness": {
+        "ok": true,
+        "agree_on_broken": true,
+        "validate_is_final": true
+      },
+      "sample": "rust-loop-cranelift",
+      "commit": "b80aebecffa988735752e9bd576c7a0b175ae0e3",
+      "timestamp": "2026-10-21T03:37:17.762277+00:00",
+      "n_evals": 3,
+      "non_improving": 0,
+      "stopped": false
+    },
+    {
+      "cell": "small|noop",
+      "size": "small",
+      "edit": "noop",
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "cranelift",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "build",
+        "jobs": null,
+        "offline": false
+      },
+      "fitness_ms": 10.836642999947799,
+      "spread_ms": 0.10624164536611917,
+      "disk_bytes": 62372,
+      "correctness": {
+        "ok": true,
+        "agree_on_broken": true,
+        "validate_is_final": true
+      },
+      "sample": "rust-loop-cranelift",
+      "commit": "b80aebecffa988735752e9bd576c7a0b175ae0e3",
+      "timestamp": "2026-10-21T03:37:17.762280+00:00",
+      "n_evals": 3,
+      "non_improving": 0,
+      "stopped": false
+    },
+    {
+      "cell": "small|body",
+      "size": "small",
+      "edit": "body",
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "cranelift",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "build",
+        "jobs": null,
+        "offline": false
+      },
+      "fitness_ms": 24.97602600033133,
+      "spread_ms": 0.0,
+      "disk_bytes": 62352,
+      "correctness": {
+        "ok": true,
+        "agree_on_broken": true,
+        "validate_is_final": true
+      },
+      "sample": "rust-loop-cranelift",
+      "commit": "b80aebecffa988735752e9bd576c7a0b175ae0e3",
+      "timestamp": "2026-10-21T03:37:17.762283+00:00",
+      "n_evals": 1,
+      "non_improving": 0,
+      "stopped": false
+    },
+    {
+      "cell": "small|sig_dep",
+      "size": "small",
+      "edit": "sig_dep",
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "cranelift",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "build",
+        "jobs": null,
+        "offline": false
+      },
+      "fitness_ms": 26.26334200022029,
+      "spread_ms": 0.0,
+      "disk_bytes": 62383,
+      "correctness": {
+        "ok": true,
+        "agree_on_broken": true,
+        "validate_is_final": true
+      },
+      "sample": "rust-loop-cranelift",
+      "commit": "b80aebecffa988735752e9bd576c7a0b175ae0e3",
+      "timestamp": "2026-10-21T03:37:17.762285+00:00",
+      "n_evals": 1,
+      "non_improving": 0,
+      "stopped": false
+    }
+  ]
+}

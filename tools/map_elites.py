@@ -31,10 +31,16 @@ BACKENDS = ("llvm", "cranelift")
 LINKERS = ("default", "mold", "lld")
 DEBUGINFO = ("full", "line-tables-only", "none")
 FAST_CHECK = ("cargo-check", "none")
-LOOPS = ("check", "graph", "test")
+LOOPS = ("check", "graph", "test", "build")
+PACKAGE_SCOPES = ("workspace", "touched")
+FITNESS_METHODS = ("official_first_rebuild", "restore_rebuild_mean_of_medians")
+CACHE_STATES = ("empty", "warm_compiler_cache")
+SAMPLE_CLASSES = ("fixture", "real")
 ACTIONS = ("seed", "replace", "reject", "held_out", "promote", "stop")
 CHARLIE = "https://x.com/charliermarsh/status/2112711387285758250"
 FORBIDDEN = ("cranelift", "codegen-backend", "cg_clif", "cargo-clif", "rustd", "lust", "relax")
+# Tiny harness trees. Real samples (pinned crates, ripgrep, tokio) outvote these.
+FIXTURE_PREFIXES = ("rust-loop",)
 
 EMPTY = {
     "schema_version": SCHEMA,
@@ -42,9 +48,12 @@ EMPTY = {
     "attribution": CHARLIE,
     "axes": {"size": list(SIZES), "edit": list(EDITS)},
     "size_rules": {
-        "small": "workspace crates <= 1 and Rust LOC < 2000",
-        "mid": "workspace crates <= 20 and Rust LOC < 50000",
+        "small": "Rust LOC < 2000",
+        "mid": "Rust LOC >= 2000 and < 50000 and workspace crates <= 20",
         "large": "otherwise",
+        "sample_class": "fixture = rust-loop* harness trees; real = pinned crates and public mid/large samples",
+        "fitness_method": "official_first_rebuild (rust_loop_bench) vs restore_rebuild_mean_of_medians (PR #11). Do not compare fitness_ms across methods.",
+        "cache_state": "empty = cleared target and compiler cache; warm_compiler_cache = sccache/nanocompile retained across emptied target/",
     },
     "fitness": {
         "metric": "median_ms",
@@ -122,8 +131,9 @@ def genome_ok(genome):
         ("debuginfo", DEBUGINFO),
         ("fast_check", FAST_CHECK),
         ("loop", LOOPS),
+        ("package_scope", PACKAGE_SCOPES),
     ):
-        if key in genome and genome[key] not in allowed:
+        if key in genome and genome[key] is not None and genome[key] not in allowed:
             fail("genome.%s must be one of %s" % (key, ", ".join(allowed)))
     if genome.get("wrapper") and genome.get("sccache"):
         fail("genome cannot stack nanocompile wrapper with sccache")
@@ -135,15 +145,53 @@ def genome_ok(genome):
     return True
 
 
+def package_scope(genome):
+    scope = (genome or {}).get("package_scope")
+    if scope in (None, "", "workspace"):
+        return "workspace"
+    return scope
+
+
+def is_fixture_sample(sample):
+    name = sample or ""
+    if name.startswith("midsize") or name.startswith("pinned-"):
+        return False
+    return name.startswith(FIXTURE_PREFIXES)
+
+
+def is_held_out(row):
+    return bool(row.get("held_out")) or str(row.get("sample") or "").find("-held-out") >= 0
+
+
 def correctness_ok(row):
     correctness = row.get("correctness")
     if not isinstance(correctness, dict):
         return False
-    return bool(
+    if not (
         correctness.get("ok")
         and correctness.get("agree_on_broken")
         and correctness.get("validate_is_final")
-    )
+    ):
+        return False
+    genome = row.get("genome") or {}
+    if package_scope(genome) == "touched" and row.get("edit") == "sig_dep":
+        # cargo check -p <hub> does not compile dependents. Occupy sig_dep
+        # only when a downstream broken-edit test exists.
+        return bool(correctness.get("dependents_agree_on_broken"))
+    return True
+
+
+def correctness_reject_reason(row):
+    correctness = row.get("correctness") or {}
+    genome = row.get("genome") or {}
+    if package_scope(genome) == "touched" and row.get("edit") == "sig_dep":
+        if not correctness.get("dependents_agree_on_broken"):
+            return (
+                "package_scope=touched is cargo check -p hub; it skips dependents. "
+                "Fail the sig_dep gate unless correctness.dependents_agree_on_broken "
+                "or reframe as a gene with a mandatory workspace check before validate"
+            )
+    return "correctness gate failed"
 
 
 def check_evaluation(row, where):
@@ -176,7 +224,66 @@ def check_evaluation(row, where):
         fail("%s: missing sample" % where)
     if "correctness" not in row:
         fail("%s: missing correctness" % where)
+    if row.get("fitness_method") not in (None, *FITNESS_METHODS):
+        fail("%s: unknown fitness_method" % where)
+    if row.get("cache_state") not in (None, *CACHE_STATES):
+        fail("%s: unknown cache_state" % where)
+    if row.get("sample_class") not in (None, *SAMPLE_CLASSES):
+        fail("%s: unknown sample_class" % where)
     return row
+
+
+def annotate_row(row, shard=None):
+    shard = shard or {}
+    sample = row.get("sample") or shard.get("sample")
+    row["sample"] = sample
+    row["sample_class"] = row.get("sample_class") or (
+        "fixture" if is_fixture_sample(sample) else "real"
+    )
+    aggregation = (shard.get("fitness") or {}).get("aggregation")
+    if not row.get("fitness_method"):
+        if aggregation == "mean_of_per_sample_medians" or row.get("per_sample"):
+            row["fitness_method"] = "restore_rebuild_mean_of_medians"
+        else:
+            row["fitness_method"] = "official_first_rebuild"
+    genome = row.get("genome") or {}
+    if not row.get("cache_state"):
+        if row.get("edit") == "cold" and (
+            genome.get("sccache") or genome.get("wrapper")
+        ) and row.get("fitness_method") == "restore_rebuild_mean_of_medians":
+            row["cache_state"] = "warm_compiler_cache"
+        elif row.get("edit") == "cold":
+            row["cache_state"] = "empty"
+    return row
+
+
+def history_fallback_rows(data):
+    rows = []
+    sample = data.get("sample")
+    for item in data.get("history") or []:
+        if item.get("action") not in ("seed", "replace"):
+            continue
+        if item.get("fitness_ms") is None or not item.get("genome") or not item.get("cell"):
+            continue
+        if item.get("reason") not in ("empty-cell", "win"):
+            continue
+        size, edit = item["cell"].split("|", 1)
+        rows.append({
+            "cell": item["cell"],
+            "size": size,
+            "edit": edit,
+            "genome": item["genome"],
+            "fitness_ms": item["fitness_ms"],
+            "correctness": {
+                "ok": True,
+                "agree_on_broken": True,
+                "validate_is_final": True,
+            },
+            "sample": item.get("sample") or sample,
+            "timestamp": item.get("timestamp"),
+            "from_history": True,
+        })
+    return rows
 
 
 def check_archive(data, path):
@@ -271,11 +378,19 @@ def occupy(archive, row, action, reason):
 
 
 def apply_candidate(archive, row):
+    if is_held_out(row):
+        note(archive, "held_out", row, "held-out evaluation; does not occupy a cell")
+        return "held_out"
     if not correctness_ok(row):
-        note(archive, "reject", row, "correctness gate failed")
+        note(archive, "reject", row, correctness_reject_reason(row))
         return "reject"
     cells = archive.setdefault("cells", {})
     elite = cells.get(row["cell"])
+    if elite and elite.get("fitness_method") and row.get("fitness_method"):
+        if elite.get("fitness_method") != row.get("fitness_method"):
+            note(archive, "reject", row, "incomparable fitness_method %s vs elite %s" % (
+                row.get("fitness_method"), elite.get("fitness_method")))
+            return "reject"
     win, action = better(row, elite, min_gain(archive))
     if win:
         occupy(archive, row, action, "median %.3f ms" % row["fitness_ms"] if action == "seed"
@@ -295,27 +410,53 @@ def apply_candidate(archive, row):
     return "reject"
 
 
+def unique_matrix(rows):
+    seen = set()
+    out = []
+    for row in rows or []:
+        key = (
+            row.get("trained_on"),
+            row.get("genome_from"),
+            row.get("tested_on"),
+            row.get("cell"),
+        )
+        if key in seen:
+            continue
+        seen.add(key)
+        out.append(row)
+    return out
+
+
 def merge_files(into: Path, shards):
     archive = load(into) if into.is_file() else json.loads(json.dumps(EMPTY))
     if check_archive(archive, str(into)) != "archive":
         fail("%s is a shard; pass --into bench/map_elites.json" % into)
+    for key, row in list((archive.get("cells") or {}).items()):
+        archive["cells"][key] = annotate_row(row)
     for path in shards:
         data = load(path)
         kind = check_archive(data, str(path))
         if kind == "shard":
-            for row in data.get("evaluations") or []:
-                if "sample" not in row:
+            for row in list(data.get("evaluations") or []) + history_fallback_rows(data):
+                if "sample" not in row or not row.get("sample"):
                     row["sample"] = data.get("sample")
                 if "commit" not in row:
                     row["commit"] = data.get("commit")
-                apply_candidate(archive, row)
+                apply_candidate(archive, annotate_row(row, data))
             extra = data.get("generalization")
             if extra:
-                matrix = archive.setdefault("generalization", {}).setdefault("matrix", [])
-                matrix.extend(extra.get("matrix") or extra.get("rows") or [])
+                dest = archive.setdefault("generalization", {"samples": [], "elites_tested": [], "matrix": []})
+                dest.setdefault("matrix", []).extend(extra.get("matrix") or extra.get("rows") or [])
+                for name in extra.get("samples") or []:
+                    if name not in dest.setdefault("samples", []):
+                        dest["samples"].append(name)
+                for key in extra.get("elites_tested") or []:
+                    if key not in dest.setdefault("elites_tested", []):
+                        dest["elites_tested"].append(key)
+                dest["matrix"] = unique_matrix(dest["matrix"])
         else:
             for row in (data.get("cells") or {}).values():
-                apply_candidate(archive, row)
+                apply_candidate(archive, annotate_row(row, data))
             archive.setdefault("history", []).extend(data.get("history") or [])
             extra = data.get("generalization") or {}
             dest = archive.setdefault("generalization", {"samples": [], "elites_tested": [], "matrix": []})
@@ -323,6 +464,9 @@ def merge_files(into: Path, shards):
                 if name not in dest.setdefault("samples", []):
                     dest["samples"].append(name)
             dest.setdefault("matrix", []).extend(extra.get("matrix") or [])
+            dest["matrix"] = unique_matrix(dest["matrix"])
+    dest = archive.setdefault("generalization", {"samples": [], "elites_tested": [], "matrix": []})
+    dest["matrix"] = unique_matrix(dest.get("matrix") or [])
     dump(into, archive)
     return archive
 
@@ -362,7 +506,7 @@ def classify(root: Path):
             loc += sum(1 for _ in path.open(encoding="utf-8", errors="replace"))
         except OSError:
             pass
-    if crates <= 1 and loc < 2000:
+    if loc < 2000:
         size = "small"
     elif crates <= 20 and loc < 50000:
         size = "mid"
@@ -405,21 +549,22 @@ def render(archive):
         lines.append("No cells occupied yet.")
         lines.append("")
     else:
-        lines.append("| Cell | Sample | Fitness ms | Spread | Disk | Loop | Wrapper | Linker | Backend |")
-        lines.append("| --- | --- | ---: | ---: | ---: | --- | --- | --- | --- |")
+        lines.append("| Cell | Sample | Fitness ms | Method | Cache | Loop | Wrapper | Backend |")
+        lines.append("| --- | --- | ---: | --- | --- | --- | --- | --- |")
         for key in ("%s|%s" % (s, e) for s in SIZES for e in EDITS):
             elite = cells.get(key)
             if not elite:
                 continue
             genome = elite.get("genome") or {}
-            lines.append("| %s | %s | %.1f | %s | %s | %s | %s | %s | %s |" % (
+            method = elite.get("fitness_method") or "official_first_rebuild"
+            cache = elite.get("cache_state") or ("empty" if elite.get("edit") == "cold" else "—")
+            lines.append("| %s | %s | %.1f | %s | %s | %s | %s | %s |" % (
                 key, elite.get("sample", ""),
                 elite["fitness_ms"],
-                "%.1f" % elite["spread_ms"] if elite.get("spread_ms") is not None else "—",
-                elite.get("disk_bytes") if elite.get("disk_bytes") is not None else "—",
+                "restore+mean" if method == "restore_rebuild_mean_of_medians" else "first-rebuild",
+                cache,
                 genome.get("loop"),
                 "yes" if genome.get("wrapper") else "no",
-                genome.get("linker"),
                 genome.get("dev_backend"),
             ))
         lines.append("")
@@ -466,7 +611,7 @@ def render(archive):
         lines.append("Sample-specific elites:")
         lines.append("")
         for row in specific:
-            lines.append("- `%s`: %s" % (row.get("sample"), row.get("reason", "")))
+            lines.append("- `%s` `%s`: %s" % (row.get("cell"), row.get("sample"), row.get("reason", "")))
         lines.append("")
     return "\n".join(lines) + "\n"
 
@@ -491,13 +636,12 @@ def write_render(path: Path, archive):
 
 
 def promote(archive):
-    """Promote a genome that wins held-out cells; mark sample-specific ones."""
+    """Promote genomes that win on real samples; fixtures do not drive defaults."""
     cells = archive.get("cells") or {}
     matrix = (archive.get("generalization") or {}).get("matrix") or []
     if not cells:
         return archive
-    # Do not promote the lowest raw ms (noop graph always wins that). Vote by
-    # edit family: iteration (cold/body/sig_dep) vs warm no-op.
+
     def signature(genome):
         genome = genome or {}
         return (
@@ -505,13 +649,34 @@ def promote(archive):
             bool(genome.get("wrapper")),
             genome.get("linker") or "default",
             genome.get("dev_backend") or "llvm",
+            genome.get("debuginfo") or "full",
+            bool(genome.get("incremental")),
+            bool(genome.get("sccache")),
+            package_scope(genome),
         )
+
+    def is_real(row):
+        return (row.get("sample_class") or (
+            "fixture" if is_fixture_sample(row.get("sample")) else "real"
+        )) == "real"
+
+    has_real = any(is_real(row) for row in cells.values())
+
+    def weight(row):
+        if has_real and not is_real(row):
+            return 0
+        if row.get("edit") == "cold" and row.get("cache_state") == "warm_compiler_cache":
+            return 0
+        return 2 if is_real(row) else 1
 
     def majority(rows):
         counts = {}
         for row in rows:
+            w = weight(row)
+            if w <= 0:
+                continue
             key = signature(row.get("genome"))
-            counts[key] = counts.get(key, 0) + 1
+            counts[key] = counts.get(key, 0) + w
         if not counts:
             return None
         return max(counts.items(), key=lambda item: item[1])[0]
@@ -520,39 +685,63 @@ def promote(archive):
     noops = [row for row in cells.values() if row.get("edit") == "noop"]
     inc_sig = majority(incremental)
     noop_sig = majority(noops)
-    inc_genome = next((row.get("genome") for row in incremental if signature(row.get("genome")) == inc_sig), None)
-    noop_genome = next((row.get("genome") for row in noops if signature(row.get("genome")) == noop_sig), None)
+    inc_genome = next(
+        (row.get("genome") for row in incremental
+         if signature(row.get("genome")) == inc_sig and weight(row) > 0),
+        None,
+    )
+    noop_genome = next(
+        (row.get("genome") for row in noops
+         if signature(row.get("genome")) == noop_sig and weight(row) > 0),
+        None,
+    )
     defaults = {
         "iteration": {
             "genome": inc_genome,
-            "reason": "majority elite on cold/body/sig_dep across occupied size buckets; do not use graph wall time as the edit-loop default",
+            "reason": (
+                "weighted majority on real-sample cold/body/sig_dep; "
+                "fixture cells do not vote when real elites exist; "
+                "warm-cache sccache cold is sample-specific, not a true-cold default"
+            ),
             "edits": ["cold", "body", "sig_dep"],
+            "voters": "real" if has_real else "fixture",
         } if inc_genome else None,
         "noop": {
             "genome": noop_genome,
-            "reason": "majority elite on noop: declared graph plus nanocompile task cache",
+            "reason": (
+                "weighted majority on real-sample noop; "
+                "fixture graph elites do not set the default when a real noop exists"
+            ),
             "edits": ["noop"],
+            "voters": "real" if has_real else "fixture",
         } if noop_genome else None,
     }
-    # Keep a single "defaults.genome" pointing at the iteration config so older
-    # readers still see one promoted genome. Graph-for-noop is recorded beside it.
     defaults["genome"] = inc_genome
     specific = []
     for key, elite in cells.items():
-        if signature(elite.get("genome")) in {inc_sig, noop_sig}:
-            continue
-        specific.append({
-            "sample": elite.get("sample"),
-            "cell": key,
-            "genome": elite.get("genome"),
-            "reason": "loses the majority vote for its edit family",
-        })
+        reasons = []
+        if has_real and not is_real(elite):
+            reasons.append("fixture elite; real samples outvote fixtures")
+        if elite.get("edit") == "cold" and elite.get("cache_state") == "warm_compiler_cache":
+            reasons.append("warm compiler cache (sccache/wrapper retained), not empty-cache cold")
+        if signature(elite.get("genome")) not in {inc_sig, noop_sig}:
+            reasons.append("loses the weighted vote for its edit family")
+        if reasons:
+            specific.append({
+                "sample": elite.get("sample"),
+                "cell": key,
+                "genome": elite.get("genome"),
+                "reason": "; ".join(reasons),
+                "sample_class": elite.get("sample_class"),
+                "cache_state": elite.get("cache_state"),
+                "fitness_method": elite.get("fitness_method"),
+            })
     _ = matrix
     archive["promoted"] = {"defaults": defaults, "sample_specific": specific}
     if inc_genome:
         note(archive, "promote", {
             "cell": "iteration",
-            "sample": "majority",
+            "sample": "real" if has_real else "majority",
             "fitness_ms": None,
             "genome": inc_genome,
         }, defaults["iteration"]["reason"])
