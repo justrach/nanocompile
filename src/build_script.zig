@@ -511,7 +511,9 @@ test "snapshot reuse refuses changed input state before atomic publication" {
     const key = "123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0";
     try cache.store(&ctx, key, before.records, &.{output}, "", "");
     try tmp.dir.deleteFile(io, "out/value");
-    try tmp.dir.writeFile(io, .{ .sub_path = "input", .data = "modified" });
+    // Size must change: epoch hashes metadata, not bytes, and same-length
+    // rewrites can keep mtime/ctime on coarse filesystems.
+    try tmp.dir.writeFile(io, .{ .sub_path = "input", .data = "modified!" });
     try std.testing.expectError(error.InputChangedDuringRestore, restoreOutputs(&ctx, key, root, &.{output}, roots, before));
     try std.testing.expect(try empty(&ctx, root));
     try tmp.dir.writeFile(io, .{ .sub_path = "input", .data = "original" });

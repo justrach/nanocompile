@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "kind": "nanocompile.rust-loop.map-elites",
+  "attribution": "https://x.com/charliermarsh/status/2112711387285758250",
+  "axes": {
+    "size": ["small", "mid", "large"],
+    "edit": ["cold", "noop", "body", "sig_dep"]
+  },
+  "size_rules": {
+    "small": "workspace crates <= 1 and Rust LOC < 2000",
+    "mid": "workspace crates <= 20 and Rust LOC < 50000",
+    "large": "otherwise"
+  },
+  "design_notes": [
+    "Two axes (size x edit) yield 12 cells. Disk usage is a recorded metric, not a third axis: a disk tertile would triple the grid and leave most cells empty while four agents are still seeding.",
+    "Fitness is median wall time in milliseconds of the configured iteration loop (genome.loop: check, graph, or test) on that edit type. Lower is better. Spread is population stdev of the timed samples.",
+    "validate is not a gene. It is always cargo test with default LLVM rustc. A genome that fails the correctness gate (fast path and rustc must agree on broken edits; validate is the final signal) cannot occupy a cell.",
+    "Replace an elite only when the new median is at least fitness.min_gain_pct faster (default 3%) and correctness.ok is true. Seed an empty cell with the first passing evaluation.",
+    "Stop a cell after fitness.max_non_improving consecutive non-improving tries. Hill-climb restarts may re-seed a stopped cell with a new genome family.",
+    "Do not stack RUSTC_WRAPPER=nanocompile with sccache. Cranelift is a dev-backend gene only; rust-loop run strips it from validate.",
+    "Other agents write bench/archive/<sample>.json shards. Merge with `nanocompile map-elites merge` or `python3 tools/map_elites.py merge`."
+  ],
+  "fitness": {
+    "metric": "median_ms",
+    "goal": "min",
+    "min_gain_pct": 3.0,
+    "max_non_improving": 4
+  },
+  "cells": {},
+  "history": [],
+  "generalization": {
+    "samples": [],
+    "elites_tested": [],
+    "matrix": []
+  },
+  "promoted": {
+    "defaults": null,
+    "sample_specific": []
+  }
+}

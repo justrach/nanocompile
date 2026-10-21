@@ -5,11 +5,8 @@
       "name": "fast-check",
       "cwd": ".",
       "command": [
-        "python3",
-        "-I",
-        "-S",
-        "-B",
-        "../../tools/rust_loop.py",
+        "nanocompile",
+        "rust-loop",
         "run",
         "--step",
         "fast-check",
@@ -23,7 +20,7 @@
         "check"
       ],
       "inputs": [
-        "../../tools/rust_loop.py",
+        "Cargo.lock",
         "Cargo.toml",
         "src/lib.rs"
       ],
@@ -38,11 +35,8 @@
         "fast-check"
       ],
       "command": [
-        "python3",
-        "-I",
-        "-S",
-        "-B",
-        "../../tools/rust_loop.py",
+        "nanocompile",
+        "rust-loop",
         "run",
         "--step",
         "validate",
@@ -56,7 +50,7 @@
         "test"
       ],
       "inputs": [
-        "../../tools/rust_loop.py",
+        "Cargo.lock",
         "Cargo.toml",
         "src/lib.rs",
         ".nanocompile-loop/fast-check.ok"

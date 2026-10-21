@@ -21,6 +21,8 @@ const help =
     \\  nanocompile xcodebuild [XCODE FLAGS]  use Xcode native Swift/Clang CAS (macOS)
     \\  RUSTC_WRAPPER=/absolute/path/nanocompile cargo build
     \\  nanocompile task SPEC.json  experimental ordered declared-file task cache
+    \\  nanocompile rust-loop list|spec|check-spec|run|verify-flags
+    \\  nanocompile map-elites validate|merge|render|classify
     \\  nanocompile artifact put|get|head NAMESPACE KEY [FILE] [METADATA_JSON]
     \\  nanocompile stats | clear | doctor
     \\  nanocompile gc [MAX_BYTES]  remove orphan blobs and evict to a budget
@@ -116,6 +118,12 @@ fn dispatch(ctx: *cache.Context, args: []const [:0]const u8) !u8 {
         if (args.len != 3) return error.MissingTaskSpec;
         return @import("task.zig").execute(ctx, args[2]);
     }
+    if (std.mem.eql(u8, command, "rust-loop")) {
+        return @import("rust_loop.zig").execute(ctx, args[2..], args[0]);
+    }
+    if (std.mem.eql(u8, command, "map-elites")) {
+        return @import("map_elites.zig").execute(ctx, args[2..]);
+    }
     if (std.mem.eql(u8, command, "artifact")) {
         if (args.len < 5) return error.MissingArtifactArguments;
         const op = args[2];
@@ -197,4 +205,6 @@ test {
     _ = @import("native_identity.zig");
     _ = @import("producer_dependencies.zig");
     _ = @import("task.zig");
+    _ = @import("rust_loop.zig");
+    _ = @import("map_elites.zig");
 }
