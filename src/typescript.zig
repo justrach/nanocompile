@@ -12,7 +12,7 @@ const Dir = std.Io.Dir;
 
 pub const Checker = enum { tsc, tsgo, tsrs, bun };
 
-const skip_dirs = [_][]const u8{ "node_modules", ".git", ".next", "dist", "out", "coverage", ".turbo", ".open-next", "zig-out", "target", ".cache" };
+const skip_dirs = [_][]const u8{ "node_modules", ".git", ".next", "dist", "out", "coverage", ".turbo", ".open-next", "zig-out", "target", ".cache", ".nanocompile", ".cargo" };
 const source_ext = [_][]const u8{ ".ts", ".tsx", ".mts", ".cts", ".js", ".jsx" };
 
 fn eq(a: []const u8, b: []const u8) bool {
@@ -74,6 +74,7 @@ pub fn collectSources(ctx: *cache.Context, root: []const u8) ![]const Source {
     while (try walk.next(ctx.io)) |item| {
         if (item.kind != .file) continue;
         if (skippedPath(item.path)) continue;
+        if (std.mem.endsWith(u8, item.basename, ".tsbuildinfo")) continue;
         if (!isSourceName(item.basename)) continue;
         const abs = try std.fs.path.join(ctx.a, &.{ root, item.path });
         const rel = try normalizeRel(ctx.a, item.path);
@@ -210,6 +211,33 @@ fn remapText(ctx: *cache.Context, text: []const u8, to_logical: bool) ![]u8 {
     return try ctx.a.dupe(u8, current);
 }
 
+fn restoreSeedBuildinfo(ctx: *cache.Context, checker: Checker, exe: []const u8, args: []const []const u8, project: Project) !void {
+    if (project.buildinfo) |info| {
+        if (eq(ctx.env.get("NANOCOMPILE_TS_SEED") orelse "1", "1")) {
+            const seed = try seedKey(ctx, checker, exe, args, project);
+            const names = [_][]const u8{"tsbuildinfo"};
+            const dests = [_][]const u8{info};
+            if (cache.restoreStaged(ctx, seed, &names, &dests) catch null != null)
+                remapFile(ctx, info, false);
+        }
+    }
+}
+
+fn storeSeedBuildinfo(ctx: *cache.Context, checker: Checker, exe: []const u8, args: []const []const u8, project: Project) !void {
+    if (project.buildinfo) |info| {
+        if (eq(ctx.env.get("NANOCOMPILE_TS_SEED") orelse "1", "1")) {
+            if (Dir.cwd().statFile(ctx.io, info, .{})) |_| {
+                remapFile(ctx, info, true);
+                const seed = try seedKey(ctx, checker, exe, args, project);
+                const names = [_][]const u8{"tsbuildinfo"};
+                const dests = [_][]const u8{info};
+                cache.storeNamedTask(ctx, seed, &names, &dests, "", "") catch {};
+                remapFile(ctx, info, false);
+            } else |_| {}
+        }
+    }
+}
+
 fn remapFile(ctx: *cache.Context, path: []const u8, to_logical: bool) void {
     const bytes = ctx.read(path) catch return;
     const next = remapText(ctx, bytes, to_logical) catch return;
@@ -293,14 +321,11 @@ pub fn execute(ctx: *cache.Context, checker: Checker, args: []const []const u8) 
         return bypass(ctx, &.{exe}, "bypass: key lock unavailable");
     defer flight.release();
 
-    var outputs: std.ArrayList([]const u8) = .empty;
-    if (project.buildinfo) |info| {
-        if (Dir.cwd().statFile(ctx.io, info, .{})) |_| {
-            try outputs.append(ctx.a, info);
-        } else |_| {}
-    }
-    if (cache.restoreStaged(ctx, key, outputs.items, outputs.items) catch null) |streams| {
-        if (project.buildinfo) |info| remapFile(ctx, info, false);
+    // Result entries are stream-only. Putting .tsbuildinfo in the same entry
+    // made a cold worktree miss when the dest file was absent (output-count
+    // mismatch) even though source hashes matched. Seed restore is separate.
+    if (cache.restoreStaged(ctx, key, &.{}, &.{}) catch null) |streams| {
+        try restoreSeedBuildinfo(ctx, checker, exe, args, project);
         try replay(ctx, streams.stdout, streams.stderr);
         ctx.trace("hit");
         ctx.event("ts_hit");
@@ -308,15 +333,7 @@ pub fn execute(ctx: *cache.Context, checker: Checker, args: []const []const u8) 
         return 0;
     }
 
-    if (project.buildinfo) |info| {
-        if (eq(ctx.env.get("NANOCOMPILE_TS_SEED") orelse "1", "1")) {
-            const seed = try seedKey(ctx, checker, exe, args, project);
-            const names = [_][]const u8{"tsbuildinfo"};
-            const dests = [_][]const u8{info};
-            if (cache.restoreStaged(ctx, seed, &names, &dests) catch null != null)
-                remapFile(ctx, info, false);
-        }
-    }
+    try restoreSeedBuildinfo(ctx, checker, exe, args, project);
 
     const argv = try childArgv(ctx, checker, exe, args, project);
     const result = compiler_stream.run(ctx, argv) catch |err|
@@ -330,25 +347,11 @@ pub fn execute(ctx: *cache.Context, checker: Checker, args: []const []const u8) 
     }
     var deps: std.ArrayList(cache.Dependency) = .empty;
     for (sources) |src| try deps.append(ctx.a, .{ .path = src.path, .hash = src.hash });
-    var store_outputs: std.ArrayList([]const u8) = .empty;
-    if (project.buildinfo) |info| {
-        if (Dir.cwd().statFile(ctx.io, info, .{})) |_| {
-            remapFile(ctx, info, true);
-            try store_outputs.append(ctx.a, info);
-        } else |_| {}
-    }
     const stdout = try remapText(ctx, result.stdout, true);
     const stderr = try remapText(ctx, result.stderr, true);
-    cache.store(ctx, key, deps.items, store_outputs.items, stdout, stderr) catch |err|
+    cache.store(ctx, key, deps.items, &.{}, stdout, stderr) catch |err|
         ctx.trace(try std.fmt.allocPrint(ctx.a, "uncached: {s}", .{@errorName(err)}));
-    if (project.buildinfo) |info| {
-        if (store_outputs.items.len != 0 and eq(ctx.env.get("NANOCOMPILE_TS_SEED") orelse "1", "1")) {
-            const seed = try seedKey(ctx, checker, exe, args, project);
-            const names = [_][]const u8{"tsbuildinfo"};
-            cache.storeNamedTask(ctx, seed, &names, store_outputs.items, "", "") catch {};
-            remapFile(ctx, info, false);
-        }
-    }
+    try storeSeedBuildinfo(ctx, checker, exe, args, project);
     ctx.event("ts_miss");
     ctx.event("miss");
     return 0;

@@ -22,7 +22,7 @@ for p in root.rglob("*.ts"):
     if "node_modules" in p.parts:
         continue
     text = p.read_text(encoding="utf-8")
-    if "TYPE_ERROR_INJECT" in text:
+    if "TYPE_ERROR_INJECT" in text or "_nano_ts_error" in text or "_nano_undefined_ident" in text:
         errors.append("%s(1,1): error TS2322: Type 'string' is not assignable to type 'number'." % p)
 if errors:
     sys.stderr.write("\n".join(errors) + "\n")
@@ -62,6 +62,15 @@ class Classify(unittest.TestCase):
             self.assertTrue(kinds["tsconfig"].name == "tsconfig.json")
         finally:
             shutil.rmtree(root, ignore_errors=True)
+
+
+class FilesFor(unittest.TestCase):
+    def test_nano_miss_is_project_grain(self):
+        hit = {"hits": 1, "misses": 0}
+        miss = {"hits": 0, "misses": 1}
+        self.assertEqual(tw.files_for(hit, 126, "l0_result_cache"), 0)
+        self.assertEqual(tw.files_for(miss, 126, "l2_seed_buildinfo"), 1)
+        self.assertEqual(tw.files_for(miss, 126, "none"), 126)
 
 
 class Pareto(unittest.TestCase):

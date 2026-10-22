@@ -453,7 +453,8 @@
       "wall_ms": 10184.386263994384
     }
   ],
-  "commit": "4593353f35f419d6e95aaabd7610456e4bcb5398",
+  "commit": "8dbb34939289996d9fdc13111fd4df23f202905c",
+  "docs": "docs/agent-worktrees.md",
   "evaluations": [
     {
       "cache_state": "empty",
@@ -850,6 +851,166 @@
       "size": "large",
       "split": "train",
       "store_bytes": 68369982,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      }
+    },
+    {
+      "cache_state": "warm_compiler_cache",
+      "cache_tool": "nanocompile",
+      "cell": "mid|worktree",
+      "correctness": {
+        "agree_on_broken": true,
+        "ok": false,
+        "validate_is_final": true
+      },
+      "crates_compiled_mean": 0.0,
+      "disk_bytes": 106550167,
+      "edit": "worktree",
+      "fitness_ms": 523.427988999174,
+      "genome": {
+        "debuginfo": "full",
+        "dev_backend": "llvm",
+        "fast_check": "cargo-check",
+        "incremental": true,
+        "kache": false,
+        "linker": "default",
+        "loop": "check",
+        "sccache": false,
+        "warm_store": true,
+        "wrapper": true
+      },
+      "held_out": true,
+      "lever": "l21_check_native",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "pareto": true,
+      "product": "agent_worktrees",
+      "sample": "axum-agent-worktrees-train",
+      "size": "mid",
+      "split": "train",
+      "store_bytes": 102049345,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      }
+    },
+    {
+      "cache_state": "warm_compiler_cache",
+      "cache_tool": "nanocompile",
+      "cell": "large|worktree",
+      "correctness": {
+        "agree_on_broken": true,
+        "ok": false,
+        "validate_is_final": true
+      },
+      "crates_compiled_mean": 0.0,
+      "disk_bytes": 72199687,
+      "edit": "worktree",
+      "fitness_ms": 105.92756800178904,
+      "genome": {
+        "debuginfo": "full",
+        "dev_backend": "llvm",
+        "fast_check": "cargo-check",
+        "incremental": true,
+        "kache": false,
+        "linker": "default",
+        "loop": "check",
+        "sccache": false,
+        "warm_store": true,
+        "wrapper": true
+      },
+      "held_out": true,
+      "lever": "l21_check_native",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "pareto": true,
+      "product": "agent_worktrees",
+      "sample": "ripgrep-agent-worktrees-train",
+      "size": "large",
+      "split": "train",
+      "store_bytes": 68523471,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      }
+    },
+    {
+      "cache_state": "warm_compiler_cache",
+      "cache_tool": "nanocompile",
+      "cell": "mid|worktree",
+      "correctness": {
+        "agree_on_broken": true,
+        "ok": true,
+        "validate_is_final": true
+      },
+      "crates_compiled_mean": 20.0,
+      "disk_bytes": 111384596,
+      "edit": "worktree",
+      "fitness_ms": 20183.893051995256,
+      "genome": {
+        "debuginfo": "full",
+        "dev_backend": "llvm",
+        "fast_check": "cargo-check",
+        "incremental": true,
+        "kache": false,
+        "linker": "default",
+        "loop": "check",
+        "sccache": false,
+        "warm_store": true,
+        "wrapper": true
+      },
+      "held_out": true,
+      "lever": "l21_check_native",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "pareto": true,
+      "product": "agent_worktrees",
+      "sample": "axum-agent-worktrees-train",
+      "size": "mid",
+      "split": "train",
+      "store_bytes": 107327372,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      }
+    },
+    {
+      "cache_state": "warm_compiler_cache",
+      "cache_tool": "nanocompile",
+      "cell": "large|worktree",
+      "correctness": {
+        "agree_on_broken": true,
+        "ok": true,
+        "validate_is_final": true
+      },
+      "crates_compiled_mean": 18.5,
+      "disk_bytes": 72106893,
+      "edit": "worktree",
+      "fitness_ms": 7224.767908999638,
+      "genome": {
+        "debuginfo": "full",
+        "dev_backend": "llvm",
+        "fast_check": "cargo-check",
+        "incremental": true,
+        "kache": false,
+        "linker": "default",
+        "loop": "check",
+        "sccache": false,
+        "warm_store": true,
+        "wrapper": true
+      },
+      "held_out": true,
+      "lever": "l21_check_native",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "pareto": true,
+      "product": "agent_worktrees",
+      "sample": "ripgrep-agent-worktrees-train",
+      "size": "large",
+      "split": "train",
+      "store_bytes": 68374794,
       "variant": {
         "edit_kind": "mixed",
         "from_older": false
@@ -2266,6 +2427,7 @@
     "NANOCOMPILE_PROC_MACRO_PRODUCERS": "1",
     "NANOCOMPILE_REMAP_PATHS": "1"
   },
+  "harness": "bench/agent_worktrees.py",
   "held_out": [
     {
       "approach": "none",
@@ -3838,6 +4000,70 @@
         },
         "note": "Train disk -12% axum / -6% ripgrep via rustc --remap-path-prefix.",
         "vs": "l14_slim_graph"
+      },
+      {
+        "keep": false,
+        "lever": "l21_check_native",
+        "metrics": {
+          "crates_compiled_mean": {
+            "base": null,
+            "gain": null,
+            "keep": false,
+            "new": null
+          },
+          "disk_bytes": {
+            "base": null,
+            "gain": null,
+            "keep": false,
+            "new": null
+          },
+          "store_bytes": {
+            "base": null,
+            "gain": null,
+            "keep": false,
+            "new": null
+          },
+          "wall_ms": {
+            "base": null,
+            "gain": null,
+            "keep": false,
+            "new": null
+          }
+        },
+        "note": "extra per-objective round on train",
+        "vs": "frozen"
+      },
+      {
+        "keep": false,
+        "lever": "l21_check_native",
+        "metrics": {
+          "crates_compiled_mean": {
+            "base": 19.25,
+            "gain": 0.0,
+            "keep": false,
+            "new": 19.25
+          },
+          "disk_bytes": {
+            "base": 91746838.5,
+            "gain": 1.1924116600486458e-05,
+            "keep": false,
+            "new": 91745744.5
+          },
+          "store_bytes": {
+            "base": 87846020.5,
+            "gain": -5.762924684789791e-05,
+            "keep": false,
+            "new": 87851083.0
+          },
+          "wall_ms": {
+            "base": 13967.880151001737,
+            "gain": 0.018868265452964144,
+            "keep": false,
+            "new": 13704.330480497447
+          }
+        },
+        "note": "extra per-objective round on train",
+        "vs": "frozen"
       }
     ]
   },
@@ -4048,6 +4274,14 @@
             "lever": "frozen",
             "store_bytes": 107322059,
             "wall_ms": 20746.094490998075
+          },
+          {
+            "approach": "nanocompile",
+            "crates_compiled_mean": 20.0,
+            "disk_bytes": 111384596,
+            "lever": "l21_check_native",
+            "store_bytes": 107327372,
+            "wall_ms": 20183.893051995256
           }
         ],
         "nano_dominated_by": [],
@@ -4073,13 +4307,282 @@
             "wall_ms": 7189.665811005398
           }
         ],
-        "nano_dominated_by": [],
+        "nano_dominated_by": [
+          {
+            "approach": "nanocompile",
+            "by": "frozen",
+            "nano_lever": "l21_check_native",
+            "objectives": {
+              "crates_compiled_mean": {
+                "nano": 18.5,
+                "other": 18.5
+              },
+              "disk_bytes": {
+                "nano": 72106893,
+                "other": 72101212
+              },
+              "store_bytes": {
+                "nano": 68374794,
+                "other": 68369982
+              },
+              "wall_ms": {
+                "nano": 7224.767908999638,
+                "other": 7189.665811005398
+              }
+            }
+          }
+        ],
         "nano_on_frontier": true,
         "split": "train"
       }
     }
   },
   "sample": "agent-worktrees",
+  "scenario_pareto": {
+    "held_out": {
+      "bhumi|sequential": {
+        "frontier": [
+          {
+            "approach": "shared_target",
+            "crates_compiled_mean": 0.25,
+            "disk_bytes": 301503851,
+            "lever": "shared_target",
+            "store_bytes": 0,
+            "wall_ms": 678.9502880055807
+          },
+          {
+            "approach": "kache",
+            "crates_compiled_mean": 0.0,
+            "disk_bytes": 4590479442,
+            "lever": "kache",
+            "store_bytes": 48866938,
+            "wall_ms": 4355.019488997641
+          },
+          {
+            "approach": "nanocompile",
+            "crates_compiled_mean": 36.0,
+            "disk_bytes": 299270183,
+            "lever": "frozen",
+            "store_bytes": 275175877,
+            "wall_ms": 18823.399210996286
+          }
+        ],
+        "nano_on_frontier": true,
+        "scenario": "sequential",
+        "split": "held_out"
+      },
+      "emergentDB|sequential": {
+        "frontier": [
+          {
+            "approach": "shared_target",
+            "crates_compiled_mean": 0.0,
+            "disk_bytes": 145550858,
+            "lever": "shared_target",
+            "store_bytes": 0,
+            "wall_ms": 302.25169099867344
+          },
+          {
+            "approach": "nanocompile",
+            "crates_compiled_mean": 18.75,
+            "disk_bytes": 133791754,
+            "lever": "frozen",
+            "store_bytes": 130119246,
+            "wall_ms": 10184.386263994384
+          }
+        ],
+        "nano_on_frontier": true,
+        "scenario": "sequential",
+        "split": "held_out"
+      },
+      "hashbrown|sequential": {
+        "frontier": [
+          {
+            "approach": "shared_target",
+            "crates_compiled_mean": 0.25,
+            "disk_bytes": 8261952,
+            "lever": "shared_target",
+            "store_bytes": 0,
+            "wall_ms": 460.81229799892753
+          },
+          {
+            "approach": "kache",
+            "crates_compiled_mean": 1.25,
+            "disk_bytes": 6638859,
+            "lever": "kache",
+            "store_bytes": 3307801,
+            "wall_ms": 1392.3294549967977
+          },
+          {
+            "approach": "sccache",
+            "crates_compiled_mean": 4.0,
+            "disk_bytes": 5623064,
+            "lever": "sccache",
+            "store_bytes": 0,
+            "wall_ms": 2542.5848770028097
+          },
+          {
+            "approach": "nanocompile",
+            "crates_compiled_mean": 1.75,
+            "disk_bytes": 2532352,
+            "lever": "frozen",
+            "store_bytes": 2527657,
+            "wall_ms": 1822.3271050010226
+          }
+        ],
+        "nano_on_frontier": true,
+        "scenario": "sequential",
+        "split": "held_out"
+      },
+      "nalgebra|sequential": {
+        "frontier": [
+          {
+            "approach": "shared_target",
+            "crates_compiled_mean": 0.25,
+            "disk_bytes": 145827028,
+            "lever": "shared_target",
+            "store_bytes": 0,
+            "wall_ms": 4523.814095002308
+          },
+          {
+            "approach": "nanocompile",
+            "crates_compiled_mean": 8.25,
+            "disk_bytes": 84529916,
+            "lever": "frozen",
+            "store_bytes": 84494045,
+            "wall_ms": 20309.546192002017
+          }
+        ],
+        "nano_on_frontier": true,
+        "scenario": "sequential",
+        "split": "held_out"
+      },
+      "ruff|sequential": {
+        "frontier": [
+          {
+            "approach": "shared_target",
+            "crates_compiled_mean": 1.0,
+            "disk_bytes": 1185761641,
+            "lever": "shared_target",
+            "store_bytes": 0,
+            "wall_ms": 4595.914761004678
+          },
+          {
+            "approach": "nanocompile",
+            "crates_compiled_mean": 127.75,
+            "disk_bytes": 794872899,
+            "lever": "frozen",
+            "store_bytes": 679381619,
+            "wall_ms": 124216.04949599714
+          }
+        ],
+        "nano_on_frontier": true,
+        "scenario": "sequential",
+        "split": "held_out"
+      },
+      "serde|sequential": {
+        "frontier": [
+          {
+            "approach": "shared_target",
+            "crates_compiled_mean": 0.25,
+            "disk_bytes": 47084150,
+            "lever": "shared_target",
+            "store_bytes": 0,
+            "wall_ms": 392.55990799574647
+          },
+          {
+            "approach": "nanocompile",
+            "crates_compiled_mean": 4.0,
+            "disk_bytes": 13355434,
+            "lever": "frozen",
+            "store_bytes": 13346819,
+            "wall_ms": 6339.478683999914
+          }
+        ],
+        "nano_on_frontier": true,
+        "scenario": "sequential",
+        "split": "held_out"
+      },
+      "tokio|sequential": {
+        "frontier": [
+          {
+            "approach": "shared_target",
+            "crates_compiled_mean": 0.25,
+            "disk_bytes": 109226449,
+            "lever": "shared_target",
+            "store_bytes": 0,
+            "wall_ms": 2966.573227997287
+          },
+          {
+            "approach": "nanocompile",
+            "crates_compiled_mean": 8.5,
+            "disk_bytes": 62163951,
+            "lever": "frozen",
+            "store_bytes": 58122920,
+            "wall_ms": 14922.941049997462
+          }
+        ],
+        "nano_on_frontier": true,
+        "scenario": "sequential",
+        "split": "held_out"
+      }
+    },
+    "train": {
+      "axum|sequential": {
+        "frontier": [
+          {
+            "approach": "shared_target",
+            "crates_compiled_mean": 0.5,
+            "disk_bytes": 157767267,
+            "lever": "shared_target",
+            "store_bytes": 0,
+            "wall_ms": 3453.596542000014
+          },
+          {
+            "approach": "nanocompile",
+            "crates_compiled_mean": 20.0,
+            "disk_bytes": 111392465,
+            "lever": "frozen",
+            "store_bytes": 107322059,
+            "wall_ms": 20746.094490998075
+          },
+          {
+            "approach": "nanocompile",
+            "crates_compiled_mean": 20.0,
+            "disk_bytes": 111384596,
+            "lever": "l21_check_native",
+            "store_bytes": 107327372,
+            "wall_ms": 20183.893051995256
+          }
+        ],
+        "nano_on_frontier": true,
+        "scenario": "sequential",
+        "split": "train"
+      },
+      "ripgrep|sequential": {
+        "frontier": [
+          {
+            "approach": "shared_target",
+            "crates_compiled_mean": 1.0,
+            "disk_bytes": 102451447,
+            "lever": "shared_target",
+            "store_bytes": 0,
+            "wall_ms": 1611.2793710053666
+          },
+          {
+            "approach": "nanocompile",
+            "crates_compiled_mean": 18.5,
+            "disk_bytes": 72101212,
+            "lever": "frozen",
+            "store_bytes": 68369982,
+            "wall_ms": 7189.665811005398
+          }
+        ],
+        "nano_on_frontier": true,
+        "scenario": "sequential",
+        "split": "train"
+      }
+    }
+  },
   "schema_version": 1,
   "survival": {
     "general": [
@@ -4587,243 +5090,216 @@
       "warm_crates": 0,
       "warm_ms": 398.0607180055813,
       "warm_ok": true
-    }
-  ],
-  "scenario_pareto": {
-    "train": {
-      "axum|sequential": {
-        "split": "train",
-        "scenario": "sequential",
-        "frontier": [
-          {
-            "lever": "shared_target",
-            "approach": "shared_target",
-            "crates_compiled_mean": 0.5,
-            "wall_ms": 3453.596542000014,
-            "disk_bytes": 157767267,
-            "store_bytes": 0
-          },
-          {
-            "lever": "frozen",
-            "approach": "nanocompile",
-            "crates_compiled_mean": 20.0,
-            "wall_ms": 20746.094490998075,
-            "disk_bytes": 111392465,
-            "store_bytes": 107322059
-          }
-        ],
-        "nano_on_frontier": true
-      },
-      "ripgrep|sequential": {
-        "split": "train",
-        "scenario": "sequential",
-        "frontier": [
-          {
-            "lever": "shared_target",
-            "approach": "shared_target",
-            "crates_compiled_mean": 1.0,
-            "wall_ms": 1611.2793710053666,
-            "disk_bytes": 102451447,
-            "store_bytes": 0
-          },
-          {
-            "lever": "frozen",
-            "approach": "nanocompile",
-            "crates_compiled_mean": 18.5,
-            "wall_ms": 7189.665811005398,
-            "disk_bytes": 72101212,
-            "store_bytes": 68369982
-          }
-        ],
-        "nano_on_frontier": true
-      }
     },
-    "held_out": {
-      "bhumi|sequential": {
-        "split": "held_out",
-        "scenario": "sequential",
-        "frontier": [
-          {
-            "lever": "shared_target",
-            "approach": "shared_target",
-            "crates_compiled_mean": 0.25,
-            "wall_ms": 678.9502880055807,
-            "disk_bytes": 301503851,
-            "store_bytes": 0
-          },
-          {
-            "lever": "kache",
-            "approach": "kache",
-            "crates_compiled_mean": 0.0,
-            "wall_ms": 4355.019488997641,
-            "disk_bytes": 4590479442,
-            "store_bytes": 48866938
-          },
-          {
-            "lever": "frozen",
-            "approach": "nanocompile",
-            "crates_compiled_mean": 36.0,
-            "wall_ms": 18823.399210996286,
-            "disk_bytes": 299270183,
-            "store_bytes": 275175877
-          }
-        ],
-        "nano_on_frontier": true
+    {
+      "approach": "nanocompile",
+      "crates_compiled": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "crates_compiled_mean": 0.0,
+      "crates_restored_mean": 64.0,
+      "disk_bytes": 106550167,
+      "edit_kind": "mixed",
+      "env": {
+        "CARGO_INCREMENTAL": "0",
+        "NANOCOMPILE_ALLOW_INCREMENTAL": "1",
+        "NANOCOMPILE_CHECK_NATIVE": "1",
+        "NANOCOMPILE_EXECUTABLE_PRODUCERS": "1",
+        "NANOCOMPILE_HARDLINK_TARGET": "1",
+        "NANOCOMPILE_NO_VARIANTS": "1",
+        "NANOCOMPILE_PROC_MACROS": "reported",
+        "NANOCOMPILE_PROC_MACRO_PRODUCERS": "1",
+        "NANOCOMPILE_REMAP_PATHS": "1"
       },
-      "emergentDB|sequential": {
-        "split": "held_out",
-        "scenario": "sequential",
-        "frontier": [
-          {
-            "lever": "shared_target",
-            "approach": "shared_target",
-            "crates_compiled_mean": 0.0,
-            "wall_ms": 302.25169099867344,
-            "disk_bytes": 145550858,
-            "store_bytes": 0
-          },
-          {
-            "lever": "frozen",
-            "approach": "nanocompile",
-            "crates_compiled_mean": 18.75,
-            "wall_ms": 10184.386263994384,
-            "disk_bytes": 133791754,
-            "store_bytes": 130119246
-          }
-        ],
-        "nano_on_frontier": true
+      "errors": [
+        " your intent to not inherit, add:\n   |\n14 ~ tracing-subscriber = { version = \"0.3\", features = [\"env-filter\"] }\n15 + [lints]\n   |\nwarning: `example-reqwest-response` (manifest) generated 1 warning\nwarning: missing `[lints]` to inherit `[workspace.lints]`\n  --> examples/routes-and-handlers-close-together/Cargo.toml\n   = note: `cargo::missing_lints_inheritance` is set to `warn` by default\nhelp: to inherit `workspace.lints, add:\n   |\n 9 ~ tokio = { version = \"1.0\", features = [\"full\"] }\n10 + [lints]\n11 + workspace = true\n   |\nhelp: to clarify your intent to not inherit, add:\n   |\n 9 ~ tokio = { version = \"1.0\", features = [\"full\"] }\n10 + [lints]\n   |\nwarning: `example-routes-and-handlers-close-together` (manifest) generated 1 warning\nwarning: missing `[lints]` to inherit `[workspace.lints]`\n  --> examples/print-request-response/Cargo.toml\n   = note: `cargo::missing_lints_inheritance` is set to `warn` by default\nhelp: to inherit `workspace.lints, add:\n   |\n12 ~ tracing-subscriber = { version = \"0.3\", features = [\"env-filter\"] }\n13 + [lints]\n14 + workspace = true\n   |\nhelp: to clarify your intent to not inherit, add:\n   |\n12 ~ tracing-subscriber = { version = \"0.3\", features = [\"env-filter\"] }\n13 + [lints]\n   |\nwarning: `example-print-request-response` (manifest) generated 1 warning\nwarning: missing `[lints]` to inherit `[workspace.lints]`\n  --> examples/anyhow-error-response/Cargo.toml\n   = note: `cargo::missing_lints_inheritance` is set to `warn` by default\nhelp: to inherit `workspace.lints, add:\n   |\n14 ~ tower = { version = \"0.5.2\", features = [\"util\"] }\n15 + [lints]\n16 + workspace = true\n   |\nhelp: to clarify your intent to not inherit, add:\n   |\n14 ~ tower = { version = \"0.5.2\", features = [\"util\"] }\n15 + [lints]\n   |\nwarning: `example-anyhow-error-response` (manifest) generated 1 warning\nerror: failed to open: /tmp/agent-worktrees/train/axum/l21_check_native/4-sequential-mixed-head/wt-0/target/debug/.cargo-build-lock\n\nCaused by:\n  Permission denied (os error 13)\n\n",
+        " reqwest-eventsource = \"0.6\"\n22 + [lints]\n23 + workspace = true\n   |\nhelp: to clarify your intent to not inherit, add:\n   |\n21 ~ reqwest-eventsource = \"0.6\"\n22 + [lints]\n   |\nwarning: `example-sse` (manifest) generated 1 warning\nwarning: missing `[lints]` to inherit `[workspace.lints]`\n  --> examples/todos/Cargo.toml\n   = note: `cargo::missing_lints_inheritance` is set to `warn` by default\nhelp: to inherit `workspace.lints, add:\n   |\n15 ~ uuid = { version = \"1.0\", features = [\"serde\", \"v4\"] }\n16 + [lints]\n17 + workspace = true\n   |\nhelp: to clarify your intent to not inherit, add:\n   |\n15 ~ uuid = { version = \"1.0\", features = [\"serde\", \"v4\"] }\n16 + [lints]\n   |\nwarning: `example-todos` (manifest) generated 1 warning\nwarning: missing `[lints]` to inherit `[workspace.lints]`\n  --> examples/unix-domain-socket/Cargo.toml\n   = note: `cargo::missing_lints_inheritance` is set to `warn` by default\nhelp: to inherit `workspace.lints, add:\n   |\n13 ~ tracing-subscriber = { version = \"0.3\", features = [\"env-filter\"] }\n14 + [lints]\n15 + workspace = true\n   |\nhelp: to clarify your intent to not inherit, add:\n   |\n13 ~ tracing-subscriber = { version = \"0.3\", features = [\"env-filter\"] }\n14 + [lints]\n   |\nwarning: `example-unix-domain-socket` (manifest) generated 1 warning\nwarning: missing `[lints]` to inherit `[workspace.lints]`\n  --> examples/key-value-store/Cargo.toml\n   = note: `cargo::missing_lints_inheritance` is set to `warn` by default\nhelp: to inherit `workspace.lints, add:\n   |\n19 ~ tracing-subscriber = { version = \"0.3\", features = [\"env-filter\"] }\n20 + [lints]\n21 + workspace = true\n   |\nhelp: to clarify your intent to not inherit, add:\n   |\n19 ~ tracing-subscriber = { version = \"0.3\", features = [\"env-filter\"] }\n20 + [lints]\n   |\nwarning: `example-key-value-store` (manifest) generated 1 warning\nerror: failed to open: /tmp/agent-worktrees/train/axum/l21_check_native/4-sequential-mixed-head/wt-1/target/debug/.cargo-build-lock\n\nCaused by:\n  Permission denied (os error 13)\n\n"
+      ],
+      "first_green": {},
+      "from_older": false,
+      "held_out": false,
+      "lever": "l21_check_native",
+      "loop": "check",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "ok": false,
+      "per_worktree_ms": [
+        135.47477099928074,
+        129.9729029997252,
+        125.65241799893556,
+        115.690288002952
+      ],
+      "product": "agent_worktrees",
+      "sample": "axum",
+      "split": "train",
+      "store_bytes": 102049345,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
       },
-      "hashbrown|sequential": {
-        "split": "held_out",
-        "scenario": "sequential",
-        "frontier": [
-          {
-            "lever": "shared_target",
-            "approach": "shared_target",
-            "crates_compiled_mean": 0.25,
-            "wall_ms": 460.81229799892753,
-            "disk_bytes": 8261952,
-            "store_bytes": 0
-          },
-          {
-            "lever": "kache",
-            "approach": "kache",
-            "crates_compiled_mean": 1.25,
-            "wall_ms": 1392.3294549967977,
-            "disk_bytes": 6638859,
-            "store_bytes": 3307801
-          },
-          {
-            "lever": "sccache",
-            "approach": "sccache",
-            "crates_compiled_mean": 4.0,
-            "wall_ms": 2542.5848770028097,
-            "disk_bytes": 5623064,
-            "store_bytes": 0
-          },
-          {
-            "lever": "frozen",
-            "approach": "nanocompile",
-            "crates_compiled_mean": 1.75,
-            "wall_ms": 1822.3271050010226,
-            "disk_bytes": 2532352,
-            "store_bytes": 2527657
-          }
-        ],
-        "nano_on_frontier": true
+      "wall_ms": 523.427988999174,
+      "warm_crates": 64,
+      "warm_ms": 11532.42019800382,
+      "warm_ok": true
+    },
+    {
+      "approach": "nanocompile",
+      "crates_compiled": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "crates_compiled_mean": 0.0,
+      "crates_restored_mean": 44.0,
+      "disk_bytes": 72199687,
+      "edit_kind": "mixed",
+      "env": {
+        "CARGO_INCREMENTAL": "0",
+        "NANOCOMPILE_ALLOW_INCREMENTAL": "1",
+        "NANOCOMPILE_CHECK_NATIVE": "1",
+        "NANOCOMPILE_EXECUTABLE_PRODUCERS": "1",
+        "NANOCOMPILE_HARDLINK_TARGET": "1",
+        "NANOCOMPILE_NO_VARIANTS": "1",
+        "NANOCOMPILE_PROC_MACROS": "reported",
+        "NANOCOMPILE_PROC_MACRO_PRODUCERS": "1",
+        "NANOCOMPILE_REMAP_PATHS": "1"
       },
-      "nalgebra|sequential": {
-        "split": "held_out",
-        "scenario": "sequential",
-        "frontier": [
-          {
-            "lever": "shared_target",
-            "approach": "shared_target",
-            "crates_compiled_mean": 0.25,
-            "wall_ms": 4523.814095002308,
-            "disk_bytes": 145827028,
-            "store_bytes": 0
-          },
-          {
-            "lever": "frozen",
-            "approach": "nanocompile",
-            "crates_compiled_mean": 8.25,
-            "wall_ms": 20309.546192002017,
-            "disk_bytes": 84529916,
-            "store_bytes": 84494045
-          }
-        ],
-        "nano_on_frontier": true
+      "errors": [
+        "` by default\nhelp: consider removing `package.homepage`\nwarning: `grep-regex` (manifest) generated 1 warning\nwarning: `package.homepage` is redundant with `package.repository`\n  --> crates/printer/Cargo.toml:10:12\n   |\n10 | homepage = \"https://github.com/BurntSushi/ripgrep/tree/master/crates/printer\"\n   |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n11 | repository = \"https://github.com/BurntSushi/ripgrep/tree/master/crates/printer\"\n   |              ------------------------------------------------------------------\n   |\n   = note: `cargo::redundant_homepage` is set to `warn` by default\nhelp: consider removing `package.homepage`\nwarning: `grep-printer` (manifest) generated 1 warning\nwarning: `package.homepage` is redundant with `package.repository`\n  --> Cargo.toml:11:12\n   |\n11 | homepage = \"https://github.com/BurntSushi/ripgrep\"\n   |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n12 | repository = \"https://github.com/BurntSushi/ripgrep\"\n   |              ---------------------------------------\n   |\n   = note: `cargo::redundant_homepage` is set to `warn` by default\nhelp: consider removing `package.homepage`\nwarning: `ripgrep` (manifest) generated 1 warning\nwarning: `package.homepage` is redundant with `package.repository`\n  --> crates/ignore/Cargo.toml:10:12\n   |\n10 | homepage = \"https://github.com/BurntSushi/ripgrep/tree/master/crates/ignore\"\n   |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n11 | repository = \"https://github.com/BurntSushi/ripgrep/tree/master/crates/ignore\"\n   |              -----------------------------------------------------------------\n   |\n   = note: `cargo::redundant_homepage` is set to `warn` by default\nhelp: consider removing `package.homepage`\nwarning: `ignore` (manifest) generated 1 warning\nerror: failed to open: /tmp/agent-worktrees/train/ripgrep/l21_check_native/4-sequential-mixed-head/wt-0/target/debug/.cargo-build-lock\n\nCaused by:\n  Permission denied (os error 13)\n\n",
+        "g: `package.homepage` is redundant with `package.repository`\n  --> crates/regex/Cargo.toml:9:12\n   |\n 9 | homepage = \"https://github.com/BurntSushi/ripgrep/tree/master/crates/regex\"\n   |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n10 | repository = \"https://github.com/BurntSushi/ripgrep/tree/master/crates/regex\"\n   |              ----------------------------------------------------------------\n   |\n   = note: `cargo::redundant_homepage` is set to `warn` by default\nhelp: consider removing `package.homepage`\nwarning: `grep-regex` (manifest) generated 1 warning\nwarning: `package.homepage` is redundant with `package.repository`\n  --> crates/printer/Cargo.toml:10:12\n   |\n10 | homepage = \"https://github.com/BurntSushi/ripgrep/tree/master/crates/printer\"\n   |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n11 | repository = \"https://github.com/BurntSushi/ripgrep/tree/master/crates/printer\"\n   |              ------------------------------------------------------------------\n   |\n   = note: `cargo::redundant_homepage` is set to `warn` by default\nhelp: consider removing `package.homepage`\nwarning: `grep-printer` (manifest) generated 1 warning\nwarning: `package.homepage` is redundant with `package.repository`\n  --> crates/ignore/Cargo.toml:10:12\n   |\n10 | homepage = \"https://github.com/BurntSushi/ripgrep/tree/master/crates/ignore\"\n   |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n11 | repository = \"https://github.com/BurntSushi/ripgrep/tree/master/crates/ignore\"\n   |              -----------------------------------------------------------------\n   |\n   = note: `cargo::redundant_homepage` is set to `warn` by default\nhelp: consider removing `package.homepage`\nwarning: `ignore` (manifest) generated 1 warning\nerror: failed to open: /tmp/agent-worktrees/train/ripgrep/l21_check_native/4-sequential-mixed-head/wt-1/target/debug/.cargo-build-lock\n\nCaused by:\n  Permission denied (os error 13)\n\n"
+      ],
+      "first_green": {},
+      "from_older": false,
+      "held_out": false,
+      "lever": "l21_check_native",
+      "loop": "check",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "ok": false,
+      "per_worktree_ms": [
+        25.240284005121794,
+        23.61796899640467,
+        23.55122400331311,
+        23.87929000542499
+      ],
+      "product": "agent_worktrees",
+      "sample": "ripgrep",
+      "split": "train",
+      "store_bytes": 68523471,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
       },
-      "ruff|sequential": {
-        "split": "held_out",
-        "scenario": "sequential",
-        "frontier": [
-          {
-            "lever": "shared_target",
-            "approach": "shared_target",
-            "crates_compiled_mean": 1.0,
-            "wall_ms": 4595.914761004678,
-            "disk_bytes": 1185761641,
-            "store_bytes": 0
-          },
-          {
-            "lever": "frozen",
-            "approach": "nanocompile",
-            "crates_compiled_mean": 127.75,
-            "wall_ms": 124216.04949599714,
-            "disk_bytes": 794872899,
-            "store_bytes": 679381619
-          }
-        ],
-        "nano_on_frontier": true
+      "wall_ms": 105.92756800178904,
+      "warm_crates": 44,
+      "warm_ms": 4432.3333150023245,
+      "warm_ok": true
+    },
+    {
+      "approach": "nanocompile",
+      "crates_compiled": [
+        64,
+        6,
+        5,
+        5
+      ],
+      "crates_compiled_mean": 20.0,
+      "crates_restored_mean": 0,
+      "disk_bytes": 111384596,
+      "edit_kind": "mixed",
+      "env": {
+        "CARGO_INCREMENTAL": "0",
+        "NANOCOMPILE_ALLOW_INCREMENTAL": "1",
+        "NANOCOMPILE_CHECK_NATIVE": "1",
+        "NANOCOMPILE_EXECUTABLE_PRODUCERS": "1",
+        "NANOCOMPILE_HARDLINK_TARGET": "1",
+        "NANOCOMPILE_NO_VARIANTS": "1",
+        "NANOCOMPILE_PROC_MACROS": "reported",
+        "NANOCOMPILE_PROC_MACRO_PRODUCERS": "1",
+        "NANOCOMPILE_REMAP_PATHS": "1"
       },
-      "serde|sequential": {
-        "split": "held_out",
-        "scenario": "sequential",
-        "frontier": [
-          {
-            "lever": "shared_target",
-            "approach": "shared_target",
-            "crates_compiled_mean": 0.25,
-            "wall_ms": 392.55990799574647,
-            "disk_bytes": 47084150,
-            "store_bytes": 0
-          },
-          {
-            "lever": "frozen",
-            "approach": "nanocompile",
-            "crates_compiled_mean": 4.0,
-            "wall_ms": 6339.478683999914,
-            "disk_bytes": 13355434,
-            "store_bytes": 13346819
-          }
-        ],
-        "nano_on_frontier": true
+      "errors": [],
+      "first_green": {},
+      "from_older": false,
+      "held_out": false,
+      "lever": "l21_check_native",
+      "loop": "check",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "ok": true,
+      "per_worktree_ms": [
+        8409.413723995385,
+        3860.6873309981893,
+        4097.179071999562,
+        3800.4982599959476
+      ],
+      "product": "agent_worktrees",
+      "sample": "axum",
+      "split": "train",
+      "store_bytes": 107327372,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
       },
-      "tokio|sequential": {
-        "split": "held_out",
-        "scenario": "sequential",
-        "frontier": [
-          {
-            "lever": "shared_target",
-            "approach": "shared_target",
-            "crates_compiled_mean": 0.25,
-            "wall_ms": 2966.573227997287,
-            "disk_bytes": 109226449,
-            "store_bytes": 0
-          },
-          {
-            "lever": "frozen",
-            "approach": "nanocompile",
-            "crates_compiled_mean": 8.5,
-            "wall_ms": 14922.941049997462,
-            "disk_bytes": 62163951,
-            "store_bytes": 58122920
-          }
-        ],
-        "nano_on_frontier": true
-      }
+      "wall_ms": 20183.893051995256,
+      "warm_crates": 0,
+      "warm_ms": 414.7829069988802,
+      "warm_ok": true
+    },
+    {
+      "approach": "nanocompile",
+      "crates_compiled": [
+        44,
+        10,
+        10,
+        10
+      ],
+      "crates_compiled_mean": 18.5,
+      "crates_restored_mean": 0,
+      "disk_bytes": 72106893,
+      "edit_kind": "mixed",
+      "env": {
+        "CARGO_INCREMENTAL": "0",
+        "NANOCOMPILE_ALLOW_INCREMENTAL": "1",
+        "NANOCOMPILE_CHECK_NATIVE": "1",
+        "NANOCOMPILE_EXECUTABLE_PRODUCERS": "1",
+        "NANOCOMPILE_HARDLINK_TARGET": "1",
+        "NANOCOMPILE_NO_VARIANTS": "1",
+        "NANOCOMPILE_PROC_MACROS": "reported",
+        "NANOCOMPILE_PROC_MACRO_PRODUCERS": "1",
+        "NANOCOMPILE_REMAP_PATHS": "1"
+      },
+      "errors": [],
+      "first_green": {},
+      "from_older": false,
+      "held_out": false,
+      "lever": "l21_check_native",
+      "loop": "check",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "ok": true,
+      "per_worktree_ms": [
+        3334.4167360046413,
+        1287.1399050054606,
+        1297.8018400026485,
+        1292.2389450031915
+      ],
+      "product": "agent_worktrees",
+      "sample": "ripgrep",
+      "split": "train",
+      "store_bytes": 68374794,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      },
+      "wall_ms": 7224.767908999638,
+      "warm_crates": 0,
+      "warm_ms": 632.6374860000215,
+      "warm_ok": true
     }
-  }
+  ]
 }

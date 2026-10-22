@@ -1298,6 +1298,7 @@ def render_docs(payload) -> str:
         "Same four objectives, split by mode: sequential mixed-edit (leaf / body /",
         "sig analogue) and concurrent 4-worktree checks. L21 `NANOCOMPILE_CHECK_NATIVE=1`",
         "is the extra crates/wall lever (metadata-only rustc may cache `-l` native units).",
+        "Measure it with `python3 bench/agent_worktrees.py --append-lever l21_check_native`.",
         "",
     ]
     scenario = payload.get("scenario_pareto") or {}
@@ -1336,6 +1337,7 @@ def parse_args(argv=None):
     p.add_argument("--out", type=Path, default=REPO / "bench" / "archive" / "agent-worktrees.json")
     p.add_argument("--skip-baselines", action="store_true")
     p.add_argument("--quick", action="store_true", help="4 sequential worktrees only; skip concurrent and 8")
+    p.add_argument("--append-lever", default="", help="Measure one extra CLIMB_DELTAS lever on existing train archive")
     return p.parse_args(argv)
 
 
@@ -1357,7 +1359,54 @@ def main(argv=None):
         except json.JSONDecodeError:
             payload = {}
 
-    if args.phase in ("all", "train"):
+    if args.append_lever:
+        if not args.out.exists():
+            raise SystemExit(" --append-lever needs an existing archive at %s" % args.out)
+        payload = json.loads(args.out.read_text(encoding="utf-8"))
+        delta = next((d for d in CLIMB_DELTAS if d["id"] == args.append_lever), None)
+        if delta is None:
+            raise SystemExit("unknown lever %s" % args.append_lever)
+        elite_env = dict((payload.get("hill_climb") or {}).get("frozen_env") or NANO_FRONTIER)
+        elite_id = (payload.get("hill_climb") or {}).get("frozen_lever") or "frozen"
+        env = dict(elite_env)
+        env.update(delta["env"])
+        lever = {"id": delta["id"], "approach": "nanocompile", "env": env, "loop": "check"}
+        nxt = run_matrix(
+            train_names, [lever], n_list, modes, wrapper, args.work / "train", split="train",
+        )
+        train = list(payload.get("train") or [])
+        train.extend(nxt)
+        payload["train"] = train
+        base = [r for r in train if r.get("lever") in (elite_id, "frozen") and r.get("ok") and (r.get("mode") or "sequential") == "sequential"]
+        cand = [r for r in nxt if r.get("ok") and (r.get("mode") or "sequential") == "sequential"]
+        summary = summarize_pair(base, cand)
+        keep = keep_decision(summary)
+        print(json.dumps({"climb": delta["id"], "vs": elite_id, "keep": keep, "metrics": {
+            m: (summary.get(m) or {}).get("gain") for m in OBJECTIVES
+        }}), flush=True)
+        climb = payload.get("hill_climb") or {"log": []}
+        climb.setdefault("log", []).append({
+            "lever": delta["id"], "vs": elite_id, "keep": keep, "metrics": summary,
+            "note": "extra per-objective round on train",
+        })
+        if keep:
+            climb["frozen_env"] = env
+            climb["frozen_lever"] = delta["id"]
+            payload["frozen_env"] = env
+            elite_env = env
+        payload["hill_climb"] = climb
+        payload["pareto"] = {"train": pareto_by_repo(train, "train"), "held_out": (payload.get("pareto") or {}).get("held_out") or {}}
+        payload["scenario_pareto"] = {
+            "train": scenario_pareto(train, "train"),
+            "held_out": scenario_pareto(payload.get("held_out") or [], "held_out"),
+        }
+        write_json(args.out, payload)
+        if keep and args.phase in ("all", "held-out"):
+            args.phase = "held-out"
+        else:
+            args.phase = "record"
+
+    if args.phase in ("all", "train") and not args.append_lever:
         baselines = list(BASELINES if not args.skip_baselines else ())
         if not sccache_bin():
             baselines = [b for b in baselines if b["id"] != "sccache"]

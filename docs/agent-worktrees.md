@@ -55,6 +55,8 @@ objective past 3%. Stop a metric after it stalls.
 | `l12_no_variants` | l5_no_incremental | n/a | n/a | n/a | n/a | yes |  |
 | `l14_slim_graph` | l12_no_variants | n/a | n/a | n/a | n/a | yes | Skip empty -L prefix guards; unique dependency records. Ruff entries 244MB -> ~1MB. |
 | `l20_remap_paths` | l14_slim_graph | 0.0% | 1.8% | 9.2% | 9.6% | yes | Train disk -12% axum / -6% ripgrep via rustc --remap-path-prefix. |
+| `l21_check_native` | frozen | n/a | n/a | n/a | n/a | stall | extra per-objective round on train |
+| `l21_check_native` | frozen | 0.0% | 1.9% | 0.0% | -0.0% | stall | extra per-objective round on train |
 
 Frozen lever: `frozen`.
 
@@ -137,6 +139,7 @@ the held-out frontier for every repo.
 | --- | --- | --- | --- | --- | --- |
 | shared_target | shared_target | 0.5 | 3454 | 157767267 | 0 |
 | nanocompile | frozen | 20.0 | 20746 | 111392465 | 107322059 |
+| nanocompile | l21_check_native | 20.0 | 20184 | 111384596 | 107327372 |
 
 **ripgrep** — nanocompile on frontier: yes
 
@@ -144,6 +147,8 @@ the held-out frontier for every repo.
 | --- | --- | --- | --- | --- | --- |
 | shared_target | shared_target | 1.0 | 1611 | 102451447 | 0 |
 | nanocompile | frozen | 18.5 | 7190 | 72101212 | 68369982 |
+
+- dominated by `frozen` (nanocompile)
 
 ### Held-out
 
@@ -214,6 +219,10 @@ the held-out frontier for every repo.
 | ripgrep | kache | kache | 4 | sequential | 3.2 | 4507 | 2579098072 | 11235295 | yes |
 | ripgrep | sccache | sccache | 4 | sequential | 34.0 | 13637 | 283858704 | 0 | yes |
 | ripgrep | frozen | nanocompile | 4 | sequential | 18.5 | 7190 | 72101212 | 68369982 | yes |
+| axum | l21_check_native | nanocompile | 4 | sequential | 0.0 | 523 | 106550167 | 102049345 | no |
+| ripgrep | l21_check_native | nanocompile | 4 | sequential | 0.0 | 106 | 72199687 | 68523471 | no |
+| axum | l21_check_native | nanocompile | 4 | sequential | 20.0 | 20184 | 111384596 | 107327372 | yes |
+| ripgrep | l21_check_native | nanocompile | 4 | sequential | 18.5 | 7225 | 72106893 | 68374794 | yes |
 
 ## What climbed
 
@@ -249,6 +258,7 @@ Harness: `bench/agent_worktrees.py`. Raw rows: `bench/archive/agent-worktrees.js
 Same four objectives, split by mode: sequential mixed-edit (leaf / body /
 sig analogue) and concurrent 4-worktree checks. L21 `NANOCOMPILE_CHECK_NATIVE=1`
 is the extra crates/wall lever (metadata-only rustc may cache `-l` native units).
+Measure it with `python3 bench/agent_worktrees.py --append-lever l21_check_native`.
 
 ### Train scenarios
 
@@ -258,6 +268,7 @@ is the extra crates/wall lever (metadata-only rustc may cache `-l` native units)
 | --- | --- | --- | --- | --- | --- |
 | shared_target | shared_target | 0.5 | 3454 | 157767267 | 0 |
 | nanocompile | frozen | 20.0 | 20746 | 111392465 | 107322059 |
+| nanocompile | l21_check_native | 20.0 | 20184 | 111384596 | 107327372 |
 
 **ripgrep|sequential** — nanocompile on frontier: yes
 
