@@ -28,6 +28,7 @@ pub const general_flags = [_]GeneralFlag{
     .{ .name = "NANOCOMPILE_REMAP_PATHS", .value = "1" },
     .{ .name = "NANOCOMPILE_TS_INCREMENTAL", .value = "1" },
     .{ .name = "NANOCOMPILE_TS_SEED", .value = "1" },
+    .{ .name = "NANOCOMPILE_TS_DIRTY_SCOPE", .value = "1" },
     .{ .name = "NANOCOMPILE_TSRS_CHECKERS", .value = "4" },
 };
 

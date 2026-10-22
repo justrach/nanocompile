@@ -11,7 +11,8 @@ Real `git worktree add` off a warm main. node_modules is a symlink to
 main's install (counted once). `nanocompile worktree init` writes the TS
 shims used for nanocompile rows.
 
-Tune on condensation-site when present, else the 126-file public stand-in.
+Tune on condensation-site when present, else the 126-file public
+stand-in (labeled condensation-standin, never as the private app).
 Freeze one shipped config, then verify held-out (ajv, prettier).
 
     python3 bench/ts_worktrees.py
@@ -22,6 +23,7 @@ from __future__ import annotations
 
 import argparse
 from concurrent.futures import ThreadPoolExecutor, as_completed
+import fnmatch
 import json
 import os
 from pathlib import Path
@@ -52,29 +54,39 @@ CHECKERS = (
 NANO_TS_FRONTIER = {
     "NANOCOMPILE_TS_INCREMENTAL": "1",
     "NANOCOMPILE_TS_SEED": "1",
+    "NANOCOMPILE_TS_DIRTY_SCOPE": "1",
     "NANOCOMPILE_TSRS_CHECKERS": "4",
 }
 
 CLIMB_DELTAS = (
-    {"id": "l0_result_cache", "env": {"NANOCOMPILE_TS_INCREMENTAL": "0", "NANOCOMPILE_TS_SEED": "0"}},
-    {"id": "l1_incremental", "env": {"NANOCOMPILE_TS_INCREMENTAL": "1", "NANOCOMPILE_TS_SEED": "0"}},
-    {"id": "l2_seed_buildinfo", "env": {"NANOCOMPILE_TS_INCREMENTAL": "1", "NANOCOMPILE_TS_SEED": "1"}},
+    {"id": "l0_result_cache", "env": {"NANOCOMPILE_TS_INCREMENTAL": "0", "NANOCOMPILE_TS_SEED": "0", "NANOCOMPILE_TS_DIRTY_SCOPE": "0"}},
+    {"id": "l1_incremental", "env": {"NANOCOMPILE_TS_INCREMENTAL": "1", "NANOCOMPILE_TS_SEED": "0", "NANOCOMPILE_TS_DIRTY_SCOPE": "0"}},
+    {"id": "l2_seed_buildinfo", "env": {"NANOCOMPILE_TS_INCREMENTAL": "1", "NANOCOMPILE_TS_SEED": "1", "NANOCOMPILE_TS_DIRTY_SCOPE": "0"}},
+    {"id": "l3_dirty_scope", "env": {"NANOCOMPILE_TS_INCREMENTAL": "1", "NANOCOMPILE_TS_SEED": "1", "NANOCOMPILE_TS_DIRTY_SCOPE": "1"}},
 )
+
+WALL_NOISE = 0.03
+INJECT_MARKERS = ("_nano_ts_error", "_nano_undefined_ident")
+_MODULE_RE = re.compile(r'"module"\s*:\s*"([^"]+)"')
+_RESOLUTION_RE = re.compile(r'"moduleResolution"\s*:\s*"([^"]+)"')
 
 RSS_LINE = re.compile(r"Maximum resident set size \(kbytes\):\s+(\d+)")
 
 
-def _condensation_path() -> Path:
+def _train_catalog_entry() -> tuple[str, Path]:
     real = Path("/tmp/real-samples/condensation-site")
+    standin = Path("/tmp/real-samples/condensation-standin")
     if (real / "tsconfig.json").exists():
-        return real
-    return Path("/tmp/real-samples/condensation-standin")
+        return "condensation-site", real
+    return "condensation-standin", standin
 
+
+_TRAIN_NAME, _TRAIN_PATH = _train_catalog_entry()
 
 SAMPLE_CATALOG = {
-    "condensation-site": {"path": _condensation_path(), "size": "mid", "args": ["--noEmit"], "split": "train"},
-    "ajv": {"path": Path("/tmp/real-samples/ajv"), "size": "mid", "args": ["--noEmit", "--pretty", "false"], "split": "held_out"},
-    "prettier": {"path": Path("/tmp/real-samples/prettier"), "size": "large", "args": ["--noEmit", "--pretty", "false"], "split": "held_out"},
+    _TRAIN_NAME: {"path": _TRAIN_PATH, "size": "mid", "args": ["--noEmit"], "split": "train"},
+    "ajv": {"path": Path("/tmp/real-samples/ajv"), "size": "mid", "args": ["--noEmit"], "split": "held_out"},
+    "prettier": {"path": Path("/tmp/real-samples/prettier"), "size": "large", "args": ["--noEmit"], "split": "held_out"},
 }
 
 
@@ -165,25 +177,40 @@ def link_node_modules(src: Path, dest: Path):
             return
 
 
+def _set_module_resolution(text: str, value: str) -> str:
+    if _RESOLUTION_RE.search(text):
+        return _RESOLUTION_RE.sub('"moduleResolution": "%s"' % value, text, count=1)
+    for old in ('"compilerOptions": {', '"compilerOptions":{'):
+        if old in text:
+            return text.replace(old, old + ' "moduleResolution": "%s",' % value, 1)
+    return text
+
+
 def compat_tsconfig_for_checker(root: Path, checker_id: str):
-    """TS 7 / bun reject `moduleResolution=node10` from extended configs.
-    Force bundler on the repo tsconfig so none / incremental / nano are
-    measured on a checkable program (same rewrite for every approach)."""
+    """Make TS 7 / bun actually typecheck the same program as tsc.
+
+    General rule (never force bundler onto NodeNext/Node16):
+    - module NodeNext/Node16 → matching moduleResolution
+    - extends or node/node10 resolution → bundler
+    """
     if checker_id not in {"tsgo", "tsrs", "bun"}:
         return
     path = root / "tsconfig.json"
     if not path.exists():
         return
     text = path.read_text(encoding="utf-8", errors="replace")
-    if "NodeNext" in text or "nodenext" in text:
+    module_m = _MODULE_RE.search(text)
+    module = (module_m.group(1).lower() if module_m else "")
+    res_m = _RESOLUTION_RE.search(text)
+    resolution = (res_m.group(1).lower() if res_m else "")
+    if module in {"nodenext", "node16"}:
+        want = "nodenext" if module == "nodenext" else "node16"
+        if resolution != want:
+            path.write_text(_set_module_resolution(text, want), encoding="utf-8")
         return
-    if '"moduleResolution"' in text:
-        for old in ('"node10"', '"node"', '"node16"', '"nodenext"'):
-            text = text.replace(old, '"bundler"')
-    elif '"compilerOptions"' in text:
-        text = text.replace('"compilerOptions": {', '"compilerOptions": { "moduleResolution": "bundler",', 1)
-        text = text.replace('"compilerOptions":{', '"compilerOptions":{ "moduleResolution": "bundler",', 1)
-    path.write_text(text, encoding="utf-8")
+    if "extends" in text or resolution in {"", "node", "node10", "classic"}:
+        if resolution != "bundler":
+            path.write_text(_set_module_resolution(text, "bundler"), encoding="utf-8")
 
 
 def worktree_init(wrapper: Path, dest: Path, store: Path):
@@ -200,15 +227,83 @@ CLASSIFY_SKIP = {
 }
 
 
+def strip_jsonc(text: str) -> str:
+    out = []
+    i = 0
+    n = len(text)
+    while i < n:
+        if text.startswith("//", i):
+            while i < n and text[i] != "\n":
+                i += 1
+            continue
+        if text.startswith("/*", i):
+            end = text.find("*/", i + 2)
+            i = n if end < 0 else end + 2
+            continue
+        if text[i] in "\"'":
+            q = text[i]
+            out.append(q)
+            i += 1
+            while i < n:
+                out.append(text[i])
+                if text[i] == "\\" and i + 1 < n:
+                    out.append(text[i + 1])
+                    i += 2
+                    continue
+                if text[i] == q:
+                    i += 1
+                    break
+                i += 1
+            continue
+        out.append(text[i])
+        i += 1
+    return re.sub(r",\s*([}\]])", r"\1", "".join(out))
+
+
+def tsconfig_filters(root: Path):
+    path = root / "tsconfig.json"
+    if not path.exists():
+        return None, []
+    try:
+        data = json.loads(strip_jsonc(path.read_text(encoding="utf-8", errors="replace")))
+    except json.JSONDecodeError:
+        return None, []
+    if not isinstance(data, dict):
+        return None, []
+    include = data.get("include")
+    exclude = list(data.get("exclude") or [])
+    return include if isinstance(include, list) else None, exclude
+
+
+def rel_matches(rel: str, patterns) -> bool:
+    rel = rel.replace("\\", "/")
+    name = Path(rel).name
+    for raw in patterns or []:
+        pat = str(raw).replace("\\", "/").rstrip("/")
+        if not pat:
+            continue
+        if fnmatch.fnmatch(rel, pat) or fnmatch.fnmatch(rel, pat + "/**") or rel.startswith(pat + "/"):
+            return True
+        if "/" not in pat and fnmatch.fnmatch(name, pat):
+            return True
+    return False
+
+
 def classify_sources(root: Path) -> dict:
+    include, exclude = tsconfig_filters(root)
     files = []
     for p in root.rglob("*"):
         if p.suffix not in {".ts", ".tsx", ".mts", ".cts", ".js", ".jsx", ".mjs", ".cjs"}:
             continue
         if p.name.endswith(".d.ts"):
             continue
+        rel = str(p.relative_to(root)).replace("\\", "/")
         rel_parts = p.relative_to(root).parts
         if any(part in CLASSIFY_SKIP or part.startswith(".") for part in rel_parts[:-1]):
+            continue
+        if rel_matches(rel, exclude):
+            continue
+        if include is not None and not rel_matches(rel, include):
             continue
         files.append(p)
     counts = {p: 0 for p in files}
@@ -321,11 +416,17 @@ def run_check(cwd: Path, checker: dict, approach: str, store: Path, wrapper: Pat
         "misses": max(0, misses),
         "stdout": (proc.stdout or "")[-2000:],
         "stderr": (proc.stderr or "")[-2000:],
-        "error_seen": any(
-            token in ((proc.stdout or "") + (proc.stderr or ""))
-            for token in ("_nano_ts_error", "_nano_undefined_ident", "TS2304", "TS2322")
-        ),
+        "error_seen": inject_reported({
+            "stdout": proc.stdout or "",
+            "stderr": proc.stderr or "",
+        }),
     }
+
+
+def inject_reported(result) -> bool:
+    """Generic TS2304/TS2322 from the host program must not satisfy the gate."""
+    blob = (result.get("stdout") or "") + (result.get("stderr") or "")
+    return any(marker in blob for marker in INJECT_MARKERS)
 
 
 def files_for(result, n_sources, approach):
@@ -446,16 +547,13 @@ def scenario_rows(sample, checker, approach, lever, split, setup, wrapper, args)
         rec = edit_file(victim, "error")
         bad = run_check(trees[-1], checker, approach, store, wrapper, env, args)
         restore_edit(rec)
-        blob = (bad.get("stderr") or "") + (bad.get("stdout") or "")
-        error_ok = (not bad["ok"]) and (
-            bad.get("error_seen")
-            or "_nano_ts_error" in blob or "_nano_undefined_ident" in blob
-            or "TS2304" in blob or "TS2322" in blob
-        )
+        error_ok = bool(bad.get("error_seen")) or inject_reported(bad)
         clean = run_check(trees[0], checker, approach, store, wrapper, env, args)
-        # A sibling failure is only a false hit when the project was clean
-        # before inject. Checkers that cannot typecheck the repo already fail.
-        if setup["warm"]["ok"] and not clean["ok"]:
+        # Sibling must not replay the inject. A clean-project sibling that
+        # now fails is a false hit; a repo that already failed warm is not.
+        if inject_reported(clean):
+            false_hit = True
+        elif setup["warm"]["ok"] and not clean["ok"]:
             false_hit = True
     for row in rows:
         row["error_reported"] = error_ok
@@ -481,11 +579,27 @@ def pareto_set(rows, objectives=OBJECTIVES):
     return front
 
 
+def honestly_won(nano, none, wall_noise=WALL_NOISE):
+    """Strictly better on ≥1 objective and wall not worse beyond noise."""
+    if not nano or not none or not nano.get("correctness_ok"):
+        return False
+    if nano.get("wall_ms") is None or none.get("wall_ms") is None:
+        return False
+    if none["wall_ms"] > 0 and nano["wall_ms"] > none["wall_ms"] * (1.0 + wall_noise):
+        return False
+    return any(
+        nano.get(obj) is not None and none.get(obj) is not None and nano[obj] < none[obj]
+        for obj in OBJECTIVES
+    )
+
+
 def cell_summary(rows):
     front = pareto_set(rows)
     nano = [r for r in rows if r.get("approach") == "nanocompile" and r.get("ok")]
+    none = [r for r in rows if r.get("approach") == "none" and r.get("correctness_ok")]
     front_ids = {(r.get("approach"), r.get("lever")) for r in front}
     nano_on = any((r.get("approach"), r.get("lever")) in front_ids for r in nano)
+    nano_won = any(none and honestly_won(n, none[0]) for n in nano)
     dominated_by = []
     for n in nano:
         for b in rows:
@@ -499,6 +613,7 @@ def cell_summary(rows):
             for r in front
         ],
         "nano_on_frontier": nano_on,
+        "nano_won": nano_won,
         "nano_dominated_by": dominated_by,
     }
 
@@ -548,8 +663,9 @@ def render_docs(payload) -> str:
         "same shared `NANOCOMPILE_DIR`.",
         "",
         "condensation-site is the intended train repo. This environment cannot",
-        "clone that private tree, so train is a 126-file public stand-in with the",
-        "same checker × scenario grid. Re-run on the real app with:",
+        "clone that private tree, so train is **condensation-standin** (126-file",
+        "public stand-in) with the same checker × scenario grid. Re-run on the",
+        "real app with:",
         "",
         "```sh",
         "python3 bench/ts_worktrees.py --repo /path/to/condensation-site --phase all",
@@ -564,8 +680,9 @@ def render_docs(payload) -> str:
         "",
         "## Frozen vs baselines (checker × scenario)",
         "",
-        "Shipped lever vs `none` / `incremental_local`. **front** = nanocompile is",
-        "non-dominated in that cell.",
+        "Shipped lever vs `none` / `incremental_local`. **front** = honest win:",
+        "strictly better on ≥1 objective and wall not worse beyond 3% noise.",
+        "Pareto non-domination alone is not a win when wall is equal or slower.",
         "",
         "| split | cell | front | wall nano/none | files nano/none | store | disk nano/none | rss nano/none | correct |",
         "| --- | --- | --- | --- | --- | --- | --- | --- | --- |",
@@ -585,7 +702,7 @@ def render_docs(payload) -> str:
             none = next((x for x in rows if x.get("sample")==sample and x.get("checker")==checker and x.get("scenario")==scenario and x.get("approach")=="none"), None)
             cell = "%s/%s|%s" % (sample, checker, scenario)
             info = cells.get(cell) or cells.get("%s|%s" % (checker, scenario)) or {}
-            on = "yes" if info.get("nano_on_frontier") else "NO"
+            on = "yes" if info.get("nano_won") else "NO"
             def pair(attr, digits=0):
                 a = (nano or {}).get(attr)
                 b = (none or {}).get(attr)
@@ -625,7 +742,8 @@ def render_docs(payload) -> str:
         "```",
         "",
         "Cache key: checker identity + argv + tsconfig + source hashes, paths as",
-        "`$NANO_ROOT`. Only zero-error results are stored.",
+        "`$NANO_ROOT`. Every exit code is stored (replay prefix",
+        "`NANOCOMPILE_TS_EXIT=N`). Edit misses do not add a new result entry.",
         "",
         "## Hill-climb",
         "",
@@ -656,8 +774,8 @@ def render_docs(payload) -> str:
             lines += ["(not measured yet)", ""]
             continue
         for cell, info in block.items():
-            on = "yes" if info.get("nano_on_frontier") else "NO"
-            lines.append("**%s** — nanocompile on frontier: %s" % (cell, on))
+            on = "yes" if info.get("nano_won") else "NO"
+            lines.append("**%s** — nanocompile honest win: %s" % (cell, on))
             lines.append("")
             lines.append("| approach | lever | wall | files | store | disk | rss kb |")
             lines.append("| --- | --- | --- | --- | --- | --- | --- |")
@@ -699,11 +817,13 @@ def render_docs(payload) -> str:
         "- **L0** content-addressed result cache (file hashes + `$NANO_ROOT`).",
         "- **L1** store/restore `.tsbuildinfo` with the result.",
         "- **L2** seed key (no source hashes) so an edit starts from sibling buildinfo.",
+        "- **L3** dirty-file scope for `bun check` (≤4 dirty paths).",
         "",
-        "`bun check` has no incremental file; L1/L2 do not apply.",
-        "prettier + tsgo/tsrs/bun: the program is `checkJs` with `module: NodeNext`.",
-        "TS 7 rejects a bundler override on NodeNext and stops before typechecking, so",
-        "the inject gate cannot be certified. tsc 5.9 on prettier is on the frontier.",
+        "`bun check` has no incremental file; L1/L2 do not apply. Seed",
+        "`.tsbuildinfo` is deleted locally after CAS store (hardlink on restore).",
+        "TS 7 / bun: NodeNext keeps matching `moduleResolution`; extends/node10",
+        "gets `bundler`. Inject gate requires `_nano_ts_error` /",
+        "`_nano_undefined_ident`, not a generic TS2304.",
         "Correctness: `tests/typescript_worktrees.py` uses real `git worktree add`.",
         "",
         "Harness: `python3 bench/ts_worktrees.py --repo PATH`.",
@@ -729,7 +849,7 @@ def train_names():
     for name, meta in SAMPLE_CATALOG.items():
         if meta.get("split") == "train" and meta["path"].exists():
             names.append(name)
-    return names or ["condensation-site"]
+    return names or [_TRAIN_NAME]
 
 
 def held_names():
@@ -829,22 +949,27 @@ def main(argv=None):
                         sample, src, checker, delta["id"], delta["id"], wrapper, args.work, delta["env"], meta["args"], "train", args.worktrees,
                     )
                     rows.extend(nxt)
+                    correct = all(r.get("correctness_ok") for r in nxt)
                     improved = False
-                    for scenario in SCENARIOS:
-                        cell_rows = [r for r in rows if r.get("sample") == sample and r.get("checker") == checker["id"] and r.get("scenario") == scenario]
-                        info = cell_summary(cell_rows)
-                        if info["nano_on_frontier"]:
-                            improved = True
+                    if correct:
+                        for scenario in SCENARIOS:
+                            cell_rows = [r for r in rows if r.get("sample") == sample and r.get("checker") == checker["id"] and r.get("scenario") == scenario]
+                            info = cell_summary(cell_rows)
+                            if info.get("nano_won"):
+                                improved = True
                     climb_log.append({
                         "lever": delta["id"], "vs": vs, "keep": improved,
                         "checker": checker["id"], "sample": sample,
-                        "note": "on frontier in at least one cell" if improved else "no cell improved",
+                        "note": (
+                            "correctness failed; not shipped" if not correct else
+                            ("honest win in at least one cell" if improved else "no honest cell win")
+                        ),
                     })
                     if improved:
                         last_keep = True
                         vs = delta["id"]
-                        frozen_env = dict(delta["env"])
-                        frozen_env.setdefault("NANOCOMPILE_TSRS_CHECKERS", "4")
+                        frozen_env = dict(NANO_TS_FRONTIER)
+                        frozen_env.update(delta["env"])
                         frozen_lever = delta["id"]
                         stalled[checker["id"]] = 0
                     else:
@@ -862,6 +987,10 @@ def main(argv=None):
                     subset = [r for r in rows if r.get("sample") == sample and r.get("checker") == checker["id"] and r.get("scenario") == scenario]
                     payload["pareto"]["train"][cell] = cell_summary(subset)
         payload["train_note"] = "condensation-site private; trained on " + ",".join(samples)
+        bad_frozen = [r for r in rows if r.get("approach") == "nanocompile" and r.get("lever") == frozen_lever and not r.get("correctness_ok")]
+        payload["frozen_correct"] = not bad_frozen
+        if bad_frozen:
+            payload["train_note"] += "; frozen lever failed correctness — not a shippable config"
         payload["vite_note"] = (
             "vite (github.com/vitejs/vite) is a pnpm-only monorepo with no root tsconfig; "
             "typecheck is workspace-wide. Held-out is ajv + prettier. Re-run with "

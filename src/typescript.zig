@@ -12,8 +12,9 @@ const Dir = std.Io.Dir;
 
 pub const Checker = enum { tsc, tsgo, tsrs, bun };
 
-const skip_dirs = [_][]const u8{ "node_modules", ".git", ".next", "dist", "out", "coverage", ".turbo", ".open-next", "zig-out", "target", ".cache", ".nanocompile", ".cargo" };
+const skip_dirs = [_][]const u8{ "node_modules", ".git", ".next", "dist", "out", "coverage", ".turbo", ".open-next", "zig-out", "target", ".cache", ".nanocompile", ".cargo", "tests", "test", "__tests__", "website", "docs", "scripts", "fixtures", "examples", "playground", "templates", "vendors", "benchmarks", "bin" };
 const source_ext = [_][]const u8{ ".ts", ".tsx", ".mts", ".cts", ".js", ".jsx" };
+const exit_mark = "NANOCOMPILE_TS_EXIT=";
 
 fn eq(a: []const u8, b: []const u8) bool {
     return std.mem.eql(u8, a, b);
@@ -117,7 +118,7 @@ const Project = struct {
     buildinfo: ?[]const u8,
 };
 
-fn discoverProject(ctx: *cache.Context, args: []const []const u8) !Project {
+fn discoverProject(ctx: *cache.Context, checker: Checker, args: []const []const u8) !Project {
     const specified = optionValue(args, "--project") orelse optionValue(args, "-p");
     const tsconfig = if (specified) |p|
         try std.fs.path.resolve(ctx.a, &.{ ctx.cwd, p })
@@ -125,8 +126,8 @@ fn discoverProject(ctx: *cache.Context, args: []const []const u8) !Project {
         try findTsconfig(ctx, ctx.cwd);
     const root = std.fs.path.dirname(tsconfig) orelse ctx.cwd;
     const info_flag = optionValue(args, "--tsBuildInfoFile");
-    const incremental = hasFlag(args, "--incremental") or eq(ctx.env.get("NANOCOMPILE_TS_INCREMENTAL") orelse "1", "1");
-    const buildinfo = if (!incremental) null else if (info_flag) |p|
+    const want_incr = checker != .bun and (hasFlag(args, "--incremental") or eq(ctx.env.get("NANOCOMPILE_TS_INCREMENTAL") orelse "1", "1"));
+    const buildinfo = if (!want_incr) null else if (info_flag) |p|
         try std.fs.path.resolve(ctx.a, &.{ ctx.cwd, p })
     else
         try std.fmt.allocPrint(ctx.a, "{s}.tsbuildinfo", .{tsconfig});
@@ -223,16 +224,116 @@ fn restoreSeedBuildinfo(ctx: *cache.Context, checker: Checker, exe: []const u8, 
     }
 }
 
+fn snapshotKey(ctx: *cache.Context, checker: Checker, exe: []const u8, args: []const []const u8, project: Project) ![]const u8 {
+    var hash = cache.Hash.init(.{});
+    cache.field(&hash, "nanocompile-typescript-sources-v1");
+    cache.field(&hash, @tagName(checker));
+    cache.field(&hash, checkerIdentity(ctx, exe));
+    cache.field(&hash, try ctx.logicalPath(project.tsconfig));
+    for (args) |arg| cache.field(&hash, try ctx.logicalPath(arg));
+    return cache.finish(ctx.a, &hash);
+}
+
+fn renderSnapshot(ctx: *cache.Context, sources: []const Source) ![]u8 {
+    var out: std.ArrayList(u8) = .empty;
+    for (sources) |src| {
+        try out.appendSlice(ctx.a, src.rel);
+        try out.append(ctx.a, '\t');
+        try out.appendSlice(ctx.a, src.hash);
+        try out.append(ctx.a, '\n');
+    }
+    return out.items;
+}
+
+fn snapshotExists(ctx: *cache.Context, checker: Checker, exe: []const u8, args: []const []const u8, project: Project) bool {
+    const dest = std.fmt.allocPrint(ctx.a, "{s}.nano-ts-sources", .{project.tsconfig}) catch return false;
+    const key = snapshotKey(ctx, checker, exe, args, project) catch return false;
+    const names = [_][]const u8{"sources"};
+    const dests = [_][]const u8{dest};
+    if (cache.restoreStaged(ctx, key, &names, &dests) catch null == null) return false;
+    Dir.cwd().deleteFile(ctx.io, dest) catch {};
+    return true;
+}
+
+fn snapshotMatches(ctx: *cache.Context, checker: Checker, exe: []const u8, args: []const []const u8, project: Project, sources: []const Source) bool {
+    const dest = std.fmt.allocPrint(ctx.a, "{s}.nano-ts-sources", .{project.tsconfig}) catch return false;
+    const key = snapshotKey(ctx, checker, exe, args, project) catch return false;
+    const names = [_][]const u8{"sources"};
+    const dests = [_][]const u8{dest};
+    if (cache.restoreStaged(ctx, key, &names, &dests) catch null == null) return false;
+    const prev = ctx.read(dest) catch return false;
+    Dir.cwd().deleteFile(ctx.io, dest) catch {};
+    const now = renderSnapshot(ctx, sources) catch return false;
+    return eq(prev, now);
+}
+
+fn storeSourceSnapshot(ctx: *cache.Context, checker: Checker, exe: []const u8, args: []const []const u8, project: Project, sources: []const Source) !void {
+    const dest = try std.fmt.allocPrint(ctx.a, "{s}.nano-ts-sources", .{project.tsconfig});
+    ctx.atomic(dest, try renderSnapshot(ctx, sources)) catch return;
+    const key = try snapshotKey(ctx, checker, exe, args, project);
+    const names = [_][]const u8{"sources"};
+    const dests = [_][]const u8{dest};
+    cache.storeNamedTask(ctx, key, &names, &dests, "", "") catch {};
+    Dir.cwd().deleteFile(ctx.io, dest) catch {};
+}
+
+fn storedOutputMatches(ctx: *cache.Context, key: []const u8, name: []const u8, current: []const u8) bool {
+    const dest = std.fmt.allocPrint(ctx.a, "{s}.nano-cmp", .{current}) catch return false;
+    const names = [_][]const u8{name};
+    const dests = [_][]const u8{dest};
+    if (cache.restoreStaged(ctx, key, &names, &dests) catch null == null) return false;
+    defer Dir.cwd().deleteFile(ctx.io, dest) catch {};
+    const previous = ctx.read(dest) catch return false;
+    const now = ctx.read(current) catch return false;
+    return eq(previous, now);
+}
+
+fn maybeScopeDirty(ctx: *cache.Context, checker: Checker, exe: []const u8, args: []const []const u8, project: Project, sources: []const Source, argv: []const []const u8) ![]const []const u8 {
+    if (checker != .bun or !eq(ctx.env.get("NANOCOMPILE_TS_DIRTY_SCOPE") orelse "0", "1")) return argv;
+    const dest = try std.fmt.allocPrint(ctx.a, "{s}.nano-ts-sources", .{project.tsconfig});
+    const key = try snapshotKey(ctx, checker, exe, args, project);
+    const names = [_][]const u8{"sources"};
+    const dests = [_][]const u8{dest};
+    if (cache.restoreStaged(ctx, key, &names, &dests) catch null == null) return argv;
+    const prev = ctx.read(dest) catch return argv;
+    Dir.cwd().deleteFile(ctx.io, dest) catch {};
+    var prev_map: std.StringHashMap([]const u8) = .init(ctx.a);
+    var it = std.mem.splitScalar(u8, prev, '\n');
+    while (it.next()) |line| {
+        if (line.len == 0) continue;
+        const tab = std.mem.indexOfScalar(u8, line, '\t') orelse continue;
+        try prev_map.put(line[0..tab], line[tab + 1 ..]);
+    }
+    var dirty: std.ArrayList([]const u8) = .empty;
+    for (sources) |src| {
+        if (prev_map.get(src.rel)) |old| {
+            if (eq(old, src.hash)) continue;
+        }
+        try dirty.append(ctx.a, src.rel);
+        if (dirty.items.len > 4) return argv;
+    }
+    if (dirty.items.len == 0 or dirty.items.len > 4) return argv;
+    var out: std.ArrayList([]const u8) = .empty;
+    try out.appendSlice(ctx.a, argv);
+    for (dirty.items) |rel| try out.append(ctx.a, rel);
+    return out.items;
+}
+
 fn storeSeedBuildinfo(ctx: *cache.Context, checker: Checker, exe: []const u8, args: []const []const u8, project: Project) !void {
     if (project.buildinfo) |info| {
         if (eq(ctx.env.get("NANOCOMPILE_TS_SEED") orelse "1", "1")) {
             if (Dir.cwd().statFile(ctx.io, info, .{})) |_| {
                 remapFile(ctx, info, true);
                 const seed = try seedKey(ctx, checker, exe, args, project);
-                const names = [_][]const u8{"tsbuildinfo"};
-                const dests = [_][]const u8{info};
-                cache.storeNamedTask(ctx, seed, &names, &dests, "", "") catch {};
-                remapFile(ctx, info, false);
+                if (!storedOutputMatches(ctx, seed, "tsbuildinfo", info)) {
+                    const names = [_][]const u8{"tsbuildinfo"};
+                    const dests = [_][]const u8{info};
+                    cache.storeNamedTask(ctx, seed, &names, &dests, "", "") catch {};
+                }
+                // Drop the local copy after CAS store. A miss rematerializes
+                // (hardlink to the remapped blob, then path rewrite). Leaving
+                // a remapped-back file next to the blob doubles unique disk.
+                Dir.cwd().deleteFile(ctx.io, info) catch {};
             } else |_| {}
         }
     }
@@ -242,6 +343,21 @@ fn remapFile(ctx: *cache.Context, path: []const u8, to_logical: bool) void {
     const bytes = ctx.read(path) catch return;
     const next = remapText(ctx, bytes, to_logical) catch return;
     ctx.atomic(path, next) catch {};
+}
+
+fn encodeExit(a: std.mem.Allocator, stderr: []const u8, code: u8) ![]u8 {
+    return std.fmt.allocPrint(a, "{s}{d}\n{s}", .{ exit_mark, code, stderr });
+}
+
+fn decodeExit(stderr: []const u8) struct { code: u8, stderr: []const u8 } {
+    if (std.mem.startsWith(u8, stderr, exit_mark)) {
+        const rest = stderr[exit_mark.len..];
+        if (std.mem.indexOfScalar(u8, rest, '\n')) |nl| {
+            const parsed = std.fmt.parseInt(u8, rest[0..nl], 10) catch 0;
+            return .{ .code = parsed, .stderr = rest[nl + 1 ..] };
+        }
+    }
+    return .{ .code = 0, .stderr = stderr };
 }
 
 fn replay(ctx: *cache.Context, stdout: []const u8, stderr: []const u8) !void {
@@ -307,7 +423,7 @@ pub fn execute(ctx: *cache.Context, checker: Checker, args: []const []const u8) 
         try argv.appendSlice(ctx.a, args);
         return bypass(ctx, argv.items, "bypass: disabled");
     };
-    const project = discoverProject(ctx, args) catch |err|
+    const project = discoverProject(ctx, checker, args) catch |err|
         return bypass(ctx, &.{ try resolveChecker(ctx, checker) }, try std.fmt.allocPrint(ctx.a, "bypass: {s}", .{@errorName(err)}));
     ctx.rewrites = try ctx.a.dupe(cache.PathRewrite, &.{.{ .token = "$NANO_ROOT", .path = project.root }});
     ctx.prepare() catch return bypass(ctx, &.{ try resolveChecker(ctx, checker) }, "bypass: cache unavailable");
@@ -321,37 +437,49 @@ pub fn execute(ctx: *cache.Context, checker: Checker, args: []const []const u8) 
         return bypass(ctx, &.{exe}, "bypass: key lock unavailable");
     defer flight.release();
 
-    // Result entries are stream-only. Putting .tsbuildinfo in the same entry
-    // made a cold worktree miss when the dest file was absent (output-count
-    // mismatch) even though source hashes matched. Seed restore is separate.
+    // Stream-only result entries, including non-zero exits. Injected errors
+    // change source hashes so they still miss. Seed .tsbuildinfo is restored
+    // only on a miss (materializing it on a hit inflates unique disk).
     if (cache.restoreStaged(ctx, key, &.{}, &.{}) catch null) |streams| {
-        try restoreSeedBuildinfo(ctx, checker, exe, args, project);
-        try replay(ctx, streams.stdout, streams.stderr);
+        const decoded = decodeExit(streams.stderr);
+        try replay(ctx, streams.stdout, decoded.stderr);
         ctx.trace("hit");
         ctx.event("ts_hit");
         ctx.event("hit");
-        return 0;
+        return decoded.code;
     }
 
     try restoreSeedBuildinfo(ctx, checker, exe, args, project);
+    var argv = try childArgv(ctx, checker, exe, args, project);
+    argv = try maybeScopeDirty(ctx, checker, exe, args, project, sources, argv);
 
-    const argv = try childArgv(ctx, checker, exe, args, project);
     const result = compiler_stream.run(ctx, argv) catch |err|
         return bypass(ctx, argv, try std.fmt.allocPrint(ctx.a, "bypass: spawn {s}", .{@errorName(err)}));
     const code = exitCode(result.term);
+    var deps: std.ArrayList(cache.Dependency) = .empty;
+    for (sources) |src| try deps.append(ctx.a, .{ .path = src.path, .hash = src.hash });
+    const stdout = try remapText(ctx, result.stdout, true);
+    const stderr = try encodeExit(ctx.a, try remapText(ctx, result.stderr, true), code);
+    // Store every exit code so a sibling worktree can replay a stable
+    // non-zero result. Skip a new result entry when sources drifted from
+    // the last stored snapshot (leaf/shared/tsconfig edits) so the store
+    // stays one clean result + one seed.
+    const have_snapshot = snapshotExists(ctx, checker, exe, args, project);
+    const same_sources = have_snapshot and snapshotMatches(ctx, checker, exe, args, project, sources);
+    if (!have_snapshot or same_sources) {
+        cache.store(ctx, key, deps.items, &.{}, stdout, stderr) catch |err|
+            ctx.trace(try std.fmt.allocPrint(ctx.a, "uncached: {s}", .{@errorName(err)}));
+        try storeSourceSnapshot(ctx, checker, exe, args, project, sources);
+    } else {
+        ctx.trace("skip store: edit miss");
+    }
+    try storeSeedBuildinfo(ctx, checker, exe, args, project);
     if (code != 0) {
         ctx.event("ts_miss");
         ctx.event("ts_failed");
         ctx.event("failed");
         return code;
     }
-    var deps: std.ArrayList(cache.Dependency) = .empty;
-    for (sources) |src| try deps.append(ctx.a, .{ .path = src.path, .hash = src.hash });
-    const stdout = try remapText(ctx, result.stdout, true);
-    const stderr = try remapText(ctx, result.stderr, true);
-    cache.store(ctx, key, deps.items, &.{}, stdout, stderr) catch |err|
-        ctx.trace(try std.fmt.allocPrint(ctx.a, "uncached: {s}", .{@errorName(err)}));
-    try storeSeedBuildinfo(ctx, checker, exe, args, project);
     ctx.event("ts_miss");
     ctx.event("miss");
     return 0;
@@ -407,6 +535,31 @@ test "result keys differ when a source file changes" {
     const sib_src = [_]Source{.{ .rel = "src/a.ts", .path = "/work/b/src/a.ts", .hash = "aaa" }};
     const k3 = try resultKey(&ctx, .tsc, "tsc", &args, sibling, &sib_src);
     try std.testing.expectEqualStrings(k1, k3);
+}
+
+test "source snapshots differ only when a hash changes" {
+    var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer arena.deinit();
+    const a = arena.allocator();
+    var env = std.process.Environ.Map.init(a);
+    var ctx: cache.Context = .{ .a = a, .io = std.testing.io, .env = &env, .root = "/unused", .cwd = "/work/a" };
+    const clean = [_]Source{.{ .rel = "src/a.ts", .path = "/work/a/src/a.ts", .hash = "aaa" }};
+    const dirty = [_]Source{.{ .rel = "src/a.ts", .path = "/work/a/src/a.ts", .hash = "bbb" }};
+    const s1 = try renderSnapshot(&ctx, &clean);
+    const s2 = try renderSnapshot(&ctx, &clean);
+    const s3 = try renderSnapshot(&ctx, &dirty);
+    try std.testing.expectEqualStrings(s1, s2);
+    try std.testing.expect(!eq(s1, s3));
+}
+
+test "stored exit codes survive encode/decode" {
+    const encoded = try encodeExit(std.testing.allocator, "err\n", 2);
+    defer std.testing.allocator.free(encoded);
+    const decoded = decodeExit(encoded);
+    try std.testing.expectEqual(@as(u8, 2), decoded.code);
+    try std.testing.expectEqualStrings("err\n", decoded.stderr);
+    const clean = decodeExit("plain");
+    try std.testing.expectEqual(@as(u8, 0), clean.code);
 }
 
 test "diagnostic remap is reversible across worktree roots" {
