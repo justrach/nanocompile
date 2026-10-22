@@ -1,68 +1,58 @@
 #!/usr/bin/env python3
-"""Agent worktrees for TypeScript checkers: shared NANOCOMPILE_DIR hill-climb.
+"""MAP-Elites hill-climb for TypeScript agent worktrees.
 
-Tune on the training sample, freeze, then verify held-out public repos.
-condensation-site is the intended train set; this environment cannot clone
-that private repo, so train falls back to zod.
+Cells: checker (tsc / tsgo / tsrs / bun) × scenario
+  (cold | leaf | shared | tsconfig | concurrent).
+
+Each cell keeps a Pareto set over wall_ms, files_rechecked, store_bytes,
+disk_bytes, rss_kb. Injected type errors are a hard gate.
+
+Real `git worktree add` off a warm main. node_modules is a symlink to
+main's install (counted once). `nanocompile worktree init` writes the TS
+shims used for nanocompile rows.
+
+Tune on condensation-site when present, else the 126-file public stand-in.
+Freeze one shipped config, then verify held-out (ajv, prettier).
 
     python3 bench/ts_worktrees.py
+    python3 bench/ts_worktrees.py --repo /path/to/any-ts-app
     python3 bench/ts_worktrees.py --phase record
 """
 from __future__ import annotations
 
 import argparse
+from concurrent.futures import ThreadPoolExecutor, as_completed
 import json
 import os
 from pathlib import Path
+import re
 import shutil
 import subprocess
 import sys
+import tempfile
 import time
 
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO / "bench"))
 import agent_worktrees as aw  # noqa: E402
 
-TRAIN = ("condensation-site",)
-TRAIN_FALLBACK = ("condensation-site",)
-HELD_OUT = ("ajv", "prettier")
-OBJECTIVES = ("wall_ms", "disk_bytes")
+OBJECTIVES = ("wall_ms", "files_rechecked", "store_bytes", "disk_bytes", "rss_kb")
+SCENARIOS = ("cold", "leaf", "shared", "tsconfig", "concurrent")
+STALL_ROUNDS = 2
 MIN_GAIN = 0.03
-
-def _condensation_path() -> Path:
-    real = Path("/tmp/real-samples/condensation-site")
-    if (real / "tsconfig.json").exists():
-        return real
-    return Path("/tmp/real-samples/condensation-standin")
-
-SAMPLE_CATALOG = {
-    "condensation-site": {
-        "path": _condensation_path(),
-        "size": "mid",
-        "args": ["--noEmit"],
-    },
-    "ajv": {
-        "path": Path("/tmp/real-samples/ajv"),
-        "size": "mid",
-        "args": ["--noEmit", "--pretty", "false"],
-    },
-    "prettier": {
-        "path": Path("/tmp/real-samples/prettier"),
-        "size": "large",
-        "args": ["--noEmit", "--pretty", "false"],
-    },
-}
+N_WORKTREES = 4
 
 CHECKERS = (
-    {"id": "tsc", "bin_env": "NANOCOMPILE_TSC", "default": "tsc", "install": "typescript@5.9.3"},
-    {"id": "tsgo", "bin_env": "NANOCOMPILE_TSGO", "default": "tsgo", "install": "@typescript/native-preview"},
-    {"id": "tsrs", "bin_env": "NANOCOMPILE_TSRS", "default": "tsrs", "install": "tsrs"},
-    {"id": "bun", "bin_env": "NANOCOMPILE_BUN", "default": "bun", "install": None},
+    {"id": "tsc", "bin_env": "NANOCOMPILE_TSC", "default": "tsc"},
+    {"id": "tsgo", "bin_env": "NANOCOMPILE_TSGO", "default": "tsgo"},
+    {"id": "tsrs", "bin_env": "NANOCOMPILE_TSRS", "default": "tsrs"},
+    {"id": "bun", "bin_env": "NANOCOMPILE_BUN", "default": "bun"},
 )
 
 NANO_TS_FRONTIER = {
     "NANOCOMPILE_TS_INCREMENTAL": "1",
     "NANOCOMPILE_TS_SEED": "1",
+    "NANOCOMPILE_TSRS_CHECKERS": "4",
 }
 
 CLIMB_DELTAS = (
@@ -70,6 +60,22 @@ CLIMB_DELTAS = (
     {"id": "l1_incremental", "env": {"NANOCOMPILE_TS_INCREMENTAL": "1", "NANOCOMPILE_TS_SEED": "0"}},
     {"id": "l2_seed_buildinfo", "env": {"NANOCOMPILE_TS_INCREMENTAL": "1", "NANOCOMPILE_TS_SEED": "1"}},
 )
+
+RSS_LINE = re.compile(r"Maximum resident set size \(kbytes\):\s+(\d+)")
+
+
+def _condensation_path() -> Path:
+    real = Path("/tmp/real-samples/condensation-site")
+    if (real / "tsconfig.json").exists():
+        return real
+    return Path("/tmp/real-samples/condensation-standin")
+
+
+SAMPLE_CATALOG = {
+    "condensation-site": {"path": _condensation_path(), "size": "mid", "args": ["--noEmit"], "split": "train"},
+    "ajv": {"path": Path("/tmp/real-samples/ajv"), "size": "mid", "args": ["--noEmit", "--pretty", "false"], "split": "held_out"},
+    "prettier": {"path": Path("/tmp/real-samples/prettier"), "size": "large", "args": ["--noEmit", "--pretty", "false"], "split": "held_out"},
+}
 
 
 def which(name: str):
@@ -80,16 +86,14 @@ def resolve_checker(spec) -> str | None:
     env_path = os.environ.get(spec["bin_env"])
     if env_path and Path(env_path).exists():
         return env_path
-    local = REPO / "node_modules" / ".bin" / spec["default"]
-    if local.exists():
-        return str(local)
-    found = which(spec["default"])
-    if found:
-        return found
-    tools = Path("/tmp/ts-tools/node_modules/.bin") / spec["default"]
-    if tools.exists():
-        return str(tools)
-    return None
+    for candidate in (
+        REPO / "node_modules" / ".bin" / spec["default"],
+        Path("/tmp/ts-tools/node_modules/.bin") / spec["default"],
+        Path.home() / ".bun" / "bin" / spec["default"],
+    ):
+        if candidate.exists():
+            return str(candidate)
+    return which(spec["default"])
 
 
 def available_checkers():
@@ -101,313 +105,499 @@ def available_checkers():
     return out
 
 
-def unique_disk(paths):
-    return aw.unique_disk_bytes(paths)
+def is_git(root: Path) -> bool:
+    return subprocess.run(
+        ["git", "-C", str(root), "rev-parse", "--is-inside-work-tree"],
+        capture_output=True,
+    ).returncode == 0
 
 
-def inject_edit(root: Path, kind: str) -> list:
-    srcs = [p for p in root.rglob("*.ts") if "node_modules" not in p.parts and ".d.ts" not in p.name]
-    if not srcs:
-        srcs = [p for p in root.rglob("*.tsx") if "node_modules" not in p.parts]
-    if not srcs:
-        return []
-    target = sorted(srcs, key=lambda p: len(p.parts))[0]
-    original = target.read_text(encoding="utf-8")
-    if kind == "error":
-        target.write_text(original + "\nconst _nano_ts_error: number = 'TYPE_ERROR_INJECT';\n", encoding="utf-8")
+def ensure_git(root: Path):
+    if is_git(root):
+        return
+    subprocess.run(["git", "init"], cwd=root, check=True, capture_output=True)
+    subprocess.run(["git", "add", "-A"], cwd=root, check=True, capture_output=True)
+    subprocess.run(
+        ["git", "-c", "user.email=nano@local", "-c", "user.name=nano", "commit", "-qm", "nano ts fixture"],
+        cwd=root, check=True, capture_output=True,
+    )
+
+
+def clone_main(src: Path, dest: Path):
+    if dest.exists():
+        shutil.rmtree(dest)
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    ensure_git(src)
+    subprocess.run(["git", "clone", "--quiet", str(src), str(dest)], check=True, capture_output=True)
+    link_node_modules(src, dest)
+
+
+def add_git_worktree(main: Path, dest: Path):
+    if dest.exists():
+        subprocess.run(["git", "-C", str(main), "worktree", "remove", "--force", str(dest)], capture_output=True)
+        if dest.exists():
+            shutil.rmtree(dest, ignore_errors=True)
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    result = subprocess.run(
+        ["git", "-C", str(main), "worktree", "add", "--detach", str(dest)],
+        capture_output=True, text=True,
+    )
+    if result.returncode != 0:
+        raise RuntimeError("git worktree add failed: %s" % result.stderr)
+    link_node_modules(main, dest)
+
+
+def prune_worktrees(main: Path, dests):
+    for dest in dests:
+        subprocess.run(["git", "-C", str(main), "worktree", "remove", "--force", str(dest)], capture_output=True)
+        if dest.exists():
+            shutil.rmtree(dest, ignore_errors=True)
+    subprocess.run(["git", "-C", str(main), "worktree", "prune"], capture_output=True)
+
+
+def link_node_modules(src: Path, dest: Path):
+    target = dest / "node_modules"
+    if target.exists() or target.is_symlink():
+        return
+    for candidate in (src / "node_modules", src.resolve() / "node_modules"):
+        if candidate.exists():
+            target.symlink_to(candidate.resolve())
+            return
+
+
+def worktree_init(wrapper: Path, dest: Path, store: Path):
+    subprocess.run(
+        [str(wrapper), "worktree", "init", "--store", str(store), str(dest)],
+        check=False, capture_output=True, text=True,
+    )
+
+
+def classify_sources(root: Path) -> dict:
+    files = [
+        p for p in root.rglob("*")
+        if p.suffix in {".ts", ".tsx", ".mts", ".cts"}
+        and "node_modules" not in p.parts
+        and ".git" not in p.parts
+        and not p.name.endswith(".d.ts")
+    ]
+    counts = {p: 0 for p in files}
+    names = {p: p.stem for p in files}
+    for p in files:
+        text = p.read_text(encoding="utf-8", errors="replace")
+        for q, stem in names.items():
+            if q == p:
+                continue
+            if stem and stem in text:
+                counts[q] += 1
+    shared = max(files, key=lambda p: (counts[p], -len(p.parts))) if files else None
+    leaf = min(files, key=lambda p: (counts[p], -len(p.parts), str(p))) if files else None
+    if shared is not None and leaf is not None and shared == leaf and len(files) > 1:
+        leaf = min((p for p in files if p != shared), key=lambda p: (counts[p], -len(p.parts), str(p)))
+    tsconfig = root / "tsconfig.json"
+    return {
+        "leaf": leaf,
+        "shared": shared,
+        "tsconfig": tsconfig if tsconfig.exists() else None,
+        "n_sources": len(files),
+        "import_counts": {str(p.relative_to(root)): c for p, c in counts.items()},
+    }
+
+
+def edit_file(path: Path, kind: str) -> dict:
+    original = path.read_text(encoding="utf-8")
+    if kind == "tsconfig":
+        text = original
+        if '"forceConsistentCasingInFileNames"' not in text:
+            text = text.replace("{", '{ "forceConsistentCasingInFileNames": true,', 1)
+        else:
+            text = text.replace("true", "true ", 1) if "true" in text else text + "\n"
+        path.write_text(text, encoding="utf-8")
+    elif kind == "error":
+        path.write_text(original + "\nconst _nano_ts_error: number = 'TYPE_ERROR_INJECT';\n", encoding="utf-8")
     else:
-        target.write_text(original + "\nvoid 0;\n", encoding="utf-8")
-    return [{"path": target, "text": original}]
+        path.write_text(original + "\nvoid 0;\n", encoding="utf-8")
+    return {"path": path, "text": original}
 
 
-def restore_edits(records):
-    for rec in records:
-        rec["path"].write_text(rec["text"], encoding="utf-8")
+def restore_edit(rec):
+    rec["path"].write_text(rec["text"], encoding="utf-8")
 
 
-def run_check(cwd: Path, checker: dict, approach: str, store: Path, wrapper: Path, extra_env=None):
+def nano_stats(wrapper: Path, store: Path) -> dict:
+    return aw.read_nano_stats(wrapper, store)
+
+
+def run_check(cwd: Path, checker: dict, approach: str, store: Path, wrapper: Path, extra_env=None, args=None):
     env = os.environ.copy()
     env["NANOCOMPILE_DIR"] = str(store)
     env[checker["bin_env"]] = checker["exe"]
     if extra_env:
         env.update(extra_env)
-    args = list(SAMPLE_CATALOG.get(cwd.name, {}).get("args") or ["--noEmit"])
-    sample = None
-    for name, meta in SAMPLE_CATALOG.items():
-        if meta["path"].resolve() == cwd.resolve() or name == cwd.name:
-            sample = name
-            args = list(meta["args"])
-            break
-    if approach == "none":
+    args = list(args or ["--noEmit"])
+    bin_dir = cwd / ".nanocompile" / "bin"
+    if approach.startswith("nano") or approach in {d["id"] for d in CLIMB_DELTAS} or approach == "frozen":
+        env["PATH"] = str(bin_dir) + os.pathsep + env.get("PATH", "")
         if checker["id"] == "bun":
-            cmd = [checker["exe"], "check"]
+            cmd = [str(bin_dir / "bun") if (bin_dir / "bun").exists() else str(wrapper), "check"]
+            if (bin_dir / "bun").exists():
+                cmd = [str(bin_dir / "bun"), "check"]
+            else:
+                cmd = [str(wrapper), "bun", "check"]
         else:
-            cmd = [checker["exe"], *args]
-    elif approach == "incremental_local":
-        if checker["id"] == "bun":
-            cmd = [checker["exe"], "check"]
-        else:
-            info = cwd / f".{checker['id']}.tsbuildinfo"
-            cmd = [checker["exe"], *args, "--incremental", "--tsBuildInfoFile", str(info)]
+            shim = bin_dir / checker["id"]
+            cmd = [str(shim), *args] if shim.exists() else [str(wrapper), checker["id"], *args]
+    elif approach == "incremental_local" and checker["id"] != "bun":
+        info = cwd / (".%s.tsbuildinfo" % checker["id"])
+        cmd = [checker["exe"], *args, "--incremental", "--tsBuildInfoFile", str(info)]
     else:
-        if checker["id"] == "bun":
-            cmd = [str(wrapper), "bun", "check"]
-        else:
-            cmd = [str(wrapper), checker["id"], *args]
+        cmd = [checker["exe"], "check"] if checker["id"] == "bun" else [checker["exe"], *args]
+    time_bin = Path("/usr/bin/time") if Path("/usr/bin/time").exists() else None
+    time_log = None
+    run_cmd = list(cmd)
+    if time_bin:
+        fd, name = tempfile.mkstemp(prefix="nano-ts-time-")
+        os.close(fd)
+        time_log = Path(name)
+        run_cmd = [str(time_bin), "-v", "-o", str(time_log), *cmd]
+    before = nano_stats(wrapper, store)
     start = time.perf_counter()
-    proc = subprocess.run(cmd, cwd=cwd, env=env, capture_output=True, text=True)
+    proc = subprocess.run(run_cmd, cwd=cwd, env=env, capture_output=True, text=True)
     wall_ms = (time.perf_counter() - start) * 1000
-    text = (proc.stdout or "") + (proc.stderr or "")
-    files = text.count("error TS") + text.count("error TS")
+    after = nano_stats(wrapper, store)
+    rss = 0
+    if time_log:
+        try:
+            match = RSS_LINE.search(time_log.read_text(encoding="utf-8", errors="replace"))
+            if match:
+                rss = int(match.group(1))
+        except OSError:
+            rss = 0
+        time_log.unlink(missing_ok=True)
+    hits = int(after.get("typescript hits") or after.get("hits") or 0) - int(before.get("typescript hits") or before.get("hits") or 0)
+    misses = int(after.get("typescript misses") or after.get("misses") or 0) - int(before.get("typescript misses") or before.get("misses") or 0)
     return {
         "ok": proc.returncode == 0,
-        "wall_ms": wall_ms,
         "returncode": proc.returncode,
-        "stdout": proc.stdout[-2000:] if proc.stdout else "",
-        "stderr": proc.stderr[-2000:] if proc.stderr else "",
-        "sample": sample,
-        "error_lines": files,
+        "wall_ms": wall_ms,
+        "rss_kb": rss,
+        "hits": max(0, hits),
+        "misses": max(0, misses),
+        "stdout": (proc.stdout or "")[-2000:],
+        "stderr": (proc.stderr or "")[-2000:],
     }
 
 
-def copy_worktree(src: Path, dst: Path):
-    if dst.exists():
-        shutil.rmtree(dst)
-    shutil.copytree(src, dst, symlinks=True, ignore=shutil.ignore_patterns(
-        "node_modules", ".git", ".next", "dist", "coverage", ".tsbuildinfo", "*.tsbuildinfo",
-    ))
-    nm = src / "node_modules"
-    if nm.exists():
-        (dst / "node_modules").symlink_to(nm)
+def files_for(result, n_sources, approach):
+    if approach.startswith("nano") or approach in {d["id"] for d in CLIMB_DELTAS} or approach == "frozen":
+        return 0 if result["hits"] and not result["misses"] else n_sources
+    return n_sources
 
 
-def measure_row(sample: str, checker: dict, approach: str, wrapper: Path, work: Path, extra_env=None, split="train"):
-    meta = SAMPLE_CATALOG[sample]
-    src = meta["path"]
-    if not src.exists():
-        return {"sample": sample, "checker": checker["id"], "approach": approach, "ok": False, "error": "missing sample"}
+def unique_disk(paths):
+    return aw.unique_disk_bytes(paths)
+
+
+def measure_setup(sample: str, src: Path, checker: dict, approach: str, wrapper: Path, work: Path, extra_env, args, n=N_WORKTREES):
     root = work / sample / checker["id"] / approach
     if root.exists():
         shutil.rmtree(root)
     main = root / "main"
-    copy_worktree(src, main)
     store = root / "store"
     store.mkdir(parents=True)
+    clone_main(src, main)
+    worktree_init(wrapper, main, store)
+    kinds = classify_sources(main)
+    n_sources = kinds["n_sources"] or 1
     env = dict(extra_env or {})
-    warm = run_check(main, checker, approach, store, wrapper, env)
+    warm = run_check(main, checker, approach, store, wrapper, env, args)
     trees = []
-    walls = []
-    edit_walls = []
-    error_ok = True
-    for i in range(2):
-        wt = root / f"wt-{i}"
-        copy_worktree(main, wt)
-        trees.append(wt)
-        cold = run_check(wt, checker, approach, store, wrapper, env)
-        walls.append(cold["wall_ms"])
-        rec = inject_edit(wt, "body")
-        edited = run_check(wt, checker, approach, store, wrapper, env)
-        edit_walls.append(edited["wall_ms"])
-        restore_edits(rec)
-        rec = inject_edit(wt, "error")
-        bad = run_check(wt, checker, approach, store, wrapper, env)
-        restore_edits(rec)
-        if bad["ok"]:
-            error_ok = False
-    disk = unique_disk([store, *trees, main])
-    store_bytes = unique_disk([store]) if store.exists() else 0
+    for i in range(n):
+        dest = root / ("wt-%d" % i)
+        add_git_worktree(main, dest)
+        worktree_init(wrapper, dest, store)
+        trees.append(dest)
     return {
-        "sample": sample,
-        "checker": checker["id"],
-        "approach": approach,
-        "lever": approach,
-        "split": split,
-        "ok": warm["ok"] and error_ok,
-        "error_reported": error_ok,
-        "warm_wall_ms": warm["wall_ms"],
-        "wall_ms": sum(walls) / len(walls) if walls else None,
-        "edit_wall_ms": sum(edit_walls) / len(edit_walls) if edit_walls else None,
-        "disk_bytes": disk,
-        "store_bytes": store_bytes,
-        "n_worktrees": 2,
-        "warm_ok": warm["ok"],
-        "warm_error": warm.get("stderr"),
+        "root": root, "main": main, "store": store, "trees": trees,
+        "kinds": kinds, "n_sources": n_sources, "warm": warm, "env": env,
     }
 
 
-def pareto_ts(rows, checker, sample):
-    subset = [r for r in rows if r.get("checker") == checker and r.get("sample") == sample and r.get("ok") and r.get("wall_ms") is not None]
-    frontier = []
-    for a in subset:
-        dominated = False
-        for b in subset:
-            if b is a:
-                continue
-            le = all((b.get(o) or 0) <= (a.get(o) or 0) for o in OBJECTIVES)
-            lt = any((b.get(o) or 0) < (a.get(o) or 0) for o in OBJECTIVES)
-            if le and lt:
-                dominated = True
-                break
-        if not dominated:
-            frontier.append(a)
-    nano = [r for r in subset if r.get("approach", "").startswith("nanocompile") or r.get("approach") in ("l0_result_cache", "l1_incremental", "l2_seed_buildinfo", "frozen")]
-    on = any(r in frontier or r.get("approach") in {f.get("approach") for f in frontier} for r in nano)
-    # identity by approach
-    front_ids = {(r.get("approach"), r.get("lever")) for r in frontier}
+def scenario_rows(sample, checker, approach, lever, split, setup, wrapper, args):
+    store, trees, kinds, n_sources, env = setup["store"], setup["trees"], setup["kinds"], setup["n_sources"], setup["env"]
+    rows = []
+
+    def pack(scenario, results, extra=None):
+        walls = [r["wall_ms"] for r in results]
+        rss = [r["rss_kb"] for r in results]
+        files = [files_for(r, n_sources, approach) for r in results]
+        disk_roots = [store, setup["main"], *trees]
+        nm = setup["main"] / "node_modules"
+        if nm.exists() and not nm.is_symlink():
+            disk_roots.append(nm.resolve())
+        elif nm.is_symlink():
+            disk_roots.append(nm.resolve())
+        rec = {
+            "sample": sample,
+            "checker": checker["id"],
+            "scenario": scenario,
+            "cell": "%s|%s" % (checker["id"], scenario),
+            "approach": "nanocompile" if approach not in ("none", "incremental_local") else approach,
+            "lever": lever,
+            "split": split,
+            "ok": all(r["ok"] for r in results) and setup["warm"]["ok"],
+            "wall_ms": sum(walls) / len(walls) if walls else None,
+            "files_rechecked": sum(files) / len(files) if files else None,
+            "rss_kb": max(rss) if rss else 0,
+            "store_bytes": unique_disk([store]),
+            "disk_bytes": unique_disk(disk_roots),
+            "n_worktrees": len(trees),
+            "n_sources": n_sources,
+            "warm_wall_ms": setup["warm"]["wall_ms"],
+            "node_modules": "symlink-to-main",
+        }
+        if extra:
+            rec.update(extra)
+        return rec
+
+    # cold: first check off warm main, sequential
+    colds = [run_check(wt, checker, approach, store, wrapper, env, args) for wt in trees]
+    rows.append(pack("cold", colds, {"per_worktree_wall_ms": [r["wall_ms"] for r in colds]}))
+
+    # leaf / shared / tsconfig: edit then recheck that worktree
+    mapping = [("leaf", 0, kinds["leaf"]), ("shared", 1, kinds["shared"]), ("tsconfig", 2, kinds["tsconfig"])]
+    for scenario, idx, path in mapping:
+        if path is None or idx >= len(trees):
+            rows.append(pack(scenario, [{"ok": False, "wall_ms": None, "rss_kb": 0, "hits": 0, "misses": 1}]))
+            continue
+        rel = path.relative_to(setup["main"]) if path.is_relative_to(setup["main"]) else path.name
+        target = trees[idx] / rel
+        if not target.exists():
+            # worktree has the same relative layout
+            target = trees[idx] / path.name if scenario == "tsconfig" else trees[idx] / Path(*rel.parts)
+        rec = edit_file(target, scenario)
+        edited = run_check(trees[idx], checker, approach, store, wrapper, env, args)
+        restore_edit(rec)
+        rows.append(pack(scenario, [edited], {"edit_path": str(rel)}))
+
+    # concurrent: all worktrees check at once (mixed leftover state is clean)
+    start = time.perf_counter()
+    with ThreadPoolExecutor(max_workers=len(trees)) as pool:
+        futs = [pool.submit(run_check, wt, checker, approach, store, wrapper, env, args) for wt in trees]
+        conc = [f.result() for f in futs]
+    span = (time.perf_counter() - start) * 1000
+    packed = pack("concurrent", conc, {"concurrent_span_ms": span, "wall_ms": span})
+    rows.append(packed)
+
+    # correctness gate: inject error in last worktree; siblings must still hit clean
+    error_ok = True
+    false_hit = False
+    if kinds["leaf"] is not None and trees:
+        rel = kinds["leaf"].relative_to(setup["main"])
+        victim = trees[-1] / rel
+        rec = edit_file(victim, "error")
+        bad = run_check(trees[-1], checker, approach, store, wrapper, env, args)
+        restore_edit(rec)
+        if bad["ok"]:
+            error_ok = False
+        clean = run_check(trees[0], checker, approach, store, wrapper, env, args)
+        if not clean["ok"]:
+            false_hit = True
+    for row in rows:
+        row["error_reported"] = error_ok
+        row["false_hit"] = false_hit
+        row["correctness_ok"] = error_ok and not false_hit
+        if not row["correctness_ok"]:
+            row["ok"] = False
+    return rows
+
+
+def dominates(a, b, objectives=OBJECTIVES):
+    le = all((a.get(o) or 0) <= (b.get(o) or 0) for o in objectives)
+    lt = any((a.get(o) or 0) < (b.get(o) or 0) for o in objectives)
+    return le and lt
+
+
+def pareto_set(rows, objectives=OBJECTIVES):
+    ok = [r for r in rows if r.get("ok") and r.get("correctness_ok", True) and r.get("wall_ms") is not None]
+    front = []
+    for a in ok:
+        if not any(dominates(b, a, objectives) for b in ok if b is not a):
+            front.append(a)
+    return front
+
+
+def cell_summary(rows):
+    front = pareto_set(rows)
+    nano = [r for r in rows if r.get("approach") == "nanocompile" and r.get("ok")]
+    front_ids = {(r.get("approach"), r.get("lever")) for r in front}
     nano_on = any((r.get("approach"), r.get("lever")) in front_ids for r in nano)
     dominated_by = []
     for n in nano:
-        for b in subset:
-            if b is n:
+        for b in rows:
+            if b is n or not b.get("ok"):
                 continue
-            le = all((b.get(o) or 0) <= (n.get(o) or 0) for o in OBJECTIVES)
-            lt = any((b.get(o) or 0) < (n.get(o) or 0) for o in OBJECTIVES)
-            if le and lt:
-                dominated_by.append({"by": b.get("approach"), "approach": b.get("approach")})
+            if dominates(b, n):
+                dominated_by.append({"by": b.get("approach"), "lever": b.get("lever")})
     return {
         "frontier": [
-            {"approach": r.get("approach"), "lever": r.get("lever"), "wall_ms": r.get("wall_ms"),
-             "edit_wall_ms": r.get("edit_wall_ms"), "disk_bytes": r.get("disk_bytes"), "store_bytes": r.get("store_bytes")}
-            for r in frontier
+            {k: r.get(k) for k in ("approach", "lever", *OBJECTIVES)}
+            for r in front
         ],
-        "nano_on_frontier": nano_on or on,
+        "nano_on_frontier": nano_on,
         "nano_dominated_by": dominated_by,
     }
 
 
-def keep_ts(prev, cand):
-    if not prev or not cand:
-        return True
-    gains = {}
+def survival(train_rows, held_rows, frozen_lever):
+    out = {"per_metric": {}, "per_cell": {}}
     for obj in OBJECTIVES:
-        a, b = prev.get(obj), cand.get(obj)
-        if a is None or b is None or a == 0:
-            gains[obj] = 0.0
-            continue
-        gains[obj] = (a - b) / a
-    win = any(g > MIN_GAIN for g in gains.values())
-    regress = any(g < -MIN_GAIN for g in gains.values())
-    return win and not regress
+        def gain(rows, sample_checker_scenario=None):
+            none = [r for r in rows if r.get("approach") == "none" and r.get("ok") and r.get(obj) is not None]
+            nano = [r for r in rows if r.get("approach") == "nanocompile" and r.get("lever") == frozen_lever and r.get("ok") and r.get(obj) is not None]
+            if sample_checker_scenario:
+                none = [r for r in none if (r.get("sample"), r.get("cell")) == sample_checker_scenario]
+                nano = [r for r in nano if (r.get("sample"), r.get("cell")) == sample_checker_scenario]
+            if not none or not nano:
+                return None
+            n = sum(r[obj] for r in none) / len(none)
+            m = sum(r[obj] for r in nano) / len(nano)
+            return None if n == 0 else (n - m) / n
+        train_g = gain(train_rows)
+        held_g = gain(held_rows)
+        out["per_metric"][obj] = {
+            "train_gain": train_g,
+            "held_out_gain": held_g,
+            "survived_fraction": None if train_g in (None, 0) or held_g is None else held_g / train_g,
+        }
+    return out
 
 
 def render_docs(payload) -> str:
+    frozen = payload.get("frozen_env") or NANO_TS_FRONTIER
     lines = [
         "# TypeScript agent worktrees",
         "",
-        "Several coding agents in parallel git worktrees should only re-check",
-        "what they changed. A shared `NANOCOMPILE_DIR` restores type-check",
-        "results produced by main or a sibling. Paths are rewritten as",
-        "`$NANO_ROOT` so a result restores into any worktree.",
+        "MAP-Elites cells are **checker × scenario**. Each cell keeps a Pareto",
+        "set over wall time, files re-checked, store size, unique disk, and peak",
+        "RSS. Injected type errors are a hard gate: a false hit cannot occupy.",
         "",
         "Checkers: `tsc` 5.9.3, TypeScript 7 (`tsgo`), `tsrs --checkers 4`, `bun check`.",
-        "See condensation-site PR #22 / `bench/ts-compilers/REPORT.md` for the",
-        "raw checker bakeoff. This tree could not clone that private repo, so",
-        "train is the public stand-in listed below.",
+        "Scenarios: cold worktree off warm main; leaf-file edit; shared-types edit;",
+        "tsconfig/config change; 3–4 worktrees checking concurrently.",
         "",
-        "## Setup",
+        "Setup uses real `git worktree add` off a warm main. `node_modules` is a",
+        "**symlink to main's install** (one copy; unique disk counts that inode",
+        "set once). `nanocompile worktree init` writes `.cargo/config.toml` and",
+        "`.nanocompile/{env,bin/tsc,tsgo,tsrs,bun}` so a new worktree uses the",
+        "same shared `NANOCOMPILE_DIR`.",
+        "",
+        "condensation-site is the intended train repo. This environment cannot",
+        "clone that private tree, so train is a 126-file public stand-in with the",
+        "same checker × scenario grid. Re-run on the real app with:",
+        "",
+        "```sh",
+        "python3 bench/ts_worktrees.py --repo /path/to/condensation-site --phase all",
+        "```",
+        "",
+        "## Setup Rach should use",
         "",
         "```sh",
         "zig build -Doptimize=ReleaseFast",
-        "./zig-out/bin/nanocompile worktree init",
+        "./zig-out/bin/nanocompile worktree init   # Rust + TypeScript",
         "git worktree add --detach ../agent-1",
-        "# from any worktree:",
-        "./zig-out/bin/nanocompile tsrs --noEmit --checkers 4",
-        "./zig-out/bin/nanocompile tsc --noEmit",
-        "./zig-out/bin/nanocompile tsgo --noEmit",
-        "./zig-out/bin/nanocompile bun check",
+        "./zig-out/bin/nanocompile worktree init --store \"$NANOCOMPILE_DIR\" ../agent-1",
+        "ln -s \"$PWD/node_modules\" ../agent-1/node_modules   # shared install",
+        "export PATH=\"$PWD/.nanocompile/bin:$PATH\"",
+        "tsc --noEmit          # or tsrs / tsgo / bun check",
         "```",
         "",
-        "Cache key: checker identity + argv + tsconfig + content hashes of",
-        "project sources (node_modules skipped). Only zero-error results are",
-        "stored. An injected type error changes the key and always runs the",
-        "real checker (see `tests/typescript_worktrees.py`).",
-        "",
-        "Optional incremental seed: last `.tsbuildinfo` is stored under a",
-        "path-normalized seed key so an edit can reuse incremental state.",
-        "`bun check` exposes no incremental file; result cache only.",
-        "",
-        "## Frozen config",
+        "Frozen env:",
         "",
         "```",
-        json.dumps(payload.get("frozen_env") or NANO_TS_FRONTIER, indent=2),
+        json.dumps(frozen, indent=2),
         "```",
+        "",
+        "Cache key: checker identity + argv + tsconfig + source hashes, paths as",
+        "`$NANO_ROOT`. Only zero-error results are stored.",
         "",
         "## Hill-climb",
         "",
-        "| lever | vs | wall | disk | keep | note |",
-        "| --- | --- | --- | --- | --- | --- |",
+        "| lever | vs | keep | note |",
+        "| --- | --- | --- | --- |",
     ]
     for entry in (payload.get("hill_climb") or {}).get("log") or []:
-        m = entry.get("metrics") or {}
-        def fmt(metric):
-            g = (m.get(metric) or {}).get("gain")
-            return "n/a" if g is None else "%.1f%%" % (g * 100)
-        lines.append("| `%s` | %s | %s | %s | %s | %s |" % (
+        lines.append("| `%s` | %s | %s | %s |" % (
             entry.get("lever"), entry.get("vs"),
-            fmt("wall_ms"), fmt("disk_bytes"),
             "yes" if entry.get("keep") else "stall",
             entry.get("note") or "",
         ))
-    lines += [
-        "",
-        "## Pareto frontier (minimize wall, unique disk)",
-        "",
-    ]
-    pareto = payload.get("pareto") or {}
+    lines += ["", "## Generalization (held-out vs none)", "",
+              "| metric | train gain vs none | held-out gain vs none | fraction that survived |",
+              "| --- | --- | --- | --- |"]
+    for metric, info in (payload.get("survival") or {}).get("per_metric", {}).items():
+        def pct(v):
+            return "n/a" if v is None else "%.1f%%" % (v * 100)
+        lines.append("| %s | %s | %s | %s |" % (
+            metric, pct(info.get("train_gain")), pct(info.get("held_out_gain")), pct(info.get("survived_fraction")),
+        ))
+    lines += ["", "## Pareto frontier per cell", ""]
+    grid = payload.get("pareto") or {}
     for split_name, label in (("train", "Train"), ("held_out", "Held-out")):
-        block = pareto.get(split_name) or {}
+        block = grid.get(split_name) or {}
         lines += ["### %s" % label, ""]
         if not block:
             lines += ["(not measured yet)", ""]
             continue
-        for key, info in block.items():
+        for cell, info in block.items():
             on = "yes" if info.get("nano_on_frontier") else "NO"
-            lines.append("**%s** — nanocompile on frontier: %s" % (key, on))
+            lines.append("**%s** — nanocompile on frontier: %s" % (cell, on))
             lines.append("")
-            lines.append("| approach | wall ms | edit wall | disk | store |")
-            lines.append("| --- | --- | --- | --- | --- |")
+            lines.append("| approach | lever | wall | files | store | disk | rss kb |")
+            lines.append("| --- | --- | --- | --- | --- | --- | --- |")
             for row in info.get("frontier") or []:
-                lines.append("| %s | %s | %s | %s | %s |" % (
-                    row.get("approach"),
+                lines.append("| %s | %s | %s | %s | %s | %s | %s |" % (
+                    row.get("approach"), row.get("lever"),
                     "%.0f" % row["wall_ms"] if row.get("wall_ms") is not None else "",
-                    "%.0f" % row["edit_wall_ms"] if row.get("edit_wall_ms") is not None else "",
-                    row.get("disk_bytes") if row.get("disk_bytes") is not None else "",
+                    "%.1f" % row["files_rechecked"] if row.get("files_rechecked") is not None else "",
                     row.get("store_bytes") if row.get("store_bytes") is not None else "",
+                    row.get("disk_bytes") if row.get("disk_bytes") is not None else "",
+                    row.get("rss_kb") if row.get("rss_kb") is not None else "",
                 ))
             if info.get("nano_dominated_by"):
                 for dom in info["nano_dominated_by"]:
-                    lines.append("- dominated by `%s`" % dom.get("by"))
+                    lines.append("- dominated by `%s` (%s)" % (dom.get("by"), dom.get("lever")))
             lines.append("")
     lines += [
         "",
         "## Rows",
         "",
-        "| sample | checker | approach | wall ms | edit wall | disk | store | error reported | ok |",
-        "| --- | --- | --- | --- | --- | --- | --- | --- | --- |",
+        "| sample | cell | approach | wall | files | store | disk | rss | correct | ok |",
+        "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
     ]
     for row in (payload.get("train") or []) + (payload.get("held_out") or []):
-        lines.append("| %s | %s | %s | %s | %s | %s | %s | %s | %s |" % (
-            row.get("sample"), row.get("checker"), row.get("approach"),
+        lines.append("| %s | %s | %s | %s | %s | %s | %s | %s | %s | %s |" % (
+            row.get("sample"), row.get("cell"), row.get("approach"),
             "%.0f" % row["wall_ms"] if row.get("wall_ms") is not None else "",
-            "%.0f" % row["edit_wall_ms"] if row.get("edit_wall_ms") is not None else "",
+            "%.1f" % row["files_rechecked"] if row.get("files_rechecked") is not None else "",
+            row.get("store_bytes") or "",
             row.get("disk_bytes") or "",
-            row.get("store_bytes") if row.get("store_bytes") is not None else "",
-            "yes" if row.get("error_reported") else "no",
+            row.get("rss_kb") or "",
+            "yes" if row.get("correctness_ok") else "no",
             "yes" if row.get("ok") else "no",
         ))
     lines += [
         "",
         "## What climbed",
         "",
-        "- **L0** content-addressed result cache: checker + tsconfig + source hashes,",
-        "  `$NANO_ROOT` path rewrite, replay zero-error diagnostics.",
-        "- **L1** restore/store `.tsbuildinfo` with the result (incremental checkers).",
+        "- **L0** content-addressed result cache (file hashes + `$NANO_ROOT`).",
+        "- **L1** store/restore `.tsbuildinfo` with the result.",
         "- **L2** seed key (no source hashes) so an edit starts from sibling buildinfo.",
         "",
-        "Correctness: injected `TS2322` must be reported; success is never replayed",
-        "for a dirty file set. `bun check` has no incremental file.",
+        "`bun check` has no incremental file; L1/L2 do not apply.",
+        "Correctness: `tests/typescript_worktrees.py` uses real `git worktree add`.",
         "",
-        "Harness: `bench/ts_worktrees.py`. Archive: `bench/archive/ts-worktrees.json`.",
+        "Harness: `python3 bench/ts_worktrees.py --repo PATH`.",
+        "Archive: `bench/archive/ts-worktrees.json` → `map_elites.json` `typescript_worktrees`.",
         "",
     ]
     return "\n".join(lines)
@@ -417,46 +607,68 @@ def default_nano():
     return REPO / "zig-out" / "bin" / "nanocompile"
 
 
-def train_samples():
+def register_repo(path: Path, name=None, split="train"):
+    path = path.resolve()
+    name = name or path.name
+    SAMPLE_CATALOG[name] = {"path": path, "size": "mid", "args": ["--noEmit"], "split": split}
+    return name
+
+
+def train_names():
     names = []
-    for name in TRAIN:
-        if SAMPLE_CATALOG[name]["path"].exists():
+    for name, meta in SAMPLE_CATALOG.items():
+        if meta.get("split") == "train" and meta["path"].exists():
             names.append(name)
-    if not names:
-        for name in TRAIN_FALLBACK:
-            if SAMPLE_CATALOG[name]["path"].exists():
-                names.append(name)
-    return names
+    return names or ["condensation-site"]
 
 
-def held_samples(train_names):
-    out = []
-    for name in HELD_OUT:
-        if name in train_names:
-            continue
-        if SAMPLE_CATALOG[name]["path"].exists():
-            out.append(name)
-    return out
+def held_names():
+    return [n for n, m in SAMPLE_CATALOG.items() if m.get("split") == "held_out" and m["path"].exists()]
 
 
-def record_archive(payload, dest: Path):
+def record_elites(payload, dest: Path):
     dest.parent.mkdir(parents=True, exist_ok=True)
     dest.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
     elites = REPO / "bench" / "map_elites.json"
     data = json.loads(elites.read_text(encoding="utf-8")) if elites.exists() else {}
-    data["typescript_worktrees"] = payload
+    data["typescript_worktrees"] = {
+        "source": str(dest.relative_to(REPO)) if dest.is_relative_to(REPO) else str(dest),
+        "docs": "docs/typescript-worktrees.md",
+        "harness": "bench/ts_worktrees.py",
+        "commit": aw.git_commit(),
+        "grid_axes": {"checker": [c["id"] for c in CHECKERS], "scenario": list(SCENARIOS)},
+        "objectives": list(OBJECTIVES),
+        "hill_climb": payload.get("hill_climb"),
+        "frozen_env": payload.get("frozen_env"),
+        "pareto": payload.get("pareto"),
+        "survival": payload.get("survival"),
+        "train": payload.get("train") or [],
+        "held_out": payload.get("held_out") or [],
+        "train_note": payload.get("train_note"),
+        "node_modules": "symlink-to-main",
+    }
     elites.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
 
 
 def parse_args(argv=None):
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--phase", choices=("all", "train", "held-out", "record"), default="all")
+    p.add_argument("--repo", default="", help="Any TS repo path; becomes the train sample")
     p.add_argument("--samples", default="")
+    p.add_argument("--worktrees", type=int, default=N_WORKTREES)
     p.add_argument("--nano", type=Path, default=default_nano())
     p.add_argument("--work", type=Path, default=Path("/tmp/ts-worktrees"))
     p.add_argument("--out", type=Path, default=REPO / "bench" / "archive" / "ts-worktrees.json")
-    p.add_argument("--quick", action="store_true")
+    p.add_argument("--checkers", default="")
     return p.parse_args(argv)
+
+
+def measure_approach(sample, src, checker, approach, lever, wrapper, work, env, args, split, n):
+    setup = measure_setup(sample, src, checker, approach, wrapper, work, env, args, n)
+    try:
+        return scenario_rows(sample, checker, approach, lever, split, setup, wrapper, args)
+    finally:
+        prune_worktrees(setup["main"], setup["trees"])
 
 
 def main(argv=None):
@@ -464,10 +676,15 @@ def main(argv=None):
     wrapper = args.nano.resolve()
     if not wrapper.exists():
         raise SystemExit("missing nanocompile binary: %s" % wrapper)
+    if args.repo:
+        register_repo(Path(args.repo), split="train")
     checkers = available_checkers()
+    if args.checkers:
+        want = {x.strip() for x in args.checkers.split(",") if x.strip()}
+        checkers = [c for c in checkers if c["id"] in want]
     if not checkers:
-        raise SystemExit("no TypeScript checkers on PATH (tsc/tsgo/tsrs/bun)")
-    train_names = [s.strip() for s in args.samples.split(",") if s.strip()] or train_samples()
+        raise SystemExit("no TypeScript checkers on PATH")
+    samples = [s.strip() for s in args.samples.split(",") if s.strip()] or train_names()
     payload = {}
     if args.out.exists() and args.phase != "train":
         try:
@@ -478,88 +695,98 @@ def main(argv=None):
     if args.phase in ("all", "train"):
         rows = []
         climb_log = []
+        stalled = {c["id"]: 0 for c in checkers}
         frozen_env = dict(NANO_TS_FRONTIER)
+        frozen_lever = "l0_result_cache"
         for checker in checkers:
-            baselines = ["none"]
-            if checker["id"] != "bun":
-                baselines.append("incremental_local")
-            for sample in train_names:
+            for sample in samples:
+                meta = SAMPLE_CATALOG[sample]
+                src = meta["path"]
+                if not src.exists():
+                    continue
+                baselines = ["none"] + ([] if checker["id"] == "bun" else ["incremental_local"])
                 for approach in baselines:
-                    rows.append(measure_row(sample, checker, approach, wrapper, args.work, split="train"))
-                    print(json.dumps({"row": rows[-1]["sample"], "checker": checker["id"], "approach": approach, "ok": rows[-1]["ok"], "wall_ms": rows[-1].get("wall_ms")}), flush=True)
-                elite = None
-                elite_id = "none"
+                    print(json.dumps({"measure": sample, "checker": checker["id"], "approach": approach}), flush=True)
+                    rows.extend(measure_approach(
+                        sample, src, checker, approach, approach, wrapper, args.work, {}, meta["args"], "train", args.worktrees,
+                    ))
+                last_keep = False
+                vs = "none"
                 for delta in CLIMB_DELTAS:
-                    row = measure_row(sample, checker, delta["id"], wrapper, args.work, extra_env=delta["env"], split="train")
-                    row["approach"] = "nanocompile"
-                    row["lever"] = delta["id"]
-                    rows.append(row)
-                    keep = keep_ts(elite, row) if elite else row.get("ok")
+                    print(json.dumps({"climb": delta["id"], "checker": checker["id"], "sample": sample}), flush=True)
+                    nxt = measure_approach(
+                        sample, src, checker, delta["id"], delta["id"], wrapper, args.work, delta["env"], meta["args"], "train", args.worktrees,
+                    )
+                    rows.extend(nxt)
+                    improved = False
+                    for scenario in SCENARIOS:
+                        cell_rows = [r for r in rows if r.get("sample") == sample and r.get("checker") == checker["id"] and r.get("scenario") == scenario]
+                        info = cell_summary(cell_rows)
+                        if info["nano_on_frontier"]:
+                            improved = True
                     climb_log.append({
-                        "lever": delta["id"],
-                        "vs": elite_id,
-                        "keep": bool(keep),
-                        "checker": checker["id"],
-                        "sample": sample,
-                        "metrics": {
-                            "wall_ms": {"gain": None if not elite or not elite.get("wall_ms") else (elite["wall_ms"] - (row.get("wall_ms") or 0)) / elite["wall_ms"]},
-                            "disk_bytes": {"gain": None if not elite or not elite.get("disk_bytes") else (elite["disk_bytes"] - (row.get("disk_bytes") or 0)) / elite["disk_bytes"]},
-                        },
+                        "lever": delta["id"], "vs": vs, "keep": improved,
+                        "checker": checker["id"], "sample": sample,
+                        "note": "on frontier in at least one cell" if improved else "no cell improved",
                     })
-                    print(json.dumps({"climb": delta["id"], "checker": checker["id"], "keep": keep, "wall_ms": row.get("wall_ms")}), flush=True)
-                    if keep:
-                        elite = row
-                        elite_id = delta["id"]
+                    if improved:
+                        last_keep = True
+                        vs = delta["id"]
                         frozen_env = dict(delta["env"])
+                        frozen_env.setdefault("NANOCOMPILE_TSRS_CHECKERS", "4")
+                        frozen_lever = delta["id"]
+                        stalled[checker["id"]] = 0
+                    else:
+                        stalled[checker["id"]] += 1
+                        if stalled[checker["id"]] >= STALL_ROUNDS:
+                            break
         payload["train"] = rows
-        payload["hill_climb"] = {"log": climb_log, "frozen_env": frozen_env, "frozen_lever": elite_id if rows else "l2_seed_buildinfo"}
+        payload["hill_climb"] = {"log": climb_log, "frozen_env": frozen_env, "frozen_lever": frozen_lever, "stall_rounds": STALL_ROUNDS}
         payload["frozen_env"] = frozen_env
         payload["pareto"] = {"train": {}}
         for checker in checkers:
-            for sample in train_names:
-                payload["pareto"]["train"]["%s/%s" % (sample, checker["id"])] = pareto_ts(rows, checker["id"], sample)
+            for sample in samples:
+                for scenario in SCENARIOS:
+                    cell = "%s/%s|%s" % (sample, checker["id"], scenario)
+                    subset = [r for r in rows if r.get("sample") == sample and r.get("checker") == checker["id"] and r.get("scenario") == scenario]
+                    payload["pareto"]["train"][cell] = cell_summary(subset)
+        payload["train_note"] = "condensation-site private; trained on " + ",".join(samples)
         payload["commit"] = aw.git_commit()
         args.out.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
 
     if args.phase in ("all", "held-out"):
         frozen_env = (payload.get("hill_climb") or {}).get("frozen_env") or NANO_TS_FRONTIER
+        frozen_lever = (payload.get("hill_climb") or {}).get("frozen_lever") or "frozen"
         held = []
         for checker in checkers:
-            for sample in held_samples(train_names):
-                for approach in (["none", "incremental_local"] if checker["id"] != "bun" else ["none"]):
-                    held.append(measure_row(sample, checker, approach, wrapper, args.work / "held", split="held_out"))
-                row = measure_row(sample, checker, "frozen", wrapper, args.work / "held", extra_env=frozen_env, split="held_out")
-                row["approach"] = "nanocompile"
-                held.append(row)
-                print(json.dumps({"held": sample, "checker": checker["id"], "ok": row["ok"], "wall_ms": row.get("wall_ms")}), flush=True)
+            for sample in held_names():
+                meta = SAMPLE_CATALOG[sample]
+                src = meta["path"]
+                baselines = ["none"] + ([] if checker["id"] == "bun" else ["incremental_local"])
+                for approach in baselines:
+                    print(json.dumps({"held": sample, "checker": checker["id"], "approach": approach}), flush=True)
+                    held.extend(measure_approach(
+                        sample, src, checker, approach, approach, wrapper, args.work / "held", {}, meta["args"], "held_out", args.worktrees,
+                    ))
+                print(json.dumps({"held": sample, "checker": checker["id"], "approach": "frozen"}), flush=True)
+                held.extend(measure_approach(
+                    sample, src, checker, "frozen", frozen_lever, wrapper, args.work / "held", frozen_env, meta["args"], "held_out", args.worktrees,
+                ))
         payload["held_out"] = held
         payload.setdefault("pareto", {})
         payload["pareto"]["held_out"] = {}
         for checker in checkers:
-            for sample in held_samples(train_names):
-                payload["pareto"]["held_out"]["%s/%s" % (sample, checker["id"])] = pareto_ts(
-                    [r for r in held if r.get("sample") == sample and r.get("checker") == checker["id"]],
-                    checker["id"],
-                    sample,
-                )
+            for sample in held_names():
+                for scenario in SCENARIOS:
+                    cell = "%s/%s|%s" % (sample, checker["id"], scenario)
+                    subset = [r for r in held if r.get("sample") == sample and r.get("checker") == checker["id"] and r.get("scenario") == scenario]
+                    payload["pareto"]["held_out"][cell] = cell_summary(subset)
+        payload["survival"] = survival(payload.get("train") or [], held, frozen_lever)
         args.out.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
 
     if args.phase in ("all", "record"):
         payload.setdefault("docs", "docs/typescript-worktrees.md")
-        payload.setdefault("harness", "bench/ts_worktrees.py")
-        payload.setdefault("train_note", "condensation-site private; trained on " + ",".join(train_names))
-        record_archive({
-            "source": "bench/archive/ts-worktrees.json",
-            "docs": "docs/typescript-worktrees.md",
-            "harness": "bench/ts_worktrees.py",
-            "commit": aw.git_commit(),
-            "hill_climb": payload.get("hill_climb"),
-            "frozen_env": payload.get("frozen_env") or NANO_TS_FRONTIER,
-            "pareto": payload.get("pareto"),
-            "train": payload.get("train") or [],
-            "held_out": payload.get("held_out") or [],
-            "train_note": payload.get("train_note"),
-        }, args.out)
+        record_elites(payload, args.out)
         (REPO / "docs" / "typescript-worktrees.md").write_text(render_docs(payload), encoding="utf-8")
         print("recorded", args.out, "and docs/typescript-worktrees.md", flush=True)
     return 0

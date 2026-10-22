@@ -243,3 +243,80 @@ Competitors on the same chart: no cache, shared `CARGO_TARGET_DIR`, kache,
 sccache (if it runs), and every nanocompile config tried.
 
 Harness: `bench/agent_worktrees.py`. Raw rows: `bench/archive/agent-worktrees.json`.
+
+## Rust scenario cells (per-objective)
+
+Same four objectives, split by mode: sequential mixed-edit (leaf / body /
+sig analogue) and concurrent 4-worktree checks. L21 `NANOCOMPILE_CHECK_NATIVE=1`
+is the extra crates/wall lever (metadata-only rustc may cache `-l` native units).
+
+### Train scenarios
+
+**axum|sequential** — nanocompile on frontier: yes
+
+| approach | lever | crates/wt | wall | disk | store |
+| --- | --- | --- | --- | --- | --- |
+| shared_target | shared_target | 0.5 | 3454 | 157767267 | 0 |
+| nanocompile | frozen | 20.0 | 20746 | 111392465 | 107322059 |
+
+**ripgrep|sequential** — nanocompile on frontier: yes
+
+| approach | lever | crates/wt | wall | disk | store |
+| --- | --- | --- | --- | --- | --- |
+| shared_target | shared_target | 1.0 | 1611 | 102451447 | 0 |
+| nanocompile | frozen | 18.5 | 7190 | 72101212 | 68369982 |
+
+### Held-out scenarios
+
+**bhumi|sequential** — nanocompile on frontier: yes
+
+| approach | lever | crates/wt | wall | disk | store |
+| --- | --- | --- | --- | --- | --- |
+| shared_target | shared_target | 0.2 | 679 | 301503851 | 0 |
+| kache | kache | 0.0 | 4355 | 4590479442 | 48866938 |
+| nanocompile | frozen | 36.0 | 18823 | 299270183 | 275175877 |
+
+**emergentDB|sequential** — nanocompile on frontier: yes
+
+| approach | lever | crates/wt | wall | disk | store |
+| --- | --- | --- | --- | --- | --- |
+| shared_target | shared_target | 0.0 | 302 | 145550858 | 0 |
+| nanocompile | frozen | 18.8 | 10184 | 133791754 | 130119246 |
+
+**hashbrown|sequential** — nanocompile on frontier: yes
+
+| approach | lever | crates/wt | wall | disk | store |
+| --- | --- | --- | --- | --- | --- |
+| shared_target | shared_target | 0.2 | 461 | 8261952 | 0 |
+| kache | kache | 1.2 | 1392 | 6638859 | 3307801 |
+| sccache | sccache | 4.0 | 2543 | 5623064 | 0 |
+| nanocompile | frozen | 1.8 | 1822 | 2532352 | 2527657 |
+
+**nalgebra|sequential** — nanocompile on frontier: yes
+
+| approach | lever | crates/wt | wall | disk | store |
+| --- | --- | --- | --- | --- | --- |
+| shared_target | shared_target | 0.2 | 4524 | 145827028 | 0 |
+| nanocompile | frozen | 8.2 | 20310 | 84529916 | 84494045 |
+
+**ruff|sequential** — nanocompile on frontier: yes
+
+| approach | lever | crates/wt | wall | disk | store |
+| --- | --- | --- | --- | --- | --- |
+| shared_target | shared_target | 1.0 | 4596 | 1185761641 | 0 |
+| nanocompile | frozen | 127.8 | 124216 | 794872899 | 679381619 |
+
+**serde|sequential** — nanocompile on frontier: yes
+
+| approach | lever | crates/wt | wall | disk | store |
+| --- | --- | --- | --- | --- | --- |
+| shared_target | shared_target | 0.2 | 393 | 47084150 | 0 |
+| nanocompile | frozen | 4.0 | 6339 | 13355434 | 13346819 |
+
+**tokio|sequential** — nanocompile on frontier: yes
+
+| approach | lever | crates/wt | wall | disk | store |
+| --- | --- | --- | --- | --- | --- |
+| shared_target | shared_target | 0.2 | 2967 | 109226449 | 0 |
+| nanocompile | frozen | 8.5 | 14923 | 62163951 | 58122920 |
+

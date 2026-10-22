@@ -66,6 +66,9 @@ NANO_FRONTIER = {
     "NANOCOMPILE_PROC_MACRO_PRODUCERS": "1",
     "NANOCOMPILE_EXECUTABLE_PRODUCERS": "1",
     "NANOCOMPILE_REMAP_PATHS": "1",
+    "NANOCOMPILE_TS_INCREMENTAL": "1",
+    "NANOCOMPILE_TS_SEED": "1",
+    "NANOCOMPILE_TSRS_CHECKERS": "4",
 }
 NANO_SCRIPT = dict(NANO_BEST, NANOCOMPILE_BUILD_SCRIPT_CACHE="1")
 
@@ -829,6 +832,37 @@ def pareto_by_repo(rows, split="held_out"):
     return out
 
 
+def scenario_pareto(rows, split):
+    """Per-objective Pareto for each sample × mode (sequential / concurrent)."""
+    out = {}
+    keys = sorted({
+        (r.get("sample"), r.get("mode") or "sequential")
+        for r in rows if r.get("sample") and r.get("ok")
+    })
+    for sample, mode in keys:
+        subset = [
+            r for r in rows
+            if r.get("sample") == sample and r.get("ok")
+            and (r.get("mode") or "sequential") == mode
+            and r.get("n_worktrees") == 4
+            and not (r.get("from_older") or (r.get("variant") or {}).get("from_older"))
+        ]
+        if not subset:
+            continue
+        front = pareto_frontier(subset)
+        cell = "%s|%s" % (sample, mode)
+        out[cell] = {
+            "split": split,
+            "scenario": mode,
+            "frontier": [
+                {"lever": r.get("lever"), "approach": r.get("approach"), **{m: r.get(m) for m in OBJECTIVES}}
+                for r in front
+            ],
+            "nano_on_frontier": any(r.get("approach") == "nanocompile" for r in front),
+        }
+    return out
+
+
 def hill_climb(rows):
     """One change at a time on train. Keep >3% wins that do not regress another >3%."""
     log = []
@@ -1259,7 +1293,35 @@ def render_docs(payload) -> str:
         "",
         "Harness: `bench/agent_worktrees.py`. Raw rows: `bench/archive/agent-worktrees.json`.",
         "",
+        "## Rust scenario cells (per-objective)",
+        "",
+        "Same four objectives, split by mode: sequential mixed-edit (leaf / body /",
+        "sig analogue) and concurrent 4-worktree checks. L21 `NANOCOMPILE_CHECK_NATIVE=1`",
+        "is the extra crates/wall lever (metadata-only rustc may cache `-l` native units).",
+        "",
     ]
+    scenario = payload.get("scenario_pareto") or {}
+    for split_name, label in (("train", "Train"), ("held_out", "Held-out")):
+        block = scenario.get(split_name) or {}
+        if not block:
+            continue
+        lines += ["### %s scenarios" % label, ""]
+        for cell, info in block.items():
+            on = "yes" if info.get("nano_on_frontier") else "NO"
+            lines.append("**%s** — nanocompile on frontier: %s" % (cell, on))
+            lines.append("")
+            lines.append("| approach | lever | crates/wt | wall | disk | store |")
+            lines.append("| --- | --- | --- | --- | --- | --- |")
+            for row in info.get("frontier") or []:
+                lines.append("| %s | %s | %s | %s | %s | %s |" % (
+                    row.get("approach"), row.get("lever"),
+                    "%.1f" % row["crates_compiled_mean"] if row.get("crates_compiled_mean") is not None else "",
+                    "%.0f" % row["wall_ms"] if row.get("wall_ms") is not None else "",
+                    row.get("disk_bytes") if row.get("disk_bytes") is not None else "",
+                    row.get("store_bytes") if row.get("store_bytes") is not None else "",
+                ))
+            lines.append("")
+    lines += [""]
     return "\n".join(lines)
 
 
@@ -1330,6 +1392,7 @@ def main(argv=None):
         payload["hill_climb"]["frozen_env"] = elite_env
         payload["hill_climb"]["frozen_lever"] = elite_id
         payload["pareto"] = {"train": pareto_by_repo(train, "train")}
+        payload["scenario_pareto"] = {"train": scenario_pareto(train, "train")}
         payload["commit"] = git_commit()
         payload["frozen_env"] = elite_env
         write_json(args.out, payload)
@@ -1366,6 +1429,10 @@ def main(argv=None):
         payload["breakdown"] = breakdown(held)
         payload.setdefault("pareto", {})
         payload["pareto"]["held_out"] = pareto_by_repo(held, "held_out")
+        payload["scenario_pareto"] = {
+            "train": scenario_pareto(payload.get("train") or [], "train"),
+            "held_out": scenario_pareto(held, "held_out"),
+        }
         payload["commit"] = git_commit()
         write_json(args.out, payload)
 
@@ -1383,6 +1450,7 @@ def main(argv=None):
             "survival": payload.get("survival"),
             "frozen_env": payload.get("frozen_env") or payload.get("hill_climb", {}).get("frozen_env"),
             "pareto": payload.get("pareto"),
+            "scenario_pareto": payload.get("scenario_pareto"),
             "train": payload.get("train") or [],
             "held_out": payload.get("held_out") or [],
             "breakdown": payload.get("breakdown") or [],

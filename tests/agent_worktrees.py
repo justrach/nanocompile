@@ -172,6 +172,7 @@ class Docs(unittest.TestCase):
             "breakdown": [],
         })
         self.assertIn("NANOCOMPILE_REMAP_PATHS", text)
+        self.assertIn("NANOCOMPILE_TS_INCREMENTAL", text)
         self.assertIn("| `l14_slim_graph` |", text)
         self.assertIn("Skip empty -L prefix guards", text)
         climb = text.split("## Hill-climb")[1].split("## Generalization")[0]

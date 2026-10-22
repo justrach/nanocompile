@@ -41633,6 +41633,243 @@
         "store_bytes": 130119246,
         "ok": true
       }
-    ]
+    ],
+    "scenario_pareto": {
+      "train": {
+        "axum|sequential": {
+          "split": "train",
+          "scenario": "sequential",
+          "frontier": [
+            {
+              "lever": "shared_target",
+              "approach": "shared_target",
+              "crates_compiled_mean": 0.5,
+              "wall_ms": 3453.596542000014,
+              "disk_bytes": 157767267,
+              "store_bytes": 0
+            },
+            {
+              "lever": "frozen",
+              "approach": "nanocompile",
+              "crates_compiled_mean": 20.0,
+              "wall_ms": 20746.094490998075,
+              "disk_bytes": 111392465,
+              "store_bytes": 107322059
+            }
+          ],
+          "nano_on_frontier": true
+        },
+        "ripgrep|sequential": {
+          "split": "train",
+          "scenario": "sequential",
+          "frontier": [
+            {
+              "lever": "shared_target",
+              "approach": "shared_target",
+              "crates_compiled_mean": 1.0,
+              "wall_ms": 1611.2793710053666,
+              "disk_bytes": 102451447,
+              "store_bytes": 0
+            },
+            {
+              "lever": "frozen",
+              "approach": "nanocompile",
+              "crates_compiled_mean": 18.5,
+              "wall_ms": 7189.665811005398,
+              "disk_bytes": 72101212,
+              "store_bytes": 68369982
+            }
+          ],
+          "nano_on_frontier": true
+        }
+      },
+      "held_out": {
+        "bhumi|sequential": {
+          "split": "held_out",
+          "scenario": "sequential",
+          "frontier": [
+            {
+              "lever": "shared_target",
+              "approach": "shared_target",
+              "crates_compiled_mean": 0.25,
+              "wall_ms": 678.9502880055807,
+              "disk_bytes": 301503851,
+              "store_bytes": 0
+            },
+            {
+              "lever": "kache",
+              "approach": "kache",
+              "crates_compiled_mean": 0.0,
+              "wall_ms": 4355.019488997641,
+              "disk_bytes": 4590479442,
+              "store_bytes": 48866938
+            },
+            {
+              "lever": "frozen",
+              "approach": "nanocompile",
+              "crates_compiled_mean": 36.0,
+              "wall_ms": 18823.399210996286,
+              "disk_bytes": 299270183,
+              "store_bytes": 275175877
+            }
+          ],
+          "nano_on_frontier": true
+        },
+        "emergentDB|sequential": {
+          "split": "held_out",
+          "scenario": "sequential",
+          "frontier": [
+            {
+              "lever": "shared_target",
+              "approach": "shared_target",
+              "crates_compiled_mean": 0.0,
+              "wall_ms": 302.25169099867344,
+              "disk_bytes": 145550858,
+              "store_bytes": 0
+            },
+            {
+              "lever": "frozen",
+              "approach": "nanocompile",
+              "crates_compiled_mean": 18.75,
+              "wall_ms": 10184.386263994384,
+              "disk_bytes": 133791754,
+              "store_bytes": 130119246
+            }
+          ],
+          "nano_on_frontier": true
+        },
+        "hashbrown|sequential": {
+          "split": "held_out",
+          "scenario": "sequential",
+          "frontier": [
+            {
+              "lever": "shared_target",
+              "approach": "shared_target",
+              "crates_compiled_mean": 0.25,
+              "wall_ms": 460.81229799892753,
+              "disk_bytes": 8261952,
+              "store_bytes": 0
+            },
+            {
+              "lever": "kache",
+              "approach": "kache",
+              "crates_compiled_mean": 1.25,
+              "wall_ms": 1392.3294549967977,
+              "disk_bytes": 6638859,
+              "store_bytes": 3307801
+            },
+            {
+              "lever": "sccache",
+              "approach": "sccache",
+              "crates_compiled_mean": 4.0,
+              "wall_ms": 2542.5848770028097,
+              "disk_bytes": 5623064,
+              "store_bytes": 0
+            },
+            {
+              "lever": "frozen",
+              "approach": "nanocompile",
+              "crates_compiled_mean": 1.75,
+              "wall_ms": 1822.3271050010226,
+              "disk_bytes": 2532352,
+              "store_bytes": 2527657
+            }
+          ],
+          "nano_on_frontier": true
+        },
+        "nalgebra|sequential": {
+          "split": "held_out",
+          "scenario": "sequential",
+          "frontier": [
+            {
+              "lever": "shared_target",
+              "approach": "shared_target",
+              "crates_compiled_mean": 0.25,
+              "wall_ms": 4523.814095002308,
+              "disk_bytes": 145827028,
+              "store_bytes": 0
+            },
+            {
+              "lever": "frozen",
+              "approach": "nanocompile",
+              "crates_compiled_mean": 8.25,
+              "wall_ms": 20309.546192002017,
+              "disk_bytes": 84529916,
+              "store_bytes": 84494045
+            }
+          ],
+          "nano_on_frontier": true
+        },
+        "ruff|sequential": {
+          "split": "held_out",
+          "scenario": "sequential",
+          "frontier": [
+            {
+              "lever": "shared_target",
+              "approach": "shared_target",
+              "crates_compiled_mean": 1.0,
+              "wall_ms": 4595.914761004678,
+              "disk_bytes": 1185761641,
+              "store_bytes": 0
+            },
+            {
+              "lever": "frozen",
+              "approach": "nanocompile",
+              "crates_compiled_mean": 127.75,
+              "wall_ms": 124216.04949599714,
+              "disk_bytes": 794872899,
+              "store_bytes": 679381619
+            }
+          ],
+          "nano_on_frontier": true
+        },
+        "serde|sequential": {
+          "split": "held_out",
+          "scenario": "sequential",
+          "frontier": [
+            {
+              "lever": "shared_target",
+              "approach": "shared_target",
+              "crates_compiled_mean": 0.25,
+              "wall_ms": 392.55990799574647,
+              "disk_bytes": 47084150,
+              "store_bytes": 0
+            },
+            {
+              "lever": "frozen",
+              "approach": "nanocompile",
+              "crates_compiled_mean": 4.0,
+              "wall_ms": 6339.478683999914,
+              "disk_bytes": 13355434,
+              "store_bytes": 13346819
+            }
+          ],
+          "nano_on_frontier": true
+        },
+        "tokio|sequential": {
+          "split": "held_out",
+          "scenario": "sequential",
+          "frontier": [
+            {
+              "lever": "shared_target",
+              "approach": "shared_target",
+              "crates_compiled_mean": 0.25,
+              "wall_ms": 2966.573227997287,
+              "disk_bytes": 109226449,
+              "store_bytes": 0
+            },
+            {
+              "lever": "frozen",
+              "approach": "nanocompile",
+              "crates_compiled_mean": 8.5,
+              "wall_ms": 14922.941049997462,
+              "disk_bytes": 62163951,
+              "store_bytes": 58122920
+            }
+          ],
+          "nano_on_frontier": true
+        }
+      }
+    }
   }
 }
