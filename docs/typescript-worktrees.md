@@ -15,83 +15,85 @@ set once). `nanocompile worktree init` writes `.cargo/config.toml` and
 same shared `NANOCOMPILE_DIR`.
 
 condensation-site is the intended train repo. This environment cannot
-clone that private tree, so train is a 126-file public stand-in with the
-same checker × scenario grid. Re-run on the real app with:
+clone that private tree, so train is **condensation-standin** (126-file
+public stand-in) with the same checker × scenario grid. Re-run on the
+real app with:
 
 ```sh
 python3 bench/ts_worktrees.py --repo /path/to/condensation-site --phase all
 python3 bench/ts_worktrees.py --repo /path/to/any-ts-app --phase all
 ```
 
-vite (github.com/vitejs/vite) is a pnpm-only monorepo with no root tsconfig; typecheck is workspace-wide. Held-out is ajv + prettier.
+vite (github.com/vitejs/vite) is a pnpm-only monorepo with no root tsconfig; typecheck is workspace-wide. Held-out is ajv + prettier. Re-run with `python3 bench/ts_worktrees.py --repo /path/to/vite-app`.
 
 ## Frozen vs baselines (checker × scenario)
 
-Shipped lever vs `none` / `incremental_local`. **front** = nanocompile is
-non-dominated in that cell.
+Shipped lever vs `none` / `incremental_local`. **front** = honest win:
+strictly better on ≥1 objective and wall not worse beyond 3% noise.
+Pareto non-domination alone is not a win when wall is equal or slower.
 
 | split | cell | front | wall nano/none | files nano/none | store | disk nano/none | rss nano/none | correct |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| train | condensation-site/tsc|cold | yes | 5 / 391 | 0.0 / 126.0 | 56228 | 472124 / 315735 | 3944 / 154440 | yes |
-| train | condensation-site/tsc|leaf | yes | 369 / 377 | 1.0 / 126.0 | 112095 | 528082 / 315826 | 152812 / 153036 | yes |
-| train | condensation-site/tsc|shared | yes | 387 / 377 | 1.0 / 126.0 | 168053 | 584222 / 315917 | 154280 / 154412 | yes |
-| train | condensation-site/tsc|tsconfig | yes | 380 / 340 | 1.0 / 126.0 | 224011 | 640362 / 315917 | 153840 / 151556 | yes |
-| train | condensation-site/tsc|concurrent | yes | 12 / 832 | 0.0 / 126.0 | 224107 | 640731 / 315917 | 3960 / 153400 | yes |
-| train | condensation-site/tsgo|cold | yes | 5 / 72 | 0.0 / 126.0 | 46045 | 411048 / 264842 | 3808 / 51284 | yes |
-| train | condensation-site/tsgo|leaf | yes | 74 / 75 | 1.0 / 126.0 | 91719 | 456803 / 264923 | 50388 / 51156 | yes |
-| train | condensation-site/tsgo|shared | yes | 76 / 69 | 1.0 / 126.0 | 137474 | 502720 / 265004 | 50388 / 50388 | yes |
-| train | condensation-site/tsgo|tsconfig | yes | 72 / 71 | 1.0 / 126.0 | 183229 | 548637 / 265004 | 50772 / 47888 | yes |
-| train | condensation-site/tsgo|concurrent | yes | 11 / 124 | 0.0 / 126.0 | 183325 | 548976 / 265004 | 3816 / 50388 | yes |
-| train | condensation-site/tsrs|cold | yes | 5 / 44 | 0.0 / 126.0 | 46536 | 413994 / 267297 | 3832 / 47140 | yes |
-| train | condensation-site/tsrs|leaf | yes | 52 / 42 | 1.0 / 126.0 | 92701 | 460240 / 267378 | 47340 / 47096 | yes |
-| train | condensation-site/tsrs|shared | yes | 45 / 45 | 1.0 / 126.0 | 138947 | 506648 / 267459 | 47356 / 47136 | yes |
-| train | condensation-site/tsrs|tsconfig | yes | 49 / 41 | 1.0 / 126.0 | 185193 | 553056 / 267459 | 47364 / 47148 | yes |
-| train | condensation-site/tsrs|concurrent | yes | 9 / 60 | 0.0 / 126.0 | 185289 | 553395 / 267459 | 3588 / 47120 | yes |
-| train | condensation-site/bun|cold | yes | 7 / 32 | 0.0 / 126.0 | 26182 | 293743 / 267275 | 5056 / 58540 | yes |
-| train | condensation-site/bun|leaf | yes | 39 / 32 | 1.0 / 126.0 | 52320 | 319881 / 267275 | 58480 / 58724 | yes |
-| train | condensation-site/bun|shared | yes | 35 / 31 | 1.0 / 126.0 | 78458 | 346019 / 267275 | 57308 / 57664 | yes |
-| train | condensation-site/bun|tsconfig | yes | 37 / 31 | 1.0 / 126.0 | 104596 | 372157 / 267275 | 58024 / 57456 | yes |
-| train | condensation-site/bun|concurrent | yes | 15 / 57 | 0.0 / 126.0 | 104640 | 372201 / 267275 | 5056 / 59448 | yes |
-| held_out | ajv/tsc|cold | yes | 7 / 1215 | 0.0 / 198.0 | 94931 | 204898596 / 204553936 | 4200 / 239212 | yes |
-| held_out | ajv/tsc|leaf | yes | 580 / 1219 | 1.0 / 198.0 | 139473 | 204943138 / 204553936 | 203516 / 237864 | yes |
-| held_out | ajv/tsc|shared | yes | 729 / 1226 | 1.0 / 198.0 | 234316 | 205038345 / 204553936 | 216712 / 237640 | yes |
-| held_out | ajv/tsc|tsconfig | yes | 637 / 1228 | 1.0 / 198.0 | 329159 | 205133552 / 204553936 | 212996 / 239000 | yes |
-| held_out | ajv/tsc|concurrent | yes | 18 / 3087 | 0.0 / 198.0 | 329255 | 205134376 / 204553936 | 4216 / 238372 | yes |
-| held_out | prettier/tsc|cold | yes | 103 / 18578 | 0.0 / 556.0 | 1889060 | 465484952 / 460949873 | 18168 / 1233608 | yes |
-| held_out | prettier/tsc|leaf | yes | 1616 / 18245 | 1.0 / 556.0 | 3777747 | 467373718 / 460949873 | 415128 / 1221752 | yes |
-| held_out | prettier/tsc|shared | yes | 3004 / 18401 | 1.0 / 556.0 | 5668330 | 469266276 / 460949873 | 511380 / 1219628 | yes |
-| held_out | prettier/tsc|tsconfig | yes | 2180 / 18620 | 1.0 / 556.0 | 7558913 | 471158834 / 460949873 | 468780 / 1222548 | yes |
-| held_out | prettier/tsc|concurrent | yes | 216 / 26858 | 0.0 / 556.0 | 7559009 | 471162801 / 460949873 | 18280 / 1251104 | yes |
-| held_out | ajv/tsgo|cold | yes | 144 / 142 | 1.0 / 198.0 | 125 | 204945207 / 204554113 | 106060 / 109324 | yes |
-| held_out | ajv/tsgo|leaf | yes | 101 / 153 | 1.0 / 198.0 | 150 | 204945232 / 204554113 | 85520 / 110036 | yes |
-| held_out | ajv/tsgo|shared | yes | 128 / 146 | 1.0 / 198.0 | 175 | 204945581 / 204554113 | 90960 / 110032 | yes |
-| held_out | ajv/tsgo|tsconfig | yes | 105 / 148 | 1.0 / 198.0 | 200 | 204945606 / 204554113 | 85712 / 108560 | yes |
-| held_out | ajv/tsgo|concurrent | yes | 417 / 381 | 1.0 / 198.0 | 300 | 204945706 / 204554113 | 87568 / 111952 | yes |
-| held_out | ajv/tsrs|cold | yes | 63 / 57 | 1.0 / 198.0 | 125 | 204945567 / 204554113 | 56064 / 55852 | yes |
-| held_out | ajv/tsrs|leaf | yes | 53 / 57 | 1.0 / 198.0 | 150 | 204945592 / 204554113 | 48344 / 54148 | yes |
-| held_out | ajv/tsrs|shared | yes | 64 / 58 | 1.0 / 198.0 | 175 | 204945941 / 204554113 | 55608 / 54012 | yes |
-| held_out | ajv/tsrs|tsconfig | yes | 54 / 57 | 1.0 / 198.0 | 200 | 204945966 / 204554113 | 47332 / 53956 | yes |
-| held_out | ajv/tsrs|concurrent | yes | 202 / 126 | 1.0 / 198.0 | 300 | 204946066 / 204554113 | 59480 / 53572 | yes |
-| held_out | ajv/bun|cold | yes | 69 / 60 | 1.0 / 198.0 | 125 | 204554260 / 204554091 | 95328 / 95320 | yes |
-| held_out | ajv/bun|leaf | yes | 71 / 66 | 1.0 / 198.0 | 150 | 204554285 / 204554091 | 95952 / 95244 | yes |
-| held_out | ajv/bun|shared | yes | 70 / 66 | 1.0 / 198.0 | 175 | 204554310 / 204554091 | 95516 / 94484 | yes |
-| held_out | ajv/bun|tsconfig | yes | 66 / 63 | 1.0 / 198.0 | 200 | 204554335 / 204554091 | 95004 / 96284 | yes |
-| held_out | ajv/bun|concurrent | yes | 246 / 161 | 1.0 / 198.0 | 300 | 204554435 / 204554091 | 96216 / 96268 | yes |
-| held_out | prettier/tsgo|cold | NO | 412 / 297 | 1.0 / 556.0 | 125 | 464521654 / 460950050 | 279632 / 222672 | no |
-| held_out | prettier/tsgo|leaf | NO | 402 / 572 | 1.0 / 556.0 | 150 | 464521778 / 460950050 | 274304 / 228296 | no |
-| held_out | prettier/tsgo|shared | NO | 420 / 538 | 1.0 / 556.0 | 175 | 464521902 / 460950050 | 279184 / 229312 | no |
-| held_out | prettier/tsgo|tsconfig | NO | 352 / 482 | 1.0 / 556.0 | 200 | 464521927 / 460950050 | 250700 / 229264 | no |
-| held_out | prettier/tsgo|concurrent | NO | 1380 / 870 | 1.0 / 556.0 | 300 | 464521865 / 460950050 | 274896 / 230288 | no |
-| held_out | prettier/tsrs|cold | NO | 160 / 88 | 1.0 / 556.0 | 125 | 464524409 / 460950050 | 109104 / 93052 | no |
-| held_out | prettier/tsrs|leaf | NO | 152 / 94 | 1.0 / 556.0 | 150 | 464524533 / 460950050 | 117432 / 92560 | no |
-| held_out | prettier/tsrs|shared | NO | 155 / 87 | 1.0 / 556.0 | 175 | 464524657 / 460950050 | 118120 / 90952 | no |
-| held_out | prettier/tsrs|tsconfig | NO | 148 / 95 | 1.0 / 556.0 | 200 | 464524682 / 460950050 | 115944 / 90288 | no |
-| held_out | prettier/tsrs|concurrent | NO | 457 / 212 | 1.0 / 556.0 | 300 | 464524620 / 460950050 | 119888 / 91948 | no |
-| held_out | prettier/bun|cold | NO | 190 / 123 | 1.0 / 556.0 | 125 | 460950197 / 460950028 | 193316 / 189552 | no |
-| held_out | prettier/bun|leaf | NO | 175 / 134 | 1.0 / 556.0 | 150 | 460950222 / 460950028 | 187936 / 192928 | no |
-| held_out | prettier/bun|shared | NO | 179 / 126 | 1.0 / 556.0 | 175 | 460950247 / 460950028 | 193188 / 182560 | no |
-| held_out | prettier/bun|tsconfig | NO | 172 / 133 | 1.0 / 556.0 | 200 | 460950272 / 460950028 | 188568 / 192808 | no |
-| held_out | prettier/bun|concurrent | NO | 560 / 309 | 1.0 / 556.0 | 300 | 460950372 / 460950028 | 192340 / 191508 | no |
+| train | condensation-standin/tsc|cold | yes | 4 / 395 | 0.0 / 126.0 | 67795 | 336138 / 316583 | 3540 / 154636 | yes |
+| train | condensation-standin/tsc|leaf | yes | 370 / 372 | 1.0 / 126.0 | 97618 | 365961 / 316674 | 154096 / 154724 | yes |
+| train | condensation-standin/tsc|shared | yes | 395 / 416 | 1.0 / 126.0 | 127532 | 395875 / 316765 | 155736 / 153984 | yes |
+| train | condensation-standin/tsc|tsconfig | NO | 368 / 348 | 1.0 / 126.0 | 157446 | 425789 / 316765 | 155308 / 151076 | yes |
+| train | condensation-standin/tsc|concurrent | yes | 9 / 812 | 0.0 / 126.0 | 157490 | 425833 / 316765 | 3472 / 152640 | yes |
+| train | condensation-standin/tsgo|cold | yes | 4 / 72 | 0.0 / 126.0 | 57612 | 325977 / 265690 | 3472 / 51216 | yes |
+| train | condensation-standin/tsgo|leaf | NO | 82 / 74 | 1.0 / 126.0 | 77242 | 345607 / 265771 | 51156 / 51540 | yes |
+| train | condensation-standin/tsgo|shared | NO | 80 / 70 | 1.0 / 126.0 | 96953 | 365318 / 265852 | 51468 / 50444 | yes |
+| train | condensation-standin/tsgo|tsconfig | yes | 78 / 76 | 1.0 / 126.0 | 116664 | 385029 / 265852 | 51156 / 49492 | yes |
+| train | condensation-standin/tsgo|concurrent | yes | 10 / 129 | 0.0 / 126.0 | 116708 | 385073 / 265852 | 3472 / 51088 | yes |
+| train | condensation-standin/tsrs|cold | yes | 4 / 45 | 0.0 / 126.0 | 58103 | 326468 / 268145 | 3472 / 47160 | yes |
+| train | condensation-standin/tsrs|leaf | NO | 51 / 44 | 1.0 / 126.0 | 78224 | 346589 / 268226 | 47364 / 47156 | yes |
+| train | condensation-standin/tsrs|shared | yes | 48 / 51 | 1.0 / 126.0 | 98426 | 366791 / 268307 | 47368 / 47156 | yes |
+| train | condensation-standin/tsrs|tsconfig | NO | 49 / 42 | 1.0 / 126.0 | 118628 | 386993 / 268307 | 47376 / 47144 | yes |
+| train | condensation-standin/tsrs|concurrent | yes | 10 / 65 | 0.0 / 126.0 | 118672 | 387037 / 268307 | 3600 / 47124 | yes |
+| train | condensation-standin/bun|cold | yes | 5 / 33 | 0.0 / 126.0 | 37801 | 306144 / 268123 | 5056 / 58992 | yes |
+| train | condensation-standin/bun|leaf | NO | 42 / 32 | 1.0 / 126.0 | 37853 | 306196 / 268123 | 57200 / 57904 | yes |
+| train | condensation-standin/bun|shared | NO | 41 / 31 | 1.0 / 126.0 | 37905 | 306248 / 268123 | 56512 / 58412 | yes |
+| train | condensation-standin/bun|tsconfig | NO | 40 / 32 | 1.0 / 126.0 | 37957 | 306300 / 268123 | 55284 / 58296 | yes |
+| train | condensation-standin/bun|concurrent | yes | 12 / 54 | 0.0 / 126.0 | 38001 | 306344 / 268123 | 5056 / 57660 | yes |
+| held_out | ajv/tsc|cold | yes | 7 / 1210 | 0.0 / 106.0 | 113605 | 204668367 / 204554718 | 3728 / 239164 | yes |
+| held_out | ajv/tsc|leaf | yes | 622 / 1217 | 1.0 / 106.0 | 163698 | 204718460 / 204554718 | 206716 / 240532 | yes |
+| held_out | ajv/tsc|shared | yes | 725 / 1237 | 1.0 / 106.0 | 214155 | 204768917 / 204554718 | 215948 / 238704 | yes |
+| held_out | ajv/tsc|tsconfig | yes | 647 / 1240 | 1.0 / 106.0 | 264612 | 204819374 / 204554718 | 210728 / 238692 | yes |
+| held_out | ajv/tsc|concurrent | yes | 17 / 3047 | 0.0 / 106.0 | 264656 | 204819418 / 204554718 | 3600 / 238432 | yes |
+| held_out | prettier/tsc|cold | yes | 34 / 18622 | 0.0 / 494.0 | 711873 | 461662572 / 460950655 | 4496 / 1222960 | yes |
+| held_out | prettier/tsc|leaf | yes | 4110 / 18373 | 1.0 / 494.0 | 1242555 | 462193254 / 460950655 | 544384 / 1222996 | yes |
+| held_out | prettier/tsc|shared | yes | 2981 / 18055 | 1.0 / 494.0 | 1774659 | 462725358 / 460950655 | 509036 / 1219512 | yes |
+| held_out | prettier/tsc|tsconfig | yes | 2205 / 18342 | 1.0 / 494.0 | 2306763 | 463257462 / 460950655 | 468556 / 1218108 | yes |
+| held_out | prettier/tsc|concurrent | yes | 45 / 26602 | 0.0 / 494.0 | 2306807 | 463257506 / 460950655 | 4496 / 1226132 | yes |
+| held_out | ajv/tsgo|cold | yes | 7 / 139 | 0.0 / 106.0 | 143046 | 204697985 / 204554895 | 3728 / 110420 | yes |
+| held_out | ajv/tsgo|leaf | yes | 134 / 147 | 1.0 / 106.0 | 221389 | 204776328 / 204554895 | 88212 / 108816 | yes |
+| held_out | ajv/tsgo|shared | yes | 125 / 151 | 1.0 / 106.0 | 300056 | 204854995 / 204554895 | 93072 / 109072 | yes |
+| held_out | ajv/tsgo|tsconfig | yes | 131 / 137 | 1.0 / 106.0 | 378723 | 204933662 / 204554895 | 87376 / 109328 | yes |
+| held_out | ajv/tsgo|concurrent | yes | 16 / 382 | 0.0 / 106.0 | 378767 | 204933706 / 204554895 | 3668 / 111124 | yes |
+| held_out | prettier/tsgo|cold | yes | 32 / 4710 | 0.0 / 494.0 | 1123754 | 462074635 / 460950837 | 4880 / 1555180 | yes |
+| held_out | prettier/tsgo|leaf | yes | 973 / 4516 | 1.0 / 494.0 | 1967635 | 462918516 / 460950837 | 369152 / 1472392 | yes |
+| held_out | prettier/tsgo|shared | yes | 1063 / 4649 | 1.0 / 494.0 | 2812362 | 463763243 / 460950837 | 408720 / 1480412 | yes |
+| held_out | prettier/tsgo|tsconfig | yes | 545 / 4652 | 1.0 / 494.0 | 3657089 | 464607970 / 460950837 | 321292 / 1467624 | yes |
+| held_out | prettier/tsgo|concurrent | yes | 43 / 11996 | 0.0 / 494.0 | 3657133 | 464608014 / 460950837 | 4752 / 1519464 | yes |
+| held_out | ajv/tsrs|cold | yes | 7 / 58 | 0.0 / 106.0 | 143118 | 204698057 / 204554895 | 3728 / 53884 | yes |
+| held_out | ajv/tsrs|leaf | NO | 63 / 60 | 1.0 / 106.0 | 221533 | 204776472 / 204554895 | 58152 / 53980 | yes |
+| held_out | ajv/tsrs|shared | yes | 64 / 63 | 1.0 / 106.0 | 300272 | 204855211 / 204554895 | 56456 / 53700 | yes |
+| held_out | ajv/tsrs|tsconfig | NO | 69 / 54 | 1.0 / 106.0 | 379011 | 204933950 / 204554895 | 57456 / 53672 | yes |
+| held_out | ajv/tsrs|concurrent | yes | 14 / 126 | 0.0 / 106.0 | 379055 | 204933994 / 204554895 | 3668 / 53932 | yes |
+| held_out | prettier/tsrs|cold | yes | 32 / 754 | 0.0 / 494.0 | 1124267 | 462075148 / 460950837 | 4880 / 368528 | yes |
+| held_out | prettier/tsrs|leaf | yes | 296 / 756 | 1.0 / 494.0 | 1968670 | 462919551 / 460950837 | 149156 / 369748 | yes |
+| held_out | prettier/tsrs|shared | yes | 361 / 619 | 1.0 / 494.0 | 2813919 | 463764800 / 460950837 | 168368 / 326260 | yes |
+| held_out | prettier/tsrs|tsconfig | yes | 191 / 759 | 1.0 / 494.0 | 3659168 | 464610049 / 460950837 | 134288 / 378172 | yes |
+| held_out | prettier/tsrs|concurrent | yes | 42 / 2299 | 0.0 / 494.0 | 3659212 | 464610093 / 460950837 | 4752 / 373472 | yes |
+| held_out | ajv/bun|cold | yes | 8 / 57 | 0.0 / 106.0 | 64636 | 204619553 / 204554873 | 5056 / 96008 | yes |
+| held_out | ajv/bun|leaf | yes | 57 / 57 | 1.0 / 106.0 | 64688 | 204619605 / 204554873 | 82732 / 93344 | yes |
+| held_out | ajv/bun|shared | NO | 69 / 59 | 1.0 / 106.0 | 64752 | 204619669 / 204554873 | 94944 / 95048 | yes |
+| held_out | ajv/bun|tsconfig | yes | 47 / 62 | 1.0 / 106.0 | 64804 | 204619721 / 204554873 | 81560 / 95900 | yes |
+| held_out | ajv/bun|concurrent | yes | 16 / 157 | 0.0 / 106.0 | 64848 | 204619765 / 204554873 | 5056 / 95812 | yes |
+| held_out | prettier/bun|cold | yes | 33 / 3270 | 0.0 / 494.0 | 285799 | 461236658 / 460950815 | 5056 / 733052 | yes |
+| held_out | prettier/bun|leaf | yes | 305 / 3176 | 1.0 / 494.0 | 285863 | 461236722 / 460950815 | 257828 / 740572 | yes |
+| held_out | prettier/bun|shared | yes | 350 / 3135 | 1.0 / 494.0 | 285927 | 461236786 / 460950815 | 231296 / 726432 | yes |
+| held_out | prettier/bun|tsconfig | yes | 147 / 3236 | 1.0 / 494.0 | 285979 | 461236838 / 460950815 | 193184 / 728528 | yes |
+| held_out | prettier/bun|concurrent | yes | 43 / 6796 | 0.0 / 494.0 | 286023 | 461236882 / 460950815 | 5056 / 728116 | yes |
 
 ## Setup Rach should use
 
@@ -111,736 +113,825 @@ Frozen env:
 {
   "NANOCOMPILE_TS_INCREMENTAL": "1",
   "NANOCOMPILE_TS_SEED": "1",
+  "NANOCOMPILE_TS_DIRTY_SCOPE": "1",
   "NANOCOMPILE_TSRS_CHECKERS": "4"
 }
 ```
 
 Cache key: checker identity + argv + tsconfig + source hashes, paths as
-`$NANO_ROOT`. Only zero-error results are stored.
+`$NANO_ROOT`. Every exit code is stored (replay prefix
+`NANOCOMPILE_TS_EXIT=N`). Edit misses do not add a new result entry.
 
 ## Hill-climb
 
 | lever | vs | keep | note |
 | --- | --- | --- | --- |
-| `l0_result_cache` | none | yes | on frontier in at least one cell |
-| `l1_incremental` | l0_result_cache | yes | on frontier in at least one cell |
-| `l2_seed_buildinfo` | l1_incremental | yes | on frontier in at least one cell |
-| `l0_result_cache` | none | yes | on frontier in at least one cell |
-| `l1_incremental` | l0_result_cache | yes | on frontier in at least one cell |
-| `l2_seed_buildinfo` | l1_incremental | yes | on frontier in at least one cell |
-| `l0_result_cache` | none | yes | on frontier in at least one cell |
-| `l1_incremental` | l0_result_cache | yes | on frontier in at least one cell |
-| `l2_seed_buildinfo` | l1_incremental | yes | on frontier in at least one cell |
-| `l0_result_cache` | none | yes | on frontier in at least one cell |
-| `l1_incremental` | l0_result_cache | yes | on frontier in at least one cell |
-| `l2_seed_buildinfo` | l1_incremental | yes | on frontier in at least one cell |
+| `l0_result_cache` | none | yes | honest win in at least one cell |
+| `l1_incremental` | l0_result_cache | yes | honest win in at least one cell |
+| `l2_seed_buildinfo` | l1_incremental | yes | honest win in at least one cell |
+| `l3_dirty_scope` | l2_seed_buildinfo | yes | honest win in at least one cell |
+| `l0_result_cache` | none | yes | honest win in at least one cell |
+| `l1_incremental` | l0_result_cache | yes | honest win in at least one cell |
+| `l2_seed_buildinfo` | l1_incremental | yes | honest win in at least one cell |
+| `l3_dirty_scope` | l2_seed_buildinfo | yes | honest win in at least one cell |
+| `l0_result_cache` | none | yes | honest win in at least one cell |
+| `l1_incremental` | l0_result_cache | yes | honest win in at least one cell |
+| `l2_seed_buildinfo` | l1_incremental | yes | honest win in at least one cell |
+| `l3_dirty_scope` | l2_seed_buildinfo | yes | honest win in at least one cell |
+| `l0_result_cache` | none | yes | honest win in at least one cell |
+| `l1_incremental` | l0_result_cache | yes | honest win in at least one cell |
+| `l2_seed_buildinfo` | l1_incremental | yes | honest win in at least one cell |
+| `l3_dirty_scope` | l2_seed_buildinfo | yes | honest win in at least one cell |
 
 ## Generalization (held-out vs none)
 
 | metric | train gain vs none | held-out gain vs none | fraction that survived |
 | --- | --- | --- | --- |
-| wall_ms | 46.4% | 90.1% | 194.1% |
-| files_rechecked | 99.5% | 99.7% | 100.2% |
+| wall_ms | 46.6% | 89.9% | 192.8% |
+| files_rechecked | 99.5% | 99.8% | 100.3% |
 | store_bytes | n/a | n/a | n/a |
-| disk_bytes | -70.8% | -0.7% | 1.0% |
-| rss_kb | 37.8% | 62.1% | 164.3% |
+| disk_bytes | -26.9% | -0.3% | 1.1% |
+| rss_kb | 37.9% | 76.1% | 200.7% |
 
 ## Pareto frontier per cell
 
 ### Train
 
-**condensation-site/tsc|cold** — nanocompile on frontier: yes
+**condensation-standin/tsc|cold** — nanocompile honest win: yes
 
 | approach | lever | wall | files | store | disk | rss kb |
 | --- | --- | --- | --- | --- | --- | --- |
-| none | none | 391 | 126.0 | 0 | 315735 | 154440 |
-| incremental_local | incremental_local | 386 | 126.0 | 0 | 415851 | 155460 |
-| nanocompile | l0_result_cache | 4 | 0.0 | 26140 | 303349 | 3504 |
+| none | none | 395 | 126.0 | 0 | 316583 | 154636 |
+| incremental_local | incremental_local | 385 | 126.0 | 0 | 416699 | 156248 |
+| nanocompile | l0_result_cache | 4 | 0.0 | 37759 | 315816 | 3472 |
+| nanocompile | l2_seed_buildinfo | 4 | 0.0 | 67795 | 336204 | 3472 |
+| nanocompile | l3_dirty_scope | 4 | 0.0 | 67795 | 336138 | 3540 |
 - dominated by `nanocompile` (l0_result_cache)
+
+**condensation-standin/tsc|leaf** — nanocompile honest win: yes
+
+| approach | lever | wall | files | store | disk | rss kb |
+| --- | --- | --- | --- | --- | --- | --- |
+| none | none | 372 | 126.0 | 0 | 316674 | 154724 |
+| incremental_local | incremental_local | 368 | 126.0 | 0 | 416790 | 155240 |
+| nanocompile | l0_result_cache | 397 | 1.0 | 37798 | 325547 | 154704 |
+| nanocompile | l1_incremental | 385 | 1.0 | 37798 | 365475 | 155644 |
+| nanocompile | l3_dirty_scope | 370 | 1.0 | 97618 | 365961 | 154096 |
+- dominated by `nanocompile` (l3_dirty_scope)
+
+**condensation-standin/tsc|shared** — nanocompile honest win: yes
+
+| approach | lever | wall | files | store | disk | rss kb |
+| --- | --- | --- | --- | --- | --- | --- |
+| none | none | 416 | 126.0 | 0 | 316765 | 153984 |
+| incremental_local | incremental_local | 402 | 126.0 | 0 | 416881 | 152544 |
+| nanocompile | l0_result_cache | 394 | 1.0 | 37837 | 335278 | 153444 |
+| nanocompile | l1_incremental | 388 | 1.0 | 37837 | 395181 | 154280 |
+- dominated by `nanocompile` (l0_result_cache)
+- dominated by `nanocompile` (l1_incremental)
+- dominated by `nanocompile` (l3_dirty_scope)
 - dominated by `nanocompile` (l0_result_cache)
 - dominated by `nanocompile` (l1_incremental)
 
-**condensation-site/tsc|leaf** — nanocompile on frontier: yes
+**condensation-standin/tsc|tsconfig** — nanocompile honest win: NO
 
 | approach | lever | wall | files | store | disk | rss kb |
 | --- | --- | --- | --- | --- | --- | --- |
-| none | none | 377 | 126.0 | 0 | 315826 | 153036 |
-| incremental_local | incremental_local | 377 | 126.0 | 0 | 415942 | 152560 |
-| nanocompile | l0_result_cache | 383 | 1.0 | 52236 | 339137 | 154856 |
-| nanocompile | l1_incremental | 383 | 1.0 | 52236 | 379065 | 154676 |
-| nanocompile | l2_seed_buildinfo | 369 | 1.0 | 112095 | 528082 | 152812 |
-
-**condensation-site/tsc|shared** — nanocompile on frontier: yes
-
-| approach | lever | wall | files | store | disk | rss kb |
-| --- | --- | --- | --- | --- | --- | --- |
-| none | none | 377 | 126.0 | 0 | 315917 | 154412 |
-| incremental_local | incremental_local | 395 | 126.0 | 0 | 416033 | 151848 |
-| nanocompile | l0_result_cache | 383 | 1.0 | 78332 | 374925 | 150356 |
-| nanocompile | l1_incremental | 368 | 1.0 | 78332 | 434828 | 156788 |
+| none | none | 348 | 126.0 | 0 | 316765 | 151076 |
+| nanocompile | l0_result_cache | 386 | 1.0 | 37876 | 345009 | 153620 |
+| nanocompile | l2_seed_buildinfo | 386 | 1.0 | 157446 | 425855 | 153312 |
+| nanocompile | l3_dirty_scope | 368 | 1.0 | 157446 | 425789 | 155308 |
 - dominated by `nanocompile` (l0_result_cache)
 
-**condensation-site/tsc|tsconfig** — nanocompile on frontier: yes
+**condensation-standin/tsc|concurrent** — nanocompile honest win: yes
 
 | approach | lever | wall | files | store | disk | rss kb |
 | --- | --- | --- | --- | --- | --- | --- |
-| none | none | 340 | 126.0 | 0 | 315917 | 151556 |
-| incremental_local | incremental_local | 360 | 126.0 | 0 | 416033 | 149900 |
-| nanocompile | l0_result_cache | 378 | 1.0 | 104428 | 410713 | 155476 |
-| nanocompile | l2_seed_buildinfo | 380 | 1.0 | 224011 | 640362 | 153840 |
-- dominated by `nanocompile` (l0_result_cache)
-
-**condensation-site/tsc|concurrent** — nanocompile on frontier: yes
-
-| approach | lever | wall | files | store | disk | rss kb |
-| --- | --- | --- | --- | --- | --- | --- |
-| none | none | 832 | 126.0 | 0 | 315917 | 153400 |
-| nanocompile | l0_result_cache | 11 | 0.0 | 104472 | 410757 | 3632 |
-| nanocompile | l1_incremental | 11 | 0.0 | 104472 | 490635 | 3592 |
+| none | none | 812 | 126.0 | 0 | 316765 | 152640 |
+| nanocompile | l0_result_cache | 10 | 0.0 | 37920 | 345053 | 3472 |
+| nanocompile | l1_incremental | 9 | 0.0 | 37920 | 424931 | 3468 |
+| nanocompile | l3_dirty_scope | 9 | 0.0 | 157490 | 425833 | 3472 |
 - dominated by `nanocompile` (l0_result_cache)
 - dominated by `nanocompile` (l1_incremental)
+- dominated by `nanocompile` (l3_dirty_scope)
 
-**condensation-site/tsgo|cold** — nanocompile on frontier: yes
-
-| approach | lever | wall | files | store | disk | rss kb |
-| --- | --- | --- | --- | --- | --- | --- |
-| none | none | 72 | 126.0 | 0 | 264842 | 51284 |
-| incremental_local | incremental_local | 68 | 126.0 | 0 | 364963 | 50516 |
-| nanocompile | l0_result_cache | 4 | 0.0 | 26140 | 293188 | 3592 |
-| nanocompile | l1_incremental | 4 | 0.0 | 26140 | 313141 | 3584 |
-- dominated by `nanocompile` (l0_result_cache)
-- dominated by `nanocompile` (l1_incremental)
-
-**condensation-site/tsgo|leaf** — nanocompile on frontier: yes
+**condensation-standin/tsgo|cold** — nanocompile honest win: yes
 
 | approach | lever | wall | files | store | disk | rss kb |
 | --- | --- | --- | --- | --- | --- | --- |
-| none | none | 75 | 126.0 | 0 | 264923 | 51156 |
-| incremental_local | incremental_local | 74 | 126.0 | 0 | 365044 | 51028 |
-| nanocompile | l0_result_cache | 72 | 1.0 | 52236 | 318793 | 50388 |
-| nanocompile | l1_incremental | 71 | 1.0 | 52236 | 358721 | 50516 |
-- dominated by `nanocompile` (l0_result_cache)
-
-**condensation-site/tsgo|shared** — nanocompile on frontier: yes
-
-| approach | lever | wall | files | store | disk | rss kb |
-| --- | --- | --- | --- | --- | --- | --- |
-| none | none | 69 | 126.0 | 0 | 265004 | 50388 |
-| incremental_local | incremental_local | 71 | 126.0 | 0 | 365125 | 50256 |
-| nanocompile | l0_result_cache | 74 | 1.0 | 78332 | 344398 | 51088 |
-| nanocompile | l1_incremental | 71 | 1.0 | 78332 | 404301 | 49940 |
-- dominated by `nanocompile` (l1_incremental)
-
-**condensation-site/tsgo|tsconfig** — nanocompile on frontier: yes
-
-| approach | lever | wall | files | store | disk | rss kb |
-| --- | --- | --- | --- | --- | --- | --- |
-| none | none | 71 | 126.0 | 0 | 265004 | 47888 |
-| incremental_local | incremental_local | 70 | 126.0 | 0 | 365125 | 49104 |
-| nanocompile | l0_result_cache | 75 | 1.0 | 104428 | 370003 | 51540 |
-| nanocompile | l1_incremental | 76 | 1.0 | 104428 | 449881 | 50132 |
-| nanocompile | l2_seed_buildinfo | 72 | 1.0 | 183229 | 548637 | 50772 |
-
-**condensation-site/tsgo|concurrent** — nanocompile on frontier: yes
-
-| approach | lever | wall | files | store | disk | rss kb |
-| --- | --- | --- | --- | --- | --- | --- |
-| none | none | 124 | 126.0 | 0 | 265004 | 50388 |
-| incremental_local | incremental_local | 121 | 126.0 | 0 | 365125 | 51412 |
-| nanocompile | l0_result_cache | 9 | 0.0 | 104472 | 370047 | 3604 |
-| nanocompile | l1_incremental | 9 | 0.0 | 104472 | 449925 | 3592 |
-- dominated by `nanocompile` (l0_result_cache)
-- dominated by `nanocompile` (l1_incremental)
-
-**condensation-site/tsrs|cold** — nanocompile on frontier: yes
-
-| approach | lever | wall | files | store | disk | rss kb |
-| --- | --- | --- | --- | --- | --- | --- |
-| none | none | 44 | 126.0 | 0 | 267297 | 47140 |
-| incremental_local | incremental_local | 43 | 126.0 | 0 | 367418 | 47360 |
-| nanocompile | l0_result_cache | 4 | 0.0 | 26140 | 293679 | 3612 |
+| none | none | 72 | 126.0 | 0 | 265690 | 51216 |
+| incremental_local | incremental_local | 72 | 126.0 | 0 | 365811 | 51284 |
+| nanocompile | l0_result_cache | 4 | 0.0 | 37759 | 305655 | 3472 |
+| nanocompile | l3_dirty_scope | 4 | 0.0 | 57612 | 325977 | 3472 |
 - dominated by `nanocompile` (l0_result_cache)
 - dominated by `nanocompile` (l0_result_cache)
-- dominated by `nanocompile` (l1_incremental)
+- dominated by `nanocompile` (l3_dirty_scope)
 
-**condensation-site/tsrs|leaf** — nanocompile on frontier: yes
-
-| approach | lever | wall | files | store | disk | rss kb |
-| --- | --- | --- | --- | --- | --- | --- |
-| none | none | 42 | 126.0 | 0 | 267378 | 47096 |
-| nanocompile | l0_result_cache | 47 | 1.0 | 52236 | 319856 | 47092 |
-| nanocompile | l1_incremental | 46 | 1.0 | 52236 | 359703 | 47364 |
-- dominated by `nanocompile` (l0_result_cache)
-
-**condensation-site/tsrs|shared** — nanocompile on frontier: yes
+**condensation-standin/tsgo|leaf** — nanocompile honest win: NO
 
 | approach | lever | wall | files | store | disk | rss kb |
 | --- | --- | --- | --- | --- | --- | --- |
-| none | none | 45 | 126.0 | 0 | 267459 | 47136 |
-| incremental_local | incremental_local | 41 | 126.0 | 0 | 367580 | 47356 |
-| nanocompile | l0_result_cache | 46 | 1.0 | 78332 | 346033 | 47144 |
-| nanocompile | l1_incremental | 46 | 1.0 | 78332 | 405774 | 47352 |
-| nanocompile | l2_seed_buildinfo | 45 | 1.0 | 138947 | 506648 | 47356 |
-
-**condensation-site/tsrs|tsconfig** — nanocompile on frontier: yes
-
-| approach | lever | wall | files | store | disk | rss kb |
-| --- | --- | --- | --- | --- | --- | --- |
-| none | none | 41 | 126.0 | 0 | 267459 | 47148 |
-| incremental_local | incremental_local | 39 | 126.0 | 0 | 367580 | 47348 |
-| nanocompile | l0_result_cache | 45 | 1.0 | 104428 | 372129 | 47140 |
-- dominated by `nanocompile` (l0_result_cache)
-- dominated by `nanocompile` (l0_result_cache)
-- dominated by `nanocompile` (l1_incremental)
-
-**condensation-site/tsrs|concurrent** — nanocompile on frontier: yes
-
-| approach | lever | wall | files | store | disk | rss kb |
-| --- | --- | --- | --- | --- | --- | --- |
-| none | none | 60 | 126.0 | 0 | 267459 | 47120 |
-| nanocompile | l0_result_cache | 10 | 0.0 | 104472 | 372173 | 3612 |
-| nanocompile | l1_incremental | 9 | 0.0 | 104472 | 451889 | 3500 |
-- dominated by `nanocompile` (l1_incremental)
-
-**condensation-site/bun|cold** — nanocompile on frontier: yes
-
-| approach | lever | wall | files | store | disk | rss kb |
-| --- | --- | --- | --- | --- | --- | --- |
-| none | none | 32 | 126.0 | 0 | 267275 | 58540 |
-| nanocompile | l0_result_cache | 5 | 0.0 | 26182 | 293699 | 5056 |
-| nanocompile | l1_incremental | 6 | 0.0 | 26182 | 293677 | 5056 |
-- dominated by `nanocompile` (l0_result_cache)
-- dominated by `nanocompile` (l1_incremental)
-
-**condensation-site/bun|leaf** — nanocompile on frontier: yes
-
-| approach | lever | wall | files | store | disk | rss kb |
-| --- | --- | --- | --- | --- | --- | --- |
-| none | none | 32 | 126.0 | 0 | 267275 | 58724 |
-| nanocompile | l0_result_cache | 36 | 1.0 | 52320 | 319837 | 57912 |
-| nanocompile | l1_incremental | 37 | 1.0 | 52320 | 319815 | 57768 |
-- dominated by `nanocompile` (l0_result_cache)
-- dominated by `nanocompile` (l1_incremental)
-
-**condensation-site/bun|shared** — nanocompile on frontier: yes
-
-| approach | lever | wall | files | store | disk | rss kb |
-| --- | --- | --- | --- | --- | --- | --- |
-| none | none | 31 | 126.0 | 0 | 267275 | 57664 |
-| nanocompile | l0_result_cache | 35 | 1.0 | 78458 | 345975 | 57404 |
-| nanocompile | l1_incremental | 36 | 1.0 | 78458 | 345953 | 58272 |
-| nanocompile | l2_seed_buildinfo | 35 | 1.0 | 78458 | 346019 | 57308 |
-
-**condensation-site/bun|tsconfig** — nanocompile on frontier: yes
-
-| approach | lever | wall | files | store | disk | rss kb |
-| --- | --- | --- | --- | --- | --- | --- |
-| none | none | 31 | 126.0 | 0 | 267275 | 57456 |
-| nanocompile | l1_incremental | 34 | 1.0 | 104596 | 372091 | 57076 |
+| none | none | 74 | 126.0 | 0 | 265771 | 51540 |
+| incremental_local | incremental_local | 72 | 126.0 | 0 | 365892 | 50772 |
+| nanocompile | l0_result_cache | 77 | 1.0 | 37798 | 305203 | 50700 |
+| nanocompile | l1_incremental | 77 | 1.0 | 37798 | 345131 | 49236 |
 - dominated by `nanocompile` (l1_incremental)
 - dominated by `nanocompile` (l0_result_cache)
 - dominated by `nanocompile` (l1_incremental)
 
-**condensation-site/bun|concurrent** — nanocompile on frontier: yes
+**condensation-standin/tsgo|shared** — nanocompile honest win: NO
 
 | approach | lever | wall | files | store | disk | rss kb |
 | --- | --- | --- | --- | --- | --- | --- |
-| none | none | 57 | 126.0 | 0 | 267275 | 59448 |
-| nanocompile | l1_incremental | 11 | 0.0 | 104640 | 372135 | 5056 |
+| none | none | 70 | 126.0 | 0 | 265852 | 50444 |
+| nanocompile | l0_result_cache | 77 | 1.0 | 37837 | 304751 | 51540 |
+| nanocompile | l1_incremental | 75 | 1.0 | 37837 | 364654 | 51284 |
+| nanocompile | l2_seed_buildinfo | 74 | 1.0 | 96953 | 365384 | 50704 |
+- dominated by `nanocompile` (l1_incremental)
+
+**condensation-standin/tsgo|tsconfig** — nanocompile honest win: yes
+
+| approach | lever | wall | files | store | disk | rss kb |
+| --- | --- | --- | --- | --- | --- | --- |
+| none | none | 76 | 126.0 | 0 | 265852 | 49492 |
+| incremental_local | incremental_local | 70 | 126.0 | 0 | 365973 | 48724 |
+| nanocompile | l0_result_cache | 72 | 1.0 | 37876 | 304299 | 50704 |
+| nanocompile | l1_incremental | 74 | 1.0 | 37876 | 384177 | 50448 |
+- dominated by `nanocompile` (l0_result_cache)
 - dominated by `nanocompile` (l1_incremental)
 - dominated by `nanocompile` (l0_result_cache)
 - dominated by `nanocompile` (l1_incremental)
+
+**condensation-standin/tsgo|concurrent** — nanocompile honest win: yes
+
+| approach | lever | wall | files | store | disk | rss kb |
+| --- | --- | --- | --- | --- | --- | --- |
+| none | none | 129 | 126.0 | 0 | 265852 | 51088 |
+| incremental_local | incremental_local | 126 | 126.0 | 0 | 365973 | 51540 |
+| nanocompile | l0_result_cache | 10 | 0.0 | 37920 | 304343 | 3472 |
+| nanocompile | l1_incremental | 10 | 0.0 | 37920 | 384221 | 3472 |
+| nanocompile | l2_seed_buildinfo | 10 | 0.0 | 116708 | 385139 | 3472 |
+| nanocompile | l3_dirty_scope | 10 | 0.0 | 116708 | 385073 | 3472 |
+
+**condensation-standin/tsrs|cold** — nanocompile honest win: yes
+
+| approach | lever | wall | files | store | disk | rss kb |
+| --- | --- | --- | --- | --- | --- | --- |
+| none | none | 45 | 126.0 | 0 | 268145 | 47160 |
+| nanocompile | l0_result_cache | 4 | 0.0 | 37759 | 306146 | 3472 |
+| nanocompile | l1_incremental | 4 | 0.0 | 37759 | 326099 | 3600 |
+| nanocompile | l3_dirty_scope | 4 | 0.0 | 58103 | 326468 | 3472 |
+- dominated by `nanocompile` (l3_dirty_scope)
+
+**condensation-standin/tsrs|leaf** — nanocompile honest win: NO
+
+| approach | lever | wall | files | store | disk | rss kb |
+| --- | --- | --- | --- | --- | --- | --- |
+| none | none | 44 | 126.0 | 0 | 268226 | 47156 |
+| nanocompile | l0_result_cache | 51 | 1.0 | 37798 | 306266 | 47148 |
+| nanocompile | l1_incremental | 50 | 1.0 | 37798 | 346113 | 47376 |
+- dominated by `nanocompile` (l0_result_cache)
+- dominated by `nanocompile` (l1_incremental)
+- dominated by `nanocompile` (l3_dirty_scope)
+- dominated by `nanocompile` (l0_result_cache)
+
+**condensation-standin/tsrs|shared** — nanocompile honest win: yes
+
+| approach | lever | wall | files | store | disk | rss kb |
+| --- | --- | --- | --- | --- | --- | --- |
+| none | none | 51 | 126.0 | 0 | 268307 | 47156 |
+| incremental_local | incremental_local | 48 | 126.0 | 0 | 368428 | 47368 |
+| nanocompile | l0_result_cache | 54 | 1.0 | 37837 | 306386 | 47144 |
+| nanocompile | l1_incremental | 49 | 1.0 | 37837 | 366127 | 47368 |
+| nanocompile | l3_dirty_scope | 48 | 1.0 | 98426 | 366791 | 47368 |
+- dominated by `nanocompile` (l1_incremental)
+- dominated by `nanocompile` (l3_dirty_scope)
+
+**condensation-standin/tsrs|tsconfig** — nanocompile honest win: NO
+
+| approach | lever | wall | files | store | disk | rss kb |
+| --- | --- | --- | --- | --- | --- | --- |
+| none | none | 42 | 126.0 | 0 | 268307 | 47144 |
+| nanocompile | l0_result_cache | 54 | 1.0 | 37876 | 306425 | 47160 |
+| nanocompile | l1_incremental | 47 | 1.0 | 37876 | 386141 | 47372 |
+- dominated by `nanocompile` (l1_incremental)
+- dominated by `nanocompile` (l1_incremental)
+
+**condensation-standin/tsrs|concurrent** — nanocompile honest win: yes
+
+| approach | lever | wall | files | store | disk | rss kb |
+| --- | --- | --- | --- | --- | --- | --- |
+| none | none | 65 | 126.0 | 0 | 268307 | 47124 |
+| incremental_local | incremental_local | 64 | 126.0 | 0 | 368428 | 47404 |
+| nanocompile | l0_result_cache | 9 | 0.0 | 37920 | 306469 | 3472 |
+| nanocompile | l2_seed_buildinfo | 9 | 0.0 | 118672 | 387103 | 3540 |
+- dominated by `nanocompile` (l0_result_cache)
+- dominated by `nanocompile` (l0_result_cache)
+
+**condensation-standin/bun|cold** — nanocompile honest win: yes
+
+| approach | lever | wall | files | store | disk | rss kb |
+| --- | --- | --- | --- | --- | --- | --- |
+| none | none | 33 | 126.0 | 0 | 268123 | 58992 |
+| nanocompile | l3_dirty_scope | 5 | 0.0 | 37801 | 306144 | 5056 |
+- dominated by `nanocompile` (l3_dirty_scope)
+- dominated by `nanocompile` (l3_dirty_scope)
+- dominated by `nanocompile` (l0_result_cache)
+- dominated by `nanocompile` (l1_incremental)
+- dominated by `nanocompile` (l3_dirty_scope)
+
+**condensation-standin/bun|leaf** — nanocompile honest win: NO
+
+| approach | lever | wall | files | store | disk | rss kb |
+| --- | --- | --- | --- | --- | --- | --- |
+| none | none | 32 | 126.0 | 0 | 268123 | 57904 |
+| nanocompile | l0_result_cache | 40 | 1.0 | 37840 | 306205 | 56684 |
+| nanocompile | l1_incremental | 45 | 1.0 | 37840 | 306183 | 58856 |
+| nanocompile | l3_dirty_scope | 42 | 1.0 | 37853 | 306196 | 57200 |
+- dominated by `nanocompile` (l0_result_cache)
+
+**condensation-standin/bun|shared** — nanocompile honest win: NO
+
+| approach | lever | wall | files | store | disk | rss kb |
+| --- | --- | --- | --- | --- | --- | --- |
+| none | none | 31 | 126.0 | 0 | 268123 | 58412 |
+| nanocompile | l0_result_cache | 41 | 1.0 | 37879 | 306244 | 57016 |
+| nanocompile | l1_incremental | 44 | 1.0 | 37879 | 306222 | 57980 |
+| nanocompile | l2_seed_buildinfo | 40 | 1.0 | 37879 | 306288 | 59488 |
+| nanocompile | l3_dirty_scope | 41 | 1.0 | 37905 | 306248 | 56512 |
+
+**condensation-standin/bun|tsconfig** — nanocompile honest win: NO
+
+| approach | lever | wall | files | store | disk | rss kb |
+| --- | --- | --- | --- | --- | --- | --- |
+| none | none | 32 | 126.0 | 0 | 268123 | 58296 |
+| nanocompile | l0_result_cache | 42 | 1.0 | 37918 | 306283 | 57144 |
+| nanocompile | l1_incremental | 45 | 1.0 | 37918 | 306261 | 59316 |
+| nanocompile | l2_seed_buildinfo | 39 | 1.0 | 37918 | 306327 | 56448 |
+| nanocompile | l3_dirty_scope | 40 | 1.0 | 37957 | 306300 | 55284 |
+
+**condensation-standin/bun|concurrent** — nanocompile honest win: yes
+
+| approach | lever | wall | files | store | disk | rss kb |
+| --- | --- | --- | --- | --- | --- | --- |
+| none | none | 54 | 126.0 | 0 | 268123 | 57660 |
+| nanocompile | l0_result_cache | 12 | 0.0 | 37962 | 306327 | 5056 |
+| nanocompile | l1_incremental | 14 | 0.0 | 37962 | 306305 | 5056 |
+| nanocompile | l2_seed_buildinfo | 11 | 0.0 | 37962 | 306371 | 5056 |
+- dominated by `nanocompile` (l0_result_cache)
 
 ### Held-out
 
-**ajv/bun|cold** — nanocompile on frontier: yes
+**ajv/bun|cold** — nanocompile honest win: yes
 
 | approach | lever | wall | files | store | disk | rss kb |
 | --- | --- | --- | --- | --- | --- | --- |
-| none | none | 60 | 198.0 | 0 | 204554091 | 95320 |
-| nanocompile | l2_seed_buildinfo | 69 | 1.0 | 125 | 204554260 | 95328 |
+| none | none | 57 | 106.0 | 0 | 204554873 | 96008 |
+| nanocompile | l3_dirty_scope | 8 | 0.0 | 64636 | 204619553 | 5056 |
 
-**ajv/bun|leaf** — nanocompile on frontier: yes
-
-| approach | lever | wall | files | store | disk | rss kb |
-| --- | --- | --- | --- | --- | --- | --- |
-| none | none | 66 | 198.0 | 0 | 204554091 | 95244 |
-| nanocompile | l2_seed_buildinfo | 71 | 1.0 | 150 | 204554285 | 95952 |
-
-**ajv/bun|shared** — nanocompile on frontier: yes
+**ajv/bun|leaf** — nanocompile honest win: yes
 
 | approach | lever | wall | files | store | disk | rss kb |
 | --- | --- | --- | --- | --- | --- | --- |
-| none | none | 66 | 198.0 | 0 | 204554091 | 94484 |
-| nanocompile | l2_seed_buildinfo | 70 | 1.0 | 175 | 204554310 | 95516 |
+| none | none | 57 | 106.0 | 0 | 204554873 | 93344 |
+| nanocompile | l3_dirty_scope | 57 | 1.0 | 64688 | 204619605 | 82732 |
 
-**ajv/bun|tsconfig** — nanocompile on frontier: yes
-
-| approach | lever | wall | files | store | disk | rss kb |
-| --- | --- | --- | --- | --- | --- | --- |
-| none | none | 63 | 198.0 | 0 | 204554091 | 96284 |
-| nanocompile | l2_seed_buildinfo | 66 | 1.0 | 200 | 204554335 | 95004 |
-
-**ajv/bun|concurrent** — nanocompile on frontier: yes
+**ajv/bun|shared** — nanocompile honest win: NO
 
 | approach | lever | wall | files | store | disk | rss kb |
 | --- | --- | --- | --- | --- | --- | --- |
-| none | none | 161 | 198.0 | 0 | 204554091 | 96268 |
-| nanocompile | l2_seed_buildinfo | 246 | 1.0 | 300 | 204554435 | 96216 |
+| none | none | 59 | 106.0 | 0 | 204554873 | 95048 |
+| nanocompile | l3_dirty_scope | 69 | 1.0 | 64752 | 204619669 | 94944 |
 
-**prettier/bun|cold** — nanocompile on frontier: NO
-
-| approach | lever | wall | files | store | disk | rss kb |
-| --- | --- | --- | --- | --- | --- | --- |
-
-**prettier/bun|leaf** — nanocompile on frontier: NO
+**ajv/bun|tsconfig** — nanocompile honest win: yes
 
 | approach | lever | wall | files | store | disk | rss kb |
 | --- | --- | --- | --- | --- | --- | --- |
+| none | none | 62 | 106.0 | 0 | 204554873 | 95900 |
+| nanocompile | l3_dirty_scope | 47 | 1.0 | 64804 | 204619721 | 81560 |
 
-**prettier/bun|shared** — nanocompile on frontier: NO
-
-| approach | lever | wall | files | store | disk | rss kb |
-| --- | --- | --- | --- | --- | --- | --- |
-
-**prettier/bun|tsconfig** — nanocompile on frontier: NO
+**ajv/bun|concurrent** — nanocompile honest win: yes
 
 | approach | lever | wall | files | store | disk | rss kb |
 | --- | --- | --- | --- | --- | --- | --- |
+| none | none | 157 | 106.0 | 0 | 204554873 | 95812 |
+| nanocompile | l3_dirty_scope | 16 | 0.0 | 64848 | 204619765 | 5056 |
 
-**prettier/bun|concurrent** — nanocompile on frontier: NO
-
-| approach | lever | wall | files | store | disk | rss kb |
-| --- | --- | --- | --- | --- | --- | --- |
-
-**ajv/tsc|cold** — nanocompile on frontier: yes
+**prettier/bun|cold** — nanocompile honest win: yes
 
 | approach | lever | wall | files | store | disk | rss kb |
 | --- | --- | --- | --- | --- | --- | --- |
-| none | none | 1215 | 198.0 | 0 | 204553936 | 239212 |
-| nanocompile | l2_seed_buildinfo | 7 | 0.0 | 94931 | 204898596 | 4200 |
+| none | none | 3270 | 494.0 | 0 | 460950815 | 733052 |
+| nanocompile | l3_dirty_scope | 33 | 0.0 | 285799 | 461236658 | 5056 |
 
-**ajv/tsc|leaf** — nanocompile on frontier: yes
-
-| approach | lever | wall | files | store | disk | rss kb |
-| --- | --- | --- | --- | --- | --- | --- |
-| none | none | 1219 | 198.0 | 0 | 204553936 | 237864 |
-| incremental_local | incremental_local | 573 | 198.0 | 0 | 204803862 | 204376 |
-| nanocompile | l2_seed_buildinfo | 580 | 1.0 | 139473 | 204943138 | 203516 |
-
-**ajv/tsc|shared** — nanocompile on frontier: yes
+**prettier/bun|leaf** — nanocompile honest win: yes
 
 | approach | lever | wall | files | store | disk | rss kb |
 | --- | --- | --- | --- | --- | --- | --- |
-| none | none | 1226 | 198.0 | 0 | 204553936 | 237640 |
-| incremental_local | incremental_local | 703 | 198.0 | 0 | 204804226 | 214024 |
-| nanocompile | l2_seed_buildinfo | 729 | 1.0 | 234316 | 205038345 | 216712 |
+| none | none | 3176 | 494.0 | 0 | 460950815 | 740572 |
+| nanocompile | l3_dirty_scope | 305 | 1.0 | 285863 | 461236722 | 257828 |
 
-**ajv/tsc|tsconfig** — nanocompile on frontier: yes
-
-| approach | lever | wall | files | store | disk | rss kb |
-| --- | --- | --- | --- | --- | --- | --- |
-| none | none | 1228 | 198.0 | 0 | 204553936 | 239000 |
-| incremental_local | incremental_local | 593 | 198.0 | 0 | 204804226 | 207648 |
-| nanocompile | l2_seed_buildinfo | 637 | 1.0 | 329159 | 205133552 | 212996 |
-
-**ajv/tsc|concurrent** — nanocompile on frontier: yes
+**prettier/bun|shared** — nanocompile honest win: yes
 
 | approach | lever | wall | files | store | disk | rss kb |
 | --- | --- | --- | --- | --- | --- | --- |
-| none | none | 3087 | 198.0 | 0 | 204553936 | 238372 |
-| incremental_local | incremental_local | 1438 | 198.0 | 0 | 204804226 | 207616 |
-| nanocompile | l2_seed_buildinfo | 18 | 0.0 | 329255 | 205134376 | 4216 |
+| none | none | 3135 | 494.0 | 0 | 460950815 | 726432 |
+| nanocompile | l3_dirty_scope | 350 | 1.0 | 285927 | 461236786 | 231296 |
 
-**prettier/tsc|cold** — nanocompile on frontier: yes
-
-| approach | lever | wall | files | store | disk | rss kb |
-| --- | --- | --- | --- | --- | --- | --- |
-| none | none | 18578 | 556.0 | 0 | 460949873 | 1233608 |
-| incremental_local | incremental_local | 18560 | 556.0 | 0 | 463596089 | 1232136 |
-| nanocompile | l2_seed_buildinfo | 103 | 0.0 | 1889060 | 465484952 | 18168 |
-
-**prettier/tsc|leaf** — nanocompile on frontier: yes
+**prettier/bun|tsconfig** — nanocompile honest win: yes
 
 | approach | lever | wall | files | store | disk | rss kb |
 | --- | --- | --- | --- | --- | --- | --- |
-| none | none | 18245 | 556.0 | 0 | 460949873 | 1221752 |
-| incremental_local | incremental_local | 1536 | 556.0 | 0 | 463596168 | 415860 |
-| nanocompile | l2_seed_buildinfo | 1616 | 1.0 | 3777747 | 467373718 | 415128 |
+| none | none | 3236 | 494.0 | 0 | 460950815 | 728528 |
+| nanocompile | l3_dirty_scope | 147 | 1.0 | 285979 | 461236838 | 193184 |
 
-**prettier/tsc|shared** — nanocompile on frontier: yes
-
-| approach | lever | wall | files | store | disk | rss kb |
-| --- | --- | --- | --- | --- | --- | --- |
-| none | none | 18401 | 556.0 | 0 | 460949873 | 1219628 |
-| incremental_local | incremental_local | 2994 | 556.0 | 0 | 463598064 | 511228 |
-| nanocompile | l2_seed_buildinfo | 3004 | 1.0 | 5668330 | 469266276 | 511380 |
-
-**prettier/tsc|tsconfig** — nanocompile on frontier: yes
+**prettier/bun|concurrent** — nanocompile honest win: yes
 
 | approach | lever | wall | files | store | disk | rss kb |
 | --- | --- | --- | --- | --- | --- | --- |
-| none | none | 18620 | 556.0 | 0 | 460949873 | 1222548 |
-| incremental_local | incremental_local | 1501 | 556.0 | 0 | 463598064 | 409760 |
-| nanocompile | l2_seed_buildinfo | 2180 | 1.0 | 7558913 | 471158834 | 468780 |
+| none | none | 6796 | 494.0 | 0 | 460950815 | 728116 |
+| nanocompile | l3_dirty_scope | 43 | 0.0 | 286023 | 461236882 | 5056 |
 
-**prettier/tsc|concurrent** — nanocompile on frontier: yes
-
-| approach | lever | wall | files | store | disk | rss kb |
-| --- | --- | --- | --- | --- | --- | --- |
-| none | none | 26858 | 556.0 | 0 | 460949873 | 1251104 |
-| incremental_local | incremental_local | 4265 | 556.0 | 0 | 463598064 | 469500 |
-| nanocompile | l2_seed_buildinfo | 216 | 0.0 | 7559009 | 471162801 | 18280 |
-
-**ajv/tsgo|cold** — nanocompile on frontier: yes
+**ajv/tsc|cold** — nanocompile honest win: yes
 
 | approach | lever | wall | files | store | disk | rss kb |
 | --- | --- | --- | --- | --- | --- | --- |
-| none | none | 142 | 198.0 | 0 | 204554113 | 109324 |
-| incremental_local | incremental_local | 144 | 198.0 | 0 | 204945284 | 105868 |
-| nanocompile | l2_seed_buildinfo | 144 | 1.0 | 125 | 204945207 | 106060 |
+| none | none | 1210 | 106.0 | 0 | 204554718 | 239164 |
+| nanocompile | l3_dirty_scope | 7 | 0.0 | 113605 | 204668367 | 3728 |
 
-**ajv/tsgo|leaf** — nanocompile on frontier: yes
-
-| approach | lever | wall | files | store | disk | rss kb |
-| --- | --- | --- | --- | --- | --- | --- |
-| none | none | 153 | 198.0 | 0 | 204554113 | 110036 |
-| incremental_local | incremental_local | 117 | 198.0 | 0 | 204945284 | 84368 |
-| nanocompile | l2_seed_buildinfo | 101 | 1.0 | 150 | 204945232 | 85520 |
-
-**ajv/tsgo|shared** — nanocompile on frontier: yes
+**ajv/tsc|leaf** — nanocompile honest win: yes
 
 | approach | lever | wall | files | store | disk | rss kb |
 | --- | --- | --- | --- | --- | --- | --- |
-| none | none | 146 | 198.0 | 0 | 204554113 | 110032 |
-| incremental_local | incremental_local | 123 | 198.0 | 0 | 204945608 | 92304 |
-| nanocompile | l2_seed_buildinfo | 128 | 1.0 | 175 | 204945581 | 90960 |
+| none | none | 1217 | 106.0 | 0 | 204554718 | 240532 |
+| incremental_local | incremental_local | 592 | 106.0 | 0 | 204804735 | 206880 |
+| nanocompile | l3_dirty_scope | 622 | 1.0 | 163698 | 204718460 | 206716 |
 
-**ajv/tsgo|tsconfig** — nanocompile on frontier: yes
-
-| approach | lever | wall | files | store | disk | rss kb |
-| --- | --- | --- | --- | --- | --- | --- |
-| none | none | 148 | 198.0 | 0 | 204554113 | 108560 |
-| incremental_local | incremental_local | 105 | 198.0 | 0 | 204945608 | 86612 |
-| nanocompile | l2_seed_buildinfo | 105 | 1.0 | 200 | 204945606 | 85712 |
-
-**ajv/tsgo|concurrent** — nanocompile on frontier: yes
+**ajv/tsc|shared** — nanocompile honest win: yes
 
 | approach | lever | wall | files | store | disk | rss kb |
 | --- | --- | --- | --- | --- | --- | --- |
-| none | none | 381 | 198.0 | 0 | 204554113 | 111952 |
-| incremental_local | incremental_local | 256 | 198.0 | 0 | 204945608 | 88340 |
-| nanocompile | l2_seed_buildinfo | 417 | 1.0 | 300 | 204945706 | 87568 |
+| none | none | 1237 | 106.0 | 0 | 204554718 | 238704 |
+| incremental_local | incremental_local | 711 | 106.0 | 0 | 204805099 | 213788 |
+| nanocompile | l3_dirty_scope | 725 | 1.0 | 214155 | 204768917 | 215948 |
 
-**prettier/tsgo|cold** — nanocompile on frontier: NO
-
-| approach | lever | wall | files | store | disk | rss kb |
-| --- | --- | --- | --- | --- | --- | --- |
-
-**prettier/tsgo|leaf** — nanocompile on frontier: NO
+**ajv/tsc|tsconfig** — nanocompile honest win: yes
 
 | approach | lever | wall | files | store | disk | rss kb |
 | --- | --- | --- | --- | --- | --- | --- |
+| none | none | 1240 | 106.0 | 0 | 204554718 | 238692 |
+| incremental_local | incremental_local | 566 | 106.0 | 0 | 204805099 | 203844 |
+| nanocompile | l3_dirty_scope | 647 | 1.0 | 264612 | 204819374 | 210728 |
 
-**prettier/tsgo|shared** — nanocompile on frontier: NO
-
-| approach | lever | wall | files | store | disk | rss kb |
-| --- | --- | --- | --- | --- | --- | --- |
-
-**prettier/tsgo|tsconfig** — nanocompile on frontier: NO
+**ajv/tsc|concurrent** — nanocompile honest win: yes
 
 | approach | lever | wall | files | store | disk | rss kb |
 | --- | --- | --- | --- | --- | --- | --- |
+| none | none | 3047 | 106.0 | 0 | 204554718 | 238432 |
+| incremental_local | incremental_local | 1438 | 106.0 | 0 | 204805099 | 207256 |
+| nanocompile | l3_dirty_scope | 17 | 0.0 | 264656 | 204819418 | 3600 |
 
-**prettier/tsgo|concurrent** — nanocompile on frontier: NO
-
-| approach | lever | wall | files | store | disk | rss kb |
-| --- | --- | --- | --- | --- | --- | --- |
-
-**ajv/tsrs|cold** — nanocompile on frontier: yes
+**prettier/tsc|cold** — nanocompile honest win: yes
 
 | approach | lever | wall | files | store | disk | rss kb |
 | --- | --- | --- | --- | --- | --- | --- |
-| none | none | 57 | 198.0 | 0 | 204554113 | 55852 |
-| nanocompile | l2_seed_buildinfo | 63 | 1.0 | 125 | 204945567 | 56064 |
+| none | none | 18622 | 494.0 | 0 | 460950655 | 1222960 |
+| incremental_local | incremental_local | 18248 | 494.0 | 0 | 463596871 | 1245612 |
+| nanocompile | l3_dirty_scope | 34 | 0.0 | 711873 | 461662572 | 4496 |
 
-**ajv/tsrs|leaf** — nanocompile on frontier: yes
-
-| approach | lever | wall | files | store | disk | rss kb |
-| --- | --- | --- | --- | --- | --- | --- |
-| none | none | 57 | 198.0 | 0 | 204554113 | 54148 |
-| incremental_local | incremental_local | 47 | 198.0 | 0 | 204945644 | 48132 |
-| nanocompile | l2_seed_buildinfo | 53 | 1.0 | 150 | 204945592 | 48344 |
-
-**ajv/tsrs|shared** — nanocompile on frontier: yes
+**prettier/tsc|leaf** — nanocompile honest win: yes
 
 | approach | lever | wall | files | store | disk | rss kb |
 | --- | --- | --- | --- | --- | --- | --- |
-| none | none | 58 | 198.0 | 0 | 204554113 | 54012 |
-| nanocompile | l2_seed_buildinfo | 64 | 1.0 | 175 | 204945941 | 55608 |
+| none | none | 18373 | 494.0 | 0 | 460950655 | 1222996 |
+| incremental_local | incremental_local | 4112 | 494.0 | 0 | 463598293 | 542960 |
+| nanocompile | l3_dirty_scope | 4110 | 1.0 | 1242555 | 462193254 | 544384 |
 
-**ajv/tsrs|tsconfig** — nanocompile on frontier: yes
-
-| approach | lever | wall | files | store | disk | rss kb |
-| --- | --- | --- | --- | --- | --- | --- |
-| none | none | 57 | 198.0 | 0 | 204554113 | 53956 |
-| incremental_local | incremental_local | 46 | 198.0 | 0 | 204945968 | 48352 |
-| nanocompile | l2_seed_buildinfo | 54 | 1.0 | 200 | 204945966 | 47332 |
-
-**ajv/tsrs|concurrent** — nanocompile on frontier: yes
+**prettier/tsc|shared** — nanocompile honest win: yes
 
 | approach | lever | wall | files | store | disk | rss kb |
 | --- | --- | --- | --- | --- | --- | --- |
-| none | none | 126 | 198.0 | 0 | 204554113 | 53572 |
-| incremental_local | incremental_local | 100 | 198.0 | 0 | 204945968 | 54876 |
-| nanocompile | l2_seed_buildinfo | 202 | 1.0 | 300 | 204946066 | 59480 |
+| none | none | 18055 | 494.0 | 0 | 460950655 | 1219512 |
+| incremental_local | incremental_local | 2912 | 494.0 | 0 | 463600189 | 509972 |
+| nanocompile | l3_dirty_scope | 2981 | 1.0 | 1774659 | 462725358 | 509036 |
 
-**prettier/tsrs|cold** — nanocompile on frontier: NO
-
-| approach | lever | wall | files | store | disk | rss kb |
-| --- | --- | --- | --- | --- | --- | --- |
-
-**prettier/tsrs|leaf** — nanocompile on frontier: NO
+**prettier/tsc|tsconfig** — nanocompile honest win: yes
 
 | approach | lever | wall | files | store | disk | rss kb |
 | --- | --- | --- | --- | --- | --- | --- |
+| none | none | 18342 | 494.0 | 0 | 460950655 | 1218108 |
+| incremental_local | incremental_local | 1505 | 494.0 | 0 | 463600189 | 412296 |
+| nanocompile | l3_dirty_scope | 2205 | 1.0 | 2306763 | 463257462 | 468556 |
 
-**prettier/tsrs|shared** — nanocompile on frontier: NO
-
-| approach | lever | wall | files | store | disk | rss kb |
-| --- | --- | --- | --- | --- | --- | --- |
-
-**prettier/tsrs|tsconfig** — nanocompile on frontier: NO
+**prettier/tsc|concurrent** — nanocompile honest win: yes
 
 | approach | lever | wall | files | store | disk | rss kb |
 | --- | --- | --- | --- | --- | --- | --- |
+| none | none | 26602 | 494.0 | 0 | 460950655 | 1226132 |
+| incremental_local | incremental_local | 4486 | 494.0 | 0 | 463600189 | 466460 |
+| nanocompile | l3_dirty_scope | 45 | 0.0 | 2306807 | 463257506 | 4496 |
 
-**prettier/tsrs|concurrent** — nanocompile on frontier: NO
+**ajv/tsgo|cold** — nanocompile honest win: yes
 
 | approach | lever | wall | files | store | disk | rss kb |
 | --- | --- | --- | --- | --- | --- | --- |
+| none | none | 139 | 106.0 | 0 | 204554895 | 110420 |
+| incremental_local | incremental_local | 151 | 106.0 | 0 | 204946066 | 106640 |
+| nanocompile | l3_dirty_scope | 7 | 0.0 | 143046 | 204697985 | 3728 |
+
+**ajv/tsgo|leaf** — nanocompile honest win: yes
+
+| approach | lever | wall | files | store | disk | rss kb |
+| --- | --- | --- | --- | --- | --- | --- |
+| none | none | 147 | 106.0 | 0 | 204554895 | 108816 |
+| incremental_local | incremental_local | 124 | 106.0 | 0 | 204946147 | 87640 |
+| nanocompile | l3_dirty_scope | 134 | 1.0 | 221389 | 204776328 | 88212 |
+
+**ajv/tsgo|shared** — nanocompile honest win: yes
+
+| approach | lever | wall | files | store | disk | rss kb |
+| --- | --- | --- | --- | --- | --- | --- |
+| none | none | 151 | 106.0 | 0 | 204554895 | 109072 |
+| incremental_local | incremental_local | 132 | 106.0 | 0 | 204946471 | 91980 |
+| nanocompile | l3_dirty_scope | 125 | 1.0 | 300056 | 204854995 | 93072 |
+
+**ajv/tsgo|tsconfig** — nanocompile honest win: yes
+
+| approach | lever | wall | files | store | disk | rss kb |
+| --- | --- | --- | --- | --- | --- | --- |
+| none | none | 137 | 106.0 | 0 | 204554895 | 109328 |
+| incremental_local | incremental_local | 110 | 106.0 | 0 | 204946471 | 84628 |
+| nanocompile | l3_dirty_scope | 131 | 1.0 | 378723 | 204933662 | 87376 |
+
+**ajv/tsgo|concurrent** — nanocompile honest win: yes
+
+| approach | lever | wall | files | store | disk | rss kb |
+| --- | --- | --- | --- | --- | --- | --- |
+| none | none | 382 | 106.0 | 0 | 204554895 | 111124 |
+| incremental_local | incremental_local | 260 | 106.0 | 0 | 204946471 | 89232 |
+| nanocompile | l3_dirty_scope | 16 | 0.0 | 378767 | 204933706 | 3668 |
+
+**prettier/tsgo|cold** — nanocompile honest win: yes
+
+| approach | lever | wall | files | store | disk | rss kb |
+| --- | --- | --- | --- | --- | --- | --- |
+| none | none | 4710 | 494.0 | 0 | 460950837 | 1555180 |
+| nanocompile | l3_dirty_scope | 32 | 0.0 | 1123754 | 462074635 | 4880 |
+
+**prettier/tsgo|leaf** — nanocompile honest win: yes
+
+| approach | lever | wall | files | store | disk | rss kb |
+| --- | --- | --- | --- | --- | --- | --- |
+| none | none | 4516 | 494.0 | 0 | 460950837 | 1472392 |
+| incremental_local | incremental_local | 975 | 494.0 | 0 | 465166719 | 368208 |
+| nanocompile | l3_dirty_scope | 973 | 1.0 | 1967635 | 462918516 | 369152 |
+
+**prettier/tsgo|shared** — nanocompile honest win: yes
+
+| approach | lever | wall | files | store | disk | rss kb |
+| --- | --- | --- | --- | --- | --- | --- |
+| none | none | 4649 | 494.0 | 0 | 460950837 | 1480412 |
+| incremental_local | incremental_local | 1030 | 494.0 | 0 | 465167847 | 380812 |
+| nanocompile | l3_dirty_scope | 1063 | 1.0 | 2812362 | 463763243 | 408720 |
+
+**prettier/tsgo|tsconfig** — nanocompile honest win: yes
+
+| approach | lever | wall | files | store | disk | rss kb |
+| --- | --- | --- | --- | --- | --- | --- |
+| none | none | 4652 | 494.0 | 0 | 460950837 | 1467624 |
+| incremental_local | incremental_local | 299 | 494.0 | 0 | 465167847 | 257872 |
+| nanocompile | l3_dirty_scope | 545 | 1.0 | 3657089 | 464607970 | 321292 |
+
+**prettier/tsgo|concurrent** — nanocompile honest win: yes
+
+| approach | lever | wall | files | store | disk | rss kb |
+| --- | --- | --- | --- | --- | --- | --- |
+| none | none | 11996 | 494.0 | 0 | 460950837 | 1519464 |
+| incremental_local | incremental_local | 1043 | 494.0 | 0 | 465167847 | 313992 |
+| nanocompile | l3_dirty_scope | 43 | 0.0 | 3657133 | 464608014 | 4752 |
+
+**ajv/tsrs|cold** — nanocompile honest win: yes
+
+| approach | lever | wall | files | store | disk | rss kb |
+| --- | --- | --- | --- | --- | --- | --- |
+| none | none | 58 | 106.0 | 0 | 204554895 | 53884 |
+| incremental_local | incremental_local | 56 | 106.0 | 0 | 204946426 | 56036 |
+| nanocompile | l3_dirty_scope | 7 | 0.0 | 143118 | 204698057 | 3728 |
+
+**ajv/tsrs|leaf** — nanocompile honest win: NO
+
+| approach | lever | wall | files | store | disk | rss kb |
+| --- | --- | --- | --- | --- | --- | --- |
+| none | none | 60 | 106.0 | 0 | 204554895 | 53980 |
+| nanocompile | l3_dirty_scope | 63 | 1.0 | 221533 | 204776472 | 58152 |
+
+**ajv/tsrs|shared** — nanocompile honest win: yes
+
+| approach | lever | wall | files | store | disk | rss kb |
+| --- | --- | --- | --- | --- | --- | --- |
+| none | none | 63 | 106.0 | 0 | 204554895 | 53700 |
+| incremental_local | incremental_local | 56 | 106.0 | 0 | 204946831 | 58828 |
+| nanocompile | l3_dirty_scope | 64 | 1.0 | 300272 | 204855211 | 56456 |
+
+**ajv/tsrs|tsconfig** — nanocompile honest win: NO
+
+| approach | lever | wall | files | store | disk | rss kb |
+| --- | --- | --- | --- | --- | --- | --- |
+| none | none | 54 | 106.0 | 0 | 204554895 | 53672 |
+| incremental_local | incremental_local | 50 | 106.0 | 0 | 204946831 | 48460 |
+| nanocompile | l3_dirty_scope | 69 | 1.0 | 379011 | 204933950 | 57456 |
+
+**ajv/tsrs|concurrent** — nanocompile honest win: yes
+
+| approach | lever | wall | files | store | disk | rss kb |
+| --- | --- | --- | --- | --- | --- | --- |
+| none | none | 126 | 106.0 | 0 | 204554895 | 53932 |
+| incremental_local | incremental_local | 98 | 106.0 | 0 | 204946831 | 57764 |
+| nanocompile | l3_dirty_scope | 14 | 0.0 | 379055 | 204933994 | 3668 |
+
+**prettier/tsrs|cold** — nanocompile honest win: yes
+
+| approach | lever | wall | files | store | disk | rss kb |
+| --- | --- | --- | --- | --- | --- | --- |
+| none | none | 754 | 494.0 | 0 | 460950837 | 368528 |
+| incremental_local | incremental_local | 832 | 494.0 | 0 | 465168483 | 310984 |
+| nanocompile | l3_dirty_scope | 32 | 0.0 | 1124267 | 462075148 | 4880 |
+
+**prettier/tsrs|leaf** — nanocompile honest win: yes
+
+| approach | lever | wall | files | store | disk | rss kb |
+| --- | --- | --- | --- | --- | --- | --- |
+| none | none | 756 | 494.0 | 0 | 460950837 | 369748 |
+| incremental_local | incremental_local | 264 | 494.0 | 0 | 465169329 | 150048 |
+| nanocompile | l3_dirty_scope | 296 | 1.0 | 1968670 | 462919551 | 149156 |
+
+**prettier/tsrs|shared** — nanocompile honest win: yes
+
+| approach | lever | wall | files | store | disk | rss kb |
+| --- | --- | --- | --- | --- | --- | --- |
+| none | none | 619 | 494.0 | 0 | 460950837 | 326260 |
+| incremental_local | incremental_local | 329 | 494.0 | 0 | 465170457 | 169728 |
+| nanocompile | l3_dirty_scope | 361 | 1.0 | 2813919 | 463764800 | 168368 |
+
+**prettier/tsrs|tsconfig** — nanocompile honest win: yes
+
+| approach | lever | wall | files | store | disk | rss kb |
+| --- | --- | --- | --- | --- | --- | --- |
+| none | none | 759 | 494.0 | 0 | 460950837 | 378172 |
+| incremental_local | incremental_local | 119 | 494.0 | 0 | 465170457 | 115112 |
+| nanocompile | l3_dirty_scope | 191 | 1.0 | 3659168 | 464610049 | 134288 |
+
+**prettier/tsrs|concurrent** — nanocompile honest win: yes
+
+| approach | lever | wall | files | store | disk | rss kb |
+| --- | --- | --- | --- | --- | --- | --- |
+| none | none | 2299 | 494.0 | 0 | 460950837 | 373472 |
+| incremental_local | incremental_local | 333 | 494.0 | 0 | 465170457 | 135976 |
+| nanocompile | l3_dirty_scope | 42 | 0.0 | 3659212 | 464610093 | 4752 |
 
 
 ## Rows
 
 | sample | cell | approach | wall | files | store | disk | rss | correct | ok |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| condensation-site | tsc|cold | none | 391 | 126.0 |  | 315735 | 154440 | yes | yes |
-| condensation-site | tsc|leaf | none | 377 | 126.0 |  | 315826 | 153036 | yes | yes |
-| condensation-site | tsc|shared | none | 377 | 126.0 |  | 315917 | 154412 | yes | yes |
-| condensation-site | tsc|tsconfig | none | 340 | 126.0 |  | 315917 | 151556 | yes | yes |
-| condensation-site | tsc|concurrent | none | 832 | 126.0 |  | 315917 | 153400 | yes | yes |
-| condensation-site | tsc|cold | incremental_local | 386 | 126.0 |  | 415851 | 155460 | yes | yes |
-| condensation-site | tsc|leaf | incremental_local | 377 | 126.0 |  | 415942 | 152560 | yes | yes |
-| condensation-site | tsc|shared | incremental_local | 395 | 126.0 |  | 416033 | 151848 | yes | yes |
-| condensation-site | tsc|tsconfig | incremental_local | 360 | 126.0 |  | 416033 | 149900 | yes | yes |
-| condensation-site | tsc|concurrent | incremental_local | 846 | 126.0 |  | 416033 | 153824 | yes | yes |
-| condensation-site | tsc|cold | nanocompile | 4 | 0.0 | 26140 | 303349 | 3504 | yes | yes |
-| condensation-site | tsc|leaf | nanocompile | 383 | 1.0 | 52236 | 339137 | 154856 | yes | yes |
-| condensation-site | tsc|shared | nanocompile | 383 | 1.0 | 78332 | 374925 | 150356 | yes | yes |
-| condensation-site | tsc|tsconfig | nanocompile | 378 | 1.0 | 104428 | 410713 | 155476 | yes | yes |
-| condensation-site | tsc|concurrent | nanocompile | 11 | 0.0 | 104472 | 410757 | 3632 | yes | yes |
-| condensation-site | tsc|cold | nanocompile | 4 | 0.0 | 26140 | 323302 | 3600 | yes | yes |
-| condensation-site | tsc|leaf | nanocompile | 383 | 1.0 | 52236 | 379065 | 154676 | yes | yes |
-| condensation-site | tsc|shared | nanocompile | 368 | 1.0 | 78332 | 434828 | 156788 | yes | yes |
-| condensation-site | tsc|tsconfig | nanocompile | 394 | 1.0 | 104428 | 490591 | 156940 | yes | yes |
-| condensation-site | tsc|concurrent | nanocompile | 11 | 0.0 | 104472 | 490635 | 3592 | yes | yes |
-| condensation-site | tsc|cold | nanocompile | 5 | 0.0 | 56228 | 472124 | 3944 | yes | yes |
-| condensation-site | tsc|leaf | nanocompile | 369 | 1.0 | 112095 | 528082 | 152812 | yes | yes |
-| condensation-site | tsc|shared | nanocompile | 387 | 1.0 | 168053 | 584222 | 154280 | yes | yes |
-| condensation-site | tsc|tsconfig | nanocompile | 380 | 1.0 | 224011 | 640362 | 153840 | yes | yes |
-| condensation-site | tsc|concurrent | nanocompile | 12 | 0.0 | 224107 | 640731 | 3960 | yes | yes |
-| condensation-site | tsgo|cold | none | 72 | 126.0 |  | 264842 | 51284 | yes | yes |
-| condensation-site | tsgo|leaf | none | 75 | 126.0 |  | 264923 | 51156 | yes | yes |
-| condensation-site | tsgo|shared | none | 69 | 126.0 |  | 265004 | 50388 | yes | yes |
-| condensation-site | tsgo|tsconfig | none | 71 | 126.0 |  | 265004 | 47888 | yes | yes |
-| condensation-site | tsgo|concurrent | none | 124 | 126.0 |  | 265004 | 50388 | yes | yes |
-| condensation-site | tsgo|cold | incremental_local | 68 | 126.0 |  | 364963 | 50516 | yes | yes |
-| condensation-site | tsgo|leaf | incremental_local | 74 | 126.0 |  | 365044 | 51028 | yes | yes |
-| condensation-site | tsgo|shared | incremental_local | 71 | 126.0 |  | 365125 | 50256 | yes | yes |
-| condensation-site | tsgo|tsconfig | incremental_local | 70 | 126.0 |  | 365125 | 49104 | yes | yes |
-| condensation-site | tsgo|concurrent | incremental_local | 121 | 126.0 |  | 365125 | 51412 | yes | yes |
-| condensation-site | tsgo|cold | nanocompile | 4 | 0.0 | 26140 | 293188 | 3592 | yes | yes |
-| condensation-site | tsgo|leaf | nanocompile | 72 | 1.0 | 52236 | 318793 | 50388 | yes | yes |
-| condensation-site | tsgo|shared | nanocompile | 74 | 1.0 | 78332 | 344398 | 51088 | yes | yes |
-| condensation-site | tsgo|tsconfig | nanocompile | 75 | 1.0 | 104428 | 370003 | 51540 | yes | yes |
-| condensation-site | tsgo|concurrent | nanocompile | 9 | 0.0 | 104472 | 370047 | 3604 | yes | yes |
-| condensation-site | tsgo|cold | nanocompile | 4 | 0.0 | 26140 | 313141 | 3584 | yes | yes |
-| condensation-site | tsgo|leaf | nanocompile | 71 | 1.0 | 52236 | 358721 | 50516 | yes | yes |
-| condensation-site | tsgo|shared | nanocompile | 71 | 1.0 | 78332 | 404301 | 49940 | yes | yes |
-| condensation-site | tsgo|tsconfig | nanocompile | 76 | 1.0 | 104428 | 449881 | 50132 | yes | yes |
-| condensation-site | tsgo|concurrent | nanocompile | 9 | 0.0 | 104472 | 449925 | 3592 | yes | yes |
-| condensation-site | tsgo|cold | nanocompile | 5 | 0.0 | 46045 | 411048 | 3808 | yes | yes |
-| condensation-site | tsgo|leaf | nanocompile | 74 | 1.0 | 91719 | 456803 | 50388 | yes | yes |
-| condensation-site | tsgo|shared | nanocompile | 76 | 1.0 | 137474 | 502720 | 50388 | yes | yes |
-| condensation-site | tsgo|tsconfig | nanocompile | 72 | 1.0 | 183229 | 548637 | 50772 | yes | yes |
-| condensation-site | tsgo|concurrent | nanocompile | 11 | 0.0 | 183325 | 548976 | 3816 | yes | yes |
-| condensation-site | tsrs|cold | none | 44 | 126.0 |  | 267297 | 47140 | yes | yes |
-| condensation-site | tsrs|leaf | none | 42 | 126.0 |  | 267378 | 47096 | yes | yes |
-| condensation-site | tsrs|shared | none | 45 | 126.0 |  | 267459 | 47136 | yes | yes |
-| condensation-site | tsrs|tsconfig | none | 41 | 126.0 |  | 267459 | 47148 | yes | yes |
-| condensation-site | tsrs|concurrent | none | 60 | 126.0 |  | 267459 | 47120 | yes | yes |
-| condensation-site | tsrs|cold | incremental_local | 43 | 126.0 |  | 367418 | 47360 | yes | yes |
-| condensation-site | tsrs|leaf | incremental_local | 47 | 126.0 |  | 367499 | 47360 | yes | yes |
-| condensation-site | tsrs|shared | incremental_local | 41 | 126.0 |  | 367580 | 47356 | yes | yes |
-| condensation-site | tsrs|tsconfig | incremental_local | 39 | 126.0 |  | 367580 | 47348 | yes | yes |
-| condensation-site | tsrs|concurrent | incremental_local | 61 | 126.0 |  | 367580 | 47364 | yes | yes |
-| condensation-site | tsrs|cold | nanocompile | 4 | 0.0 | 26140 | 293679 | 3612 | yes | yes |
-| condensation-site | tsrs|leaf | nanocompile | 47 | 1.0 | 52236 | 319856 | 47092 | yes | yes |
-| condensation-site | tsrs|shared | nanocompile | 46 | 1.0 | 78332 | 346033 | 47144 | yes | yes |
-| condensation-site | tsrs|tsconfig | nanocompile | 45 | 1.0 | 104428 | 372129 | 47140 | yes | yes |
-| condensation-site | tsrs|concurrent | nanocompile | 10 | 0.0 | 104472 | 372173 | 3612 | yes | yes |
-| condensation-site | tsrs|cold | nanocompile | 4 | 0.0 | 26140 | 313632 | 3632 | yes | yes |
-| condensation-site | tsrs|leaf | nanocompile | 46 | 1.0 | 52236 | 359703 | 47364 | yes | yes |
-| condensation-site | tsrs|shared | nanocompile | 46 | 1.0 | 78332 | 405774 | 47352 | yes | yes |
-| condensation-site | tsrs|tsconfig | nanocompile | 45 | 1.0 | 104428 | 451845 | 47360 | yes | yes |
-| condensation-site | tsrs|concurrent | nanocompile | 9 | 0.0 | 104472 | 451889 | 3500 | yes | yes |
-| condensation-site | tsrs|cold | nanocompile | 5 | 0.0 | 46536 | 413994 | 3832 | yes | yes |
-| condensation-site | tsrs|leaf | nanocompile | 52 | 1.0 | 92701 | 460240 | 47340 | yes | yes |
-| condensation-site | tsrs|shared | nanocompile | 45 | 1.0 | 138947 | 506648 | 47356 | yes | yes |
-| condensation-site | tsrs|tsconfig | nanocompile | 49 | 1.0 | 185193 | 553056 | 47364 | yes | yes |
-| condensation-site | tsrs|concurrent | nanocompile | 9 | 0.0 | 185289 | 553395 | 3588 | yes | yes |
-| condensation-site | bun|cold | none | 32 | 126.0 |  | 267275 | 58540 | yes | yes |
-| condensation-site | bun|leaf | none | 32 | 126.0 |  | 267275 | 58724 | yes | yes |
-| condensation-site | bun|shared | none | 31 | 126.0 |  | 267275 | 57664 | yes | yes |
-| condensation-site | bun|tsconfig | none | 31 | 126.0 |  | 267275 | 57456 | yes | yes |
-| condensation-site | bun|concurrent | none | 57 | 126.0 |  | 267275 | 59448 | yes | yes |
-| condensation-site | bun|cold | nanocompile | 5 | 0.0 | 26182 | 293699 | 5056 | yes | yes |
-| condensation-site | bun|leaf | nanocompile | 36 | 1.0 | 52320 | 319837 | 57912 | yes | yes |
-| condensation-site | bun|shared | nanocompile | 35 | 1.0 | 78458 | 345975 | 57404 | yes | yes |
-| condensation-site | bun|tsconfig | nanocompile | 36 | 1.0 | 104596 | 372113 | 57824 | yes | yes |
-| condensation-site | bun|concurrent | nanocompile | 11 | 0.0 | 104640 | 372157 | 5056 | yes | yes |
-| condensation-site | bun|cold | nanocompile | 6 | 0.0 | 26182 | 293677 | 5056 | yes | yes |
-| condensation-site | bun|leaf | nanocompile | 37 | 1.0 | 52320 | 319815 | 57768 | yes | yes |
-| condensation-site | bun|shared | nanocompile | 36 | 1.0 | 78458 | 345953 | 58272 | yes | yes |
-| condensation-site | bun|tsconfig | nanocompile | 34 | 1.0 | 104596 | 372091 | 57076 | yes | yes |
-| condensation-site | bun|concurrent | nanocompile | 11 | 0.0 | 104640 | 372135 | 5056 | yes | yes |
-| condensation-site | bun|cold | nanocompile | 7 | 0.0 | 26182 | 293743 | 5056 | yes | yes |
-| condensation-site | bun|leaf | nanocompile | 39 | 1.0 | 52320 | 319881 | 58480 | yes | yes |
-| condensation-site | bun|shared | nanocompile | 35 | 1.0 | 78458 | 346019 | 57308 | yes | yes |
-| condensation-site | bun|tsconfig | nanocompile | 37 | 1.0 | 104596 | 372157 | 58024 | yes | yes |
-| condensation-site | bun|concurrent | nanocompile | 15 | 0.0 | 104640 | 372201 | 5056 | yes | yes |
-| ajv | tsc|cold | none | 1215 | 198.0 |  | 204553936 | 239212 | yes | yes |
-| ajv | tsc|leaf | none | 1219 | 198.0 |  | 204553936 | 237864 | yes | yes |
-| ajv | tsc|shared | none | 1226 | 198.0 |  | 204553936 | 237640 | yes | yes |
-| ajv | tsc|tsconfig | none | 1228 | 198.0 |  | 204553936 | 239000 | yes | yes |
-| ajv | tsc|concurrent | none | 3087 | 198.0 |  | 204553936 | 238372 | yes | yes |
-| ajv | tsc|cold | incremental_local | 1240 | 198.0 |  | 204803862 | 240824 | yes | yes |
-| ajv | tsc|leaf | incremental_local | 573 | 198.0 |  | 204803862 | 204376 | yes | yes |
-| ajv | tsc|shared | incremental_local | 703 | 198.0 |  | 204804226 | 214024 | yes | yes |
-| ajv | tsc|tsconfig | incremental_local | 593 | 198.0 |  | 204804226 | 207648 | yes | yes |
-| ajv | tsc|concurrent | incremental_local | 1438 | 198.0 |  | 204804226 | 207616 | yes | yes |
-| ajv | tsc|cold | nanocompile | 7 | 0.0 | 94931 | 204898596 | 4200 | yes | yes |
-| ajv | tsc|leaf | nanocompile | 580 | 1.0 | 139473 | 204943138 | 203516 | yes | yes |
-| ajv | tsc|shared | nanocompile | 729 | 1.0 | 234316 | 205038345 | 216712 | yes | yes |
-| ajv | tsc|tsconfig | nanocompile | 637 | 1.0 | 329159 | 205133552 | 212996 | yes | yes |
-| ajv | tsc|concurrent | nanocompile | 18 | 0.0 | 329255 | 205134376 | 4216 | yes | yes |
-| prettier | tsc|cold | none | 18578 | 556.0 |  | 460949873 | 1233608 | yes | yes |
-| prettier | tsc|leaf | none | 18245 | 556.0 |  | 460949873 | 1221752 | yes | yes |
-| prettier | tsc|shared | none | 18401 | 556.0 |  | 460949873 | 1219628 | yes | yes |
-| prettier | tsc|tsconfig | none | 18620 | 556.0 |  | 460949873 | 1222548 | yes | yes |
-| prettier | tsc|concurrent | none | 26858 | 556.0 |  | 460949873 | 1251104 | yes | yes |
-| prettier | tsc|cold | incremental_local | 18560 | 556.0 |  | 463596089 | 1232136 | yes | yes |
-| prettier | tsc|leaf | incremental_local | 1536 | 556.0 |  | 463596168 | 415860 | yes | yes |
-| prettier | tsc|shared | incremental_local | 2994 | 556.0 |  | 463598064 | 511228 | yes | yes |
-| prettier | tsc|tsconfig | incremental_local | 1501 | 556.0 |  | 463598064 | 409760 | yes | yes |
-| prettier | tsc|concurrent | incremental_local | 4265 | 556.0 |  | 463598064 | 469500 | yes | yes |
-| prettier | tsc|cold | nanocompile | 103 | 0.0 | 1889060 | 465484952 | 18168 | yes | yes |
-| prettier | tsc|leaf | nanocompile | 1616 | 1.0 | 3777747 | 467373718 | 415128 | yes | yes |
-| prettier | tsc|shared | nanocompile | 3004 | 1.0 | 5668330 | 469266276 | 511380 | yes | yes |
-| prettier | tsc|tsconfig | nanocompile | 2180 | 1.0 | 7558913 | 471158834 | 468780 | yes | yes |
-| prettier | tsc|concurrent | nanocompile | 216 | 0.0 | 7559009 | 471162801 | 18280 | yes | yes |
-| ajv | tsgo|cold | none | 142 | 198.0 |  | 204554113 | 109324 | yes | yes |
-| ajv | tsgo|leaf | none | 153 | 198.0 |  | 204554113 | 110036 | yes | yes |
-| ajv | tsgo|shared | none | 146 | 198.0 |  | 204554113 | 110032 | yes | yes |
-| ajv | tsgo|tsconfig | none | 148 | 198.0 |  | 204554113 | 108560 | yes | yes |
-| ajv | tsgo|concurrent | none | 381 | 198.0 |  | 204554113 | 111952 | yes | yes |
-| ajv | tsgo|cold | incremental_local | 144 | 198.0 |  | 204945284 | 105868 | yes | yes |
-| ajv | tsgo|leaf | incremental_local | 117 | 198.0 |  | 204945284 | 84368 | yes | yes |
-| ajv | tsgo|shared | incremental_local | 123 | 198.0 |  | 204945608 | 92304 | yes | yes |
-| ajv | tsgo|tsconfig | incremental_local | 105 | 198.0 |  | 204945608 | 86612 | yes | yes |
-| ajv | tsgo|concurrent | incremental_local | 256 | 198.0 |  | 204945608 | 88340 | yes | yes |
-| ajv | tsgo|cold | nanocompile | 144 | 1.0 | 125 | 204945207 | 106060 | yes | yes |
-| ajv | tsgo|leaf | nanocompile | 101 | 1.0 | 150 | 204945232 | 85520 | yes | yes |
-| ajv | tsgo|shared | nanocompile | 128 | 1.0 | 175 | 204945581 | 90960 | yes | yes |
-| ajv | tsgo|tsconfig | nanocompile | 105 | 1.0 | 200 | 204945606 | 85712 | yes | yes |
-| ajv | tsgo|concurrent | nanocompile | 417 | 1.0 | 300 | 204945706 | 87568 | yes | yes |
-| ajv | tsrs|cold | none | 57 | 198.0 |  | 204554113 | 55852 | yes | yes |
-| ajv | tsrs|leaf | none | 57 | 198.0 |  | 204554113 | 54148 | yes | yes |
-| ajv | tsrs|shared | none | 58 | 198.0 |  | 204554113 | 54012 | yes | yes |
-| ajv | tsrs|tsconfig | none | 57 | 198.0 |  | 204554113 | 53956 | yes | yes |
-| ajv | tsrs|concurrent | none | 126 | 198.0 |  | 204554113 | 53572 | yes | yes |
-| ajv | tsrs|cold | incremental_local | 58 | 198.0 |  | 204945644 | 55896 | yes | yes |
-| ajv | tsrs|leaf | incremental_local | 47 | 198.0 |  | 204945644 | 48132 | yes | yes |
-| ajv | tsrs|shared | incremental_local | 58 | 198.0 |  | 204945968 | 56352 | yes | yes |
-| ajv | tsrs|tsconfig | incremental_local | 46 | 198.0 |  | 204945968 | 48352 | yes | yes |
-| ajv | tsrs|concurrent | incremental_local | 100 | 198.0 |  | 204945968 | 54876 | yes | yes |
-| ajv | tsrs|cold | nanocompile | 63 | 1.0 | 125 | 204945567 | 56064 | yes | yes |
-| ajv | tsrs|leaf | nanocompile | 53 | 1.0 | 150 | 204945592 | 48344 | yes | yes |
-| ajv | tsrs|shared | nanocompile | 64 | 1.0 | 175 | 204945941 | 55608 | yes | yes |
-| ajv | tsrs|tsconfig | nanocompile | 54 | 1.0 | 200 | 204945966 | 47332 | yes | yes |
-| ajv | tsrs|concurrent | nanocompile | 202 | 1.0 | 300 | 204946066 | 59480 | yes | yes |
-| ajv | bun|cold | none | 60 | 198.0 |  | 204554091 | 95320 | yes | yes |
-| ajv | bun|leaf | none | 66 | 198.0 |  | 204554091 | 95244 | yes | yes |
-| ajv | bun|shared | none | 66 | 198.0 |  | 204554091 | 94484 | yes | yes |
-| ajv | bun|tsconfig | none | 63 | 198.0 |  | 204554091 | 96284 | yes | yes |
-| ajv | bun|concurrent | none | 161 | 198.0 |  | 204554091 | 96268 | yes | yes |
-| ajv | bun|cold | nanocompile | 69 | 1.0 | 125 | 204554260 | 95328 | yes | yes |
-| ajv | bun|leaf | nanocompile | 71 | 1.0 | 150 | 204554285 | 95952 | yes | yes |
-| ajv | bun|shared | nanocompile | 70 | 1.0 | 175 | 204554310 | 95516 | yes | yes |
-| ajv | bun|tsconfig | nanocompile | 66 | 1.0 | 200 | 204554335 | 95004 | yes | yes |
-| ajv | bun|concurrent | nanocompile | 246 | 1.0 | 300 | 204554435 | 96216 | yes | yes |
-| prettier | tsgo|cold | none | 297 | 556.0 |  | 460950050 | 222672 | no | no |
-| prettier | tsgo|leaf | none | 572 | 556.0 |  | 460950050 | 228296 | no | no |
-| prettier | tsgo|shared | none | 538 | 556.0 |  | 460950050 | 229312 | no | no |
-| prettier | tsgo|tsconfig | none | 482 | 556.0 |  | 460950050 | 229264 | no | no |
-| prettier | tsgo|concurrent | none | 870 | 556.0 |  | 460950050 | 230288 | no | no |
-| prettier | tsgo|cold | incremental_local | 668 | 556.0 |  | 464521731 | 280584 | no | no |
-| prettier | tsgo|leaf | incremental_local | 419 | 556.0 |  | 464521830 | 271376 | no | no |
-| prettier | tsgo|shared | incremental_local | 348 | 556.0 |  | 464521929 | 277832 | no | no |
-| prettier | tsgo|tsconfig | incremental_local | 325 | 556.0 |  | 464521929 | 252104 | no | no |
-| prettier | tsgo|concurrent | incremental_local | 910 | 556.0 |  | 464521767 | 272008 | no | no |
-| prettier | tsgo|cold | nanocompile | 412 | 1.0 | 125 | 464521654 | 279632 | no | no |
-| prettier | tsgo|leaf | nanocompile | 402 | 1.0 | 150 | 464521778 | 274304 | no | no |
-| prettier | tsgo|shared | nanocompile | 420 | 1.0 | 175 | 464521902 | 279184 | no | no |
-| prettier | tsgo|tsconfig | nanocompile | 352 | 1.0 | 200 | 464521927 | 250700 | no | no |
-| prettier | tsgo|concurrent | nanocompile | 1380 | 1.0 | 300 | 464521865 | 274896 | no | no |
-| prettier | tsrs|cold | none | 88 | 556.0 |  | 460950050 | 93052 | no | no |
-| prettier | tsrs|leaf | none | 94 | 556.0 |  | 460950050 | 92560 | no | no |
-| prettier | tsrs|shared | none | 87 | 556.0 |  | 460950050 | 90952 | no | no |
-| prettier | tsrs|tsconfig | none | 95 | 556.0 |  | 460950050 | 90288 | no | no |
-| prettier | tsrs|concurrent | none | 212 | 556.0 |  | 460950050 | 91948 | no | no |
-| prettier | tsrs|cold | incremental_local | 110 | 556.0 |  | 464524486 | 109808 | no | no |
-| prettier | tsrs|leaf | incremental_local | 112 | 556.0 |  | 464524585 | 114880 | no | no |
-| prettier | tsrs|shared | incremental_local | 122 | 556.0 |  | 464524684 | 116444 | no | no |
-| prettier | tsrs|tsconfig | incremental_local | 111 | 556.0 |  | 464524684 | 115716 | no | no |
-| prettier | tsrs|concurrent | incremental_local | 256 | 556.0 |  | 464524522 | 119452 | no | no |
-| prettier | tsrs|cold | nanocompile | 160 | 1.0 | 125 | 464524409 | 109104 | no | no |
-| prettier | tsrs|leaf | nanocompile | 152 | 1.0 | 150 | 464524533 | 117432 | no | no |
-| prettier | tsrs|shared | nanocompile | 155 | 1.0 | 175 | 464524657 | 118120 | no | no |
-| prettier | tsrs|tsconfig | nanocompile | 148 | 1.0 | 200 | 464524682 | 115944 | no | no |
-| prettier | tsrs|concurrent | nanocompile | 457 | 1.0 | 300 | 464524620 | 119888 | no | no |
-| prettier | bun|cold | none | 123 | 556.0 |  | 460950028 | 189552 | no | no |
-| prettier | bun|leaf | none | 134 | 556.0 |  | 460950028 | 192928 | no | no |
-| prettier | bun|shared | none | 126 | 556.0 |  | 460950028 | 182560 | no | no |
-| prettier | bun|tsconfig | none | 133 | 556.0 |  | 460950028 | 192808 | no | no |
-| prettier | bun|concurrent | none | 309 | 556.0 |  | 460950028 | 191508 | no | no |
-| prettier | bun|cold | nanocompile | 190 | 1.0 | 125 | 460950197 | 193316 | no | no |
-| prettier | bun|leaf | nanocompile | 175 | 1.0 | 150 | 460950222 | 187936 | no | no |
-| prettier | bun|shared | nanocompile | 179 | 1.0 | 175 | 460950247 | 193188 | no | no |
-| prettier | bun|tsconfig | nanocompile | 172 | 1.0 | 200 | 460950272 | 188568 | no | no |
-| prettier | bun|concurrent | nanocompile | 560 | 1.0 | 300 | 460950372 | 192340 | no | no |
+| condensation-standin | tsc|cold | none | 395 | 126.0 |  | 316583 | 154636 | yes | yes |
+| condensation-standin | tsc|leaf | none | 372 | 126.0 |  | 316674 | 154724 | yes | yes |
+| condensation-standin | tsc|shared | none | 416 | 126.0 |  | 316765 | 153984 | yes | yes |
+| condensation-standin | tsc|tsconfig | none | 348 | 126.0 |  | 316765 | 151076 | yes | yes |
+| condensation-standin | tsc|concurrent | none | 812 | 126.0 |  | 316765 | 152640 | yes | yes |
+| condensation-standin | tsc|cold | incremental_local | 385 | 126.0 |  | 416699 | 156248 | yes | yes |
+| condensation-standin | tsc|leaf | incremental_local | 368 | 126.0 |  | 416790 | 155240 | yes | yes |
+| condensation-standin | tsc|shared | incremental_local | 402 | 126.0 |  | 416881 | 152544 | yes | yes |
+| condensation-standin | tsc|tsconfig | incremental_local | 380 | 126.0 |  | 416881 | 152796 | yes | yes |
+| condensation-standin | tsc|concurrent | incremental_local | 838 | 126.0 |  | 416881 | 153476 | yes | yes |
+| condensation-standin | tsc|cold | nanocompile | 4 | 0.0 | 37759 | 315816 | 3472 | yes | yes |
+| condensation-standin | tsc|leaf | nanocompile | 397 | 1.0 | 37798 | 325547 | 154704 | yes | yes |
+| condensation-standin | tsc|shared | nanocompile | 394 | 1.0 | 37837 | 335278 | 153444 | yes | yes |
+| condensation-standin | tsc|tsconfig | nanocompile | 386 | 1.0 | 37876 | 345009 | 153620 | yes | yes |
+| condensation-standin | tsc|concurrent | nanocompile | 10 | 0.0 | 37920 | 345053 | 3472 | yes | yes |
+| condensation-standin | tsc|cold | nanocompile | 5 | 0.0 | 37759 | 335769 | 3540 | yes | yes |
+| condensation-standin | tsc|leaf | nanocompile | 385 | 1.0 | 37798 | 365475 | 155644 | yes | yes |
+| condensation-standin | tsc|shared | nanocompile | 388 | 1.0 | 37837 | 395181 | 154280 | yes | yes |
+| condensation-standin | tsc|tsconfig | nanocompile | 389 | 1.0 | 37876 | 424887 | 155092 | yes | yes |
+| condensation-standin | tsc|concurrent | nanocompile | 9 | 0.0 | 37920 | 424931 | 3468 | yes | yes |
+| condensation-standin | tsc|cold | nanocompile | 4 | 0.0 | 67795 | 336204 | 3472 | yes | yes |
+| condensation-standin | tsc|leaf | nanocompile | 387 | 1.0 | 97618 | 366027 | 154544 | yes | yes |
+| condensation-standin | tsc|shared | nanocompile | 403 | 1.0 | 127532 | 395941 | 156260 | yes | yes |
+| condensation-standin | tsc|tsconfig | nanocompile | 386 | 1.0 | 157446 | 425855 | 153312 | yes | yes |
+| condensation-standin | tsc|concurrent | nanocompile | 10 | 0.0 | 157490 | 425899 | 3472 | yes | yes |
+| condensation-standin | tsc|cold | nanocompile | 4 | 0.0 | 67795 | 336138 | 3540 | yes | yes |
+| condensation-standin | tsc|leaf | nanocompile | 370 | 1.0 | 97618 | 365961 | 154096 | yes | yes |
+| condensation-standin | tsc|shared | nanocompile | 395 | 1.0 | 127532 | 395875 | 155736 | yes | yes |
+| condensation-standin | tsc|tsconfig | nanocompile | 368 | 1.0 | 157446 | 425789 | 155308 | yes | yes |
+| condensation-standin | tsc|concurrent | nanocompile | 9 | 0.0 | 157490 | 425833 | 3472 | yes | yes |
+| condensation-standin | tsgo|cold | none | 72 | 126.0 |  | 265690 | 51216 | yes | yes |
+| condensation-standin | tsgo|leaf | none | 74 | 126.0 |  | 265771 | 51540 | yes | yes |
+| condensation-standin | tsgo|shared | none | 70 | 126.0 |  | 265852 | 50444 | yes | yes |
+| condensation-standin | tsgo|tsconfig | none | 76 | 126.0 |  | 265852 | 49492 | yes | yes |
+| condensation-standin | tsgo|concurrent | none | 129 | 126.0 |  | 265852 | 51088 | yes | yes |
+| condensation-standin | tsgo|cold | incremental_local | 72 | 126.0 |  | 365811 | 51284 | yes | yes |
+| condensation-standin | tsgo|leaf | incremental_local | 72 | 126.0 |  | 365892 | 50772 | yes | yes |
+| condensation-standin | tsgo|shared | incremental_local | 76 | 126.0 |  | 365973 | 51540 | yes | yes |
+| condensation-standin | tsgo|tsconfig | incremental_local | 70 | 126.0 |  | 365973 | 48724 | yes | yes |
+| condensation-standin | tsgo|concurrent | incremental_local | 126 | 126.0 |  | 365973 | 51540 | yes | yes |
+| condensation-standin | tsgo|cold | nanocompile | 4 | 0.0 | 37759 | 305655 | 3472 | yes | yes |
+| condensation-standin | tsgo|leaf | nanocompile | 77 | 1.0 | 37798 | 305203 | 50700 | yes | yes |
+| condensation-standin | tsgo|shared | nanocompile | 77 | 1.0 | 37837 | 304751 | 51540 | yes | yes |
+| condensation-standin | tsgo|tsconfig | nanocompile | 72 | 1.0 | 37876 | 304299 | 50704 | yes | yes |
+| condensation-standin | tsgo|concurrent | nanocompile | 10 | 0.0 | 37920 | 304343 | 3472 | yes | yes |
+| condensation-standin | tsgo|cold | nanocompile | 4 | 0.0 | 37759 | 325608 | 3600 | yes | yes |
+| condensation-standin | tsgo|leaf | nanocompile | 77 | 1.0 | 37798 | 345131 | 49236 | yes | yes |
+| condensation-standin | tsgo|shared | nanocompile | 75 | 1.0 | 37837 | 364654 | 51284 | yes | yes |
+| condensation-standin | tsgo|tsconfig | nanocompile | 74 | 1.0 | 37876 | 384177 | 50448 | yes | yes |
+| condensation-standin | tsgo|concurrent | nanocompile | 10 | 0.0 | 37920 | 384221 | 3472 | yes | yes |
+| condensation-standin | tsgo|cold | nanocompile | 5 | 0.0 | 57612 | 326043 | 3472 | yes | yes |
+| condensation-standin | tsgo|leaf | nanocompile | 78 | 1.0 | 77242 | 345673 | 49876 | yes | yes |
+| condensation-standin | tsgo|shared | nanocompile | 74 | 1.0 | 96953 | 365384 | 50704 | yes | yes |
+| condensation-standin | tsgo|tsconfig | nanocompile | 76 | 1.0 | 116664 | 385095 | 50832 | yes | yes |
+| condensation-standin | tsgo|concurrent | nanocompile | 10 | 0.0 | 116708 | 385139 | 3472 | yes | yes |
+| condensation-standin | tsgo|cold | nanocompile | 4 | 0.0 | 57612 | 325977 | 3472 | yes | yes |
+| condensation-standin | tsgo|leaf | nanocompile | 82 | 1.0 | 77242 | 345607 | 51156 | yes | yes |
+| condensation-standin | tsgo|shared | nanocompile | 80 | 1.0 | 96953 | 365318 | 51468 | yes | yes |
+| condensation-standin | tsgo|tsconfig | nanocompile | 78 | 1.0 | 116664 | 385029 | 51156 | yes | yes |
+| condensation-standin | tsgo|concurrent | nanocompile | 10 | 0.0 | 116708 | 385073 | 3472 | yes | yes |
+| condensation-standin | tsrs|cold | none | 45 | 126.0 |  | 268145 | 47160 | yes | yes |
+| condensation-standin | tsrs|leaf | none | 44 | 126.0 |  | 268226 | 47156 | yes | yes |
+| condensation-standin | tsrs|shared | none | 51 | 126.0 |  | 268307 | 47156 | yes | yes |
+| condensation-standin | tsrs|tsconfig | none | 42 | 126.0 |  | 268307 | 47144 | yes | yes |
+| condensation-standin | tsrs|concurrent | none | 65 | 126.0 |  | 268307 | 47124 | yes | yes |
+| condensation-standin | tsrs|cold | incremental_local | 46 | 126.0 |  | 368266 | 47372 | yes | yes |
+| condensation-standin | tsrs|leaf | incremental_local | 48 | 126.0 |  | 368347 | 47364 | yes | yes |
+| condensation-standin | tsrs|shared | incremental_local | 48 | 126.0 |  | 368428 | 47368 | yes | yes |
+| condensation-standin | tsrs|tsconfig | incremental_local | 46 | 126.0 |  | 368428 | 47368 | yes | yes |
+| condensation-standin | tsrs|concurrent | incremental_local | 64 | 126.0 |  | 368428 | 47404 | yes | yes |
+| condensation-standin | tsrs|cold | nanocompile | 4 | 0.0 | 37759 | 306146 | 3472 | yes | yes |
+| condensation-standin | tsrs|leaf | nanocompile | 51 | 1.0 | 37798 | 306266 | 47148 | yes | yes |
+| condensation-standin | tsrs|shared | nanocompile | 54 | 1.0 | 37837 | 306386 | 47144 | yes | yes |
+| condensation-standin | tsrs|tsconfig | nanocompile | 54 | 1.0 | 37876 | 306425 | 47160 | yes | yes |
+| condensation-standin | tsrs|concurrent | nanocompile | 9 | 0.0 | 37920 | 306469 | 3472 | yes | yes |
+| condensation-standin | tsrs|cold | nanocompile | 4 | 0.0 | 37759 | 326099 | 3600 | yes | yes |
+| condensation-standin | tsrs|leaf | nanocompile | 50 | 1.0 | 37798 | 346113 | 47376 | yes | yes |
+| condensation-standin | tsrs|shared | nanocompile | 49 | 1.0 | 37837 | 366127 | 47368 | yes | yes |
+| condensation-standin | tsrs|tsconfig | nanocompile | 47 | 1.0 | 37876 | 386141 | 47372 | yes | yes |
+| condensation-standin | tsrs|concurrent | nanocompile | 10 | 0.0 | 37920 | 386185 | 3472 | yes | yes |
+| condensation-standin | tsrs|cold | nanocompile | 4 | 0.0 | 58103 | 326534 | 3472 | yes | yes |
+| condensation-standin | tsrs|leaf | nanocompile | 52 | 1.0 | 78224 | 346655 | 47376 | yes | yes |
+| condensation-standin | tsrs|shared | nanocompile | 53 | 1.0 | 98426 | 366857 | 47372 | yes | yes |
+| condensation-standin | tsrs|tsconfig | nanocompile | 50 | 1.0 | 118628 | 387059 | 47372 | yes | yes |
+| condensation-standin | tsrs|concurrent | nanocompile | 9 | 0.0 | 118672 | 387103 | 3540 | yes | yes |
+| condensation-standin | tsrs|cold | nanocompile | 4 | 0.0 | 58103 | 326468 | 3472 | yes | yes |
+| condensation-standin | tsrs|leaf | nanocompile | 51 | 1.0 | 78224 | 346589 | 47364 | yes | yes |
+| condensation-standin | tsrs|shared | nanocompile | 48 | 1.0 | 98426 | 366791 | 47368 | yes | yes |
+| condensation-standin | tsrs|tsconfig | nanocompile | 49 | 1.0 | 118628 | 386993 | 47376 | yes | yes |
+| condensation-standin | tsrs|concurrent | nanocompile | 10 | 0.0 | 118672 | 387037 | 3600 | yes | yes |
+| condensation-standin | bun|cold | none | 33 | 126.0 |  | 268123 | 58992 | yes | yes |
+| condensation-standin | bun|leaf | none | 32 | 126.0 |  | 268123 | 57904 | yes | yes |
+| condensation-standin | bun|shared | none | 31 | 126.0 |  | 268123 | 58412 | yes | yes |
+| condensation-standin | bun|tsconfig | none | 32 | 126.0 |  | 268123 | 58296 | yes | yes |
+| condensation-standin | bun|concurrent | none | 54 | 126.0 |  | 268123 | 57660 | yes | yes |
+| condensation-standin | bun|cold | nanocompile | 6 | 0.0 | 37801 | 306166 | 5056 | yes | yes |
+| condensation-standin | bun|leaf | nanocompile | 40 | 1.0 | 37840 | 306205 | 56684 | yes | yes |
+| condensation-standin | bun|shared | nanocompile | 41 | 1.0 | 37879 | 306244 | 57016 | yes | yes |
+| condensation-standin | bun|tsconfig | nanocompile | 42 | 1.0 | 37918 | 306283 | 57144 | yes | yes |
+| condensation-standin | bun|concurrent | nanocompile | 12 | 0.0 | 37962 | 306327 | 5056 | yes | yes |
+| condensation-standin | bun|cold | nanocompile | 6 | 0.0 | 37801 | 306144 | 5056 | yes | yes |
+| condensation-standin | bun|leaf | nanocompile | 45 | 1.0 | 37840 | 306183 | 58856 | yes | yes |
+| condensation-standin | bun|shared | nanocompile | 44 | 1.0 | 37879 | 306222 | 57980 | yes | yes |
+| condensation-standin | bun|tsconfig | nanocompile | 45 | 1.0 | 37918 | 306261 | 59316 | yes | yes |
+| condensation-standin | bun|concurrent | nanocompile | 14 | 0.0 | 37962 | 306305 | 5056 | yes | yes |
+| condensation-standin | bun|cold | nanocompile | 6 | 0.0 | 37801 | 306210 | 5056 | yes | yes |
+| condensation-standin | bun|leaf | nanocompile | 40 | 1.0 | 37840 | 306249 | 58020 | yes | yes |
+| condensation-standin | bun|shared | nanocompile | 40 | 1.0 | 37879 | 306288 | 59488 | yes | yes |
+| condensation-standin | bun|tsconfig | nanocompile | 39 | 1.0 | 37918 | 306327 | 56448 | yes | yes |
+| condensation-standin | bun|concurrent | nanocompile | 11 | 0.0 | 37962 | 306371 | 5056 | yes | yes |
+| condensation-standin | bun|cold | nanocompile | 5 | 0.0 | 37801 | 306144 | 5056 | yes | yes |
+| condensation-standin | bun|leaf | nanocompile | 42 | 1.0 | 37853 | 306196 | 57200 | yes | yes |
+| condensation-standin | bun|shared | nanocompile | 41 | 1.0 | 37905 | 306248 | 56512 | yes | yes |
+| condensation-standin | bun|tsconfig | nanocompile | 40 | 1.0 | 37957 | 306300 | 55284 | yes | yes |
+| condensation-standin | bun|concurrent | nanocompile | 12 | 0.0 | 38001 | 306344 | 5056 | yes | yes |
+| ajv | tsc|cold | none | 1210 | 106.0 |  | 204554718 | 239164 | yes | yes |
+| ajv | tsc|leaf | none | 1217 | 106.0 |  | 204554718 | 240532 | yes | yes |
+| ajv | tsc|shared | none | 1237 | 106.0 |  | 204554718 | 238704 | yes | yes |
+| ajv | tsc|tsconfig | none | 1240 | 106.0 |  | 204554718 | 238692 | yes | yes |
+| ajv | tsc|concurrent | none | 3047 | 106.0 |  | 204554718 | 238432 | yes | yes |
+| ajv | tsc|cold | incremental_local | 1221 | 106.0 |  | 204804644 | 240728 | yes | yes |
+| ajv | tsc|leaf | incremental_local | 592 | 106.0 |  | 204804735 | 206880 | yes | yes |
+| ajv | tsc|shared | incremental_local | 711 | 106.0 |  | 204805099 | 213788 | yes | yes |
+| ajv | tsc|tsconfig | incremental_local | 566 | 106.0 |  | 204805099 | 203844 | yes | yes |
+| ajv | tsc|concurrent | incremental_local | 1438 | 106.0 |  | 204805099 | 207256 | yes | yes |
+| ajv | tsc|cold | nanocompile | 7 | 0.0 | 113605 | 204668367 | 3728 | yes | yes |
+| ajv | tsc|leaf | nanocompile | 622 | 1.0 | 163698 | 204718460 | 206716 | yes | yes |
+| ajv | tsc|shared | nanocompile | 725 | 1.0 | 214155 | 204768917 | 215948 | yes | yes |
+| ajv | tsc|tsconfig | nanocompile | 647 | 1.0 | 264612 | 204819374 | 210728 | yes | yes |
+| ajv | tsc|concurrent | nanocompile | 17 | 0.0 | 264656 | 204819418 | 3600 | yes | yes |
+| prettier | tsc|cold | none | 18622 | 494.0 |  | 460950655 | 1222960 | yes | yes |
+| prettier | tsc|leaf | none | 18373 | 494.0 |  | 460950655 | 1222996 | yes | yes |
+| prettier | tsc|shared | none | 18055 | 494.0 |  | 460950655 | 1219512 | yes | yes |
+| prettier | tsc|tsconfig | none | 18342 | 494.0 |  | 460950655 | 1218108 | yes | yes |
+| prettier | tsc|concurrent | none | 26602 | 494.0 |  | 460950655 | 1226132 | yes | yes |
+| prettier | tsc|cold | incremental_local | 18248 | 494.0 |  | 463596871 | 1245612 | yes | yes |
+| prettier | tsc|leaf | incremental_local | 4112 | 494.0 |  | 463598293 | 542960 | yes | yes |
+| prettier | tsc|shared | incremental_local | 2912 | 494.0 |  | 463600189 | 509972 | yes | yes |
+| prettier | tsc|tsconfig | incremental_local | 1505 | 494.0 |  | 463600189 | 412296 | yes | yes |
+| prettier | tsc|concurrent | incremental_local | 4486 | 494.0 |  | 463600189 | 466460 | yes | yes |
+| prettier | tsc|cold | nanocompile | 34 | 0.0 | 711873 | 461662572 | 4496 | yes | yes |
+| prettier | tsc|leaf | nanocompile | 4110 | 1.0 | 1242555 | 462193254 | 544384 | yes | yes |
+| prettier | tsc|shared | nanocompile | 2981 | 1.0 | 1774659 | 462725358 | 509036 | yes | yes |
+| prettier | tsc|tsconfig | nanocompile | 2205 | 1.0 | 2306763 | 463257462 | 468556 | yes | yes |
+| prettier | tsc|concurrent | nanocompile | 45 | 0.0 | 2306807 | 463257506 | 4496 | yes | yes |
+| ajv | tsgo|cold | none | 139 | 106.0 |  | 204554895 | 110420 | yes | yes |
+| ajv | tsgo|leaf | none | 147 | 106.0 |  | 204554895 | 108816 | yes | yes |
+| ajv | tsgo|shared | none | 151 | 106.0 |  | 204554895 | 109072 | yes | yes |
+| ajv | tsgo|tsconfig | none | 137 | 106.0 |  | 204554895 | 109328 | yes | yes |
+| ajv | tsgo|concurrent | none | 382 | 106.0 |  | 204554895 | 111124 | yes | yes |
+| ajv | tsgo|cold | incremental_local | 151 | 106.0 |  | 204946066 | 106640 | yes | yes |
+| ajv | tsgo|leaf | incremental_local | 124 | 106.0 |  | 204946147 | 87640 | yes | yes |
+| ajv | tsgo|shared | incremental_local | 132 | 106.0 |  | 204946471 | 91980 | yes | yes |
+| ajv | tsgo|tsconfig | incremental_local | 110 | 106.0 |  | 204946471 | 84628 | yes | yes |
+| ajv | tsgo|concurrent | incremental_local | 260 | 106.0 |  | 204946471 | 89232 | yes | yes |
+| ajv | tsgo|cold | nanocompile | 7 | 0.0 | 143046 | 204697985 | 3728 | yes | yes |
+| ajv | tsgo|leaf | nanocompile | 134 | 1.0 | 221389 | 204776328 | 88212 | yes | yes |
+| ajv | tsgo|shared | nanocompile | 125 | 1.0 | 300056 | 204854995 | 93072 | yes | yes |
+| ajv | tsgo|tsconfig | nanocompile | 131 | 1.0 | 378723 | 204933662 | 87376 | yes | yes |
+| ajv | tsgo|concurrent | nanocompile | 16 | 0.0 | 378767 | 204933706 | 3668 | yes | yes |
+| prettier | tsgo|cold | none | 4710 | 494.0 |  | 460950837 | 1555180 | yes | yes |
+| prettier | tsgo|leaf | none | 4516 | 494.0 |  | 460950837 | 1472392 | yes | yes |
+| prettier | tsgo|shared | none | 4649 | 494.0 |  | 460950837 | 1480412 | yes | yes |
+| prettier | tsgo|tsconfig | none | 4652 | 494.0 |  | 460950837 | 1467624 | yes | yes |
+| prettier | tsgo|concurrent | none | 11996 | 494.0 |  | 460950837 | 1519464 | yes | yes |
+| prettier | tsgo|cold | incremental_local | 4794 | 494.0 |  | 465165873 | 1606960 | yes | yes |
+| prettier | tsgo|leaf | incremental_local | 975 | 494.0 |  | 465166719 | 368208 | yes | yes |
+| prettier | tsgo|shared | incremental_local | 1030 | 494.0 |  | 465167847 | 380812 | yes | yes |
+| prettier | tsgo|tsconfig | incremental_local | 299 | 494.0 |  | 465167847 | 257872 | yes | yes |
+| prettier | tsgo|concurrent | incremental_local | 1043 | 494.0 |  | 465167847 | 313992 | yes | yes |
+| prettier | tsgo|cold | nanocompile | 32 | 0.0 | 1123754 | 462074635 | 4880 | yes | yes |
+| prettier | tsgo|leaf | nanocompile | 973 | 1.0 | 1967635 | 462918516 | 369152 | yes | yes |
+| prettier | tsgo|shared | nanocompile | 1063 | 1.0 | 2812362 | 463763243 | 408720 | yes | yes |
+| prettier | tsgo|tsconfig | nanocompile | 545 | 1.0 | 3657089 | 464607970 | 321292 | yes | yes |
+| prettier | tsgo|concurrent | nanocompile | 43 | 0.0 | 3657133 | 464608014 | 4752 | yes | yes |
+| ajv | tsrs|cold | none | 58 | 106.0 |  | 204554895 | 53884 | yes | yes |
+| ajv | tsrs|leaf | none | 60 | 106.0 |  | 204554895 | 53980 | yes | yes |
+| ajv | tsrs|shared | none | 63 | 106.0 |  | 204554895 | 53700 | yes | yes |
+| ajv | tsrs|tsconfig | none | 54 | 106.0 |  | 204554895 | 53672 | yes | yes |
+| ajv | tsrs|concurrent | none | 126 | 106.0 |  | 204554895 | 53932 | yes | yes |
+| ajv | tsrs|cold | incremental_local | 56 | 106.0 |  | 204946426 | 56036 | yes | yes |
+| ajv | tsrs|leaf | incremental_local | 63 | 106.0 |  | 204946507 | 55780 | yes | yes |
+| ajv | tsrs|shared | incremental_local | 56 | 106.0 |  | 204946831 | 58828 | yes | yes |
+| ajv | tsrs|tsconfig | incremental_local | 50 | 106.0 |  | 204946831 | 48460 | yes | yes |
+| ajv | tsrs|concurrent | incremental_local | 98 | 106.0 |  | 204946831 | 57764 | yes | yes |
+| ajv | tsrs|cold | nanocompile | 7 | 0.0 | 143118 | 204698057 | 3728 | yes | yes |
+| ajv | tsrs|leaf | nanocompile | 63 | 1.0 | 221533 | 204776472 | 58152 | yes | yes |
+| ajv | tsrs|shared | nanocompile | 64 | 1.0 | 300272 | 204855211 | 56456 | yes | yes |
+| ajv | tsrs|tsconfig | nanocompile | 69 | 1.0 | 379011 | 204933950 | 57456 | yes | yes |
+| ajv | tsrs|concurrent | nanocompile | 14 | 0.0 | 379055 | 204933994 | 3668 | yes | yes |
+| prettier | tsrs|cold | none | 754 | 494.0 |  | 460950837 | 368528 | yes | yes |
+| prettier | tsrs|leaf | none | 756 | 494.0 |  | 460950837 | 369748 | yes | yes |
+| prettier | tsrs|shared | none | 619 | 494.0 |  | 460950837 | 326260 | yes | yes |
+| prettier | tsrs|tsconfig | none | 759 | 494.0 |  | 460950837 | 378172 | yes | yes |
+| prettier | tsrs|concurrent | none | 2299 | 494.0 |  | 460950837 | 373472 | yes | yes |
+| prettier | tsrs|cold | incremental_local | 832 | 494.0 |  | 465168483 | 310984 | yes | yes |
+| prettier | tsrs|leaf | incremental_local | 264 | 494.0 |  | 465169329 | 150048 | yes | yes |
+| prettier | tsrs|shared | incremental_local | 329 | 494.0 |  | 465170457 | 169728 | yes | yes |
+| prettier | tsrs|tsconfig | incremental_local | 119 | 494.0 |  | 465170457 | 115112 | yes | yes |
+| prettier | tsrs|concurrent | incremental_local | 333 | 494.0 |  | 465170457 | 135976 | yes | yes |
+| prettier | tsrs|cold | nanocompile | 32 | 0.0 | 1124267 | 462075148 | 4880 | yes | yes |
+| prettier | tsrs|leaf | nanocompile | 296 | 1.0 | 1968670 | 462919551 | 149156 | yes | yes |
+| prettier | tsrs|shared | nanocompile | 361 | 1.0 | 2813919 | 463764800 | 168368 | yes | yes |
+| prettier | tsrs|tsconfig | nanocompile | 191 | 1.0 | 3659168 | 464610049 | 134288 | yes | yes |
+| prettier | tsrs|concurrent | nanocompile | 42 | 0.0 | 3659212 | 464610093 | 4752 | yes | yes |
+| ajv | bun|cold | none | 57 | 106.0 |  | 204554873 | 96008 | yes | yes |
+| ajv | bun|leaf | none | 57 | 106.0 |  | 204554873 | 93344 | yes | yes |
+| ajv | bun|shared | none | 59 | 106.0 |  | 204554873 | 95048 | yes | yes |
+| ajv | bun|tsconfig | none | 62 | 106.0 |  | 204554873 | 95900 | yes | yes |
+| ajv | bun|concurrent | none | 157 | 106.0 |  | 204554873 | 95812 | yes | yes |
+| ajv | bun|cold | nanocompile | 8 | 0.0 | 64636 | 204619553 | 5056 | yes | yes |
+| ajv | bun|leaf | nanocompile | 57 | 1.0 | 64688 | 204619605 | 82732 | yes | yes |
+| ajv | bun|shared | nanocompile | 69 | 1.0 | 64752 | 204619669 | 94944 | yes | yes |
+| ajv | bun|tsconfig | nanocompile | 47 | 1.0 | 64804 | 204619721 | 81560 | yes | yes |
+| ajv | bun|concurrent | nanocompile | 16 | 0.0 | 64848 | 204619765 | 5056 | yes | yes |
+| prettier | bun|cold | none | 3270 | 494.0 |  | 460950815 | 733052 | yes | yes |
+| prettier | bun|leaf | none | 3176 | 494.0 |  | 460950815 | 740572 | yes | yes |
+| prettier | bun|shared | none | 3135 | 494.0 |  | 460950815 | 726432 | yes | yes |
+| prettier | bun|tsconfig | none | 3236 | 494.0 |  | 460950815 | 728528 | yes | yes |
+| prettier | bun|concurrent | none | 6796 | 494.0 |  | 460950815 | 728116 | yes | yes |
+| prettier | bun|cold | nanocompile | 33 | 0.0 | 285799 | 461236658 | 5056 | yes | yes |
+| prettier | bun|leaf | nanocompile | 305 | 1.0 | 285863 | 461236722 | 257828 | yes | yes |
+| prettier | bun|shared | nanocompile | 350 | 1.0 | 285927 | 461236786 | 231296 | yes | yes |
+| prettier | bun|tsconfig | nanocompile | 147 | 1.0 | 285979 | 461236838 | 193184 | yes | yes |
+| prettier | bun|concurrent | nanocompile | 43 | 0.0 | 286023 | 461236882 | 5056 | yes | yes |
 
 ## What climbed
 
 - **L0** content-addressed result cache (file hashes + `$NANO_ROOT`).
 - **L1** store/restore `.tsbuildinfo` with the result.
 - **L2** seed key (no source hashes) so an edit starts from sibling buildinfo.
+- **L3** dirty-file scope for `bun check` (≤4 dirty paths).
 
-`bun check` has no incremental file; L1/L2 do not apply.
-prettier + tsgo/tsrs/bun: the program is `checkJs` with `module: NodeNext`.
-TS 7 rejects a bundler override on NodeNext and stops before typechecking, so
-the inject gate cannot be certified. tsc 5.9 on prettier is on the frontier.
+`bun check` has no incremental file; L1/L2 do not apply. Seed
+`.tsbuildinfo` is deleted locally after CAS store (hardlink on restore).
+TS 7 / bun: NodeNext keeps matching `moduleResolution`; extends/node10
+gets `bundler`. Inject gate requires `_nano_ts_error` /
+`_nano_undefined_ident`, not a generic TS2304.
 Correctness: `tests/typescript_worktrees.py` uses real `git worktree add`.
 
 Harness: `python3 bench/ts_worktrees.py --repo PATH`.
