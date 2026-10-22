@@ -463,7 +463,77 @@ pub const MaterializeMethod = enum { reflink, hardlink, copy };
 
 fn immutableArtifact(path: []const u8) bool {
     return std.mem.endsWith(u8, path, ".rlib") or std.mem.endsWith(u8, path, ".rmeta") or
-        std.mem.endsWith(u8, path, ".dylib") or std.mem.endsWith(u8, path, ".so");
+        std.mem.endsWith(u8, path, ".dylib") or std.mem.endsWith(u8, path, ".so") or
+        std.mem.endsWith(u8, path, ".a");
+}
+
+const zstd_c = struct {
+    extern "c" fn ZSTD_compress(dst: [*]u8, dstCapacity: usize, src: [*]const u8, srcSize: usize, compressionLevel: c_int) usize;
+    extern "c" fn ZSTD_decompress(dst: [*]u8, dstCapacity: usize, src: [*]const u8, srcSize: usize) usize;
+    extern "c" fn ZSTD_compressBound(srcSize: usize) usize;
+    extern "c" fn ZSTD_isError(code: usize) c_uint;
+    extern "c" fn ZSTD_getFrameContentSize(src: [*]const u8, srcSize: usize) u64;
+};
+const zstd_magic = [_]u8{ 0x28, 0xB5, 0x2F, 0xFD };
+
+fn zstdEnabled(ctx: *Context) bool {
+    return std.mem.eql(u8, ctx.env.get("NANOCOMPILE_ZSTD") orelse "", "1");
+}
+
+fn hardlinkTargetEnabled(ctx: *Context) bool {
+    return std.mem.eql(u8, ctx.env.get("NANOCOMPILE_HARDLINK_TARGET") orelse "", "1");
+}
+
+fn looksZstd(bytes: []const u8) bool {
+    return bytes.len >= 4 and std.mem.eql(u8, bytes[0..4], &zstd_magic);
+}
+
+fn zstdCompress(ctx: *Context, bytes: []const u8) ![]const u8 {
+    const bound = zstd_c.ZSTD_compressBound(bytes.len);
+    const out = try ctx.a.alloc(u8, bound);
+    const n = zstd_c.ZSTD_compress(out.ptr, out.len, bytes.ptr, bytes.len, 3);
+    if (zstd_c.ZSTD_isError(n) != 0 or n >= bytes.len) return error.ZstdCompress;
+    return out[0..n];
+}
+
+fn zstdDecompress(ctx: *Context, bytes: []const u8) ![]const u8 {
+    const hinted = zstd_c.ZSTD_getFrameContentSize(bytes.ptr, bytes.len);
+    const cap: usize = if (hinted != 0 and hinted != std.math.maxInt(u64) and hinted <= 64 * 1024 * 1024)
+        @intCast(hinted)
+    else
+        bytes.len * 8 + 4096;
+    const out = try ctx.a.alloc(u8, cap);
+    const n = zstd_c.ZSTD_decompress(out.ptr, out.len, bytes.ptr, bytes.len);
+    if (zstd_c.ZSTD_isError(n) != 0) return error.ZstdDecompress;
+    return out[0..n];
+}
+
+fn blobLogicalHash(ctx: *Context, path_: []const u8) ![]const u8 {
+    const raw = Dir.cwd().readFileAlloc(ctx.io, path_, ctx.a, .limited(64 * 1024 * 1024)) catch return ctx.digest(path_);
+    if (!looksZstd(raw)) {
+        var h = Hash.init(.{});
+        h.update(raw);
+        return finish(ctx.a, &h);
+    }
+    const plain = zstdDecompress(ctx, raw) catch return ctx.digest(path_);
+    var h = Hash.init(.{});
+    h.update(plain);
+    return finish(ctx.a, &h);
+}
+
+fn shareImmutableOutput(ctx: *Context, destination: []const u8, hash: []const u8) void {
+    if (!hardlinkTargetEnabled(ctx) or !immutableArtifact(destination)) return;
+    const source = blobPath(ctx, hash) catch return;
+    if (looksZstd(ctx.read(source) catch return)) return;
+    const src_z = ctx.a.dupeSentinel(u8, source, 0) catch return;
+    const tmp = std.fmt.allocPrint(ctx.a, "{s}.nano-share-{d}", .{ destination, c.getpid() }) catch return;
+    const dst_z = ctx.a.dupeSentinel(u8, tmp, 0) catch return;
+    Dir.cwd().deleteFile(ctx.io, tmp) catch {};
+    if (c.link(src_z, dst_z) != 0) return;
+    makeReadOnly(ctx, source);
+    Dir.cwd().rename(tmp, .cwd(), destination, ctx.io) catch {
+        Dir.cwd().deleteFile(ctx.io, tmp) catch {};
+    };
 }
 
 fn makeReadOnly(ctx: *Context, path: []const u8) void {
@@ -552,8 +622,20 @@ fn materializeWith(ctx: *Context, source: []const u8, destination: []const u8, m
 pub fn putFile(ctx: *Context, source: []const u8) ![]const u8 {
     const hash = try ctx.digest(source);
     const destination = try blobPath(ctx, hash);
-    const existing = ctx.digest(destination) catch "";
-    if (!std.mem.eql(u8, hash, existing)) try materialize(ctx, source, destination, 0o600);
+    const existing = blobLogicalHash(ctx, destination) catch "";
+    if (std.mem.eql(u8, hash, existing)) return hash;
+    const st = Dir.cwd().statFile(ctx.io, source, .{}) catch null;
+    if (zstdEnabled(ctx) and st != null and st.?.size >= 4096 and st.?.size <= 32 * 1024 * 1024) {
+        const plain = Dir.cwd().readFileAlloc(ctx.io, source, ctx.a, .limited(32 * 1024 * 1024)) catch {
+            try materialize(ctx, source, destination, 0o600);
+            return hash;
+        };
+        if (zstdCompress(ctx, plain)) |compressed| {
+            try ctx.atomic(destination, compressed);
+            return hash;
+        } else |_| {}
+    }
+    try materialize(ctx, source, destination, 0o600);
     return hash;
 }
 
@@ -606,7 +688,9 @@ fn storeEntry(ctx: *Context, key: []const u8, dependencies: []const Dependency, 
         const st = try Dir.cwd().statFile(ctx.io, path_, .{});
         if (st.kind != .file) return error.NotRegularFile;
         const recorded = if (output_names) |names| names[index] else try ctx.logicalPath(path_);
-        try outputs.append(ctx.a, .{ .path = recorded, .hash = try putFile(ctx, path_), .mode = fileMode(st.permissions) });
+        const hash = try putFile(ctx, path_);
+        try outputs.append(ctx.a, .{ .path = recorded, .hash = hash, .mode = fileMode(st.permissions) });
+        shareImmutableOutput(ctx, path_, hash);
     }
     const entry: Entry = .{
         .dependencies = logical_deps.items,
@@ -669,7 +753,7 @@ pub fn fetchArtifact(ctx: *Context, namespace: []const u8, key: []const u8, dest
         !std.mem.eql(u8, info.namespace, namespace) or !std.mem.eql(u8, info.key, key) or
         !std.mem.eql(u8, entry.outputs[0].path, "artifact")) return false;
     const source = blobPath(ctx, entry.outputs[0].hash) catch return false;
-    const actual = ctx.digest(source) catch return false;
+    const actual = blobLogicalHash(ctx, source) catch return false;
     if (!std.mem.eql(u8, actual, entry.outputs[0].hash)) return false;
     const st = try Dir.cwd().statFile(ctx.io, source, .{});
     if (destination) |out_| try materialize(ctx, source, out_, 0o600);
@@ -743,7 +827,7 @@ const OutputCheck = struct {
         local.a = arena.allocator();
         for (check.entry.outputs) |output| {
             const path = blobPath(&local, output.hash) catch return;
-            const hash = local.digest(path) catch return;
+            const hash = blobLogicalHash(&local, path) catch return;
             if (!std.mem.eql(u8, hash, output.hash)) return;
         }
         check.valid = true;
@@ -872,7 +956,7 @@ fn restoreWithSnapshot(ctx: *Context, key: []const u8, allowed_outputs: []const 
         if (!output_check.valid) return null;
     } else {
         for (entry.outputs) |output| {
-            const hash = ctx.digest(try blobPath(ctx, output.hash)) catch return null;
+            const hash = blobLogicalHash(ctx, try blobPath(ctx, output.hash)) catch return null;
             if (!std.mem.eql(u8, hash, output.hash)) return null;
         }
     }
@@ -894,7 +978,22 @@ fn restoreWithSnapshot(ctx: *Context, key: []const u8, allowed_outputs: []const 
         timing_start = boundary;
         materializing = true;
     }
-    for (entry.outputs, destinations) |output, destination| _ = try materializeRestore(ctx, try blobPath(ctx, output.hash), destination, output.mode);
+    for (entry.outputs, destinations) |output, destination| {
+        const blob = try blobPath(ctx, output.hash);
+        const raw = ctx.read(blob) catch {
+            _ = try materializeRestore(ctx, blob, destination, output.mode);
+            continue;
+        };
+        if (looksZstd(raw)) {
+            const plain = zstdDecompress(ctx, raw) catch return null;
+            const tmp = try std.fmt.allocPrint(ctx.a, "{s}.nano-zstd-{d}", .{ destination, c.getpid() });
+            try ctx.atomic(tmp, plain);
+            defer Dir.cwd().deleteFile(ctx.io, tmp) catch {};
+            _ = try materializeRestore(ctx, tmp, destination, output.mode);
+        } else {
+            _ = try materializeRestore(ctx, blob, destination, output.mode);
+        }
+    }
     ctx.profileEnd("restore.materialization", phase);
     return .{ .stdout = stdout, .stderr = stderr };
 }
@@ -1168,7 +1267,37 @@ test "immutable rlib restore hardlinks when clone is unavailable" {
     }
     try std.testing.expect(immutableArtifact("libmacro.so"));
     try std.testing.expect(immutableArtifact("libmacro.dylib"));
+    try std.testing.expect(immutableArtifact("libfoo.a"));
     try std.testing.expect(!immutableArtifact("app"));
+}
+
+test "zstd blobs restore to the original bytes" {
+    if (builtin.os.tag == .windows) return;
+    var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer arena.deinit();
+    const a = arena.allocator();
+    const io = std.testing.io;
+    var tmp = std.testing.tmpDir(.{});
+    defer tmp.cleanup();
+    const root = try Dir.cwd().realPathFileAlloc(io, try std.fs.path.join(a, &.{ ".zig-cache", "tmp", &tmp.sub_path }), a);
+    var env = std.process.Environ.Map.init(a);
+    try env.put("NANOCOMPILE_ZSTD", "1");
+    var ctx: Context = .{ .a = a, .io = io, .env = &env, .root = root, .cwd = root };
+    try ctx.prepare();
+    const source = try std.fs.path.join(a, &.{ root, "plain.rmeta" });
+    var payload: [8192]u8 = undefined;
+    for (&payload, 0..) |*b, i| b.* = @truncate(i);
+    try tmp.dir.writeFile(io, .{ .sub_path = "plain.rmeta", .data = &payload });
+    const hash = try putFile(&ctx, source);
+    const blob = try blobPath(&ctx, hash);
+    const stored = try ctx.read(blob);
+    try std.testing.expect(looksZstd(stored));
+    try std.testing.expectEqualStrings(hash, try blobLogicalHash(&ctx, blob));
+    const dest = try std.fs.path.join(a, &.{ root, "out", "plain.rmeta" });
+    const raw = try ctx.read(blob);
+    const plain = try zstdDecompress(&ctx, raw);
+    try ctx.atomic(dest, plain);
+    try std.testing.expectEqualSlices(u8, &payload, try ctx.read(dest));
 }
 
 test "logical output paths restore into a sibling target directory" {

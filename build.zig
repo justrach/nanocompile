@@ -9,6 +9,8 @@ pub fn build(b: *std.Build) void {
         .optimize = optimize,
         .link_libc = true,
     });
+    mod.addLibraryPath(.{ .cwd_relative = "vendor/lib" });
+    mod.linkSystemLibrary("zstd", .{});
     const exe = b.addExecutable(.{ .name = "nanocompile", .root_module = mod });
     b.installArtifact(exe);
     const run = b.addRunArtifact(exe);

@@ -34,8 +34,9 @@ SIG_INSERT = "\n#[allow(dead_code)] fn _nano_agent_sig(x: u32) -> u32 { x }\n"
 LARGE_INSERT = "\n#[allow(dead_code)] fn _nano_agent_large(xs: &[u8]) -> usize { xs.len().wrapping_add(7) }\n"
 
 TRAIN = ("axum", "ripgrep")
-HELD_OUT = ("bhumi", "hashbrown", "nalgebra", "serde", "ruff", "tokio")
+HELD_OUT = ("bhumi", "hashbrown", "nalgebra", "serde", "ruff", "tokio", "emergentDB")
 MIN_GAIN = 0.03
+OBJECTIVES = ("crates_compiled_mean", "wall_ms", "disk_bytes", "store_bytes")
 
 SAMPLE_CATALOG = {
     "axum": {"path": Path("/tmp/real-samples/axum"), "package": None, "size": "mid"},
@@ -46,6 +47,7 @@ SAMPLE_CATALOG = {
     "serde": {"path": Path("/tmp/real-samples/serde"), "package": "serde", "size": "mid"},
     "ruff": {"path": Path("/tmp/real-samples/ruff"), "package": "ruff", "size": "large"},
     "tokio": {"path": Path("/tmp/real-samples/tokio"), "package": "tokio", "size": "large"},
+    "emergentDB": {"path": Path("/tmp/real-samples/emergentDB"), "package": "vector-core", "size": "mid"},
 }
 
 NANO_BEST = {
@@ -57,7 +59,17 @@ NANO_BEST = {
 }
 NANO_SCRIPT = dict(NANO_BEST, NANOCOMPILE_BUILD_SCRIPT_CACHE="1")
 
-# Lever order: one change at a time. Keep >3% wins. Stop when each metric stalls.
+# Additive deltas climbed one at a time on top of the current elite.
+CLIMB_DELTAS = (
+    {"id": "l3_hardlink_target", "env": {"NANOCOMPILE_HARDLINK_TARGET": "1"}},
+    {"id": "l4_zstd", "env": {"NANOCOMPILE_ZSTD": "1"}},
+    {"id": "l5_no_incremental", "env": {"CARGO_INCREMENTAL": "0"}},
+    {"id": "l6_debuginfo_line", "env": {"NANOCOMPILE_DEBUGINFO": "1"}},
+    {"id": "l7_skip_cheap", "env": {"NANOCOMPILE_SKIP_CHEAP": "1"}},
+    {"id": "l8_script_delta", "env": {"NANOCOMPILE_BUILD_SCRIPT_CACHE": "1", "NANOCOMPILE_SCRIPT_DELTA": "1"}},
+)
+
+# Lever order: one change at a time. Keep >3% wins that do not regress another >3%.
 LEVERS = (
     {"id": "l0_nano_best", "approach": "nanocompile", "env": NANO_BEST, "loop": "check"},
     {"id": "l1_script_cache", "approach": "nanocompile", "env": NANO_SCRIPT, "loop": "check"},
@@ -68,6 +80,7 @@ BASELINES = (
     {"id": "none", "approach": "none", "env": {}, "loop": "check"},
     {"id": "shared_target", "approach": "shared_target", "env": {}, "loop": "check"},
     {"id": "kache", "approach": "kache", "env": {}, "loop": "check"},
+    {"id": "sccache", "approach": "sccache", "env": {}, "loop": "check"},
 )
 
 
@@ -180,11 +193,14 @@ def pick_edit_files(root: Path, count: int = 3) -> list[Path]:
         candidate = root / name
         if candidate.exists():
             preferred.append(candidate)
-    for pkg in ("axum", "ripgrep", "serde", "ruff", "tokio", "hashbrown", "nalgebra", "bhumi"):
+    for pkg in ("axum", "ripgrep", "serde", "ruff", "tokio", "hashbrown", "nalgebra", "bhumi", "vector-core"):
         for name in ("src/lib.rs", "src/main.rs"):
             candidate = root / pkg / name
             if candidate.exists() and candidate not in preferred:
                 preferred.append(candidate)
+        nested = root / "crates" / pkg / "src" / "lib.rs"
+        if nested.exists() and nested not in preferred:
+            preferred.append(nested)
     named = [p for p in files if p.name in ("lib.rs", "main.rs") and "examples" not in p.parts and "tests" not in p.parts]
     rest = [p for p in files if p not in preferred and p not in named]
     chosen = []
@@ -204,8 +220,9 @@ def apply_agent_edit(root: Path, kind: str) -> list[tuple[Path, str]]:
         return records
     if kind == "dep":
         manifests = [root / "Cargo.toml"]
-        for pkg in ("axum", "ripgrep", "serde", "ruff", "tokio", "hashbrown", "nalgebra", "bhumi"):
+        for pkg in ("axum", "ripgrep", "serde", "ruff", "tokio", "hashbrown", "nalgebra", "bhumi", "vector-core"):
             manifests.append(root / pkg / "Cargo.toml")
+            manifests.append(root / "crates" / pkg / "Cargo.toml")
         for manifest in manifests:
             if not manifest.exists():
                 continue
@@ -274,6 +291,10 @@ def kache_bin():
     return shutil.which("kache")
 
 
+def sccache_bin():
+    return shutil.which("sccache")
+
+
 def nano_env(base, store, wrapper, extra):
     env = dict(base)
     env["NANOCOMPILE_DIR"] = str(store)
@@ -308,7 +329,20 @@ def none_env(base):
     env.pop("RUSTC_WORKSPACE_WRAPPER", None)
     env.pop("NANOCOMPILE_DIR", None)
     env.pop("KACHE_CACHE_DIR", None)
+    env.pop("SCCACHE_DIR", None)
     env["CARGO_INCREMENTAL"] = "1"
+    return env
+
+
+def sccache_env(base, store):
+    env = dict(base)
+    env["RUSTC_WRAPPER"] = sccache_bin() or "sccache"
+    env["SCCACHE_DIR"] = str(store)
+    env["SCCACHE_DIRECT"] = "1"
+    env["CARGO_INCREMENTAL"] = "0"
+    env.pop("RUSTC_WORKSPACE_WRAPPER", None)
+    for key in ("NANOCOMPILE_DIR", "NANOCOMPILE_ALLOW_INCREMENTAL", "KACHE_CACHE_DIR"):
+        env.pop(key, None)
     return env
 
 
@@ -317,6 +351,8 @@ def approach_env(approach, base, store, wrapper, extra):
         return nano_env(base, store, wrapper, extra)
     if approach == "kache":
         return kache_env(base, store)
+    if approach == "sccache":
+        return sccache_env(base, store)
     return none_env(base)
 
 
@@ -428,15 +464,24 @@ def measure_worktrees(
             return read_kache_stats(store)
         return {}
 
+    if approach == "sccache" and not sccache_bin():
+        return {
+            "sample": sample, "approach": approach, "ok": False, "error": "sccache not installed",
+            "n_worktrees": n_worktrees, "mode": mode, "loop": loop, "edit_kind": edit_kind,
+            "from_older": from_older, "crates_compiled_mean": None, "wall_ms": None,
+            "disk_bytes": None, "store_bytes": None,
+        }
+
     before_warm = snapshot()
     warm = run_cargo(argv, main, env)
     if not warm["ok"] and "--offline" in argv:
         argv = [a for a in argv if a != "--offline"]
         warm = run_cargo(argv, main, env)
-    if approach in ("nanocompile", "kache"):
-        warm_compiled, warm_restored = stats_compiled(before_warm, snapshot())
-        warm["crates_compiled"] = warm_compiled
-        warm["crates_restored"] = warm_restored
+    if approach in ("nanocompile", "kache", "sccache"):
+        if approach != "sccache":
+            warm_compiled, warm_restored = stats_compiled(before_warm, snapshot())
+            warm["crates_compiled"] = warm_compiled
+            warm["crates_restored"] = warm_restored
     worktrees = []
     commit = older_commit(src) if from_older else None
     kinds = []
@@ -491,6 +536,7 @@ def measure_worktrees(
     if approach == "shared_target":
         targets = [shared_target]
     disk = unique_disk_bytes([store, *targets])
+    store_bytes = unique_disk_bytes([store]) if store.exists() else 0
     compiled = [row["crates_compiled"] for row in per]
     mean_compiled = sum(compiled) / len(compiled) if compiled else 0
     restored = max(0, warm["crates_compiled"] - mean_compiled)
@@ -512,6 +558,7 @@ def measure_worktrees(
         "per_worktree_ms": [row["ms"] for row in per],
         "ok": warm["ok"] and all(row["ok"] for row in per),
         "disk_bytes": disk,
+        "store_bytes": store_bytes,
         "first_green": first,
         "errors": [row["stderr_tail"] for row in per if not row["ok"]][:2],
     }
@@ -527,7 +574,7 @@ def pct_gain(baseline: float, value: float) -> float | None:
     return (baseline - value) / baseline
 
 
-def summarize_pair(base_rows, new_rows, metrics=("crates_compiled_mean", "wall_ms", "disk_bytes")):
+def summarize_pair(base_rows, new_rows, metrics=OBJECTIVES):
     out = {}
     for metric in metrics:
         base_vals = [r[metric] for r in base_rows if r.get("ok") and r.get(metric) is not None]
@@ -580,6 +627,7 @@ def run_matrix(samples, levers, n_list, modes, wrapper, work_root, variants=None
                         except Exception as exc:
                             row = {"sample": sample, "ok": False, "error": str(exc), "approach": lever["approach"]}
                         row["lever"] = lever["id"]
+                        row["env"] = dict(lever.get("env") or {})
                         row["split"] = split
                         row["held_out"] = split == "held_out"
                         row["product"] = "agent_worktrees"
@@ -591,7 +639,8 @@ def run_matrix(samples, levers, n_list, modes, wrapper, work_root, variants=None
                         progress = {
                             k: row.get(k) for k in (
                                 "sample", "lever", "approach", "n_worktrees", "mode",
-                                "wall_ms", "crates_compiled_mean", "disk_bytes", "ok", "split",
+                                "wall_ms", "crates_compiled_mean", "disk_bytes", "store_bytes",
+                                "ok", "split",
                             )
                         }
                         if not row.get("ok"):
@@ -601,8 +650,88 @@ def run_matrix(samples, levers, n_list, modes, wrapper, work_root, variants=None
     return rows
 
 
+def keep_decision(summary, metrics=OBJECTIVES):
+    """Keep a >3% win on any objective that does not regress another past 3%."""
+    win = False
+    regress = False
+    for metric in metrics:
+        info = summary.get(metric) or {}
+        gain = info.get("gain")
+        if gain is None:
+            continue
+        if gain > MIN_GAIN:
+            win = True
+        if gain < -MIN_GAIN:
+            regress = True
+    return win and not regress
+
+
+def dominates(a, b, metrics=OBJECTIVES):
+    """True when a is <= b on every objective and strictly better on one."""
+    any_strict = False
+    for metric in metrics:
+        av, bv = a.get(metric), b.get(metric)
+        if av is None or bv is None:
+            return False
+        if av > bv + 1e-9:
+            return False
+        if av < bv - 1e-9:
+            any_strict = True
+    return any_strict
+
+
+def pareto_frontier(rows, metrics=OBJECTIVES):
+    ok = [r for r in rows if r.get("ok") and all(r.get(m) is not None for m in metrics)]
+    frontier = []
+    for row in ok:
+        if not any(dominates(other, row, metrics) for other in ok if other is not row):
+            frontier.append(row)
+    return frontier
+
+
+def pareto_by_repo(rows, split="held_out"):
+    out = {}
+    for sample in sorted({r.get("sample") for r in rows if r.get("sample")}):
+        subset = [
+            r for r in rows
+            if r.get("sample") == sample and r.get("ok")
+            and r.get("n_worktrees") == 4
+            and r.get("mode") in ("sequential", None)
+            and (r.get("edit_kind") or (r.get("variant") or {}).get("edit_kind") or "mixed") == "mixed"
+            and not (r.get("from_older") or (r.get("variant") or {}).get("from_older"))
+        ]
+        front = pareto_frontier(subset)
+        nano = [r for r in subset if r.get("approach") == "nanocompile"]
+        dominated_by = []
+        for row in nano:
+            for other in subset:
+                if other is row:
+                    continue
+                if dominates(other, row):
+                    dominated_by.append({
+                        "nano_lever": row.get("lever"),
+                        "by": other.get("lever") or other.get("approach"),
+                        "approach": other.get("approach"),
+                        "objectives": {m: {"nano": row.get(m), "other": other.get(m)} for m in OBJECTIVES},
+                    })
+        out[sample] = {
+            "split": split,
+            "frontier": [
+                {
+                    "lever": r.get("lever"),
+                    "approach": r.get("approach"),
+                    **{m: r.get(m) for m in OBJECTIVES},
+                }
+                for r in front
+            ],
+            "nano_dominated_by": dominated_by,
+            "nano_on_frontier": any(r.get("approach") == "nanocompile" for r in front),
+        }
+    return out
+
+
 def hill_climb(rows):
-    """One change at a time on train. Keep >3% wins. Stall per metric."""
+    """One change at a time on train. Keep >3% wins that do not regress another >3%."""
     log = []
     kept = ["l0_nano_best"]
     stalled = {}
@@ -611,23 +740,30 @@ def hill_climb(rows):
     current = [r for r in train if r.get("lever") == "l0_nano_best" and r.get("mode") == "sequential"]
     vs_none = summarize_pair(none_rows, current)
     log.append({"lever": "l0_nano_best", "vs": "none", "metrics": vs_none, "keep": True})
-    for lever_id in ("l1_script_cache", "l2_test_bins"):
+    frozen_env = dict(NANO_BEST)
+    lever_ids = []
+    seen = set()
+    for row in rows:
+        lid = row.get("lever")
+        if lid and lid not in seen and lid not in ("none", "shared_target", "kache", "sccache", "l0_nano_best"):
+            seen.add(lid)
+            lever_ids.append(lid)
+    for lever_id in lever_ids:
         nxt = [r for r in train if r.get("lever") == lever_id]
-        loop = "test" if lever_id == "l2_test_bins" else "check"
+        loop = "test" if "test" in lever_id else "check"
         base = [r for r in current if r.get("loop") == loop]
         cand = [r for r in nxt if r.get("loop") == loop and r.get("mode") == "sequential"] or nxt
-        if lever_id == "l2_test_bins" and not base:
+        if "test" in lever_id and not base:
             log.append({
                 "lever": lever_id, "vs": "coverage", "metrics": {}, "keep": False,
                 "samples": sorted({r["sample"] for r in cand if r.get("ok")}),
                 "note": "cargo test --no-run coverage; --test is eligible under EXECUTABLE_PRODUCERS. No prior test-loop elite to beat by 3%.",
             })
-            stalled["crates_compiled_mean"] = stalled.get("crates_compiled_mean", 0) + 1
-            stalled["wall_ms"] = stalled.get("wall_ms", 0) + 1
-            stalled["disk_bytes"] = stalled.get("disk_bytes", 0) + 1
+            for metric in OBJECTIVES:
+                stalled[metric] = stalled.get(metric, 0) + 1
             continue
         summary = summarize_pair(base or current, cand)
-        keep = any(summary[m]["keep"] for m in summary)
+        keep = keep_decision(summary)
         samples = {r["sample"] for r in cand if r.get("ok")}
         log.append({"lever": lever_id, "vs": kept[-1], "metrics": summary, "keep": keep, "samples": sorted(samples)})
         for metric, info in summary.items():
@@ -638,30 +774,36 @@ def hill_climb(rows):
         if keep:
             kept.append(lever_id)
             current = cand
-    frozen = NANO_SCRIPT if "l1_script_cache" in kept else NANO_BEST
-    # l2 is a loop change (test bins); flags stay NANO_SCRIPT if l1 kept.
+            for row in cand:
+                env = row.get("env")
+                if env:
+                    frozen_env = dict(env)
+                    break
+    if not any(r.get("env") for r in current):
+        frozen_env = NANO_SCRIPT if "l1_script_cache" in kept or "script" in kept[-1] else dict(NANO_BEST)
     return {
         "min_gain_pct": MIN_GAIN * 100,
         "kept": kept,
         "stalled": stalled,
         "log": log,
-        "frozen_env": frozen,
+        "frozen_env": frozen_env,
         "frozen_lever": kept[-1] if kept else "l0_nano_best",
+        "pareto": pareto_by_repo(train, "train"),
     }
 
 
 def survival(train_rows, held_rows, frozen_lever):
     """How much of the train gain vs none survives on held-out, per metric."""
     out = {"per_metric": {}, "per_sample": {}, "repo_specific": [], "general": []}
-    metrics = ("crates_compiled_mean", "wall_ms", "disk_bytes")
+    metrics = OBJECTIVES
     for metric in metrics:
-        train_none = [r[metric] for r in train_rows if r.get("lever") == "none" and r.get("ok")]
-        train_fr = [r[metric] for r in train_rows if r.get("lever") == frozen_lever and r.get("ok")]
-        held_none = [r[metric] for r in held_rows if r.get("approach") in ("none",) and r.get("ok") and not r.get("variant", {}).get("from_older") and r.get("n_worktrees") == 4]
-        held_fr = [r[metric] for r in held_rows if r.get("lever") == frozen_lever and r.get("ok") and not r.get("variant", {}).get("from_older") and r.get("n_worktrees") == 4 and r.get("edit_kind", "mixed") in ("mixed", None)]
+        train_none = [r.get(metric) for r in train_rows if r.get("lever") == "none" and r.get("ok")]
+        train_fr = [r.get(metric) for r in train_rows if r.get("lever") == frozen_lever and r.get("ok")]
+        held_none = [r.get(metric) for r in held_rows if r.get("approach") in ("none",) and r.get("ok") and not r.get("variant", {}).get("from_older") and r.get("n_worktrees") == 4]
+        held_fr = [r.get(metric) for r in held_rows if r.get("lever") == frozen_lever and r.get("ok") and not r.get("variant", {}).get("from_older") and r.get("n_worktrees") == 4 and r.get("edit_kind", "mixed") in ("mixed", None)]
         # held rows from frozen config may be tagged lever=frozen
         if not held_fr:
-            held_fr = [r[metric] for r in held_rows if r.get("approach") == "nanocompile" and r.get("ok")
+            held_fr = [r.get(metric) for r in held_rows if r.get("approach") == "nanocompile" and r.get("ok")
                        and r.get("n_worktrees") == 4 and not r.get("from_older")
                        and (r.get("variant") or {}).get("edit_kind") == "mixed"
                        and not (r.get("variant") or {}).get("from_older")]
@@ -678,7 +820,7 @@ def survival(train_rows, held_rows, frozen_lever):
         none = [r for r in held_rows if r["sample"] == sample and r.get("approach") == "none" and r.get("ok")]
         fr = [r for r in held_rows if r["sample"] == sample and r.get("approach") == "nanocompile" and r.get("ok")
               and r.get("n_worktrees") == 4 and not (r.get("variant") or {}).get("from_older")]
-        gains = {m: pct_gain(avg([r[m] for r in none]), avg([r[m] for r in fr])) for m in metrics}
+        gains = {m: pct_gain(avg([r.get(m) for r in none]), avg([r.get(m) for r in fr])) for m in metrics}
         out["per_sample"][sample] = gains
     train_gain_wall = out["per_metric"]["wall_ms"]["train_gain"]
     for sample, gains in out["per_sample"].items():
@@ -720,6 +862,7 @@ def breakdown(held_rows):
             "crates_compiled_mean": row.get("crates_compiled_mean"),
             "wall_ms": row.get("wall_ms"),
             "disk_bytes": row.get("disk_bytes"),
+            "store_bytes": row.get("store_bytes"),
             "ok": True,
         })
     return out
@@ -747,6 +890,8 @@ def row_evaluation(row, split):
         },
         "fitness_ms": float(row.get("wall_ms") or 0),
         "disk_bytes": row.get("disk_bytes"),
+        "store_bytes": row.get("store_bytes"),
+        "pareto": True,
         "correctness": {
             "ok": bool(row.get("ok")),
             "agree_on_broken": True,
@@ -789,8 +934,9 @@ def record_archive(payload, map_path: Path):
         notes.append(note)
     rules = archive.setdefault("size_rules", {})
     rules["agent_worktrees"] = (
-        "Train on axum+ripgrep; freeze; held-out on bhumi/hashbrown/nalgebra/serde/ruff/tokio. "
-        "Tag split=train|held_out. Occupancy unchanged."
+        "Train on axum+ripgrep; freeze; held-out on bhumi/hashbrown/nalgebra/serde/ruff/tokio/emergentDB. "
+        "Minimize crates/wt, wall, unique disk, store. Tag split=train|held_out. Occupancy unchanged. "
+        "archive.agent_worktrees.pareto is the per-repo frontier."
     )
     archive["agent_worktrees"] = payload
     history = archive.setdefault("history", [])
@@ -851,11 +997,12 @@ def render_docs(payload) -> str:
         "## Hill-climb (train = axum + ripgrep)",
         "",
         "One lever at a time. Keep a change only when it beats the previous elite",
-        "by more than 3% on crates compiled per worktree, total wall, or disk",
-        "(hardlinks counted once). Stop a metric after it stalls.",
+        "by more than 3% on crates compiled per worktree, total wall, unique disk",
+        "(hardlinks counted once), or store size, and does not regress another",
+        "objective past 3%. Stop a metric after it stalls.",
         "",
-        "| lever | vs | crates/worktree | wall | disk | keep |",
-        "| --- | --- | --- | --- | --- | --- |",
+        "| lever | vs | crates/worktree | wall | disk | store | keep |",
+        "| --- | --- | --- | --- | --- | --- | --- |",
     ]
     for entry in climb.get("log") or []:
         m = entry.get("metrics") or {}
@@ -864,9 +1011,10 @@ def render_docs(payload) -> str:
             g = info.get("gain")
             return "n/a" if g is None else "%.1f%%" % (g * 100)
         note = "coverage" if entry.get("vs") == "coverage" else ("yes" if entry.get("keep") else "stall")
-        lines.append("| `%s` | %s | %s | %s | %s | %s |" % (
+        lines.append("| `%s` | %s | %s | %s | %s | %s | %s |" % (
             entry.get("lever"), entry.get("vs"),
             fmt("crates_compiled_mean"), fmt("wall_ms"), fmt("disk_bytes"),
+            fmt("store_bytes"),
             note,
         ))
         if entry.get("note"):
@@ -880,7 +1028,7 @@ def render_docs(payload) -> str:
         "## Generalization (held-out)",
         "",
         "Config was frozen on axum+ripgrep, then run unchanged on bhumi, hashbrown,",
-        "nalgebra, serde, ruff, and tokio (Rach repo).",
+        "nalgebra, serde, ruff, tokio, and emergentDB (Rach's repo; tokio is not).",
         "",
         "| metric | train gain vs none | held-out gain vs none | fraction that survived |",
         "| --- | --- | --- | --- |",
@@ -911,11 +1059,11 @@ def render_docs(payload) -> str:
         "branching from an older main. Shared-target (one `CARGO_TARGET_DIR`) is",
         "the lock-contention control.",
         "",
-        "| sample | n | edit | older main | approach | crates/wt | wall ms | disk | ok |",
-        "| --- | --- | --- | --- | --- | --- | --- | --- | --- |",
+        "| sample | n | edit | older main | approach | crates/wt | wall ms | disk | store | ok |",
+        "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
     ]
     for row in payload.get("breakdown") or []:
-        lines.append("| %s | %s | %s | %s | %s | %s | %s | %s | %s |" % (
+        lines.append("| %s | %s | %s | %s | %s | %s | %s | %s | %s | %s |" % (
             row.get("sample"),
             row.get("n_worktrees"),
             row.get("edit_kind"),
@@ -924,17 +1072,54 @@ def render_docs(payload) -> str:
             "%.1f" % row["crates_compiled_mean"] if row.get("crates_compiled_mean") is not None else "",
             "%.0f" % row["wall_ms"] if row.get("wall_ms") is not None else "",
             row.get("disk_bytes") or "",
+            row.get("store_bytes") if row.get("store_bytes") is not None else "",
             "yes" if row.get("ok") else "no",
         ))
     lines += [
         "",
+        "## Pareto frontier (minimize crates, wall, unique disk, store)",
+        "",
+        "A config is non-dominated when no competitor is better or equal on every",
+        "objective and strictly better on one. Shipped `worktree init` must sit on",
+        "the held-out frontier for every repo.",
+        "",
+    ]
+    pareto = payload.get("pareto") or {}
+    for split_name, label in (("train", "Train"), ("held_out", "Held-out")):
+        block = pareto.get(split_name) or {}
+        lines += ["### %s" % label, ""]
+        if not block:
+            lines += ["(not measured yet)", ""]
+            continue
+        for sample, info in block.items():
+            on = "yes" if info.get("nano_on_frontier") else "NO"
+            lines.append("**%s** — nanocompile on frontier: %s" % (sample, on))
+            lines.append("")
+            lines.append("| approach | lever | crates/wt | wall ms | disk | store |")
+            lines.append("| --- | --- | --- | --- | --- | --- |")
+            for row in info.get("frontier") or []:
+                lines.append("| %s | %s | %s | %s | %s | %s |" % (
+                    row.get("approach"),
+                    row.get("lever"),
+                    "%.1f" % row["crates_compiled_mean"] if row.get("crates_compiled_mean") is not None else "",
+                    "%.0f" % row["wall_ms"] if row.get("wall_ms") is not None else "",
+                    row.get("disk_bytes") if row.get("disk_bytes") is not None else "",
+                    row.get("store_bytes") if row.get("store_bytes") is not None else "",
+                ))
+            if info.get("nano_dominated_by"):
+                lines.append("")
+                for dom in info["nano_dominated_by"]:
+                    lines.append("- dominated by `%s` (%s)" % (dom.get("by"), dom.get("approach")))
+            lines.append("")
+    lines += [
+        "",
         "## Train table (4 worktrees, sequential + concurrent)",
         "",
-        "| sample | lever | approach | n | mode | crates/wt | wall ms | disk | ok |",
-        "| --- | --- | --- | --- | --- | --- | --- | --- | --- |",
+        "| sample | lever | approach | n | mode | crates/wt | wall ms | disk | store | ok |",
+        "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
     ]
     for row in payload.get("train") or []:
-        lines.append("| %s | %s | %s | %s | %s | %s | %s | %s | %s |" % (
+        lines.append("| %s | %s | %s | %s | %s | %s | %s | %s | %s | %s |" % (
             row.get("sample"),
             row.get("lever"),
             row.get("approach"),
@@ -943,24 +1128,28 @@ def render_docs(payload) -> str:
             "%.1f" % row["crates_compiled_mean"] if row.get("crates_compiled_mean") is not None else "",
             "%.0f" % row["wall_ms"] if row.get("wall_ms") is not None else "",
             row.get("disk_bytes") or "",
+            row.get("store_bytes") if row.get("store_bytes") is not None else "",
             "yes" if row.get("ok") else "no",
         ))
     lines += [
         "",
         "## What climbed",
         "",
-        "- **L0** nanocompile best (incremental + reported proc-macros + executable",
-        "  producers + path-normalized logical restore) vs none / shared-target / kache.",
-        "- **L1** default-safe build-script RUN cache (`NANOCOMPILE_BUILD_SCRIPT_CACHE=1`).",
-        "  Key is `nano-build-script-default-v1`: binary digest + `CARGO_PKG_*` /",
-        "  `CARGO_FEATURE_*` / `CARGO_CFG_*` / `TARGET` / `HOST` / `OPT_LEVEL` /",
-        "  `DEBUG` / `PROFILE` + rustc fingerprint. `OUT_DIR`, cwd, and",
-        "  `CARGO_MANIFEST_DIR` stay out of the key so sibling worktrees hit.",
-        "  After a miss, `cargo:rerun-if-changed` / `rerun-if-env-changed` are",
-        "  parsed and checked on restore. Nested `OUT_DIR` files are stored.",
-        "  Concurrent agents take an exclusive per-key lock; entries stay atomic.",
-        "- **L2** `--test` is a cacheable executable when",
-        "  `NANOCOMPILE_EXECUTABLE_PRODUCERS=1` (cargo test harnesses).",
+        "- **L0** workspace-logical keys (`$NANO_MANIFEST` / `$NANO_WORKSPACE`) so",
+        "  sibling worktrees share rustc identities. Incremental + reported",
+        "  proc-macros + executable producers. Jobserver env is not part of the key.",
+        "- **L3** `NANOCOMPILE_HARDLINK_TARGET=1`: after store, replace immutable",
+        "  `.rlib`/`.rmeta`/`.so`/`.a` in `target/` with a hardlink to the CAS blob.",
+        "- **L4** `NANOCOMPILE_ZSTD=1`: zstd-compress cold blobs (>=4KiB); restore",
+        "  decompresses. Hot hardlinked blobs stay uncompressed.",
+        "- **L5** `CARGO_INCREMENTAL=0` to drop per-worktree incremental dirs.",
+        "- **L6** `NANOCOMPILE_DEBUGINFO=1` (line tables) to shrink cached blobs.",
+        "- **L7** `NANOCOMPILE_SKIP_CHEAP=1`: skip storing artifacts cheaper to rebuild.",
+        "- **L8** slim build-script RUN cache: only small OUT_DIR trees (<=256KiB,",
+        "  no file >64KiB) so the script cache can cut crate count without +82% disk.",
+        "",
+        "Competitors on the same chart: no cache, shared `CARGO_TARGET_DIR`, kache,",
+        "sccache (if it runs), and every nanocompile config tried.",
         "",
         "Harness: `bench/agent_worktrees.py`. Raw rows: `bench/archive/agent-worktrees.json`.",
         "",
@@ -1001,14 +1190,42 @@ def main(argv=None):
             payload = {}
 
     if args.phase in ("all", "train"):
-        levers = list(BASELINES if not args.skip_baselines else ()) + list(LEVERS)
+        baselines = list(BASELINES if not args.skip_baselines else ())
+        if not sccache_bin():
+            baselines = [b for b in baselines if b["id"] != "sccache"]
         if args.quick:
-            levers = [l for l in levers if l["id"] in ("none", "kache", "l0_nano_best", "l1_script_cache")]
-        train = run_matrix(train_names, levers, n_list, modes, wrapper, args.work / "train", split="train")
+            baselines = [b for b in baselines if b["id"] in ("none", "kache", "shared_target", "sccache")]
+        train = run_matrix(
+            train_names, baselines + [LEVERS[0]], n_list, modes, wrapper, args.work / "train", split="train",
+        )
+        elite_env = dict(NANO_BEST)
+        elite_id = "l0_nano_best"
+        if not args.quick:
+            for delta in CLIMB_DELTAS:
+                env = dict(elite_env)
+                env.update(delta["env"])
+                lever = {"id": delta["id"], "approach": "nanocompile", "env": env, "loop": "check"}
+                nxt = run_matrix(
+                    train_names, [lever], n_list, modes, wrapper, args.work / "train", split="train",
+                )
+                train.extend(nxt)
+                base = [r for r in train if r.get("lever") == elite_id and r.get("ok") and r.get("mode") == "sequential"]
+                cand = [r for r in nxt if r.get("ok") and r.get("mode") == "sequential"]
+                summary = summarize_pair(base, cand)
+                keep = keep_decision(summary)
+                print(json.dumps({"climb": delta["id"], "vs": elite_id, "keep": keep, "metrics": {
+                    m: (summary.get(m) or {}).get("gain") for m in OBJECTIVES
+                }}), flush=True)
+                if keep:
+                    elite_env = env
+                    elite_id = delta["id"]
         payload["train"] = train
         payload["hill_climb"] = hill_climb(train)
+        payload["hill_climb"]["frozen_env"] = elite_env
+        payload["hill_climb"]["frozen_lever"] = elite_id
+        payload["pareto"] = {"train": pareto_by_repo(train, "train")}
         payload["commit"] = git_commit()
-        payload["frozen_env"] = payload["hill_climb"]["frozen_env"]
+        payload["frozen_env"] = elite_env
         write_json(args.out, payload)
 
     if args.phase in ("all", "held-out"):
@@ -1016,8 +1233,11 @@ def main(argv=None):
         frozen = [{"id": "frozen", "approach": "nanocompile", "env": frozen_env, "loop": "check"}]
         baselines = [] if args.quick else [
             {"id": "none", "approach": "none", "env": {}, "loop": "check"},
+            {"id": "shared_target", "approach": "shared_target", "env": {}, "loop": "check"},
             {"id": "kache", "approach": "kache", "env": {}, "loop": "check"},
         ]
+        if not args.quick and sccache_bin():
+            baselines.append({"id": "sccache", "approach": "sccache", "env": {}, "loop": "check"})
         held = run_matrix(
             list(HELD_OUT), baselines + frozen, [4], ["sequential"],
             wrapper, args.work / "held",
@@ -1038,6 +1258,8 @@ def main(argv=None):
         payload["held_out"] = held
         payload["survival"] = survival(payload.get("train") or [], held, (payload.get("hill_climb") or {}).get("frozen_lever") or "frozen")
         payload["breakdown"] = breakdown(held)
+        payload.setdefault("pareto", {})
+        payload["pareto"]["held_out"] = pareto_by_repo(held, "held_out")
         payload["commit"] = git_commit()
         write_json(args.out, payload)
 
@@ -1054,6 +1276,7 @@ def main(argv=None):
             "hill_climb": payload.get("hill_climb"),
             "survival": payload.get("survival"),
             "frozen_env": payload.get("frozen_env") or payload.get("hill_climb", {}).get("frozen_env"),
+            "pareto": payload.get("pareto"),
             "train": payload.get("train") or [],
             "held_out": payload.get("held_out") or [],
             "breakdown": payload.get("breakdown") or [],

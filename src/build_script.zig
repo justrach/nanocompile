@@ -416,6 +416,19 @@ fn executeDefault(ctx: *cache.Context, real: []const u8, args: []const []const u
     }
     ctx.event("build_script_miss");
     const paths = collectNestedOutputs(ctx, root) catch return 0;
+    if (eq(ctx.env.get("NANOCOMPILE_SCRIPT_DELTA") orelse "", "1")) {
+        var total: u64 = 0;
+        var too_big = false;
+        for (paths) |path| {
+            const st = Dir.cwd().statFile(ctx.io, path, .{}) catch continue;
+            total +|= st.size;
+            if (st.size > 64 * 1024) too_big = true;
+        }
+        if (too_big or total > 256 * 1024) {
+            ctx.trace("build-script skip store: OUT_DIR larger than delta budget");
+            return 0;
+        }
+    }
     var rels: std.ArrayList([]const u8) = .empty;
     for (paths) |path| try rels.append(ctx.a, relativeTo(root, path) orelse return 0);
     const rerun = parseRerun(ctx, result.stdout, manifest) catch return 0;

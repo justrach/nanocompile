@@ -91,6 +91,39 @@ class Climb(unittest.TestCase):
         self.assertIn("l1_script_cache", result["kept"])
         self.assertNotIn("l2_test_bins", result["kept"])
 
+    def test_regression_blocks_keep(self):
+        summary = {
+            "crates_compiled_mean": {"gain": 0.2, "keep": True},
+            "wall_ms": {"gain": 0.1, "keep": True},
+            "disk_bytes": {"gain": -0.4, "keep": False},
+            "store_bytes": {"gain": 0.0, "keep": False},
+        }
+        self.assertFalse(aw.keep_decision(summary))
+        summary["disk_bytes"] = {"gain": -0.02, "keep": False}
+        self.assertTrue(aw.keep_decision(summary))
+
+    def test_pareto_non_dominated(self):
+        rows = [
+            {"sample": "axum", "approach": "none", "lever": "none", "ok": True, "n_worktrees": 4,
+             "mode": "sequential", "edit_kind": "mixed",
+             "crates_compiled_mean": 50, "wall_ms": 20000, "disk_bytes": 800, "store_bytes": 0},
+            {"sample": "axum", "approach": "shared_target", "lever": "shared_target", "ok": True, "n_worktrees": 4,
+             "mode": "sequential", "edit_kind": "mixed",
+             "crates_compiled_mean": 1, "wall_ms": 3000, "disk_bytes": 160, "store_bytes": 0},
+            {"sample": "axum", "approach": "nanocompile", "lever": "l0_nano_best", "ok": True, "n_worktrees": 4,
+             "mode": "sequential", "edit_kind": "mixed",
+             "crates_compiled_mean": 2, "wall_ms": 4000, "disk_bytes": 150, "store_bytes": 40},
+            {"sample": "axum", "approach": "kache", "lever": "kache", "ok": True, "n_worktrees": 4,
+             "mode": "sequential", "edit_kind": "mixed",
+             "crates_compiled_mean": 1, "wall_ms": 5000, "disk_bytes": 600, "store_bytes": 200},
+        ]
+        front = aw.pareto_frontier(rows)
+        approaches = {r["approach"] for r in front}
+        self.assertIn("shared_target", approaches)
+        self.assertIn("nanocompile", approaches)
+        info = aw.pareto_by_repo(rows, "train")["axum"]
+        self.assertTrue(info["nano_on_frontier"])
+
     def test_survival_fraction(self):
         train = [
             {"lever": "none", "ok": True, "crates_compiled_mean": 10, "wall_ms": 1000, "disk_bytes": 100},
