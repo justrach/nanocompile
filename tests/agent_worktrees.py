@@ -152,6 +152,32 @@ class Docs(unittest.TestCase):
         })
         self.assertIn("worktree init", text)
         self.assertIn("NANOCOMPILE_EXECUTABLE_PRODUCERS", text)
+        self.assertIn("NANOCOMPILE_HARDLINK_TARGET", text)
+
+    def test_climb_notes_stay_in_table(self):
+        text = aw.render_docs({
+            "hill_climb": {
+                "log": [{
+                    "lever": "l14_slim_graph",
+                    "vs": "l12_no_variants",
+                    "keep": True,
+                    "metrics": {},
+                    "note": "Skip empty -L prefix guards",
+                }],
+                "frozen_lever": "frozen",
+                "frozen_env": aw.NANO_FRONTIER,
+            },
+            "survival": {"per_metric": {}, "general": [], "repo_specific": []},
+            "train": [],
+            "breakdown": [],
+        })
+        self.assertIn("NANOCOMPILE_REMAP_PATHS", text)
+        self.assertIn("| `l14_slim_graph` |", text)
+        self.assertIn("Skip empty -L prefix guards", text)
+        climb = text.split("## Hill-climb")[1].split("## Generalization")[0]
+        rows = [line for line in climb.splitlines() if line.startswith("| `")]
+        self.assertEqual(len(rows), 1)
+        self.assertTrue(all(line.startswith("|") for line in climb.splitlines() if "l14_slim_graph" in line))
 
 
 if __name__ == "__main__":

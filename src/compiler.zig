@@ -561,7 +561,7 @@ fn skipEnvName(name: []const u8) bool {
         "OLDPWD",         "LS_COLORS",      "DISPLAY",        "SSH_AUTH_SOCK",
         "SSH_CONNECTION", "SSH_CLIENT",     "SSH_TTY",        "PS1",
         "PROMPT_COMMAND", "_",              "CARGO_MAKEFLAGS", "NUM_JOBS",
-        "MAKEFLAGS",      "CARGO_BUILD_JOBS",
+        "MAKEFLAGS",      "CARGO_BUILD_JOBS", "PWD",
     }) |skip| {
         if (eq(name, skip)) return true;
     }
@@ -748,6 +748,19 @@ fn keyFor(ctx: *cache.Context, kind: Kind, argv: []const []const u8) ![]const u8
 
 fn less(_: void, a: []const u8, b: []const u8) bool {
     return std.mem.order(u8, a, b) == .lt;
+}
+
+fn applyRemapPrefixes(ctx: *cache.Context, argv: []const []const u8) ![]const []const u8 {
+    if (!eq(ctx.env.get("NANOCOMPILE_REMAP_PATHS") orelse "", "1")) return argv;
+    const prefixes = try pathPrefixes(ctx, argv);
+    if (prefixes.len == 0) return argv;
+    var out: std.ArrayList([]const u8) = .empty;
+    try out.appendSlice(ctx.a, argv);
+    for (prefixes) |prefix| {
+        if (prefix.path.len == 0) continue;
+        try out.append(ctx.a, try std.fmt.allocPrint(ctx.a, "--remap-path-prefix={s}={s}", .{ prefix.path, prefix.token }));
+    }
+    return out.items;
 }
 
 fn applyDebuginfoOverride(ctx: *cache.Context, argv: []const []const u8) ![]const []const u8 {
@@ -983,7 +996,10 @@ pub fn execute(ctx: *cache.Context, kind: Kind, argv: []const []const u8) !u8 {
     const total = ctx.profileStart();
     defer ctx.profileEnd("compiler.total", total);
     var phase = ctx.profileStart();
-    const argv_use = if (kind == .rust) try applyDebuginfoOverride(ctx, argv) else argv;
+    const argv_use = if (kind == .rust)
+        try applyRemapPrefixes(ctx, try applyDebuginfoOverride(ctx, argv))
+    else
+        argv;
     if (ctx.env.get("NANOCOMPILE_DISABLE")) |v| if (eq(v, "1")) return bypass(ctx, argv_use, "bypass: disabled");
     if (kind == .rust and bypassWorkspaceForIncremental(ctx, argv_use))
         return bypass(ctx, argv_use, "bypass: workspace crate left to incremental rustc");
@@ -1175,7 +1191,10 @@ fn save(ctx: *cache.Context, key: []const u8, plan: Plan, argv: []const []const 
         ctx.trace("skip store: cheaper to rebuild than to cache");
         return;
     }
-    try cache.storeVariants(ctx, key, records.items, plan.outputs, result.stdout, result.stderr);
+    if (eq(ctx.env.get("NANOCOMPILE_NO_VARIANTS") orelse "", "1"))
+        try cache.store(ctx, key, records.items, plan.outputs, result.stdout, result.stderr)
+    else
+        try cache.storeVariants(ctx, key, records.items, plan.outputs, result.stdout, result.stderr);
     ctx.profileEnd("save.artifacts", phase);
 }
 
@@ -1254,6 +1273,7 @@ test "workspace paths make sibling checkouts share a key" {
     );
     try std.testing.expectEqualStrings("$NANO_MANIFEST", try normalizeCacheText(&ctx, ctx.cwd, sibling_prefixes));
     try std.testing.expect(skipEnvName("CARGO_MAKEFLAGS"));
+    try std.testing.expect(skipEnvName("PWD"));
 }
 
 test "workspace-root cwd is rewritten when it parents the package" {

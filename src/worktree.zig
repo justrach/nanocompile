@@ -19,10 +19,13 @@ pub const GeneralFlag = struct { name: []const u8, value: []const u8 };
 /// Prefer these over per-repo tuning. See docs/agent-worktrees.md.
 pub const general_flags = [_]GeneralFlag{
     .{ .name = "NANOCOMPILE_ALLOW_INCREMENTAL", .value = "1" },
-    .{ .name = "CARGO_INCREMENTAL", .value = "1" },
+    .{ .name = "CARGO_INCREMENTAL", .value = "0" },
+    .{ .name = "NANOCOMPILE_HARDLINK_TARGET", .value = "1" },
+    .{ .name = "NANOCOMPILE_NO_VARIANTS", .value = "1" },
     .{ .name = "NANOCOMPILE_PROC_MACROS", .value = "reported" },
     .{ .name = "NANOCOMPILE_PROC_MACRO_PRODUCERS", .value = "1" },
     .{ .name = "NANOCOMPILE_EXECUTABLE_PRODUCERS", .value = "1" },
+    .{ .name = "NANOCOMPILE_REMAP_PATHS", .value = "1" },
 };
 
 pub fn renderConfig(allocator: std.mem.Allocator, wrapper: []const u8, store: []const u8) ![]const u8 {
@@ -86,8 +89,39 @@ pub fn execute(ctx: *cache.Context, args: []const [:0]const u8, self_exe: []cons
             \\  Write .cargo/config.toml so every git worktree shares one nanocompile store.
             \\  Uses the general hill-climbed defaults (not per-repo knobs). Each worktree
             \\  keeps its own target/; only invalidated crates compile.
+            \\nanocompile worktree dedup DIR...
+            \\  Hardlink identical files across target directories (one inode per blob).
+            \\nanocompile worktree seed SRC DST
+            \\  Hardlink SRC/ into DST/ (immutable) so a new worktree reuses the
+            \\  warm target instead of allocating a second copy of fingerprints.
+            \\nanocompile worktree gc DIR...
+            \\  Drop store blobs that no live target still materializes (working set).
             \\
         );
+        return 0;
+    }
+    if (eq(args[0], "seed")) {
+        if (args.len < 3) return error.MissingValue;
+        const src = try std.fs.path.resolve(ctx.a, &.{ ctx.cwd, args[1] });
+        const dst = try std.fs.path.resolve(ctx.a, &.{ ctx.cwd, args[2] });
+        const n = try cache.seedTree(ctx, src, dst);
+        try ctx.out(try std.fmt.allocPrint(ctx.a, "seeded {d} files\n", .{n}));
+        return 0;
+    }
+    if (eq(args[0], "dedup")) {
+        if (args.len < 2) return error.MissingValue;
+        var roots: std.ArrayList([]const u8) = .empty;
+        for (args[1..]) |arg| try roots.append(ctx.a, try std.fs.path.resolve(ctx.a, &.{ ctx.cwd, arg }));
+        const n = try cache.dedupTrees(ctx, roots.items);
+        try ctx.out(try std.fmt.allocPrint(ctx.a, "deduped {d} files\n", .{n}));
+        return 0;
+    }
+    if (eq(args[0], "gc")) {
+        if (args.len < 2) return error.MissingValue;
+        var roots: std.ArrayList([]const u8) = .empty;
+        for (args[1..]) |arg| try roots.append(ctx.a, try std.fs.path.resolve(ctx.a, &.{ ctx.cwd, arg }));
+        const n = try cache.gcWorkingSet(ctx, roots.items);
+        try ctx.out(try std.fmt.allocPrint(ctx.a, "gc dropped {d}\n", .{n}));
         return 0;
     }
     if (!eq(args[0], "init")) return error.UnknownWorktreeCommand;
@@ -121,6 +155,10 @@ test "worktree init renders the general shared-store block" {
     const block = try renderConfig(a, "/opt/nanocompile", "/home/user/.cache/nanocompile");
     try std.testing.expect(std.mem.indexOf(u8, block, "NANOCOMPILE_BUILD_SCRIPT_CACHE") == null);
     try std.testing.expect(std.mem.indexOf(u8, block, "NANOCOMPILE_EXECUTABLE_PRODUCERS") != null);
+    try std.testing.expect(std.mem.indexOf(u8, block, "NANOCOMPILE_HARDLINK_TARGET") != null);
+    try std.testing.expect(std.mem.indexOf(u8, block, "NANOCOMPILE_NO_VARIANTS") != null);
+    try std.testing.expect(std.mem.indexOf(u8, block, "NANOCOMPILE_REMAP_PATHS") != null);
+    try std.testing.expect(std.mem.indexOf(u8, block, "CARGO_INCREMENTAL") != null);
     try std.testing.expect(std.mem.indexOf(u8, block, "force = true") != null);
     const merged = try mergeConfig(a, "[build]\njobs = 8\n", block);
     try std.testing.expect(std.mem.indexOf(u8, merged, "jobs = 8") != null);

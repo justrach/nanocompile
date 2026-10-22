@@ -250,6 +250,13 @@ pub fn collect(ctx: *cache.Context, argv: []const []const u8, outputs: []const [
             const old_hash = if (normalize_companion) try cache.metadataCompanionDigest(ctx.a, old.names, prefix) else try cache.prefixDigest(ctx.a, old.names, prefix);
             const new_hash = if (normalize_companion) try cache.metadataCompanionDigest(ctx.a, dir.names, prefix) else try cache.prefixDigest(ctx.a, dir.names, prefix);
             if (!std.mem.eql(u8, old_hash, new_hash)) return error.LibraryDirectoryChangedDuringCompilation;
+            // Empty prefix matches on this -L dir cannot change rustc's search
+            // and explode entries (one guard per crate × every build OUT_DIR).
+            var matches: usize = 0;
+            for (dir.names) |entry| {
+                if (std.mem.startsWith(u8, entry, prefix)) matches += 1;
+            }
+            if (matches == 0) continue;
             try records.append(ctx.a, .{ .path = dir.path, .hash = new_hash, .directory = true, .libraries = true, .library_prefix = prefix, .metadata_companion = normalize_companion });
             for (dir.names) |entry| {
                 if (!std.mem.startsWith(u8, entry, prefix)) continue;

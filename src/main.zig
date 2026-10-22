@@ -25,6 +25,7 @@ const help =
     \\  nanocompile map-elites validate|merge|render|classify
     \\  nanocompile artifact put|get|head NAMESPACE KEY [FILE] [METADATA_JSON]
     \\  nanocompile worktree init [DIR]  shared store for agent worktrees (general defaults)
+    \\  nanocompile worktree dedup DIR...  hardlink identical files across target dirs
     \\  nanocompile stats | clear | doctor
     \\  nanocompile gc [MAX_BYTES]  remove orphan blobs and evict to a budget
     \\Environment:

@@ -47,7 +47,7 @@ SAMPLE_CATALOG = {
     "serde": {"path": Path("/tmp/real-samples/serde"), "package": "serde", "size": "mid"},
     "ruff": {"path": Path("/tmp/real-samples/ruff"), "package": "ruff", "size": "large"},
     "tokio": {"path": Path("/tmp/real-samples/tokio"), "package": "tokio", "size": "large"},
-    "emergentDB": {"path": Path("/tmp/real-samples/emergentDB"), "package": "vector-core", "size": "mid"},
+    "emergentDB": {"path": Path("/tmp/real-samples/emergentDB"), "package": "grep-core", "size": "mid"},
 }
 
 NANO_BEST = {
@@ -56,6 +56,16 @@ NANO_BEST = {
     "NANOCOMPILE_PROC_MACROS": "reported",
     "NANOCOMPILE_PROC_MACRO_PRODUCERS": "1",
     "NANOCOMPILE_EXECUTABLE_PRODUCERS": "1",
+}
+NANO_FRONTIER = {
+    "NANOCOMPILE_ALLOW_INCREMENTAL": "1",
+    "CARGO_INCREMENTAL": "0",
+    "NANOCOMPILE_HARDLINK_TARGET": "1",
+    "NANOCOMPILE_NO_VARIANTS": "1",
+    "NANOCOMPILE_PROC_MACROS": "reported",
+    "NANOCOMPILE_PROC_MACRO_PRODUCERS": "1",
+    "NANOCOMPILE_EXECUTABLE_PRODUCERS": "1",
+    "NANOCOMPILE_REMAP_PATHS": "1",
 }
 NANO_SCRIPT = dict(NANO_BEST, NANOCOMPILE_BUILD_SCRIPT_CACHE="1")
 
@@ -67,6 +77,9 @@ CLIMB_DELTAS = (
     {"id": "l6_debuginfo_line", "env": {"NANOCOMPILE_DEBUGINFO": "1"}},
     {"id": "l7_skip_cheap", "env": {"NANOCOMPILE_SKIP_CHEAP": "1"}},
     {"id": "l8_script_delta", "env": {"NANOCOMPILE_BUILD_SCRIPT_CACHE": "1", "NANOCOMPILE_SCRIPT_DELTA": "1"}},
+    {"id": "l9_hardlink_bins", "env": {"NANOCOMPILE_HARDLINK_TARGET": "1", "CARGO_INCREMENTAL": "0"}},
+    {"id": "l13_unique_deps", "env": {}},
+    {"id": "l20_remap_paths", "env": {"NANOCOMPILE_REMAP_PATHS": "1"}},
 )
 
 # Lever order: one change at a time. Keep >3% wins that do not regress another >3%.
@@ -143,6 +156,65 @@ def stats_compiled(before: dict, after: dict) -> tuple[int, int]:
     hits = n(after, "hits") - n(before, "hits")
     script_hit = n(after, "build-script hits") - n(before, "build-script hits")
     return max(0, misses + script_miss), max(0, hits + script_hit)
+
+
+def report_leftover(store: Path, targets, dest: Path) -> None:
+    """Write unique-inode leftover (target files not in the store) by folder."""
+    import stat as statmod
+    from collections import defaultdict
+
+    store_inodes = set()
+    if store.exists():
+        for dirpath, _, filenames in os.walk(store):
+            for name in filenames:
+                path = Path(dirpath) / name
+                try:
+                    st = path.lstat()
+                except OSError:
+                    continue
+                if statmod.S_ISREG(st.st_mode):
+                    store_inodes.add((st.st_dev, st.st_ino))
+    folder = defaultdict(lambda: [0, 0])
+    ext = defaultdict(lambda: [0, 0])
+    seen = set()
+    leftover = 0
+    big = []
+    for root in targets:
+        root = Path(root)
+        if not root.exists():
+            continue
+        for dirpath, _, filenames in os.walk(root):
+            parts = Path(dirpath).parts
+            tag = "other"
+            for name in ("fingerprint", "deps", "build", "incremental", "examples"):
+                if name in parts:
+                    tag = name
+                    break
+            for name in filenames:
+                path = Path(dirpath) / name
+                try:
+                    st = path.lstat()
+                except OSError:
+                    continue
+                if not statmod.S_ISREG(st.st_mode):
+                    continue
+                key = (st.st_dev, st.st_ino)
+                if key in seen or key in store_inodes:
+                    continue
+                seen.add(key)
+                leftover += st.st_size
+                folder[tag][0] += st.st_size
+                folder[tag][1] += 1
+                suffix = path.suffix.lower() or "<bin>"
+                ext[suffix][0] += st.st_size
+                ext[suffix][1] += 1
+                big.append((st.st_size, str(path)[-120:]))
+    dest.write_text(json.dumps({
+        "leftover_bytes": leftover,
+        "folder": {k: {"bytes": v[0], "n": v[1]} for k, v in folder.items()},
+        "ext": {k: {"bytes": v[0], "n": v[1]} for k, v in ext.items()},
+        "top": [{"bytes": b, "path": p} for b, p in sorted(big, reverse=True)[:12]],
+    }, indent=2, sort_keys=True), encoding="utf-8")
 
 
 def unique_disk_bytes(paths) -> int:
@@ -495,10 +567,22 @@ def measure_worktrees(
         add_worktree(main if not from_older else src, dest, commit if from_older else None)
         records = apply_agent_edit(dest, kinds[i])
         target = dest / "target" if approach != "shared_target" else shared_target
+        if approach == "nanocompile" and (main / "target").exists():
+            try:
+                subprocess.run(
+                    [str(wrapper), "worktree", "seed", str(main / "target"), str(target)],
+                    check=False, capture_output=True, timeout=600,
+                )
+            except (OSError, subprocess.TimeoutExpired):
+                pass
         wt_env = dict(env)
         if approach != "shared_target":
             wt_env["CARGO_TARGET_DIR"] = str(target)
         worktrees.append({"path": dest, "env": wt_env, "target": target, "records": records, "kind": kinds[i]})
+    # Warm artifacts live in the store and seeded worktrees. Dropping main's
+    # target avoids counting a fifth copy of fingerprints / edit-pre images.
+    if approach == "nanocompile":
+        shutil.rmtree(main / "target", ignore_errors=True)
 
     per = []
     start = time.perf_counter()
@@ -535,8 +619,22 @@ def measure_worktrees(
     targets = [wt["target"] for wt in worktrees] + [main / "target"]
     if approach == "shared_target":
         targets = [shared_target]
+    if approach == "nanocompile":
+        try:
+            subprocess.run(
+                [str(wrapper), "worktree", "dedup", *([str(store)] if store.exists() else []), *[str(t) for t in targets if Path(t).exists()]],
+                check=False, capture_output=True, timeout=600,
+            )
+            subprocess.run(
+                [str(wrapper), "worktree", "gc", *[str(t) for t in targets if Path(t).exists()]],
+                check=False, capture_output=True, timeout=600,
+            )
+        except (OSError, subprocess.TimeoutExpired):
+            pass
     disk = unique_disk_bytes([store, *targets])
     store_bytes = unique_disk_bytes([store]) if store.exists() else 0
+    if os.environ.get("NANOCOMPILE_LEFTOVER_REPORT") == "1":
+        report_leftover(store, targets, work / "leftover-report.json")
     compiled = [row["crates_compiled"] for row in per]
     mean_compiled = sum(compiled) / len(compiled) if compiled else 0
     restored = max(0, warm["crates_compiled"] - mean_compiled)
@@ -954,7 +1052,7 @@ def record_archive(payload, map_path: Path):
 def render_docs(payload) -> str:
     climb = payload.get("hill_climb") or {}
     surv = payload.get("survival") or {}
-    frozen = climb.get("frozen_env") or NANO_SCRIPT
+    frozen = climb.get("frozen_env") or NANO_FRONTIER
     lines = [
         "# Agent worktrees",
         "",
@@ -1001,8 +1099,8 @@ def render_docs(payload) -> str:
         "(hardlinks counted once), or store size, and does not regress another",
         "objective past 3%. Stop a metric after it stalls.",
         "",
-        "| lever | vs | crates/worktree | wall | disk | store | keep |",
-        "| --- | --- | --- | --- | --- | --- | --- |",
+        "| lever | vs | crates/worktree | wall | disk | store | keep | note |",
+        "| --- | --- | --- | --- | --- | --- | --- | --- |",
     ]
     for entry in climb.get("log") or []:
         m = entry.get("metrics") or {}
@@ -1010,17 +1108,15 @@ def render_docs(payload) -> str:
             info = m.get(metric) or {}
             g = info.get("gain")
             return "n/a" if g is None else "%.1f%%" % (g * 100)
-        note = "coverage" if entry.get("vs") == "coverage" else ("yes" if entry.get("keep") else "stall")
-        lines.append("| `%s` | %s | %s | %s | %s | %s | %s |" % (
+        keep = "coverage" if entry.get("vs") == "coverage" else ("yes" if entry.get("keep") else "stall")
+        note = (entry.get("note") or "").replace("|", "/")
+        lines.append("| `%s` | %s | %s | %s | %s | %s | %s | %s |" % (
             entry.get("lever"), entry.get("vs"),
             fmt("crates_compiled_mean"), fmt("wall_ms"), fmt("disk_bytes"),
             fmt("store_bytes"),
+            keep,
             note,
         ))
-        if entry.get("note"):
-            lines.append("")
-            lines.append(entry["note"])
-            lines.append("")
     lines += [
         "",
         "Frozen lever: `%s`." % climb.get("frozen_lever", "l0_nano_best"),
@@ -1137,16 +1233,25 @@ def render_docs(payload) -> str:
         "",
         "- **L0** workspace-logical keys (`$NANO_MANIFEST` / `$NANO_WORKSPACE`) so",
         "  sibling worktrees share rustc identities. Incremental + reported",
-        "  proc-macros + executable producers. Jobserver env is not part of the key.",
+        "  proc-macros + executable producers. Jobserver env and `PWD` are not",
+        "  part of the key.",
         "- **L3** `NANOCOMPILE_HARDLINK_TARGET=1`: after store, replace immutable",
-        "  `.rlib`/`.rmeta`/`.so`/`.a` in `target/` with a hardlink to the CAS blob.",
-        "- **L4** `NANOCOMPILE_ZSTD=1`: zstd-compress cold blobs (>=4KiB); restore",
-        "  decompresses. Hot hardlinked blobs stay uncompressed.",
+        "  `.rlib`/`.rmeta`/`.so`/`.a`/bins in `target/` with a hardlink to the CAS blob.",
         "- **L5** `CARGO_INCREMENTAL=0` to drop per-worktree incremental dirs.",
-        "- **L6** `NANOCOMPILE_DEBUGINFO=1` (line tables) to shrink cached blobs.",
-        "- **L7** `NANOCOMPILE_SKIP_CHEAP=1`: skip storing artifacts cheaper to rebuild.",
-        "- **L8** slim build-script RUN cache: only small OUT_DIR trees (<=256KiB,",
-        "  no file >64KiB) so the script cache can cut crate count without +82% disk.",
+        "- **L12** `NANOCOMPILE_NO_VARIANTS=1`: write-once entries (no 3-slot history).",
+        "- **L13/L14** unique dependency records + skip empty `-L` prefix guards so",
+        "  fat graphs (ruff) stop storing the same directory 200+ times.",
+        "- **L16** `nanocompile worktree seed`: hardlink a warm target into a new",
+        "  worktree (immutable) before cargo runs.",
+        "- **L17** `nanocompile worktree gc`: drop store blobs the live targets no",
+        "  longer materialize (working set of N worktrees).",
+        "- **L18** `worktree dedup` includes the store so leftover copies collapse.",
+        "- **L20** `NANOCOMPILE_REMAP_PATHS=1`: `--remap-path-prefix` so rustc",
+        "  embeds logical `$NANO_*` paths and sibling rmetas share one blob.",
+        "",
+        "Stalled or discarded: zstd-on-hot-blobs (inflates unique disk vs hardlink),",
+        "debuginfo=1/0 (regressed train disk), build-script RUN cache (+82% disk),",
+        "RUSTFLAGS=-Cdebuginfo=0 (did not reach bypassed openssl-sys leftover).",
         "",
         "Competitors on the same chart: no cache, shared `CARGO_TARGET_DIR`, kache,",
         "sccache (if it runs), and every nanocompile config tried.",
