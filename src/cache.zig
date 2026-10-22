@@ -8,6 +8,7 @@ const c = struct {
     extern "c" fn flock(fd: c_int, operation: c_int) c_int;
     extern "c" fn clonefile(src: [*:0]const u8, dst: [*:0]const u8, flags: u32) c_int;
     extern "c" fn ioctl(fd: c_int, request: c_ulong, ...) c_int;
+    extern "c" fn link(oldpath: [*:0]const u8, newpath: [*:0]const u8) c_int;
     const O_RDONLY = 0;
     const O_WRONLY = 1;
     const O_RDWR = 2;
@@ -34,6 +35,19 @@ const win = struct {
 const Dir = std.Io.Dir;
 pub const Hash = std.crypto.hash.Blake3;
 pub const CheckedDigest = struct { hash: []const u8, state: std.Io.File.Stat };
+
+fn replaceAll(a: std.mem.Allocator, bytes: []const u8, old: []const u8, new: []const u8) ![]const u8 {
+    if (old.len == 0 or std.mem.indexOf(u8, bytes, old) == null) return bytes;
+    var out: std.ArrayList(u8) = .empty;
+    var cursor: usize = 0;
+    while (std.mem.indexOfPos(u8, bytes, cursor, old)) |at| {
+        try out.appendSlice(a, bytes[cursor..at]);
+        try out.appendSlice(a, new);
+        cursor = at + old.len;
+    }
+    try out.appendSlice(a, bytes[cursor..]);
+    return out.items;
+}
 
 pub fn permissions(mode: u32) std.Io.File.Permissions {
     return if (builtin.os.tag == .windows) .default_file else .fromMode(@intCast(mode & 0o777));
@@ -63,6 +77,7 @@ pub fn readMetadata(io: std.Io, a: std.mem.Allocator, path: []const u8) ![]const
 }
 
 pub const RustLocations = struct { compiler: []const u8, sysroot: []const u8, target_libdir: []const u8, fallback_verified: bool = false };
+pub const PathRewrite = struct { token: []const u8, path: []const u8 };
 
 pub const Context = struct {
     a: std.mem.Allocator,
@@ -74,6 +89,7 @@ pub const Context = struct {
     compiler_decoder_identity: ?[]const u8 = null,
     compiler_epoch: ?[]const u8 = null,
     rust_locations: ?RustLocations = null,
+    rewrites: []const PathRewrite = &.{},
 
     pub fn init(a: std.mem.Allocator, io: std.Io, env: *std.process.Environ.Map) !Context {
         const root = env.get("NANOCOMPILE_DIR") orelse try std.fs.path.join(a, &.{
@@ -92,6 +108,30 @@ pub const Context = struct {
         try all.append(self.a, self.root);
         try all.appendSlice(self.a, parts);
         return std.fs.path.join(self.a, all.items);
+    }
+
+    pub fn logicalPath(self: *Context, text: []const u8) ![]const u8 {
+        const ordered = try self.a.dupe(PathRewrite, self.rewrites);
+        std.mem.sort(PathRewrite, ordered, {}, struct {
+            fn less(_: void, a: PathRewrite, b: PathRewrite) bool {
+                return a.path.len > b.path.len;
+            }
+        }.less);
+        var current = text;
+        for (ordered) |rewrite| {
+            if (rewrite.path.len == 0) continue;
+            current = try replaceAll(self.a, current, rewrite.path, rewrite.token);
+        }
+        return current;
+    }
+
+    pub fn physicalPath(self: *Context, text: []const u8) ![]const u8 {
+        var current = text;
+        for (self.rewrites) |rewrite| {
+            if (rewrite.token.len == 0) continue;
+            current = try replaceAll(self.a, current, rewrite.token, rewrite.path);
+        }
+        return current;
     }
 
     pub fn prepare(self: *Context) !void {
@@ -419,8 +459,124 @@ fn blobPath(ctx: *Context, hash: []const u8) ![]const u8 {
     return ctx.path(&.{ "blobs", hash[0..2], hash });
 }
 
-// Never hardlink: a later linker, strip, or user write must not mutate the cache.
+pub const MaterializeMethod = enum { reflink, hardlink, copy };
+
+fn immutableArtifact(path: []const u8) bool {
+    return std.mem.endsWith(u8, path, ".rlib") or std.mem.endsWith(u8, path, ".rmeta") or
+        std.mem.endsWith(u8, path, ".dylib") or std.mem.endsWith(u8, path, ".so") or
+        std.mem.endsWith(u8, path, ".a") or std.mem.endsWith(u8, path, ".d");
+}
+
+fn shareableOutput(path: []const u8) bool {
+    if (immutableArtifact(path)) return true;
+    const base = std.fs.path.basename(path);
+    if (std.mem.indexOfScalar(u8, base, '.') != null) return false;
+    return base.len > 0;
+}
+
+const zstd_c = struct {
+    extern "c" fn ZSTD_compress(dst: [*]u8, dstCapacity: usize, src: [*]const u8, srcSize: usize, compressionLevel: c_int) usize;
+    extern "c" fn ZSTD_decompress(dst: [*]u8, dstCapacity: usize, src: [*]const u8, srcSize: usize) usize;
+    extern "c" fn ZSTD_compressBound(srcSize: usize) usize;
+    extern "c" fn ZSTD_isError(code: usize) c_uint;
+    extern "c" fn ZSTD_getFrameContentSize(src: [*]const u8, srcSize: usize) u64;
+};
+const zstd_magic = [_]u8{ 0x28, 0xB5, 0x2F, 0xFD };
+
+fn zstdEnabled(ctx: *Context) bool {
+    return std.mem.eql(u8, ctx.env.get("NANOCOMPILE_ZSTD") orelse "", "1");
+}
+
+fn hardlinkTargetEnabled(ctx: *Context) bool {
+    return std.mem.eql(u8, ctx.env.get("NANOCOMPILE_HARDLINK_TARGET") orelse "", "1");
+}
+
+fn looksZstd(bytes: []const u8) bool {
+    return bytes.len >= 4 and std.mem.eql(u8, bytes[0..4], &zstd_magic);
+}
+
+fn zstdCompress(ctx: *Context, bytes: []const u8) ![]const u8 {
+    const bound = zstd_c.ZSTD_compressBound(bytes.len);
+    const out = try ctx.a.alloc(u8, bound);
+    const n = zstd_c.ZSTD_compress(out.ptr, out.len, bytes.ptr, bytes.len, 3);
+    if (zstd_c.ZSTD_isError(n) != 0 or n >= bytes.len) return error.ZstdCompress;
+    return out[0..n];
+}
+
+fn zstdDecompress(ctx: *Context, bytes: []const u8) ![]const u8 {
+    const hinted = zstd_c.ZSTD_getFrameContentSize(bytes.ptr, bytes.len);
+    const cap: usize = if (hinted != 0 and hinted != std.math.maxInt(u64) and hinted <= 64 * 1024 * 1024)
+        @intCast(hinted)
+    else
+        bytes.len * 8 + 4096;
+    const out = try ctx.a.alloc(u8, cap);
+    const n = zstd_c.ZSTD_decompress(out.ptr, out.len, bytes.ptr, bytes.len);
+    if (zstd_c.ZSTD_isError(n) != 0) return error.ZstdDecompress;
+    return out[0..n];
+}
+
+fn blobLogicalHash(ctx: *Context, path_: []const u8) ![]const u8 {
+    const raw = Dir.cwd().readFileAlloc(ctx.io, path_, ctx.a, .limited(64 * 1024 * 1024)) catch return ctx.digest(path_);
+    if (!looksZstd(raw)) {
+        var h = Hash.init(.{});
+        h.update(raw);
+        return finish(ctx.a, &h);
+    }
+    const plain = zstdDecompress(ctx, raw) catch return ctx.digest(path_);
+    var h = Hash.init(.{});
+    h.update(plain);
+    return finish(ctx.a, &h);
+}
+
+fn shareImmutableOutput(ctx: *Context, destination: []const u8, hash: []const u8) void {
+    if (!hardlinkTargetEnabled(ctx) or !shareableOutput(destination)) return;
+    const source = blobPath(ctx, hash) catch return;
+    if (looksZstd(ctx.read(source) catch return)) return;
+    const src_z = ctx.a.dupeSentinel(u8, source, 0) catch return;
+    const tmp = std.fmt.allocPrint(ctx.a, "{s}.nano-share-{d}", .{ destination, c.getpid() }) catch return;
+    const dst_z = ctx.a.dupeSentinel(u8, tmp, 0) catch return;
+    Dir.cwd().deleteFile(ctx.io, tmp) catch {};
+    if (c.link(src_z, dst_z) != 0) return;
+    makeImmutable(ctx, source, isExecutableName(destination));
+    Dir.cwd().rename(tmp, .cwd(), destination, ctx.io) catch {
+        Dir.cwd().deleteFile(ctx.io, tmp) catch {};
+    };
+}
+
+fn makeReadOnly(ctx: *Context, path: []const u8) void {
+    makeImmutable(ctx, path, false);
+}
+
+fn makeImmutable(ctx: *Context, path: []const u8, executable: bool) void {
+    const file = Dir.cwd().openFile(ctx.io, path, .{ .mode = .read_write }) catch return;
+    defer file.close(ctx.io);
+    file.setPermissions(ctx.io, .fromMode(if (executable) 0o555 else 0o444)) catch {};
+}
+
+fn isExecutableName(path: []const u8) bool {
+    const base = std.fs.path.basename(path);
+    return std.mem.indexOfScalar(u8, base, '.') == null and base.len > 0;
+}
+
+/// Clone/copy into the CAS. Never hardlink a compiler output onto a blob:
+/// cargo or rustc may later rewrite that path in place.
 pub fn materialize(ctx: *Context, source: []const u8, destination: []const u8, mode: u32) !void {
+    _ = try materializeWith(ctx, source, destination, mode, false);
+}
+
+/// Restore into a build tree. Immutable artifacts and host bins may share the blob inode.
+pub fn materializeRestore(ctx: *Context, source: []const u8, destination: []const u8, mode: u32) !MaterializeMethod {
+    const allow = immutableArtifact(destination) or (hardlinkTargetEnabled(ctx) and shareableOutput(destination));
+    const method = try materializeWith(ctx, source, destination, mode, allow);
+    ctx.event(switch (method) {
+        .reflink => "restore_reflink",
+        .hardlink => "restore_hardlink",
+        .copy => "restore_copy",
+    });
+    return method;
+}
+
+fn materializeWith(ctx: *Context, source: []const u8, destination: []const u8, mode: u32, allow_hardlink: bool) !MaterializeMethod {
     if (builtin.os.tag == .windows) {
         // Independent copy into an exclusive temporary, then atomic replace.
         // Never expose partial outputs or alias an immutable cache blob.
@@ -439,7 +595,7 @@ pub fn materialize(ctx: *Context, source: []const u8, destination: []const u8, m
         // No stat is needed: this API returns no file-state memo. In particular,
         // write-only Windows atomic handles do not grant read-attributes access.
         try atomic.replace(ctx.io);
-        return;
+        return .copy;
     }
     try Dir.cwd().createDirPath(ctx.io, std.fs.path.dirname(destination) orelse ".");
     const temp = try std.fmt.allocPrint(ctx.a, "{s}.nano-{d}", .{ destination, c.getpid() });
@@ -447,6 +603,14 @@ pub fn materialize(ctx: *Context, source: []const u8, destination: []const u8, m
     Dir.cwd().deleteFile(ctx.io, temp) catch {};
     const src_z = try ctx.a.dupeSentinel(u8, source, 0);
     const dst_z = try ctx.a.dupeSentinel(u8, temp, 0);
+    // Prefer a hardlink when the caller wants one inode: FICLONE/clonefile
+    // create a new inode and unique-disk accounting counts it fully.
+    if (allow_hardlink and c.link(src_z, dst_z) == 0) {
+        makeImmutable(ctx, source, isExecutableName(destination) or (mode & 0o111) != 0);
+        try Dir.cwd().rename(temp, .cwd(), destination, ctx.io);
+        return .hardlink;
+    }
+    Dir.cwd().deleteFile(ctx.io, temp) catch {};
     const cloned = if (builtin.os.tag == .macos)
         c.clonefile(src_z, dst_z, 0) == 0
     else blk: {
@@ -458,21 +622,39 @@ pub fn materialize(ctx: *Context, source: []const u8, destination: []const u8, m
         defer _ = c.close(dst);
         break :blk c.ioctl(dst, c.FICLONE, src) == 0;
     };
-    if (!cloned) {
-        Dir.cwd().deleteFile(ctx.io, temp) catch {};
-        try Dir.cwd().copyFile(source, .cwd(), temp, ctx.io, .{});
+    if (cloned) {
+        const file = try Dir.cwd().openFile(ctx.io, temp, .{ .mode = .read_write });
+        defer file.close(ctx.io);
+        try file.setPermissions(ctx.io, .fromMode(@intCast(mode & 0o777)));
+        try Dir.cwd().rename(temp, .cwd(), destination, ctx.io);
+        return .reflink;
     }
+    Dir.cwd().deleteFile(ctx.io, temp) catch {};
+    try Dir.cwd().copyFile(source, .cwd(), temp, ctx.io, .{});
     const file = try Dir.cwd().openFile(ctx.io, temp, .{ .mode = .read_write });
     defer file.close(ctx.io);
     try file.setPermissions(ctx.io, .fromMode(@intCast(mode & 0o777)));
     try Dir.cwd().rename(temp, .cwd(), destination, ctx.io);
+    return .copy;
 }
 
 pub fn putFile(ctx: *Context, source: []const u8) ![]const u8 {
     const hash = try ctx.digest(source);
     const destination = try blobPath(ctx, hash);
-    const existing = ctx.digest(destination) catch "";
-    if (!std.mem.eql(u8, hash, existing)) try materialize(ctx, source, destination, 0o600);
+    const existing = blobLogicalHash(ctx, destination) catch "";
+    if (std.mem.eql(u8, hash, existing)) return hash;
+    const st = Dir.cwd().statFile(ctx.io, source, .{}) catch null;
+    if (zstdEnabled(ctx) and st != null and st.?.size >= 4096 and st.?.size <= 32 * 1024 * 1024) {
+        const plain = Dir.cwd().readFileAlloc(ctx.io, source, ctx.a, .limited(32 * 1024 * 1024)) catch {
+            try materialize(ctx, source, destination, 0o600);
+            return hash;
+        };
+        if (zstdCompress(ctx, plain)) |compressed| {
+            try ctx.atomic(destination, compressed);
+            return hash;
+        } else |_| {}
+    }
+    try materialize(ctx, source, destination, 0o600);
     return hash;
 }
 
@@ -510,18 +692,55 @@ pub fn storeNamedTask(ctx: *Context, key: []const u8, names: []const []const u8,
     return storeEntry(ctx, key, &.{}, output_paths, stdout, stderr, false, names);
 }
 
+fn dependencyDedupeKey(ctx: *Context, dep: Dependency) ![]const u8 {
+    return std.fmt.allocPrint(ctx.a, "{s}\x00{s}\x00{d}{d}{d}{d}{d}\x00{s}\x00{s}", .{
+        dep.path,
+        dep.hash,
+        @intFromBool(dep.directory),
+        @intFromBool(dep.libraries),
+        @intFromBool(dep.all_members),
+        @intFromBool(dep.metadata_companion),
+        @intFromBool(dep.missing != null),
+        dep.library_prefix orelse "",
+        dep.symlink_target orelse "",
+    });
+}
+
+/// rustc graph collection repeats the same -L membership once per crate.
+/// Restore only needs each (path, hash, guard) once; duplicates inflate entries.
+fn uniqueDependencies(ctx: *Context, dependencies: []const Dependency) ![]const Dependency {
+    var seen: std.StringHashMap(void) = .init(ctx.a);
+    var out: std.ArrayList(Dependency) = .empty;
+    for (dependencies) |dep| {
+        const slot = try seen.getOrPut(try dependencyDedupeKey(ctx, dep));
+        if (slot.found_existing) continue;
+        try out.append(ctx.a, dep);
+    }
+    return out.items;
+}
+
 fn storeEntry(ctx: *Context, key: []const u8, dependencies: []const Dependency, output_paths: []const []const u8, stdout: []const u8, stderr: []const u8, variants: bool, output_names: ?[]const []const u8) !void {
     if (output_names) |names| if (names.len != output_paths.len) return error.InvalidDestinations;
-    for (dependencies) |dep| if (dep.missing != null and !try missingValid(ctx, dep)) return error.InvalidMissingDependency;
-    for (dependencies) |dep| if (dep.symlink_target != null and !try symlinkValid(ctx, dep)) return error.InvalidSymlinkDependency;
+    const unique = try uniqueDependencies(ctx, dependencies);
+    for (unique) |dep| if (dep.missing != null and !try missingValid(ctx, dep)) return error.InvalidMissingDependency;
+    for (unique) |dep| if (dep.symlink_target != null and !try symlinkValid(ctx, dep)) return error.InvalidSymlinkDependency;
+    var logical_deps: std.ArrayList(Dependency) = .empty;
+    for (unique) |dep| {
+        var next = dep;
+        next.path = try ctx.logicalPath(dep.path);
+        try logical_deps.append(ctx.a, next);
+    }
     var outputs: std.ArrayList(Output) = .empty;
     for (output_paths, 0..) |path_, index| {
         const st = try Dir.cwd().statFile(ctx.io, path_, .{});
         if (st.kind != .file) return error.NotRegularFile;
-        try outputs.append(ctx.a, .{ .path = if (output_names) |names| names[index] else path_, .hash = try putFile(ctx, path_), .mode = fileMode(st.permissions) });
+        const recorded = if (output_names) |names| names[index] else try ctx.logicalPath(path_);
+        const hash = try putFile(ctx, path_);
+        try outputs.append(ctx.a, .{ .path = recorded, .hash = hash, .mode = fileMode(st.permissions) });
+        shareImmutableOutput(ctx, path_, hash);
     }
     const entry: Entry = .{
-        .dependencies = dependencies,
+        .dependencies = logical_deps.items,
         .outputs = outputs.items,
         .stdout = try putBytes(ctx, stdout),
         .stderr = try putBytes(ctx, stderr),
@@ -581,7 +800,7 @@ pub fn fetchArtifact(ctx: *Context, namespace: []const u8, key: []const u8, dest
         !std.mem.eql(u8, info.namespace, namespace) or !std.mem.eql(u8, info.key, key) or
         !std.mem.eql(u8, entry.outputs[0].path, "artifact")) return false;
     const source = blobPath(ctx, entry.outputs[0].hash) catch return false;
-    const actual = ctx.digest(source) catch return false;
+    const actual = blobLogicalHash(ctx, source) catch return false;
     if (!std.mem.eql(u8, actual, entry.outputs[0].hash)) return false;
     const st = try Dir.cwd().statFile(ctx.io, source, .{});
     if (destination) |out_| try materialize(ctx, source, out_, 0o600);
@@ -619,11 +838,12 @@ fn parallelFileHashes(ctx: *Context, dependencies: []const Dependency, hashes: *
     var size: u64 = 0;
     for (dependencies) |dep| {
         if (dep.directory or dep.missing != null or dep.symlink_target != null) continue;
-        const slot = try paths.getOrPut(ctx.a, dep.path);
+        const resolved = ctx.physicalPath(dep.path) catch return false;
+        const slot = try paths.getOrPut(ctx.a, resolved);
         if (slot.found_existing) continue;
-        const st = Dir.cwd().statFile(ctx.io, dep.path, .{}) catch return false;
+        const st = Dir.cwd().statFile(ctx.io, resolved, .{}) catch return false;
         size +|= st.size;
-        try jobs.append(ctx.a, .{ .path = dep.path });
+        try jobs.append(ctx.a, .{ .path = resolved });
     }
     // Small restores retain their serial path. Large graphs use at most four
     // workers, leaving the same full hashes and per-restore lifetime intact.
@@ -654,7 +874,7 @@ const OutputCheck = struct {
         local.a = arena.allocator();
         for (check.entry.outputs) |output| {
             const path = blobPath(&local, output.hash) catch return;
-            const hash = local.digest(path) catch return;
+            const hash = blobLogicalHash(&local, path) catch return;
             if (!std.mem.eql(u8, hash, output.hash)) return;
         }
         check.valid = true;
@@ -712,7 +932,10 @@ fn restoreWithSnapshot(ctx: *Context, key: []const u8, allowed_outputs: []const 
     // and explicit externs can also appear in the transitive graph. Reuse the
     // enumeration and content hashes only within this restore. No metadata
     // shortcut survives a compiler invocation or a before/after input check.
-    for (entry.outputs, allowed_outputs) |output, allowed| if (!std.mem.eql(u8, output.path, allowed)) return null;
+    for (entry.outputs, allowed_outputs) |output, allowed| {
+        const allowed_logical = try ctx.logicalPath(allowed);
+        if (!std.mem.eql(u8, output.path, allowed) and !std.mem.eql(u8, output.path, allowed_logical)) return null;
+    }
     ctx.profileEnd("restore.manifest", phase);
     phase = ctx.profileStart();
     var output_check: OutputCheck = .{ .entry = &entry };
@@ -740,28 +963,30 @@ fn restoreWithSnapshot(ctx: *Context, key: []const u8, allowed_outputs: []const 
         if (!try parallelFileHashes(ctx, entry.dependencies, &file_hashes)) return null;
         ctx.profileEnd("restore.parallel_input_hashes", hash_start);
         for (entry.dependencies) |dep| {
-            if (dep.symlink_target != null) {
-                if (!(symlinkValid(ctx, dep) catch false)) return null;
+            var resolved = dep;
+            resolved.path = try ctx.physicalPath(dep.path);
+            if (resolved.symlink_target != null) {
+                if (!(symlinkValid(ctx, resolved) catch false)) return null;
                 continue;
             }
-            if (dep.missing != null) {
-                if (!(missingValid(ctx, dep) catch false)) {
+            if (resolved.missing != null) {
+                if (!(missingValid(ctx, resolved) catch false)) {
                     ctx.trace("miss: negative lookup changed or unavailable");
                     return null;
                 }
                 continue;
             }
-            const hash = if (dep.library_prefix) |prefix| blk: {
-                const slot = try library_names.getOrPut(ctx.a, dep.path);
-                if (!slot.found_existing) slot.value_ptr.* = ctx.libraryNames(dep.path, allowed_outputs) catch return null;
-                break :blk if (dep.metadata_companion) metadataCompanionDigest(ctx.a, slot.value_ptr.*, prefix) catch return null else try prefixDigest(ctx.a, slot.value_ptr.*, prefix);
-            } else if (dep.all_members)
-                ctx.nativeDirectoryDigest(dep.path) catch return null
-            else if (dep.directory)
-                ctx.directoryDigest(dep.path, dep.libraries, allowed_outputs) catch return null
+            const hash = if (resolved.library_prefix) |prefix| blk: {
+                const slot = try library_names.getOrPut(ctx.a, resolved.path);
+                if (!slot.found_existing) slot.value_ptr.* = ctx.libraryNames(resolved.path, allowed_outputs) catch return null;
+                break :blk if (resolved.metadata_companion) metadataCompanionDigest(ctx.a, slot.value_ptr.*, prefix) catch return null else try prefixDigest(ctx.a, slot.value_ptr.*, prefix);
+            } else if (resolved.all_members)
+                ctx.nativeDirectoryDigest(resolved.path) catch return null
+            else if (resolved.directory)
+                ctx.directoryDigest(resolved.path, resolved.libraries, allowed_outputs) catch return null
             else blk: {
-                const slot = try file_hashes.getOrPut(ctx.a, dep.path);
-                if (!slot.found_existing) slot.value_ptr.* = ctx.digest(dep.path) catch return null;
+                const slot = try file_hashes.getOrPut(ctx.a, resolved.path);
+                if (!slot.found_existing) slot.value_ptr.* = ctx.digest(resolved.path) catch return null;
                 break :blk slot.value_ptr.*;
             };
             if (!std.mem.eql(u8, hash, dep.hash)) {
@@ -778,7 +1003,7 @@ fn restoreWithSnapshot(ctx: *Context, key: []const u8, allowed_outputs: []const 
         if (!output_check.valid) return null;
     } else {
         for (entry.outputs) |output| {
-            const hash = ctx.digest(try blobPath(ctx, output.hash)) catch return null;
+            const hash = blobLogicalHash(ctx, try blobPath(ctx, output.hash)) catch return null;
             if (!std.mem.eql(u8, hash, output.hash)) return null;
         }
     }
@@ -800,7 +1025,22 @@ fn restoreWithSnapshot(ctx: *Context, key: []const u8, allowed_outputs: []const 
         timing_start = boundary;
         materializing = true;
     }
-    for (entry.outputs, destinations) |output, destination| try materialize(ctx, try blobPath(ctx, output.hash), destination, output.mode);
+    for (entry.outputs, destinations) |output, destination| {
+        const blob = try blobPath(ctx, output.hash);
+        const raw = ctx.read(blob) catch {
+            _ = try materializeRestore(ctx, blob, destination, output.mode);
+            continue;
+        };
+        if (looksZstd(raw)) {
+            const plain = zstdDecompress(ctx, raw) catch return null;
+            const tmp = try std.fmt.allocPrint(ctx.a, "{s}.nano-zstd-{d}", .{ destination, c.getpid() });
+            try ctx.atomic(tmp, plain);
+            defer Dir.cwd().deleteFile(ctx.io, tmp) catch {};
+            _ = try materializeRestore(ctx, tmp, destination, output.mode);
+        } else {
+            _ = try materializeRestore(ctx, blob, destination, output.mode);
+        }
+    }
     ctx.profileEnd("restore.materialization", phase);
     return .{ .stdout = stdout, .stderr = stderr };
 }
@@ -835,12 +1075,28 @@ pub fn stats(ctx: *Context) !void {
     var script_miss: usize = 0;
     var script_bypass: usize = 0;
     var script_failed: usize = 0;
+    var ts_hit: usize = 0;
+    var ts_miss: usize = 0;
+    var ts_bypass: usize = 0;
+    var ts_failed: usize = 0;
+    var restore_reflink: usize = 0;
+    var restore_hardlink: usize = 0;
+    var restore_copy: usize = 0;
+    var restore_ns_total: u64 = 0;
+    var restore_ns_samples: usize = 0;
     var it = std.mem.tokenizeScalar(u8, events, '\n');
     while (it.next()) |event| {
         if (std.mem.eql(u8, event, "hit")) hit += 1;
         if (std.mem.eql(u8, event, "miss")) miss += 1;
         if (std.mem.eql(u8, event, "bypass")) bypass += 1;
         if (std.mem.eql(u8, event, "failed")) failed += 1;
+        if (std.mem.eql(u8, event, "restore_reflink")) restore_reflink += 1;
+        if (std.mem.eql(u8, event, "restore_hardlink")) restore_hardlink += 1;
+        if (std.mem.eql(u8, event, "restore_copy")) restore_copy += 1;
+        if (std.mem.startsWith(u8, event, "restore_ns=")) {
+            restore_ns_total += std.fmt.parseInt(u64, event["restore_ns=".len..], 10) catch 0;
+            restore_ns_samples += 1;
+        }
         if (std.mem.eql(u8, event, "xcode_native_run")) xcode_runs += 1;
         if (std.mem.eql(u8, event, "xcode_native_failed")) xcode_failed += 1;
         if (std.mem.eql(u8, event, "clang_native_run")) clang_run += 1;
@@ -855,6 +1111,10 @@ pub fn stats(ctx: *Context) !void {
         if (std.mem.eql(u8, event, "build_script_miss")) script_miss += 1;
         if (std.mem.eql(u8, event, "build_script_bypass")) script_bypass += 1;
         if (std.mem.eql(u8, event, "build_script_failed")) script_failed += 1;
+        if (std.mem.eql(u8, event, "ts_hit")) ts_hit += 1;
+        if (std.mem.eql(u8, event, "ts_miss")) ts_miss += 1;
+        if (std.mem.eql(u8, event, "ts_bypass")) ts_bypass += 1;
+        if (std.mem.eql(u8, event, "ts_failed")) ts_failed += 1;
     }
     var blobs: usize = 0;
     var size: u64 = 0;
@@ -871,6 +1131,147 @@ pub fn stats(ctx: *Context) !void {
     try ctx.out(try std.fmt.allocPrint(ctx.a, "native Clang invocations: {d}\nnative Clang failures: {d}\nobserved Clang hits: {d}\nobserved Clang misses: {d}\nClang hit/miss observations require NANOCOMPILE_CLANG_REMARKS=1\n", .{ clang_run, clang_failed, clang_hit, clang_miss }));
     try ctx.out(try std.fmt.allocPrint(ctx.a, "portable C/C++ hits: {d}\nportable C/C++ misses: {d}\nportable C/C++ bypasses: {d}\nportable C/C++ failures: {d}\n", .{ cc_hit, cc_miss, cc_bypass, cc_failed }));
     try ctx.out(try std.fmt.allocPrint(ctx.a, "build-script hits: {d}\nbuild-script misses: {d}\nbuild-script bypasses: {d}\nbuild-script failures: {d}\n", .{ script_hit, script_miss, script_bypass, script_failed }));
+    try ctx.out(try std.fmt.allocPrint(ctx.a, "typescript hits: {d}\ntypescript misses: {d}\ntypescript bypasses: {d}\ntypescript failures: {d}\n", .{ ts_hit, ts_miss, ts_bypass, ts_failed }));
+    try ctx.out(try std.fmt.allocPrint(ctx.a, "restore reflink: {d}\nrestore hardlink: {d}\nrestore copy: {d}\nrestore ns total: {d}\nrestore ns samples: {d}\n", .{ restore_reflink, restore_hardlink, restore_copy, restore_ns_total, restore_ns_samples }));
+}
+
+/// Hardlink every regular file from source into destination and mark it
+/// immutable so a later cargo/rustc replace cannot mutate the shared inode.
+pub fn seedTree(ctx: *Context, source: []const u8, destination: []const u8) !usize {
+    var dir = Dir.cwd().openDir(ctx.io, source, .{ .iterate = true }) catch return 0;
+    defer dir.close(ctx.io);
+    var walk = try dir.walk(ctx.a);
+    defer walk.deinit();
+    var linked: usize = 0;
+    while (try walk.next(ctx.io)) |item| {
+        if (item.kind != .file) continue;
+        const src = try std.fs.path.join(ctx.a, &.{ source, item.path });
+        const dst = try std.fs.path.join(ctx.a, &.{ destination, item.path });
+        try Dir.cwd().createDirPath(ctx.io, std.fs.path.dirname(dst) orelse ".");
+        Dir.cwd().deleteFile(ctx.io, dst) catch {};
+        const src_z = try ctx.a.dupeSentinel(u8, src, 0);
+        const dst_z = try ctx.a.dupeSentinel(u8, dst, 0);
+        if (c.link(src_z, dst_z) != 0) {
+            try Dir.cwd().copyFile(src, .cwd(), dst, ctx.io, .{});
+        }
+        const st = Dir.cwd().statFile(ctx.io, src, .{}) catch continue;
+        makeImmutable(ctx, src, isExecutableName(src) or (fileMode(st.permissions) & 0o111) != 0);
+        makeImmutable(ctx, dst, isExecutableName(dst) or (fileMode(st.permissions) & 0o111) != 0);
+        linked += 1;
+    }
+    return linked;
+}
+
+/// Hardlink identical regular files across the given trees so unique-disk
+/// counts one inode per content. Used by `nanocompile worktree dedup`.
+pub fn dedupTrees(ctx: *Context, roots: []const []const u8) !usize {
+    var first: std.StringHashMap([]const u8) = .init(ctx.a);
+    var linked: usize = 0;
+    for (roots) |root| {
+        var dir = Dir.cwd().openDir(ctx.io, root, .{ .iterate = true }) catch continue;
+        defer dir.close(ctx.io);
+        var walk = try dir.walk(ctx.a);
+        defer walk.deinit();
+        while (try walk.next(ctx.io)) |item| {
+            if (item.kind != .file) continue;
+            const path = try std.fs.path.join(ctx.a, &.{ root, item.path });
+            const st = Dir.cwd().statFile(ctx.io, path, .{}) catch continue;
+            if (st.size == 0) continue;
+            const digest = ctx.digest(path) catch continue;
+            const key = try std.fmt.allocPrint(ctx.a, "{d}:{s}", .{ st.size, digest });
+            const slot = try first.getOrPut(key);
+            if (!slot.found_existing) {
+                slot.value_ptr.* = path;
+                continue;
+            }
+            if (std.mem.eql(u8, slot.value_ptr.*, path)) continue;
+            const src_st = Dir.cwd().statFile(ctx.io, slot.value_ptr.*, .{}) catch continue;
+            if (src_st.inode == st.inode) continue;
+            const tmp = try std.fmt.allocPrint(ctx.a, "{s}.nano-dedup-{d}", .{ path, c.getpid() });
+            Dir.cwd().deleteFile(ctx.io, tmp) catch {};
+            const src_z = try ctx.a.dupeSentinel(u8, slot.value_ptr.*, 0);
+            const dst_z = try ctx.a.dupeSentinel(u8, tmp, 0);
+            if (c.link(src_z, dst_z) != 0) continue;
+            Dir.cwd().rename(tmp, .cwd(), path, ctx.io) catch {
+                Dir.cwd().deleteFile(ctx.io, tmp) catch {};
+                continue;
+            };
+            linked += 1;
+        }
+    }
+    return linked;
+}
+
+/// Drop store blobs that no live target still materializes. Tuned to the
+/// working set of N agent worktrees: keep anything hardlinked or content-
+/// identical to a current target file, plus stdout/stderr of those entries.
+pub fn gcWorkingSet(ctx: *Context, targets: []const []const u8) !usize {
+    try ctx.prepare();
+    const lock = try Lock.acquire(ctx, "maintenance", true);
+    defer lock.release();
+    var keep_hash: std.StringHashMap(void) = .init(ctx.a);
+    var keep_inode: std.AutoHashMap(u64, void) = .init(ctx.a);
+    for (targets) |root| {
+        var dir = Dir.cwd().openDir(ctx.io, root, .{ .iterate = true }) catch continue;
+        defer dir.close(ctx.io);
+        var walk = try dir.walk(ctx.a);
+        defer walk.deinit();
+        while (try walk.next(ctx.io)) |item| {
+            if (item.kind != .file) continue;
+            const path = try std.fs.path.join(ctx.a, &.{ root, item.path });
+            const st = Dir.cwd().statFile(ctx.io, path, .{}) catch continue;
+            try keep_inode.put(st.inode, {});
+            if (ctx.digest(path)) |digest| {
+                try keep_hash.put(digest, {});
+            } else |_| {}
+        }
+    }
+    var entries_dir = try Dir.cwd().openDir(ctx.io, try ctx.path(&.{"entries"}), .{ .iterate = true });
+    defer entries_dir.close(ctx.io);
+    var iterator = entries_dir.iterate();
+    var dropped: usize = 0;
+    while (try iterator.next(ctx.io)) |item| {
+        if (item.kind != .file) continue;
+        const path_ = try ctx.path(&.{ "entries", item.name });
+        const bytes = ctx.read(path_) catch continue;
+        const entry = parseEntry(ctx, bytes) catch {
+            try Dir.cwd().deleteFile(ctx.io, path_);
+            dropped += 1;
+            continue;
+        };
+        var live = entry.outputs.len == 0;
+        for (entry.outputs) |output| {
+            const blob = blobPath(ctx, output.hash) catch continue;
+            const st = Dir.cwd().statFile(ctx.io, blob, .{}) catch continue;
+            if (keep_inode.contains(st.inode) or keep_hash.contains(output.hash)) {
+                live = true;
+                try keep_hash.put(output.hash, {});
+                try keep_hash.put(entry.stdout, {});
+                try keep_hash.put(entry.stderr, {});
+            }
+        }
+        if (!live) {
+            try Dir.cwd().deleteFile(ctx.io, path_);
+            dropped += 1;
+        }
+    }
+    var blobs = try Dir.cwd().openDir(ctx.io, try ctx.path(&.{"blobs"}), .{ .iterate = true });
+    defer blobs.close(ctx.io);
+    var walk = try blobs.walk(ctx.a);
+    defer walk.deinit();
+    while (try walk.next(ctx.io)) |item| {
+        if (item.kind != .file) continue;
+        const path_ = try ctx.path(&.{ "blobs", item.path });
+        const st = Dir.cwd().statFile(ctx.io, path_, .{}) catch continue;
+        const name = item.basename;
+        if (keep_inode.contains(st.inode) or keep_hash.contains(name)) continue;
+        if (blobLogicalHash(ctx, path_)) |logical| {
+            if (keep_hash.contains(logical)) continue;
+        } else |_| {}
+        try Dir.cwd().deleteFile(ctx.io, path_);
+        dropped += 1;
+    }
+    return dropped;
 }
 
 pub fn clear(ctx: *Context) !void {
@@ -1035,6 +1436,174 @@ test "materialization replaces atomically without sharing mutable bytes" {
     const missing = try std.fs.path.join(a, &.{ root, "missing" });
     try std.testing.expectError(error.FileNotFound, materialize(&ctx, missing, destination, 0o600));
     try std.testing.expectEqualSlices(u8, bytes, try ctx.read(destination));
+}
+
+test "immutable rlib restore hardlinks when clone is unavailable" {
+    if (builtin.os.tag == .windows) return;
+    var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer arena.deinit();
+    const a = arena.allocator();
+    const io = std.testing.io;
+    var tmp = std.testing.tmpDir(.{});
+    defer tmp.cleanup();
+    const root = try Dir.cwd().realPathFileAlloc(io, try std.fs.path.join(a, &.{ ".zig-cache", "tmp", &tmp.sub_path }), a);
+    var env = std.process.Environ.Map.init(a);
+    var ctx: Context = .{ .a = a, .io = io, .env = &env, .root = root, .cwd = root };
+    const source = try std.fs.path.join(a, &.{ root, "libcrate.rlib" });
+    const destination = try std.fs.path.join(a, &.{ root, "out", "libcrate.rlib" });
+    try tmp.dir.writeFile(io, .{ .sub_path = "libcrate.rlib", .data = "rlib-bytes" });
+    const method = try materializeWith(&ctx, source, destination, 0o444, true);
+    try std.testing.expect(method == .hardlink or method == .reflink);
+    try std.testing.expectEqualSlices(u8, "rlib-bytes", try ctx.read(destination));
+    if (method == .hardlink) {
+        const src_st = try Dir.cwd().statFile(io, source, .{});
+        const dst_st = try Dir.cwd().statFile(io, destination, .{});
+        try std.testing.expectEqual(src_st.inode, dst_st.inode);
+    }
+    try std.testing.expect(immutableArtifact("libmacro.so"));
+    try std.testing.expect(immutableArtifact("libmacro.dylib"));
+    try std.testing.expect(immutableArtifact("libfoo.a"));
+    try std.testing.expect(immutableArtifact("foo.d"));
+    try std.testing.expect(shareableOutput("build_script_build"));
+    try std.testing.expect(shareableOutput("app-abc123"));
+    try std.testing.expect(!immutableArtifact("app"));
+}
+
+test "zstd blobs restore to the original bytes" {
+    if (builtin.os.tag == .windows) return;
+    var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer arena.deinit();
+    const a = arena.allocator();
+    const io = std.testing.io;
+    var tmp = std.testing.tmpDir(.{});
+    defer tmp.cleanup();
+    const root = try Dir.cwd().realPathFileAlloc(io, try std.fs.path.join(a, &.{ ".zig-cache", "tmp", &tmp.sub_path }), a);
+    var env = std.process.Environ.Map.init(a);
+    try env.put("NANOCOMPILE_ZSTD", "1");
+    var ctx: Context = .{ .a = a, .io = io, .env = &env, .root = root, .cwd = root };
+    try ctx.prepare();
+    const source = try std.fs.path.join(a, &.{ root, "plain.rmeta" });
+    var payload: [8192]u8 = undefined;
+    for (&payload, 0..) |*b, i| b.* = @truncate(i);
+    try tmp.dir.writeFile(io, .{ .sub_path = "plain.rmeta", .data = &payload });
+    const hash = try putFile(&ctx, source);
+    const blob = try blobPath(&ctx, hash);
+    const stored = try ctx.read(blob);
+    try std.testing.expect(looksZstd(stored));
+    try std.testing.expectEqualStrings(hash, try blobLogicalHash(&ctx, blob));
+    const dest = try std.fs.path.join(a, &.{ root, "out", "plain.rmeta" });
+    const raw = try ctx.read(blob);
+    const plain = try zstdDecompress(&ctx, raw);
+    try ctx.atomic(dest, plain);
+    try std.testing.expectEqualSlices(u8, &payload, try ctx.read(dest));
+}
+
+test "gcWorkingSet drops blobs that no target still holds" {
+    if (builtin.os.tag == .windows) return;
+    var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer arena.deinit();
+    const a = arena.allocator();
+    const io = std.testing.io;
+    var tmp = std.testing.tmpDir(.{});
+    defer tmp.cleanup();
+    const root = try Dir.cwd().realPathFileAlloc(io, try std.fs.path.join(a, &.{ ".zig-cache", "tmp", &tmp.sub_path }), a);
+    var env = std.process.Environ.Map.init(a);
+    var ctx: Context = .{ .a = a, .io = io, .env = &env, .root = try std.fs.path.join(a, &.{ root, "store" }), .cwd = root };
+    try ctx.prepare();
+    const live = try std.fs.path.join(a, &.{ root, "keep.rmeta" });
+    const gone = try std.fs.path.join(a, &.{ root, "drop.rmeta" });
+    try tmp.dir.writeFile(io, .{ .sub_path = "keep.rmeta", .data = "keep-bytes" });
+    try tmp.dir.writeFile(io, .{ .sub_path = "drop.rmeta", .data = "drop-bytes" });
+    const keep_hash = try putFile(&ctx, live);
+    const drop_hash = try putFile(&ctx, gone);
+    try store(&ctx, "keep-key", &.{}, &.{live}, "", "");
+    try store(&ctx, "drop-key", &.{}, &.{gone}, "", "");
+    const target = try std.fs.path.join(a, &.{ root, "target" });
+    try Dir.cwd().createDirPath(io, target);
+    const dest = try std.fs.path.join(a, &.{ target, "keep.rmeta" });
+    _ = try materializeRestore(&ctx, try blobPath(&ctx, keep_hash), dest, 0o444);
+    const dropped = try gcWorkingSet(&ctx, &.{target});
+    try std.testing.expect(dropped >= 1);
+    try std.testing.expect(try restore(&ctx, "keep-key", &.{dest}));
+    try std.testing.expectError(error.FileNotFound, ctx.read(try blobPath(&ctx, drop_hash)));
+}
+
+test "seedTree hardlinks files and marks them immutable" {
+    if (builtin.os.tag == .windows) return;
+    var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer arena.deinit();
+    const a = arena.allocator();
+    const io = std.testing.io;
+    var tmp = std.testing.tmpDir(.{});
+    defer tmp.cleanup();
+    const root = try Dir.cwd().realPathFileAlloc(io, try std.fs.path.join(a, &.{ ".zig-cache", "tmp", &tmp.sub_path }), a);
+    var env = std.process.Environ.Map.init(a);
+    var ctx: Context = .{ .a = a, .io = io, .env = &env, .root = root, .cwd = root };
+    try Dir.cwd().createDirPath(io, try std.fs.path.join(a, &.{ root, "src", "deps" }));
+    try tmp.dir.writeFile(io, .{ .sub_path = "src/deps/lib.rmeta", .data = "rmeta" });
+    const n = try seedTree(&ctx, try std.fs.path.join(a, &.{ root, "src" }), try std.fs.path.join(a, &.{ root, "dst" }));
+    try std.testing.expectEqual(@as(usize, 1), n);
+    const src = try std.fs.path.join(a, &.{ root, "src", "deps", "lib.rmeta" });
+    const dst = try std.fs.path.join(a, &.{ root, "dst", "deps", "lib.rmeta" });
+    const src_st = try Dir.cwd().statFile(io, src, .{});
+    const dst_st = try Dir.cwd().statFile(io, dst, .{});
+    try std.testing.expectEqual(src_st.inode, dst_st.inode);
+    try std.testing.expectEqualStrings("rmeta", try ctx.read(dst));
+}
+
+test "storeEntry keeps one copy of a repeated dependency record" {
+    var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer arena.deinit();
+    const a = arena.allocator();
+    const repeated = [_]Dependency{
+        .{ .path = "/tmp/a", .hash = "h1" },
+        .{ .path = "/tmp/a", .hash = "h1" },
+        .{ .path = "/tmp/b", .hash = "h2", .directory = true, .libraries = true, .library_prefix = "libfoo" },
+        .{ .path = "/tmp/b", .hash = "h2", .directory = true, .libraries = true, .library_prefix = "libfoo" },
+        .{ .path = "/tmp/b", .hash = "h2", .directory = true, .libraries = true, .library_prefix = "libbar" },
+    };
+    var env = std.process.Environ.Map.init(a);
+    var ctx: Context = .{ .a = a, .io = std.testing.io, .env = &env, .root = "/unused", .cwd = "/unused" };
+    const unique = try uniqueDependencies(&ctx, &repeated);
+    try std.testing.expectEqual(@as(usize, 3), unique.len);
+    try std.testing.expectEqualStrings("/tmp/a", unique[0].path);
+    try std.testing.expectEqualStrings("libfoo", unique[1].library_prefix.?);
+    try std.testing.expectEqualStrings("libbar", unique[2].library_prefix.?);
+}
+
+test "logical output paths restore into a sibling target directory" {
+    if (builtin.os.tag == .windows) return;
+    var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer arena.deinit();
+    const a = arena.allocator();
+    const io = std.testing.io;
+    var tmp = std.testing.tmpDir(.{});
+    defer tmp.cleanup();
+    const root = try Dir.cwd().realPathFileAlloc(io, try std.fs.path.join(a, &.{ ".zig-cache", "tmp", &tmp.sub_path }), a);
+    var env = std.process.Environ.Map.init(a);
+    const first = try std.fs.path.join(a, &.{ root, "first" });
+    const second = try std.fs.path.join(a, &.{ root, "second" });
+    try env.put("CARGO_TARGET_DIR", first);
+    var ctx: Context = .{
+        .a = a,
+        .io = io,
+        .env = &env,
+        .root = root,
+        .cwd = root,
+        .rewrites = &.{.{ .token = "$NANO_TARGET", .path = first }},
+    };
+    try ctx.prepare();
+    const source = try std.fs.path.join(a, &.{ first, "libcrate.rlib" });
+    try Dir.cwd().createDirPath(io, first);
+    try tmp.dir.writeFile(io, .{ .sub_path = "first/libcrate.rlib", .data = "crate-bytes" });
+    try tmp.dir.writeFile(io, .{ .sub_path = "input.rs", .data = "fn main() {}" });
+    const input = try std.fs.path.join(a, &.{ root, "input.rs" });
+    try storeVariants(&ctx, "sibling-key", &.{.{ .path = input, .hash = try ctx.digest(input) }}, &.{source}, "", "");
+    try env.put("CARGO_TARGET_DIR", second);
+    ctx.rewrites = &.{.{ .token = "$NANO_TARGET", .path = second }};
+    const dest = try std.fs.path.join(a, &.{ second, "libcrate.rlib" });
+    try std.testing.expect(try restoreVariants(&ctx, "sibling-key", &.{dest}));
+    try std.testing.expectEqualSlices(u8, "crate-bytes", try ctx.read(dest));
 }
 
 test "hash fields cannot collide through concatenation" {

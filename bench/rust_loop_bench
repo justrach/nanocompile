@@ -1,0 +1,8 @@
+#!/usr/bin/env python3
+"""Stable entrypoint. Other agents should call this file, not rust_loop_bench.py."""
+import runpy
+from pathlib import Path
+import sys
+
+sys.argv[0] = str(Path(__file__).resolve())
+runpy.run_path(str(Path(__file__).with_name("rust_loop_bench.py")), run_name="__main__")

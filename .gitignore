@@ -1,5 +1,6 @@
 .zig-cache/
 zig-out/
+vendor/lib/
 codedb.snapshot
 bench-results/
 __pycache__/

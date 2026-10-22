@@ -1,0 +1,5305 @@
+{
+  "breakdown": [
+    {
+      "error": null,
+      "n_worktrees": 4,
+      "ok": false,
+      "sample": "bhumi",
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      }
+    },
+    {
+      "approach": "shared_target",
+      "crates_compiled_mean": 0.25,
+      "disk_bytes": 301503851,
+      "edit_kind": "mixed",
+      "from_older": false,
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "ok": true,
+      "sample": "bhumi",
+      "store_bytes": 0,
+      "wall_ms": 678.9502880055807
+    },
+    {
+      "approach": "kache",
+      "crates_compiled_mean": 0.0,
+      "disk_bytes": 4590479442,
+      "edit_kind": "mixed",
+      "from_older": false,
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "ok": true,
+      "sample": "bhumi",
+      "store_bytes": 48866938,
+      "wall_ms": 4355.019488997641
+    },
+    {
+      "approach": "sccache",
+      "crates_compiled_mean": 120.0,
+      "disk_bytes": 1182501458,
+      "edit_kind": "mixed",
+      "from_older": false,
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "ok": true,
+      "sample": "bhumi",
+      "store_bytes": 0,
+      "wall_ms": 54218.7367880033
+    },
+    {
+      "approach": "nanocompile",
+      "crates_compiled_mean": 36.0,
+      "disk_bytes": 299270183,
+      "edit_kind": "mixed",
+      "from_older": false,
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "ok": true,
+      "sample": "bhumi",
+      "store_bytes": 275175877,
+      "wall_ms": 18823.399210996286
+    },
+    {
+      "approach": "none",
+      "crates_compiled_mean": 4.0,
+      "disk_bytes": 33046600,
+      "edit_kind": "mixed",
+      "from_older": false,
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "ok": true,
+      "sample": "hashbrown",
+      "store_bytes": 0,
+      "wall_ms": 2404.169487002946
+    },
+    {
+      "approach": "shared_target",
+      "crates_compiled_mean": 0.25,
+      "disk_bytes": 8261952,
+      "edit_kind": "mixed",
+      "from_older": false,
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "ok": true,
+      "sample": "hashbrown",
+      "store_bytes": 0,
+      "wall_ms": 460.81229799892753
+    },
+    {
+      "approach": "kache",
+      "crates_compiled_mean": 1.25,
+      "disk_bytes": 6638859,
+      "edit_kind": "mixed",
+      "from_older": false,
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "ok": true,
+      "sample": "hashbrown",
+      "store_bytes": 3307801,
+      "wall_ms": 1392.3294549967977
+    },
+    {
+      "approach": "sccache",
+      "crates_compiled_mean": 4.0,
+      "disk_bytes": 5623064,
+      "edit_kind": "mixed",
+      "from_older": false,
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "ok": true,
+      "sample": "hashbrown",
+      "store_bytes": 0,
+      "wall_ms": 2542.5848770028097
+    },
+    {
+      "approach": "nanocompile",
+      "crates_compiled_mean": 1.75,
+      "disk_bytes": 2532352,
+      "edit_kind": "mixed",
+      "from_older": false,
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "ok": true,
+      "sample": "hashbrown",
+      "store_bytes": 2527657,
+      "wall_ms": 1822.3271050010226
+    },
+    {
+      "approach": "none",
+      "crates_compiled_mean": 20.0,
+      "disk_bytes": 583295707,
+      "edit_kind": "mixed",
+      "from_older": false,
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "ok": true,
+      "sample": "nalgebra",
+      "store_bytes": 0,
+      "wall_ms": 29712.57066399994
+    },
+    {
+      "approach": "shared_target",
+      "crates_compiled_mean": 0.25,
+      "disk_bytes": 145827028,
+      "edit_kind": "mixed",
+      "from_older": false,
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "ok": true,
+      "sample": "nalgebra",
+      "store_bytes": 0,
+      "wall_ms": 4523.814095002308
+    },
+    {
+      "approach": "kache",
+      "crates_compiled_mean": 7.75,
+      "disk_bytes": 372020513,
+      "edit_kind": "mixed",
+      "from_older": false,
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "ok": true,
+      "sample": "nalgebra",
+      "store_bytes": 88811710,
+      "wall_ms": 13140.772427999764
+    },
+    {
+      "approach": "sccache",
+      "crates_compiled_mean": 20.0,
+      "disk_bytes": 308572712,
+      "edit_kind": "mixed",
+      "from_older": false,
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "ok": true,
+      "sample": "nalgebra",
+      "store_bytes": 0,
+      "wall_ms": 30676.196186002926
+    },
+    {
+      "approach": "nanocompile",
+      "crates_compiled_mean": 8.25,
+      "disk_bytes": 84529916,
+      "edit_kind": "mixed",
+      "from_older": false,
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "ok": true,
+      "sample": "nalgebra",
+      "store_bytes": 84494045,
+      "wall_ms": 20309.546192002017
+    },
+    {
+      "approach": "none",
+      "crates_compiled_mean": 2.0,
+      "disk_bytes": 188334026,
+      "edit_kind": "mixed",
+      "from_older": false,
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "ok": true,
+      "sample": "serde",
+      "store_bytes": 0,
+      "wall_ms": 7571.261120996496
+    },
+    {
+      "approach": "shared_target",
+      "crates_compiled_mean": 0.25,
+      "disk_bytes": 47084150,
+      "edit_kind": "mixed",
+      "from_older": false,
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "ok": true,
+      "sample": "serde",
+      "store_bytes": 0,
+      "wall_ms": 392.55990799574647
+    },
+    {
+      "approach": "kache",
+      "crates_compiled_mean": 1.75,
+      "disk_bytes": 82071888,
+      "edit_kind": "mixed",
+      "from_older": false,
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "ok": true,
+      "sample": "serde",
+      "store_bytes": 16356834,
+      "wall_ms": 3198.334551001608
+    },
+    {
+      "approach": "sccache",
+      "crates_compiled_mean": 2.0,
+      "disk_bytes": 50562768,
+      "edit_kind": "mixed",
+      "from_older": false,
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "ok": true,
+      "sample": "serde",
+      "store_bytes": 0,
+      "wall_ms": 7242.545225999493
+    },
+    {
+      "approach": "nanocompile",
+      "crates_compiled_mean": 4.0,
+      "disk_bytes": 13355434,
+      "edit_kind": "mixed",
+      "from_older": false,
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "ok": true,
+      "sample": "serde",
+      "store_bytes": 13346819,
+      "wall_ms": 6339.478683999914
+    },
+    {
+      "approach": "none",
+      "crates_compiled_mean": 313.0,
+      "disk_bytes": 4742876358,
+      "edit_kind": "mixed",
+      "from_older": false,
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "ok": true,
+      "sample": "ruff",
+      "store_bytes": 0,
+      "wall_ms": 190773.59910799714
+    },
+    {
+      "approach": "shared_target",
+      "crates_compiled_mean": 1.0,
+      "disk_bytes": 1185761641,
+      "edit_kind": "mixed",
+      "from_older": false,
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "ok": true,
+      "sample": "ruff",
+      "store_bytes": 0,
+      "wall_ms": 4595.914761004678
+    },
+    {
+      "approach": "kache",
+      "crates_compiled_mean": 103.5,
+      "disk_bytes": 3457471756,
+      "edit_kind": "mixed",
+      "from_older": false,
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "ok": true,
+      "sample": "ruff",
+      "store_bytes": 819599267,
+      "wall_ms": 118888.03722600278
+    },
+    {
+      "approach": "sccache",
+      "crates_compiled_mean": 313.0,
+      "disk_bytes": 2884290543,
+      "edit_kind": "mixed",
+      "from_older": false,
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "ok": true,
+      "sample": "ruff",
+      "store_bytes": 0,
+      "wall_ms": 196134.04903500486
+    },
+    {
+      "approach": "nanocompile",
+      "crates_compiled_mean": 127.75,
+      "disk_bytes": 794872899,
+      "edit_kind": "mixed",
+      "from_older": false,
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "ok": true,
+      "sample": "ruff",
+      "store_bytes": 679381619,
+      "wall_ms": 124216.04949599714
+    },
+    {
+      "approach": "none",
+      "crates_compiled_mean": 19.0,
+      "disk_bytes": 436882601,
+      "edit_kind": "mixed",
+      "from_older": false,
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "ok": true,
+      "sample": "tokio",
+      "store_bytes": 0,
+      "wall_ms": 20664.280004995817
+    },
+    {
+      "approach": "shared_target",
+      "crates_compiled_mean": 0.25,
+      "disk_bytes": 109226449,
+      "edit_kind": "mixed",
+      "from_older": false,
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "ok": true,
+      "sample": "tokio",
+      "store_bytes": 0,
+      "wall_ms": 2966.573227997287
+    },
+    {
+      "approach": "kache",
+      "crates_compiled_mean": 7.0,
+      "disk_bytes": 265003809,
+      "edit_kind": "mixed",
+      "from_older": false,
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "ok": true,
+      "sample": "tokio",
+      "store_bytes": 66814682,
+      "wall_ms": 9285.463592997985
+    },
+    {
+      "approach": "sccache",
+      "crates_compiled_mean": 19.0,
+      "disk_bytes": 212067438,
+      "edit_kind": "mixed",
+      "from_older": false,
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "ok": true,
+      "sample": "tokio",
+      "store_bytes": 0,
+      "wall_ms": 21164.095592001104
+    },
+    {
+      "approach": "nanocompile",
+      "crates_compiled_mean": 8.5,
+      "disk_bytes": 62163951,
+      "edit_kind": "mixed",
+      "from_older": false,
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "ok": true,
+      "sample": "tokio",
+      "store_bytes": 58122920,
+      "wall_ms": 14922.941049997462
+    },
+    {
+      "approach": "none",
+      "crates_compiled_mean": 53.0,
+      "disk_bytes": 582195312,
+      "edit_kind": "mixed",
+      "from_older": false,
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "ok": true,
+      "sample": "emergentDB",
+      "store_bytes": 0,
+      "wall_ms": 22261.437800996646
+    },
+    {
+      "approach": "shared_target",
+      "crates_compiled_mean": 0.0,
+      "disk_bytes": 145550858,
+      "edit_kind": "mixed",
+      "from_older": false,
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "ok": true,
+      "sample": "emergentDB",
+      "store_bytes": 0,
+      "wall_ms": 302.25169099867344
+    },
+    {
+      "approach": "kache",
+      "crates_compiled_mean": 19.75,
+      "disk_bytes": 651949453,
+      "edit_kind": "mixed",
+      "from_older": false,
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "ok": true,
+      "sample": "emergentDB",
+      "store_bytes": 136991520,
+      "wall_ms": 7592.75184100261
+    },
+    {
+      "approach": "sccache",
+      "crates_compiled_mean": 53.0,
+      "disk_bytes": 528271852,
+      "edit_kind": "mixed",
+      "from_older": false,
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "ok": true,
+      "sample": "emergentDB",
+      "store_bytes": 0,
+      "wall_ms": 23983.452380998642
+    },
+    {
+      "approach": "nanocompile",
+      "crates_compiled_mean": 18.75,
+      "disk_bytes": 133791754,
+      "edit_kind": "mixed",
+      "from_older": false,
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "ok": true,
+      "sample": "emergentDB",
+      "store_bytes": 130119246,
+      "wall_ms": 10184.386263994384
+    }
+  ],
+  "commit": "8dbb34939289996d9fdc13111fd4df23f202905c",
+  "docs": "docs/agent-worktrees.md",
+  "evaluations": [
+    {
+      "cache_state": "empty",
+      "cache_tool": "none",
+      "cell": "mid|worktree",
+      "correctness": {
+        "agree_on_broken": true,
+        "ok": true,
+        "validate_is_final": true
+      },
+      "crates_compiled_mean": 51.0,
+      "disk_bytes": 631055157,
+      "edit": "worktree",
+      "fitness_ms": 30744.23499500699,
+      "genome": {
+        "debuginfo": "full",
+        "dev_backend": "llvm",
+        "fast_check": "cargo-check",
+        "incremental": true,
+        "kache": false,
+        "linker": "default",
+        "loop": "check",
+        "sccache": false,
+        "warm_store": false,
+        "wrapper": false
+      },
+      "held_out": true,
+      "lever": "none",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "pareto": true,
+      "product": "agent_worktrees",
+      "sample": "axum-agent-worktrees-train",
+      "size": "mid",
+      "split": "train",
+      "store_bytes": 0,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      }
+    },
+    {
+      "cache_state": "empty",
+      "cache_tool": "none",
+      "cell": "mid|worktree",
+      "correctness": {
+        "agree_on_broken": true,
+        "ok": true,
+        "validate_is_final": true
+      },
+      "crates_compiled_mean": 0.5,
+      "disk_bytes": 157767267,
+      "edit": "worktree",
+      "fitness_ms": 3453.596542000014,
+      "genome": {
+        "debuginfo": "full",
+        "dev_backend": "llvm",
+        "fast_check": "cargo-check",
+        "incremental": true,
+        "kache": false,
+        "linker": "default",
+        "loop": "check",
+        "sccache": false,
+        "warm_store": false,
+        "wrapper": false
+      },
+      "held_out": true,
+      "lever": "shared_target",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "pareto": true,
+      "product": "agent_worktrees",
+      "sample": "axum-agent-worktrees-train",
+      "size": "mid",
+      "split": "train",
+      "store_bytes": 0,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      }
+    },
+    {
+      "cache_state": "warm_compiler_cache",
+      "cache_tool": "kache",
+      "cell": "mid|worktree",
+      "correctness": {
+        "agree_on_broken": true,
+        "ok": true,
+        "validate_is_final": true
+      },
+      "crates_compiled_mean": 18.5,
+      "disk_bytes": 509315624,
+      "edit": "worktree",
+      "fitness_ms": 13248.63637299859,
+      "genome": {
+        "debuginfo": "full",
+        "dev_backend": "llvm",
+        "fast_check": "cargo-check",
+        "incremental": true,
+        "kache": true,
+        "linker": "default",
+        "loop": "check",
+        "sccache": false,
+        "warm_store": true,
+        "wrapper": false
+      },
+      "held_out": true,
+      "lever": "kache",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "pareto": true,
+      "product": "agent_worktrees",
+      "sample": "axum-agent-worktrees-train",
+      "size": "mid",
+      "split": "train",
+      "store_bytes": 114904790,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      }
+    },
+    {
+      "cache_state": "empty",
+      "cache_tool": "none",
+      "cell": "mid|worktree",
+      "correctness": {
+        "agree_on_broken": true,
+        "ok": true,
+        "validate_is_final": true
+      },
+      "crates_compiled_mean": 51.0,
+      "disk_bytes": 476398235,
+      "edit": "worktree",
+      "fitness_ms": 34043.14870500093,
+      "genome": {
+        "debuginfo": "full",
+        "dev_backend": "llvm",
+        "fast_check": "cargo-check",
+        "incremental": true,
+        "kache": false,
+        "linker": "default",
+        "loop": "check",
+        "sccache": false,
+        "warm_store": false,
+        "wrapper": false
+      },
+      "held_out": true,
+      "lever": "sccache",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "pareto": true,
+      "product": "agent_worktrees",
+      "sample": "axum-agent-worktrees-train",
+      "size": "mid",
+      "split": "train",
+      "store_bytes": 58538823,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      }
+    },
+    {
+      "cache_state": "warm_compiler_cache",
+      "cache_tool": "nanocompile",
+      "cell": "mid|worktree",
+      "correctness": {
+        "agree_on_broken": true,
+        "ok": true,
+        "validate_is_final": true
+      },
+      "crates_compiled_mean": 20.0,
+      "disk_bytes": 111392465,
+      "edit": "worktree",
+      "fitness_ms": 20746.094490998075,
+      "genome": {
+        "debuginfo": "full",
+        "dev_backend": "llvm",
+        "fast_check": "cargo-check",
+        "incremental": true,
+        "kache": false,
+        "linker": "default",
+        "loop": "check",
+        "sccache": false,
+        "warm_store": true,
+        "wrapper": true
+      },
+      "held_out": true,
+      "lever": "frozen",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "pareto": true,
+      "product": "agent_worktrees",
+      "sample": "axum-agent-worktrees-train",
+      "size": "mid",
+      "split": "train",
+      "store_bytes": 107322059,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      }
+    },
+    {
+      "cache_state": "empty",
+      "cache_tool": "none",
+      "cell": "large|worktree",
+      "correctness": {
+        "agree_on_broken": true,
+        "ok": false,
+        "validate_is_final": true
+      },
+      "crates_compiled_mean": 34.0,
+      "disk_bytes": 409797233,
+      "edit": "worktree",
+      "fitness_ms": 13539.559381999425,
+      "genome": {
+        "debuginfo": "full",
+        "dev_backend": "llvm",
+        "fast_check": "cargo-check",
+        "incremental": true,
+        "kache": false,
+        "linker": "default",
+        "loop": "check",
+        "sccache": false,
+        "warm_store": false,
+        "wrapper": false
+      },
+      "held_out": true,
+      "lever": "none",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "pareto": true,
+      "product": "agent_worktrees",
+      "sample": "ripgrep-agent-worktrees-train",
+      "size": "large",
+      "split": "train",
+      "store_bytes": 0,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      }
+    },
+    {
+      "cache_state": "empty",
+      "cache_tool": "none",
+      "cell": "large|worktree",
+      "correctness": {
+        "agree_on_broken": true,
+        "ok": true,
+        "validate_is_final": true
+      },
+      "crates_compiled_mean": 1.0,
+      "disk_bytes": 102451447,
+      "edit": "worktree",
+      "fitness_ms": 1611.2793710053666,
+      "genome": {
+        "debuginfo": "full",
+        "dev_backend": "llvm",
+        "fast_check": "cargo-check",
+        "incremental": true,
+        "kache": false,
+        "linker": "default",
+        "loop": "check",
+        "sccache": false,
+        "warm_store": false,
+        "wrapper": false
+      },
+      "held_out": true,
+      "lever": "shared_target",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "pareto": true,
+      "product": "agent_worktrees",
+      "sample": "ripgrep-agent-worktrees-train",
+      "size": "large",
+      "split": "train",
+      "store_bytes": 0,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      }
+    },
+    {
+      "cache_state": "warm_compiler_cache",
+      "cache_tool": "kache",
+      "cell": "large|worktree",
+      "correctness": {
+        "agree_on_broken": true,
+        "ok": true,
+        "validate_is_final": true
+      },
+      "crates_compiled_mean": 3.25,
+      "disk_bytes": 2579098072,
+      "edit": "worktree",
+      "fitness_ms": 4507.031926004856,
+      "genome": {
+        "debuginfo": "full",
+        "dev_backend": "llvm",
+        "fast_check": "cargo-check",
+        "incremental": true,
+        "kache": true,
+        "linker": "default",
+        "loop": "check",
+        "sccache": false,
+        "warm_store": true,
+        "wrapper": false
+      },
+      "held_out": true,
+      "lever": "kache",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "pareto": true,
+      "product": "agent_worktrees",
+      "sample": "ripgrep-agent-worktrees-train",
+      "size": "large",
+      "split": "train",
+      "store_bytes": 11235295,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      }
+    },
+    {
+      "cache_state": "empty",
+      "cache_tool": "none",
+      "cell": "large|worktree",
+      "correctness": {
+        "agree_on_broken": true,
+        "ok": true,
+        "validate_is_final": true
+      },
+      "crates_compiled_mean": 34.0,
+      "disk_bytes": 283858704,
+      "edit": "worktree",
+      "fitness_ms": 13637.051375997544,
+      "genome": {
+        "debuginfo": "full",
+        "dev_backend": "llvm",
+        "fast_check": "cargo-check",
+        "incremental": true,
+        "kache": false,
+        "linker": "default",
+        "loop": "check",
+        "sccache": false,
+        "warm_store": false,
+        "wrapper": false
+      },
+      "held_out": true,
+      "lever": "sccache",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "pareto": true,
+      "product": "agent_worktrees",
+      "sample": "ripgrep-agent-worktrees-train",
+      "size": "large",
+      "split": "train",
+      "store_bytes": 0,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      }
+    },
+    {
+      "cache_state": "warm_compiler_cache",
+      "cache_tool": "nanocompile",
+      "cell": "large|worktree",
+      "correctness": {
+        "agree_on_broken": true,
+        "ok": true,
+        "validate_is_final": true
+      },
+      "crates_compiled_mean": 18.5,
+      "disk_bytes": 72101212,
+      "edit": "worktree",
+      "fitness_ms": 7189.665811005398,
+      "genome": {
+        "debuginfo": "full",
+        "dev_backend": "llvm",
+        "fast_check": "cargo-check",
+        "incremental": true,
+        "kache": false,
+        "linker": "default",
+        "loop": "check",
+        "sccache": false,
+        "warm_store": true,
+        "wrapper": true
+      },
+      "held_out": true,
+      "lever": "frozen",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "pareto": true,
+      "product": "agent_worktrees",
+      "sample": "ripgrep-agent-worktrees-train",
+      "size": "large",
+      "split": "train",
+      "store_bytes": 68369982,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      }
+    },
+    {
+      "cache_state": "warm_compiler_cache",
+      "cache_tool": "nanocompile",
+      "cell": "mid|worktree",
+      "correctness": {
+        "agree_on_broken": true,
+        "ok": false,
+        "validate_is_final": true
+      },
+      "crates_compiled_mean": 0.0,
+      "disk_bytes": 106550167,
+      "edit": "worktree",
+      "fitness_ms": 523.427988999174,
+      "genome": {
+        "debuginfo": "full",
+        "dev_backend": "llvm",
+        "fast_check": "cargo-check",
+        "incremental": true,
+        "kache": false,
+        "linker": "default",
+        "loop": "check",
+        "sccache": false,
+        "warm_store": true,
+        "wrapper": true
+      },
+      "held_out": true,
+      "lever": "l21_check_native",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "pareto": true,
+      "product": "agent_worktrees",
+      "sample": "axum-agent-worktrees-train",
+      "size": "mid",
+      "split": "train",
+      "store_bytes": 102049345,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      }
+    },
+    {
+      "cache_state": "warm_compiler_cache",
+      "cache_tool": "nanocompile",
+      "cell": "large|worktree",
+      "correctness": {
+        "agree_on_broken": true,
+        "ok": false,
+        "validate_is_final": true
+      },
+      "crates_compiled_mean": 0.0,
+      "disk_bytes": 72199687,
+      "edit": "worktree",
+      "fitness_ms": 105.92756800178904,
+      "genome": {
+        "debuginfo": "full",
+        "dev_backend": "llvm",
+        "fast_check": "cargo-check",
+        "incremental": true,
+        "kache": false,
+        "linker": "default",
+        "loop": "check",
+        "sccache": false,
+        "warm_store": true,
+        "wrapper": true
+      },
+      "held_out": true,
+      "lever": "l21_check_native",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "pareto": true,
+      "product": "agent_worktrees",
+      "sample": "ripgrep-agent-worktrees-train",
+      "size": "large",
+      "split": "train",
+      "store_bytes": 68523471,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      }
+    },
+    {
+      "cache_state": "warm_compiler_cache",
+      "cache_tool": "nanocompile",
+      "cell": "mid|worktree",
+      "correctness": {
+        "agree_on_broken": true,
+        "ok": true,
+        "validate_is_final": true
+      },
+      "crates_compiled_mean": 20.0,
+      "disk_bytes": 111384596,
+      "edit": "worktree",
+      "fitness_ms": 20183.893051995256,
+      "genome": {
+        "debuginfo": "full",
+        "dev_backend": "llvm",
+        "fast_check": "cargo-check",
+        "incremental": true,
+        "kache": false,
+        "linker": "default",
+        "loop": "check",
+        "sccache": false,
+        "warm_store": true,
+        "wrapper": true
+      },
+      "held_out": true,
+      "lever": "l21_check_native",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "pareto": true,
+      "product": "agent_worktrees",
+      "sample": "axum-agent-worktrees-train",
+      "size": "mid",
+      "split": "train",
+      "store_bytes": 107327372,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      }
+    },
+    {
+      "cache_state": "warm_compiler_cache",
+      "cache_tool": "nanocompile",
+      "cell": "large|worktree",
+      "correctness": {
+        "agree_on_broken": true,
+        "ok": true,
+        "validate_is_final": true
+      },
+      "crates_compiled_mean": 18.5,
+      "disk_bytes": 72106893,
+      "edit": "worktree",
+      "fitness_ms": 7224.767908999638,
+      "genome": {
+        "debuginfo": "full",
+        "dev_backend": "llvm",
+        "fast_check": "cargo-check",
+        "incremental": true,
+        "kache": false,
+        "linker": "default",
+        "loop": "check",
+        "sccache": false,
+        "warm_store": true,
+        "wrapper": true
+      },
+      "held_out": true,
+      "lever": "l21_check_native",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "pareto": true,
+      "product": "agent_worktrees",
+      "sample": "ripgrep-agent-worktrees-train",
+      "size": "large",
+      "split": "train",
+      "store_bytes": 68374794,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      }
+    },
+    {
+      "cache_state": "empty",
+      "cache_tool": "none",
+      "cell": "mid|worktree",
+      "correctness": {
+        "agree_on_broken": true,
+        "ok": false,
+        "validate_is_final": true
+      },
+      "crates_compiled_mean": 120.0,
+      "disk_bytes": 1206001317,
+      "edit": "worktree",
+      "fitness_ms": 41156.29245200398,
+      "genome": {
+        "debuginfo": "full",
+        "dev_backend": "llvm",
+        "fast_check": "cargo-check",
+        "incremental": true,
+        "kache": false,
+        "linker": "default",
+        "loop": "check",
+        "sccache": false,
+        "warm_store": false,
+        "wrapper": false
+      },
+      "held_out": true,
+      "lever": "none",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "pareto": true,
+      "product": "agent_worktrees",
+      "sample": "bhumi-agent-worktrees-held_out",
+      "size": "mid",
+      "split": "held_out",
+      "store_bytes": 0,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      }
+    },
+    {
+      "cache_state": "empty",
+      "cache_tool": "none",
+      "cell": "mid|worktree",
+      "correctness": {
+        "agree_on_broken": true,
+        "ok": true,
+        "validate_is_final": true
+      },
+      "crates_compiled_mean": 0.25,
+      "disk_bytes": 301503851,
+      "edit": "worktree",
+      "fitness_ms": 678.9502880055807,
+      "genome": {
+        "debuginfo": "full",
+        "dev_backend": "llvm",
+        "fast_check": "cargo-check",
+        "incremental": true,
+        "kache": false,
+        "linker": "default",
+        "loop": "check",
+        "sccache": false,
+        "warm_store": false,
+        "wrapper": false
+      },
+      "held_out": true,
+      "lever": "shared_target",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "pareto": true,
+      "product": "agent_worktrees",
+      "sample": "bhumi-agent-worktrees-held_out",
+      "size": "mid",
+      "split": "held_out",
+      "store_bytes": 0,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      }
+    },
+    {
+      "cache_state": "warm_compiler_cache",
+      "cache_tool": "kache",
+      "cell": "mid|worktree",
+      "correctness": {
+        "agree_on_broken": true,
+        "ok": true,
+        "validate_is_final": true
+      },
+      "crates_compiled_mean": 0.0,
+      "disk_bytes": 4590479442,
+      "edit": "worktree",
+      "fitness_ms": 4355.019488997641,
+      "genome": {
+        "debuginfo": "full",
+        "dev_backend": "llvm",
+        "fast_check": "cargo-check",
+        "incremental": true,
+        "kache": true,
+        "linker": "default",
+        "loop": "check",
+        "sccache": false,
+        "warm_store": true,
+        "wrapper": false
+      },
+      "held_out": true,
+      "lever": "kache",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "pareto": true,
+      "product": "agent_worktrees",
+      "sample": "bhumi-agent-worktrees-held_out",
+      "size": "mid",
+      "split": "held_out",
+      "store_bytes": 48866938,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      }
+    },
+    {
+      "cache_state": "empty",
+      "cache_tool": "none",
+      "cell": "mid|worktree",
+      "correctness": {
+        "agree_on_broken": true,
+        "ok": true,
+        "validate_is_final": true
+      },
+      "crates_compiled_mean": 120.0,
+      "disk_bytes": 1182501458,
+      "edit": "worktree",
+      "fitness_ms": 54218.7367880033,
+      "genome": {
+        "debuginfo": "full",
+        "dev_backend": "llvm",
+        "fast_check": "cargo-check",
+        "incremental": true,
+        "kache": false,
+        "linker": "default",
+        "loop": "check",
+        "sccache": false,
+        "warm_store": false,
+        "wrapper": false
+      },
+      "held_out": true,
+      "lever": "sccache",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "pareto": true,
+      "product": "agent_worktrees",
+      "sample": "bhumi-agent-worktrees-held_out",
+      "size": "mid",
+      "split": "held_out",
+      "store_bytes": 0,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      }
+    },
+    {
+      "cache_state": "warm_compiler_cache",
+      "cache_tool": "nanocompile",
+      "cell": "mid|worktree",
+      "correctness": {
+        "agree_on_broken": true,
+        "ok": true,
+        "validate_is_final": true
+      },
+      "crates_compiled_mean": 36.0,
+      "disk_bytes": 299270183,
+      "edit": "worktree",
+      "fitness_ms": 18823.399210996286,
+      "genome": {
+        "debuginfo": "full",
+        "dev_backend": "llvm",
+        "fast_check": "cargo-check",
+        "incremental": true,
+        "kache": false,
+        "linker": "default",
+        "loop": "check",
+        "sccache": false,
+        "warm_store": true,
+        "wrapper": true
+      },
+      "held_out": true,
+      "lever": "frozen",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "pareto": true,
+      "product": "agent_worktrees",
+      "sample": "bhumi-agent-worktrees-held_out",
+      "size": "mid",
+      "split": "held_out",
+      "store_bytes": 275175877,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      }
+    },
+    {
+      "cache_state": "empty",
+      "cache_tool": "none",
+      "cell": "mid|worktree",
+      "correctness": {
+        "agree_on_broken": true,
+        "ok": true,
+        "validate_is_final": true
+      },
+      "crates_compiled_mean": 4.0,
+      "disk_bytes": 33046600,
+      "edit": "worktree",
+      "fitness_ms": 2404.169487002946,
+      "genome": {
+        "debuginfo": "full",
+        "dev_backend": "llvm",
+        "fast_check": "cargo-check",
+        "incremental": true,
+        "kache": false,
+        "linker": "default",
+        "loop": "check",
+        "sccache": false,
+        "warm_store": false,
+        "wrapper": false
+      },
+      "held_out": true,
+      "lever": "none",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "pareto": true,
+      "product": "agent_worktrees",
+      "sample": "hashbrown-agent-worktrees-held_out",
+      "size": "mid",
+      "split": "held_out",
+      "store_bytes": 0,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      }
+    },
+    {
+      "cache_state": "empty",
+      "cache_tool": "none",
+      "cell": "mid|worktree",
+      "correctness": {
+        "agree_on_broken": true,
+        "ok": true,
+        "validate_is_final": true
+      },
+      "crates_compiled_mean": 0.25,
+      "disk_bytes": 8261952,
+      "edit": "worktree",
+      "fitness_ms": 460.81229799892753,
+      "genome": {
+        "debuginfo": "full",
+        "dev_backend": "llvm",
+        "fast_check": "cargo-check",
+        "incremental": true,
+        "kache": false,
+        "linker": "default",
+        "loop": "check",
+        "sccache": false,
+        "warm_store": false,
+        "wrapper": false
+      },
+      "held_out": true,
+      "lever": "shared_target",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "pareto": true,
+      "product": "agent_worktrees",
+      "sample": "hashbrown-agent-worktrees-held_out",
+      "size": "mid",
+      "split": "held_out",
+      "store_bytes": 0,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      }
+    },
+    {
+      "cache_state": "warm_compiler_cache",
+      "cache_tool": "kache",
+      "cell": "mid|worktree",
+      "correctness": {
+        "agree_on_broken": true,
+        "ok": true,
+        "validate_is_final": true
+      },
+      "crates_compiled_mean": 1.25,
+      "disk_bytes": 6638859,
+      "edit": "worktree",
+      "fitness_ms": 1392.3294549967977,
+      "genome": {
+        "debuginfo": "full",
+        "dev_backend": "llvm",
+        "fast_check": "cargo-check",
+        "incremental": true,
+        "kache": true,
+        "linker": "default",
+        "loop": "check",
+        "sccache": false,
+        "warm_store": true,
+        "wrapper": false
+      },
+      "held_out": true,
+      "lever": "kache",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "pareto": true,
+      "product": "agent_worktrees",
+      "sample": "hashbrown-agent-worktrees-held_out",
+      "size": "mid",
+      "split": "held_out",
+      "store_bytes": 3307801,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      }
+    },
+    {
+      "cache_state": "empty",
+      "cache_tool": "none",
+      "cell": "mid|worktree",
+      "correctness": {
+        "agree_on_broken": true,
+        "ok": true,
+        "validate_is_final": true
+      },
+      "crates_compiled_mean": 4.0,
+      "disk_bytes": 5623064,
+      "edit": "worktree",
+      "fitness_ms": 2542.5848770028097,
+      "genome": {
+        "debuginfo": "full",
+        "dev_backend": "llvm",
+        "fast_check": "cargo-check",
+        "incremental": true,
+        "kache": false,
+        "linker": "default",
+        "loop": "check",
+        "sccache": false,
+        "warm_store": false,
+        "wrapper": false
+      },
+      "held_out": true,
+      "lever": "sccache",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "pareto": true,
+      "product": "agent_worktrees",
+      "sample": "hashbrown-agent-worktrees-held_out",
+      "size": "mid",
+      "split": "held_out",
+      "store_bytes": 0,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      }
+    },
+    {
+      "cache_state": "warm_compiler_cache",
+      "cache_tool": "nanocompile",
+      "cell": "mid|worktree",
+      "correctness": {
+        "agree_on_broken": true,
+        "ok": true,
+        "validate_is_final": true
+      },
+      "crates_compiled_mean": 1.75,
+      "disk_bytes": 2532352,
+      "edit": "worktree",
+      "fitness_ms": 1822.3271050010226,
+      "genome": {
+        "debuginfo": "full",
+        "dev_backend": "llvm",
+        "fast_check": "cargo-check",
+        "incremental": true,
+        "kache": false,
+        "linker": "default",
+        "loop": "check",
+        "sccache": false,
+        "warm_store": true,
+        "wrapper": true
+      },
+      "held_out": true,
+      "lever": "frozen",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "pareto": true,
+      "product": "agent_worktrees",
+      "sample": "hashbrown-agent-worktrees-held_out",
+      "size": "mid",
+      "split": "held_out",
+      "store_bytes": 2527657,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      }
+    },
+    {
+      "cache_state": "empty",
+      "cache_tool": "none",
+      "cell": "large|worktree",
+      "correctness": {
+        "agree_on_broken": true,
+        "ok": true,
+        "validate_is_final": true
+      },
+      "crates_compiled_mean": 20.0,
+      "disk_bytes": 583295707,
+      "edit": "worktree",
+      "fitness_ms": 29712.57066399994,
+      "genome": {
+        "debuginfo": "full",
+        "dev_backend": "llvm",
+        "fast_check": "cargo-check",
+        "incremental": true,
+        "kache": false,
+        "linker": "default",
+        "loop": "check",
+        "sccache": false,
+        "warm_store": false,
+        "wrapper": false
+      },
+      "held_out": true,
+      "lever": "none",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "pareto": true,
+      "product": "agent_worktrees",
+      "sample": "nalgebra-agent-worktrees-held_out",
+      "size": "large",
+      "split": "held_out",
+      "store_bytes": 0,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      }
+    },
+    {
+      "cache_state": "empty",
+      "cache_tool": "none",
+      "cell": "large|worktree",
+      "correctness": {
+        "agree_on_broken": true,
+        "ok": true,
+        "validate_is_final": true
+      },
+      "crates_compiled_mean": 0.25,
+      "disk_bytes": 145827028,
+      "edit": "worktree",
+      "fitness_ms": 4523.814095002308,
+      "genome": {
+        "debuginfo": "full",
+        "dev_backend": "llvm",
+        "fast_check": "cargo-check",
+        "incremental": true,
+        "kache": false,
+        "linker": "default",
+        "loop": "check",
+        "sccache": false,
+        "warm_store": false,
+        "wrapper": false
+      },
+      "held_out": true,
+      "lever": "shared_target",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "pareto": true,
+      "product": "agent_worktrees",
+      "sample": "nalgebra-agent-worktrees-held_out",
+      "size": "large",
+      "split": "held_out",
+      "store_bytes": 0,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      }
+    },
+    {
+      "cache_state": "warm_compiler_cache",
+      "cache_tool": "kache",
+      "cell": "large|worktree",
+      "correctness": {
+        "agree_on_broken": true,
+        "ok": true,
+        "validate_is_final": true
+      },
+      "crates_compiled_mean": 7.75,
+      "disk_bytes": 372020513,
+      "edit": "worktree",
+      "fitness_ms": 13140.772427999764,
+      "genome": {
+        "debuginfo": "full",
+        "dev_backend": "llvm",
+        "fast_check": "cargo-check",
+        "incremental": true,
+        "kache": true,
+        "linker": "default",
+        "loop": "check",
+        "sccache": false,
+        "warm_store": true,
+        "wrapper": false
+      },
+      "held_out": true,
+      "lever": "kache",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "pareto": true,
+      "product": "agent_worktrees",
+      "sample": "nalgebra-agent-worktrees-held_out",
+      "size": "large",
+      "split": "held_out",
+      "store_bytes": 88811710,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      }
+    },
+    {
+      "cache_state": "empty",
+      "cache_tool": "none",
+      "cell": "large|worktree",
+      "correctness": {
+        "agree_on_broken": true,
+        "ok": true,
+        "validate_is_final": true
+      },
+      "crates_compiled_mean": 20.0,
+      "disk_bytes": 308572712,
+      "edit": "worktree",
+      "fitness_ms": 30676.196186002926,
+      "genome": {
+        "debuginfo": "full",
+        "dev_backend": "llvm",
+        "fast_check": "cargo-check",
+        "incremental": true,
+        "kache": false,
+        "linker": "default",
+        "loop": "check",
+        "sccache": false,
+        "warm_store": false,
+        "wrapper": false
+      },
+      "held_out": true,
+      "lever": "sccache",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "pareto": true,
+      "product": "agent_worktrees",
+      "sample": "nalgebra-agent-worktrees-held_out",
+      "size": "large",
+      "split": "held_out",
+      "store_bytes": 0,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      }
+    },
+    {
+      "cache_state": "warm_compiler_cache",
+      "cache_tool": "nanocompile",
+      "cell": "large|worktree",
+      "correctness": {
+        "agree_on_broken": true,
+        "ok": true,
+        "validate_is_final": true
+      },
+      "crates_compiled_mean": 8.25,
+      "disk_bytes": 84529916,
+      "edit": "worktree",
+      "fitness_ms": 20309.546192002017,
+      "genome": {
+        "debuginfo": "full",
+        "dev_backend": "llvm",
+        "fast_check": "cargo-check",
+        "incremental": true,
+        "kache": false,
+        "linker": "default",
+        "loop": "check",
+        "sccache": false,
+        "warm_store": true,
+        "wrapper": true
+      },
+      "held_out": true,
+      "lever": "frozen",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "pareto": true,
+      "product": "agent_worktrees",
+      "sample": "nalgebra-agent-worktrees-held_out",
+      "size": "large",
+      "split": "held_out",
+      "store_bytes": 84494045,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      }
+    },
+    {
+      "cache_state": "empty",
+      "cache_tool": "none",
+      "cell": "mid|worktree",
+      "correctness": {
+        "agree_on_broken": true,
+        "ok": true,
+        "validate_is_final": true
+      },
+      "crates_compiled_mean": 2.0,
+      "disk_bytes": 188334026,
+      "edit": "worktree",
+      "fitness_ms": 7571.261120996496,
+      "genome": {
+        "debuginfo": "full",
+        "dev_backend": "llvm",
+        "fast_check": "cargo-check",
+        "incremental": true,
+        "kache": false,
+        "linker": "default",
+        "loop": "check",
+        "sccache": false,
+        "warm_store": false,
+        "wrapper": false
+      },
+      "held_out": true,
+      "lever": "none",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "pareto": true,
+      "product": "agent_worktrees",
+      "sample": "serde-agent-worktrees-held_out",
+      "size": "mid",
+      "split": "held_out",
+      "store_bytes": 0,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      }
+    },
+    {
+      "cache_state": "empty",
+      "cache_tool": "none",
+      "cell": "mid|worktree",
+      "correctness": {
+        "agree_on_broken": true,
+        "ok": true,
+        "validate_is_final": true
+      },
+      "crates_compiled_mean": 0.25,
+      "disk_bytes": 47084150,
+      "edit": "worktree",
+      "fitness_ms": 392.55990799574647,
+      "genome": {
+        "debuginfo": "full",
+        "dev_backend": "llvm",
+        "fast_check": "cargo-check",
+        "incremental": true,
+        "kache": false,
+        "linker": "default",
+        "loop": "check",
+        "sccache": false,
+        "warm_store": false,
+        "wrapper": false
+      },
+      "held_out": true,
+      "lever": "shared_target",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "pareto": true,
+      "product": "agent_worktrees",
+      "sample": "serde-agent-worktrees-held_out",
+      "size": "mid",
+      "split": "held_out",
+      "store_bytes": 0,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      }
+    },
+    {
+      "cache_state": "warm_compiler_cache",
+      "cache_tool": "kache",
+      "cell": "mid|worktree",
+      "correctness": {
+        "agree_on_broken": true,
+        "ok": true,
+        "validate_is_final": true
+      },
+      "crates_compiled_mean": 1.75,
+      "disk_bytes": 82071888,
+      "edit": "worktree",
+      "fitness_ms": 3198.334551001608,
+      "genome": {
+        "debuginfo": "full",
+        "dev_backend": "llvm",
+        "fast_check": "cargo-check",
+        "incremental": true,
+        "kache": true,
+        "linker": "default",
+        "loop": "check",
+        "sccache": false,
+        "warm_store": true,
+        "wrapper": false
+      },
+      "held_out": true,
+      "lever": "kache",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "pareto": true,
+      "product": "agent_worktrees",
+      "sample": "serde-agent-worktrees-held_out",
+      "size": "mid",
+      "split": "held_out",
+      "store_bytes": 16356834,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      }
+    },
+    {
+      "cache_state": "empty",
+      "cache_tool": "none",
+      "cell": "mid|worktree",
+      "correctness": {
+        "agree_on_broken": true,
+        "ok": true,
+        "validate_is_final": true
+      },
+      "crates_compiled_mean": 2.0,
+      "disk_bytes": 50562768,
+      "edit": "worktree",
+      "fitness_ms": 7242.545225999493,
+      "genome": {
+        "debuginfo": "full",
+        "dev_backend": "llvm",
+        "fast_check": "cargo-check",
+        "incremental": true,
+        "kache": false,
+        "linker": "default",
+        "loop": "check",
+        "sccache": false,
+        "warm_store": false,
+        "wrapper": false
+      },
+      "held_out": true,
+      "lever": "sccache",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "pareto": true,
+      "product": "agent_worktrees",
+      "sample": "serde-agent-worktrees-held_out",
+      "size": "mid",
+      "split": "held_out",
+      "store_bytes": 0,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      }
+    },
+    {
+      "cache_state": "warm_compiler_cache",
+      "cache_tool": "nanocompile",
+      "cell": "mid|worktree",
+      "correctness": {
+        "agree_on_broken": true,
+        "ok": true,
+        "validate_is_final": true
+      },
+      "crates_compiled_mean": 4.0,
+      "disk_bytes": 13355434,
+      "edit": "worktree",
+      "fitness_ms": 6339.478683999914,
+      "genome": {
+        "debuginfo": "full",
+        "dev_backend": "llvm",
+        "fast_check": "cargo-check",
+        "incremental": true,
+        "kache": false,
+        "linker": "default",
+        "loop": "check",
+        "sccache": false,
+        "warm_store": true,
+        "wrapper": true
+      },
+      "held_out": true,
+      "lever": "frozen",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "pareto": true,
+      "product": "agent_worktrees",
+      "sample": "serde-agent-worktrees-held_out",
+      "size": "mid",
+      "split": "held_out",
+      "store_bytes": 13346819,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      }
+    },
+    {
+      "cache_state": "empty",
+      "cache_tool": "none",
+      "cell": "large|worktree",
+      "correctness": {
+        "agree_on_broken": true,
+        "ok": true,
+        "validate_is_final": true
+      },
+      "crates_compiled_mean": 313.0,
+      "disk_bytes": 4742876358,
+      "edit": "worktree",
+      "fitness_ms": 190773.59910799714,
+      "genome": {
+        "debuginfo": "full",
+        "dev_backend": "llvm",
+        "fast_check": "cargo-check",
+        "incremental": true,
+        "kache": false,
+        "linker": "default",
+        "loop": "check",
+        "sccache": false,
+        "warm_store": false,
+        "wrapper": false
+      },
+      "held_out": true,
+      "lever": "none",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "pareto": true,
+      "product": "agent_worktrees",
+      "sample": "ruff-agent-worktrees-held_out",
+      "size": "large",
+      "split": "held_out",
+      "store_bytes": 0,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      }
+    },
+    {
+      "cache_state": "empty",
+      "cache_tool": "none",
+      "cell": "large|worktree",
+      "correctness": {
+        "agree_on_broken": true,
+        "ok": true,
+        "validate_is_final": true
+      },
+      "crates_compiled_mean": 1.0,
+      "disk_bytes": 1185761641,
+      "edit": "worktree",
+      "fitness_ms": 4595.914761004678,
+      "genome": {
+        "debuginfo": "full",
+        "dev_backend": "llvm",
+        "fast_check": "cargo-check",
+        "incremental": true,
+        "kache": false,
+        "linker": "default",
+        "loop": "check",
+        "sccache": false,
+        "warm_store": false,
+        "wrapper": false
+      },
+      "held_out": true,
+      "lever": "shared_target",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "pareto": true,
+      "product": "agent_worktrees",
+      "sample": "ruff-agent-worktrees-held_out",
+      "size": "large",
+      "split": "held_out",
+      "store_bytes": 0,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      }
+    },
+    {
+      "cache_state": "warm_compiler_cache",
+      "cache_tool": "kache",
+      "cell": "large|worktree",
+      "correctness": {
+        "agree_on_broken": true,
+        "ok": true,
+        "validate_is_final": true
+      },
+      "crates_compiled_mean": 103.5,
+      "disk_bytes": 3457471756,
+      "edit": "worktree",
+      "fitness_ms": 118888.03722600278,
+      "genome": {
+        "debuginfo": "full",
+        "dev_backend": "llvm",
+        "fast_check": "cargo-check",
+        "incremental": true,
+        "kache": true,
+        "linker": "default",
+        "loop": "check",
+        "sccache": false,
+        "warm_store": true,
+        "wrapper": false
+      },
+      "held_out": true,
+      "lever": "kache",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "pareto": true,
+      "product": "agent_worktrees",
+      "sample": "ruff-agent-worktrees-held_out",
+      "size": "large",
+      "split": "held_out",
+      "store_bytes": 819599267,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      }
+    },
+    {
+      "cache_state": "empty",
+      "cache_tool": "none",
+      "cell": "large|worktree",
+      "correctness": {
+        "agree_on_broken": true,
+        "ok": true,
+        "validate_is_final": true
+      },
+      "crates_compiled_mean": 313.0,
+      "disk_bytes": 2884290543,
+      "edit": "worktree",
+      "fitness_ms": 196134.04903500486,
+      "genome": {
+        "debuginfo": "full",
+        "dev_backend": "llvm",
+        "fast_check": "cargo-check",
+        "incremental": true,
+        "kache": false,
+        "linker": "default",
+        "loop": "check",
+        "sccache": false,
+        "warm_store": false,
+        "wrapper": false
+      },
+      "held_out": true,
+      "lever": "sccache",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "pareto": true,
+      "product": "agent_worktrees",
+      "sample": "ruff-agent-worktrees-held_out",
+      "size": "large",
+      "split": "held_out",
+      "store_bytes": 0,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      }
+    },
+    {
+      "cache_state": "warm_compiler_cache",
+      "cache_tool": "nanocompile",
+      "cell": "large|worktree",
+      "correctness": {
+        "agree_on_broken": true,
+        "ok": true,
+        "validate_is_final": true
+      },
+      "crates_compiled_mean": 127.75,
+      "disk_bytes": 794872899,
+      "edit": "worktree",
+      "fitness_ms": 124216.04949599714,
+      "genome": {
+        "debuginfo": "full",
+        "dev_backend": "llvm",
+        "fast_check": "cargo-check",
+        "incremental": true,
+        "kache": false,
+        "linker": "default",
+        "loop": "check",
+        "sccache": false,
+        "warm_store": true,
+        "wrapper": true
+      },
+      "held_out": true,
+      "lever": "frozen",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "pareto": true,
+      "product": "agent_worktrees",
+      "sample": "ruff-agent-worktrees-held_out",
+      "size": "large",
+      "split": "held_out",
+      "store_bytes": 679381619,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      }
+    },
+    {
+      "cache_state": "empty",
+      "cache_tool": "none",
+      "cell": "large|worktree",
+      "correctness": {
+        "agree_on_broken": true,
+        "ok": true,
+        "validate_is_final": true
+      },
+      "crates_compiled_mean": 19.0,
+      "disk_bytes": 436882601,
+      "edit": "worktree",
+      "fitness_ms": 20664.280004995817,
+      "genome": {
+        "debuginfo": "full",
+        "dev_backend": "llvm",
+        "fast_check": "cargo-check",
+        "incremental": true,
+        "kache": false,
+        "linker": "default",
+        "loop": "check",
+        "sccache": false,
+        "warm_store": false,
+        "wrapper": false
+      },
+      "held_out": true,
+      "lever": "none",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "pareto": true,
+      "product": "agent_worktrees",
+      "sample": "tokio-agent-worktrees-held_out",
+      "size": "large",
+      "split": "held_out",
+      "store_bytes": 0,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      }
+    },
+    {
+      "cache_state": "empty",
+      "cache_tool": "none",
+      "cell": "large|worktree",
+      "correctness": {
+        "agree_on_broken": true,
+        "ok": true,
+        "validate_is_final": true
+      },
+      "crates_compiled_mean": 0.25,
+      "disk_bytes": 109226449,
+      "edit": "worktree",
+      "fitness_ms": 2966.573227997287,
+      "genome": {
+        "debuginfo": "full",
+        "dev_backend": "llvm",
+        "fast_check": "cargo-check",
+        "incremental": true,
+        "kache": false,
+        "linker": "default",
+        "loop": "check",
+        "sccache": false,
+        "warm_store": false,
+        "wrapper": false
+      },
+      "held_out": true,
+      "lever": "shared_target",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "pareto": true,
+      "product": "agent_worktrees",
+      "sample": "tokio-agent-worktrees-held_out",
+      "size": "large",
+      "split": "held_out",
+      "store_bytes": 0,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      }
+    },
+    {
+      "cache_state": "warm_compiler_cache",
+      "cache_tool": "kache",
+      "cell": "large|worktree",
+      "correctness": {
+        "agree_on_broken": true,
+        "ok": true,
+        "validate_is_final": true
+      },
+      "crates_compiled_mean": 7.0,
+      "disk_bytes": 265003809,
+      "edit": "worktree",
+      "fitness_ms": 9285.463592997985,
+      "genome": {
+        "debuginfo": "full",
+        "dev_backend": "llvm",
+        "fast_check": "cargo-check",
+        "incremental": true,
+        "kache": true,
+        "linker": "default",
+        "loop": "check",
+        "sccache": false,
+        "warm_store": true,
+        "wrapper": false
+      },
+      "held_out": true,
+      "lever": "kache",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "pareto": true,
+      "product": "agent_worktrees",
+      "sample": "tokio-agent-worktrees-held_out",
+      "size": "large",
+      "split": "held_out",
+      "store_bytes": 66814682,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      }
+    },
+    {
+      "cache_state": "empty",
+      "cache_tool": "none",
+      "cell": "large|worktree",
+      "correctness": {
+        "agree_on_broken": true,
+        "ok": true,
+        "validate_is_final": true
+      },
+      "crates_compiled_mean": 19.0,
+      "disk_bytes": 212067438,
+      "edit": "worktree",
+      "fitness_ms": 21164.095592001104,
+      "genome": {
+        "debuginfo": "full",
+        "dev_backend": "llvm",
+        "fast_check": "cargo-check",
+        "incremental": true,
+        "kache": false,
+        "linker": "default",
+        "loop": "check",
+        "sccache": false,
+        "warm_store": false,
+        "wrapper": false
+      },
+      "held_out": true,
+      "lever": "sccache",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "pareto": true,
+      "product": "agent_worktrees",
+      "sample": "tokio-agent-worktrees-held_out",
+      "size": "large",
+      "split": "held_out",
+      "store_bytes": 0,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      }
+    },
+    {
+      "cache_state": "warm_compiler_cache",
+      "cache_tool": "nanocompile",
+      "cell": "large|worktree",
+      "correctness": {
+        "agree_on_broken": true,
+        "ok": true,
+        "validate_is_final": true
+      },
+      "crates_compiled_mean": 8.5,
+      "disk_bytes": 62163951,
+      "edit": "worktree",
+      "fitness_ms": 14922.941049997462,
+      "genome": {
+        "debuginfo": "full",
+        "dev_backend": "llvm",
+        "fast_check": "cargo-check",
+        "incremental": true,
+        "kache": false,
+        "linker": "default",
+        "loop": "check",
+        "sccache": false,
+        "warm_store": true,
+        "wrapper": true
+      },
+      "held_out": true,
+      "lever": "frozen",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "pareto": true,
+      "product": "agent_worktrees",
+      "sample": "tokio-agent-worktrees-held_out",
+      "size": "large",
+      "split": "held_out",
+      "store_bytes": 58122920,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      }
+    },
+    {
+      "cache_state": "empty",
+      "cache_tool": "none",
+      "cell": "mid|worktree",
+      "correctness": {
+        "agree_on_broken": true,
+        "ok": true,
+        "validate_is_final": true
+      },
+      "crates_compiled_mean": 53.0,
+      "disk_bytes": 582195312,
+      "edit": "worktree",
+      "fitness_ms": 22261.437800996646,
+      "genome": {
+        "debuginfo": "full",
+        "dev_backend": "llvm",
+        "fast_check": "cargo-check",
+        "incremental": true,
+        "kache": false,
+        "linker": "default",
+        "loop": "check",
+        "sccache": false,
+        "warm_store": false,
+        "wrapper": false
+      },
+      "held_out": true,
+      "lever": "none",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "pareto": true,
+      "product": "agent_worktrees",
+      "sample": "emergentDB-agent-worktrees-held_out",
+      "size": "mid",
+      "split": "held_out",
+      "store_bytes": 0,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      }
+    },
+    {
+      "cache_state": "empty",
+      "cache_tool": "none",
+      "cell": "mid|worktree",
+      "correctness": {
+        "agree_on_broken": true,
+        "ok": true,
+        "validate_is_final": true
+      },
+      "crates_compiled_mean": 0.0,
+      "disk_bytes": 145550858,
+      "edit": "worktree",
+      "fitness_ms": 302.25169099867344,
+      "genome": {
+        "debuginfo": "full",
+        "dev_backend": "llvm",
+        "fast_check": "cargo-check",
+        "incremental": true,
+        "kache": false,
+        "linker": "default",
+        "loop": "check",
+        "sccache": false,
+        "warm_store": false,
+        "wrapper": false
+      },
+      "held_out": true,
+      "lever": "shared_target",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "pareto": true,
+      "product": "agent_worktrees",
+      "sample": "emergentDB-agent-worktrees-held_out",
+      "size": "mid",
+      "split": "held_out",
+      "store_bytes": 0,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      }
+    },
+    {
+      "cache_state": "warm_compiler_cache",
+      "cache_tool": "kache",
+      "cell": "mid|worktree",
+      "correctness": {
+        "agree_on_broken": true,
+        "ok": true,
+        "validate_is_final": true
+      },
+      "crates_compiled_mean": 19.75,
+      "disk_bytes": 651949453,
+      "edit": "worktree",
+      "fitness_ms": 7592.75184100261,
+      "genome": {
+        "debuginfo": "full",
+        "dev_backend": "llvm",
+        "fast_check": "cargo-check",
+        "incremental": true,
+        "kache": true,
+        "linker": "default",
+        "loop": "check",
+        "sccache": false,
+        "warm_store": true,
+        "wrapper": false
+      },
+      "held_out": true,
+      "lever": "kache",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "pareto": true,
+      "product": "agent_worktrees",
+      "sample": "emergentDB-agent-worktrees-held_out",
+      "size": "mid",
+      "split": "held_out",
+      "store_bytes": 136991520,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      }
+    },
+    {
+      "cache_state": "empty",
+      "cache_tool": "none",
+      "cell": "mid|worktree",
+      "correctness": {
+        "agree_on_broken": true,
+        "ok": true,
+        "validate_is_final": true
+      },
+      "crates_compiled_mean": 53.0,
+      "disk_bytes": 528271852,
+      "edit": "worktree",
+      "fitness_ms": 23983.452380998642,
+      "genome": {
+        "debuginfo": "full",
+        "dev_backend": "llvm",
+        "fast_check": "cargo-check",
+        "incremental": true,
+        "kache": false,
+        "linker": "default",
+        "loop": "check",
+        "sccache": false,
+        "warm_store": false,
+        "wrapper": false
+      },
+      "held_out": true,
+      "lever": "sccache",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "pareto": true,
+      "product": "agent_worktrees",
+      "sample": "emergentDB-agent-worktrees-held_out",
+      "size": "mid",
+      "split": "held_out",
+      "store_bytes": 0,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      }
+    },
+    {
+      "cache_state": "warm_compiler_cache",
+      "cache_tool": "nanocompile",
+      "cell": "mid|worktree",
+      "correctness": {
+        "agree_on_broken": true,
+        "ok": true,
+        "validate_is_final": true
+      },
+      "crates_compiled_mean": 18.75,
+      "disk_bytes": 133791754,
+      "edit": "worktree",
+      "fitness_ms": 10184.386263994384,
+      "genome": {
+        "debuginfo": "full",
+        "dev_backend": "llvm",
+        "fast_check": "cargo-check",
+        "incremental": true,
+        "kache": false,
+        "linker": "default",
+        "loop": "check",
+        "sccache": false,
+        "warm_store": true,
+        "wrapper": true
+      },
+      "held_out": true,
+      "lever": "frozen",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "pareto": true,
+      "product": "agent_worktrees",
+      "sample": "emergentDB-agent-worktrees-held_out",
+      "size": "mid",
+      "split": "held_out",
+      "store_bytes": 130119246,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      }
+    }
+  ],
+  "frozen_env": {
+    "CARGO_INCREMENTAL": "0",
+    "NANOCOMPILE_ALLOW_INCREMENTAL": "1",
+    "NANOCOMPILE_EXECUTABLE_PRODUCERS": "1",
+    "NANOCOMPILE_HARDLINK_TARGET": "1",
+    "NANOCOMPILE_NO_VARIANTS": "1",
+    "NANOCOMPILE_PROC_MACROS": "reported",
+    "NANOCOMPILE_PROC_MACRO_PRODUCERS": "1",
+    "NANOCOMPILE_REMAP_PATHS": "1"
+  },
+  "harness": "bench/agent_worktrees.py",
+  "held_out": [
+    {
+      "approach": "none",
+      "crates_compiled": [
+        120,
+        120,
+        120,
+        120
+      ],
+      "crates_compiled_mean": 120.0,
+      "crates_restored_mean": 0,
+      "disk_bytes": 1206001317,
+      "edit_kind": "mixed",
+      "env": {},
+      "errors": [],
+      "first_green": {},
+      "from_older": false,
+      "held_out": true,
+      "lever": "none",
+      "loop": "check",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "ok": false,
+      "per_worktree_ms": [
+        10304.834450005728,
+        10176.881205996324,
+        10292.595068996889,
+        10381.358827995427
+      ],
+      "product": "agent_worktrees",
+      "sample": "bhumi",
+      "split": "held_out",
+      "store_bytes": 0,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      },
+      "wall_ms": 41156.29245200398,
+      "warm_crates": 1,
+      "warm_ms": 85.43321599427145,
+      "warm_ok": false
+    },
+    {
+      "approach": "shared_target",
+      "crates_compiled": [
+        1,
+        0,
+        0,
+        0
+      ],
+      "crates_compiled_mean": 0.25,
+      "crates_restored_mean": 119.75,
+      "disk_bytes": 301503851,
+      "edit_kind": "mixed",
+      "env": {},
+      "errors": [],
+      "first_green": {},
+      "from_older": false,
+      "held_out": true,
+      "lever": "shared_target",
+      "loop": "check",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "ok": true,
+      "per_worktree_ms": [
+        477.58265399897937,
+        68.66998699842952,
+        67.52688399865292,
+        64.84211899805814
+      ],
+      "product": "agent_worktrees",
+      "sample": "bhumi",
+      "split": "held_out",
+      "store_bytes": 0,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      },
+      "wall_ms": 678.9502880055807,
+      "warm_crates": 120,
+      "warm_ms": 10422.679310999229,
+      "warm_ok": true
+    },
+    {
+      "approach": "kache",
+      "crates_compiled": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "crates_compiled_mean": 0.0,
+      "crates_restored_mean": 12.0,
+      "disk_bytes": 4590479442,
+      "edit_kind": "mixed",
+      "env": {},
+      "errors": [],
+      "first_green": {},
+      "from_older": false,
+      "held_out": true,
+      "lever": "kache",
+      "loop": "check",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "ok": true,
+      "per_worktree_ms": [
+        1633.6958230021992,
+        935.1289339974755,
+        705.4238659984549,
+        1046.1566710000625
+      ],
+      "product": "agent_worktrees",
+      "sample": "bhumi",
+      "split": "held_out",
+      "store_bytes": 48866938,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      },
+      "wall_ms": 4355.019488997641,
+      "warm_crates": 12,
+      "warm_ms": 5228.847575002874,
+      "warm_ok": true
+    },
+    {
+      "approach": "sccache",
+      "crates_compiled": [
+        120,
+        120,
+        120,
+        120
+      ],
+      "crates_compiled_mean": 120.0,
+      "crates_restored_mean": 0,
+      "disk_bytes": 1182501458,
+      "edit_kind": "mixed",
+      "env": {},
+      "errors": [],
+      "first_green": {},
+      "from_older": false,
+      "held_out": true,
+      "lever": "sccache",
+      "loop": "check",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "ok": true,
+      "per_worktree_ms": [
+        12775.445016995945,
+        13414.48098699766,
+        14125.244809001742,
+        13902.862730996276
+      ],
+      "product": "agent_worktrees",
+      "sample": "bhumi",
+      "split": "held_out",
+      "store_bytes": 0,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      },
+      "wall_ms": 54218.7367880033,
+      "warm_crates": 1,
+      "warm_ms": 454.41434199892683,
+      "warm_ok": true
+    },
+    {
+      "approach": "nanocompile",
+      "crates_compiled": [
+        136,
+        4,
+        2,
+        2
+      ],
+      "crates_compiled_mean": 36.0,
+      "crates_restored_mean": 0,
+      "disk_bytes": 299270183,
+      "edit_kind": "mixed",
+      "env": {
+        "CARGO_INCREMENTAL": "0",
+        "NANOCOMPILE_ALLOW_INCREMENTAL": "1",
+        "NANOCOMPILE_EXECUTABLE_PRODUCERS": "1",
+        "NANOCOMPILE_HARDLINK_TARGET": "1",
+        "NANOCOMPILE_NO_VARIANTS": "1",
+        "NANOCOMPILE_PROC_MACROS": "reported",
+        "NANOCOMPILE_PROC_MACRO_PRODUCERS": "1",
+        "NANOCOMPILE_REMAP_PATHS": "1"
+      },
+      "errors": [],
+      "first_green": {},
+      "from_older": false,
+      "held_out": true,
+      "lever": "frozen",
+      "loop": "check",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "ok": true,
+      "per_worktree_ms": [
+        13745.557952002855,
+        1683.5671150038252,
+        1641.1583670051186,
+        1733.1649019979523
+      ],
+      "product": "agent_worktrees",
+      "sample": "bhumi",
+      "split": "held_out",
+      "store_bytes": 275175877,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      },
+      "wall_ms": 18823.399210996286,
+      "warm_crates": 0,
+      "warm_ms": 96.05017200374277,
+      "warm_ok": true
+    },
+    {
+      "approach": "none",
+      "crates_compiled": [
+        4,
+        4,
+        4,
+        4
+      ],
+      "crates_compiled_mean": 4.0,
+      "crates_restored_mean": 0,
+      "disk_bytes": 33046600,
+      "edit_kind": "mixed",
+      "env": {},
+      "errors": [],
+      "first_green": {},
+      "from_older": false,
+      "held_out": true,
+      "lever": "none",
+      "loop": "check",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "ok": true,
+      "per_worktree_ms": [
+        600.8096709992969,
+        611.507323999831,
+        584.6944889999577,
+        607.04290799913
+      ],
+      "product": "agent_worktrees",
+      "sample": "hashbrown",
+      "split": "held_out",
+      "store_bytes": 0,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      },
+      "wall_ms": 2404.169487002946,
+      "warm_crates": 0,
+      "warm_ms": 61.583449998579454,
+      "warm_ok": true
+    },
+    {
+      "approach": "shared_target",
+      "crates_compiled": [
+        1,
+        0,
+        0,
+        0
+      ],
+      "crates_compiled_mean": 0.25,
+      "crates_restored_mean": 3.75,
+      "disk_bytes": 8261952,
+      "edit_kind": "mixed",
+      "env": {},
+      "errors": [],
+      "first_green": {},
+      "from_older": false,
+      "held_out": true,
+      "lever": "shared_target",
+      "loop": "check",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "ok": true,
+      "per_worktree_ms": [
+        407.2440910022124,
+        18.34018700174056,
+        17.786589000024833,
+        17.36541999707697
+      ],
+      "product": "agent_worktrees",
+      "sample": "hashbrown",
+      "split": "held_out",
+      "store_bytes": 0,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      },
+      "wall_ms": 460.81229799892753,
+      "warm_crates": 4,
+      "warm_ms": 601.1731350008631,
+      "warm_ok": true
+    },
+    {
+      "approach": "kache",
+      "crates_compiled": [
+        4,
+        1,
+        0,
+        0
+      ],
+      "crates_compiled_mean": 1.25,
+      "crates_restored_mean": 0,
+      "disk_bytes": 6638859,
+      "edit_kind": "mixed",
+      "env": {},
+      "errors": [],
+      "first_green": {},
+      "from_older": false,
+      "held_out": true,
+      "lever": "kache",
+      "loop": "check",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "ok": true,
+      "per_worktree_ms": [
+        651.412043000164,
+        437.76058700314024,
+        135.97099499747856,
+        130.48050700308522
+      ],
+      "product": "agent_worktrees",
+      "sample": "hashbrown",
+      "split": "held_out",
+      "store_bytes": 3307801,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      },
+      "wall_ms": 1392.3294549967977,
+      "warm_crates": 0,
+      "warm_ms": 52.898120004101656,
+      "warm_ok": true
+    },
+    {
+      "approach": "sccache",
+      "crates_compiled": [
+        4,
+        4,
+        4,
+        4
+      ],
+      "crates_compiled_mean": 4.0,
+      "crates_restored_mean": 0,
+      "disk_bytes": 5623064,
+      "edit_kind": "mixed",
+      "env": {},
+      "errors": [],
+      "first_green": {},
+      "from_older": false,
+      "held_out": true,
+      "lever": "sccache",
+      "loop": "check",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "ok": true,
+      "per_worktree_ms": [
+        635.9131080025691,
+        635.6644150000648,
+        629.3833229938173,
+        641.5165100042941
+      ],
+      "product": "agent_worktrees",
+      "sample": "hashbrown",
+      "split": "held_out",
+      "store_bytes": 0,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      },
+      "wall_ms": 2542.5848770028097,
+      "warm_crates": 0,
+      "warm_ms": 53.28330300108064,
+      "warm_ok": true
+    },
+    {
+      "approach": "nanocompile",
+      "crates_compiled": [
+        4,
+        1,
+        1,
+        1
+      ],
+      "crates_compiled_mean": 1.75,
+      "crates_restored_mean": 0,
+      "disk_bytes": 2532352,
+      "edit_kind": "mixed",
+      "env": {
+        "CARGO_INCREMENTAL": "0",
+        "NANOCOMPILE_ALLOW_INCREMENTAL": "1",
+        "NANOCOMPILE_EXECUTABLE_PRODUCERS": "1",
+        "NANOCOMPILE_HARDLINK_TARGET": "1",
+        "NANOCOMPILE_NO_VARIANTS": "1",
+        "NANOCOMPILE_PROC_MACROS": "reported",
+        "NANOCOMPILE_PROC_MACRO_PRODUCERS": "1",
+        "NANOCOMPILE_REMAP_PATHS": "1"
+      },
+      "errors": [],
+      "first_green": {},
+      "from_older": false,
+      "held_out": true,
+      "lever": "frozen",
+      "loop": "check",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "ok": true,
+      "per_worktree_ms": [
+        637.7243419992737,
+        377.2447590017691,
+        378.1838630020502,
+        419.39091800304595
+      ],
+      "product": "agent_worktrees",
+      "sample": "hashbrown",
+      "split": "held_out",
+      "store_bytes": 2527657,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      },
+      "wall_ms": 1822.3271050010226,
+      "warm_crates": 0,
+      "warm_ms": 48.69516799953999,
+      "warm_ok": true
+    },
+    {
+      "approach": "none",
+      "crates_compiled": [
+        20,
+        20,
+        20,
+        20
+      ],
+      "crates_compiled_mean": 20.0,
+      "crates_restored_mean": 0,
+      "disk_bytes": 583295707,
+      "edit_kind": "mixed",
+      "env": {},
+      "errors": [],
+      "first_green": {},
+      "from_older": false,
+      "held_out": true,
+      "lever": "none",
+      "loop": "check",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "ok": true,
+      "per_worktree_ms": [
+        7254.295407001337,
+        7497.8555380002945,
+        7407.429348000733,
+        7552.810086002864
+      ],
+      "product": "agent_worktrees",
+      "sample": "nalgebra",
+      "split": "held_out",
+      "store_bytes": 0,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      },
+      "wall_ms": 29712.57066399994,
+      "warm_crates": 0,
+      "warm_ms": 296.4867699993192,
+      "warm_ok": true
+    },
+    {
+      "approach": "shared_target",
+      "crates_compiled": [
+        1,
+        0,
+        0,
+        0
+      ],
+      "crates_compiled_mean": 0.25,
+      "crates_restored_mean": 19.75,
+      "disk_bytes": 145827028,
+      "edit_kind": "mixed",
+      "env": {},
+      "errors": [],
+      "first_green": {},
+      "from_older": false,
+      "held_out": true,
+      "lever": "shared_target",
+      "loop": "check",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "ok": true,
+      "per_worktree_ms": [
+        4353.42656699504,
+        58.28357800055528,
+        55.175004999910016,
+        56.80928500078153
+      ],
+      "product": "agent_worktrees",
+      "sample": "nalgebra",
+      "split": "held_out",
+      "store_bytes": 0,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      },
+      "wall_ms": 4523.814095002308,
+      "warm_crates": 20,
+      "warm_ms": 7580.625119997421,
+      "warm_ok": true
+    },
+    {
+      "approach": "kache",
+      "crates_compiled": [
+        30,
+        1,
+        0,
+        0
+      ],
+      "crates_compiled_mean": 7.75,
+      "crates_restored_mean": 0,
+      "disk_bytes": 372020513,
+      "edit_kind": "mixed",
+      "env": {},
+      "errors": [],
+      "first_green": {},
+      "from_older": false,
+      "held_out": true,
+      "lever": "kache",
+      "loop": "check",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "ok": true,
+      "per_worktree_ms": [
+        8115.541086997837,
+        4004.5560049984488,
+        485.0286969958688,
+        477.8172330043162
+      ],
+      "product": "agent_worktrees",
+      "sample": "nalgebra",
+      "split": "held_out",
+      "store_bytes": 88811710,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      },
+      "wall_ms": 13140.772427999764,
+      "warm_crates": 0,
+      "warm_ms": 91.2392149984953,
+      "warm_ok": true
+    },
+    {
+      "approach": "sccache",
+      "crates_compiled": [
+        20,
+        20,
+        20,
+        20
+      ],
+      "crates_compiled_mean": 20.0,
+      "crates_restored_mean": 0,
+      "disk_bytes": 308572712,
+      "edit_kind": "mixed",
+      "env": {},
+      "errors": [],
+      "first_green": {},
+      "from_older": false,
+      "held_out": true,
+      "lever": "sccache",
+      "loop": "check",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "ok": true,
+      "per_worktree_ms": [
+        7822.703233003267,
+        7561.294766994251,
+        7603.038677996665,
+        7688.967082998715
+      ],
+      "product": "agent_worktrees",
+      "sample": "nalgebra",
+      "split": "held_out",
+      "store_bytes": 0,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      },
+      "wall_ms": 30676.196186002926,
+      "warm_crates": 0,
+      "warm_ms": 95.46716900513275,
+      "warm_ok": true
+    },
+    {
+      "approach": "nanocompile",
+      "crates_compiled": [
+        26,
+        3,
+        2,
+        2
+      ],
+      "crates_compiled_mean": 8.25,
+      "crates_restored_mean": 0,
+      "disk_bytes": 84529916,
+      "edit_kind": "mixed",
+      "env": {
+        "CARGO_INCREMENTAL": "0",
+        "NANOCOMPILE_ALLOW_INCREMENTAL": "1",
+        "NANOCOMPILE_EXECUTABLE_PRODUCERS": "1",
+        "NANOCOMPILE_HARDLINK_TARGET": "1",
+        "NANOCOMPILE_NO_VARIANTS": "1",
+        "NANOCOMPILE_PROC_MACROS": "reported",
+        "NANOCOMPILE_PROC_MACRO_PRODUCERS": "1",
+        "NANOCOMPILE_REMAP_PATHS": "1"
+      },
+      "errors": [],
+      "first_green": {},
+      "from_older": false,
+      "held_out": true,
+      "lever": "frozen",
+      "loop": "check",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "ok": true,
+      "per_worktree_ms": [
+        7347.529614002269,
+        4443.162839997967,
+        4261.703238997143,
+        4244.681084994227
+      ],
+      "product": "agent_worktrees",
+      "sample": "nalgebra",
+      "split": "held_out",
+      "store_bytes": 84494045,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      },
+      "wall_ms": 20309.546192002017,
+      "warm_crates": 0,
+      "warm_ms": 84.58963000157382,
+      "warm_ok": true
+    },
+    {
+      "approach": "none",
+      "crates_compiled": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "crates_compiled_mean": 2.0,
+      "crates_restored_mean": 0,
+      "disk_bytes": 188334026,
+      "edit_kind": "mixed",
+      "env": {},
+      "errors": [],
+      "first_green": {},
+      "from_older": false,
+      "held_out": true,
+      "lever": "none",
+      "loop": "check",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "ok": true,
+      "per_worktree_ms": [
+        1951.1236709950026,
+        1863.364183001977,
+        1860.8179289949476,
+        1895.8444640011294
+      ],
+      "product": "agent_worktrees",
+      "sample": "serde",
+      "split": "held_out",
+      "store_bytes": 0,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      },
+      "wall_ms": 7571.261120996496,
+      "warm_crates": 0,
+      "warm_ms": 52.77818100148579,
+      "warm_ok": true
+    },
+    {
+      "approach": "shared_target",
+      "crates_compiled": [
+        1,
+        0,
+        0,
+        0
+      ],
+      "crates_compiled_mean": 0.25,
+      "crates_restored_mean": 1.75,
+      "disk_bytes": 47084150,
+      "edit_kind": "mixed",
+      "env": {},
+      "errors": [],
+      "first_green": {},
+      "from_older": false,
+      "held_out": true,
+      "lever": "shared_target",
+      "loop": "check",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "ok": true,
+      "per_worktree_ms": [
+        338.00954499747604,
+        19.190095001249574,
+        18.293628003448248,
+        16.987813003652263
+      ],
+      "product": "agent_worktrees",
+      "sample": "serde",
+      "split": "held_out",
+      "store_bytes": 0,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      },
+      "wall_ms": 392.55990799574647,
+      "warm_crates": 2,
+      "warm_ms": 1899.485576999723,
+      "warm_ok": true
+    },
+    {
+      "approach": "kache",
+      "crates_compiled": [
+        6,
+        1,
+        0,
+        0
+      ],
+      "crates_compiled_mean": 1.75,
+      "crates_restored_mean": 0,
+      "disk_bytes": 82071888,
+      "edit_kind": "mixed",
+      "env": {},
+      "errors": [],
+      "first_green": {},
+      "from_older": false,
+      "held_out": true,
+      "lever": "kache",
+      "loop": "check",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "ok": true,
+      "per_worktree_ms": [
+        1964.6116489966516,
+        559.9048500007484,
+        309.22665600519395,
+        326.6584960001637
+      ],
+      "product": "agent_worktrees",
+      "sample": "serde",
+      "split": "held_out",
+      "store_bytes": 16356834,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      },
+      "wall_ms": 3198.334551001608,
+      "warm_crates": 0,
+      "warm_ms": 52.1083429994178,
+      "warm_ok": true
+    },
+    {
+      "approach": "sccache",
+      "crates_compiled": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "crates_compiled_mean": 2.0,
+      "crates_restored_mean": 0,
+      "disk_bytes": 50562768,
+      "edit_kind": "mixed",
+      "env": {},
+      "errors": [],
+      "first_green": {},
+      "from_older": false,
+      "held_out": true,
+      "lever": "sccache",
+      "loop": "check",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "ok": true,
+      "per_worktree_ms": [
+        1822.110432003683,
+        1854.5947750026244,
+        1827.822097002354,
+        1737.9125000006752
+      ],
+      "product": "agent_worktrees",
+      "sample": "serde",
+      "split": "held_out",
+      "store_bytes": 0,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      },
+      "wall_ms": 7242.545225999493,
+      "warm_crates": 0,
+      "warm_ms": 61.884521004685666,
+      "warm_ok": true
+    },
+    {
+      "approach": "nanocompile",
+      "crates_compiled": [
+        4,
+        4,
+        4,
+        4
+      ],
+      "crates_compiled_mean": 4.0,
+      "crates_restored_mean": 0,
+      "disk_bytes": 13355434,
+      "edit_kind": "mixed",
+      "env": {
+        "CARGO_INCREMENTAL": "0",
+        "NANOCOMPILE_ALLOW_INCREMENTAL": "1",
+        "NANOCOMPILE_EXECUTABLE_PRODUCERS": "1",
+        "NANOCOMPILE_HARDLINK_TARGET": "1",
+        "NANOCOMPILE_NO_VARIANTS": "1",
+        "NANOCOMPILE_PROC_MACROS": "reported",
+        "NANOCOMPILE_PROC_MACRO_PRODUCERS": "1",
+        "NANOCOMPILE_REMAP_PATHS": "1"
+      },
+      "errors": [],
+      "first_green": {},
+      "from_older": false,
+      "held_out": true,
+      "lever": "frozen",
+      "loop": "check",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "ok": true,
+      "per_worktree_ms": [
+        1622.640968002088,
+        1557.6535110012628,
+        1617.0959170049173,
+        1531.90741599974
+      ],
+      "product": "agent_worktrees",
+      "sample": "serde",
+      "split": "held_out",
+      "store_bytes": 13346819,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      },
+      "wall_ms": 6339.478683999914,
+      "warm_crates": 0,
+      "warm_ms": 54.13478000264149,
+      "warm_ok": true
+    },
+    {
+      "approach": "none",
+      "crates_compiled": [
+        313,
+        313,
+        313,
+        313
+      ],
+      "crates_compiled_mean": 313.0,
+      "crates_restored_mean": 0,
+      "disk_bytes": 4742876358,
+      "edit_kind": "mixed",
+      "env": {},
+      "errors": [],
+      "first_green": {},
+      "from_older": false,
+      "held_out": true,
+      "lever": "none",
+      "loop": "check",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "ok": true,
+      "per_worktree_ms": [
+        48425.35255799885,
+        44582.77835199988,
+        45860.35285800608,
+        51903.20852300647
+      ],
+      "product": "agent_worktrees",
+      "sample": "ruff",
+      "split": "held_out",
+      "store_bytes": 0,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      },
+      "wall_ms": 190773.59910799714,
+      "warm_crates": 0,
+      "warm_ms": 968.1039979986963,
+      "warm_ok": true
+    },
+    {
+      "approach": "shared_target",
+      "crates_compiled": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "crates_compiled_mean": 1.0,
+      "crates_restored_mean": 312.0,
+      "disk_bytes": 1185761641,
+      "edit_kind": "mixed",
+      "env": {},
+      "errors": [],
+      "first_green": {},
+      "from_older": false,
+      "held_out": true,
+      "lever": "shared_target",
+      "loop": "check",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "ok": true,
+      "per_worktree_ms": [
+        1155.4201949984417,
+        1164.5047450001584,
+        1152.1247810014756,
+        1122.8440909981146
+      ],
+      "product": "agent_worktrees",
+      "sample": "ruff",
+      "split": "held_out",
+      "store_bytes": 0,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      },
+      "wall_ms": 4595.914761004678,
+      "warm_crates": 313,
+      "warm_ms": 50819.41028499568,
+      "warm_ok": true
+    },
+    {
+      "approach": "kache",
+      "crates_compiled": [
+        408,
+        3,
+        2,
+        1
+      ],
+      "crates_compiled_mean": 103.5,
+      "crates_restored_mean": 0,
+      "disk_bytes": 3457471756,
+      "edit_kind": "mixed",
+      "env": {},
+      "errors": [],
+      "first_green": {},
+      "from_older": false,
+      "held_out": true,
+      "lever": "kache",
+      "loop": "check",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "ok": true,
+      "per_worktree_ms": [
+        51963.0318779964,
+        24060.650751998764,
+        22268.53164100612,
+        20383.53854900197
+      ],
+      "product": "agent_worktrees",
+      "sample": "ruff",
+      "split": "held_out",
+      "store_bytes": 819599267,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      },
+      "wall_ms": 118888.03722600278,
+      "warm_crates": 0,
+      "warm_ms": 686.0181569936685,
+      "warm_ok": true
+    },
+    {
+      "approach": "sccache",
+      "crates_compiled": [
+        313,
+        313,
+        313,
+        313
+      ],
+      "crates_compiled_mean": 313.0,
+      "crates_restored_mean": 0,
+      "disk_bytes": 2884290543,
+      "edit_kind": "mixed",
+      "env": {},
+      "errors": [],
+      "first_green": {},
+      "from_older": false,
+      "held_out": true,
+      "lever": "sccache",
+      "loop": "check",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "ok": true,
+      "per_worktree_ms": [
+        49497.44875000033,
+        48747.92303099821,
+        49126.28269000561,
+        48760.51362600265
+      ],
+      "product": "agent_worktrees",
+      "sample": "ruff",
+      "split": "held_out",
+      "store_bytes": 0,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      },
+      "wall_ms": 196134.04903500486,
+      "warm_crates": 0,
+      "warm_ms": 358.4344479968422,
+      "warm_ok": true
+    },
+    {
+      "approach": "nanocompile",
+      "crates_compiled": [
+        373,
+        48,
+        45,
+        45
+      ],
+      "crates_compiled_mean": 127.75,
+      "crates_restored_mean": 0,
+      "disk_bytes": 794872899,
+      "edit_kind": "mixed",
+      "env": {
+        "CARGO_INCREMENTAL": "0",
+        "NANOCOMPILE_ALLOW_INCREMENTAL": "1",
+        "NANOCOMPILE_EXECUTABLE_PRODUCERS": "1",
+        "NANOCOMPILE_HARDLINK_TARGET": "1",
+        "NANOCOMPILE_NO_VARIANTS": "1",
+        "NANOCOMPILE_PROC_MACROS": "reported",
+        "NANOCOMPILE_PROC_MACRO_PRODUCERS": "1",
+        "NANOCOMPILE_REMAP_PATHS": "1"
+      },
+      "errors": [],
+      "first_green": {},
+      "from_older": false,
+      "held_out": true,
+      "lever": "frozen",
+      "loop": "check",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "ok": true,
+      "per_worktree_ms": [
+        47978.04645699944,
+        25463.90963900194,
+        25306.26551900059,
+        25440.900599998713
+      ],
+      "product": "agent_worktrees",
+      "sample": "ruff",
+      "split": "held_out",
+      "store_bytes": 679381619,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      },
+      "wall_ms": 124216.04949599714,
+      "warm_crates": 0,
+      "warm_ms": 242.48696800350444,
+      "warm_ok": true
+    },
+    {
+      "approach": "none",
+      "crates_compiled": [
+        19,
+        19,
+        19,
+        19
+      ],
+      "crates_compiled_mean": 19.0,
+      "crates_restored_mean": 0,
+      "disk_bytes": 436882601,
+      "edit_kind": "mixed",
+      "env": {},
+      "errors": [],
+      "first_green": {},
+      "from_older": false,
+      "held_out": true,
+      "lever": "none",
+      "loop": "check",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "ok": true,
+      "per_worktree_ms": [
+        5308.213413001795,
+        5180.008458002703,
+        5086.3848099979805,
+        5089.528715994675
+      ],
+      "product": "agent_worktrees",
+      "sample": "tokio",
+      "split": "held_out",
+      "store_bytes": 0,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      },
+      "wall_ms": 20664.280004995817,
+      "warm_crates": 0,
+      "warm_ms": 152.9060600005323,
+      "warm_ok": true
+    },
+    {
+      "approach": "shared_target",
+      "crates_compiled": [
+        1,
+        0,
+        0,
+        0
+      ],
+      "crates_compiled_mean": 0.25,
+      "crates_restored_mean": 18.75,
+      "disk_bytes": 109226449,
+      "edit_kind": "mixed",
+      "env": {},
+      "errors": [],
+      "first_green": {},
+      "from_older": false,
+      "held_out": true,
+      "lever": "shared_target",
+      "loop": "check",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "ok": true,
+      "per_worktree_ms": [
+        2849.74023399991,
+        40.03443499823334,
+        38.35455900116358,
+        38.377178003429435
+      ],
+      "product": "agent_worktrees",
+      "sample": "tokio",
+      "split": "held_out",
+      "store_bytes": 0,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      },
+      "wall_ms": 2966.573227997287,
+      "warm_crates": 19,
+      "warm_ms": 5192.648627999006,
+      "warm_ok": true
+    },
+    {
+      "approach": "kache",
+      "crates_compiled": [
+        27,
+        1,
+        0,
+        0
+      ],
+      "crates_compiled_mean": 7.0,
+      "crates_restored_mean": 0,
+      "disk_bytes": 265003809,
+      "edit_kind": "mixed",
+      "env": {},
+      "errors": [],
+      "first_green": {},
+      "from_older": false,
+      "held_out": true,
+      "lever": "kache",
+      "loop": "check",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "ok": true,
+      "per_worktree_ms": [
+        5310.008213004039,
+        2889.76527700288,
+        520.6849820024217,
+        513.4070760032046
+      ],
+      "product": "agent_worktrees",
+      "sample": "tokio",
+      "split": "held_out",
+      "store_bytes": 66814682,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      },
+      "wall_ms": 9285.463592997985,
+      "warm_crates": 0,
+      "warm_ms": 66.32640899624676,
+      "warm_ok": true
+    },
+    {
+      "approach": "sccache",
+      "crates_compiled": [
+        19,
+        19,
+        19,
+        19
+      ],
+      "crates_compiled_mean": 19.0,
+      "crates_restored_mean": 0,
+      "disk_bytes": 212067438,
+      "edit_kind": "mixed",
+      "env": {},
+      "errors": [],
+      "first_green": {},
+      "from_older": false,
+      "held_out": true,
+      "lever": "sccache",
+      "loop": "check",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "ok": true,
+      "per_worktree_ms": [
+        5312.165383002139,
+        5288.827740994748,
+        5294.371184005286,
+        5268.572631997813
+      ],
+      "product": "agent_worktrees",
+      "sample": "tokio",
+      "split": "held_out",
+      "store_bytes": 0,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      },
+      "wall_ms": 21164.095592001104,
+      "warm_crates": 0,
+      "warm_ms": 74.31807899411069,
+      "warm_ok": true
+    },
+    {
+      "approach": "nanocompile",
+      "crates_compiled": [
+        24,
+        4,
+        3,
+        3
+      ],
+      "crates_compiled_mean": 8.5,
+      "crates_restored_mean": 0,
+      "disk_bytes": 62163951,
+      "edit_kind": "mixed",
+      "env": {
+        "CARGO_INCREMENTAL": "0",
+        "NANOCOMPILE_ALLOW_INCREMENTAL": "1",
+        "NANOCOMPILE_EXECUTABLE_PRODUCERS": "1",
+        "NANOCOMPILE_HARDLINK_TARGET": "1",
+        "NANOCOMPILE_NO_VARIANTS": "1",
+        "NANOCOMPILE_PROC_MACROS": "reported",
+        "NANOCOMPILE_PROC_MACRO_PRODUCERS": "1",
+        "NANOCOMPILE_REMAP_PATHS": "1"
+      },
+      "errors": [],
+      "first_green": {},
+      "from_older": false,
+      "held_out": true,
+      "lever": "frozen",
+      "loop": "check",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "ok": true,
+      "per_worktree_ms": [
+        4877.312069998879,
+        4266.543896002986,
+        2892.3420880018966,
+        2876.540778997878
+      ],
+      "product": "agent_worktrees",
+      "sample": "tokio",
+      "split": "held_out",
+      "store_bytes": 58122920,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      },
+      "wall_ms": 14922.941049997462,
+      "warm_crates": 0,
+      "warm_ms": 66.70908499654615,
+      "warm_ok": true
+    },
+    {
+      "approach": "none",
+      "crates_compiled": [
+        53,
+        53,
+        53,
+        53
+      ],
+      "crates_compiled_mean": 53.0,
+      "crates_restored_mean": 0,
+      "disk_bytes": 582195312,
+      "edit_kind": "mixed",
+      "env": {},
+      "errors": [],
+      "first_green": {},
+      "from_older": false,
+      "held_out": true,
+      "lever": "none",
+      "loop": "check",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "ok": true,
+      "per_worktree_ms": [
+        5550.852218002547,
+        5586.036758999398,
+        5569.746268003655,
+        5554.471093004395
+      ],
+      "product": "agent_worktrees",
+      "sample": "emergentDB",
+      "split": "held_out",
+      "store_bytes": 0,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      },
+      "wall_ms": 22261.437800996646,
+      "warm_crates": 32,
+      "warm_ms": 4868.629910000891,
+      "warm_ok": true
+    },
+    {
+      "approach": "shared_target",
+      "crates_compiled": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "crates_compiled_mean": 0.0,
+      "crates_restored_mean": 53.0,
+      "disk_bytes": 145550858,
+      "edit_kind": "mixed",
+      "env": {},
+      "errors": [],
+      "first_green": {},
+      "from_older": false,
+      "held_out": true,
+      "lever": "shared_target",
+      "loop": "check",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "ok": true,
+      "per_worktree_ms": [
+        77.21511900308542,
+        74.97216900083004,
+        75.18072899983963,
+        74.74001299851807
+      ],
+      "product": "agent_worktrees",
+      "sample": "emergentDB",
+      "split": "held_out",
+      "store_bytes": 0,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      },
+      "wall_ms": 302.25169099867344,
+      "warm_crates": 53,
+      "warm_ms": 5591.765149998537,
+      "warm_ok": true
+    },
+    {
+      "approach": "kache",
+      "crates_compiled": [
+        79,
+        0,
+        0,
+        0
+      ],
+      "crates_compiled_mean": 19.75,
+      "crates_restored_mean": 0,
+      "disk_bytes": 651949453,
+      "edit_kind": "mixed",
+      "env": {},
+      "errors": [],
+      "first_green": {},
+      "from_older": false,
+      "held_out": true,
+      "lever": "kache",
+      "loop": "check",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "ok": true,
+      "per_worktree_ms": [
+        6671.689035996678,
+        278.68186499836156,
+        291.08091100351885,
+        296.38257899932796
+      ],
+      "product": "agent_worktrees",
+      "sample": "emergentDB",
+      "split": "held_out",
+      "store_bytes": 136991520,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      },
+      "wall_ms": 7592.75184100261,
+      "warm_crates": 0,
+      "warm_ms": 103.76644899952225,
+      "warm_ok": true
+    },
+    {
+      "approach": "sccache",
+      "crates_compiled": [
+        53,
+        53,
+        53,
+        53
+      ],
+      "crates_compiled_mean": 53.0,
+      "crates_restored_mean": 0,
+      "disk_bytes": 528271852,
+      "edit_kind": "mixed",
+      "env": {},
+      "errors": [],
+      "first_green": {},
+      "from_older": false,
+      "held_out": true,
+      "lever": "sccache",
+      "loop": "check",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "ok": true,
+      "per_worktree_ms": [
+        5929.830134002259,
+        6149.2333479982335,
+        6087.218397995457,
+        5816.811358003179
+      ],
+      "product": "agent_worktrees",
+      "sample": "emergentDB",
+      "split": "held_out",
+      "store_bytes": 0,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      },
+      "wall_ms": 23983.452380998642,
+      "warm_crates": 1,
+      "warm_ms": 957.1587649988942,
+      "warm_ok": true
+    },
+    {
+      "approach": "nanocompile",
+      "crates_compiled": [
+        68,
+        3,
+        2,
+        2
+      ],
+      "crates_compiled_mean": 18.75,
+      "crates_restored_mean": 0,
+      "disk_bytes": 133791754,
+      "edit_kind": "mixed",
+      "env": {
+        "CARGO_INCREMENTAL": "0",
+        "NANOCOMPILE_ALLOW_INCREMENTAL": "1",
+        "NANOCOMPILE_EXECUTABLE_PRODUCERS": "1",
+        "NANOCOMPILE_HARDLINK_TARGET": "1",
+        "NANOCOMPILE_NO_VARIANTS": "1",
+        "NANOCOMPILE_PROC_MACROS": "reported",
+        "NANOCOMPILE_PROC_MACRO_PRODUCERS": "1",
+        "NANOCOMPILE_REMAP_PATHS": "1"
+      },
+      "errors": [],
+      "first_green": {},
+      "from_older": false,
+      "held_out": true,
+      "lever": "frozen",
+      "loop": "check",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "ok": true,
+      "per_worktree_ms": [
+        6243.458290999115,
+        1312.4786269981996,
+        1299.1894830047386,
+        1314.8132200003602
+      ],
+      "product": "agent_worktrees",
+      "sample": "emergentDB",
+      "split": "held_out",
+      "store_bytes": 130119246,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      },
+      "wall_ms": 10184.386263994384,
+      "warm_crates": 0,
+      "warm_ms": 103.71271299663931,
+      "warm_ok": true
+    }
+  ],
+  "hill_climb": {
+    "frozen_env": {
+      "CARGO_INCREMENTAL": "0",
+      "NANOCOMPILE_ALLOW_INCREMENTAL": "1",
+      "NANOCOMPILE_EXECUTABLE_PRODUCERS": "1",
+      "NANOCOMPILE_HARDLINK_TARGET": "1",
+      "NANOCOMPILE_NO_VARIANTS": "1",
+      "NANOCOMPILE_PROC_MACROS": "reported",
+      "NANOCOMPILE_PROC_MACRO_PRODUCERS": "1",
+      "NANOCOMPILE_REMAP_PATHS": "1"
+    },
+    "frozen_lever": "frozen",
+    "kept": [
+      "l0_nano_best",
+      "l3_hardlink_target",
+      "l5_no_incremental",
+      "l12_no_variants",
+      "l14_slim_graph",
+      "l20_remap_paths"
+    ],
+    "log": [
+      {
+        "keep": true,
+        "lever": "l0_nano_best",
+        "metrics": {},
+        "note": "workspace-logical keys + reported proc-macros + executable producers",
+        "vs": "none"
+      },
+      {
+        "keep": true,
+        "lever": "l3_hardlink_target",
+        "metrics": {},
+        "vs": "l0_nano_best"
+      },
+      {
+        "keep": true,
+        "lever": "l5_no_incremental",
+        "metrics": {},
+        "vs": "l3_hardlink_target"
+      },
+      {
+        "keep": true,
+        "lever": "l12_no_variants",
+        "metrics": {},
+        "vs": "l5_no_incremental"
+      },
+      {
+        "keep": true,
+        "lever": "l14_slim_graph",
+        "metrics": {},
+        "note": "Skip empty -L prefix guards; unique dependency records. Ruff entries 244MB -> ~1MB.",
+        "vs": "l12_no_variants"
+      },
+      {
+        "keep": true,
+        "lever": "l20_remap_paths",
+        "metrics": {
+          "crates_compiled_mean": {
+            "gain": 0.0
+          },
+          "disk_bytes": {
+            "gain": 0.092
+          },
+          "store_bytes": {
+            "gain": 0.096
+          },
+          "wall_ms": {
+            "gain": 0.018
+          }
+        },
+        "note": "Train disk -12% axum / -6% ripgrep via rustc --remap-path-prefix.",
+        "vs": "l14_slim_graph"
+      },
+      {
+        "keep": false,
+        "lever": "l21_check_native",
+        "metrics": {
+          "crates_compiled_mean": {
+            "base": null,
+            "gain": null,
+            "keep": false,
+            "new": null
+          },
+          "disk_bytes": {
+            "base": null,
+            "gain": null,
+            "keep": false,
+            "new": null
+          },
+          "store_bytes": {
+            "base": null,
+            "gain": null,
+            "keep": false,
+            "new": null
+          },
+          "wall_ms": {
+            "base": null,
+            "gain": null,
+            "keep": false,
+            "new": null
+          }
+        },
+        "note": "extra per-objective round on train",
+        "vs": "frozen"
+      },
+      {
+        "keep": false,
+        "lever": "l21_check_native",
+        "metrics": {
+          "crates_compiled_mean": {
+            "base": 19.25,
+            "gain": 0.0,
+            "keep": false,
+            "new": 19.25
+          },
+          "disk_bytes": {
+            "base": 91746838.5,
+            "gain": 1.1924116600486458e-05,
+            "keep": false,
+            "new": 91745744.5
+          },
+          "store_bytes": {
+            "base": 87846020.5,
+            "gain": -5.762924684789791e-05,
+            "keep": false,
+            "new": 87851083.0
+          },
+          "wall_ms": {
+            "base": 13967.880151001737,
+            "gain": 0.018868265452964144,
+            "keep": false,
+            "new": 13704.330480497447
+          }
+        },
+        "note": "extra per-objective round on train",
+        "vs": "frozen"
+      }
+    ]
+  },
+  "kind": "nanocompile.rust-loop.map-elites.shard",
+  "pareto": {
+    "held_out": {
+      "bhumi": {
+        "frontier": [
+          {
+            "approach": "shared_target",
+            "crates_compiled_mean": 0.25,
+            "disk_bytes": 301503851,
+            "lever": "shared_target",
+            "store_bytes": 0,
+            "wall_ms": 678.9502880055807
+          },
+          {
+            "approach": "kache",
+            "crates_compiled_mean": 0.0,
+            "disk_bytes": 4590479442,
+            "lever": "kache",
+            "store_bytes": 48866938,
+            "wall_ms": 4355.019488997641
+          },
+          {
+            "approach": "nanocompile",
+            "crates_compiled_mean": 36.0,
+            "disk_bytes": 299270183,
+            "lever": "frozen",
+            "store_bytes": 275175877,
+            "wall_ms": 18823.399210996286
+          }
+        ],
+        "nano_dominated_by": [],
+        "nano_on_frontier": true,
+        "split": "held_out"
+      },
+      "emergentDB": {
+        "frontier": [
+          {
+            "approach": "shared_target",
+            "crates_compiled_mean": 0.0,
+            "disk_bytes": 145550858,
+            "lever": "shared_target",
+            "store_bytes": 0,
+            "wall_ms": 302.25169099867344
+          },
+          {
+            "approach": "nanocompile",
+            "crates_compiled_mean": 18.75,
+            "disk_bytes": 133791754,
+            "lever": "frozen",
+            "store_bytes": 130119246,
+            "wall_ms": 10184.386263994384
+          }
+        ],
+        "nano_dominated_by": [],
+        "nano_on_frontier": true,
+        "split": "held_out"
+      },
+      "hashbrown": {
+        "frontier": [
+          {
+            "approach": "shared_target",
+            "crates_compiled_mean": 0.25,
+            "disk_bytes": 8261952,
+            "lever": "shared_target",
+            "store_bytes": 0,
+            "wall_ms": 460.81229799892753
+          },
+          {
+            "approach": "kache",
+            "crates_compiled_mean": 1.25,
+            "disk_bytes": 6638859,
+            "lever": "kache",
+            "store_bytes": 3307801,
+            "wall_ms": 1392.3294549967977
+          },
+          {
+            "approach": "sccache",
+            "crates_compiled_mean": 4.0,
+            "disk_bytes": 5623064,
+            "lever": "sccache",
+            "store_bytes": 0,
+            "wall_ms": 2542.5848770028097
+          },
+          {
+            "approach": "nanocompile",
+            "crates_compiled_mean": 1.75,
+            "disk_bytes": 2532352,
+            "lever": "frozen",
+            "store_bytes": 2527657,
+            "wall_ms": 1822.3271050010226
+          }
+        ],
+        "nano_dominated_by": [],
+        "nano_on_frontier": true,
+        "split": "held_out"
+      },
+      "nalgebra": {
+        "frontier": [
+          {
+            "approach": "shared_target",
+            "crates_compiled_mean": 0.25,
+            "disk_bytes": 145827028,
+            "lever": "shared_target",
+            "store_bytes": 0,
+            "wall_ms": 4523.814095002308
+          },
+          {
+            "approach": "nanocompile",
+            "crates_compiled_mean": 8.25,
+            "disk_bytes": 84529916,
+            "lever": "frozen",
+            "store_bytes": 84494045,
+            "wall_ms": 20309.546192002017
+          }
+        ],
+        "nano_dominated_by": [],
+        "nano_on_frontier": true,
+        "split": "held_out"
+      },
+      "ruff": {
+        "frontier": [
+          {
+            "approach": "shared_target",
+            "crates_compiled_mean": 1.0,
+            "disk_bytes": 1185761641,
+            "lever": "shared_target",
+            "store_bytes": 0,
+            "wall_ms": 4595.914761004678
+          },
+          {
+            "approach": "nanocompile",
+            "crates_compiled_mean": 127.75,
+            "disk_bytes": 794872899,
+            "lever": "frozen",
+            "store_bytes": 679381619,
+            "wall_ms": 124216.04949599714
+          }
+        ],
+        "nano_dominated_by": [],
+        "nano_on_frontier": true,
+        "split": "held_out"
+      },
+      "serde": {
+        "frontier": [
+          {
+            "approach": "shared_target",
+            "crates_compiled_mean": 0.25,
+            "disk_bytes": 47084150,
+            "lever": "shared_target",
+            "store_bytes": 0,
+            "wall_ms": 392.55990799574647
+          },
+          {
+            "approach": "nanocompile",
+            "crates_compiled_mean": 4.0,
+            "disk_bytes": 13355434,
+            "lever": "frozen",
+            "store_bytes": 13346819,
+            "wall_ms": 6339.478683999914
+          }
+        ],
+        "nano_dominated_by": [],
+        "nano_on_frontier": true,
+        "split": "held_out"
+      },
+      "tokio": {
+        "frontier": [
+          {
+            "approach": "shared_target",
+            "crates_compiled_mean": 0.25,
+            "disk_bytes": 109226449,
+            "lever": "shared_target",
+            "store_bytes": 0,
+            "wall_ms": 2966.573227997287
+          },
+          {
+            "approach": "nanocompile",
+            "crates_compiled_mean": 8.5,
+            "disk_bytes": 62163951,
+            "lever": "frozen",
+            "store_bytes": 58122920,
+            "wall_ms": 14922.941049997462
+          }
+        ],
+        "nano_dominated_by": [],
+        "nano_on_frontier": true,
+        "split": "held_out"
+      }
+    },
+    "train": {
+      "axum": {
+        "frontier": [
+          {
+            "approach": "shared_target",
+            "crates_compiled_mean": 0.5,
+            "disk_bytes": 157767267,
+            "lever": "shared_target",
+            "store_bytes": 0,
+            "wall_ms": 3453.596542000014
+          },
+          {
+            "approach": "nanocompile",
+            "crates_compiled_mean": 20.0,
+            "disk_bytes": 111392465,
+            "lever": "frozen",
+            "store_bytes": 107322059,
+            "wall_ms": 20746.094490998075
+          },
+          {
+            "approach": "nanocompile",
+            "crates_compiled_mean": 20.0,
+            "disk_bytes": 111384596,
+            "lever": "l21_check_native",
+            "store_bytes": 107327372,
+            "wall_ms": 20183.893051995256
+          }
+        ],
+        "nano_dominated_by": [],
+        "nano_on_frontier": true,
+        "split": "train"
+      },
+      "ripgrep": {
+        "frontier": [
+          {
+            "approach": "shared_target",
+            "crates_compiled_mean": 1.0,
+            "disk_bytes": 102451447,
+            "lever": "shared_target",
+            "store_bytes": 0,
+            "wall_ms": 1611.2793710053666
+          },
+          {
+            "approach": "nanocompile",
+            "crates_compiled_mean": 18.5,
+            "disk_bytes": 72101212,
+            "lever": "frozen",
+            "store_bytes": 68369982,
+            "wall_ms": 7189.665811005398
+          }
+        ],
+        "nano_dominated_by": [
+          {
+            "approach": "nanocompile",
+            "by": "frozen",
+            "nano_lever": "l21_check_native",
+            "objectives": {
+              "crates_compiled_mean": {
+                "nano": 18.5,
+                "other": 18.5
+              },
+              "disk_bytes": {
+                "nano": 72106893,
+                "other": 72101212
+              },
+              "store_bytes": {
+                "nano": 68374794,
+                "other": 68369982
+              },
+              "wall_ms": {
+                "nano": 7224.767908999638,
+                "other": 7189.665811005398
+              }
+            }
+          }
+        ],
+        "nano_on_frontier": true,
+        "split": "train"
+      }
+    }
+  },
+  "sample": "agent-worktrees",
+  "scenario_pareto": {
+    "held_out": {
+      "bhumi|sequential": {
+        "frontier": [
+          {
+            "approach": "shared_target",
+            "crates_compiled_mean": 0.25,
+            "disk_bytes": 301503851,
+            "lever": "shared_target",
+            "store_bytes": 0,
+            "wall_ms": 678.9502880055807
+          },
+          {
+            "approach": "kache",
+            "crates_compiled_mean": 0.0,
+            "disk_bytes": 4590479442,
+            "lever": "kache",
+            "store_bytes": 48866938,
+            "wall_ms": 4355.019488997641
+          },
+          {
+            "approach": "nanocompile",
+            "crates_compiled_mean": 36.0,
+            "disk_bytes": 299270183,
+            "lever": "frozen",
+            "store_bytes": 275175877,
+            "wall_ms": 18823.399210996286
+          }
+        ],
+        "nano_on_frontier": true,
+        "scenario": "sequential",
+        "split": "held_out"
+      },
+      "emergentDB|sequential": {
+        "frontier": [
+          {
+            "approach": "shared_target",
+            "crates_compiled_mean": 0.0,
+            "disk_bytes": 145550858,
+            "lever": "shared_target",
+            "store_bytes": 0,
+            "wall_ms": 302.25169099867344
+          },
+          {
+            "approach": "nanocompile",
+            "crates_compiled_mean": 18.75,
+            "disk_bytes": 133791754,
+            "lever": "frozen",
+            "store_bytes": 130119246,
+            "wall_ms": 10184.386263994384
+          }
+        ],
+        "nano_on_frontier": true,
+        "scenario": "sequential",
+        "split": "held_out"
+      },
+      "hashbrown|sequential": {
+        "frontier": [
+          {
+            "approach": "shared_target",
+            "crates_compiled_mean": 0.25,
+            "disk_bytes": 8261952,
+            "lever": "shared_target",
+            "store_bytes": 0,
+            "wall_ms": 460.81229799892753
+          },
+          {
+            "approach": "kache",
+            "crates_compiled_mean": 1.25,
+            "disk_bytes": 6638859,
+            "lever": "kache",
+            "store_bytes": 3307801,
+            "wall_ms": 1392.3294549967977
+          },
+          {
+            "approach": "sccache",
+            "crates_compiled_mean": 4.0,
+            "disk_bytes": 5623064,
+            "lever": "sccache",
+            "store_bytes": 0,
+            "wall_ms": 2542.5848770028097
+          },
+          {
+            "approach": "nanocompile",
+            "crates_compiled_mean": 1.75,
+            "disk_bytes": 2532352,
+            "lever": "frozen",
+            "store_bytes": 2527657,
+            "wall_ms": 1822.3271050010226
+          }
+        ],
+        "nano_on_frontier": true,
+        "scenario": "sequential",
+        "split": "held_out"
+      },
+      "nalgebra|sequential": {
+        "frontier": [
+          {
+            "approach": "shared_target",
+            "crates_compiled_mean": 0.25,
+            "disk_bytes": 145827028,
+            "lever": "shared_target",
+            "store_bytes": 0,
+            "wall_ms": 4523.814095002308
+          },
+          {
+            "approach": "nanocompile",
+            "crates_compiled_mean": 8.25,
+            "disk_bytes": 84529916,
+            "lever": "frozen",
+            "store_bytes": 84494045,
+            "wall_ms": 20309.546192002017
+          }
+        ],
+        "nano_on_frontier": true,
+        "scenario": "sequential",
+        "split": "held_out"
+      },
+      "ruff|sequential": {
+        "frontier": [
+          {
+            "approach": "shared_target",
+            "crates_compiled_mean": 1.0,
+            "disk_bytes": 1185761641,
+            "lever": "shared_target",
+            "store_bytes": 0,
+            "wall_ms": 4595.914761004678
+          },
+          {
+            "approach": "nanocompile",
+            "crates_compiled_mean": 127.75,
+            "disk_bytes": 794872899,
+            "lever": "frozen",
+            "store_bytes": 679381619,
+            "wall_ms": 124216.04949599714
+          }
+        ],
+        "nano_on_frontier": true,
+        "scenario": "sequential",
+        "split": "held_out"
+      },
+      "serde|sequential": {
+        "frontier": [
+          {
+            "approach": "shared_target",
+            "crates_compiled_mean": 0.25,
+            "disk_bytes": 47084150,
+            "lever": "shared_target",
+            "store_bytes": 0,
+            "wall_ms": 392.55990799574647
+          },
+          {
+            "approach": "nanocompile",
+            "crates_compiled_mean": 4.0,
+            "disk_bytes": 13355434,
+            "lever": "frozen",
+            "store_bytes": 13346819,
+            "wall_ms": 6339.478683999914
+          }
+        ],
+        "nano_on_frontier": true,
+        "scenario": "sequential",
+        "split": "held_out"
+      },
+      "tokio|sequential": {
+        "frontier": [
+          {
+            "approach": "shared_target",
+            "crates_compiled_mean": 0.25,
+            "disk_bytes": 109226449,
+            "lever": "shared_target",
+            "store_bytes": 0,
+            "wall_ms": 2966.573227997287
+          },
+          {
+            "approach": "nanocompile",
+            "crates_compiled_mean": 8.5,
+            "disk_bytes": 62163951,
+            "lever": "frozen",
+            "store_bytes": 58122920,
+            "wall_ms": 14922.941049997462
+          }
+        ],
+        "nano_on_frontier": true,
+        "scenario": "sequential",
+        "split": "held_out"
+      }
+    },
+    "train": {
+      "axum|sequential": {
+        "frontier": [
+          {
+            "approach": "shared_target",
+            "crates_compiled_mean": 0.5,
+            "disk_bytes": 157767267,
+            "lever": "shared_target",
+            "store_bytes": 0,
+            "wall_ms": 3453.596542000014
+          },
+          {
+            "approach": "nanocompile",
+            "crates_compiled_mean": 20.0,
+            "disk_bytes": 111392465,
+            "lever": "frozen",
+            "store_bytes": 107322059,
+            "wall_ms": 20746.094490998075
+          },
+          {
+            "approach": "nanocompile",
+            "crates_compiled_mean": 20.0,
+            "disk_bytes": 111384596,
+            "lever": "l21_check_native",
+            "store_bytes": 107327372,
+            "wall_ms": 20183.893051995256
+          }
+        ],
+        "nano_on_frontier": true,
+        "scenario": "sequential",
+        "split": "train"
+      },
+      "ripgrep|sequential": {
+        "frontier": [
+          {
+            "approach": "shared_target",
+            "crates_compiled_mean": 1.0,
+            "disk_bytes": 102451447,
+            "lever": "shared_target",
+            "store_bytes": 0,
+            "wall_ms": 1611.2793710053666
+          },
+          {
+            "approach": "nanocompile",
+            "crates_compiled_mean": 18.5,
+            "disk_bytes": 72101212,
+            "lever": "frozen",
+            "store_bytes": 68369982,
+            "wall_ms": 7189.665811005398
+          }
+        ],
+        "nano_on_frontier": true,
+        "scenario": "sequential",
+        "split": "train"
+      }
+    }
+  },
+  "schema_version": 1,
+  "survival": {
+    "general": [
+      "nalgebra",
+      "ruff",
+      "emergentDB",
+      "tokio"
+    ],
+    "per_metric": {
+      "crates_compiled_mean": {
+        "held_out_gain": 0.5724713242961418,
+        "survived_fraction": 0.9195602374520703,
+        "train_gain": 0.6225490196078431
+      },
+      "disk_bytes": {
+        "held_out_gain": 0.8184957631757606,
+        "survived_fraction": 0.9577378182693734,
+        "train_gain": 0.8546135983799591
+      },
+      "store_bytes": {
+        "held_out_gain": null,
+        "survived_fraction": null,
+        "train_gain": null
+      },
+      "wall_ms": {
+        "held_out_gain": 0.3835492256189764,
+        "survived_fraction": 0.7028897298745688,
+        "train_gain": 0.5456748182782826
+      }
+    },
+    "per_sample": {
+      "bhumi": {
+        "crates_compiled_mean": null,
+        "disk_bytes": null,
+        "store_bytes": null,
+        "wall_ms": null
+      },
+      "emergentDB": {
+        "crates_compiled_mean": 0.6462264150943396,
+        "disk_bytes": 0.7701943810911346,
+        "store_bytes": null,
+        "wall_ms": 0.5425099512872242
+      },
+      "hashbrown": {
+        "crates_compiled_mean": 0.5625,
+        "disk_bytes": 0.9233702710717593,
+        "store_bytes": null,
+        "wall_ms": 0.24201387845049646
+      },
+      "nalgebra": {
+        "crates_compiled_mean": 0.5875,
+        "disk_bytes": 0.8550822250437032,
+        "store_bytes": null,
+        "wall_ms": 0.3164662047700479
+      },
+      "ruff": {
+        "crates_compiled_mean": 0.59185303514377,
+        "disk_bytes": 0.8324069954597791,
+        "store_bytes": null,
+        "wall_ms": 0.3488823921297501
+      },
+      "serde": {
+        "crates_compiled_mean": -1.0,
+        "disk_bytes": 0.9290864519616864,
+        "store_bytes": null,
+        "wall_ms": 0.1626918445040316
+      },
+      "tokio": {
+        "crates_compiled_mean": 0.5526315789473685,
+        "disk_bytes": 0.8577101700600799,
+        "store_bytes": null,
+        "wall_ms": 0.2778388094630117
+      }
+    },
+    "repo_specific": [
+      "hashbrown",
+      "serde"
+    ]
+  },
+  "train": [
+    {
+      "approach": "none",
+      "crates_compiled": [
+        51,
+        51,
+        51,
+        51
+      ],
+      "crates_compiled_mean": 51.0,
+      "crates_restored_mean": 0,
+      "disk_bytes": 631055157,
+      "edit_kind": "mixed",
+      "env": {},
+      "errors": [],
+      "first_green": {},
+      "from_older": false,
+      "held_out": false,
+      "lever": "none",
+      "loop": "check",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "ok": true,
+      "per_worktree_ms": [
+        7510.374254001363,
+        7658.877543995914,
+        7699.518253000861,
+        7874.10966999596
+      ],
+      "product": "agent_worktrees",
+      "sample": "axum",
+      "split": "train",
+      "store_bytes": 0,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      },
+      "wall_ms": 30744.23499500699,
+      "warm_crates": 0,
+      "warm_ms": 168.48644200217677,
+      "warm_ok": true
+    },
+    {
+      "approach": "shared_target",
+      "crates_compiled": [
+        2,
+        0,
+        0,
+        0
+      ],
+      "crates_compiled_mean": 0.5,
+      "crates_restored_mean": 50.5,
+      "disk_bytes": 157767267,
+      "edit_kind": "mixed",
+      "env": {},
+      "errors": [],
+      "first_green": {},
+      "from_older": false,
+      "held_out": false,
+      "lever": "shared_target",
+      "loop": "check",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "ok": true,
+      "per_worktree_ms": [
+        3060.1255180008593,
+        128.8758169976063,
+        131.3707839944982,
+        131.8217869993532
+      ],
+      "product": "agent_worktrees",
+      "sample": "axum",
+      "split": "train",
+      "store_bytes": 0,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      },
+      "wall_ms": 3453.596542000014,
+      "warm_crates": 51,
+      "warm_ms": 7885.890261000895,
+      "warm_ok": true
+    },
+    {
+      "approach": "kache",
+      "crates_compiled": [
+        72,
+        2,
+        0,
+        0
+      ],
+      "crates_compiled_mean": 18.5,
+      "crates_restored_mean": 0,
+      "disk_bytes": 509315624,
+      "edit_kind": "mixed",
+      "env": {},
+      "errors": [],
+      "first_green": {},
+      "from_older": false,
+      "held_out": false,
+      "lever": "kache",
+      "loop": "check",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "ok": true,
+      "per_worktree_ms": [
+        9110.872253004345,
+        3104.9677490009344,
+        487.4988960000337,
+        483.21508600201923
+      ],
+      "product": "agent_worktrees",
+      "sample": "axum",
+      "split": "train",
+      "store_bytes": 114904790,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      },
+      "wall_ms": 13248.63637299859,
+      "warm_crates": 0,
+      "warm_ms": 173.75090399582405,
+      "warm_ok": true
+    },
+    {
+      "approach": "sccache",
+      "crates_compiled": [
+        51,
+        51,
+        51,
+        51
+      ],
+      "crates_compiled_mean": 51.0,
+      "crates_restored_mean": 0,
+      "disk_bytes": 476398235,
+      "edit_kind": "mixed",
+      "env": {},
+      "errors": [],
+      "first_green": {},
+      "from_older": false,
+      "held_out": false,
+      "lever": "sccache",
+      "loop": "check",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "ok": true,
+      "per_worktree_ms": [
+        8316.086044003896,
+        8569.922636001138,
+        8513.44235400029,
+        8642.199051006173
+      ],
+      "product": "agent_worktrees",
+      "sample": "axum",
+      "split": "train",
+      "store_bytes": 58538823,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      },
+      "wall_ms": 34043.14870500093,
+      "warm_crates": 0,
+      "warm_ms": 334.9454940034775,
+      "warm_ok": true
+    },
+    {
+      "approach": "nanocompile",
+      "crates_compiled": [
+        64,
+        6,
+        5,
+        5
+      ],
+      "crates_compiled_mean": 20.0,
+      "crates_restored_mean": 0,
+      "disk_bytes": 111392465,
+      "edit_kind": "mixed",
+      "env": {
+        "CARGO_INCREMENTAL": "0",
+        "NANOCOMPILE_ALLOW_INCREMENTAL": "1",
+        "NANOCOMPILE_EXECUTABLE_PRODUCERS": "1",
+        "NANOCOMPILE_HARDLINK_TARGET": "1",
+        "NANOCOMPILE_NO_VARIANTS": "1",
+        "NANOCOMPILE_PROC_MACROS": "reported",
+        "NANOCOMPILE_PROC_MACRO_PRODUCERS": "1",
+        "NANOCOMPILE_REMAP_PATHS": "1"
+      },
+      "errors": [],
+      "first_green": {},
+      "from_older": false,
+      "held_out": false,
+      "lever": "frozen",
+      "loop": "check",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "ok": true,
+      "per_worktree_ms": [
+        8427.558436000254,
+        4407.611280003039,
+        3971.867319000012,
+        3921.432367998932
+      ],
+      "product": "agent_worktrees",
+      "sample": "axum",
+      "split": "train",
+      "store_bytes": 107322059,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      },
+      "wall_ms": 20746.094490998075,
+      "warm_crates": 0,
+      "warm_ms": 163.63080099836225,
+      "warm_ok": true
+    },
+    {
+      "approach": "none",
+      "crates_compiled": [
+        34,
+        34,
+        34,
+        34
+      ],
+      "crates_compiled_mean": 34.0,
+      "crates_restored_mean": 0,
+      "disk_bytes": 409797233,
+      "edit_kind": "mixed",
+      "env": {},
+      "errors": [],
+      "first_green": {},
+      "from_older": false,
+      "held_out": false,
+      "lever": "none",
+      "loop": "check",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "ok": false,
+      "per_worktree_ms": [
+        3418.9937349947286,
+        3423.0107349940226,
+        3392.5929319957504,
+        3304.5157580054365
+      ],
+      "product": "agent_worktrees",
+      "sample": "ripgrep",
+      "split": "train",
+      "store_bytes": 0,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      },
+      "wall_ms": 13539.559381999425,
+      "warm_crates": 1,
+      "warm_ms": 539.2193359948578,
+      "warm_ok": false
+    },
+    {
+      "approach": "shared_target",
+      "crates_compiled": [
+        2,
+        0,
+        1,
+        1
+      ],
+      "crates_compiled_mean": 1.0,
+      "crates_restored_mean": 33.0,
+      "disk_bytes": 102451447,
+      "edit_kind": "mixed",
+      "env": {},
+      "errors": [],
+      "first_green": {},
+      "from_older": false,
+      "held_out": false,
+      "lever": "shared_target",
+      "loop": "check",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "ok": true,
+      "per_worktree_ms": [
+        532.6879330023075,
+        30.29965799942147,
+        489.8394379997626,
+        558.0284200041206
+      ],
+      "product": "agent_worktrees",
+      "sample": "ripgrep",
+      "split": "train",
+      "store_bytes": 0,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      },
+      "wall_ms": 1611.2793710053666,
+      "warm_crates": 34,
+      "warm_ms": 3398.947784000484,
+      "warm_ok": true
+    },
+    {
+      "approach": "kache",
+      "crates_compiled": [
+        10,
+        2,
+        1,
+        0
+      ],
+      "crates_compiled_mean": 3.25,
+      "crates_restored_mean": 0,
+      "disk_bytes": 2579098072,
+      "edit_kind": "mixed",
+      "env": {},
+      "errors": [],
+      "first_green": {},
+      "from_older": false,
+      "held_out": false,
+      "lever": "kache",
+      "loop": "check",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "ok": true,
+      "per_worktree_ms": [
+        2273.6483810003847,
+        805.8927970050718,
+        859.99239100056,
+        518.4824530006154
+      ],
+      "product": "agent_worktrees",
+      "sample": "ripgrep",
+      "split": "train",
+      "store_bytes": 11235295,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      },
+      "wall_ms": 4507.031926004856,
+      "warm_crates": 1,
+      "warm_ms": 599.184596001578,
+      "warm_ok": true
+    },
+    {
+      "approach": "sccache",
+      "crates_compiled": [
+        34,
+        34,
+        34,
+        34
+      ],
+      "crates_compiled_mean": 34.0,
+      "crates_restored_mean": 0,
+      "disk_bytes": 283858704,
+      "edit_kind": "mixed",
+      "env": {},
+      "errors": [],
+      "first_green": {},
+      "from_older": false,
+      "held_out": false,
+      "lever": "sccache",
+      "loop": "check",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "ok": true,
+      "per_worktree_ms": [
+        3403.9903029988636,
+        3404.9787409967394,
+        3434.273138002027,
+        3393.388883996522
+      ],
+      "product": "agent_worktrees",
+      "sample": "ripgrep",
+      "split": "train",
+      "store_bytes": 0,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      },
+      "wall_ms": 13637.051375997544,
+      "warm_crates": 1,
+      "warm_ms": 464.0454740001587,
+      "warm_ok": true
+    },
+    {
+      "approach": "nanocompile",
+      "crates_compiled": [
+        44,
+        10,
+        10,
+        10
+      ],
+      "crates_compiled_mean": 18.5,
+      "crates_restored_mean": 0,
+      "disk_bytes": 72101212,
+      "edit_kind": "mixed",
+      "env": {
+        "CARGO_INCREMENTAL": "0",
+        "NANOCOMPILE_ALLOW_INCREMENTAL": "1",
+        "NANOCOMPILE_EXECUTABLE_PRODUCERS": "1",
+        "NANOCOMPILE_HARDLINK_TARGET": "1",
+        "NANOCOMPILE_NO_VARIANTS": "1",
+        "NANOCOMPILE_PROC_MACROS": "reported",
+        "NANOCOMPILE_PROC_MACRO_PRODUCERS": "1",
+        "NANOCOMPILE_REMAP_PATHS": "1"
+      },
+      "errors": [],
+      "first_green": {},
+      "from_older": false,
+      "held_out": false,
+      "lever": "frozen",
+      "loop": "check",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "ok": true,
+      "per_worktree_ms": [
+        3355.8284959945013,
+        1267.4792230027379,
+        1257.46731399704,
+        1295.8135920052882
+      ],
+      "product": "agent_worktrees",
+      "sample": "ripgrep",
+      "split": "train",
+      "store_bytes": 68369982,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      },
+      "wall_ms": 7189.665811005398,
+      "warm_crates": 0,
+      "warm_ms": 398.0607180055813,
+      "warm_ok": true
+    },
+    {
+      "approach": "nanocompile",
+      "crates_compiled": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "crates_compiled_mean": 0.0,
+      "crates_restored_mean": 64.0,
+      "disk_bytes": 106550167,
+      "edit_kind": "mixed",
+      "env": {
+        "CARGO_INCREMENTAL": "0",
+        "NANOCOMPILE_ALLOW_INCREMENTAL": "1",
+        "NANOCOMPILE_CHECK_NATIVE": "1",
+        "NANOCOMPILE_EXECUTABLE_PRODUCERS": "1",
+        "NANOCOMPILE_HARDLINK_TARGET": "1",
+        "NANOCOMPILE_NO_VARIANTS": "1",
+        "NANOCOMPILE_PROC_MACROS": "reported",
+        "NANOCOMPILE_PROC_MACRO_PRODUCERS": "1",
+        "NANOCOMPILE_REMAP_PATHS": "1"
+      },
+      "errors": [
+        " your intent to not inherit, add:\n   |\n14 ~ tracing-subscriber = { version = \"0.3\", features = [\"env-filter\"] }\n15 + [lints]\n   |\nwarning: `example-reqwest-response` (manifest) generated 1 warning\nwarning: missing `[lints]` to inherit `[workspace.lints]`\n  --> examples/routes-and-handlers-close-together/Cargo.toml\n   = note: `cargo::missing_lints_inheritance` is set to `warn` by default\nhelp: to inherit `workspace.lints, add:\n   |\n 9 ~ tokio = { version = \"1.0\", features = [\"full\"] }\n10 + [lints]\n11 + workspace = true\n   |\nhelp: to clarify your intent to not inherit, add:\n   |\n 9 ~ tokio = { version = \"1.0\", features = [\"full\"] }\n10 + [lints]\n   |\nwarning: `example-routes-and-handlers-close-together` (manifest) generated 1 warning\nwarning: missing `[lints]` to inherit `[workspace.lints]`\n  --> examples/print-request-response/Cargo.toml\n   = note: `cargo::missing_lints_inheritance` is set to `warn` by default\nhelp: to inherit `workspace.lints, add:\n   |\n12 ~ tracing-subscriber = { version = \"0.3\", features = [\"env-filter\"] }\n13 + [lints]\n14 + workspace = true\n   |\nhelp: to clarify your intent to not inherit, add:\n   |\n12 ~ tracing-subscriber = { version = \"0.3\", features = [\"env-filter\"] }\n13 + [lints]\n   |\nwarning: `example-print-request-response` (manifest) generated 1 warning\nwarning: missing `[lints]` to inherit `[workspace.lints]`\n  --> examples/anyhow-error-response/Cargo.toml\n   = note: `cargo::missing_lints_inheritance` is set to `warn` by default\nhelp: to inherit `workspace.lints, add:\n   |\n14 ~ tower = { version = \"0.5.2\", features = [\"util\"] }\n15 + [lints]\n16 + workspace = true\n   |\nhelp: to clarify your intent to not inherit, add:\n   |\n14 ~ tower = { version = \"0.5.2\", features = [\"util\"] }\n15 + [lints]\n   |\nwarning: `example-anyhow-error-response` (manifest) generated 1 warning\nerror: failed to open: /tmp/agent-worktrees/train/axum/l21_check_native/4-sequential-mixed-head/wt-0/target/debug/.cargo-build-lock\n\nCaused by:\n  Permission denied (os error 13)\n\n",
+        " reqwest-eventsource = \"0.6\"\n22 + [lints]\n23 + workspace = true\n   |\nhelp: to clarify your intent to not inherit, add:\n   |\n21 ~ reqwest-eventsource = \"0.6\"\n22 + [lints]\n   |\nwarning: `example-sse` (manifest) generated 1 warning\nwarning: missing `[lints]` to inherit `[workspace.lints]`\n  --> examples/todos/Cargo.toml\n   = note: `cargo::missing_lints_inheritance` is set to `warn` by default\nhelp: to inherit `workspace.lints, add:\n   |\n15 ~ uuid = { version = \"1.0\", features = [\"serde\", \"v4\"] }\n16 + [lints]\n17 + workspace = true\n   |\nhelp: to clarify your intent to not inherit, add:\n   |\n15 ~ uuid = { version = \"1.0\", features = [\"serde\", \"v4\"] }\n16 + [lints]\n   |\nwarning: `example-todos` (manifest) generated 1 warning\nwarning: missing `[lints]` to inherit `[workspace.lints]`\n  --> examples/unix-domain-socket/Cargo.toml\n   = note: `cargo::missing_lints_inheritance` is set to `warn` by default\nhelp: to inherit `workspace.lints, add:\n   |\n13 ~ tracing-subscriber = { version = \"0.3\", features = [\"env-filter\"] }\n14 + [lints]\n15 + workspace = true\n   |\nhelp: to clarify your intent to not inherit, add:\n   |\n13 ~ tracing-subscriber = { version = \"0.3\", features = [\"env-filter\"] }\n14 + [lints]\n   |\nwarning: `example-unix-domain-socket` (manifest) generated 1 warning\nwarning: missing `[lints]` to inherit `[workspace.lints]`\n  --> examples/key-value-store/Cargo.toml\n   = note: `cargo::missing_lints_inheritance` is set to `warn` by default\nhelp: to inherit `workspace.lints, add:\n   |\n19 ~ tracing-subscriber = { version = \"0.3\", features = [\"env-filter\"] }\n20 + [lints]\n21 + workspace = true\n   |\nhelp: to clarify your intent to not inherit, add:\n   |\n19 ~ tracing-subscriber = { version = \"0.3\", features = [\"env-filter\"] }\n20 + [lints]\n   |\nwarning: `example-key-value-store` (manifest) generated 1 warning\nerror: failed to open: /tmp/agent-worktrees/train/axum/l21_check_native/4-sequential-mixed-head/wt-1/target/debug/.cargo-build-lock\n\nCaused by:\n  Permission denied (os error 13)\n\n"
+      ],
+      "first_green": {},
+      "from_older": false,
+      "held_out": false,
+      "lever": "l21_check_native",
+      "loop": "check",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "ok": false,
+      "per_worktree_ms": [
+        135.47477099928074,
+        129.9729029997252,
+        125.65241799893556,
+        115.690288002952
+      ],
+      "product": "agent_worktrees",
+      "sample": "axum",
+      "split": "train",
+      "store_bytes": 102049345,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      },
+      "wall_ms": 523.427988999174,
+      "warm_crates": 64,
+      "warm_ms": 11532.42019800382,
+      "warm_ok": true
+    },
+    {
+      "approach": "nanocompile",
+      "crates_compiled": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "crates_compiled_mean": 0.0,
+      "crates_restored_mean": 44.0,
+      "disk_bytes": 72199687,
+      "edit_kind": "mixed",
+      "env": {
+        "CARGO_INCREMENTAL": "0",
+        "NANOCOMPILE_ALLOW_INCREMENTAL": "1",
+        "NANOCOMPILE_CHECK_NATIVE": "1",
+        "NANOCOMPILE_EXECUTABLE_PRODUCERS": "1",
+        "NANOCOMPILE_HARDLINK_TARGET": "1",
+        "NANOCOMPILE_NO_VARIANTS": "1",
+        "NANOCOMPILE_PROC_MACROS": "reported",
+        "NANOCOMPILE_PROC_MACRO_PRODUCERS": "1",
+        "NANOCOMPILE_REMAP_PATHS": "1"
+      },
+      "errors": [
+        "` by default\nhelp: consider removing `package.homepage`\nwarning: `grep-regex` (manifest) generated 1 warning\nwarning: `package.homepage` is redundant with `package.repository`\n  --> crates/printer/Cargo.toml:10:12\n   |\n10 | homepage = \"https://github.com/BurntSushi/ripgrep/tree/master/crates/printer\"\n   |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n11 | repository = \"https://github.com/BurntSushi/ripgrep/tree/master/crates/printer\"\n   |              ------------------------------------------------------------------\n   |\n   = note: `cargo::redundant_homepage` is set to `warn` by default\nhelp: consider removing `package.homepage`\nwarning: `grep-printer` (manifest) generated 1 warning\nwarning: `package.homepage` is redundant with `package.repository`\n  --> Cargo.toml:11:12\n   |\n11 | homepage = \"https://github.com/BurntSushi/ripgrep\"\n   |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n12 | repository = \"https://github.com/BurntSushi/ripgrep\"\n   |              ---------------------------------------\n   |\n   = note: `cargo::redundant_homepage` is set to `warn` by default\nhelp: consider removing `package.homepage`\nwarning: `ripgrep` (manifest) generated 1 warning\nwarning: `package.homepage` is redundant with `package.repository`\n  --> crates/ignore/Cargo.toml:10:12\n   |\n10 | homepage = \"https://github.com/BurntSushi/ripgrep/tree/master/crates/ignore\"\n   |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n11 | repository = \"https://github.com/BurntSushi/ripgrep/tree/master/crates/ignore\"\n   |              -----------------------------------------------------------------\n   |\n   = note: `cargo::redundant_homepage` is set to `warn` by default\nhelp: consider removing `package.homepage`\nwarning: `ignore` (manifest) generated 1 warning\nerror: failed to open: /tmp/agent-worktrees/train/ripgrep/l21_check_native/4-sequential-mixed-head/wt-0/target/debug/.cargo-build-lock\n\nCaused by:\n  Permission denied (os error 13)\n\n",
+        "g: `package.homepage` is redundant with `package.repository`\n  --> crates/regex/Cargo.toml:9:12\n   |\n 9 | homepage = \"https://github.com/BurntSushi/ripgrep/tree/master/crates/regex\"\n   |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n10 | repository = \"https://github.com/BurntSushi/ripgrep/tree/master/crates/regex\"\n   |              ----------------------------------------------------------------\n   |\n   = note: `cargo::redundant_homepage` is set to `warn` by default\nhelp: consider removing `package.homepage`\nwarning: `grep-regex` (manifest) generated 1 warning\nwarning: `package.homepage` is redundant with `package.repository`\n  --> crates/printer/Cargo.toml:10:12\n   |\n10 | homepage = \"https://github.com/BurntSushi/ripgrep/tree/master/crates/printer\"\n   |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n11 | repository = \"https://github.com/BurntSushi/ripgrep/tree/master/crates/printer\"\n   |              ------------------------------------------------------------------\n   |\n   = note: `cargo::redundant_homepage` is set to `warn` by default\nhelp: consider removing `package.homepage`\nwarning: `grep-printer` (manifest) generated 1 warning\nwarning: `package.homepage` is redundant with `package.repository`\n  --> crates/ignore/Cargo.toml:10:12\n   |\n10 | homepage = \"https://github.com/BurntSushi/ripgrep/tree/master/crates/ignore\"\n   |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n11 | repository = \"https://github.com/BurntSushi/ripgrep/tree/master/crates/ignore\"\n   |              -----------------------------------------------------------------\n   |\n   = note: `cargo::redundant_homepage` is set to `warn` by default\nhelp: consider removing `package.homepage`\nwarning: `ignore` (manifest) generated 1 warning\nerror: failed to open: /tmp/agent-worktrees/train/ripgrep/l21_check_native/4-sequential-mixed-head/wt-1/target/debug/.cargo-build-lock\n\nCaused by:\n  Permission denied (os error 13)\n\n"
+      ],
+      "first_green": {},
+      "from_older": false,
+      "held_out": false,
+      "lever": "l21_check_native",
+      "loop": "check",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "ok": false,
+      "per_worktree_ms": [
+        25.240284005121794,
+        23.61796899640467,
+        23.55122400331311,
+        23.87929000542499
+      ],
+      "product": "agent_worktrees",
+      "sample": "ripgrep",
+      "split": "train",
+      "store_bytes": 68523471,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      },
+      "wall_ms": 105.92756800178904,
+      "warm_crates": 44,
+      "warm_ms": 4432.3333150023245,
+      "warm_ok": true
+    },
+    {
+      "approach": "nanocompile",
+      "crates_compiled": [
+        64,
+        6,
+        5,
+        5
+      ],
+      "crates_compiled_mean": 20.0,
+      "crates_restored_mean": 0,
+      "disk_bytes": 111384596,
+      "edit_kind": "mixed",
+      "env": {
+        "CARGO_INCREMENTAL": "0",
+        "NANOCOMPILE_ALLOW_INCREMENTAL": "1",
+        "NANOCOMPILE_CHECK_NATIVE": "1",
+        "NANOCOMPILE_EXECUTABLE_PRODUCERS": "1",
+        "NANOCOMPILE_HARDLINK_TARGET": "1",
+        "NANOCOMPILE_NO_VARIANTS": "1",
+        "NANOCOMPILE_PROC_MACROS": "reported",
+        "NANOCOMPILE_PROC_MACRO_PRODUCERS": "1",
+        "NANOCOMPILE_REMAP_PATHS": "1"
+      },
+      "errors": [],
+      "first_green": {},
+      "from_older": false,
+      "held_out": false,
+      "lever": "l21_check_native",
+      "loop": "check",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "ok": true,
+      "per_worktree_ms": [
+        8409.413723995385,
+        3860.6873309981893,
+        4097.179071999562,
+        3800.4982599959476
+      ],
+      "product": "agent_worktrees",
+      "sample": "axum",
+      "split": "train",
+      "store_bytes": 107327372,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      },
+      "wall_ms": 20183.893051995256,
+      "warm_crates": 0,
+      "warm_ms": 414.7829069988802,
+      "warm_ok": true
+    },
+    {
+      "approach": "nanocompile",
+      "crates_compiled": [
+        44,
+        10,
+        10,
+        10
+      ],
+      "crates_compiled_mean": 18.5,
+      "crates_restored_mean": 0,
+      "disk_bytes": 72106893,
+      "edit_kind": "mixed",
+      "env": {
+        "CARGO_INCREMENTAL": "0",
+        "NANOCOMPILE_ALLOW_INCREMENTAL": "1",
+        "NANOCOMPILE_CHECK_NATIVE": "1",
+        "NANOCOMPILE_EXECUTABLE_PRODUCERS": "1",
+        "NANOCOMPILE_HARDLINK_TARGET": "1",
+        "NANOCOMPILE_NO_VARIANTS": "1",
+        "NANOCOMPILE_PROC_MACROS": "reported",
+        "NANOCOMPILE_PROC_MACRO_PRODUCERS": "1",
+        "NANOCOMPILE_REMAP_PATHS": "1"
+      },
+      "errors": [],
+      "first_green": {},
+      "from_older": false,
+      "held_out": false,
+      "lever": "l21_check_native",
+      "loop": "check",
+      "mode": "sequential",
+      "n_worktrees": 4,
+      "ok": true,
+      "per_worktree_ms": [
+        3334.4167360046413,
+        1287.1399050054606,
+        1297.8018400026485,
+        1292.2389450031915
+      ],
+      "product": "agent_worktrees",
+      "sample": "ripgrep",
+      "split": "train",
+      "store_bytes": 68374794,
+      "variant": {
+        "edit_kind": "mixed",
+        "from_older": false
+      },
+      "wall_ms": 7224.767908999638,
+      "warm_crates": 0,
+      "warm_ms": 632.6374860000215,
+      "warm_ok": true
+    }
+  ]
+}

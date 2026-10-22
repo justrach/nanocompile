@@ -1,0 +1,265 @@
+{
+  "schema_version": 1,
+  "kind": "nanocompile.rust-loop.map-elites.shard",
+  "sample": "pinned-hashbrown-cranelift",
+  "commit": "acd48789164b2076c242fa74382268e75ad969d4",
+  "timestamp": "2026-10-21T03:44:05.760170+00:00",
+  "evaluations": [
+    {
+      "cell": "mid|cold",
+      "size": "mid",
+      "edit": "cold",
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": false
+      },
+      "fitness_ms": 549.6763060000376,
+      "spread_ms": 12.019303768358776,
+      "disk_bytes": 13126790,
+      "correctness": {
+        "ok": true,
+        "agree_on_broken": true,
+        "validate_is_final": true
+      },
+      "sample": "pinned-hashbrown-cranelift",
+      "commit": "acd48789164b2076c242fa74382268e75ad969d4",
+      "timestamp": "2026-10-21T03:44:05.759024+00:00",
+      "n_evals": 3,
+      "non_improving": 0,
+      "stopped": false
+    },
+    {
+      "cell": "mid|noop",
+      "size": "mid",
+      "edit": "noop",
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": false
+      },
+      "fitness_ms": 17.68085899993821,
+      "spread_ms": 0.7931437311902064,
+      "disk_bytes": 13126790,
+      "correctness": {
+        "ok": true,
+        "agree_on_broken": true,
+        "validate_is_final": true
+      },
+      "sample": "pinned-hashbrown-cranelift",
+      "commit": "acd48789164b2076c242fa74382268e75ad969d4",
+      "timestamp": "2026-10-21T03:44:05.759037+00:00",
+      "n_evals": 3,
+      "non_improving": 0,
+      "stopped": false
+    },
+    {
+      "cell": "mid|body",
+      "size": "mid",
+      "edit": "body",
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": false
+      },
+      "fitness_ms": 162.76782100021592,
+      "spread_ms": 0.0,
+      "disk_bytes": 13124502,
+      "correctness": {
+        "ok": true,
+        "agree_on_broken": true,
+        "validate_is_final": true
+      },
+      "sample": "pinned-hashbrown-cranelift",
+      "commit": "acd48789164b2076c242fa74382268e75ad969d4",
+      "timestamp": "2026-10-21T03:44:05.759042+00:00",
+      "n_evals": 1,
+      "non_improving": 0,
+      "stopped": false
+    },
+    {
+      "cell": "mid|sig_dep",
+      "size": "mid",
+      "edit": "sig_dep",
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": false
+      },
+      "fitness_ms": 149.9922709999737,
+      "spread_ms": 0.0,
+      "disk_bytes": 13128775,
+      "correctness": {
+        "ok": true,
+        "agree_on_broken": true,
+        "validate_is_final": true
+      },
+      "sample": "pinned-hashbrown-cranelift",
+      "commit": "acd48789164b2076c242fa74382268e75ad969d4",
+      "timestamp": "2026-10-21T03:44:05.759046+00:00",
+      "n_evals": 1,
+      "non_improving": 0,
+      "stopped": false
+    },
+    {
+      "cell": "mid|cold",
+      "size": "mid",
+      "edit": "cold",
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": false
+      },
+      "fitness_ms": 40526.8417530001,
+      "spread_ms": 1128.1857004983603,
+      "disk_bytes": 179378802,
+      "correctness": {
+        "ok": true,
+        "agree_on_broken": true,
+        "validate_is_final": true
+      },
+      "sample": "pinned-hashbrown-cranelift",
+      "commit": "acd48789164b2076c242fa74382268e75ad969d4",
+      "timestamp": "2026-10-21T03:44:05.759049+00:00",
+      "n_evals": 3,
+      "non_improving": 0,
+      "stopped": false
+    },
+    {
+      "cell": "mid|noop",
+      "size": "mid",
+      "edit": "noop",
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": false
+      },
+      "fitness_ms": 37181.69519799994,
+      "spread_ms": 195.45185234773695,
+      "disk_bytes": 179378802,
+      "correctness": {
+        "ok": true,
+        "agree_on_broken": true,
+        "validate_is_final": true
+      },
+      "sample": "pinned-hashbrown-cranelift",
+      "commit": "acd48789164b2076c242fa74382268e75ad969d4",
+      "timestamp": "2026-10-21T03:44:05.759052+00:00",
+      "n_evals": 3,
+      "non_improving": 0,
+      "stopped": false
+    },
+    {
+      "cell": "mid|body",
+      "size": "mid",
+      "edit": "body",
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": false
+      },
+      "fitness_ms": 39279.38737900012,
+      "spread_ms": 0.0,
+      "disk_bytes": 179165705,
+      "correctness": {
+        "ok": true,
+        "agree_on_broken": true,
+        "validate_is_final": true
+      },
+      "sample": "pinned-hashbrown-cranelift",
+      "commit": "acd48789164b2076c242fa74382268e75ad969d4",
+      "timestamp": "2026-10-21T03:44:05.759054+00:00",
+      "n_evals": 1,
+      "non_improving": 0,
+      "stopped": false
+    },
+    {
+      "cell": "mid|sig_dep",
+      "size": "mid",
+      "edit": "sig_dep",
+      "genome": {
+        "wrapper": false,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": true,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "check",
+        "jobs": null,
+        "offline": false
+      },
+      "fitness_ms": 39283.36614299951,
+      "spread_ms": 0.0,
+      "disk_bytes": 179192654,
+      "correctness": {
+        "ok": true,
+        "agree_on_broken": true,
+        "validate_is_final": true
+      },
+      "sample": "pinned-hashbrown-cranelift",
+      "commit": "acd48789164b2076c242fa74382268e75ad969d4",
+      "timestamp": "2026-10-21T03:44:05.759057+00:00",
+      "n_evals": 1,
+      "non_improving": 0,
+      "stopped": false
+    }
+  ]
+}

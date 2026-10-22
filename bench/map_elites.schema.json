@@ -1,0 +1,219 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/justrach/nanocompile/bench/map_elites.schema.json",
+  "title": "nanocompile rust-loop MAP-Elites archive",
+  "description": "Source of truth for rust-loop MAP-Elites. schema_version 1. Canonical file: bench/map_elites.json. Agents write shards under bench/archive/<sample>.json; merge with `nanocompile map-elites merge` or `python3 tools/map_elites.py merge`.",
+  "oneOf": [
+    { "$ref": "#/$defs/archive" },
+    { "$ref": "#/$defs/shard" }
+  ],
+  "$defs": {
+    "size": { "type": "string", "enum": ["small", "mid", "large"] },
+    "edit": { "type": "string", "enum": ["cold", "noop", "body", "sig_dep", "worktree"] },
+    "cellKey": {
+      "type": "string",
+      "pattern": "^(small|mid|large)\\|(cold|noop|body|sig_dep|worktree)$",
+      "description": "size|edit, for example small|body"
+    },
+    "backend": { "type": "string", "enum": ["llvm", "cranelift"] },
+    "linker": { "type": "string", "enum": ["default", "mold", "lld", "wild"] },
+    "debuginfo": { "type": "string", "enum": ["full", "line-tables-only", "none", "split-unpacked", "split-packed"] },
+    "fastCheck": { "type": "string", "enum": ["cargo-check", "none"] },
+    "loop": {
+      "type": "string",
+      "enum": ["check", "graph", "test", "build", "clippy", "nextest"],
+      "description": "Iteration command whose wall time is fitness. build is the cranelift-dev gene (codegen). clippy/nextest are timed loops only. validate (cargo test + LLVM rustc) is not a gene and always runs for the correctness gate."
+    },
+    "genome": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "wrapper": { "type": "boolean", "description": "RUSTC_WRAPPER=nanocompile and CARGO_INCREMENTAL=0" },
+        "dev_backend": { "$ref": "#/$defs/backend" },
+        "linker": { "$ref": "#/$defs/linker" },
+        "sccache": { "type": "boolean" },
+        "kache": { "type": "boolean", "description": "RUSTC_WRAPPER=kache. Do not stack with wrapper or sccache." },
+        "warm_store": { "type": "boolean", "description": "Keep the compiler cache across emptied target/ or a sibling worktree." },
+        "opt_level_deps": { "type": ["integer", "string", "null"], "description": "profile.dev.package.* opt-level" },
+        "share_generics": { "type": "boolean" },
+        "frontend_threads": { "type": ["integer", "null"] },
+        "hint_mostly_unused": { "type": "boolean" },
+        "target_tmpfs": { "type": "boolean" },
+        "codegen_units": { "type": ["integer", "null"], "minimum": 1, "maximum": 256 },
+        "incremental": { "type": "boolean" },
+        "debuginfo": { "$ref": "#/$defs/debuginfo" },
+        "fast_check": { "$ref": "#/$defs/fastCheck" },
+        "loop": { "$ref": "#/$defs/loop" },
+        "jobs": { "type": ["integer", "null"], "minimum": 1 },
+        "offline": { "type": "boolean" },
+        "package_scope": {
+          "type": ["string", "null"],
+          "enum": ["workspace", "touched", null],
+          "description": "workspace = full cargo check. touched = cargo check -p hub crate. touched cannot occupy sig_dep unless correctness.dependents_agree_on_broken."
+        }
+      },
+      "required": ["wrapper", "dev_backend", "linker", "sccache", "incremental", "debuginfo", "fast_check", "loop"]
+    },
+    "correctness": {
+      "type": "object",
+      "required": ["ok", "agree_on_broken", "validate_is_final"],
+      "additionalProperties": true,
+      "properties": {
+        "ok": { "type": "boolean" },
+        "agree_on_broken": { "type": "boolean" },
+        "validate_is_final": { "type": "boolean" },
+        "dependents_agree_on_broken": {
+          "type": "boolean",
+          "description": "Required when genome.package_scope=touched on a sig_dep cell: a broken hub signature must fail a dependent crate check."
+        }
+      }
+    },
+    "evaluation": {
+      "type": "object",
+      "required": ["cell", "genome", "fitness_ms", "correctness", "sample"],
+      "additionalProperties": true,
+      "properties": {
+        "cell": { "$ref": "#/$defs/cellKey" },
+        "size": { "$ref": "#/$defs/size" },
+        "edit": { "$ref": "#/$defs/edit" },
+        "genome": { "$ref": "#/$defs/genome" },
+        "fitness_ms": { "type": "number", "minimum": 0 },
+        "spread_ms": { "type": ["number", "null"], "minimum": 0 },
+        "disk_bytes": { "type": ["integer", "null"], "minimum": 0 },
+        "correctness": { "$ref": "#/$defs/correctness" },
+        "sample": { "type": "string", "minLength": 1 },
+        "commit": { "type": ["string", "null"] },
+        "timestamp": { "type": ["string", "null"] },
+        "n_evals": { "type": "integer", "minimum": 0 },
+        "non_improving": { "type": "integer", "minimum": 0 },
+        "stopped": { "type": "boolean" },
+        "fitness_method": {
+          "type": "string",
+          "enum": ["official_first_rebuild", "restore_rebuild_mean_of_medians"],
+          "description": "official_first_rebuild is rust_loop_bench (empty target+cache on cold; first rebuild after one edit). restore_rebuild_mean_of_medians is PR #11 (restore+rebuild before every timed edit, mean of project medians). Do not compare fitness_ms across methods."
+        },
+        "cache_state": {
+          "type": "string",
+          "enum": ["empty", "warm_compiler_cache"],
+          "description": "empty = cleared target and compiler cache. warm_compiler_cache = sccache/nanocompile retained after target/ was emptied. Mark cold sccache wins explicitly."
+        },
+        "sample_class": {
+          "type": "string",
+          "enum": ["fixture", "real"],
+          "description": "fixture = rust-loop* harness trees. real = pinned crates and public samples. Promote weights real samples."
+        },
+        "cache_tool": {
+          "type": "string",
+          "enum": ["nanocompile", "kache", "none"],
+          "description": "Competing build-cache identity for the nanocompile-vs-kache bakeoff. Tag only; not an occupancy axis."
+        },
+        "split": {
+          "type": "string",
+          "enum": ["train", "held_out"],
+          "description": "agent-worktrees generalization tag. Train = axum+ripgrep. Held-out never occupies a cell."
+        },
+        "product": {
+          "type": "string",
+          "enum": ["agent_worktrees"],
+          "description": "Tag only. agent-worktrees rows live in archive.agent_worktrees and do not occupy the size x edit grid."
+        }
+      }
+    },
+    "historyEntry": {
+      "type": "object",
+      "required": ["cell", "action", "sample"],
+      "additionalProperties": true,
+      "properties": {
+        "timestamp": { "type": ["string", "null"] },
+        "sample": { "type": "string" },
+        "cell": { "$ref": "#/$defs/cellKey" },
+        "action": { "type": "string", "enum": ["seed", "replace", "reject", "held_out", "promote", "stop"] },
+        "fitness_ms": { "type": ["number", "null"] },
+        "genome": { "$ref": "#/$defs/genome" },
+        "reason": { "type": "string" }
+      }
+    },
+    "matrixRow": {
+      "type": "object",
+      "required": ["genome_from", "trained_on", "tested_on", "cell", "fitness_ms", "correctness_ok"],
+      "additionalProperties": true,
+      "properties": {
+        "genome_from": { "$ref": "#/$defs/cellKey" },
+        "trained_on": { "type": "string" },
+        "tested_on": { "type": "string" },
+        "cell": { "$ref": "#/$defs/cellKey" },
+        "fitness_ms": { "type": "number" },
+        "spread_ms": { "type": ["number", "null"] },
+        "disk_bytes": { "type": ["integer", "null"] },
+        "correctness_ok": { "type": "boolean" },
+        "delta_vs_local_elite_pct": { "type": ["number", "null"] }
+      }
+    },
+    "archive": {
+      "type": "object",
+      "required": ["schema_version", "kind", "axes", "cells"],
+      "additionalProperties": true,
+      "properties": {
+        "schema_version": { "type": "integer", "const": 1 },
+        "kind": { "type": "string", "const": "nanocompile.rust-loop.map-elites" },
+        "attribution": { "type": "string" },
+        "axes": {
+          "type": "object",
+          "required": ["size", "edit"],
+          "properties": {
+            "size": { "type": "array", "prefixItems": [{ "const": "small" }, { "const": "mid" }, { "const": "large" }], "items": false },
+            "edit": { "type": "array", "prefixItems": [{ "const": "cold" }, { "const": "noop" }, { "const": "body" }, { "const": "sig_dep" }, { "const": "worktree" }], "items": false }
+          }
+        },
+        "size_rules": { "type": "object" },
+        "design_notes": { "type": "array", "items": { "type": "string" } },
+        "fitness": {
+          "type": "object",
+          "properties": {
+            "metric": { "type": "string", "const": "median_ms" },
+            "goal": { "type": "string", "const": "min" },
+            "min_gain_pct": { "type": "number" },
+            "max_non_improving": { "type": "integer" }
+          }
+        },
+        "cells": {
+          "type": "object",
+          "propertyNames": { "$ref": "#/$defs/cellKey" },
+          "additionalProperties": { "$ref": "#/$defs/evaluation" }
+        },
+        "history": { "type": "array", "items": { "$ref": "#/$defs/historyEntry" } },
+        "generalization": {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "samples": { "type": "array", "items": { "type": "string" } },
+            "elites_tested": { "type": "array", "items": { "$ref": "#/$defs/cellKey" } },
+            "matrix": { "type": "array", "items": { "$ref": "#/$defs/matrixRow" } }
+          }
+        },
+        "promoted": {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "defaults": { "type": ["object", "null"] },
+            "sample_specific": { "type": "array" }
+          }
+        }
+      }
+    },
+    "shard": {
+      "type": "object",
+      "required": ["schema_version", "kind", "sample", "evaluations"],
+      "additionalProperties": true,
+      "properties": {
+        "schema_version": { "type": "integer", "const": 1 },
+        "kind": { "type": "string", "const": "nanocompile.rust-loop.map-elites.shard" },
+        "sample": { "type": "string", "minLength": 1 },
+        "commit": { "type": ["string", "null"] },
+        "timestamp": { "type": ["string", "null"] },
+        "evaluations": { "type": "array", "items": { "$ref": "#/$defs/evaluation" } },
+        "generalization": { "type": "object" }
+      }
+    }
+  }
+}

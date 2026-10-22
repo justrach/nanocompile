@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "kind": "nanocompile.rust-loop.skipped-genes",
+  "timestamp": "2026-10-21T09:41:34.146179+00:00",
+  "notes": "Genes requested this round that do not build or are not installed on this runner.",
+  "available": {
+    "kache": "1.2.2 (cargo +nightly install kache --locked; needed RUSTFLAGS=-C linker=cc -C link-arg=-fuse-ld=bfd because the build-script launcher failed to link with rust-lld / rust_eh_personality)",
+    "nextest": "cargo-nextest 0.9.149",
+    "clippy": "clippy 0.1.101 nightly",
+    "mold": "/usr/bin/mold",
+    "lld": "rust-lld present",
+    "cranelift": "nightly rustc-codegen-cranelift",
+    "tmpfs": "/dev/shm 7.9G",
+    "share_generics": "rustc +nightly -Zshare-generics=y",
+    "frontend_threads": "rustc +nightly -Zthreads=8",
+    "hint_mostly_unused": "rustc +nightly -Zhint-mostly-unused"
+  },
+  "skipped": [
+    {
+      "gene": "linker=wild",
+      "reason": "wild not on PATH; rustc -C link-arg=-fuse-ld=wild cannot find the linker"
+    },
+    {
+      "gene": "sccache + CARGO_INCREMENTAL=1",
+      "reason": "rust-loop compare: every sccache-inc cell returned ok=False (sccache rejects or breaks incremental rustc on this toolchain). sccache-noinc succeeds."
+    },
+    {
+      "gene": "kache via cargo install --locked on rustc 1.83",
+      "reason": "kache 1.2.2 requires rustc 1.95+; installed with nightly 1.101 after the 1.83 default failed"
+    },
+    {
+      "gene": "rustd / Lust / Ohm",
+      "reason": "Charlie thread forks. Not a validate gene; rustd/Lust remain forbidden on the cargo test + LLVM gate"
+    }
+  ]
+}

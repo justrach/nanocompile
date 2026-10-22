@@ -1,0 +1,14 @@
+{
+  "wrapper": false,
+  "dev_backend": "llvm",
+  "linker": "default",
+  "sccache": false,
+  "kache": false,
+  "codegen_units": null,
+  "incremental": true,
+  "debuginfo": "full",
+  "fast_check": "cargo-check",
+  "loop": "check",
+  "frontend_threads": 8,
+  "offline": true
+}

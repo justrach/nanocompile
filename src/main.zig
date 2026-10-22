@@ -21,7 +21,12 @@ const help =
     \\  nanocompile xcodebuild [XCODE FLAGS]  use Xcode native Swift/Clang CAS (macOS)
     \\  RUSTC_WRAPPER=/absolute/path/nanocompile cargo build
     \\  nanocompile task SPEC.json  experimental ordered declared-file task cache
+    \\  nanocompile rust-loop list|spec|check-spec|run|verify-flags
+    \\  nanocompile map-elites validate|merge|render|classify
     \\  nanocompile artifact put|get|head NAMESPACE KEY [FILE] [METADATA_JSON]
+    \\  nanocompile worktree init [DIR]  shared store for agent worktrees (general defaults)
+    \\  nanocompile worktree dedup DIR...  hardlink identical files across target dirs
+    \\  nanocompile tsc|tsgo|tsrs|bun [FLAGS]  shared TypeScript type-check cache
     \\  nanocompile stats | clear | doctor
     \\  nanocompile gc [MAX_BYTES]  remove orphan blobs and evict to a budget
     \\Environment:
@@ -29,6 +34,9 @@ const help =
     \\  NANOCOMPILE_TRACE=1   print cache decisions to stderr
     \\  NANOCOMPILE_DISABLE=1 run the compiler without caching
     \\  NANOCOMPILE_PROC_MACROS=reported  opt into compiler-reported macro inputs
+    \\  NANOCOMPILE_PROC_MACRO_PRODUCERS=1  cache proc-macro .so/.dylib (Linux reported path; Darwin observer when debuginfo=0)
+    \\  NANOCOMPILE_EXECUTABLE_PRODUCERS=1  cache host binaries / test harnesses
+    \\  NANOCOMPILE_BUILD_SCRIPT_CACHE=1  default-safe build-script RUN cache (no contract file)
     \\  NANOCOMPILE_EXTRA_INPUTS_FILE    JSON array declaring additional files
     \\  NANOCOMPILE_ZIG       Zig executable (default: zig)
     \\  NANOCOMPILE_RUSTC     rustc executable (default: rustc)
@@ -116,6 +124,20 @@ fn dispatch(ctx: *cache.Context, args: []const [:0]const u8) !u8 {
         if (args.len != 3) return error.MissingTaskSpec;
         return @import("task.zig").execute(ctx, args[2]);
     }
+    if (std.mem.eql(u8, command, "rust-loop")) {
+        return @import("rust_loop.zig").execute(ctx, args[2..], args[0]);
+    }
+    if (std.mem.eql(u8, command, "map-elites")) {
+        return @import("map_elites.zig").execute(ctx, args[2..]);
+    }
+    if (std.mem.eql(u8, command, "worktree")) {
+        return @import("worktree.zig").execute(ctx, args[2..], args[0]);
+    }
+    if (@import("typescript.zig").parseChecker(command)) |checker| {
+        var rest: std.ArrayList([]const u8) = .empty;
+        for (args[2..]) |arg| try rest.append(ctx.a, arg);
+        return @import("typescript.zig").execute(ctx, checker, rest.items);
+    }
     if (std.mem.eql(u8, command, "artifact")) {
         if (args.len < 5) return error.MissingArtifactArguments;
         const op = args[2];
@@ -158,7 +180,7 @@ fn dispatch(ctx: *cache.Context, args: []const [:0]const u8) !u8 {
         return 0;
     }
     if (std.mem.eql(u8, command, "doctor")) {
-        try ctx.out(try std.fmt.allocPrint(ctx.a, "cache: {s}\nplatform: {s}\nrestore: copy-on-write clone, falling back to independent copy\n", .{ ctx.root, @tagName(builtin.os.tag) }));
+        try ctx.out(try std.fmt.allocPrint(ctx.a, "cache: {s}\nplatform: {s}\nrestore: copy-on-write clone, then exclusive hardlink for .rlib/.rmeta/.so/.dylib, then independent copy\n", .{ ctx.root, @tagName(builtin.os.tag) }));
         try ctx.prepare();
         return 0;
     }
@@ -197,4 +219,8 @@ test {
     _ = @import("native_identity.zig");
     _ = @import("producer_dependencies.zig");
     _ = @import("task.zig");
+    _ = @import("rust_loop.zig");
+    _ = @import("map_elites.zig");
+    _ = @import("worktree.zig");
+    _ = @import("typescript.zig");
 }

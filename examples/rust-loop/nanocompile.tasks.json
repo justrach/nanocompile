@@ -1,0 +1,63 @@
+{
+  "schema": 1,
+  "tasks": [
+    {
+      "name": "fast-check",
+      "cwd": ".",
+      "command": [
+        "nanocompile",
+        "rust-loop",
+        "run",
+        "--step",
+        "fast-check",
+        "--stamp",
+        ".nanocompile-loop/fast-check.ok",
+        "--target-dir",
+        "target",
+        "--offline",
+        "--",
+        "cargo",
+        "check"
+      ],
+      "inputs": [
+        "Cargo.lock",
+        "Cargo.toml",
+        "src/lib.rs"
+      ],
+      "outputs": [
+        ".nanocompile-loop/fast-check.ok"
+      ]
+    },
+    {
+      "name": "validate",
+      "cwd": ".",
+      "depends_on": [
+        "fast-check"
+      ],
+      "command": [
+        "nanocompile",
+        "rust-loop",
+        "run",
+        "--step",
+        "validate",
+        "--stamp",
+        ".nanocompile-loop/validate.ok",
+        "--target-dir",
+        "target",
+        "--offline",
+        "--",
+        "cargo",
+        "test"
+      ],
+      "inputs": [
+        "Cargo.lock",
+        "Cargo.toml",
+        "src/lib.rs",
+        ".nanocompile-loop/fast-check.ok"
+      ],
+      "outputs": [
+        ".nanocompile-loop/validate.ok"
+      ]
+    }
+  ]
+}

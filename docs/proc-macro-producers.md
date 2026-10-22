@@ -208,7 +208,11 @@ keys are unchanged. Cargo `prefer-dynamic` and `strip=symbols` are covered by
 real direct/cold/restored artifact equality and macro execution tests. Cross
 targets, custom linker flags, LTO, relocation overrides and unusual escaped
 output paths still pass through.
-Linux integration remains unfinished.
+Linux and debug `cargo check`/`dev` builds take the reported-input store instead
+of the Darwin observer: `NANOCOMPILE_PROC_MACRO_PRODUCERS=1` caches host
+`lib*.so` / `lib*.dylib` from rustc dep-info, and
+`NANOCOMPILE_EXECUTABLE_PRODUCERS=1` caches host binaries the same way. The
+observer path stays macOS / `debuginfo=0`.
 
 On a miss it snapshots known source/extern/native inputs, compiles into the
 private job output, preserves the original dylib install name, maps dep-info

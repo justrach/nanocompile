@@ -18,6 +18,7 @@
   <a href="#build-and-use">Build and use</a> ·
   <a href="#xcode-native-cache">Xcode</a> ·
   <a href="examples/turborepo/README.md">Turborepo</a> ·
+  <a href="docs/rust-iteration.md">Rust edit loop</a> ·
   <a href="#current-eligibility">Supported builds</a> ·
   <a href="benchmarks/README.md">Benchmarks</a>
 </p>
@@ -104,7 +105,9 @@ mkdir -p out
 
 The compiler executable can be selected with `NANOCOMPILE_ZIG` or `NANOCOMPILE_RUSTC`. Cargo supplies its actual rustc executable through the wrapper protocol.
 
-Set `NANOCOMPILE_DIR` to choose a shared cache location. Its default is `$XDG_CACHE_HOME/nanocompile`, or `$HOME/.cache/nanocompile`. `NANOCOMPILE_TRACE=1` prints hit, miss, and bypass decisions. `NANOCOMPILE_DISABLE=1` runs the compiler directly. Environment values are compilation inputs: changing even an otherwise unrelated environment value currently causes a miss.
+Set `NANOCOMPILE_DIR` to choose a shared cache location. Its default is `$XDG_CACHE_HOME/nanocompile`, or `$HOME/.cache/nanocompile`. `NANOCOMPILE_TRACE=1` prints hit, miss, and bypass decisions. `NANOCOMPILE_DISABLE=1` runs the compiler directly. Cache keys hash the compilation environment after replacing `CARGO_TARGET_DIR` / `OUT_DIR` with stable placeholders and skipping `NANOCOMPILE_*` plus terminal noise, so sibling worktrees can hit registry/git artifacts. `NANOCOMPILE_ALLOW_INCREMENTAL=1` (or `CARGO_INCREMENTAL=1`) keeps rustc incremental on a miss and still caches workspace rlibs so emptied-target / sibling worktrees can restore them. `NANOCOMPILE_CACHE_DEPS_ONLY=1` is the opt-in that bypasses workspace rlibs.
+
+For a main checkout plus N agent git worktrees, run `nanocompile worktree init`. It writes `.cargo/config.toml` with the general frozen defaults (incremental + reported proc-macros + executable producers, one shared `NANOCOMPILE_DIR`). Each worktree keeps its own `target/`. See [agent-worktrees](docs/agent-worktrees.md).
 
 ```sh
 ./zig-out/bin/nanocompile stats
@@ -133,9 +136,25 @@ npm ci --prefix examples/turborepo --ignore-scripts --no-audit --no-fund
 python3 tests/turbo_integration.py zig-out/bin/nanocompile
 ```
 
+## Rust edit-compile-check loop
+
+For a Cargo project, `nanocompile task` can run a two-step declared graph:
+`cargo check` first, then a mandatory `cargo test` that still uses rustc. The
+helper refuses a specification that skips that gate or hands it to cranelift,
+rustd, Lust or Relax. See [the loop, tradeoffs and watch-list](docs/rust-iteration.md)
+and the [example crate](examples/rust-loop/README.md). Ideas and attribution:
+[Charlie Marsh, 21 Oct 2026](https://x.com/charliermarsh/status/2112711387285758250).
+
+```sh
+"$nano_wrapper" rust-loop spec --manifest path/to/Cargo.toml \
+  --write nanocompile.tasks.json --wrapper "$nano_wrapper"
+"$nano_wrapper" rust-loop check-spec nanocompile.tasks.json
+"$nano_wrapper" task nanocompile.tasks.json
+```
+
 ## Cache correctness and storage
 
-Compilation keys include compiler arguments, the full environment, working directory, runtime host CPU/OS identity, and a toolchain content fingerprint. Rust dependencies come from rustc's dep-info, explicit externs, and the compiled crate's dependency metadata. Source directory membership tracks file-versus-directory module resolution; library lookup guards track the dependency graph's full filename prefixes when matching metadata confirms rustc's primary search succeeds, and all candidates when it falls back. Unrelated Cargo outputs can appear without invalidating an entry. Zig dependencies come from tokenized literal imports, module definitions, and embedded files.
+Compilation keys include compiler arguments, the compilation environment (path-normalized target/`OUT_DIR` values; `NANOCOMPILE_*` and terminal variables omitted), the working directory after the same rewrite, runtime host CPU/OS identity, and a toolchain content fingerprint. Rust dependencies come from rustc's dep-info, explicit externs, and the compiled crate's dependency metadata. Source directory membership tracks file-versus-directory module resolution; library lookup guards track the dependency graph's full filename prefixes when matching metadata confirms rustc's primary search succeeds, and all candidates when it falls back. Unrelated Cargo outputs can appear without invalidating an entry. Zig dependencies come from tokenized literal imports, module definitions, and embedded files.
 
 On a hit, source and library inputs are hashed again with BLAKE3. Every artifact and diagnostic blob is verified against its content hash before any output is replaced. Entry manifests and toolchain memos carry integrity checksums. A missing or corrupted entry causes recompilation. Failed compilations preserve their status and diagnostics and are never stored as successful entries.
 
@@ -143,7 +162,7 @@ On a miss, known inputs are checked before and after compilation. Newly discover
 
 Per-key locks collapse identical concurrent requests into one compilation. Sorted output locks also protect different compilation keys that share destinations. A maintenance lock coordinates GC and clearing with all active cache operations. These guarantees apply to processes using this wrapper; independent tools writing the same destinations remain outside its coordination.
 
-Blobs are shared by content, even between unrelated compilation entries. Restores try APFS `clonefile` on macOS and `FICLONE` on Linux, then fall back to an independent copy. Outputs are staged beside their destinations and atomically renamed into place. No hardlinks are used: changing a restored file cannot change a stored artifact. Permissions and compiler stdout/stderr are restored too. A multi-file restore is not one filesystem transaction; if interrupted, the next build or restore repairs the outputs.
+Blobs are shared by content, even between unrelated compilation entries. Restores try APFS `clonefile` on macOS and `FICLONE` on Linux, then an exclusive hardlink for immutable `.rlib`/`.rmeta` artifacts, then an independent copy. Hardlinked destinations share the blob inode and stay read-only so a later in-place write cannot mutate the store; other outputs keep independent inodes. Outputs are staged beside their destinations and atomically renamed into place. Permissions and compiler stdout/stderr are restored too. A multi-file restore is not one filesystem transaction; if interrupted, the next build or restore repairs the outputs.
 
 Toolchain contents are hashed once and memoized. Rust selection memos retain caller-directory and override checks, while installed-file digests are shared across those memos behind the same inode/size/mtime/ctime checks. Atomic sealed records and per-file locks prevent redundant concurrent first-use hashing. Warm validation checks file identity, size, mtime, ctime, and directory metadata. It observes rustup settings and ancestor override files, and detects changes to installed compiler/runtime resources. Source inputs and artifact blobs do not use this metadata shortcut. Official native compiler executables and rustup proxies are supported; arbitrary compiler scripts pass through. The cache is for a trusted local installation, not a remote cache or a defense against a hostile filesystem that can forge metadata and checksums.
 
@@ -151,7 +170,7 @@ Toolchain contents are hashed once and memoized. Rust selection memos retain cal
 
 | Compiler | Cached | Runs directly |
 | --- | --- | --- |
-| Rust | `lib`/`rlib`, dep-info plus metadata and/or link output, ordinary supported codegen flags, extern libraries, explicit `-L dependency=…` and `-L native=…`, plain bundled `-l static=NAME` from native directories, version-checked source dynamic link declarations, Cargo release libraries and non-incremental checks | Binaries, tests, build scripts, proc macros, proc-macro consumers in the default mode, incremental compilations, other native `-l` forms, source static/unsupported link declarations, thin native archives, framework/other search kinds, custom targets, unstable/unknown flags, split-debug link sidecars |
+| Rust | `lib`/`rlib`, dep-info plus metadata and/or link output, ordinary supported codegen flags including `-C incremental`, `-C link-arg`/`linker`, and nightly `-Z` (hashed into the key) for registry/git and workspace crates, extern libraries, explicit `-L dependency=…` and `-L native=…`, plain bundled `-l static=NAME` from native directories, version-checked source dynamic link declarations, Cargo release libraries and checks. With `NANOCOMPILE_PROC_MACRO_PRODUCERS=1` / `NANOCOMPILE_EXECUTABLE_PRODUCERS=1`, host proc-macro `.so`/`.dylib` and binaries use the ordinary dep-info store (Linux/debug) or the Darwin linker observer (macOS, `debuginfo=0`) | Proc-macro consumers in the default mode, workspace rlibs only when `NANOCOMPILE_CACHE_DEPS_ONLY=1`, other native `-l` forms, source static/unsupported link declarations, thin native archives, framework/other search kinds, custom targets, unrecognized flags, split-debug link sidecars |
 | Zig | Pure Zig `build-exe`, `build-obj`, static `build-lib`, explicit `-femit-bin=…`, literal imports/embed files, positional roots and named `-M` modules | `zig build`, `zig test`, C/C++ inputs, C imports, computed imports, module aliases, dynamic libraries, Windows/UEFI targets, custom SDK/linker options and unrecognized flags |
 
 Rust source containing a possible `link(…)` declaration is conservatively left uncached, including declarations hidden inside `cfg_attr` or macro arguments. The scanner skips comments and literals and recognizes function declarations and member/qualified calls; ambiguous bare `link(…)` calls can still decline storage. Rust library search paths are scoped to the completed crate's metadata graph. Selected candidate inputs are content-hashed, and additions/removals invalidate the entry. Ordinary library builds omit a same-stem companion archive only when matching metadata is fully validated and rustc does not consume the archive. A library with a different suffix is ignored only after matching crate name, hash, target and macro kind confirm the primary phase. Broad fallback guards all candidates, including renamed artifacts. Each directory is enumerated once per restore and duplicate file dependencies are hashed once per restore. Large sets use up to four workers for full content hashing; there is no cross-invocation shortcut. On misses, a separate `rustc -Zls=root` subprocess reads the completed artifact with `RUSTC_BOOTSTRAP=1`. Content-addressed classification memos, scoped to a validated decoder identity shared across caller directories, reduce duplicate readers; they do not replace input content checks. Toolchain classification uses the selected compiler/resource identity; full compilation fingerprints retain existing and absent selector checks in their caller scope. Readers prefer `.rmeta` and run in a private cache directory with the originally selected toolchain. Actual compilations retain the user's original environment and arguments. Unsupported diagnostic formats decline storage.
@@ -175,7 +194,7 @@ Reported mode cannot detect undeclared reads, network access, clocks, or randomn
 
 Zig already has a native cache. This wrapper skips the compiler process on a matching hit and shares deduplicated outputs in the same store as Rust. It currently does not intercept compilation steps inside `zig build`; those continue to use Zig's native cache.
 
-Working directories and output paths remain in keys, preserving embedded paths and diagnostics. Cross-worktree path normalization, automatic remote lookup, a daemon/scheduler, and broader Rust/linker coverage are future work. This is not full kache feature parity.
+Target-directory paths are normalized in keys so sibling worktrees reuse registry/git artifacts. Workspace source paths are still stored as recorded dependencies, so workspace crates do not cross worktrees unless incremental coexistence bypasses them. Automatic remote lookup, a daemon/scheduler, and broader Rust/linker coverage remain future work. See [nanocompile vs kache](docs/nanocompile-vs-kache.md).
 
 The accepted Rust-only [Harness hill climb](benchmarks/harness-hill.md#two-active-native-queries-adopted) measures **2.89 s versus 22.81 s direct**, with 167 warm hits under explicit reported-input macros, experimental Apple macro/executable producers and pinned-compiler native classification. Kache still leads at 2.04 s. Capping the four live Apple selection queries at two active commands improved controlled Harness medians by 2.0% and 1.3% in two 27-pair batches, winning 42 of 54 pairs. The separate three-way Nano samples are 3.06, 2.89 and 2.64 s; the paired batches supply the before/after evidence. Cold Nano was 37.55 s versus kache's 26.72 s, with no demonstrated cold-build improvement. Earlier accepted live-driver-plan and native-classification changes gained 4.7% and 2.0% in their controlled comparisons. The last default-policy project run, on an earlier revision, took 17.36 s versus 22.96 s direct and 2.18 s kache, with 97 hits. Earlier full-prefix hosted comparisons passed on both Linux and Mac; those workloads are separate from this local run. Raw samples, executable checksums and policy limits are published alongside the results.
 
@@ -183,10 +202,12 @@ The [Xcode comparison](benchmarks/xcode.md) measures real `xcodebuild` workloads
 
 ## Experimental proc-macro producer cache
 
-Mac producer caching is available with `NANOCOMPILE_PROC_MACRO_PRODUCERS=1`.
-It currently supports Apple's default tools, native builds with debug information
-disabled, and a restricted set of codegen flags. Linux, cross targets and broader
-linker/debug configurations still run directly. The [requirements and limits](docs/proc-macro-producers.md)
+Mac observer producer caching is available with `NANOCOMPILE_PROC_MACRO_PRODUCERS=1`
+for Apple's default tools, native builds with debug information disabled, and a
+restricted set of codegen flags. Linux and debug `cargo check`/`dev` builds use a
+reported-input path: the same flag caches `lib*.so` / `lib*.dylib` through the
+ordinary rustc dep-info store and hardlink restore. Cross targets still run
+directly. The [requirements and limits](docs/proc-macro-producers.md)
 describe the tested restore/invalidation path. The latest [Harness comparison](benchmarks/harness-hill.md#cargo-macro-flag-coverage)
 restores all ten macro producers and records 142 total hits: **4.23 s** warm
 versus **22.86 s** direct and **2.01 s** kache. This flag does not opt macro consumers into reported-input mode.

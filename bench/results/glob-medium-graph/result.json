@@ -1,0 +1,85 @@
+{
+  "sample": "glob-medium-graph",
+  "project": "/tmp/glob-medium",
+  "cells": [
+    {
+      "genome_file": "bench/genomes/graph-wrapper.json",
+      "label": "graph-wrapper",
+      "edit": "cold",
+      "ok": true,
+      "error": null,
+      "median_ms": 630.4873230001249,
+      "n_evals": 3,
+      "genome": {
+        "wrapper": true,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "graph",
+        "jobs": null,
+        "offline": true
+      },
+      "size": "small"
+    },
+    {
+      "genome_file": "bench/genomes/graph-wrapper.json",
+      "label": "graph-wrapper",
+      "edit": "noop",
+      "ok": true,
+      "error": null,
+      "median_ms": 1.380444999995234,
+      "n_evals": 3,
+      "genome": {
+        "wrapper": true,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "graph",
+        "jobs": null,
+        "offline": true
+      },
+      "size": "small"
+    },
+    {
+      "genome_file": "bench/genomes/graph-wrapper.json",
+      "label": "graph-wrapper",
+      "edit": "body",
+      "ok": true,
+      "error": null,
+      "median_ms": 508.78374700005224,
+      "n_evals": 1,
+      "genome": {
+        "wrapper": true,
+        "dev_backend": "llvm",
+        "linker": "default",
+        "sccache": false,
+        "codegen_units": null,
+        "incremental": false,
+        "debuginfo": "full",
+        "fast_check": "cargo-check",
+        "loop": "graph",
+        "jobs": null,
+        "offline": true
+      },
+      "size": "small"
+    }
+  ],
+  "correctness": {
+    "broken_edit": true,
+    "fast_failed": true,
+    "validate_failed": true,
+    "validate_is_final": true,
+    "agree_on_broken": true,
+    "graph_fast_failed": true,
+    "graph_validate_stamp_written": false,
+    "notes": ""
+  }
+}
