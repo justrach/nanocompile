@@ -141,13 +141,22 @@ fn rustPlan(ctx: *cache.Context, argv: []const []const u8) !Plan {
                 try addUnique(ctx, &search_dirs, v[11..]);
             } else if (std.mem.startsWith(u8, v, "native=")) {
                 try addUnique(ctx, &native_dirs, v[7..]);
+            } else if (eq(ctx.env.get("NANOCOMPILE_CHECK_NATIVE") orelse "", "1")) {
+                continue;
             } else return error.NativeSearchPath;
             continue;
         }
         if ((try option(argv, &i, "-l")) orelse (if (std.mem.startsWith(u8, arg, "-l")) arg[2..] else null)) |v| {
             const framework = std.mem.startsWith(u8, v, "framework=") and
                 eq(ctx.env.get("NANOCOMPILE_RLIB_FRAMEWORKS") orelse "", "1");
-            if (!std.mem.startsWith(u8, v, "static=") and !framework) return error.UnsupportedNativeLibrary;
+            if (!std.mem.startsWith(u8, v, "static=") and !framework) {
+                const metadata_only = if (emit) |e|
+                    std.mem.indexOf(u8, e, "metadata") != null and std.mem.indexOf(u8, e, "link") == null
+                else
+                    false;
+                if (metadata_only and eq(ctx.env.get("NANOCOMPILE_CHECK_NATIVE") orelse "", "1")) continue;
+                return error.UnsupportedNativeLibrary;
+            }
             const offset: usize = if (framework) 10 else 7;
             const library = v[offset..];
             if (library.len == 0) return error.UnsupportedNativeLibrary;

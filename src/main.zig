@@ -26,6 +26,7 @@ const help =
     \\  nanocompile artifact put|get|head NAMESPACE KEY [FILE] [METADATA_JSON]
     \\  nanocompile worktree init [DIR]  shared store for agent worktrees (general defaults)
     \\  nanocompile worktree dedup DIR...  hardlink identical files across target dirs
+    \\  nanocompile tsc|tsgo|tsrs|bun [FLAGS]  shared TypeScript type-check cache
     \\  nanocompile stats | clear | doctor
     \\  nanocompile gc [MAX_BYTES]  remove orphan blobs and evict to a budget
     \\Environment:
@@ -132,6 +133,11 @@ fn dispatch(ctx: *cache.Context, args: []const [:0]const u8) !u8 {
     if (std.mem.eql(u8, command, "worktree")) {
         return @import("worktree.zig").execute(ctx, args[2..], args[0]);
     }
+    if (@import("typescript.zig").parseChecker(command)) |checker| {
+        var rest: std.ArrayList([]const u8) = .empty;
+        for (args[2..]) |arg| try rest.append(ctx.a, arg);
+        return @import("typescript.zig").execute(ctx, checker, rest.items);
+    }
     if (std.mem.eql(u8, command, "artifact")) {
         if (args.len < 5) return error.MissingArtifactArguments;
         const op = args[2];
@@ -216,4 +222,5 @@ test {
     _ = @import("rust_loop.zig");
     _ = @import("map_elites.zig");
     _ = @import("worktree.zig");
+    _ = @import("typescript.zig");
 }

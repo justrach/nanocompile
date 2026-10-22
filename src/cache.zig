@@ -1075,6 +1075,10 @@ pub fn stats(ctx: *Context) !void {
     var script_miss: usize = 0;
     var script_bypass: usize = 0;
     var script_failed: usize = 0;
+    var ts_hit: usize = 0;
+    var ts_miss: usize = 0;
+    var ts_bypass: usize = 0;
+    var ts_failed: usize = 0;
     var restore_reflink: usize = 0;
     var restore_hardlink: usize = 0;
     var restore_copy: usize = 0;
@@ -1107,6 +1111,10 @@ pub fn stats(ctx: *Context) !void {
         if (std.mem.eql(u8, event, "build_script_miss")) script_miss += 1;
         if (std.mem.eql(u8, event, "build_script_bypass")) script_bypass += 1;
         if (std.mem.eql(u8, event, "build_script_failed")) script_failed += 1;
+        if (std.mem.eql(u8, event, "ts_hit")) ts_hit += 1;
+        if (std.mem.eql(u8, event, "ts_miss")) ts_miss += 1;
+        if (std.mem.eql(u8, event, "ts_bypass")) ts_bypass += 1;
+        if (std.mem.eql(u8, event, "ts_failed")) ts_failed += 1;
     }
     var blobs: usize = 0;
     var size: u64 = 0;
@@ -1123,6 +1131,7 @@ pub fn stats(ctx: *Context) !void {
     try ctx.out(try std.fmt.allocPrint(ctx.a, "native Clang invocations: {d}\nnative Clang failures: {d}\nobserved Clang hits: {d}\nobserved Clang misses: {d}\nClang hit/miss observations require NANOCOMPILE_CLANG_REMARKS=1\n", .{ clang_run, clang_failed, clang_hit, clang_miss }));
     try ctx.out(try std.fmt.allocPrint(ctx.a, "portable C/C++ hits: {d}\nportable C/C++ misses: {d}\nportable C/C++ bypasses: {d}\nportable C/C++ failures: {d}\n", .{ cc_hit, cc_miss, cc_bypass, cc_failed }));
     try ctx.out(try std.fmt.allocPrint(ctx.a, "build-script hits: {d}\nbuild-script misses: {d}\nbuild-script bypasses: {d}\nbuild-script failures: {d}\n", .{ script_hit, script_miss, script_bypass, script_failed }));
+    try ctx.out(try std.fmt.allocPrint(ctx.a, "typescript hits: {d}\ntypescript misses: {d}\ntypescript bypasses: {d}\ntypescript failures: {d}\n", .{ ts_hit, ts_miss, ts_bypass, ts_failed }));
     try ctx.out(try std.fmt.allocPrint(ctx.a, "restore reflink: {d}\nrestore hardlink: {d}\nrestore copy: {d}\nrestore ns total: {d}\nrestore ns samples: {d}\n", .{ restore_reflink, restore_hardlink, restore_copy, restore_ns_total, restore_ns_samples }));
 }
 

@@ -96,6 +96,11 @@ pub fn execute(ctx: *cache.Context, args: []const [:0]const u8, self_exe: []cons
             \\  warm target instead of allocating a second copy of fingerprints.
             \\nanocompile worktree gc DIR...
             \\  Drop store blobs that no live target still materializes (working set).
+            \\TypeScript: wrap checkers with the same store
+            \\  nanocompile tsrs --noEmit --checkers 4
+            \\  nanocompile tsc --noEmit
+            \\  nanocompile tsgo --noEmit
+            \\  nanocompile bun check
             \\
         );
         return 0;

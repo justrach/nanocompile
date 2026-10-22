@@ -80,6 +80,7 @@ CLIMB_DELTAS = (
     {"id": "l9_hardlink_bins", "env": {"NANOCOMPILE_HARDLINK_TARGET": "1", "CARGO_INCREMENTAL": "0"}},
     {"id": "l13_unique_deps", "env": {}},
     {"id": "l20_remap_paths", "env": {"NANOCOMPILE_REMAP_PATHS": "1"}},
+    {"id": "l21_check_native", "env": {"NANOCOMPILE_CHECK_NATIVE": "1"}},
 )
 
 # Lever order: one change at a time. Keep >3% wins that do not regress another >3%.
