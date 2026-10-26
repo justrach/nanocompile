@@ -3,6 +3,7 @@
 //! Large source dependencies and stored outputs use the separate racy-guarded
 //! digest memo in cache.zig; its ctime check covers in-place rewrites.
 const std = @import("std");
+const builtin = @import("builtin");
 const cache = @import("cache.zig");
 const Dir = std.Io.Dir;
 pub const Stamp = struct {
@@ -35,7 +36,38 @@ pub fn equal(a: Stamp, b: Stamp) bool {
     return a.exists == b.exists and a.inode == b.inode and a.size == b.size and a.mtime == b.mtime and a.ctime == b.ctime and a.kind == b.kind;
 }
 
+fn windowsCandidate(ctx: *cache.Context, path: []const u8) !?[]const u8 {
+    const st = Dir.cwd().statFile(ctx.io, path, .{}) catch |err| switch (err) {
+        error.FileNotFound, error.NotDir => return null,
+        else => return err,
+    };
+    if (st.kind != .file) return null;
+    // Preserve a proxy's basename instead of resolving a rustc symlink to rustup.
+    return try std.fs.path.resolve(ctx.a, &.{ ctx.cwd, path });
+}
+
+fn windowsExecutable(ctx: *cache.Context, path: []const u8) !?[]const u8 {
+    if (try windowsCandidate(ctx, path)) |candidate| return candidate;
+    var extensions = std.mem.tokenizeScalar(u8, ctx.env.get("PATHEXT") orelse "", ';');
+    while (extensions.next()) |extension| {
+        if (!std.ascii.eqlIgnoreCase(extension, ".exe") and !std.ascii.eqlIgnoreCase(extension, ".com") and
+            !std.ascii.eqlIgnoreCase(extension, ".bat") and !std.ascii.eqlIgnoreCase(extension, ".cmd")) continue;
+        if (try windowsCandidate(ctx, try std.fmt.allocPrint(ctx.a, "{s}{s}", .{ path, extension }))) |candidate| return candidate;
+    }
+    return null;
+}
+
 fn resolveExecutable(ctx: *cache.Context, arg: []const u8) ![]const u8 {
+    if (builtin.os.tag == .windows) {
+        // Match std.process.spawn: exact name, then PATHEXT, cwd before PATH.
+        if (try windowsExecutable(ctx, arg)) |candidate| return candidate;
+        if (std.mem.indexOfAny(u8, arg, "/\\:") != null) return error.CompilerNotFound;
+        var paths = std.mem.tokenizeScalar(u8, ctx.env.get("PATH") orelse "", ';');
+        while (paths.next()) |dir| {
+            if (try windowsExecutable(ctx, try std.fs.path.join(ctx.a, &.{ dir, arg }))) |candidate| return candidate;
+        }
+        return error.CompilerNotFound;
+    }
     if (std.mem.indexOfScalar(u8, arg, '/') != null)
         return Dir.cwd().realPathFileAlloc(ctx.io, arg, ctx.a);
     var paths = std.mem.splitScalar(u8, ctx.env.get("PATH") orelse "", ':');
@@ -109,6 +141,7 @@ fn validStamps(ctx: *cache.Context, stamps: []const Stamp, parallel: bool) bool 
 }
 
 fn readMemo(ctx: *cache.Context, path: []const u8, minimum_stamps: usize, is_zig: bool, physical: bool) ?[]const u8 {
+    if (builtin.os.tag == .windows) return null; // Windows change times are user-writable.
     const bytes = ctx.read(path) catch return null;
     const payload = cache.unseal(ctx, bytes) catch return null;
     const parsed = std.json.parseFromSlice(Memo, ctx.a, payload, .{ .allocate = .alloc_always }) catch return null;
@@ -188,6 +221,11 @@ fn rustFileDigest(ctx: *cache.Context, expected: Stamp) ![]const u8 {
 }
 
 fn installedDigest(ctx: *cache.Context, expected: Stamp, domain: []const u8) ![]const u8 {
+    if (builtin.os.tag == .windows) {
+        const hash = try ctx.digest(expected.path);
+        if (!equal(expected, try stamp(ctx, expected.path))) return error.ToolchainChanged;
+        return hash;
+    }
     var h = cache.Hash.init(.{});
     cache.field(&h, domain);
     cache.field(&h, expected.path);
@@ -248,6 +286,17 @@ fn rustResources(ctx: *cache.Context, stamps: *std.ArrayList(Stamp), root: []con
     }
 }
 
+fn rustResourcesBin(ctx: *cache.Context, stamps: *std.ArrayList(Stamp), root: []const u8) !void {
+    try add(ctx, stamps, root);
+    var dir = try Dir.cwd().openDir(ctx.io, root, .{ .iterate = true });
+    defer dir.close(ctx.io);
+    var iterator = dir.iterate();
+    while (try iterator.next(ctx.io)) |entry| {
+        if (entry.kind == .file or entry.kind == .sym_link)
+            try add(ctx, stamps, try std.fs.path.join(ctx.a, &.{ root, entry.name }));
+    }
+}
+
 // Byte-pinned stock installation, not a version-string
 // heuristic. Unrecognized compilers/drivers keep contextual selection memos.
 fn physicalStock(ctx: *cache.Context, real: []const u8) bool {
@@ -276,7 +325,7 @@ pub fn fingerprint(ctx: *cache.Context, is_zig: bool, executable: []const u8) ![
         var buffer: [4]u8 = undefined;
         var reader = file.reader(ctx.io, &.{});
         try reader.interface.readSliceAll(&buffer);
-        const native_binary = std.mem.eql(u8, &buffer, "\x7fELF") or std.mem.eql(u8, &buffer, "\xcf\xfa\xed\xfe") or std.mem.eql(u8, &buffer, "\xce\xfa\xed\xfe") or std.mem.eql(u8, &buffer, "\xca\xfe\xba\xbe");
+        const native_binary = (builtin.os.tag == .windows and std.mem.eql(u8, buffer[0..2], "MZ")) or std.mem.eql(u8, &buffer, "\x7fELF") or std.mem.eql(u8, &buffer, "\xcf\xfa\xed\xfe") or std.mem.eql(u8, &buffer, "\xce\xfa\xed\xfe") or std.mem.eql(u8, &buffer, "\xca\xfe\xba\xbe");
         if (!native_binary) return error.UnsupportedCompilerScript;
     }
     const physical = !is_zig and std.mem.eql(u8, executable, real) and physicalStock(ctx, real);
@@ -286,7 +335,7 @@ pub fn fingerprint(ctx: *cache.Context, is_zig: bool, executable: []const u8) ![
     // rustup's selection observes ancestor override files and global settings.
     // Missing override files are recorded too: adding one invalidates the memo.
     if (!is_zig and !physical) {
-        const rustup = ctx.env.get("RUSTUP_HOME") orelse try std.fs.path.join(ctx.a, &.{ ctx.env.get("HOME") orelse "", ".rustup" });
+        const rustup = ctx.env.get("RUSTUP_HOME") orelse try std.fs.path.join(ctx.a, &.{ ctx.env.get(if (builtin.os.tag == .windows) "USERPROFILE" else "HOME") orelse "", ".rustup" });
         try add(ctx, &selectors, try std.fs.path.join(ctx.a, &.{ rustup, "settings.toml" }));
         try add(ctx, &selectors, try std.fs.path.join(ctx.a, &.{ rustup, "toolchains" }));
         var dir: ?[]const u8 = ctx.cwd;
@@ -363,7 +412,7 @@ pub fn fingerprint(ctx: *cache.Context, is_zig: bool, executable: []const u8) ![
         const sysroot = lines.next() orelse return error.InvalidSysroot;
         const target_libdir = lines.next() orelse return error.InvalidSysroot;
         if (lines.next() != null or !std.fs.path.isAbsolute(sysroot) or !std.fs.path.isAbsolute(target_libdir)) return error.InvalidSysroot;
-        const installed = try std.fs.path.join(ctx.a, &.{ sysroot, "bin", "rustc" });
+        const installed = try std.fs.path.join(ctx.a, &.{ sysroot, "bin", if (builtin.os.tag == .windows) "rustc.exe" else "rustc" });
         var loader_override = false;
         for (ctx.env.keys()) |name| if (std.mem.startsWith(u8, name, "LD_") or std.mem.startsWith(u8, name, "DYLD_")) {
             loader_override = true;
@@ -374,8 +423,9 @@ pub fn fingerprint(ctx: *cache.Context, is_zig: bool, executable: []const u8) ![
         if (physical and (!loader_override or fallback_verified) and std.mem.eql(u8, executable, real) and std.mem.eql(u8, real, installed) and
             std.mem.startsWith(u8, version.stdout, "rustc 1.97.1 (8bab26f4f 2026-07-14)\n"))
             locations = .{ .compiler = real, .sysroot = sysroot, .target_libdir = target_libdir, .fallback_verified = fallback_verified };
+        if (builtin.os.tag == .windows) try rustResourcesBin(ctx, &stamps, try std.fs.path.join(ctx.a, &.{ sysroot, "bin" }));
         try add(ctx, &stamps, target_libdir);
-        try add(ctx, &stamps, try std.fs.path.join(ctx.a, &.{ sysroot, "bin", "rustc" }));
+        try add(ctx, &stamps, try std.fs.path.join(ctx.a, &.{ sysroot, "bin", if (builtin.os.tag == .windows) "rustc.exe" else "rustc" }));
         rustResources(ctx, &stamps, try std.fs.path.join(ctx.a, &.{ sysroot, "lib" })) catch |err| {
             ctx.trace(try std.fmt.allocPrint(ctx.a, "Rust resources unavailable: {s} ({s})", .{ sysroot, @errorName(err) }));
             return err;
@@ -452,7 +502,7 @@ test "shared Rust toolchain digests reject corruption and preserved-mtime edits"
     try std.testing.expectEqualStrings(try ctx.digest(input), first);
     try std.testing.expectEqualStrings(first, try rustFileDigest(&ctx, before));
     try tmp.dir.writeFile(io, .{ .sub_path = "resource", .data = "second" });
-    const file = try tmp.dir.openFile(io, "resource", .{});
+    const file = try tmp.dir.openFile(io, "resource", .{ .mode = if (builtin.os.tag == .windows) .read_write else .read_only });
     defer file.close(io);
     try file.setTimestamps(io, .{ .modify_timestamp = .{ .new = .{ .nanoseconds = before.mtime } } });
     const after = try stamp(&ctx, input);
@@ -461,6 +511,7 @@ test "shared Rust toolchain digests reject corruption and preserved-mtime edits"
     const second = try rustFileDigest(&ctx, after);
     try std.testing.expect(!std.mem.eql(u8, first, second));
     try std.testing.expectEqualStrings(try ctx.digest(input), second);
+    if (builtin.os.tag == .windows) return; // Metadata-only persistent memos are disabled.
     var memos = try Dir.cwd().openDir(io, try ctx.path(&.{"toolchain-files"}), .{ .iterate = true });
     defer memos.close(io);
     var iterator = memos.iterate();
@@ -547,6 +598,7 @@ fn writeTreeMemo(ctx: *cache.Context, path: []const u8, digest: []const u8, stam
 }
 
 fn readTreeMemo(ctx: *cache.Context, path: []const u8) ?[]const u8 {
+    if (builtin.os.tag == .windows) return null; // Windows change times are user-writable.
     const bytes = Dir.cwd().readFileAlloc(ctx.io, path, ctx.a, .limited(256 * 1024 * 1024)) catch return null;
     const payload = cache.unseal(ctx, bytes) catch return null;
     var lines = std.mem.splitScalar(u8, payload, '\n');

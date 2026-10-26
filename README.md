@@ -1,25 +1,58 @@
 <p align="center">
-  <img src="docs/images/readme-cache-banner.png" alt="nanocompile — Reuse the build work you've already done. A workshop rat in a coral coat shelves golden build artifacts." width="960">
+  <img src="docs/images/readme-cache-rat-v2.png" alt="A workshop rat in a coral coat shelves golden build artifacts" width="280" height="280">
 </p>
 
 <h1 align="center">nanocompile</h1>
 
-<p align="center">Rust and Zig compiler caching · Xcode native cache · Turborepo task artifacts</p>
+<p align="center">Stop compiling the same code twice. A local compiler cache for Rust, Zig and Xcode, in one small Zig binary.</p>
 
 <p align="center">
   <a href="https://github.com/justrach/nanocompile/actions/workflows/ci.yml"><img src="https://github.com/justrach/nanocompile/actions/workflows/ci.yml/badge.svg" alt="Linux and macOS CI"></a>
-  <a href="build.zig.zon"><img src="https://img.shields.io/badge/Zig-0.17.0-f7a41d" alt="Stable Zig 0.17.0"></a>
+  <a href="build.zig.zon"><img src="https://img.shields.io/badge/built%20in-Zig%200.17.0-f7a41d?logo=zig&logoColor=white" alt="Built in stable Zig 0.17.0"></a>
+  <img src="https://img.shields.io/badge/Rust%20·%20Zig%20·%20Xcode%20·%20Turborepo-555" alt="Rust, Zig, Xcode and Turborepo">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-blue" alt="Apache 2.0 license"></a>
 </p>
 
 <p align="center">
+  <a href="#see-it-in-action">Demo</a> ·
   <a href="#build-and-use">Build and use</a> ·
-  <a href="examples/turborepo/README.md">Turborepo example</a> ·
   <a href="#xcode-native-cache">Xcode</a> ·
-  <a href="benchmarks/README.md">Benchmarks</a> ·
+  <a href="examples/turborepo/README.md">Turborepo</a> ·
   <a href="#current-eligibility">Supported builds</a> ·
-  <a href="#experimental-r2-testing">R2 snapshots</a>
+  <a href="benchmarks/README.md">Benchmarks</a>
 </p>
+
+## See it in action
+
+<p align="center">
+  <img src="docs/images/demo-rust-race.gif" alt="Rust race: no cache 33.1 s, nanocompile defaults 10.7 s, kache 1.5 s, nanocompile with opt-ins 0.9 s" width="800">
+</p>
+
+
+<table>
+  <tr>
+    <td width="50%"><img src="docs/images/demo-zig.png" alt="Zig: zig build-exe 5.3 s versus nanocompile 8 ms, 693 times faster"></td>
+    <td width="50%"><img src="docs/images/demo-xcode.png" alt="Xcode: xcodebuild 11.5 s, kache 11.4 s, nanocompile xcodebuild 1.6 s, 7.1 times faster"></td>
+  </tr>
+  <tr>
+    <td width="50%"><img src="docs/images/demo-rust.png" alt="Rust: no cache 33.1 s, nanocompile defaults 10.7 s, kache 1.5 s, nanocompile with opt-ins 0.9 s"></td>
+    <td width="50%"><img src="docs/images/demo-board.png" alt="Scoreboard of warm rebuilds versus no cache: Rust 35x versus kache 22x, Zig 693x, Xcode 7.1x versus 1.0x"></td>
+  </tr>
+</table>
+
+Warm rebuilds (cache filled, build output cleared), medians on one Apple M3 Ultra:
+
+| Build | No cache | kache 1.0.0 | nanocompile |
+| --- | --- | --- | --- |
+| Rust, 121 crates, `cargo build --release -j 4` (3 runs each) | 33.1 s | 1.54 s | **0.93 s** with opt-ins · 10.7 s with defaults |
+| Zig, rebuild an unchanged `zig build-exe -O ReleaseFast` binary (5 runs) | 5.28 s | does not cache Zig | **7.6 ms** |
+| Xcode, 48 Swift files, Release, `-jobs 4` (3 runs each) | 11.5 s | 11.4 s, does not cache Swift | **1.62 s** |
+
+What the numbers do and do not say:
+
+- **Rust defaults lose to kache here.** By default, proc macros and binaries run the real compiler. The opt-in row sets `NANOCOMPILE_PROC_MACROS=reported`, `NANOCOMPILE_PROC_MACRO_PRODUCERS=1`, `NANOCOMPILE_EXECUTABLE_PRODUCERS=1`, `NANOCOMPILE_THIN_LTO_PRODUCERS=1`, `NANOCOMPILE_RUST_STATICLIB=1` and `NANOCOMPILE_RLIB_FRAMEWORKS=1`; it beat kache in all 3 alternating runs. The first, cold build is about 10% slower than no cache.
+- **Zig** is compared with raw `zig build-exe` and its own cache, not with `zig build`'s artifact cache. A cold build is a tie (7.05 s vs 7.18 s).
+- **Xcode** speed comes from Apple's own compilation cache, which `nanocompile xcodebuild` switches on and manages. Enabling it by hand measured 1.55 s.
 
 A local, content-addressed compiler cache written in **stable Zig 0.17.0**, for Rust and Zig, with opt-in Apple Clang and Xcode native-cache commands. It adapts kache's shared-blob storage, copy-on-write restoration, and single-flight compilation ideas into a small standalone program.
 
@@ -54,6 +87,8 @@ On the full Harness CLI build, [the memo hill-climb](docs/nano-vs-kache-memo-res
 Large Rust metadata now uses a separate bounded, state-checked snapshot reader; the actual Harness `objc2_app_kit` replay restores byte-identical artifacts. See [scope and checks](docs/large-rust-metadata.md). [Thin-LTO producer support](docs/thin-lto-producer-investigation.md) has an opt-in stable-staging candidate; default builds still refuse it.
 
 The opt-in [stable-alias full Harness candidate](docs/full-harness-stable-alias.md) restores the thin-LTO application: two warm rounds give **17.690 s Nano versus 6.863 s kache**. Artifact, permission, signature and CLI checks pass; Nano still loses, and no repeated cold win or default promotion is claimed.
+
+Detailed measurements, including the comparisons kache wins, are in [measurement notes](docs/measurement-notes.md) and [benchmarks](benchmarks/README.md).
 
 ## Build and use
 
@@ -352,6 +387,8 @@ GitHub Actions runs real compiler tests and the synthetic benchmark on Linux and
 The [direct Rust metadata experiment](docs/direct-rmeta-experiment.md) removes own-artifact query subprocesses for supported Rust 1.97.1 metadata. Two controlled Harness cold batches improve by **3.5% and 5.0%** against the previous Nano implementation, with six of six pair wins and 193 matching artifacts. Two 27-pair warm batches are mixed; no general warm speedup is claimed. Unknown versions and encodings retain the rustc query fallback. See the [next performance experiments](docs/performance-roadmap.md) for native caching, source-edit builds and restore validation.
 
 The next three performance directions now have implementations and checks: [portable C/C++ object caching](docs/portable-cc.md), [overlapping restore validation](docs/restore-validation-overlap.md) and a [verified Harness source-edit comparison](docs/harness-source-edits.md). The new edit sequence favors kache: cold 28.709 s Nano versus 27.297 s kache; leaf edits 10.715 versus 10.205 s; shared edits 12.308 versus 11.858 s; reverts 11.981 versus 2.058 s. These are single samples with clean targets, verified against fresh artifact bytes and linked behavior. Restore overlap improves two 27-pair Harness warm batches by about 2.1%. A separate [experimental declared-task runner](docs/declared-tasks.md) compares the same two-package Node pipeline against real Turbo local caching; this small pipeline does not establish a general scheduler advantage.
+
+Declared-task guidance covers [focused input contracts](docs/focused-task-inputs.md), [explicit cross-checkout reuse](docs/relocatable-tasks.md), and [compiler reuse beneath task misses](docs/task-cache-layering.md). [Pinned executable setup](docs/ci-setup.md) avoids repeated source builds while verifying cached executables. [Local savings summaries](docs/cache-savings.md) distinguish historical estimates from matched measurements; anonymous export is explicit opt-in, with no automatic network sender.
 
 Hosted Linux/macOS [validation and coverage results](docs/hosted-three-directions.md) are published separately. GCC/Clang fixture checks pass, but the pinned Linux Harness profile currently bypasses all 30 portable native calls; kache leads its warm project comparison.
 

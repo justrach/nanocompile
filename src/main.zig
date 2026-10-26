@@ -5,8 +5,8 @@ const compiler = @import("compiler.zig");
 const xcode = @import("xcode.zig");
 
 comptime {
-    if (builtin.os.tag != .macos and builtin.os.tag != .linux)
-        @compileError("nanocompile currently supports macOS and Linux");
+    if (builtin.os.tag != .macos and builtin.os.tag != .linux and builtin.os.tag != .windows)
+        @compileError("nanocompile currently supports macOS, Linux and Windows");
     if (!std.mem.eql(u8, builtin.zig_version_string, "0.17.0"))
         @compileError("build nanocompile with stable Zig 0.17.0");
 }
@@ -196,4 +196,5 @@ test {
     _ = @import("producer_job.zig");
     _ = @import("native_identity.zig");
     _ = @import("producer_dependencies.zig");
+    _ = @import("task.zig");
 }

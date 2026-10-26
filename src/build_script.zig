@@ -665,6 +665,7 @@ fn executeDeclared(ctx: *cache.Context, real: []const u8, args: []const []const 
 
 // The explicit contract is checked at execution too, including disabled shims.
 pub fn install(ctx: *cache.Context, argv: []const []const u8) !void {
+    if (@import("builtin").os.tag == .windows) return; // Unix build-script shims are unsupported.
     _ = contract(ctx) catch if (!declaredMode(ctx)) return;
     var name: ?[]const u8 = null;
     var dir: ?[]const u8 = null;
@@ -717,6 +718,7 @@ fn scriptName(path: []const u8) bool {
     return std.mem.startsWith(u8, name, "build_script_") and std.mem.indexOfScalar(u8, name, '-') != null;
 }
 pub fn launch(ctx: *cache.Context, args: []const [:0]const u8) !?u8 {
+    if (@import("builtin").os.tag == .windows) return null; // Unix build-script shims are unsupported.
     if (args.len == 0) return null;
     // Copied binary shim: argv[0] is the script path and the record sits
     // beside this executable.
@@ -745,6 +747,7 @@ pub fn launch(ctx: *cache.Context, args: []const [:0]const u8) !?u8 {
 }
 
 pub fn wantsInstall(ctx: *cache.Context, argv: []const []const u8) bool {
+    if (@import("builtin").os.tag == .windows) return false; // Unix build-script shims are unsupported.
     if (ctx.env.get("NANOCOMPILE_BUILD_SCRIPTS_FILE") == null and !declaredMode(ctx)) return false;
     var name: ?[]const u8 = null;
     var dir: ?[]const u8 = null;
@@ -764,6 +767,7 @@ pub fn installLockName(ctx: *cache.Context, argv: []const []const u8) ![]const u
 }
 
 test "snapshot reuse refuses changed input state before atomic publication" {
+    if (@import("builtin").os.tag == .windows) return error.SkipZigTest; // Unix directory publication and modes.
     var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
     defer arena.deinit();
     const a = arena.allocator();

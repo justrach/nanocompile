@@ -1,6 +1,6 @@
 # README artwork
 
-The current README uses `images/readme-cache-banner.png`, a wide editorial banner made with the built-in imagegen tool from the transparent mascot below. It keeps the character, coral coat and golden cache cubes, adds the project name and tagline, and leaves benchmark claims in ordinary text. The previous assets remain available. The banner's alt text includes its wording; the README also retains a text heading.
+The current README header uses the transparent mascot `images/readme-cache-rat-v2.png`, as CodeGraff does; the demo-film stills (`images/demo-*.png`, `images/demo-rust-race.gif`) and `media/nanocompile-demo.mp4` come from the 26-second comparison film. The earlier header used `images/readme-cache-banner.png`, a wide editorial banner made with the built-in imagegen tool from the transparent mascot below. It keeps the character, coral coat and golden cache cubes, adds the project name and tagline, and leaves benchmark claims in ordinary text. The previous assets remain available. The banner's alt text includes its wording; the README also retains a text heading.
 
 Final banner edit prompt (edit target and character identity reference: `images/readme-cache-rat-v2.png`):
 
