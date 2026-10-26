@@ -11,6 +11,8 @@ pub fn build(b: *std.Build) void {
     });
     const exe = b.addExecutable(.{ .name = "nanocompile", .root_module = mod });
     b.installArtifact(exe);
+    for ([_][]const u8{ "worktree.py", "worktree_setup.py", "nextjs_cache.py" }) |helper|
+        b.installFile(b.fmt("tools/{s}", .{helper}), b.fmt("share/nanocompile/{s}", .{helper}));
     const run = b.addRunArtifact(exe);
     b.step("run", "Run nanocompile").dependOn(&run.step);
     const tests = b.addTest(.{ .root_module = mod });

@@ -19,6 +19,7 @@
   <a href="#xcode-native-cache">Xcode</a> ·
   <a href="examples/turborepo/README.md">Turborepo</a> ·
   <a href="#current-eligibility">Supported builds</a> ·
+  <a href="docs/worktrees.md">Next.js worktrees</a> ·
   <a href="benchmarks/README.md">Benchmarks</a>
 </p>
 
@@ -55,6 +56,12 @@ What the numbers do and do not say:
 - **Xcode** speed comes from Apple's own compilation cache, which `nanocompile xcodebuild` switches on and manages. Enabling it by hand measured 1.55 s.
 
 A local, content-addressed compiler cache written in **stable Zig 0.17.0**, for Rust and Zig, with opt-in Apple Clang and Xcode native-cache commands. It adapts kache's shared-blob storage, copy-on-write restoration, and single-flight compilation ideas into a small standalone program.
+
+Experimental [`nanocompile worktree`](docs/worktrees.md) commands create and prepare
+Next.js/OpenNext worktrees with private dependencies and outputs, shared package
+download caches, and reusable SWC/Webpack compiler hints. Builds always execute;
+complete `.next` outputs and deployments are never replayed. These commands need
+Python 3.9+ on macOS/Linux; standalone compiler caching remains native.
 
 This implementation targets repeated compilation of unchanged inputs. It is an early implementation with explicit eligibility gates; unsupported invocations run the original compiler.
 

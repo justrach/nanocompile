@@ -21,6 +21,7 @@ const help =
     \\  nanocompile xcodebuild [XCODE FLAGS]  use Xcode native Swift/Clang CAS (macOS)
     \\  RUSTC_WRAPPER=/absolute/path/nanocompile cargo build
     \\  nanocompile task SPEC.json  experimental ordered declared-file task cache
+    \\  nanocompile worktree create|prepare|build|dev  Next.js/OpenNext helpers (POSIX)
     \\  nanocompile artifact put|get|head NAMESPACE KEY [FILE] [METADATA_JSON]
     \\  nanocompile stats | clear | doctor
     \\  nanocompile gc [MAX_BYTES]  remove orphan blobs and evict to a budget
@@ -112,6 +113,7 @@ fn dispatch(ctx: *cache.Context, args: []const [:0]const u8) !u8 {
     if (std.mem.eql(u8, command, "clang")) return @import("clang.zig").execute(ctx, args[2..]);
     if (std.mem.eql(u8, command, "cc") or std.mem.eql(u8, command, "c++")) return @import("portable_cc.zig").execute(ctx, args[2..], std.mem.eql(u8, command, "c++"));
     if (std.mem.eql(u8, command, "xcodebuild")) return xcode.execute(ctx, args[2..]);
+    if (std.mem.eql(u8, command, "worktree")) return @import("worktree.zig").execute(ctx, args[2..]);
     if (std.mem.eql(u8, command, "task")) {
         if (args.len != 3) return error.MissingTaskSpec;
         return @import("task.zig").execute(ctx, args[2]);
