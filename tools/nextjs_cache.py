@@ -1,7 +1,8 @@
 """Relocatable Next.js compiler-cache hints, not cached build results.
 
-Only cache/swc and cache/webpack are shared. Frameworks must validate these
-incremental hints against source inputs on every real build; source contents
+SWC/Webpack hints are shared by default. Opt-in Turbopack snapshots use the
+installed compiler's exact engine-version directory after a completed build.
+Frameworks must validate hints against source inputs on every real build; source contents
 are deliberately not part of the key. No fetch-cache or remote data cache is
 restored. This helper serializes its own invocations, not external dev servers.
 POSIX only (flock); each Git worktree has its own private lock.
@@ -12,6 +13,7 @@ import json
 import os
 from pathlib import Path, PurePosixPath, PureWindowsPath
 import platform
+import re
 import shutil
 import stat
 import subprocess
@@ -54,7 +56,35 @@ def _identity(name, project, env, required=False):
     return [_digest(path), hashlib.sha256(result.stdout).hexdigest()]
 
 
-def _key(project, command, dist_dir, env):
+def _turbopack_version(project, env):
+    # Follow Next's own worktree seeder: version is the framework version AND
+    # native compiler build, not merely the package.json semver. Unknown/wasm
+    # runtimes and custom engine-directory overrides fall back to normal builds.
+    if any(env.get(name) for name in ('TURBO_ENGINE_VERSION',
+                                      'TURBO_ENGINE_DISABLE_VERSIONING',
+                                      'TURBO_ENGINE_IGNORE_DIRTY')):
+        return None
+    node = shutil.which('node', path=env.get('PATH', os.defpath))
+    if node is None:
+        return None
+    probe = '''const {createRequire} = require('node:module');
+const load = createRequire(process.cwd() + '/package.json');
+(async () => {
+  const swc = load('next/dist/build/swc');
+  await swc.loadBindings();
+  const version = swc.getTurbopackCacheVersion?.();
+  if (typeof version !== 'string') process.exit(1);
+  process.stdout.write(version);
+})().catch(() => process.exit(1));'''
+    result = subprocess.run([node, '-e', probe], cwd=project, env=env,
+                            capture_output=True, text=True, check=True, timeout=15)
+    version = result.stdout.strip()
+    if not re.fullmatch(r'v[0-9][A-Za-z0-9._-]{0,126}', version):
+        return None
+    return version
+
+
+def _key(project, command, dist_dir, env, turbopack_version=None):
     locks = [project / name for name in LOCKFILES if (project / name).is_file()]
     if not locks or not (project / 'package.json').is_file():
         raise ValueError('dependency lockfile and package.json required')
@@ -80,15 +110,17 @@ def _key(project, command, dist_dir, env):
             'managers': {name: _identity(name, project, env) for name in selected},
             'inputs': inputs, 'env': effective, 'dist': dist_dir,
             'command': list(command)}
+    if turbopack_version is not None:
+        data['turbopack_version'] = turbopack_version
     return hashlib.sha256(json.dumps(data, sort_keys=True).encode()).hexdigest()
 
 
-def _targets(project, dist_dir):
+def _targets(project, dist_dir, cache_dirs=CACHE_DIRS):
     path = PurePosixPath(dist_dir)
     if (not dist_dir or path.is_absolute() or PureWindowsPath(dist_dir).is_absolute()
             or '\\' in dist_dir or '..' in path.parts or str(path) == '.'):
         raise ValueError('unsafe dist_dir')
-    targets = [project / path / 'cache' / name for name in CACHE_DIRS]
+    targets = [project / path / 'cache' / name for name in cache_dirs]
     for target in targets:
         current = project
         for part in target.relative_to(project).parts:
@@ -126,8 +158,22 @@ def _artifact(binary, op, key, archive, cache_root, env):
                           env=backend_env, capture_output=True, timeout=120).returncode == 0
 
 
-def _restore(archive, project, dist_dir):
-    targets = _targets(project, dist_dir)
+def _validate_turbopack_snapshot(target):
+    current = target / 'CURRENT'
+    if current.is_symlink() or not current.is_file():
+        raise ValueError('incomplete Turbopack snapshot')
+    # CURRENT is tiny metadata, never read an unbounded compiler payload as JSON.
+    with current.open('rb') as source:
+        data = source.read(64 * 1024 + 1)
+    if len(data) > 64 * 1024:
+        raise ValueError('oversized Turbopack snapshot metadata')
+    state = json.loads(data)
+    if not isinstance(state, dict) or not isinstance(state.get('commit_time'), str):
+        raise ValueError('incomplete Turbopack snapshot')
+
+
+def _restore(archive, project, dist_dir, cache_dirs=CACHE_DIRS):
+    targets = _targets(project, dist_dir, cache_dirs)
     if any(target.exists() for target in targets):
         return False
     if archive.stat().st_size > MAX_BYTES:
@@ -138,12 +184,15 @@ def _restore(archive, project, dist_dir):
             members, seen, total = [], set(), 0
             for member in tar:
                 name = PurePosixPath(member.name)
-                if (not name.parts or name.parts[0] not in CACHE_DIRS
+                allowed = any(name == PurePosixPath(root) or PurePosixPath(root) in name.parents
+                              for root in cache_dirs)
+                if (not name.parts or not allowed
                         or member.name != name.as_posix() or name.is_absolute()
                         or '..' in name.parts or '\\' in member.name
                         or not (member.isdir() or member.isreg())
                         or member.name in seen or member.size < 0
-                        or (len(name.parts) == 1 and not member.isdir())):
+                        or (any(name == PurePosixPath(root) for root in cache_dirs)
+                            and not member.isdir())):
                     raise ValueError('unsafe compiler cache archive')
                 seen.add(member.name)
                 total += member.size
@@ -159,11 +208,14 @@ def _restore(archive, project, dist_dir):
                     destination.parent.mkdir(parents=True, exist_ok=True)
                     with tar.extractfile(member) as source, destination.open('xb') as output:
                         shutil.copyfileobj(source, output, 64 * 1024)
-        targets = _targets(project, dist_dir)
+        for name in cache_dirs:
+            if name.startswith('turbopack/') and (stage / name).exists():
+                _validate_turbopack_snapshot(stage / name)
+        targets = _targets(project, dist_dir, cache_dirs)
         if any(target.exists() for target in targets):
             return False
         restored = False
-        for name, target in zip(CACHE_DIRS, targets):
+        for name, target in zip(cache_dirs, targets):
             if (stage / name).is_dir():
                 target.parent.mkdir(parents=True, exist_ok=True)
                 # Stage resides on the project filesystem. Only absent targets
@@ -175,13 +227,17 @@ def _restore(archive, project, dist_dir):
         return restored
 
 
-def _store_archive(archive, targets):
+def _store_archive(archive, targets, cache_dirs=CACHE_DIRS):
     total, count = 0, 0
     with tarfile.open(archive, 'w:', format=tarfile.USTAR_FORMAT) as tar:
-        for name, target in zip(CACHE_DIRS, targets):
+        for name, target in zip(cache_dirs, targets):
             if not target.exists():
                 continue
+            if name.startswith('turbopack/'):
+                _validate_turbopack_snapshot(target)
             for root, dirs, files in os.walk(target, followlinks=False):
+                dirs.sort()
+                files.sort()
                 for path in [Path(root)] + [Path(root) / p for p in dirs + files]:
                     node = path.lstat()
                     if (not (stat.S_ISDIR(node.st_mode) or stat.S_ISREG(node.st_mode))
@@ -198,6 +254,8 @@ def _store_archive(archive, targets):
                         raise ValueError('compiler cache size limit')
                     info.uid = info.gid = 0
                     info.uname = info.gname = ''
+                    info.mtime = 0
+                    info.mode = 0o755 if info.isdir() else 0o644
                     if info.isreg():
                         with path.open('rb') as source:
                             tar.addfile(info, source)
@@ -206,7 +264,8 @@ def _store_archive(archive, targets):
     return count > 0 and archive.stat().st_size <= MAX_BYTES
 
 
-def run_build(project, command, binary, cache_root, dist_dir='.next', env=None):
+def run_build(project, command, binary, cache_root, dist_dir='.next', env=None,
+              turbopack_cache=False):
     """Run argv (no shell) in project, returning returncode/cache/stored[/key].
 
     env is a full subprocess environment, or None to inherit os.environ.
@@ -224,10 +283,21 @@ def run_build(project, command, binary, cache_root, dist_dir='.next', env=None):
     result = {'returncode': None, 'cache': 'disabled', 'stored': False}
     with _worktree_lock(project):
         build_env = _environment(env)
+        cache_dirs = CACHE_DIRS
+        version = None
+        if turbopack_cache and build_env.get('NANOCOMPILE_DISABLE') != '1':
+            try:
+                version = _turbopack_version(project, build_env)
+            except (OSError, ValueError, subprocess.SubprocessError):
+                pass
+            result['turbopack_cache'] = version or 'unavailable'
+            if version is not None:
+                cache_dirs += ('turbopack/' + version,)
+                _targets(project, dist_dir, cache_dirs)
         key = None
         if build_env.get('NANOCOMPILE_DISABLE') != '1':
             try:
-                key = _key(project, command, dist_dir, build_env)
+                key = _key(project, command, dist_dir, build_env, version)
             except (OSError, ValueError, subprocess.SubprocessError):
                 pass
         with tempfile.TemporaryDirectory(prefix='nextjs-artifact-') as temp:
@@ -235,9 +305,9 @@ def run_build(project, command, binary, cache_root, dist_dir='.next', env=None):
             if key is not None:
                 result.update(cache='miss', key=key)
                 try:
-                    if (not any(p.exists() for p in _targets(project, dist_dir))
+                    if (not any(p.exists() for p in _targets(project, dist_dir, cache_dirs))
                             and _artifact(binary, 'get', key, archive, cache_root, build_env)
-                            and _restore(archive, project, dist_dir)):
+                            and _restore(archive, project, dist_dir, cache_dirs)):
                         result['cache'] = 'restored'
                 except (OSError, ValueError, tarfile.TarError, subprocess.SubprocessError):
                     pass
@@ -246,8 +316,11 @@ def run_build(project, command, binary, cache_root, dist_dir='.next', env=None):
                 try:
                     # Re-read inputs after the build: changed compatibility inputs
                     # must never poison the pre-build key.
-                    if (key == _key(project, command, dist_dir, _environment(env))
-                            and _store_archive(archive, _targets(project, dist_dir))):
+                    after_env = _environment(env)
+                    after_version = _turbopack_version(project, after_env) if version is not None else None
+                    if (version == after_version
+                            and key == _key(project, command, dist_dir, after_env, after_version)
+                            and _store_archive(archive, _targets(project, dist_dir, cache_dirs), cache_dirs)):
                         result['stored'] = _artifact(binary, 'put', key, archive,
                                                      cache_root, build_env)
                 except (OSError, ValueError, tarfile.TarError, subprocess.SubprocessError):

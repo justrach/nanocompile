@@ -134,19 +134,25 @@ def main():
         assert executable.stat().st_mode & 0o777 == mode
         execute('12 second')
         if args.stable_alias_experiment:
-            # Stale foreign aliases must remain untouched and force direct
-            # compilation rather than adopting an old private job.
+            # Thin LTO now compiles in place. A stale command-key alias must
+            # remain untouched, not redirect compilation into an old job.
             jobs = list((root / 'cache/producer-jobs').glob('*/compiler-result.json'))
-            record = json.loads(jobs[-1].read_text())
-            alias = Path(record['argv'][record['argv'].index('--out-dir') + 1]).parent
+            config = json.loads((jobs[-1].parent / 'observer.json').read_text())
+            assert config['ownership']['in_place'] is not None
+            entries = list((root / 'cache/entries').iterdir())
+            assert len(entries) == 1
+            alias = root / 'cache/producer-aliases' / entries[0].name
+            alias.parent.mkdir(exist_ok=True)
+            assert not alias.exists() and not alias.is_symlink()
             shutil.rmtree(root / 'cache/entries')
             alias.symlink_to(jobs[-1].parent)
             remove()
             collision = run([str(binary), *rust])
-            assert b'bypass: exclusive thin-LTO alias unavailable' in collision.stderr
+            assert b'miss: compiling executable producer' in collision.stderr, collision.stderr.decode()
             assert alias.is_symlink() and alias.resolve() == jobs[-1].parent
             assert executable.read_bytes() == direct_bytes
             alias.unlink()
+            shutil.rmtree(root / 'cache/entries')
             remove()
             # Key/output locks serialize same-key compilers: one genuine miss,
             # one restore, identical bytes, no shared physical compilation.

@@ -1,0 +1,145 @@
+name: Unsigned releases
+on:
+  push:
+    tags: ['v[0-9]*']
+  workflow_dispatch:
+permissions:
+  contents: read
+defaults:
+  run:
+    shell: bash
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        optimize: [ReleaseFast, ReleaseSafe]
+        platform:
+          - os: macos-15
+            target: aarch64-macos
+          - os: macos-15-intel
+            target: x86_64-macos
+          - os: ubuntu-24.04
+            target: x86_64-linux-musl
+          - os: ubuntu-24.04
+            target: aarch64-linux-musl
+          - os: windows-2025
+            target: x86_64-windows-gnu
+    runs-on: ${{ matrix.platform.os }}
+    timeout-minutes: 30
+    env:
+      OPTIMIZE: ${{ matrix.optimize }}
+      PYTHON: ${{ matrix.platform.target == 'x86_64-windows-gnu' && 'python' || 'python3' }}
+      EXE_SUFFIX: ${{ matrix.platform.target == 'x86_64-windows-gnu' && '.exe' || '' }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - name: Check release version and packaging
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+          RELEASE_REF_TYPE: ${{ github.ref_type }}
+        run: |
+          "$PYTHON" tests/release_packaging.py
+          version=$("$PYTHON" tools/package_release.py version)
+          if [ "$RELEASE_REF_TYPE" = tag ]; then
+            test "$RELEASE_TAG" = "v$version"
+          fi
+      - name: Install verified Zig 0.17.0
+        run: '"$PYTHON" tools/install_zig.py "$RUNNER_TEMP/zig"'
+      - name: Native unit tests
+        env:
+          TARGET: ${{ matrix.platform.target }}
+        run: |
+          if [ "$RUNNER_OS" = Windows ]; then
+            zig build test -Doptimize="$OPTIMIZE" -Dtarget="$TARGET"
+          else
+            zig build test -Doptimize="$OPTIMIZE"
+          fi
+      - name: Build release target
+        env:
+          TARGET: ${{ matrix.platform.target }}
+        run: zig build -Doptimize="$OPTIMIZE" -Dtarget="$TARGET"
+      - name: Package explicit release files
+        env:
+          TARGET: ${{ matrix.platform.target }}
+        run: '"$PYTHON" tools/package_release.py package --binary "zig-out/bin/nanocompile$EXE_SUFFIX" --target "$TARGET" --optimize "$OPTIMIZE" --output dist'
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: release-${{ matrix.platform.target }}-${{ matrix.optimize }}
+          path: dist/
+          if-no-files-found: error
+  smoke:
+    needs: build
+    strategy:
+      fail-fast: false
+      matrix:
+        optimize: [ReleaseFast, ReleaseSafe]
+        platform:
+          - os: macos-15
+            target: aarch64-macos
+          - os: macos-15-intel
+            target: x86_64-macos
+          - os: ubuntu-24.04
+            target: x86_64-linux-musl
+          - os: ubuntu-24.04-arm
+            target: aarch64-linux-musl
+          - os: windows-2025
+            target: x86_64-windows-gnu
+    runs-on: ${{ matrix.platform.os }}
+    timeout-minutes: 15
+    env:
+      OPTIMIZE: ${{ matrix.optimize }}
+      PYTHON: ${{ matrix.platform.target == 'x86_64-windows-gnu' && 'python' || 'python3' }}
+      RUST_TOOLCHAIN: ${{ matrix.platform.target == 'x86_64-windows-gnu' && '1.97.1-x86_64-pc-windows-gnu' || '1.97.1' }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: release-${{ matrix.platform.target }}-${{ matrix.optimize }}
+          path: dist
+      - name: Rust toolchain
+        run: |
+          rustup toolchain install "$RUST_TOOLCHAIN" --profile minimal
+          rustup default "$RUST_TOOLCHAIN"
+      - name: Verify archive and run native compiler and locking smoke
+        run: '"$PYTHON" tests/release_packaging.py --smoke-archive dist'
+  verify:
+    needs: [build, smoke]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          pattern: release-*
+          merge-multiple: true
+          path: dist
+      - name: Require all ten archives and aggregate verified checksums
+        run: python3 tools/package_release.py verify dist --all-modes
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: verified-release
+          path: dist/
+          if-no-files-found: error
+  publish:
+    if: github.event_name == 'push' && github.ref_type == 'tag'
+    needs: verify
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: verified-release
+          path: dist
+      - name: Publish unsigned GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          cd dist
+          sha256sum -c SHA256SUMS
+          gh release create "$RELEASE_TAG" --verify-tag --title "nanocompile $RELEASE_TAG" \
+            --notes 'Unsigned macOS, Linux and Windows x86_64 binaries in ReleaseFast and ReleaseSafe variants. ReleaseSafe (-release-safe archives) is recommended for production; unsuffixed archives are ReleaseFast. Verify SHA256SUMS before use. See the bundled docs/releases.md for platform support scope, installation and verification limits.' \
+            ./*.tar.gz ./*.zip ./*.sha256 SHA256SUMS

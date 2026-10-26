@@ -75,7 +75,7 @@ pub fn parse(a: std.mem.Allocator, bytes: []const u8, reported: bool) ![]const C
         if (name.len == 0) return error.UnsupportedRustMetadata;
         try names.append(a, .{ .name = try a.dupe(u8, name), .hash = try a.dupe(u8, hash), .proc_macro = std.mem.indexOf(u8, line, "kind MacrosOnly") != null });
     }
-    return names.items;
+    return names.toOwnedSlice(a);
 }
 
 // rustc's metadata-only loader skips the rlib flavor after loading a matching
@@ -206,7 +206,8 @@ test "installation locations refuse alternate selection and loader environments"
         try std.testing.expect(cachedLocations(&ctx, argv) == null);
     try env.put("DYLD_LIBRARY_PATH", "");
     try std.testing.expect(cachedLocations(&ctx, &.{"/toolchain/bin/rustc"}) == null);
-    _ = env.remove("DYLD_LIBRARY_PATH");
+    env.deinit();
+    env = std.process.Environ.Map.init(a);
     try env.put("LD_PRELOAD", "");
     try std.testing.expect(cachedLocations(&ctx, &.{"/toolchain/bin/rustc"}) == null);
 }

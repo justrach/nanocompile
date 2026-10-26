@@ -84,7 +84,7 @@ pub const Context = struct {
     compiler_decoder_identity: ?[]const u8 = null,
     compiler_epoch: ?[]const u8 = null,
     rust_locations: ?RustLocations = null,
-    digest_memo: bool = true,
+    digest_memo: bool = builtin.os.tag != .windows,
     /// While one entry is built after compilation, a file hashed earlier in
     /// that construction (a fresh output classified for consumers, then
     /// stored as a blob) is not hashed again if its state is unchanged.
@@ -109,7 +109,9 @@ pub const Context = struct {
             .env = env,
             .root = try std.fs.path.resolve(a, &.{ cwd, root }),
             .cwd = cwd,
-            .digest_memo = !std.mem.eql(u8, env.get("NANOCOMPILE_DIGEST_MEMO") orelse "1", "0"),
+            // Windows change times are writable by user code; persistent
+            // metadata-only digest reuse cannot use the Unix ctime contract.
+            .digest_memo = builtin.os.tag != .windows and !std.mem.eql(u8, env.get("NANOCOMPILE_DIGEST_MEMO") orelse "1", "0"),
         };
     }
 

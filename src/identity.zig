@@ -484,6 +484,7 @@ pub fn fingerprint(ctx: *cache.Context, is_zig: bool, executable: []const u8) ![
 }
 
 test "shared Rust toolchain digests reject corruption and preserved-mtime edits" {
+    if (builtin.os.tag == .windows) return error.SkipZigTest; // Persistent metadata memos are disabled.
     var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
     defer arena.deinit();
     const a = arena.allocator();
@@ -588,7 +589,7 @@ fn writeTreeMemo(ctx: *cache.Context, path: []const u8, digest: []const u8, stam
     try out.print(ctx.a, "{s}\n{s}\n{d} {d}\n", .{ tree_memo_version, digest, stamps.len, links.len });
     for (stamps) |s| {
         if (std.mem.indexOfAny(u8, s.path, "\t\n") != null) return;
-        try out.print(ctx.a, "S\t{d}\t{d}\t{d}\t{d}\t{d}\t{d}\t{s}\n", .{ @intFromBool(s.exists), @intFromEnum(s.kind), s.inode, s.size, s.mtime, s.ctime, s.path });
+        try out.print(ctx.a, "S\t{d}\t{d}\t{d}\t{d}\t{d}\t{d}\t{s}\n", .{ @intFromBool(s.exists), @backingInt(s.kind), s.inode, s.size, s.mtime, s.ctime, s.path });
     }
     for (links) |l| {
         if (std.mem.indexOfAny(u8, l.path, "\t\n") != null or std.mem.indexOfAny(u8, l.resolved, "\t\n") != null) return;

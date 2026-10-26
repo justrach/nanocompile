@@ -99,9 +99,15 @@ Detailed measurements, including the comparisons kache wins, are in [measurement
 
 ## Build and use
 
+[Unsigned CLI releases](docs/releases.md) provide optimized **ReleaseSafe** builds
+(recommended for production) and **ReleaseFast** builds for macOS, Linux and
+Windows x86_64. Publication requires native runtime checks for every variant.
+Use `nanocompile --build-info` to check your binary's optimization mode. Next.js
+worktree helpers require Python on macOS/Linux and are included in each archive.
+
 ```sh
 zig version                         # 0.17.0
-zig build -Doptimize=ReleaseFast
+zig build -Doptimize=ReleaseSafe    # recommended production CLI; ReleaseFast also supported
 ./zig-out/bin/nanocompile --help
 ```
 

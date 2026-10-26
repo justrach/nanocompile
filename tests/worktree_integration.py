@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Real Next.js worktrees and compiler seeds through the native CLI.
 
-Run: python3 tests/worktree_integration.py zig-out/bin/nanocompile [--opennext]
+Run: python3 tests/worktree_integration.py zig-out/bin/nanocompile [--opennext] [--turbopack]
 Requires Git, npm, Node >=20.9, and registry access for the initial installs.
+--turbopack uses Next's default engine and opts into native compiler snapshots.
 --opennext also packages with @opennextjs/aws locally; nothing is deployed.
 All repositories, installs, outputs and caches live in an isolated .tmp fixture.
 """
@@ -37,7 +38,19 @@ function files(dir) {
   });
 }
 if (fs.existsSync('.fixture-expect-seed')) {
-  assert(files('.next/cache/webpack').length > 0, 'compiler seed missing before Next');
+  if (fs.existsSync('.fixture-turbopack')) {
+    const engines = fs.readdirSync('.next/cache/turbopack');
+    assert.equal(engines.length, 1, 'expected one exact native engine snapshot');
+    assert.equal(engines[0], fs.readFileSync('.fixture-expect-seed', 'utf8').trim());
+    const engine = path.join('.next/cache/turbopack', engines[0]);
+    const current = fs.readFileSync(path.join(engine, 'CURRENT'));
+    assert(current.length > 0 && current.length <= 64 * 1024, 'invalid CURRENT size');
+    assert.equal(typeof JSON.parse(current).commit_time, 'string');
+    assert(files(engine).some(name => path.basename(name) !== 'CURRENT'),
+           'native Turbopack payload missing before Next');
+  } else {
+    assert(files('.next/cache/webpack').length > 0, 'compiler seed missing before Next');
+  }
   for (const name of ['.next/cache/fetch-cache', '.next/server', '.open-next']) {
     assert(!fs.existsSync(name), 'non-compiler output restored: ' + name);
   }
@@ -56,16 +69,20 @@ for (const dir of ['.next/cache/fetch-cache', '.next/server', '.open-next']) {
 
 
 def page(marker):
-    return 'export default function Page() { return <main>' + marker + '</main>; }\n'
+    return ("import dependency from './dependency';\n"
+            'export default function Page() { return <main>' + marker
+            + '<span>{dependency}</span><span>{process.env.WORKTREE_FIXTURE_VARIANT}</span>'
+            + '</main>; }\n')
 
 
-def fixture(project, opennext):
+def fixture(project, opennext, turbopack=False):
     project.mkdir()
     (project / 'app').mkdir()
     package = {
         'name': 'nanocompile-worktree-fixture', 'version': '1.0.0', 'private': True,
         'scripts': {
-            'build': 'node check-seed.cjs && node record-build.cjs && next build --webpack',
+            'build': 'node check-seed.cjs && node record-build.cjs && next build'
+                     + ('' if turbopack else ' --webpack'),
             'dev': 'next dev --webpack --hostname 127.0.0.1',
             'probe': 'node probe.cjs',
         },
@@ -86,6 +103,9 @@ def fixture(project, opennext):
         'export default function Layout({ children }) {\n'
         '  return <html lang="en"><body>{children}</body></html>;\n}\n')
     (project / 'app/page.js').write_text(page(ORIGINAL))
+    (project / 'app/dependency.js').write_text("export default 'DEPENDENCY_" + ORIGINAL + "';\n")
+    if turbopack:
+        (project / '.fixture-turbopack').write_text('native snapshots enabled\n')
     (project / 'check-seed.cjs').write_text(CHECK_SEED)
     (project / 'record-build.cjs').write_text(RECORD_BUILD)
     (project / 'probe.cjs').write_text(
@@ -154,6 +174,7 @@ def assert_output(project, marker, stale, opennext=False):
     assert output.is_file(), 'Missing prerendered Next page'
     html = output.read_text()
     assert marker in html and stale not in html and DIRTY not in html, html
+    assert 'DEPENDENCY_' + marker in html, 'Imported source dependency is stale'
     if opennext:
         # AWS packages prerendered pages as JSON cache assets, not .html files.
         pages = list((project / '.open-next/cache').rglob('*.cache'))
@@ -164,9 +185,11 @@ def assert_output(project, marker, stale, opennext=False):
     return html
 
 
-def build_pair(binary, cache, first, second, root, env, opennext=False):
+def build_pair(binary, cache, first, second, root, env, opennext=False, turbopack=False):
     """Cold store then restore into a different tree with different source."""
     options = ['--script', 'open-next'] if opennext else []
+    if turbopack:
+        options.append('--turbopack-cache')
     for project in (first, second):
         for directory in ('.next', '.open-next'):
             shutil.rmtree(project / directory, ignore_errors=True)
@@ -176,9 +199,14 @@ def build_pair(binary, cache, first, second, root, env, opennext=False):
     cold = summary(binary, cache, ['build', '--project', first, *options], root, env)
     assert_build(cold, 'miss')
     original = assert_output(first, ORIGINAL, CHANGED, opennext)
+    if turbopack:
+        assert cold.get('turbopack_cache', '').startswith('v'), cold
+        (second / '.fixture-expect-seed').write_text(cold['turbopack_cache'] + '\n')
     warm = summary(binary, cache, ['build', '--project', second, *options], root, env)
     assert_build(warm, 'restored')
     assert cold['key'] == warm['key'], (cold, warm)
+    if turbopack:
+        assert warm.get('turbopack_cache') == cold['turbopack_cache'], (cold, warm)
     assert_output(second, CHANGED, ORIGINAL, opennext)
     assert (first / '.next/server/app/index.html').read_text() == original
     for index, project in enumerate((first, second)):
@@ -188,13 +216,17 @@ def build_pair(binary, cache, first, second, root, env, opennext=False):
     if opennext:
         assert_private(first, second, '.open-next')
     assert not (second / '.fixture-expect-seed').exists(), 'Pre-build seed check did not run'
-    print('PASS: ' + ('OpenNext packaging' if opennext else 'Next webpack')
+    print('PASS: ' + ('OpenNext packaging' if opennext else 'Next Turbopack' if turbopack else 'Next webpack')
           + ' cold store, cross-worktree seed restore, current-source outputs', flush=True)
+    return warm
 
 
-def invalidation(binary, cache, project, root, env):
+def invalidation(binary, cache, project, root, env, turbopack=False):
     # A tiny real npm script exercises key changes without extra Next builds.
-    arguments = ['build', '--project', project, '--script', 'probe', '--', 'forwarded']
+    arguments = ['build', '--project', project, '--script', 'probe']
+    if turbopack:
+        arguments.append('--turbopack-cache')
+    arguments += ['--', 'forwarded']
     baseline = summary(binary, cache, arguments, root, env)
     changed_env = summary(binary, cache, arguments, root,
                           dict(env, WORKTREE_FIXTURE_VARIANT='changed'))
@@ -260,6 +292,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('binary')
     parser.add_argument('--opennext', action='store_true')
+    parser.add_argument('--turbopack', action='store_true')
     args = parser.parse_args()
     binary = str(Path(args.binary).resolve())
     assert Path(binary).is_file(), 'Build the native nanocompile binary first'
@@ -271,11 +304,11 @@ def main():
         root = Path(temp).resolve()
         source, first, second, cache = (root / name for name in ('source', 'first', 'second', 'cache'))
         env = {k: v for k, v in os.environ.items()
-               if not k.startswith(('NANOCOMPILE_', 'NEXT_', 'OPEN_NEXT_', 'R2_'))}
+               if not k.startswith(('NANOCOMPILE_', 'NEXT_', 'OPEN_NEXT_', 'R2_', 'TURBO_ENGINE_'))}
         env.update(NEXT_TELEMETRY_DISABLED='1', NPM_CONFIG_AUDIT='false', NPM_CONFIG_FUND='false',
                    GIT_AUTHOR_NAME='Test', GIT_AUTHOR_EMAIL='test@example.invalid',
                    GIT_COMMITTER_NAME='Test', GIT_COMMITTER_EMAIL='test@example.invalid')
-        fixture(source, args.opennext)
+        fixture(source, args.opennext, args.turbopack)
         run(['git', 'init', '-q', source], root, env)
         run(['git', 'config', 'user.name', 'Test'], source, env)
         run(['git', 'config', 'user.email', 'test@example.invalid'], source, env)
@@ -306,12 +339,29 @@ def main():
         assert_private(first, second, 'node_modules')
         assert any(p.is_file() for p in (cache / 'downloads/npm/_cacache').rglob('*')), 'No npm download cache'
         (second / 'app/page.js').write_text(page(CHANGED))
+        (second / 'app/dependency.js').write_text("export default 'DEPENDENCY_" + CHANGED + "';\n")
+        if args.turbopack:
+            # Ignored fixture control files are deliberately not copied by Git.
+            for project in (first, second):
+                (project / '.fixture-turbopack').write_text('native snapshots enabled\n')
         print('PASS: real Git worktrees, frozen installs, private dependencies and uncopied dirty/env files',
               flush=True)
-        build_pair(binary, cache, first, second, root, env)
+        warm = build_pair(binary, cache, first, second, root, env, turbopack=args.turbopack)
         if args.opennext:
-            build_pair(binary, cache, first, second, root, env, opennext=True)
-        invalidation(binary, cache, second, root, env)
+            build_pair(binary, cache, first, second, root, env, opennext=True,
+                       turbopack=args.turbopack)
+        if args.turbopack:
+            # One extra real build checks an environment value consumed by Next.
+            for directory in ('.next', '.open-next'):
+                shutil.rmtree(second / directory, ignore_errors=True)
+            changed_env = summary(binary, cache,
+                                  ['build', '--project', second, '--turbopack-cache'], root,
+                                  dict(env, WORKTREE_FIXTURE_VARIANT='ENV_CHANGED_91e2'))
+            assert_build(changed_env, 'miss')
+            assert changed_env['key'] != warm['key'], (warm, changed_env)
+            assert 'ENV_CHANGED_91e2' in assert_output(second, CHANGED, ORIGINAL)
+            print('PASS: Turbopack real-page environment invalidation', flush=True)
+        invalidation(binary, cache, second, root, env, turbopack=args.turbopack)
         dev(binary, cache, second, root, env)
         assert (source / 'app/page.js').read_text() == page(DIRTY)
         assert (source / '.env').read_text() == 'FIXTURE_LOCAL_ONLY=not-copied\n'

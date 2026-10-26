@@ -8,22 +8,31 @@ hermetic.
 
 Requires macOS/Linux, Git, Python 3.9+, Node, and an already installed package
 manager. The helpers are installed by `zig build`; keep its `share/nanocompile`
-directory beside `bin` when distributing the install prefix. The Zig executable
-remains the artifact-store backend. Standalone compiler caching does not require
-Python. Set `NANOCOMPILE_PYTHON` to select a
-different Python executable.
+directory beside `bin` when distributing the install prefix. For release
+archives, keep the adjacent `tools` directory, or install all three Python
+helpers under `~/.local/share/nanocompile` alongside an executable installed in
+`~/.local/bin`; see [release installation](releases.md#verify-and-install).
+The Zig executable remains the artifact-store backend. Standalone compiler
+caching does not require Python. Set `NANOCOMPILE_PYTHON` to select a different
+Python executable.
 
 ## Create and prepare
 
 Build nanocompile, then point it at your app:
 
 ```sh
-zig build -Doptimize=ReleaseFast
+zig build -Doptimize=ReleaseSafe
 NANO="$PWD/zig-out/bin/nanocompile"
 
 "$NANO" worktree create ../shop-cart --project /path/to/shop --branch feature/cart
 "$NANO" worktree create ../shop-search --project /path/to/shop --branch feature/search
 ```
+
+ReleaseSafe is the recommended production mode for the nanocompile CLI;
+ReleaseFast is also available. This choice is independent of the app's real
+Next.js/OpenNext production build and does not certify framework production
+readiness, cache correctness, or sandboxing. Check the CLI's mode with
+`"$NANO" --build-info`.
 
 Each command creates a **new branch from HEAD** and runs a frozen dependency
 install. Use `--ref COMMIT_OR_REF` to choose another starting point. Git copies
@@ -62,9 +71,11 @@ graphs and workspace-root installs are not inferred. Use the existing
 "$NANO" worktree build --project ../shop-cart
 "$NANO" worktree build --project ../shop-search
 
-# Scripts receive arguments after --. Next 16's default Turbopack build does not
-# currently produce the compiler-cache directories supported by this helper.
+# Default sharing covers SWC/Webpack; scripts receive arguments after --.
 "$NANO" worktree build --project ../shop-cart -- --webpack
+
+# Explicit opt-in for Next's default Turbopack engine (no --webpack):
+"$NANO" worktree build --project ../shop-search --turbopack-cache
 
 # An existing package.json script can run either OpenNext adapter's build:
 "$NANO" worktree build --project ../shop-cart --script build:worker
@@ -76,7 +87,10 @@ graphs and workspace-root installs are not inferred. Use the existing
 
 For example, `build:worker` can be `opennextjs-cloudflare build` or
 `open-next build`. Configure its underlying Next build to use Webpack if you
-want Webpack seed sharing. The helper runs your package script without a shell
+want Webpack seed sharing, or pass `--turbopack-cache` when the adapter supports
+an underlying Turbopack build. This flag selects snapshot sharing, not the build
+engine: your script still controls which engine Next runs.
+The helper runs your package script without a shell
 wrapper of its own and preserves its exit status. It does not invent an adapter
 configuration, provision cloud resources, or deploy anything automatically.
 Never put deployment in a build script unless you intend to execute deployment
@@ -94,9 +108,14 @@ Dev sessions do not publish compiler seeds.
 
 ## What is reused
 
-Only `.next/cache/swc` and `.next/cache/webpack` are archived, through the
-existing content-verified `nanocompile artifact` API. They are **incremental
-hints** that Next/Webpack must validate against current source, not evidence
+By default, only `.next/cache/swc` and `.next/cache/webpack` are archived,
+through the existing content-verified `nanocompile artifact` API. Explicit
+`worktree build --turbopack-cache` also enables
+`.next/cache/turbopack/EXACTENGINE` snapshots. This opt-in targets Next 16.4.1,
+the pinned integration fixture version. The helper asks the installed Next
+`getTurbopackCacheVersion` API for the exact framework-plus-native-compiler Git
+build identity; it does not guess the directory from the package version or
+copy other engine versions. All of these caches are **incremental hints** that Next/Webpack must validate against current source, not evidence
 that a whole build can be skipped. Source contents are deliberately not part
 of the compatibility key so edited branches can try these hints. Framework
 validation may discard path-sensitive hints after relocation; a seed restore
@@ -115,14 +134,23 @@ remains essential. `next-env.d.ts` is generated source, not a compatibility key.
 The helper never shares `fetch-cache` (which can contain remote data), `.next`
 server/static outputs, `.open-next`, or live dependency directories. It never
 symlinks the mutable `.next` tree between worktrees. A seed is restored only
-when both supported local compiler-cache directories are absent; existing
-local caches are left alone. A successful build publishes fresh hints only if
-its compatibility inputs are unchanged after execution. Failures are never
-published. Corrupt/missing entries or an unavailable artifact backend fall back
+when all selected local compiler-cache directories are absent; existing
+local caches are left alone. A real successful build publishes fresh hints only
+if its compatibility inputs are unchanged after execution. Turbopack snapshots
+must have a bounded JSON `CURRENT` file with a string `commit_time` and are only
+for completed, quiescent builds. Do not use external concurrent writers (including
+Next dev servers) against these caches; the helper cannot lock those processes.
+Failures are never published. Corrupt/missing entries or an unavailable artifact backend fall back
 to the normal build. `NANOCOMPILE_DISABLE=1` runs builds without seed reuse.
 
-Turbopack persistent caches are not currently shared. A successful build that
-produces neither supported compiler directory reports `stored: false`. A custom
+If the installed version API or native identity is unavailable, Turbopack
+snapshot sharing falls back to the normal build and reports
+`summary.turbopack_cache: "unavailable"`. Unsafe/custom engine-version overrides
+(`TURBO_ENGINE_VERSION`, `TURBO_ENGINE_DISABLE_VERSIONING`, or
+`TURBO_ENGINE_IGNORE_DIRTY`) also disable Turbopack snapshots, not normal builds
+or default SWC/Webpack sharing. An available identity is reported as
+`summary.turbopack_cache` and included in the compatibility key. A successful
+build that produces no selected compiler directory reports `stored: false`. A custom
 Next `distDir` needs the matching `worktree build --dist-dir PATH` option; this
 option selects the cache location, not Next's configuration. Destinations must
 remain beneath the app without symlinked ancestors.
@@ -143,7 +171,12 @@ subcommand:
 ```
 
 Downloads live under `downloads/MANAGER`; compiler seeds use the normal CAS,
-GC, and artifact integrity checks. Archives reject links, special files,
+GC, and artifact integrity checks. Keep the cache directory private. Archives
+contain owned regular files, never hardlinked files. Sorted traversal and fixed
+mtime, mode, and owner metadata make archives deterministic, reducing CAS blob
+churn from metadata-only changes. Archives are uncompressed by default: gzip
+adds encoding work, and a smaller archive alone does not establish a speedup.
+Archives reject links, special files,
 traversal, unexpected paths, and oversized expansion. Restoration stages files
 before publishing absent directories. These checks prevent accidental archive
 escape, **not malicious compiler-cache execution**: share only with trusted
@@ -156,14 +189,26 @@ still contacts the configured package registry.
 ## Checks
 
 ```sh
-zig build -Doptimize=ReleaseFast
+zig build -Doptimize=ReleaseSafe
 python3 tests/worktree_setup.py
 python3 tests/nextjs_cache.py
 python3 tests/worktree_cli.py zig-out/bin/nanocompile
+python3 tests/worktree_integration.py zig-out/bin/nanocompile
 python3 tests/worktree_integration.py zig-out/bin/nanocompile --opennext
+python3 tests/worktree_integration.py zig-out/bin/nanocompile --turbopack
+# Combined adapter/engine check when the adapter supports Next Turbopack:
+python3 tests/worktree_integration.py zig-out/bin/nanocompile --opennext --turbopack
 ```
 
 The framework check installs pinned fixture dependencies and executes actual
 Next.js builds and optional OpenNext packaging in isolated temporary Git
-worktrees. It is correctness evidence, not a benchmark or proof of whole-build
-portability.
+worktrees. The default path preserves Webpack coverage; `--turbopack` uses the
+actual default Next 16.4.1 build without `--webpack` and passes the native CLI
+snapshot opt-in on every build. Warm seeds are checked before Next starts,
+including native `CURRENT` and payload files for Turbopack, while generated
+server, fetch-cache, and adapter outputs must be absent. Current page and imported
+dependency edits, environment/configuration key invalidation, an environment
+value consumed by the real Turbopack page, private files, and native CLI dev
+serving are checked. Combined flags run real OpenNext AWS packaging over the
+underlying Turbopack build when supported. These checks are correctness evidence,
+not a benchmark, performance claim, or proof of whole-build portability.

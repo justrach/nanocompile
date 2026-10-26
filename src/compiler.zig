@@ -286,7 +286,7 @@ fn rustPlan(ctx: *cache.Context, argv: []const []const u8) !Plan {
         // the output. A library's are cached as extra outputs. A binary or
         // macro dylib names its objects by absolute path in its debug map, and
         // producers compile in a staging directory, so those stay uncached.
-        if (!eq(split_debug, "unpacked") or producer_dylib or !(executable or eq(ct, "lib") or eq(ct, "rlib"))) return error.SplitDebugSidecars;
+        if (builtin.os.tag == .windows or !eq(split_debug, "unpacked") or producer_dylib or !(executable or eq(ct, "lib") or eq(ct, "rlib"))) return error.SplitDebugSidecars;
         debug_sidecars = try std.fmt.allocPrint(ctx.a, "{s}{s}.", .{ try absolute(ctx, try std.fs.path.join(ctx.a, &.{ dir, crate })), suffix });
     }
     var outputs: std.ArrayList([]const u8) = .empty;
@@ -900,7 +900,7 @@ pub fn execute(ctx: *cache.Context, kind: Kind, argv: []const []const u8) !u8 {
     // named on the command line and the pinned compiler's metadata can be
     // read, the snapshot is replaced by a check of the crate's own native
     // library list at store time: any static entry makes it uncacheable.
-    const native_by_metadata = !plan.bundles_native and plan.native_dirs.len != 0 and ctx.rust_locations != null and
+    const native_by_metadata = builtin.os.tag != .windows and !plan.bundles_native and plan.native_dirs.len != 0 and ctx.rust_locations != null and
         for (plan.outputs) |out| {
             if (std.mem.endsWith(u8, out, ".rmeta")) break true;
         } else false;

@@ -24,6 +24,7 @@ const help =
     \\  nanocompile worktree create|prepare|build|dev  Next.js/OpenNext helpers (POSIX)
     \\  nanocompile artifact put|get|head NAMESPACE KEY [FILE] [METADATA_JSON]
     \\  nanocompile stats | clear | doctor
+    \\  nanocompile --version | --build-info
     \\  nanocompile gc [MAX_BYTES]  remove orphan blobs and evict to a budget
     \\Environment:
     \\  NANOCOMPILE_DIR       cache directory (default: $XDG_CACHE_HOME/nanocompile)
@@ -55,8 +56,10 @@ pub fn main(init: std.process.Init) void {
 }
 
 fn dispatch(ctx: *cache.Context, args: []const [:0]const u8) !u8 {
-    if (try @import("build_script.zig").launch(ctx, args)) |code| return code;
-    if (args.len != 0 and std.mem.eql(u8, std.fs.path.basename(args[0]), "nanocompile-internal-linker")) {
+    if (builtin.os.tag != .windows) {
+        if (try @import("build_script.zig").launch(ctx, args)) |code| return code;
+    }
+    if (builtin.os.tag != .windows and args.len != 0 and std.mem.eql(u8, std.fs.path.basename(args[0]), "nanocompile-internal-linker")) {
         if (!std.fs.path.isAbsolute(args[0])) return error.InvalidLinkObserver;
         const config = try std.fs.path.join(ctx.a, &.{ std.fs.path.dirname(args[0]) orelse return error.InvalidLinkObserver, "observer.json" });
         return @import("link_observer.zig").execute(ctx, config, args[1..]);
@@ -67,6 +70,7 @@ fn dispatch(ctx: *cache.Context, args: []const [:0]const u8) !u8 {
     }
     const command = args[1];
     if (std.mem.eql(u8, command, "internal-producer-dependencies")) {
+        if (builtin.os.tag == .windows) return error.UnsupportedPlatform;
         if (args.len != 5) return error.InvalidProducerCapture;
         const parsed = try std.json.parseFromSlice(@import("link_observer.zig").Config, ctx.a, try ctx.read(args[2]), .{ .allocate = .alloc_always });
         const records = try @import("producer_dependencies.zig").collect(ctx, parsed.value, try ctx.read(args[3]), try std.fmt.parseInt(i96, args[4], 10));
@@ -97,6 +101,7 @@ fn dispatch(ctx: *cache.Context, args: []const [:0]const u8) !u8 {
         return 0;
     }
     if (std.mem.eql(u8, command, "internal-native-identity")) {
+        if (builtin.os.tag == .windows) return error.UnsupportedPlatform;
         if (args.len != 3) return error.InvalidNativeIdentity;
         try ctx.prepare();
         const maintenance = try cache.Lock.acquire(ctx, "maintenance", false);
@@ -107,6 +112,7 @@ fn dispatch(ctx: *cache.Context, args: []const [:0]const u8) !u8 {
         return 0;
     }
     if (std.mem.eql(u8, command, "internal-linker")) {
+        if (builtin.os.tag == .windows) return error.UnsupportedPlatform;
         if (args.len < 4) return error.InvalidLinkObserver;
         return @import("link_observer.zig").execute(ctx, args[2], args[3..]);
     }
@@ -146,6 +152,21 @@ fn dispatch(ctx: *cache.Context, args: []const [:0]const u8) !u8 {
         try ctx.out("nanocompile 0.1.0 (Zig 0.17.0)\n");
         return 0;
     }
+    if (std.mem.eql(u8, command, "--build-info")) {
+        try ctx.out(try std.json.Stringify.valueAlloc(ctx.a, .{
+            .optimize = switch (builtin.mode) {
+                .safe => "ReleaseSafe",
+                .fast => "ReleaseFast",
+                .small => "ReleaseSmall",
+                .debug => "Debug",
+            },
+            .zig = builtin.zig_version_string,
+            .os = @tagName(builtin.os.tag),
+            .arch = @tagName(builtin.cpu.arch),
+        }, .{}));
+        try ctx.out("\n");
+        return 0;
+    }
     if (std.mem.eql(u8, command, "stats")) {
         try cache.stats(ctx);
         return 0;
@@ -173,7 +194,7 @@ fn dispatch(ctx: *cache.Context, args: []const [:0]const u8) !u8 {
         try argv.append(ctx.a, command);
     }
     for (args[2..]) |arg| try argv.append(ctx.a, arg);
-    if (kind == .rust and @import("build_script.zig").wantsInstall(ctx, argv.items)) {
+    if (builtin.os.tag != .windows and kind == .rust and @import("build_script.zig").wantsInstall(ctx, argv.items)) {
         try ctx.prepare();
         const maintenance = try cache.Lock.acquire(ctx, "maintenance", false);
         defer maintenance.release();

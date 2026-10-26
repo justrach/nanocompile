@@ -63,6 +63,8 @@ def parser():
     build.add_argument('--project', type=Path, default=Path('.'))
     build.add_argument('--script', default='build', help='package script, e.g. build:worker for OpenNext')
     build.add_argument('--dist-dir', default='.next', help='must match your Next.js distDir configuration')
+    build.add_argument('--turbopack-cache', action='store_true',
+                       help='opt into completed, engine-version-matched Turbopack compiler snapshots')
     build.add_argument('arguments', nargs=argparse.REMAINDER)
     dev = commands.add_parser('dev', help='run an isolated foreground dev server on an explicit port')
     dev.add_argument('--project', type=Path, default=Path('.'))
@@ -110,7 +112,8 @@ def main(argv=None):
         if not args.nanocompile:
             raise ValueError('--nanocompile is required when running the Python helper directly')
         command = script(project, package, args.script, arguments)
-        summary = nextjs_cache.run_build(project, command, args.nanocompile, cache, args.dist_dir)
+        summary = nextjs_cache.run_build(project, command, args.nanocompile, cache, args.dist_dir,
+                                        turbopack_cache=args.turbopack_cache)
     print(json.dumps(summary, sort_keys=True), flush=True)
     code = summary.get('returncode', 0)
     return code if code >= 0 else 128 - code
