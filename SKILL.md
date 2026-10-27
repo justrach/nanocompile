@@ -17,6 +17,8 @@ disable-model-invocation: true
    allocated blocks separately; filesystem clones can share physical storage.
 4. Check the selected native CLI's `--help` for `NANOCOMPILE_MAX_SIZE` support.
    Do not assume an older published binary implements local source features.
+   File-granular artifacts additionally require `put-files` plus matching helpers;
+   see [the staging and inventory contract](docs/artifact-files.md).
 
 ## Use a bounded cache without weakening correctness
 
@@ -59,6 +61,10 @@ disable-model-invocation: true
    application bundles. Report dependency/download/output growth separately.
 6. If timing, alternate baseline/candidate order and confirm on a fresh fixture;
    record command wall time, setup and verification boundaries explicitly.
+7. Measure file-content churn before choosing archive versus file-granular seeds.
+   A verified exact-key seed can be retained without rewriting it, but the real
+   framework build and complete post-build key/blob validation must still run.
+   Separate this reuse-policy gain from storage-format gains and cold-put cost.
 
 ## Report and document
 
@@ -69,4 +75,5 @@ and whether the change is local or released. Do not push or publish implicitly.
 
 References: [cache policy](docs/cache-limits.md),
 [Next.js/OpenNext helpers](docs/worktrees.md),
-[Meld2 case study](docs/meld2-cache.md).
+[Meld2 case study](docs/meld2-cache.md),
+[file-granular snapshots and pipeline profile](docs/meld2-file-snapshots.md).

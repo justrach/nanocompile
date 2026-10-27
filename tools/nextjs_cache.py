@@ -211,20 +211,24 @@ def _restore(archive, project, dist_dir, cache_dirs=CACHE_DIRS):
         for name in cache_dirs:
             if name.startswith('turbopack/') and (stage / name).exists():
                 _validate_turbopack_snapshot(stage / name)
-        targets = _targets(project, dist_dir, cache_dirs)
-        if any(target.exists() for target in targets):
-            return False
-        restored = False
-        for name, target in zip(cache_dirs, targets):
-            if (stage / name).is_dir():
-                target.parent.mkdir(parents=True, exist_ok=True)
-                # Stage resides on the project filesystem. Only absent targets
-                # are published; no live cache directory is removed or merged.
-                if target.exists():
-                    raise ValueError('compiler cache appeared during restore')
-                os.rename(stage / name, target)
-                restored = True
-        return restored
+        return _publish_seed(stage, project, dist_dir, cache_dirs)
+
+
+def _publish_seed(stage, project, dist_dir, cache_dirs):
+    targets = _targets(project, dist_dir, cache_dirs)
+    if any(target.exists() for target in targets):
+        return False
+    restored = False
+    for name, target in zip(cache_dirs, targets):
+        if (stage / name).is_dir():
+            target.parent.mkdir(parents=True, exist_ok=True)
+            # Stage resides on the project filesystem. Only absent targets
+            # are published; no live cache directory is removed or merged.
+            if target.exists():
+                raise ValueError('compiler cache appeared during restore')
+            os.rename(stage / name, target)
+            restored = True
+    return restored
 
 
 def _store_archive(archive, targets, cache_dirs=CACHE_DIRS):
@@ -262,6 +266,73 @@ def _store_archive(archive, targets, cache_dirs=CACHE_DIRS):
                     else:
                         tar.addfile(info)
     return count > 0 and archive.stat().st_size <= MAX_BYTES
+
+
+def _file_inventory(targets, cache_dirs=CACHE_DIRS):
+    """Bounded owned-file inventory; native sealed entries own the blob refs."""
+    directories, files, seen, total = set(), [], set(), 0
+    for name, target in zip(cache_dirs, targets):
+        if not target.exists():
+            continue
+        if name.startswith('turbopack/'):
+            _validate_turbopack_snapshot(target)
+        for root, dirs, names in os.walk(target, followlinks=False):
+            dirs.sort()
+            names.sort()
+            for path in [Path(root)] + [Path(root) / p for p in dirs + names]:
+                info = path.lstat()
+                if (not (stat.S_ISDIR(info.st_mode) or stat.S_ISREG(info.st_mode))
+                        or (stat.S_ISREG(info.st_mode) and info.st_nlink != 1)):
+                    raise ValueError('unsafe compiler cache node')
+            directory = PurePosixPath(name) / Path(root).relative_to(target).as_posix()
+            directories.add(directory.as_posix())
+            directories.update(p.as_posix() for p in directory.parents if p != PurePosixPath('.'))
+            for filename in names:
+                path = Path(root) / filename
+                logical = (directory / filename).as_posix()
+                if logical in seen:
+                    raise ValueError('duplicate compiler cache file')
+                seen.add(logical)
+                total += path.lstat().st_size
+                files.append({'path': logical, 'source': str(path)})
+            if total > MAX_BYTES or len(files) + len(directories) > MAX_MEMBERS:
+                raise ValueError('compiler cache size limit')
+    if not directories:
+        return None
+    return {'schema': 1, 'directories': sorted(directories),
+            'files': sorted(files, key=lambda item: item['path'])}
+
+
+def _restore_files(stage, project, dist_dir, cache_dirs=CACHE_DIRS):
+    """Validate a native get-files staging tree before publishing compiler hints."""
+    targets = _targets(project, dist_dir, cache_dirs)
+    if any(target.exists() for target in targets):
+        return False
+    stage = Path(stage)
+    if stage.is_symlink() or not stage.is_dir():
+        raise ValueError('invalid compiler seed staging directory')
+    roots = tuple(PurePosixPath(name) for name in cache_dirs)
+    count, total = 0, 0
+    for root, dirs, files in os.walk(stage, followlinks=False):
+        for path in [Path(root) / name for name in dirs + files]:
+            info = path.lstat()
+            directory = stat.S_ISDIR(info.st_mode)
+            if (not (directory or stat.S_ISREG(info.st_mode))
+                    or (not directory and info.st_nlink != 1)):
+                raise ValueError('unsafe compiler seed node')
+            name = PurePosixPath(path.relative_to(stage).as_posix())
+            if not any((name == allowed and directory) or allowed in name.parents
+                       or (directory and name in allowed.parents) for allowed in roots):
+                raise ValueError('unexpected compiler seed path')
+            count += 1
+            if not directory:
+                total += info.st_size
+            if count > MAX_MEMBERS or total > MAX_BYTES:
+                raise ValueError('compiler seed size limit')
+    for name in cache_dirs:
+        if name.startswith('turbopack/') and (stage / name).exists():
+            _validate_turbopack_snapshot(stage / name)
+    return _publish_seed(stage, project, dist_dir, cache_dirs)
 
 
 def run_build(project, command, binary, cache_root, dist_dir='.next', env=None,

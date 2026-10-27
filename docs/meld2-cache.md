@@ -179,3 +179,12 @@ The held study-generated compiler directories were removed after success.
 is separate from the historical three-snapshot retention study. This verifies
 useful bounded caching on the updated application, not a new 66.4% savings claim.
 No browser/live-service acceptance, deployment or migration was performed.
+
+A subsequent [wrapper-overhead experiment](meld2-performance.md) overlaps private
+archive creation with unchanged post-build validation. It reports phase-level
+and real wrapper overhead separately from application compilation time.
+
+The next [file-granular snapshot experiment](meld2-file-snapshots.md) measures
+full pipeline stages and content churn, then retains compatible seeds without
+rewriting them. It also compares native per-file CAS references against complete
+archives under the same budget. These newer local changes are not yet released.

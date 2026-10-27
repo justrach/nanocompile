@@ -553,7 +553,7 @@ fn missingValid(ctx: *Context, dep: Dependency) !bool {
     return absent(ctx, dep.path);
 }
 pub const Output = struct { path: []const u8, hash: []const u8, mode: u32 };
-const entry_schema = 5;
+pub const entry_schema = 5;
 pub const ArtifactInfo = struct { namespace: []const u8, key: []const u8, metadata: []const u8 };
 pub const Entry = struct {
     artifact: ?ArtifactInfo = null,
@@ -675,7 +675,7 @@ pub fn putFile(ctx: *Context, source: []const u8) ![]const u8 {
     return hash;
 }
 
-fn putBytes(ctx: *Context, bytes: []const u8) ![]const u8 {
+pub fn putBytes(ctx: *Context, bytes: []const u8) ![]const u8 {
     try ctx.noteStore();
     var h = Hash.init(.{});
     h.update(bytes);
@@ -1112,7 +1112,7 @@ pub fn stats(ctx: *Context) !void {
     try ctx.out(try std.fmt.allocPrint(ctx.a, "build-script hits: {d}\nbuild-script misses: {d}\nbuild-script bypasses: {d}\nbuild-script failures: {d}\n", .{ script_hit, script_miss, script_bypass, script_failed }));
 }
 
-fn touchEntry(ctx: *Context, key: []const u8) void {
+pub fn touchEntry(ctx: *Context, key: []const u8) void {
     const path_ = ctx.path(&.{ "entries", key }) catch return;
     if (builtin.os.tag != .windows) {
         // A null timeval pair asks the kernel for its current time in one

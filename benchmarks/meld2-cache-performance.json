@@ -1,0 +1,445 @@
+{
+  "schema": 1,
+  "scope": "Meld2 workspace adapter post-build archive/revalidation overlap; not a native compiler speedup or whole-build result cache",
+  "profile": {
+    "schema": 1,
+    "purpose": "diagnostic phase profile, not a speed comparison",
+    "wall_ns": 13553011125,
+    "summary": {
+      "returncode": 0,
+      "cache": "preserved-local",
+      "stored": true,
+      "engine": "v16.3.5-ca2c75eb",
+      "build_seconds": 12.703647457999999,
+      "snapshot_bytes": 288276480
+    }
+  },
+  "profile_phases": {
+    "helper_load": {
+      "calls": 1,
+      "total_ns": 14409709
+    },
+    "_turbopack_version": {
+      "calls": 2,
+      "total_ns": 89014874
+    },
+    "digest.workspace": {
+      "calls": 3496,
+      "total_ns": 126663778
+    },
+    "digest.tool": {
+      "calls": 4,
+      "total_ns": 143208416
+    },
+    "identity.node": {
+      "calls": 2,
+      "total_ns": 125343250
+    },
+    "identity.bun": {
+      "calls": 2,
+      "total_ns": 63161291
+    },
+    "compatibility_key": {
+      "calls": 2,
+      "total_ns": 484338375
+    },
+    "_store_archive": {
+      "calls": 1,
+      "total_ns": 214702750
+    },
+    "artifact.put": {
+      "calls": 1,
+      "total_ns": 29108709
+    },
+    "artifact.head": {
+      "calls": 1,
+      "total_ns": 4154041
+    }
+  },
+  "phase_comparison": {
+    "schema": 1,
+    "scope": "same private quiescent compiler snapshot; only post-build revalidation plus archive creation timed; alternating order; confirmation uses fresh output directories, not cold source caches",
+    "phases": {
+      "initial": {
+        "pairs": [
+          {
+            "order": [
+              "baseline",
+              "candidate"
+            ],
+            "baseline": {
+              "wall_ns": 414174542
+            },
+            "candidate": {
+              "wall_ns": 260002917
+            },
+            "archives_identical": true,
+            "all_file_restores_equal": true
+          },
+          {
+            "order": [
+              "candidate",
+              "baseline"
+            ],
+            "candidate": {
+              "wall_ns": 271905375
+            },
+            "baseline": {
+              "wall_ns": 414696958
+            },
+            "archives_identical": true,
+            "all_file_restores_equal": true
+          },
+          {
+            "order": [
+              "baseline",
+              "candidate"
+            ],
+            "baseline": {
+              "wall_ns": 318225709
+            },
+            "candidate": {
+              "wall_ns": 258274042
+            },
+            "archives_identical": true,
+            "all_file_restores_equal": true
+          },
+          {
+            "order": [
+              "candidate",
+              "baseline"
+            ],
+            "candidate": {
+              "wall_ns": 264215875
+            },
+            "baseline": {
+              "wall_ns": 326851750
+            },
+            "archives_identical": true,
+            "all_file_restores_equal": true
+          },
+          {
+            "order": [
+              "baseline",
+              "candidate"
+            ],
+            "baseline": {
+              "wall_ns": 312608875
+            },
+            "candidate": {
+              "wall_ns": 260340209
+            },
+            "archives_identical": true,
+            "all_file_restores_equal": true
+          },
+          {
+            "order": [
+              "candidate",
+              "baseline"
+            ],
+            "candidate": {
+              "wall_ns": 272832958
+            },
+            "baseline": {
+              "wall_ns": 308585583
+            },
+            "archives_identical": true,
+            "all_file_restores_equal": true
+          },
+          {
+            "order": [
+              "baseline",
+              "candidate"
+            ],
+            "baseline": {
+              "wall_ns": 312305584
+            },
+            "candidate": {
+              "wall_ns": 264239792
+            },
+            "archives_identical": true,
+            "all_file_restores_equal": true
+          },
+          {
+            "order": [
+              "candidate",
+              "baseline"
+            ],
+            "candidate": {
+              "wall_ns": 268928250
+            },
+            "baseline": {
+              "wall_ns": 307473958
+            },
+            "archives_identical": true,
+            "all_file_restores_equal": true
+          },
+          {
+            "order": [
+              "baseline",
+              "candidate"
+            ],
+            "baseline": {
+              "wall_ns": 304132625
+            },
+            "candidate": {
+              "wall_ns": 272275500
+            },
+            "archives_identical": true,
+            "all_file_restores_equal": true
+          }
+        ],
+        "median_ns": {
+          "baseline": 312608875,
+          "candidate": 264239792
+        },
+        "snapshot_bytes": 288218555,
+        "file_count": 60,
+        "median_reduction_percent": 15.472715865792352
+      },
+      "fresh_output_confirmation": {
+        "pairs": [
+          {
+            "order": [
+              "candidate",
+              "baseline"
+            ],
+            "candidate": {
+              "wall_ns": 281727042
+            },
+            "baseline": {
+              "wall_ns": 298900083
+            },
+            "archives_identical": true,
+            "all_file_restores_equal": true
+          },
+          {
+            "order": [
+              "baseline",
+              "candidate"
+            ],
+            "baseline": {
+              "wall_ns": 301510958
+            },
+            "candidate": {
+              "wall_ns": 268339916
+            },
+            "archives_identical": true,
+            "all_file_restores_equal": true
+          },
+          {
+            "order": [
+              "candidate",
+              "baseline"
+            ],
+            "candidate": {
+              "wall_ns": 272863083
+            },
+            "baseline": {
+              "wall_ns": 290648042
+            },
+            "archives_identical": true,
+            "all_file_restores_equal": true
+          },
+          {
+            "order": [
+              "baseline",
+              "candidate"
+            ],
+            "baseline": {
+              "wall_ns": 317007667
+            },
+            "candidate": {
+              "wall_ns": 269565125
+            },
+            "archives_identical": true,
+            "all_file_restores_equal": true
+          },
+          {
+            "order": [
+              "candidate",
+              "baseline"
+            ],
+            "candidate": {
+              "wall_ns": 283860792
+            },
+            "baseline": {
+              "wall_ns": 295735125
+            },
+            "archives_identical": true,
+            "all_file_restores_equal": true
+          },
+          {
+            "order": [
+              "baseline",
+              "candidate"
+            ],
+            "baseline": {
+              "wall_ns": 304319542
+            },
+            "candidate": {
+              "wall_ns": 263939292
+            },
+            "archives_identical": true,
+            "all_file_restores_equal": true
+          },
+          {
+            "order": [
+              "candidate",
+              "baseline"
+            ],
+            "candidate": {
+              "wall_ns": 276565958
+            },
+            "baseline": {
+              "wall_ns": 293688541
+            },
+            "archives_identical": true,
+            "all_file_restores_equal": true
+          },
+          {
+            "order": [
+              "baseline",
+              "candidate"
+            ],
+            "baseline": {
+              "wall_ns": 305529750
+            },
+            "candidate": {
+              "wall_ns": 264302500
+            },
+            "archives_identical": true,
+            "all_file_restores_equal": true
+          },
+          {
+            "order": [
+              "candidate",
+              "baseline"
+            ],
+            "candidate": {
+              "wall_ns": 279548292
+            },
+            "baseline": {
+              "wall_ns": 289886667
+            },
+            "archives_identical": true,
+            "all_file_restores_equal": true
+          }
+        ],
+        "median_ns": {
+          "baseline": 298900083,
+          "candidate": 272863083
+        },
+        "snapshot_bytes": 288218555,
+        "file_count": 60,
+        "median_reduction_percent": 8.710937694855037
+      }
+    }
+  },
+  "real_build_comparison": {
+    "schema": 1,
+    "scope": "four real packaging builds, AB then BA order, mutable local compiler cache preserved; build time excluded from wrapper overhead; only frontend artifacts expected byte-identical",
+    "runs": [
+      {
+        "pair": 0,
+        "variant": "baseline",
+        "wall_ns": 11716918250,
+        "build_ns": 11090884417,
+        "wrapper_overhead_ns": 626033833,
+        "summary": {
+          "returncode": 0,
+          "cache": "preserved-local",
+          "stored": true,
+          "engine": "v16.3.5-ca2c75eb",
+          "build_seconds": 11.090884417000002,
+          "snapshot_bytes": 289730560
+        },
+        "frontend_bytes_equal": true,
+        "worker_packaged": true
+      },
+      {
+        "pair": 0,
+        "variant": "candidate",
+        "wall_ns": 11482380042,
+        "build_ns": 10902732541,
+        "wrapper_overhead_ns": 579647501,
+        "summary": {
+          "returncode": 0,
+          "cache": "preserved-local",
+          "stored": true,
+          "engine": "v16.3.5-ca2c75eb",
+          "build_seconds": 10.902732541,
+          "snapshot_bytes": 291184640
+        },
+        "frontend_bytes_equal": true,
+        "worker_packaged": true
+      },
+      {
+        "pair": 1,
+        "variant": "candidate",
+        "wall_ns": 11589346875,
+        "build_ns": 11015322166,
+        "wrapper_overhead_ns": 574024709,
+        "summary": {
+          "returncode": 0,
+          "cache": "preserved-local",
+          "stored": true,
+          "engine": "v16.3.5-ca2c75eb",
+          "build_seconds": 11.015322166999997,
+          "snapshot_bytes": 292638720
+        },
+        "frontend_bytes_equal": true,
+        "worker_packaged": true
+      },
+      {
+        "pair": 1,
+        "variant": "baseline",
+        "wall_ns": 11676632209,
+        "build_ns": 11050144167,
+        "wrapper_overhead_ns": 626488042,
+        "summary": {
+          "returncode": 0,
+          "cache": "preserved-local",
+          "stored": true,
+          "engine": "v16.3.5-ca2c75eb",
+          "build_seconds": 11.050144167,
+          "snapshot_bytes": 294092800
+        },
+        "frontend_bytes_equal": true,
+        "worker_packaged": true
+      }
+    ]
+  },
+  "real_wrapper_overhead_median_ns": {
+    "baseline": 626260937.5,
+    "candidate": 576836105.0
+  },
+  "real_wrapper_overhead_reduction_percent": 7.892050987133459,
+  "control_flow_checks": {
+    "checks": [
+      "success",
+      "input_changed",
+      "engine_changed",
+      "archive_error",
+      "archive_empty",
+      "thread_unavailable",
+      "child_failed",
+      "disabled"
+    ],
+    "passed": true,
+    "scope": "bounded control-flow checks; real archive equality/restoration checked separately"
+  },
+  "final_retention": {
+    "budget_bytes": 402653184,
+    "managed_logical_bytes": 294093296
+  },
+  "limits": [
+    "Nested diagnostic phase times are not additive.",
+    "Phase confirmation used fresh output directories, not cold source caches.",
+    "Four real builds are functional confirmation, not a statistically established whole-build speedup.",
+    "All build outputs used local-only fixture configuration; no deployment or live-service acceptance.",
+    "One worker adds transient concurrency; slow/busy storage and constrained hosts may differ.",
+    "App-derived archives, source filenames, environment values, compatibility keys, artifact fingerprints and raw logs stay private.",
+    "Source implementation; no new downloadable release."
+  ]
+}

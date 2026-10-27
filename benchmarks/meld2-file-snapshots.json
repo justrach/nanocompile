@@ -1,0 +1,391 @@
+{
+  "schema": 1,
+  "scope": "local macOS/aarch64 ReleaseSafe source feature; no push, release, deployment, live-service acceptance or remote-transfer measurement",
+  "budget_bytes": 402653184,
+  "pipeline": {
+    "method": "diagnostic pipeline capture and full-content compiler file churn; first build instrumented, next two uninstrumented; no throughput comparison",
+    "child_build_ns": [
+      11265910167,
+      11099776792,
+      11090773750
+    ],
+    "next_child_envelope_ns": 5417000000,
+    "next_typescript_trace_ns": 1816000000,
+    "post_next_packaging_approx_ns": 3700000000,
+    "note": "diagnostic envelopes overlap; not additive CPU attribution or speed comparisons; no application checks/configuration skipped"
+  },
+  "content_churn": [
+    {
+      "build": 0,
+      "files": 90,
+      "bytes": 295470842,
+      "unchanged_files": 82,
+      "reusable_bytes": 294005367,
+      "new_files": 6,
+      "changed_files": 2,
+      "changed_or_new_bytes": 1465475,
+      "removed_files": 0,
+      "removed_bytes": 0,
+      "reusable_fraction": 0.9950402043393507
+    },
+    {
+      "build": 1,
+      "files": 96,
+      "bytes": 296921322,
+      "unchanged_files": 88,
+      "reusable_bytes": 295455293,
+      "new_files": 6,
+      "changed_files": 2,
+      "changed_or_new_bytes": 1466029,
+      "removed_files": 0,
+      "removed_bytes": 0,
+      "reusable_fraction": 0.9950625674501072
+    },
+    {
+      "build": 2,
+      "files": 102,
+      "bytes": 298371760,
+      "unchanged_files": 94,
+      "reusable_bytes": 296905097,
+      "new_files": 6,
+      "changed_files": 2,
+      "changed_or_new_bytes": 1466663,
+      "removed_files": 0,
+      "removed_bytes": 0,
+      "reusable_fraction": 0.9950844443187251
+    }
+  ],
+  "retention": {
+    "method": "three actual completed builds; the same compiler files stored as archives or one sealed multi-file entry; private independent stores; 384 MiB bounded and 1 TiB large baseline; all restores checked; no deployment",
+    "snapshots": [
+      {
+        "actual_build": 0,
+        "files": 108,
+        "archive_bytes": 299919360,
+        "file_payload_bytes": 299822184,
+        "managed_bytes": {
+          "archive_large": 299919799,
+          "archive_bounded": 299919799,
+          "files_bounded": 299836608
+        },
+        "archive_roundtrip_equal": true,
+        "all_file_restores_equal": true
+      },
+      {
+        "actual_build": 1,
+        "files": 114,
+        "archive_bytes": 301373440,
+        "file_payload_bytes": 301272580,
+        "managed_bytes": {
+          "archive_large": 601293678,
+          "archive_bounded": 301373879,
+          "files_bounded": 301320500
+        },
+        "archive_roundtrip_equal": true,
+        "all_file_restores_equal": true
+      },
+      {
+        "actual_build": 2,
+        "files": 120,
+        "archive_bytes": 302827520,
+        "file_payload_bytes": 302723010,
+        "managed_bytes": {
+          "archive_large": 904121637,
+          "archive_bounded": 302827959,
+          "files_bounded": 302805921
+        },
+        "archive_roundtrip_equal": true,
+        "all_file_restores_equal": true
+      }
+    ],
+    "retained_snapshots": {
+      "archive_large": 3,
+      "archive_bounded": 1,
+      "files_bounded": 3
+    },
+    "full_retention_logical_bytes_saved": 601315716,
+    "full_retention_logical_reduction_fraction": 0.665082762530989,
+    "restored_real_build": {
+      "returncode": 0,
+      "cache": "restored",
+      "stored": true,
+      "storage": "files",
+      "engine": "v16.3.5-ca2c75eb",
+      "build_seconds": 11.702824625000005,
+      "snapshot": "retained"
+    },
+    "retained_seed_rebuild_passed": true
+  },
+  "real_build_comparison": {
+    "schema": 1,
+    "method": "four actual OpenNext packaging builds in AB then BA order; saved task-start archive-overlap adapter versus file snapshots plus verified retained-seed reuse; identical CLI and private fixture environment; warm local compiler state; child interval excluded from wrapper overhead; not a file-CAS-only or whole-build speed claim",
+    "runs": [
+      {
+        "pair": 0,
+        "variant": "baseline",
+        "wall_ns": 11675302208,
+        "build_ns": 11076183417,
+        "wrapper_overhead_ns": 599118791,
+        "summary": {
+          "returncode": 0,
+          "cache": "preserved-local",
+          "stored": true,
+          "engine": "v16.3.5-ca2c75eb",
+          "build_seconds": 11.076183417,
+          "snapshot_bytes": 310097920
+        },
+        "frontend_bytes_equal": true,
+        "worker_packaged": true
+      },
+      {
+        "pair": 0,
+        "variant": "candidate",
+        "wall_ns": 11458786083,
+        "build_ns": 10908602042,
+        "wrapper_overhead_ns": 550184041,
+        "summary": {
+          "returncode": 0,
+          "cache": "preserved-local",
+          "stored": true,
+          "storage": "files",
+          "engine": "v16.3.5-ca2c75eb",
+          "build_seconds": 10.908602041999998,
+          "snapshot": "retained"
+        },
+        "frontend_bytes_equal": true,
+        "worker_packaged": true
+      },
+      {
+        "pair": 1,
+        "variant": "candidate",
+        "wall_ns": 11595332459,
+        "build_ns": 11032924667,
+        "wrapper_overhead_ns": 562407792,
+        "summary": {
+          "returncode": 0,
+          "cache": "preserved-local",
+          "stored": true,
+          "storage": "files",
+          "engine": "v16.3.5-ca2c75eb",
+          "build_seconds": 11.032924666999996,
+          "snapshot": "retained"
+        },
+        "frontend_bytes_equal": true,
+        "worker_packaged": true
+      },
+      {
+        "pair": 1,
+        "variant": "baseline",
+        "wall_ns": 11520229583,
+        "build_ns": 10928545125,
+        "wrapper_overhead_ns": 591684458,
+        "summary": {
+          "returncode": 0,
+          "cache": "preserved-local",
+          "stored": true,
+          "engine": "v16.3.5-ca2c75eb",
+          "build_seconds": 10.928545124999992,
+          "snapshot_bytes": 314470400
+        },
+        "frontend_bytes_equal": true,
+        "worker_packaged": true
+      }
+    ],
+    "median_wrapper_ns": {
+      "baseline": 595401624.5,
+      "candidate": 556295916.5
+    }
+  },
+  "phase_comparison": {
+    "schema": 1,
+    "method": "same quiescent real compiler files, one cold publication per backend then six warm paired refresh/restores in alternating order; fresh output directories in each run; archive creation or file inventory included in publication, native full validation plus helper validation/publication included in restore; equality hashes outside timing; no app builds inside phase timing",
+    "runs": [
+      {
+        "phase": "cold",
+        "pair": 0,
+        "backend": "archive",
+        "publish_ns": 88353667,
+        "restore_ns": 230513208,
+        "all_files_equal": true
+      },
+      {
+        "phase": "cold",
+        "pair": 0,
+        "backend": "files",
+        "publish_ns": 385569083,
+        "restore_ns": 160210792,
+        "all_files_equal": true
+      },
+      {
+        "phase": "warm",
+        "pair": 0,
+        "backend": "archive",
+        "publish_ns": 201713208,
+        "restore_ns": 276094959,
+        "all_files_equal": true
+      },
+      {
+        "phase": "warm",
+        "pair": 0,
+        "backend": "files",
+        "publish_ns": 374765041,
+        "restore_ns": 159407542,
+        "all_files_equal": true
+      },
+      {
+        "phase": "warm",
+        "pair": 1,
+        "backend": "files",
+        "publish_ns": 367220458,
+        "restore_ns": 158837750,
+        "all_files_equal": true
+      },
+      {
+        "phase": "warm",
+        "pair": 1,
+        "backend": "archive",
+        "publish_ns": 95181125,
+        "restore_ns": 175096541,
+        "all_files_equal": true
+      },
+      {
+        "phase": "warm",
+        "pair": 2,
+        "backend": "archive",
+        "publish_ns": 91186083,
+        "restore_ns": 188105542,
+        "all_files_equal": true
+      },
+      {
+        "phase": "warm",
+        "pair": 2,
+        "backend": "files",
+        "publish_ns": 381184375,
+        "restore_ns": 157955417,
+        "all_files_equal": true
+      },
+      {
+        "phase": "warm",
+        "pair": 3,
+        "backend": "files",
+        "publish_ns": 375298833,
+        "restore_ns": 164619125,
+        "all_files_equal": true
+      },
+      {
+        "phase": "warm",
+        "pair": 3,
+        "backend": "archive",
+        "publish_ns": 89429500,
+        "restore_ns": 174940708,
+        "all_files_equal": true
+      },
+      {
+        "phase": "warm",
+        "pair": 4,
+        "backend": "archive",
+        "publish_ns": 129815792,
+        "restore_ns": 197504709,
+        "all_files_equal": true
+      },
+      {
+        "phase": "warm",
+        "pair": 4,
+        "backend": "files",
+        "publish_ns": 386529750,
+        "restore_ns": 157470708,
+        "all_files_equal": true
+      },
+      {
+        "phase": "warm",
+        "pair": 5,
+        "backend": "files",
+        "publish_ns": 376919875,
+        "restore_ns": 153890958,
+        "all_files_equal": true
+      },
+      {
+        "phase": "warm",
+        "pair": 5,
+        "backend": "archive",
+        "publish_ns": 86599750,
+        "restore_ns": 170454542,
+        "all_files_equal": true
+      }
+    ],
+    "warm_median_ns": {
+      "archive": {
+        "publish_ns": 93183604.0,
+        "restore_ns": 181601041.5
+      },
+      "files": {
+        "publish_ns": 376109354.0,
+        "restore_ns": 158396583.5
+      }
+    }
+  },
+  "default_cli_build": {
+    "method": "actual package-script invocation with the default newly installed ReleaseSafe CLI and auto backend selection",
+    "wall_ns": 12179777750,
+    "summary": {
+      "build_seconds": 11.060141000000002,
+      "cache": "preserved-local",
+      "engine": "v16.3.5-ca2c75eb",
+      "files": 174,
+      "payload_bytes": 315777146,
+      "returncode": 0,
+      "snapshot": "refreshed",
+      "storage": "files",
+      "stored": true
+    },
+    "frontend_bytes_equal": true,
+    "worker_packaged": true
+  },
+  "wrapper_reduction_fraction": 0.06567954535367582,
+  "warm_restore_reduction_fraction": 0.12777711960423976,
+  "warm_publication_ratio_files_over_archive": 4.036218152712788,
+  "controls": {
+    "checks": [
+      "archive/fresh",
+      "archive/retained",
+      "archive/input_changed",
+      "archive/engine_changed",
+      "archive/snapshot_error",
+      "archive/store_failed",
+      "archive/evicted",
+      "archive/thread_unavailable",
+      "archive/child_failed",
+      "archive/disabled",
+      "archive/forced_refresh",
+      "files/fresh",
+      "files/retained",
+      "files/input_changed",
+      "files/engine_changed",
+      "files/snapshot_error",
+      "files/store_failed",
+      "files/evicted",
+      "files/thread_unavailable",
+      "files/child_failed",
+      "files/disabled",
+      "files/forced_refresh"
+    ],
+    "passed": true,
+    "scope": "controlled wrapper publication and retained-seed branches; native corruption and real compiler builds checked separately"
+  },
+  "verification": {
+    "zig_release_safe_build_and_unit_tests": true,
+    "native_artifact_files_tests": 6,
+    "existing_budget_tests": 14,
+    "next_helper_tests": 28,
+    "existing_real_rust_zig_integration": true,
+    "all_real_builds_package_worker_and_equal_frontend": true
+  },
+  "limitations": [
+    "two actual timed builds per variant; not statistically established whole-build throughput",
+    "file publication is slower; retention policy and storage format are separate effects",
+    "logical managed entries/blobs only, not unique physical allocation or app bundle size",
+    "private non-production fixtures; never deploy their outputs",
+    "first timing attempt required warming the candidate in the exact invocation environment and was excluded",
+    "source implementation; no new public downloadable release"
+  ]
+}

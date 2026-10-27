@@ -591,5 +591,64 @@ with Path('.git/nanocompile-nextjs.lock').open('a+b') as lock:
                                 self.project / '.git/nanocompile-nextjs.lock')
 
 
+class FileSeedTests(unittest.TestCase):
+    def setUp(self):
+        self.temp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temp.cleanup)
+        self.root = Path(self.temp.name)
+        self.stage = self.root / 'stage'
+        self.project = self.root / 'project'
+        self.stage.mkdir()
+        self.project.mkdir()
+
+    def test_inventory_and_native_stage_publish(self):
+        engine = 'turbopack/v1-test'
+        (self.stage / engine).mkdir(parents=True)
+        (self.stage / engine / 'CURRENT').write_text('{"commit_time":"123"}')
+        (self.stage / engine / '000001.sst').write_bytes(b'compiler payload')
+        (self.stage / 'swc/empty').mkdir(parents=True)
+        roots = ('swc', engine)
+        inventory = cache._file_inventory([self.stage / name for name in roots], roots)
+        self.assertEqual(inventory['directories'], ['swc', 'swc/empty', 'turbopack', engine])
+        self.assertEqual(len(inventory['files']), 2)
+        self.assertTrue(cache._restore_files(self.stage, self.project, '.next', roots))
+        self.assertEqual((self.project / '.next/cache' / engine / '000001.sst').read_bytes(), b'compiler payload')
+        self.assertTrue((self.project / '.next/cache/swc/empty').is_dir())
+
+    def test_inventory_rejects_links_and_limits(self):
+        (self.stage / 'swc').mkdir()
+        source = self.stage / 'swc/hint'
+        source.write_bytes(b'owned')
+        linked = self.stage / 'swc/link'
+        for hard in (False, True):
+            if hard:
+                os.link(source, linked)
+            else:
+                linked.symlink_to(source)
+            with self.assertRaises(ValueError):
+                cache._file_inventory([self.stage / 'swc'], ('swc',))
+            linked.unlink()
+        with patch.object(cache, 'MAX_BYTES', 1), self.assertRaises(ValueError):
+            cache._file_inventory([self.stage / 'swc'], ('swc',))
+
+    def test_native_stage_rejects_unsafe_or_incomplete_data_before_publish(self):
+        (self.stage / 'swc').mkdir()
+        (self.stage / 'swc/hint').write_text('private')
+        (self.stage / 'fetch-cache').mkdir()
+        with self.assertRaises(ValueError):
+            cache._restore_files(self.stage, self.project, '.next')
+        self.assertFalse((self.project / '.next/cache/swc').exists())
+        (self.stage / 'fetch-cache').rmdir()
+        engine = 'turbopack/v1-test'
+        (self.stage / engine).mkdir(parents=True)
+        with self.assertRaises(ValueError):
+            cache._restore_files(self.stage, self.project, '.next', ('swc', engine))
+        self.assertFalse((self.project / '.next/cache/swc').exists())
+        (self.project / '.next/cache/swc').mkdir(parents=True)
+        (self.project / '.next/cache/swc/user').write_text('keep')
+        self.assertFalse(cache._restore_files(self.stage, self.project, '.next'))
+        self.assertEqual((self.project / '.next/cache/swc/user').read_text(), 'keep')
+
+
 if __name__ == '__main__':
     unittest.main()

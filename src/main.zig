@@ -23,6 +23,7 @@ const help =
     \\  nanocompile task SPEC.json  experimental ordered declared-file task cache
     \\  nanocompile worktree create|prepare|build|dev  Next.js/OpenNext helpers (POSIX)
     \\  nanocompile artifact put|get|head NAMESPACE KEY [FILE] [METADATA_JSON]
+    \\  nanocompile artifact put-files|get-files|head-files NAMESPACE KEY [INVENTORY|STAGE] [METADATA_JSON]
     \\  nanocompile stats | clear | doctor
     \\  nanocompile --version | --build-info
     \\  nanocompile gc [MAX_BYTES]  remove orphan blobs and evict to a budget
@@ -132,6 +133,8 @@ fn dispatch(ctx: *cache.Context, args: []const [:0]const u8) !u8 {
     if (std.mem.eql(u8, command, "artifact")) {
         if (args.len < 5) return error.MissingArtifactArguments;
         const op = args[2];
+        if (std.mem.eql(u8, op, "put-files") or std.mem.eql(u8, op, "get-files") or std.mem.eql(u8, op, "head-files"))
+            return @import("artifact_files.zig").execute(ctx, args[2..]);
         const namespace = args[3];
         const key = args[4];
         const put = std.mem.eql(u8, op, "put");
