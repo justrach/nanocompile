@@ -4,7 +4,10 @@ Meld2 is a Bun workspace, not an independently installable Next.js app. Its
 API app uses Next 16.3.5 and OpenNext Cloudflare 1.20.6, with a local workspace
 package and a frontend asset-sync step. The measured command is the project's
 actual `bun run --cwd apps/api opennext`: it synchronizes assets, runs Next,
-and packages the Cloudflare worker. No deployment command was executed.
+and packages the Cloudflare worker. No deployment command was executed. This
+three-snapshot study used the earlier checkout, before the static `candidate/`
+frontend was replaced by the React application in `apps/web`; the historical
+retention percentages are not a measurement of the current React application.
 
 ## Initial state and scope
 
@@ -48,9 +51,12 @@ integration targets unchanged-checkout reuse, not inferred cross-source-edit
 monorepo portability. Ignored environment files are digested, not copied into
 reports. Existing mutable local caches are preserved.
 
-The project-private shared store is `.cache/nanocompile`, with a **192 MiB**
-(201,326,592-byte) retention budget: enough for the measured approximately
-140 MiB snapshot, without retaining several obsolete full snapshots. The
+The study's project-private shared store is `.cache/nanocompile`, with a
+**192 MiB** (201,326,592-byte) retention budget: enough for the measured
+approximately 140 MiB snapshot, without retaining several obsolete full snapshots.
+The current React-workspace adapter instead uses **384 MiB** (402,653,184 bytes),
+because its first real snapshot was 281,589,760 bytes and correctly did not fit
+the historical budget. See the current-workspace verification below. The
 project's `.cache` tree is ignored. Dependencies, package downloads and local
 Next/OpenNext outputs remain separate categories, not silently included in
 this limit.
@@ -135,13 +141,41 @@ environment, omit that flag:
 bun run build:cached
 # Inspect the same project-private store with the same retention budget:
 NANOCOMPILE_DIR="$PWD/.cache/nanocompile" \
-NANOCOMPILE_MAX_SIZE=201326592 \
+NANOCOMPILE_MAX_SIZE=402653184 \
   ./.cache/nanocompile-cli/bin/nanocompile stats
 ```
 
 `--max-size` overrides the byte budget for an invocation. Keep the setting
 consistent for cooperating processes; `0` means retain nothing, not unlimited.
-The 192 MiB policy bounds settled native entries/blobs, not temporary peak writes,
+The current 384 MiB policy bounds settled native entries/blobs, not temporary peak writes,
 installed CLI files, dependencies, downloads, or `.next`/`.open-next` outputs.
 Meld2's `docs/nanocompile.md` and root `SKILL.md` describe its workspace-specific
 adapter; this repository's [`../SKILL.md`](../SKILL.md) is reusable guidance.
+
+## Current React-workspace verification
+
+The integration was subsequently updated to current Meld2 `main`, preserving the
+new workspace scripts. Its conservative contract includes all apps, packages,
+build tools/patches, root manifests/configuration and ignored environment files
+across workspace roots. Owned frontend/tool probes and ignored frontend-env
+probes proved same-size edits invalidate the key; removing the probes restored
+the original key. No application source was changed for these checks.
+
+Node.js 24 and Bun 1.4.2 were used for a frozen install and successful
+`bun run check` and `bun run test`. The Vitest suites reported 389 extension,
+1,509 API and 1,307 frontend tests passing; 201 API tests were skipped, not
+claimed as live-service passes. An initial test run incorrectly supplied
+build-fixture origin variables; a clean test environment passed without changing
+application tests or code.
+
+With the new 384 MiB budget, a real build retained a seed, then a subsequent
+build reported `cache: restored`, completed React/Vite and OpenNext packaging,
+and retained its refreshed snapshot. Final managed entries/blobs were
+**284,180,976 logical bytes**, within the 402,653,184-byte limit. Observed build
+phases were 11.14 and 11.26 seconds, not a controlled speedup comparison.
+The held study-generated compiler directories were removed after success.
+
+[Current-workspace aggregate evidence](../benchmarks/meld2-current-main.json)
+is separate from the historical three-snapshot retention study. This verifies
+useful bounded caching on the updated application, not a new 66.4% savings claim.
+No browser/live-service acceptance, deployment or migration was performed.

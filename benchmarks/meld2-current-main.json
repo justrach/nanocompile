@@ -1,0 +1,91 @@
+{
+  "schema": 1,
+  "scope": "Updated React/Vite frontend plus Next/OpenNext API workspace; compiler-hint retention and real local build validation, not a controlled speedup or historical retention comparison.",
+  "toolchain": {
+    "node_major": 24,
+    "bun": "1.4.2",
+    "next": "16.3.5",
+    "opennext_cloudflare": "1.20.6"
+  },
+  "validation": [
+    {
+      "phase": "check",
+      "returncode": 0,
+      "seconds": 2.264518625
+    },
+    {
+      "phase": "test",
+      "returncode": 1,
+      "seconds": 11.819783833999999
+    },
+    {
+      "phase": "test-clean-environment",
+      "returncode": 0,
+      "seconds": 19.751860792000002
+    },
+    {
+      "phase": "build",
+      "returncode": 0,
+      "seconds": 21.499159833,
+      "summary": {
+        "build_seconds": 19.508465292,
+        "cache": "preserved-local",
+        "engine": "v16.3.5-ca2c75eb",
+        "returncode": 0,
+        "snapshot_bytes": 281589760,
+        "stored": false
+      }
+    },
+    {
+      "phase": "bounded-populate",
+      "returncode": 0,
+      "seconds": 12.72590625,
+      "summary": {
+        "build_seconds": 11.139946959,
+        "cache": "preserved-local",
+        "engine": "v16.3.5-ca2c75eb",
+        "returncode": 0,
+        "snapshot_bytes": 282757120,
+        "stored": true
+      }
+    },
+    {
+      "phase": "bounded-restored",
+      "returncode": 0,
+      "seconds": 13.117112791000002,
+      "summary": {
+        "build_seconds": 11.256211541,
+        "cache": "restored",
+        "engine": "v16.3.5-ca2c75eb",
+        "returncode": 0,
+        "snapshot_bytes": 284180480,
+        "stored": true
+      }
+    }
+  ],
+  "retention": {
+    "budget_bytes": 402653184,
+    "managed_logical_bytes": 284180976,
+    "seed_restore_and_real_build_passed": true
+  },
+  "compatibility_checks": {
+    "frontend_source_invalidation": true,
+    "ignored_frontend_environment_invalidation": true,
+    "build_tool_invalidation": true,
+    "same_size_edit_invalidation": true,
+    "probe_cleanup_restores_original_key": true
+  },
+  "test_suites": {
+    "extension_vitest_passed": 389,
+    "api_passed": 1509,
+    "api_skipped": 201,
+    "frontend_passed": 1307
+  },
+  "notes": [
+    "Initial test failure came from build-only origin variables supplied to tests; clean test environment passed without application changes.",
+    "Historical 192 MiB budget correctly rejected an oversized current-workspace snapshot; updated default is 384 MiB.",
+    "Final restore exercise always ran React/Vite plus actual OpenNext packaging.",
+    "No application source edits, lockfile changes, browser/live-service acceptance, deployment or migrations.",
+    "Build-only fixture outputs must not be deployed."
+  ]
+}
