@@ -148,6 +148,10 @@ def transfer(action, root, snapshot, config=None, max_bytes=20 * 1024**3):
             if len(names) != index["files"] or size != index["unpacked_bytes"]:
                 raise ValueError("snapshot inventory mismatch")
             with maintenance(root):
+                # The native CLI reconciles imported data against its current
+                # budget on the next quiescent cache operation, even if the
+                # previously recorded limit has not changed.
+                (root / 'budget-pending').write_text('1\n')
                 # Merge: no unrelated entries are deleted. Each file replaces atomically.
                 for name in sorted(names):
                     path = root / name

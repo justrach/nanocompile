@@ -1,0 +1,127 @@
+{
+  "schema": 1,
+  "budget_bytes": 201326592,
+  "baseline_budget_bytes": 1099511627776,
+  "method": "Same actual completed OpenNext/Turbopack snapshots in two isolated stores; effectively unbounded baseline uses a 1 TiB limit; bounded store uses 192 MiB; unchanged source inputs; framework builds always execute; no deployment",
+  "framework": {
+    "next": "16.3.5",
+    "opennext_cloudflare": "1.20.6",
+    "engine": "v16.3.5-ca2c75eb"
+  },
+  "checks": {
+    "real_project_check": true,
+    "real_api_tests": true,
+    "three_real_opennext_builds": true,
+    "bounded_seed_restored_before_third_real_build": true,
+    "all_native_roundtrips_equal": true,
+    "workspace_inputs_unchanged": true
+  },
+  "retained_logical_bytes_saved": 294287360,
+  "temporary_comparison_cleanup": [
+    "baseline-store",
+    "snapshots",
+    "held-local-caches"
+  ],
+  "snapshots": [
+    {
+      "phase": "actual-build-1",
+      "snapshot_bytes": 146483200,
+      "baseline_store": {
+        "logical_bytes": 146483696,
+        "allocated_bytes": 146489344,
+        "files": 3
+      },
+      "bounded_store": {
+        "logical_bytes": 146483696,
+        "allocated_bytes": 146489344,
+        "files": 3
+      },
+      "roundtrip_bytes_equal": true
+    },
+    {
+      "phase": "actual-build-2",
+      "snapshot_bytes": 147804160,
+      "baseline_store": {
+        "logical_bytes": 294287856,
+        "allocated_bytes": 294293504,
+        "files": 4
+      },
+      "bounded_store": {
+        "logical_bytes": 147804656,
+        "allocated_bytes": 147808256,
+        "files": 3
+      },
+      "roundtrip_bytes_equal": true
+    },
+    {
+      "phase": "actual-build-3",
+      "snapshot_bytes": 148930560,
+      "baseline_store": {
+        "logical_bytes": 443218416,
+        "allocated_bytes": 443224064,
+        "files": 5
+      },
+      "bounded_store": {
+        "logical_bytes": 148931056,
+        "allocated_bytes": 148934656,
+        "files": 3
+      },
+      "roundtrip_bytes_equal": true
+    }
+  ],
+  "distinct_actual_snapshots": 3,
+  "retained_logical_reduction_percent": 66.4,
+  "builds": [
+    {
+      "phase": "actual-build-2",
+      "process_seconds": 10.321778583,
+      "returncode": 0,
+      "summary": {
+        "build_seconds": 9.797955958,
+        "cache": "preserved-local",
+        "engine": "v16.3.5-ca2c75eb",
+        "returncode": 0,
+        "snapshot_bytes": 147804160,
+        "stored": true
+      }
+    },
+    {
+      "phase": "actual-build-3-restored",
+      "process_seconds": 10.304795417000001,
+      "returncode": 0,
+      "summary": {
+        "build_seconds": 9.677865166,
+        "cache": "restored",
+        "engine": "v16.3.5-ca2c75eb",
+        "returncode": 0,
+        "snapshot_bytes": 148930560,
+        "stored": true
+      }
+    }
+  ],
+  "final_package_script_validation": {
+    "returncode": 0,
+    "process_seconds": 10.832839208000001,
+    "summary": {
+      "build_seconds": 9.983027417,
+      "cache": "preserved-local",
+      "engine": "v16.3.5-ca2c75eb",
+      "returncode": 0,
+      "snapshot_bytes": 150056960,
+      "stored": true
+    }
+  },
+  "task_created_download_cleanup": {
+    "removed_task_created_download_cache": true,
+    "logical_bytes_removed_from_download_directory": 951630359,
+    "node_modules_preserved": true,
+    "unique_physical_disk_bytes_freed": "not claimed; links/clones can share blocks"
+  },
+  "limitations": [
+    "Initially empty build cache; installation/build increased total checkout size.",
+    "Retention savings are logical entries/blob bytes, not unique physical space or application bundle compression.",
+    "Single timing observations are not a controlled speedup claim.",
+    "Build-only fixture outputs must not be deployed.",
+    "Updated source CLI required; local changes are not a new public release."
+  ]
+}

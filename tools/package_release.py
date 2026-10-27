@@ -17,7 +17,7 @@ TARGETS = {
     "x86_64-windows-gnu": ("windows", "x86_64"),
 }
 # Explicit ancillary files, including the optional Python worktree frontend.
-DOCUMENTS = ("LICENSE", "NOTICE", "README.md", "docs/releases.md", "docs/worktrees.md",
+DOCUMENTS = ("LICENSE", "NOTICE", "README.md", "docs/releases.md", "docs/worktrees.md", "docs/cache-limits.md",
              "tools/worktree.py", "tools/worktree_setup.py", "tools/nextjs_cache.py")
 
 

@@ -101,7 +101,8 @@ explicit approval. Do not disable system-wide security checks to install it.
 
 Each archive has a single versioned directory containing `nanocompile`
 (`nanocompile.exe` on Windows),
-`LICENSE`, `NOTICE`, `README.md`, `docs/releases.md`, `docs/worktrees.md`, and
+`LICENSE`, `NOTICE`, `README.md`, `docs/releases.md`, `docs/worktrees.md`,
+`docs/cache-limits.md`, and
 `tools/worktree.py`, `tools/worktree_setup.py`, `tools/nextjs_cache.py`. The
 package tool uses an explicit file list, normalized tar
 ownership/timestamps/modes and a zero-time

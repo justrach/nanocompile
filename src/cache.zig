@@ -5,6 +5,7 @@ const c = struct {
     extern "c" fn close(fd: c_int) c_int;
     extern "c" fn write(fd: c_int, bytes: [*]const u8, len: usize) isize;
     extern "c" fn getpid() c_int;
+    extern "c" fn utimes(path: [*:0]const u8, times: ?*const anyopaque) c_int;
     extern "c" fn flock(fd: c_int, operation: c_int) c_int;
     extern "c" fn clonefile(src: [*:0]const u8, dst: [*:0]const u8, flags: u32) c_int;
     extern "c" fn ioctl(fd: c_int, request: c_ulong, ...) c_int;
@@ -73,6 +74,9 @@ pub fn readMetadata(io: std.Io, a: std.mem.Allocator, path: []const u8) ![]const
 }
 
 pub const RustLocations = struct { compiler: []const u8, sysroot: []const u8, target_libdir: []const u8, fallback_verified: bool = false };
+pub const default_max_size: u64 = 1024 * 1024 * 1024;
+const event_limit: u64 = 1024 * 1024;
+const Retention = struct { used: bool = false, wrote: bool = false };
 
 pub const Context = struct {
     a: std.mem.Allocator,
@@ -80,6 +84,8 @@ pub const Context = struct {
     env: *std.process.Environ.Map,
     root: []const u8,
     cwd: []const u8,
+    max_size: u64 = default_max_size,
+    retention: ?*Retention = null,
     compiler_identity: ?[]const u8 = null,
     compiler_decoder_identity: ?[]const u8 = null,
     compiler_epoch: ?[]const u8 = null,
@@ -103,12 +109,20 @@ pub const Context = struct {
             "nanocompile",
         });
         const cwd = try std.process.currentPathAlloc(io, a);
+        const max_size = if (env.get("NANOCOMPILE_MAX_SIZE")) |value|
+            std.fmt.parseInt(u64, value, 10) catch return error.InvalidCacheSize
+        else
+            default_max_size;
+        const retention = try a.create(Retention);
+        retention.* = .{};
         return .{
             .a = a,
             .io = io,
             .env = env,
             .root = try std.fs.path.resolve(a, &.{ cwd, root }),
             .cwd = cwd,
+            .max_size = max_size,
+            .retention = retention,
             // Windows change times are writable by user code; persistent
             // metadata-only digest reuse cannot use the Unix ctime contract.
             .digest_memo = builtin.os.tag != .windows and !std.mem.eql(u8, env.get("NANOCOMPILE_DIGEST_MEMO") orelse "1", "0"),
@@ -125,6 +139,16 @@ pub const Context = struct {
     pub fn prepare(self: *Context) !void {
         for ([_][]const u8{ "entries", "blobs", "locks" }) |sub|
             try Dir.cwd().createDirPath(self.io, try self.path(&.{sub}));
+        if (self.retention) |state| state.used = true;
+    }
+
+    fn noteStore(self: *Context) !void {
+        if (self.retention) |state| if (!state.wrote) {
+            // Mark before publication: a crash or nested CLI cannot hide work
+            // from the next quiescent maintenance pass.
+            try self.atomic(try self.path(&.{"budget-pending"}), "1\n");
+            state.wrote = true;
+        };
     }
 
     pub fn out(self: *Context, bytes: []const u8) !void {
@@ -416,6 +440,18 @@ pub const Lock = struct {
         if (c.flock(fd, if (exclusive) c.LOCK_EX else c.LOCK_SH) != 0) return error.LockFailed;
         return .{ .fd = fd };
     }
+    /// Maintenance must never wait for a parent invocation holding a shared
+    /// lock while it waits for this child (e.g. a declared task invoking Nano).
+    pub fn tryAcquire(ctx: *Context, name: []const u8, exclusive: bool) !?Lock {
+        const file = try Dir.cwd().createFile(ctx.io, try ctx.path(&.{ "locks", name }), .{ .read = true, .truncate = false });
+        errdefer file.close(ctx.io);
+        if (!try tryFileLock(file, ctx.io, exclusive)) {
+            file.close(ctx.io);
+            return null;
+        }
+        return if (builtin.os.tag == .windows) .{ .fd = file, .io = ctx.io } else .{ .fd = file.handle };
+    }
+
     pub fn release(self: Lock) void {
         if (builtin.os.tag == .windows) {
             unlockFile(self.fd, self.io);
@@ -623,6 +659,7 @@ fn materializeInto(ctx: *Context, source: []const u8, destination: []const u8, m
 }
 
 pub fn putFile(ctx: *Context, source: []const u8) ![]const u8 {
+    try ctx.noteStore();
     const before = try Dir.cwd().statFile(ctx.io, source, .{});
     const hash = try ctx.digest(source);
     const destination = try blobPath(ctx, hash);
@@ -639,6 +676,7 @@ pub fn putFile(ctx: *Context, source: []const u8) ![]const u8 {
 }
 
 fn putBytes(ctx: *Context, bytes: []const u8) ![]const u8 {
+    try ctx.noteStore();
     var h = Hash.init(.{});
     h.update(bytes);
     const hash = try finish(ctx.a, &h);
@@ -747,6 +785,7 @@ pub fn fetchArtifact(ctx: *Context, namespace: []const u8, key: []const u8, dest
     if (!std.mem.eql(u8, actual, entry.outputs[0].hash)) return false;
     const st = try Dir.cwd().statFile(ctx.io, source, .{});
     if (destination) |out_| try materialize(ctx, source, out_, 0o600);
+    touchEntry(ctx, identity);
     const result = try std.json.Stringify.valueAlloc(ctx.a, .{ .hit = true, .bytes = st.size, .metadata = info.metadata }, .{});
     try ctx.out(result);
     try ctx.out("\n");
@@ -1000,6 +1039,7 @@ fn restoreWithSnapshot(ctx: *Context, key: []const u8, allowed_outputs: []const 
         placement.* = .{ .blob = try blobPath(ctx, output.hash), .destination = output.path, .mode = output.mode, .known = null };
     try place(ctx, placements);
     ctx.profileEnd("restore.materialization", phase);
+    touchEntry(ctx, key);
     return .{ .stdout = stdout, .stderr = stderr };
 }
 
@@ -1065,10 +1105,81 @@ pub fn stats(ctx: *Context) !void {
         size += (try item.dir.statFile(ctx.io, item.basename, .{})).size;
     };
     try ctx.out(try std.fmt.allocPrint(ctx.a, "hits: {d}\nmisses: {d}\nbypasses: {d}\nfailed compilations: {d}\nblobs: {d}\nlogical bytes: {d}\n", .{ hit, miss, bypass, failed, blobs, size }));
+    try ctx.out(try std.fmt.allocPrint(ctx.a, "automatic budget bytes (entries + blobs): {d}\nmanaged logical bytes: {d}\n", .{ ctx.max_size, try storeBytes(ctx) }));
     try ctx.out(try std.fmt.allocPrint(ctx.a, "native Xcode invocations: {d}\nnative Xcode failures: {d}\n", .{ xcode_runs, xcode_failed }));
     try ctx.out(try std.fmt.allocPrint(ctx.a, "native Clang invocations: {d}\nnative Clang failures: {d}\nobserved Clang hits: {d}\nobserved Clang misses: {d}\nClang hit/miss observations require NANOCOMPILE_CLANG_REMARKS=1\n", .{ clang_run, clang_failed, clang_hit, clang_miss }));
     try ctx.out(try std.fmt.allocPrint(ctx.a, "portable C/C++ hits: {d}\nportable C/C++ misses: {d}\nportable C/C++ bypasses: {d}\nportable C/C++ failures: {d}\n", .{ cc_hit, cc_miss, cc_bypass, cc_failed }));
     try ctx.out(try std.fmt.allocPrint(ctx.a, "build-script hits: {d}\nbuild-script misses: {d}\nbuild-script bypasses: {d}\nbuild-script failures: {d}\n", .{ script_hit, script_miss, script_bypass, script_failed }));
+}
+
+fn touchEntry(ctx: *Context, key: []const u8) void {
+    const path_ = ctx.path(&.{ "entries", key }) catch return;
+    if (builtin.os.tag != .windows) {
+        // A null timeval pair asks the kernel for its current time in one
+        // syscall, avoiding open/set-time/close on every task-graph hit.
+        const z = ctx.a.dupeSentinel(u8, path_, 0) catch return;
+        _ = c.utimes(z, null);
+        return;
+    }
+    const file = Dir.cwd().openFile(ctx.io, path_, .{ .mode = if (builtin.os.tag == .windows) .read_write else .read_only }) catch return;
+    defer file.close(ctx.io);
+    file.setTimestamps(ctx.io, .{ .modify_timestamp = .{ .new = .{ .nanoseconds = std.Io.Clock.real.now(ctx.io).nanoseconds } } }) catch {};
+}
+
+fn storeBytes(ctx: *Context) !u64 {
+    var total: u64 = 0;
+    for ([_][]const u8{ "entries", "blobs" }) |sub| {
+        var dir = try Dir.cwd().openDir(ctx.io, try ctx.path(&.{sub}), .{ .iterate = true });
+        defer dir.close(ctx.io);
+        var walk = try dir.walk(ctx.a);
+        defer walk.deinit();
+        while (try walk.next(ctx.io)) |item| if (item.kind == .file) {
+            total +|= (try item.dir.statFile(ctx.io, item.basename, .{})).size;
+        };
+    }
+    return total;
+}
+
+/// Run only after dispatch has released its locks. A nested CLI must not wait
+/// for a parent holding maintenance while waiting for that child's exit.
+/// Pending work survives crashes and lock contention for the next invocation.
+/// The bound is settled logical entries+blobs, not an in-flight disk quota.
+pub fn finishBudget(ctx: *Context) !void {
+    const state = ctx.retention orelse return;
+    if (!state.used) return;
+    const marker = try ctx.path(&.{"budget-limit"});
+    const pending = try ctx.path(&.{"budget-pending"});
+    const events = try ctx.path(&.{"events"});
+    const expected = try std.fmt.allocPrint(ctx.a, "{d}", .{ctx.max_size});
+    var buffer: [64]u8 = undefined;
+    const previous = Dir.cwd().readFile(ctx.io, marker, &buffer) catch "";
+    const dirty = if (Dir.cwd().statFile(ctx.io, pending, .{})) |_| true else |err| switch (err) {
+        error.FileNotFound => false,
+        else => return err,
+    };
+    const event_size = if (Dir.cwd().statFile(ctx.io, events, .{})) |st| st.size else |_| 0;
+    if (!state.wrote and !dirty and std.mem.eql(u8, previous, expected) and event_size <= event_limit) return;
+    const lock = (try Lock.tryAcquire(ctx, "maintenance", true)) orelse return;
+    defer lock.release();
+    if (try storeBytes(ctx) > ctx.max_size) try collect(ctx, ctx.max_size, true, false);
+    // Appends also hold maintenance. Rotate only while no reader/writer can
+    // retain a descriptor to the old event window; stats remain recent counts.
+    const settled_events = if (Dir.cwd().statFile(ctx.io, events, .{})) |st| st.size else |_| 0;
+    if (settled_events > event_limit) try ctx.atomic(events, "");
+    // Every key-lock user acquires shared maintenance first. No waiter/holder
+    // can exist here, so stale zero-byte lock inodes can safely be reclaimed.
+    var locks = try Dir.cwd().openDir(ctx.io, try ctx.path(&.{"locks"}), .{ .iterate = true });
+    defer locks.close(ctx.io);
+    var iterator = locks.iterate();
+    while (try iterator.next(ctx.io)) |item| {
+        if (item.kind != .file or std.mem.eql(u8, item.name, "maintenance")) continue;
+        if ((try locks.statFile(ctx.io, item.name, .{})).size == 0) try locks.deleteFile(ctx.io, item.name);
+    }
+    try ctx.atomic(marker, expected);
+    Dir.cwd().deleteFile(ctx.io, pending) catch |err| switch (err) {
+        error.FileNotFound => {},
+        else => return err,
+    };
 }
 
 pub fn clear(ctx: *Context) !void {
@@ -1090,7 +1201,14 @@ pub fn gc(ctx: *Context, limit: u64) !void {
     try ctx.prepare();
     const lock = try Lock.acquire(ctx, "maintenance", true);
     defer lock.release();
-    const Candidate = struct { path: []const u8, entry: Entry, used: i96 };
+    try collect(ctx, limit, false, true);
+}
+
+// Caller owns the exclusive maintenance lock. Automatic retention includes
+// sealed manifests; explicit gc preserves its existing blob-byte interface.
+fn collect(ctx: *Context, limit: u64, include_entries: bool, reporting: bool) !void {
+    const Candidate = struct { path: []const u8, entry: Entry, used: i96, size: u64, oversized: bool = false };
+    var total: u64 = 0;
     var candidates: std.ArrayList(Candidate) = .empty;
     var references: std.StringHashMap(usize) = .init(ctx.a);
     var sizes: std.StringHashMap(u64) = .init(ctx.a);
@@ -1101,7 +1219,10 @@ pub fn gc(ctx: *Context, limit: u64) !void {
         if (item.kind != .file) continue;
         const path_ = try ctx.path(&.{ "entries", item.name });
         const st = try Dir.cwd().statFile(ctx.io, path_, .{});
-        const bytes = try ctx.read(path_);
+        const bytes = ctx.read(path_) catch {
+            try Dir.cwd().deleteFile(ctx.io, path_);
+            continue;
+        };
         const entry = parseEntry(ctx, bytes) catch {
             try Dir.cwd().deleteFile(ctx.io, path_);
             continue;
@@ -1123,13 +1244,14 @@ pub fn gc(ctx: *Context, limit: u64) !void {
             if (!ref.found_existing) ref.value_ptr.* = 0;
             ref.value_ptr.* += 1;
         }
-        try candidates.append(ctx.a, .{ .path = path_, .entry = entry, .used = (st.atime orelse st.mtime).nanoseconds });
+        const size = if (include_entries) st.size else 0;
+        total +|= size;
+        try candidates.append(ctx.a, .{ .path = path_, .entry = entry, .used = st.mtime.nanoseconds, .size = size });
     }
     var blobs = try Dir.cwd().openDir(ctx.io, try ctx.path(&.{"blobs"}), .{ .iterate = true });
     defer blobs.close(ctx.io);
     var walk = try blobs.walk(ctx.a);
     defer walk.deinit();
-    var total: u64 = 0;
     var freed: u64 = 0;
     while (try walk.next(ctx.io)) |item| {
         if (item.kind != .file) continue;
@@ -1142,8 +1264,26 @@ pub fn gc(ctx: *Context, limit: u64) !void {
             total += size;
         }
     }
+    // An entry that cannot fit by itself must not flush useful small entries
+    // just because it was written most recently. Count its shared blobs once.
+    var unique: std.StringHashMapUnmanaged(void) = .empty;
+    defer unique.deinit(ctx.a);
+    for (candidates.items) |*candidate| {
+        unique.clearRetainingCapacity();
+        var needed = candidate.size;
+        for ([_][]const u8{ candidate.entry.stdout, candidate.entry.stderr }) |hash| {
+            const slot = try unique.getOrPut(ctx.a, hash);
+            if (!slot.found_existing) needed +|= sizes.get(hash) orelse 0;
+        }
+        for (candidate.entry.outputs) |output| {
+            const slot = try unique.getOrPut(ctx.a, output.hash);
+            if (!slot.found_existing) needed +|= sizes.get(output.hash) orelse 0;
+        }
+        candidate.oversized = needed > limit;
+    }
     std.mem.sort(Candidate, candidates.items, {}, struct {
         fn less(_: void, a: Candidate, b: Candidate) bool {
+            if (a.oversized != b.oversized) return a.oversized;
             return a.used < b.used;
         }
     }.less);
@@ -1151,6 +1291,8 @@ pub fn gc(ctx: *Context, limit: u64) !void {
     for (candidates.items) |candidate| {
         if (total <= limit) break;
         try Dir.cwd().deleteFile(ctx.io, candidate.path);
+        total -= candidate.size;
+        freed +|= candidate.size;
         evicted += 1;
         var hashes: std.ArrayList([]const u8) = .empty;
         try hashes.appendSlice(ctx.a, &.{ candidate.entry.stdout, candidate.entry.stderr });
@@ -1170,7 +1312,7 @@ pub fn gc(ctx: *Context, limit: u64) !void {
         }
     }
     const stale = try pruneMemos(ctx);
-    try ctx.out(try std.fmt.allocPrint(ctx.a, "evicted entries: {d}\nfreed logical bytes: {d}\nremaining logical bytes: {d}\nstale digest memos removed: {d}\n", .{ evicted, freed, total, stale }));
+    if (reporting) try ctx.out(try std.fmt.allocPrint(ctx.a, "evicted entries: {d}\nfreed logical bytes: {d}\nremaining logical bytes: {d}\nstale digest memos removed: {d}\n", .{ evicted, freed, total, stale }));
 }
 
 /// Remove digest memo records whose file is gone or no longer matches.

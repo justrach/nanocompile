@@ -28,6 +28,7 @@ const help =
     \\  nanocompile gc [MAX_BYTES]  remove orphan blobs and evict to a budget
     \\Environment:
     \\  NANOCOMPILE_DIR       cache directory (default: $XDG_CACHE_HOME/nanocompile)
+    \\  NANOCOMPILE_MAX_SIZE  automatic entries+blobs budget in bytes (default: 1 GiB; 0 retains none)
     \\  NANOCOMPILE_TRACE=1   print cache decisions to stderr
     \\  NANOCOMPILE_DISABLE=1 run the compiler without caching
     \\  NANOCOMPILE_PROC_MACROS=reported  opt into compiler-reported macro inputs
@@ -51,6 +52,10 @@ pub fn main(init: std.process.Init) void {
     const code = dispatch(&ctx, args) catch |err| blk: {
         std.debug.print("nanocompile: {s}\n", .{@errorName(err)});
         break :blk @as(u8, 1);
+    };
+    cache.finishBudget(&ctx) catch |err| {
+        // Cache housekeeping must not change the real command's exit status.
+        std.debug.print("nanocompile: automatic cache maintenance failed: {s}\n", .{@errorName(err)});
     };
     std.process.exit(code);
 }
@@ -168,6 +173,10 @@ fn dispatch(ctx: *cache.Context, args: []const [:0]const u8) !u8 {
         return 0;
     }
     if (std.mem.eql(u8, command, "stats")) {
+        try ctx.prepare();
+        // A newly lowered limit should be reflected in the displayed usage,
+        // not only in housekeeping after stats has already printed.
+        cache.finishBudget(ctx) catch |err| ctx.trace(@errorName(err));
         try cache.stats(ctx);
         return 0;
     }
@@ -176,7 +185,7 @@ fn dispatch(ctx: *cache.Context, args: []const [:0]const u8) !u8 {
         return 0;
     }
     if (std.mem.eql(u8, command, "gc")) {
-        const limit = if (args.len > 2) try std.fmt.parseInt(u64, args[2], 10) else 10 * 1024 * 1024 * 1024;
+        const limit = if (args.len > 2) try std.fmt.parseInt(u64, args[2], 10) else ctx.max_size;
         try cache.gc(ctx, limit);
         return 0;
     }

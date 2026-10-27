@@ -51,7 +51,49 @@ fn less(_: void, a: []const u8, b: []const u8) bool {
 fn isReportVariable(name: []const u8) bool {
     return if (builtin.os.tag == .windows) std.ascii.eqlIgnoreCase(name, report_variable) else std.mem.eql(u8, name, report_variable);
 }
+// Parallelize only independent full reads, never before/after validation or
+// dependency order. Each worker owns its allocator and disables digest memos.
+const InputJob = struct { path: []const u8, hash: [64]u8 = undefined, size: u64 = 0, failure: ?anyerror = null };
+fn inputWorker(ctx: *const cache.Context, jobs: []InputJob, next: *std.atomic.Value(usize)) void {
+    var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
+    defer arena.deinit();
+    var local = ctx.*;
+    local.a = arena.allocator();
+    local.digest_memo = false;
+    local.entry_digests = null;
+    while (true) {
+        const index = next.fetchAdd(1, .monotonic);
+        if (index >= jobs.len) return;
+        _ = arena.reset(.retain_capacity);
+        const digest = local.checkedDigest(jobs[index].path) catch |err| {
+            jobs[index].failure = err;
+            continue;
+        };
+        @memcpy(&jobs[index].hash, digest.hash);
+        jobs[index].size = digest.state.size;
+    }
+}
 fn records(ctx: *cache.Context, task: Task, bytes: *u64) ![]const cache.Dependency {
+    // Tiny contracts retain the serial path. Larger sets use at most four
+    // file workers; all hashes/errors join before key construction or execution.
+    if (task.inputs.len >= 8) {
+        const jobs = try ctx.a.alloc(InputJob, task.inputs.len);
+        for (jobs, task.inputs) |*job, input| job.* = .{ .path = try std.fs.path.resolve(ctx.a, &.{ ctx.cwd, input }) };
+        var next: std.atomic.Value(usize) = .init(0);
+        var group: std.Io.Group = .init;
+        defer group.cancel(ctx.io);
+        const workers = @min(@as(usize, 4), std.Thread.getCpuCount() catch 1);
+        for (1..@max(workers, 1)) |_| group.concurrent(ctx.io, inputWorker, .{ ctx, jobs, &next }) catch break;
+        inputWorker(ctx, jobs, &next);
+        try group.await(ctx.io);
+        const result = try ctx.a.alloc(cache.Dependency, jobs.len);
+        for (result, jobs) |*dep, job| {
+            if (job.failure) |err| return err;
+            bytes.* +|= job.size;
+            dep.* = .{ .path = job.path, .hash = try ctx.a.dupe(u8, &job.hash) };
+        }
+        return result;
+    }
     var result: std.ArrayList(cache.Dependency) = .empty;
     for (task.inputs) |input| {
         const path = try std.fs.path.resolve(ctx.a, &.{ ctx.cwd, input });

@@ -229,7 +229,7 @@ def _restore(archive, project, dist_dir, cache_dirs=CACHE_DIRS):
 
 def _store_archive(archive, targets, cache_dirs=CACHE_DIRS):
     total, count = 0, 0
-    with tarfile.open(archive, 'w:', format=tarfile.USTAR_FORMAT) as tar:
+    with tarfile.open(archive, 'w:', format=tarfile.USTAR_FORMAT, copybufsize=1024*1024) as tar:
         for name, target in zip(cache_dirs, targets):
             if not target.exists():
                 continue

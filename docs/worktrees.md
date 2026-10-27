@@ -171,7 +171,12 @@ subcommand:
 ```
 
 Downloads live under `downloads/MANAGER`; compiler seeds use the normal CAS,
-GC, and artifact integrity checks. Keep the cache directory private. Archives
+GC, and artifact integrity checks. Shared seed blobs and their entry manifests
+use the automatic **1 GiB** store budget; set `NANOCOMPILE_MAX_SIZE=536870912`
+for 512 MiB. Cold snapshots are evicted first and shared payloads are counted
+once. This does not limit dependency downloads, private `node_modules`, local
+`.next` caches or native compiler caches; see [cache limits](cache-limits.md).
+Keep the cache directory private. Archives
 contain owned regular files, never hardlinked files. Sorted traversal and fixed
 mtime, mode, and owner metadata make archives deterministic, reducing CAS blob
 churn from metadata-only changes. Archives are uncompressed by default: gzip

@@ -144,12 +144,12 @@ Set `NANOCOMPILE_DIR` to choose a shared cache location. Its default is `$XDG_CA
 ```sh
 ./zig-out/bin/nanocompile stats
 ./zig-out/bin/nanocompile doctor
-./zig-out/bin/nanocompile gc             # orphan cleanup; 10 GiB blob budget
+./zig-out/bin/nanocompile gc             # orphan cleanup; configured/default 1 GiB blob budget
 ./zig-out/bin/nanocompile gc 1073741824  # 1 GiB blob budget
 ./zig-out/bin/nanocompile clear
 ```
 
-GC is explicit, so the normal compilation path does not scan the entire store. It removes orphan blobs and evicts entries by recorded access time until the unique artifact bytes fit the requested budget. Filesystem access-time policies make this an approximate eviction order. The quota covers blobs; metadata and toolchain identities are additional space. `clear` removes artifacts, Rust classification memos, private diagnostic files and counters while retaining validated toolchain identities and shared Rust toolchain-file digests to avoid paying their initial fingerprinting cost again.
+The shared artifact store now has an **automatic 1 GiB budget** for unique blobs plus sealed entry manifests. Set `NANOCOMPILE_MAX_SIZE` to a decimal byte count (for example `536870912` for 512 MiB); `0` retains no entries or blobs. Successful reads refresh entry recency; eviction removes cold entries first and preserves blobs still shared by retained entries. Warm hits do not scan the entire store. Maintenance runs after writes or pending/configuration changes, only when it can safely acquire exclusive maintenance without waiting for a parent process. Concurrent/nested operations can temporarily exceed the budget; the next quiescent cache operation reconciles it. The event history is a bounded recent window. This is not a whole-directory filesystem quota: tool identities, native compiler caches, dependency downloads and worktree files are separate. See [cache limits](docs/cache-limits.md) for scope and trade-offs. Explicit `gc` still accepts a blob-byte budget and removes orphan blobs. `clear` removes artifacts, Rust classification memos, private diagnostic files and counters while retaining validated toolchain identities and shared Rust toolchain-file digests to avoid paying their initial fingerprinting cost again.
 
 ## Turborepo task artifacts
 
