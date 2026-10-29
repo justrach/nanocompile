@@ -1,7 +1,40 @@
 const std = @import("std");
 const builtin = @import("builtin");
+/// Free-space probe for the store volume. Darwin and glibc disagree on this
+/// layout: Darwin keeps 64-bit block sizes but 32-bit block counters, and glibc
+/// uses 64-bit counters plus trailing spare words. Only the fields up to
+/// `bavail` are read, and `freeBytes` refuses platforms where neither layout is
+/// known, so an unknown shape disables the guard instead of reporting nonsense.
+const StatVFS = if (builtin.os.tag == .macos) extern struct {
+    bsize: u64,
+    frsize: u64,
+    blocks: u32,
+    bfree: u32,
+    bavail: u32,
+    files: u32,
+    ffree: u32,
+    favail: u32,
+    fsid: u64,
+    flag: u64,
+    namemax: u64,
+} else extern struct {
+    bsize: u64,
+    frsize: u64,
+    blocks: u64,
+    bfree: u64,
+    bavail: u64,
+    files: u64,
+    ffree: u64,
+    favail: u64,
+    fsid: u64,
+    flag: u64,
+    namemax: u64,
+    spare: [6]u32,
+};
+
 const c = struct {
     extern "c" fn open(path: [*:0]const u8, flags: c_int, ...) c_int;
+    extern "c" fn statvfs(path: [*:0]const u8, buffer: *StatVFS) c_int;
     extern "c" fn close(fd: c_int) c_int;
     extern "c" fn write(fd: c_int, bytes: [*]const u8, len: usize) isize;
     extern "c" fn getpid() c_int;
@@ -17,6 +50,7 @@ const c = struct {
     const O_CLOEXEC = if (builtin.os.tag == .macos) 0x1000000 else 0x80000;
     const LOCK_SH = 1;
     const LOCK_EX = 2;
+    const LOCK_NB = 4;
     const LOCK_UN = 8;
     const FICLONE = 0x40049409;
 };
@@ -224,6 +258,19 @@ pub const Lock = struct {
         if (c.flock(fd, if (exclusive) c.LOCK_EX else c.LOCK_SH) != 0) return error.LockFailed;
         return .{ .fd = fd };
     }
+    /// Non-blocking variant: null when another process already holds the lock.
+    pub fn tryAcquire(ctx: *Context, name: []const u8, exclusive: bool) !?Lock {
+        const z = try ctx.a.dupeSentinel(u8, try ctx.path(&.{ "locks", name }), 0);
+        const fd = c.open(z, c.O_RDWR | c.O_CREAT | c.O_CLOEXEC, @as(c_uint, 0o600));
+        if (fd < 0) return error.LockOpenFailed;
+        const operation: c_int = if (exclusive) c.LOCK_EX else c.LOCK_SH;
+        if (c.flock(fd, operation | c.LOCK_NB) != 0) {
+            _ = c.close(fd);
+            return null;
+        }
+        return .{ .fd = fd };
+    }
+
     pub fn release(self: Lock) void {
         _ = c.flock(self.fd, c.LOCK_UN);
         _ = c.close(self.fd);
@@ -406,6 +453,14 @@ fn variantKey(ctx: *Context, key: []const u8, slot: usize) ![]const u8 {
 }
 
 fn storeEntry(ctx: *Context, key: []const u8, dependencies: []const Dependency, output_paths: []const []const u8, stdout: []const u8, stderr: []const u8, variants: bool) !void {
+    if (!storeAdmitted(ctx)) return;
+    storeEntryInner(ctx, key, dependencies, output_paths, stdout, stderr, variants) catch |err| switch (err) {
+        error.NoSpaceLeft => ctx.trace("cache: no space left while storing; the build output stays uncached"),
+        else => return err,
+    };
+}
+
+fn storeEntryInner(ctx: *Context, key: []const u8, dependencies: []const Dependency, output_paths: []const []const u8, stdout: []const u8, stderr: []const u8, variants: bool) !void {
     for (dependencies) |dep| if (dep.missing != null and !try missingValid(ctx, dep)) return error.InvalidMissingDependency;
     for (dependencies) |dep| if (dep.symlink_target != null and !try symlinkValid(ctx, dep)) return error.InvalidSymlinkDependency;
     var outputs: std.ArrayList(Output) = .empty;
@@ -687,6 +742,96 @@ pub fn restore(ctx: *Context, key: []const u8, allowed_outputs: []const []const 
     return true;
 }
 
+pub const default_budget: u64 = 10 * 1024 * 1024 * 1024;
+pub const default_min_free: u64 = 2 * 1024 * 1024 * 1024;
+/// Invocations between budget samples. Free space is checked every invocation;
+/// the full blob walk is amortized instead of run once per compilation.
+const maintenance_interval: u64 = 64;
+
+fn envBytes(ctx: *Context, name: []const u8, fallback: u64) u64 {
+    const raw = ctx.env.get(name) orelse return fallback;
+    return std.fmt.parseInt(u64, std.mem.trim(u8, raw, " \t\n"), 10) catch fallback;
+}
+
+pub fn budget(ctx: *Context) u64 {
+    return envBytes(ctx, "NANOCOMPILE_GC_BUDGET", default_budget);
+}
+
+pub fn minFree(ctx: *Context) u64 {
+    return envBytes(ctx, "NANOCOMPILE_MIN_FREE_BYTES", default_min_free);
+}
+
+/// Free bytes on the store's volume, or null when the platform call fails or
+/// the host's statvfs layout is unknown. An unknown value disables the guard
+/// rather than bypassing the cache.
+pub fn freeBytes(ctx: *Context) ?u64 {
+    if (builtin.os.tag != .macos and builtin.os.tag != .linux) return null;
+    const root = ctx.a.dupeSentinel(u8, ctx.root, 0) catch return null;
+    var buffer: StatVFS = std.mem.zeroes(StatVFS);
+    if (c.statvfs(root, &buffer) != 0) return null;
+    const unit = if (buffer.frsize != 0) buffer.frsize else buffer.bsize;
+    if (unit == 0 or buffer.blocks == 0) return null;
+    return std.math.mul(u64, buffer.bavail, unit) catch std.math.maxInt(u64);
+}
+
+pub const Usage = struct { blobs: usize, bytes: u64 };
+
+/// Logical size of the store: every retained blob. Sampled rather than tracked
+/// incrementally, so it stays correct after manual deletion or a partial run.
+pub fn usage(ctx: *Context) !Usage {
+    var result: Usage = .{ .blobs = 0, .bytes = 0 };
+    var dir = try Dir.cwd().openDir(ctx.io, try ctx.path(&.{"blobs"}), .{ .iterate = true });
+    defer dir.close(ctx.io);
+    var walk = try dir.walk(ctx.a);
+    defer walk.deinit();
+    while (try walk.next(ctx.io)) |item| if (item.kind == .file) {
+        result.blobs += 1;
+        result.bytes += (try item.dir.statFile(ctx.io, item.basename, .{})).size;
+    };
+    return result;
+}
+
+/// Skip the store, rather than failing the build, when the volume is below the
+/// minimum free space. The compiler output is already on disk and stays valid;
+/// only cache maintenance is deferred.
+fn storeAdmitted(ctx: *Context) bool {
+    const free = freeBytes(ctx) orelse return true;
+    if (free >= minFree(ctx)) return true;
+    ctx.trace("cache: free space is below the minimum; skipping the store");
+    return false;
+}
+
+fn bumpTick(ctx: *Context) u64 {
+    const path_ = ctx.path(&.{"maintenance-tick"}) catch return 0;
+    const current = blk: {
+        const bytes = ctx.read(path_) catch break :blk @as(u64, 0);
+        break :blk std.fmt.parseInt(u64, std.mem.trim(u8, bytes, " \t\n"), 10) catch 0;
+    };
+    const next = current +% 1;
+    const text = std.fmt.allocPrint(ctx.a, "{d}\n", .{next}) catch return next;
+    ctx.atomic(path_, text) catch {};
+    return next;
+}
+
+/// Opportunistic maintenance, run before a command takes any shared cache lock.
+/// Eviction needs the maintenance lock exclusively, so this never races a store
+/// or restore: when the lock is busy it simply waits for a later invocation.
+pub fn autoMaintain(ctx: *Context) void {
+    const limit = budget(ctx);
+    const free = freeBytes(ctx) orelse return;
+    const pressure = free < minFree(ctx);
+    if (!pressure and bumpTick(ctx) % maintenance_interval != 0) return;
+    if (!pressure) {
+        const used = usage(ctx) catch return;
+        if (used.bytes <= limit + limit / 10) return;
+    }
+    ctx.prepare() catch return;
+    const lock = (Lock.tryAcquire(ctx, "maintenance", true) catch return) orelse return;
+    defer lock.release();
+    _ = gcLocked(ctx, limit) catch return;
+    ctx.trace("cache: automatic eviction trimmed the store toward the byte budget");
+}
+
 pub fn stats(ctx: *Context) !void {
     try ctx.prepare();
     const lock = try Lock.acquire(ctx, "maintenance", false);
@@ -731,17 +876,10 @@ pub fn stats(ctx: *Context) !void {
         if (std.mem.eql(u8, event, "build_script_bypass")) script_bypass += 1;
         if (std.mem.eql(u8, event, "build_script_failed")) script_failed += 1;
     }
-    var blobs: usize = 0;
-    var size: u64 = 0;
-    var dir = try Dir.cwd().openDir(ctx.io, try ctx.path(&.{"blobs"}), .{ .iterate = true });
-    defer dir.close(ctx.io);
-    var walk = try dir.walk(ctx.a);
-    defer walk.deinit();
-    while (try walk.next(ctx.io)) |item| if (item.kind == .file) {
-        blobs += 1;
-        size += (try item.dir.statFile(ctx.io, item.basename, .{})).size;
-    };
-    try ctx.out(try std.fmt.allocPrint(ctx.a, "hits: {d}\nmisses: {d}\nbypasses: {d}\nfailed compilations: {d}\nblobs: {d}\nlogical bytes: {d}\n", .{ hit, miss, bypass, failed, blobs, size }));
+    const used = try usage(ctx);
+    try ctx.out(try std.fmt.allocPrint(ctx.a, "hits: {d}\nmisses: {d}\nbypasses: {d}\nfailed compilations: {d}\nblobs: {d}\nlogical bytes: {d}\n", .{ hit, miss, bypass, failed, used.blobs, used.bytes }));
+    try ctx.out(try std.fmt.allocPrint(ctx.a, "budget bytes: {d}\nminimum free bytes: {d}\n", .{ budget(ctx), minFree(ctx) }));
+    if (freeBytes(ctx)) |free| try ctx.out(try std.fmt.allocPrint(ctx.a, "free bytes: {d}\n", .{free}));
     try ctx.out(try std.fmt.allocPrint(ctx.a, "native Xcode invocations: {d}\nnative Xcode failures: {d}\n", .{ xcode_runs, xcode_failed }));
     try ctx.out(try std.fmt.allocPrint(ctx.a, "native Clang invocations: {d}\nnative Clang failures: {d}\nobserved Clang hits: {d}\nobserved Clang misses: {d}\nClang hit/miss observations require NANOCOMPILE_CLANG_REMARKS=1\n", .{ clang_run, clang_failed, clang_hit, clang_miss }));
     try ctx.out(try std.fmt.allocPrint(ctx.a, "portable C/C++ hits: {d}\nportable C/C++ misses: {d}\nportable C/C++ bypasses: {d}\nportable C/C++ failures: {d}\n", .{ cc_hit, cc_miss, cc_bypass, cc_failed }));
@@ -767,6 +905,15 @@ pub fn gc(ctx: *Context, limit: u64) !void {
     try ctx.prepare();
     const lock = try Lock.acquire(ctx, "maintenance", true);
     defer lock.release();
+    const result = try gcLocked(ctx, limit);
+    try ctx.out(try std.fmt.allocPrint(ctx.a, "evicted entries: {d}\nfreed logical bytes: {d}\nremaining logical bytes: {d}\n", .{ result.evicted, result.freed, result.remaining }));
+}
+
+pub const Eviction = struct { evicted: usize, freed: u64, remaining: u64 };
+
+/// Eviction proper. The caller holds the maintenance lock exclusively, so no
+/// compile, restore or stats run while references are reconciled.
+fn gcLocked(ctx: *Context, limit: u64) !Eviction {
     const Candidate = struct { path: []const u8, entry: Entry, used: i96 };
     var candidates: std.ArrayList(Candidate) = .empty;
     var references: std.StringHashMap(usize) = .init(ctx.a);
@@ -846,7 +993,7 @@ pub fn gc(ctx: *Context, limit: u64) !void {
             }
         }
     }
-    try ctx.out(try std.fmt.allocPrint(ctx.a, "evicted entries: {d}\nfreed logical bytes: {d}\nremaining logical bytes: {d}\n", .{ evicted, freed, total }));
+    return .{ .evicted = evicted, .freed = freed, .remaining = total };
 }
 
 test "hash fields cannot collide through concatenation" {
@@ -1084,4 +1231,76 @@ test "bounded source variants restore reverts and validate historical blobs" {
     try std.testing.expect(!try restoreVariants(&ctx, key, &.{output}));
     try std.testing.expectEqualStrings("untouched", try ctx.read(output));
     try std.testing.expect(!try restoreVariants(&ctx, key, &.{input}));
+}
+
+fn testContext(a: std.mem.Allocator, tmp: *std.testing.TmpDir, env: *std.process.Environ.Map) !Context {
+    const cwd = try Dir.cwd().realPathFileAlloc(std.testing.io, try std.fs.path.join(a, &.{ ".zig-cache", "tmp", &tmp.sub_path }), a);
+    var ctx: Context = .{ .a = a, .io = std.testing.io, .env = env, .root = try std.fs.path.join(a, &.{ cwd, "cache" }), .cwd = cwd };
+    try ctx.prepare();
+    return ctx;
+}
+
+test "byte budget and minimum free space read from the environment" {
+    var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer arena.deinit();
+    const a = arena.allocator();
+    var tmp = std.testing.tmpDir(.{});
+    defer tmp.cleanup();
+    var env = std.process.Environ.Map.init(a);
+    var ctx = try testContext(a, &tmp, &env);
+    try std.testing.expectEqual(default_budget, budget(&ctx));
+    try std.testing.expectEqual(default_min_free, minFree(&ctx));
+    try env.put("NANOCOMPILE_GC_BUDGET", "1234");
+    try env.put("NANOCOMPILE_MIN_FREE_BYTES", "99");
+    try std.testing.expectEqual(@as(u64, 1234), budget(&ctx));
+    try std.testing.expectEqual(@as(u64, 99), minFree(&ctx));
+    try env.put("NANOCOMPILE_GC_BUDGET", "not-a-number");
+    try std.testing.expectEqual(default_budget, budget(&ctx));
+    // The probe answers for a real volume, and the default budget keeps it on.
+    try std.testing.expect(freeBytes(&ctx) != null);
+    try std.testing.expect(storeAdmitted(&ctx));
+}
+
+test "eviction reaches zero logical bytes under a zero budget" {
+    var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer arena.deinit();
+    const a = arena.allocator();
+    const io = std.testing.io;
+    var tmp = std.testing.tmpDir(.{});
+    defer tmp.cleanup();
+    var env = std.process.Environ.Map.init(a);
+    var ctx = try testContext(a, &tmp, &env);
+    const output = try std.fs.path.join(a, &.{ ctx.cwd, "output" });
+    for (0..3) |i| {
+        const value = try std.fmt.allocPrint(a, "value-{d}", .{i});
+        try tmp.dir.writeFile(io, .{ .sub_path = "output", .data = value });
+        try store(&ctx, try std.fmt.allocPrint(a, "{d:0>64}", .{i}), &.{}, &.{output}, "", "");
+    }
+    try std.testing.expect((try usage(&ctx)).blobs > 0);
+    const result = try gcLocked(&ctx, 0);
+    try std.testing.expectEqual(@as(u64, 0), result.remaining);
+    const after = try usage(&ctx);
+    try std.testing.expectEqual(@as(u64, 0), after.bytes);
+    try std.testing.expectEqual(@as(usize, 0), after.blobs);
+}
+
+test "a volume below the minimum free space skips the store instead of failing" {
+    var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer arena.deinit();
+    const a = arena.allocator();
+    const io = std.testing.io;
+    var tmp = std.testing.tmpDir(.{});
+    defer tmp.cleanup();
+    var env = std.process.Environ.Map.init(a);
+    var ctx = try testContext(a, &tmp, &env);
+    const output = try std.fs.path.join(a, &.{ ctx.cwd, "output" });
+    try tmp.dir.writeFile(io, .{ .sub_path = "output", .data = "compiled" });
+    // Raise the threshold above any real volume: every store must bypass.
+    try env.put("NANOCOMPILE_MIN_FREE_BYTES", "18446744073709551615");
+    try std.testing.expect(!storeAdmitted(&ctx));
+    try store(&ctx, "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", &.{}, &.{output}, "", "");
+    const after = try usage(&ctx);
+    try std.testing.expectEqual(@as(u64, 0), after.bytes);
+    // The build output is the caller's, and remains untouched by the bypass.
+    try std.testing.expectEqualStrings("compiled", try ctx.read(output));
 }

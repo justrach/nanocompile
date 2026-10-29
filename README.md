@@ -101,7 +101,15 @@ Set `NANOCOMPILE_DIR` to choose a shared cache location. Its default is `$XDG_CA
 ./zig-out/bin/nanocompile clear
 ```
 
-GC is explicit, so the normal compilation path does not scan the entire store. It removes orphan blobs and evicts entries by recorded access time until the unique artifact bytes fit the requested budget. Filesystem access-time policies make this an approximate eviction order. The quota covers blobs; metadata and toolchain identities are additional space. `clear` removes artifacts, Rust classification memos, private diagnostic files and counters while retaining validated toolchain identities and shared Rust toolchain-file digests to avoid paying their initial fingerprinting cost again.
+GC is explicit in the sense that no compilation scans the entire store, but the store also maintains itself, so a consumer that only sets `RUSTC_WRAPPER` never has to run it. `gc` removes orphan blobs and evicts entries by recorded access time until the unique artifact bytes fit the requested budget. Filesystem access-time policies make this an approximate eviction order. The quota covers blobs; metadata and toolchain identities are additional space.
+
+Automatic maintenance runs at invocation start, before any shared cache lock is taken, so it can evict with the maintenance lock held exclusively:
+
+- Every invocation checks the free space on the store's volume. Below `NANOCOMPILE_MIN_FREE_BYTES` (default 2 GiB) it evicts to the budget; if another process holds the lock it skips this invocation rather than competing with an in-flight compile.
+- Every 64th invocation samples logical bytes and evicts once they exceed the budget by 10%, so the default budget is enforced without a full store scan per compilation.
+- A store that would land below the free-space floor is skipped rather than failed, and `NoSpaceLeft` while storing leaves the build output uncached instead of failing the build. The compiler output is already on disk in both cases.
+
+`NANOCOMPILE_GC_BUDGET` (default 10 GiB) is the automatic budget and the default for a bare `gc`. `stats` and `doctor` report the budget beside logical bytes and the volume's free space, and warn when either is at risk. `clear` removes artifacts, Rust classification memos, private diagnostic files and counters while retaining validated toolchain identities and shared Rust toolchain-file digests to avoid paying their initial fingerprinting cost again.
 
 ## Turborepo task artifacts
 

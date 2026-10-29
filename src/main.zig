@@ -26,6 +26,8 @@ const help =
     \\  nanocompile gc [MAX_BYTES]  remove orphan blobs and evict to a budget
     \\Environment:
     \\  NANOCOMPILE_DIR       cache directory (default: $XDG_CACHE_HOME/nanocompile)
+    \\  NANOCOMPILE_GC_BUDGET  logical-byte budget for automatic eviction (default: 10 GiB)
+    \\  NANOCOMPILE_MIN_FREE_BYTES  free space below which the store is skipped (default: 2 GiB)
     \\  NANOCOMPILE_TRACE=1   print cache decisions to stderr
     \\  NANOCOMPILE_DISABLE=1 run the compiler without caching
     \\  NANOCOMPILE_PROC_MACROS=reported  opt into compiler-reported macro inputs
@@ -46,6 +48,10 @@ pub fn main(init: std.process.Init) void {
         std.debug.print("nanocompile: {s}\n", .{@errorName(err)});
         std.process.exit(1);
     };
+    // Opportunistic maintenance runs before any shared cache lock is taken, so
+    // it can evict with the lock held exclusively. It is a no-op when healthy.
+    if (!(args.len >= 2 and (std.mem.eql(u8, args[1], "gc") or std.mem.eql(u8, args[1], "clear"))))
+        cache.autoMaintain(&ctx);
     const code = dispatch(&ctx, args) catch |err| blk: {
         std.debug.print("nanocompile: {s}\n", .{@errorName(err)});
         break :blk @as(u8, 1);
@@ -153,13 +159,24 @@ fn dispatch(ctx: *cache.Context, args: []const [:0]const u8) !u8 {
         return 0;
     }
     if (std.mem.eql(u8, command, "gc")) {
-        const limit = if (args.len > 2) try std.fmt.parseInt(u64, args[2], 10) else 10 * 1024 * 1024 * 1024;
+        const limit = if (args.len > 2) try std.fmt.parseInt(u64, args[2], 10) else cache.budget(ctx);
         try cache.gc(ctx, limit);
         return 0;
     }
     if (std.mem.eql(u8, command, "doctor")) {
-        try ctx.out(try std.fmt.allocPrint(ctx.a, "cache: {s}\nplatform: {s}\nrestore: copy-on-write clone, falling back to independent copy\n", .{ ctx.root, @tagName(builtin.os.tag) }));
         try ctx.prepare();
+        try ctx.out(try std.fmt.allocPrint(ctx.a, "cache: {s}\nplatform: {s}\nrestore: copy-on-write clone, falling back to independent copy\n", .{ ctx.root, @tagName(builtin.os.tag) }));
+        const limit = cache.budget(ctx);
+        const min_free = cache.minFree(ctx);
+        try ctx.out(try std.fmt.allocPrint(ctx.a, "budget bytes: {d}\nminimum free bytes: {d}\n", .{ limit, min_free }));
+        if (cache.freeBytes(ctx)) |free| {
+            try ctx.out(try std.fmt.allocPrint(ctx.a, "free bytes: {d}\n", .{free}));
+            if (free < min_free) try ctx.out("warning: free space is below the minimum; stores are skipped until it recovers\n");
+        } else try ctx.out("free bytes: unknown\n");
+        if (cache.usage(ctx) catch null) |used| {
+            try ctx.out(try std.fmt.allocPrint(ctx.a, "logical bytes: {d}\n", .{used.bytes}));
+            if (used.bytes > limit) try ctx.out("warning: logical bytes exceed the budget; run `nanocompile gc`\n");
+        }
         return 0;
     }
     var argv: std.ArrayList([]const u8) = .empty;
